@@ -16,4 +16,3 @@ services:
     autoDeploy: true
     branch: main
     rootDir: .
-    dockerfilePath: ./Dockerfile
