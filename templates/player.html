@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block title %}Player - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="player-container" x-data="fullPlayer()" x-init="loadMedia()">
+    <!-- Player Header -->
+    <div class="player-header">
+        <button @click="goBack()" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="player-title">
+            <h1 x-text="currentMedia?.title || 'Now Playing'"></h1>
+            <p x-text="currentMedia?.artist || 'Unknown Artist'"></p>
+        </div>
+        <div class="player-actions">
+            <button @click="toggleLike()"
+                class="action-btn"
+                :class="{'liked': isLiked}">
+                <i class="fas fa-heart"></i>
+            </button>
+            <button @click="addToPlaylist()" class="action-btn">
+                <i class="fas fa-plus"></i>
+            </button>
+            <button @click="shareMedia()" class="action-btn">
+                <i class="fas fa-share"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Player Area -->
+    <div class="player-main">
+        <!-- Video Player (for shows) -->
+        <div x-show="mediaType === 'show'" class="video-player">
+            <video :src="currentMedia?.video_url || currentMedia?.mp4_link"
+                :poster="currentMedia?.thumbnail"
+                @loadedmetadata="onVideoLoaded()"
+                @timeupdate="onTimeUpdate()"
+                @ended="onMediaEnded()"
+                controls
+                autoplay
+                x-ref="videoPlayer">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <!-- Audio Player (for music) -->
+        <div x-show="mediaType === 'music'" class="audio-player">
+            <div class="audio-visualizer">
+                <div class="album-art">
+                    <img
+                        :src="currentMedia?.cover_art || '/static/img/default-cover.jpg'"
+                        :alt="currentMedia?.title">
+                    <div class="vinyl-effect" :class="{'spinning': isPlaying}">
+                        <div class="vinyl-ring"></div>
+                    </div>
+                </div>
+            </div>
+
+            <audio :src="currentMedia?.audio_url"
+                @loadedmetadata="onAudioLoaded()"
+                @timeupdate="onTimeUpdate()"
+                @ended="onMediaEnded()"
+                autoplay
+                x-ref="audioPlayer">
+                Your browser does not support the audio tag.
+            </audio>
+        </div>
+
+        <!-- Media Info -->
+        <div class="media-info">
+            <h2 x-text="currentMedia?.title"></h2>
+            <p class="artist-name" x-text="currentMedia?.artist"></p>
+            <div class="media-meta">
+                <span class="duration"
+                    x-text="formatDuration(currentMedia?.duration_seconds)"></span>
+                <span class="genre" x-text="currentMedia?.genre"></span>
+                <span class="views"
+                    x-text="`${currentMedia?.views || 0} views`"></span>
+            </div>
+            <p class="description" x-text="currentMedia?.description"></p>
+        </div>
+    </div>
+
+    <!-- Player Controls -->
+    <div class="player-controls">
+        <div class="control-buttons">
+            <button @click="previousTrack()" class="control-btn">
+                <i class="fas fa-step-backward"></i>
+            </button>
+            <button @click="togglePlay()" class="control-btn play-btn">
+                <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+            </button>
+            <button @click="nextTrack()" class="control-btn">
+                <i class="fas fa-step-forward"></i>
+            </button>
+            <button @click="toggleShuffle()"
+                class="control-btn"
+                :class="{'active': isShuffled}">
+                <i class="fas fa-random"></i>
+            </button>
+            <button @click="toggleRepeat()"
+                class="control-btn"
+                :class="{'active': isRepeated}">
+                <i class="fas fa-redo"></i>
+            </button>
+        </div>
+
+        <div class="progress-section">
+            <span class="time-current" x-text="formatTime(currentTime)"></span>
+            <div class="progress-bar" @click="seekTo($event)">
+                <div class="progress-fill"
+                    :style="`width: ${progressPercent}%`"></div>
+                <div class="progress-handle"
+                    :style="`left: ${progressPercent}%`"></div>
+            </div>
+            <span class="time-total"
+                x-text="formatTime(currentMedia?.duration_seconds || 0)"></span>
+        </div>
+
+        <div class="volume-section">
+            <button @click="toggleMute()" class="volume-btn">
+                <i
+                    :class="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
+            </button>
+            <div class="volume-bar" @click="setVolume($event)">
+                <div class="volume-fill"
+                    :style="`width: ${volume * 100}%`"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Playlist Sidebar -->
+    <div class="playlist-sidebar" :class="{'open': showPlaylist}">
+        <div class="sidebar-header">
+            <h3>Up Next</h3>
+            <button @click="showPlaylist = false" class="close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="playlist-items">
+            <template x-for="(item, index) in playlist" :key="item.id">
+                <div class="playlist-item"
+                    :class="{'active': currentIndex === index}"
+                    @click="playTrack(index)">
+                    <img :src="item.cover_art || item.thumbnail"
+                        :alt="item.title"
+                        class="item-thumb">
+                    <div class="item-info">
+                        <h4 x-text="item.title"></h4>
+                        <p x-text="item.artist"></p>
+                    </div>
+                    <div class="item-duration"
+                        x-text="formatDuration(item.duration_seconds)"></div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Playlist Toggle -->
+    <button @click="showPlaylist = !showPlaylist" class="playlist-toggle">
+        <i class="fas fa-list"></i>
+    </button>
+
+    <!-- Loading State -->
+    <div x-show="isLoading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading media...</p>
+    </div>
+</div>
+
+<script>
+function fullPlayer() {
+    return {
+        // State
+        currentMedia: null,
+        mediaType: 'music',
+        isPlaying: false,
+        isMuted: false,
+        isShuffled: false,
+        isRepeated: false,
+        currentTime: 0,
+        volume: 1,
+        progressPercent: 0,
+        isLiked: false,
+        showPlaylist: false,
+        playlist: [],
+        currentIndex: 0,
+        isLoading: true,
+        
+        // Initialize
+        async loadMedia() {
+            const mediaId = new URLSearchParams(window.location.search).get('id');
+            const mediaType = new URLSearchParams(window.location.search).get('type') || 'music';
+            
+            if (mediaId) {
+                await this.loadMediaById(mediaId, mediaType);
+            } else {
+                // Load from global player or default
+                this.loadDefaultMedia();
+            }
+        },
+        
+        async loadMediaById(id, type) {
+            try {
+                this.isLoading = true;
+                this.mediaType = type;
+                
+                // Load media based on type
+                const response = await fetch(`/api/${type}/${id}`);
+                const data = await response.json();
+                
+                this.currentMedia = data;
+                this.setupMediaPlayer();
+            } catch (error) {
+                console.error('Error loading media:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        
+        loadDefaultMedia() {
+            // Load default media or from global player
+            this.currentMedia = {
+                id: 'default',
+                title: 'Welcome to Ahoy',
+                artist: 'Ahoy Indie Media',
+                duration_seconds: 180,
+                cover_art: '/static/img/default-cover.jpg'
+            };
+            this.setupMediaPlayer();
+        },
+        
+        setupMediaPlayer() {
+            // Setup media player based on type
+            if (this.mediaType === 'show' && this.$refs.videoPlayer) {
+                this.$refs.videoPlayer.load();
+            } else if (this.mediaType === 'music' && this.$refs.audioPlayer) {
+                this.$refs.audioPlayer.load();
+            }
+        },
+        
+        // Player controls
+        togglePlay() {
+            if (this.mediaType === 'show' && this.$refs.videoPlayer) {
+                if (this.isPlaying) {
+                    this.$refs.videoPlayer.pause();
+                } else {
+                    this.$refs.videoPlayer.play();
+                }
+            } else if (this.mediaType === 'music' && this.$refs.audioPlayer) {
+                if (this.isPlaying) {
+                    this.$refs.audioPlayer.pause();
+                } else {
+                    this.$refs.audioPlayer.play();
+                }
+            }
+            this.isPlaying = !this.isPlaying;
+        },
+        
+        previousTrack() {
+            if (this.currentIndex > 0) {
+                this.currentIndex--;
+                this.playTrack(this.currentIndex);
+            }
+        },
+        
+        nextTrack() {
+            if (this.currentIndex < this.playlist.length - 1) {
+                this.currentIndex++;
+                this.playTrack(this.currentIndex);
+            } else if (this.isRepeated) {
+                this.currentIndex = 0;
+                this.playTrack(0);
+            }
+        },
+        
+        playTrack(index) {
+            this.currentIndex = index;
+            this.currentMedia = this.playlist[index];
+            this.setupMediaPlayer();
+            this.togglePlay();
+        },
+        
+        toggleMute() {
+            this.isMuted = !this.isMuted;
+            if (this.$refs.audioPlayer) {
+                this.$refs.audioPlayer.muted = this.isMuted;
+            }
+            if (this.$refs.videoPlayer) {
+                this.$refs.videoPlayer.muted = this.isMuted;
+            }
+        },
+        
+        toggleShuffle() {
+            this.isShuffled = !this.isShuffled;
+            if (this.isShuffled) {
+                this.shufflePlaylist();
+            }
+        },
+        
+        toggleRepeat() {
+            this.isRepeated = !this.isRepeated;
+        },
+        
+        // Media events
+        onVideoLoaded() {
+            this.isLoading = false;
+        },
+        
+        onAudioLoaded() {
+            this.isLoading = false;
+        },
+        
+        onTimeUpdate() {
+            const player = this.mediaType === 'show' ? this.$refs.videoPlayer : this.$refs.audioPlayer;
+            if (player) {
+                this.currentTime = player.currentTime;
+                this.progressPercent = (this.currentTime / (this.currentMedia?.duration_seconds || 1)) * 100;
+            }
+        },
+        
+        onMediaEnded() {
+            this.isPlaying = false;
+            this.nextTrack();
+        },
+        
+        // Progress and volume
+        seekTo(event) {
+            const progressBar = event.currentTarget;
+            const rect = progressBar.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const percentage = clickX / rect.width;
+            const newTime = percentage * (this.currentMedia?.duration_seconds || 0);
+            
+            if (this.$refs.videoPlayer) {
+                this.$refs.videoPlayer.currentTime = newTime;
+            }
+            if (this.$refs.audioPlayer) {
+                this.$refs.audioPlayer.currentTime = newTime;
+            }
+        },
+        
+        setVolume(event) {
+            const volumeBar = event.currentTarget;
+            const rect = volumeBar.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            this.volume = Math.max(0, Math.min(1, clickX / rect.width));
+            
+            if (this.$refs.audioPlayer) {
+                this.$refs.audioPlayer.volume = this.volume;
+            }
+            if (this.$refs.videoPlayer) {
+                this.$refs.videoPlayer.volume = this.volume;
+            }
+        },
+        
+        // Actions
+        toggleLike() {
+            this.isLiked = !this.isLiked;
+            // Implement like functionality
+        },
+        
+        addToPlaylist() {
+            // Implement add to playlist
+        },
+        
+        shareMedia() {
+            // Implement share functionality
+        },
+        
+        goBack() {
+            window.history.back();
+        },
+        
+        // Utility functions
+        formatTime(seconds) {
+            if (!seconds) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        },
+        
+        formatDuration(seconds) {
+            if (!seconds) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        },
+        
+        shufflePlaylist() {
+            // Shuffle playlist array
+            for (let i = this.playlist.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [this.playlist[i], this.playlist[j]] = [this.playlist[j], this.playlist[i]];
+            }
+        }
+    };
+}
+</script>
+{% endblock %}

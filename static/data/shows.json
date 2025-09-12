@@ -1,0 +1,44 @@
+{
+  "shows": [
+    {
+      "id": "show_001",
+      "title": "The Rob Show - Ep 8 - The Gypsies - Clip 4",
+      "host": "Rob Meglio",
+      "description": "A deep dive into the world of gypsy music and culture, featuring live performances and interviews with local artists.",
+      "duration_seconds": 376,
+      "video_url": "https://cdn.jwplayer.com/videos/4f55y55N-GVOzihKP.mp4",
+      "trailer_url": "https://cdn.jwplayer.com/videos/4f55y55N-GVOzihKP-preview.mp4",
+      "thumbnail": "https://cdn.jwplayer.com/v2/media/4f55y55N/poster.jpg",
+      "published_date": "2024-01-20",
+      "views": 1250,
+      "type": "episode",
+      "is_live": false,
+      "tags": [
+        "music",
+        "culture",
+        "interview"
+      ],
+      "host_slug": "rob-meglio"
+    },
+    {
+      "id": "show_002",
+      "title": "Indie Spotlight: New Haven Sessions",
+      "host": "Sarah Chen",
+      "description": "Live acoustic performances from emerging indie artists in the New Haven area, recorded in intimate settings.",
+      "duration_seconds": 1800,
+      "video_url": "https://example.com/videos/indie-spotlight-new-haven.mp4",
+      "trailer_url": "https://example.com/videos/indie-spotlight-new-haven-preview.mp4",
+      "thumbnail": "https://example.com/thumbnails/indie-spotlight-new-haven.jpg",
+      "published_date": "2024-01-18",
+      "views": 890,
+      "type": "episode",
+      "is_live": false,
+      "tags": [
+        "indie",
+        "acoustic",
+        "live"
+      ],
+      "host_slug": "sarah-chen"
+    }
+  ]
+}

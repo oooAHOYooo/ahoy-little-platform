@@ -1,0 +1,56 @@
+{
+  "artists": [
+    {
+      "id": "artist_001",
+      "name": "Rob Meglio",
+      "slug": "rob-meglio",
+      "genre": "Alternative Rock",
+      "bio": "A passionate musician and host who explores the intersection of culture and music through intimate conversations and live performances.",
+      "avatar": "https://example.com/avatars/rob-meglio.jpg",
+      "cover_image": "https://example.com/covers/rob-meglio-cover.jpg",
+      "location": "New Haven, CT",
+      "website": "https://robmeglio.com",
+      "social_links": {
+        "instagram": "https://instagram.com/robmeglio",
+        "twitter": "https://twitter.com/robmeglio",
+        "youtube": "https://youtube.com/robmeglio"
+      },
+      "track_count": 15,
+      "show_count": 8,
+      "followers": 2500,
+      "total_plays": 45000,
+      "tags": [
+        "alternative",
+        "culture",
+        "host"
+      ],
+      "verified": true
+    },
+    {
+      "id": "artist_002",
+      "name": "Sarah Chen",
+      "slug": "sarah-chen",
+      "genre": "Indie Folk",
+      "bio": "An emerging indie folk artist known for her haunting melodies and introspective lyrics, often performing in intimate acoustic settings.",
+      "avatar": "https://example.com/avatars/sarah-chen.jpg",
+      "cover_image": "https://example.com/covers/sarah-chen-cover.jpg",
+      "location": "New Haven, CT",
+      "website": "https://sarahchenmusic.com",
+      "social_links": {
+        "instagram": "https://instagram.com/sarahchenmusic",
+        "spotify": "https://open.spotify.com/artist/sarahchen",
+        "bandcamp": "https://sarahchen.bandcamp.com"
+      },
+      "track_count": 8,
+      "show_count": 12,
+      "followers": 1200,
+      "total_plays": 18000,
+      "tags": [
+        "indie",
+        "folk",
+        "acoustic"
+      ],
+      "verified": false
+    }
+  ]
+}

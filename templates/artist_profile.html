@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}{{ artist_name }} - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="artist-profile-container" x-data="artistProfile()"
+    x-init="loadArtist('{{ artist_name }}')">
+    <!-- Artist Header -->
+    <div class="artist-header">
+        <div class="artist-cover"
+            :style="`background-image: url(${artist?.cover_image || '/static/img/default-cover.jpg')`">
+            <div class="cover-overlay">
+                <div class="artist-info">
+                    <img
+                        :src="artist?.avatar || '/static/img/default-avatar.png'"
+                        :alt="artist?.name"
+                        class="artist-avatar">
+                    <div class="artist-details">
+                        <h1 x-text="artist?.name"></h1>
+                        <p class="artist-genre" x-text="artist?.genre"></p>
+                        <p class="artist-bio" x-text="artist?.bio"></p>
+                        <div class="artist-stats">
+                            <span class="stat">
+                                <i class="fas fa-music"></i>
+                                <span
+                                    x-text="`${artist?.track_count || 0} tracks`"></span>
+                            </span>
+                            <span class="stat">
+                                <i class="fas fa-play-circle"></i>
+                                <span
+                                    x-text="`${artist?.show_count || 0} shows`"></span>
+                            </span>
+                            <span class="stat">
+                                <i class="fas fa-heart"></i>
+                                <span
+                                    x-text="`${artist?.followers || 0} followers`"></span>
+                            </span>
+                        </div>
+                        <div class="artist-actions">
+                            <button @click="followArtist()"
+                                class="btn btn-primary"
+                                :class="{'following': isFollowing}">
+                                <i class="fas fa-plus"></i>
+                                <span
+                                    x-text="isFollowing ? 'Following' : 'Follow'"></span>
+                            </button>
+                            <button @click="shareArtist()"
+                                class="btn btn-outline">
+                                <i class="fas fa-share"></i> Share
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Artist Content Tabs -->
+    <div class="artist-tabs">
+        <button @click="activeTab = 'tracks'"
+            :class="{'active': activeTab === 'tracks'}"
+            class="tab-btn">
+            <i class="fas fa-music"></i> Tracks
+        </button>
+        <button @click="activeTab = 'shows'"
+            :class="{'active': activeTab === 'shows'}"
+            class="tab-btn">
+            <i class="fas fa-play-circle"></i> Shows
+        </button>
+        <button @click="activeTab = 'about'"
+            :class="{'active': activeTab === 'about'}"
+            class="tab-btn">
+            <i class="fas fa-info-circle"></i> About
+        </button>
+    </div>
+
+    <!-- Tracks Tab -->
+    <div x-show="activeTab === 'tracks'" class="tab-content">
+        <div class="content-header">
+            <h2>Latest Tracks</h2>
+            <div class="view-options">
+                <button @click="trackView = 'grid'"
+                    :class="{'active': trackView === 'grid'}"
+                    class="view-btn">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button @click="trackView = 'list'"
+                    :class="{'active': trackView === 'list'}"
+                    class="view-btn">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tracks Grid -->
+        <div x-show="trackView === 'grid'" class="tracks-grid">
+            <template x-for="track in tracks" :key="track.id">
+                <div class="track-card" @click="playTrack(track)">
+                    <div class="track-cover">
+                        <img
+                            :src="track.cover_art || '/static/img/default-cover.jpg'"
+                            :alt="track.title">
+                        <div class="track-overlay">
+                            <button @click.stop="playTrack(track)"
+                                class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="track-info">
+                        <h3 x-text="track.title"></h3>
+                        <p x-text="track.album || 'Single'"></p>
+                        <span class="duration"
+                            x-text="formatDuration(track.duration_seconds)"></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Tracks List -->
+        <div x-show="trackView === 'list'" class="tracks-list">
+            <div class="list-header">
+                <span class="col-title">#</span>
+                <span class="col-title">Title</span>
+                <span class="col-title">Album</span>
+                <span class="col-title">Duration</span>
+                <span class="col-title">Actions</span>
+            </div>
+            <div class="list-items">
+                <template x-for="(track, index) in tracks" :key="track.id">
+                    <div class="list-item" @click="playTrack(track)">
+                        <span class="col-number" x-text="index + 1"></span>
+                        <div class="col-title-info">
+                            <img
+                                :src="track.cover_art || '/static/img/default-cover.jpg'"
+                                class="track-thumb">
+                            <div class="title-details">
+                                <h4 x-text="track.title"></h4>
+                                <p x-text="track.album || 'Single'"></p>
+                            </div>
+                        </div>
+                        <span class="col-album"
+                            x-text="track.album || 'Single'"></span>
+                        <span class="col-duration"
+                            x-text="formatDuration(track.duration_seconds)"></span>
+                        <div class="col-actions">
+                            <button @click.stop="likeTrack(track)"
+                                class="action-btn"
+                                :class="{'liked': isLiked(track)}">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button @click.stop="addToPlaylist(track)"
+                                class="action-btn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shows Tab -->
+    <div x-show="activeTab === 'shows'" class="tab-content">
+        <div class="content-header">
+            <h2>Latest Shows</h2>
+        </div>
+
+        <div class="shows-grid">
+            <template x-for="show in shows" :key="show.id">
+                <div class="show-card" @click="playShow(show)">
+                    <div class="show-thumbnail">
+                        <img :src="show.thumbnail" :alt="show.title">
+                        <div class="show-overlay">
+                            <button @click.stop="playShow(show)"
+                                class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <div class="show-duration"
+                                x-text="formatDuration(show.duration_seconds)"></div>
+                        </div>
+                    </div>
+                    <div class="show-info">
+                        <h3 x-text="show.title"></h3>
+                        <p
+                            x-text="show.description?.substring(0, 100) + '...'"></p>
+                        <div class="show-meta">
+                            <span class="views"
+                                x-text="`${show.views || 0} views`"></span>
+                            <span class="date"
+                                x-text="formatDate(show.published_date)"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- About Tab -->
+    <div x-show="activeTab === 'about'" class="tab-content">
+        <div class="about-content">
+            <div class="about-section">
+                <h3>About</h3>
+                <p x-text="artist?.bio"></p>
+            </div>
+
+            <div class="about-section" x-show="artist?.social_links">
+                <h3>Connect</h3>
+                <div class="social-links">
+                    <template x-for="(url, platform) in artist?.social_links"
+                        :key="platform">
+                        <a :href="url" target="_blank" class="social-link">
+                            <i :class="`fab fa-${platform}`"></i>
+                            <span x-text="platform"></span>
+                        </a>
+                    </template>
+                </div>
+            </div>
+
+            <div class="about-section">
+                <h3>Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number"
+                            x-text="artist?.track_count || 0"></span>
+                        <span class="stat-label">Tracks</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"
+                            x-text="artist?.show_count || 0"></span>
+                        <span class="stat-label">Shows</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"
+                            x-text="artist?.followers || 0"></span>
+                        <span class="stat-label">Followers</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"
+                            x-text="artist?.total_plays || 0"></span>
+                        <span class="stat-label">Total Plays</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div x-show="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading artist profile...</p>
+    </div>
+</div>
+
+<script>
+function artistProfile() {
+    return {
+        // State
+        artist: null,
+        tracks: [],
+        shows: [],
+        activeTab: 'tracks',
+        trackView: 'grid',
+        isFollowing: false,
+        isLoading: true,
+        
+        // Initialize
+        async loadArtist(artistName) {
+            try {
+                this.isLoading = true;
+                const response = await fetch(`/api/artist/${artistName}`);
+                const data = await response.json();
+                
+                this.artist = data.artist;
+                this.tracks = data.tracks || [];
+                this.shows = data.shows || [];
+            } catch (error) {
+                console.error('Error loading artist:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        
+        // Actions
+        playTrack(track) {
+            if (window.globalPlayer) {
+                window.globalPlayer.playTrack(track);
+            }
+        },
+        
+        playShow(show) {
+            if (window.globalPlayer) {
+                window.globalPlayer.playTrack(show);
+            }
+        },
+        
+        followArtist() {
+            this.isFollowing = !this.isFollowing;
+            // Implement follow functionality
+        },
+        
+        shareArtist() {
+            // Implement share functionality
+        },
+        
+        likeTrack(track) {
+            // Implement like functionality
+        },
+        
+        addToPlaylist(track) {
+            // Implement add to playlist
+        },
+        
+        isLiked(track) {
+            // Check if track is liked
+            return false; // Placeholder
+        },
+        
+        // Utility functions
+        formatDuration(seconds) {
+            if (!seconds) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        },
+        
+        formatDate(dateString) {
+            if (!dateString) return '';
+            return new Date(dateString).toLocaleDateString();
+        }
+    };
+}
+</script>
+{% endblock %}

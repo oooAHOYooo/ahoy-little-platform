@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}Shows & Videos - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="shows-container" x-data="showsLibrary()" x-init="loadShows()">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>Shows & Videos</h1>
+        <div class="header-actions">
+            <div class="search-container">
+                <input type="text"
+                    x-model="searchQuery"
+                    @input="filterShows()"
+                    placeholder="Search shows..."
+                    class="search-input">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div class="view-options">
+                <button @click="viewMode = 'grid'"
+                    :class="{'active': viewMode === 'grid'}"
+                    class="view-btn">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button @click="viewMode = 'list'"
+                    :class="{'active': viewMode === 'list'}"
+                    class="view-btn">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="categories-section">
+        <div class="category-tabs">
+            <button @click="selectedCategory = 'all'"
+                :class="{'active': selectedCategory === 'all'}"
+                class="category-tab">
+                All Shows
+            </button>
+            <button @click="selectedCategory = 'live'"
+                :class="{'active': selectedCategory === 'live'}"
+                class="category-tab">
+                Live Shows
+            </button>
+            <button @click="selectedCategory = 'episodes'"
+                :class="{'active': selectedCategory === 'episodes'}"
+                class="category-tab">
+                Episodes
+            </button>
+            <button @click="selectedCategory = 'clips'"
+                :class="{'active': selectedCategory === 'clips'}"
+                class="category-tab">
+                Clips
+            </button>
+        </div>
+    </div>
+
+    <!-- Featured Show -->
+    <div x-show="featuredShow" class="featured-show">
+        <div class="featured-content">
+            <div class="featured-video">
+                <img :src="featuredShow.thumbnail" :alt="featuredShow.title">
+                <div class="play-overlay">
+                    <button @click="playShow(featuredShow)"
+                        class="play-btn-large">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="featured-info">
+                <h2 x-text="featuredShow.title"></h2>
+                <p x-text="featuredShow.description"></p>
+                <div class="featured-meta">
+                    <span class="host" x-text="featuredShow.host"></span>
+                    <span class="duration"
+                        x-text="formatDuration(featuredShow.duration_seconds)"></span>
+                    <span class="views"
+                        x-text="`${featuredShow.views || 0} views`"></span>
+                </div>
+                <div class="featured-actions">
+                    <button @click="playShow(featuredShow)"
+                        class="btn btn-primary">
+                        <i class="fas fa-play"></i> Watch Now
+                    </button>
+                    <button @click="likeShow(featuredShow)"
+                        class="btn btn-outline"
+                        :class="{'liked': isLiked(featuredShow)}">
+                        <i class="fas fa-heart"></i> Like
+                    </button>
+                    <button @click="shareShow(featuredShow)"
+                        class="btn btn-outline">
+                        <i class="fas fa-share"></i> Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shows Grid View -->
+    <div x-show="viewMode === 'grid'" class="shows-grid">
+        <template x-for="show in filteredShows" :key="show.id">
+            <div class="show-card" @click="playShow(show)">
+                <div class="show-thumbnail">
+                    <img :src="show.thumbnail" :alt="show.title">
+                    <div class="show-overlay">
+                        <button @click.stop="playShow(show)" class="play-btn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div class="show-duration"
+                            x-text="formatDuration(show.duration_seconds)"></div>
+                    </div>
+                </div>
+
+                <div class="show-info">
+                    <h3 x-text="show.title"></h3>
+                    <p x-text="show.host"></p>
+                    <div class="show-meta">
+                        <span class="views"
+                            x-text="`${show.views || 0} views`"></span>
+                        <span class="date"
+                            x-text="formatDate(show.published_date)"></span>
+                    </div>
+                    <div class="show-actions">
+                        <button @click.stop="likeShow(show)"
+                            class="action-btn"
+                            :class="{'liked': isLiked(show)}">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button @click.stop="addToPlaylist(show)"
+                            class="action-btn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button @click.stop="shareShow(show)"
+                            class="action-btn">
+                            <i class="fas fa-share"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Shows List View -->
+    <div x-show="viewMode === 'list'" class="shows-list">
+        <div class="list-header">
+            <span class="col-title">Thumbnail</span>
+            <span class="col-title">Title</span>
+            <span class="col-title">Host</span>
+            <span class="col-title">Duration</span>
+            <span class="col-title">Views</span>
+            <span class="col-title">Actions</span>
+        </div>
+
+        <div class="list-items">
+            <template x-for="show in filteredShows" :key="show.id">
+                <div class="list-item" @click="playShow(show)">
+                    <div class="col-thumbnail">
+                        <img :src="show.thumbnail" :alt="show.title">
+                        <div class="play-overlay">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+
+                    <div class="col-title-info">
+                        <h4 x-text="show.title"></h4>
+                        <p
+                            x-text="show.description?.substring(0, 100) + '...'"></p>
+                    </div>
+
+                    <span class="col-host" x-text="show.host"></span>
+                    <span class="col-duration"
+                        x-text="formatDuration(show.duration_seconds)"></span>
+                    <span class="col-views"
+                        x-text="`${show.views || 0} views`"></span>
+
+                    <div class="col-actions">
+                        <button @click.stop="likeShow(show)"
+                            class="action-btn"
+                            :class="{'liked': isLiked(show)}">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button @click.stop="addToPlaylist(show)"
+                            class="action-btn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button @click.stop="shareShow(show)"
+                            class="action-btn">
+                            <i class="fas fa-share"></i>
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div x-show="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading shows...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div x-show="!isLoading && filteredShows.length === 0" class="empty-state">
+        <i class="fas fa-play-circle"></i>
+        <h3>No shows found</h3>
+        <p>Try adjusting your filters or search terms</p>
+    </div>
+</div>
+
+<script>
+function showsLibrary() {
+    return {
+        // State
+        shows: [],
+        filteredShows: [],
+        featuredShow: null,
+        viewMode: 'grid',
+        searchQuery: '',
+        selectedCategory: 'all',
+        isLoading: true,
+        
+        // Initialize
+        async loadShows() {
+            try {
+                this.isLoading = true;
+                const response = await fetch('/api/shows');
+                const data = await response.json();
+                this.shows = data.shows || [];
+                this.filteredShows = [...this.shows];
+                this.featuredShow = this.shows[0] || null;
+                this.filterShows();
+            } catch (error) {
+                console.error('Error loading shows:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        
+        // Filtering
+        filterShows() {
+            let filtered = [...this.shows];
+            
+            // Search filter
+            if (this.searchQuery) {
+                const query = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(show => 
+                    show.title.toLowerCase().includes(query) ||
+                    show.host.toLowerCase().includes(query) ||
+                    show.description?.toLowerCase().includes(query)
+                );
+            }
+            
+            // Category filter
+            if (this.selectedCategory !== 'all') {
+                filtered = filtered.filter(show => {
+                    switch (this.selectedCategory) {
+                        case 'live':
+                            return show.type === 'live' || show.is_live;
+                        case 'episodes':
+                            return show.type === 'episode';
+                        case 'clips':
+                            return show.type === 'clip';
+                        default:
+                            return true;
+                    }
+                });
+            }
+            
+            this.filteredShows = filtered;
+        },
+        
+        // Show actions
+        playShow(show) {
+            if (window.globalPlayer) {
+                window.globalPlayer.playTrack(show);
+            }
+        },
+        
+        likeShow(show) {
+            // Implement like functionality
+            console.log('Liking show:', show);
+        },
+        
+        addToPlaylist(show) {
+            // Implement add to playlist
+            console.log('Adding to playlist:', show);
+        },
+        
+        shareShow(show) {
+            // Implement share functionality
+            console.log('Sharing show:', show);
+        },
+        
+        isLiked(show) {
+            // Check if show is liked
+            return false; // Placeholder
+        },
+        
+        // Utility functions
+        formatDuration(seconds) {
+            if (!seconds) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        },
+        
+        formatDate(dateString) {
+            if (!dateString) return '';
+            return new Date(dateString).toLocaleDateString();
+        }
+    };
+}
+</script>
+{% endblock %}

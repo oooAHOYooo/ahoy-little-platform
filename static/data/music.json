@@ -1,0 +1,58 @@
+{
+  "tracks": [
+    {
+      "id": "track_001",
+      "title": "Midnight City",
+      "artist": "M83",
+      "album": "Hurry Up, We're Dreaming",
+      "genre": "Electronic",
+      "duration_seconds": 245,
+      "audio_url": "https://example.com/audio/midnight-city.mp3",
+      "preview_url": "https://example.com/preview/midnight-city.mp3",
+      "cover_art": "https://example.com/covers/midnight-city.jpg",
+      "added_date": "2024-01-15",
+      "tags": [
+        "electronic",
+        "dreamy",
+        "atmospheric"
+      ],
+      "artist_slug": "m83"
+    },
+    {
+      "id": "track_002",
+      "title": "Bohemian Rhapsody",
+      "artist": "Queen",
+      "album": "A Night at the Opera",
+      "genre": "Rock",
+      "duration_seconds": 355,
+      "audio_url": "https://example.com/audio/bohemian-rhapsody.mp3",
+      "preview_url": "https://example.com/preview/bohemian-rhapsody.mp3",
+      "cover_art": "https://example.com/covers/bohemian-rhapsody.jpg",
+      "added_date": "2024-01-10",
+      "tags": [
+        "rock",
+        "classic",
+        "opera"
+      ],
+      "artist_slug": "queen"
+    },
+    {
+      "id": "track_003",
+      "title": "Blinding Lights",
+      "artist": "The Weeknd",
+      "album": "After Hours",
+      "genre": "Pop",
+      "duration_seconds": 200,
+      "audio_url": "https://example.com/audio/blinding-lights.mp3",
+      "preview_url": "https://example.com/preview/blinding-lights.mp3",
+      "cover_art": "https://example.com/covers/blinding-lights.jpg",
+      "added_date": "2024-01-20",
+      "tags": [
+        "pop",
+        "synthwave",
+        "retro"
+      ],
+      "artist_slug": "the-weeknd"
+    }
+  ]
+}

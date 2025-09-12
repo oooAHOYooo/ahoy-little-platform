@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Artists - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="artists-container" x-data="artistsLibrary()" x-init="loadArtists()">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>Artists</h1>
+        <div class="header-actions">
+            <div class="search-container">
+                <input type="text"
+                    x-model="searchQuery"
+                    @input="filterArtists()"
+                    placeholder="Search artists..."
+                    class="search-input">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div class="view-options">
+                <button @click="viewMode = 'grid'"
+                    :class="{'active': viewMode === 'grid'}"
+                    class="view-btn">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button @click="viewMode = 'list'"
+                    :class="{'active': viewMode === 'list'}"
+                    class="view-btn">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Genre Filter -->
+    <div class="genre-filter">
+        <div class="genre-tabs">
+            <button @click="selectedGenre = 'all'"
+                :class="{'active': selectedGenre === 'all'}"
+                class="genre-tab">
+                All Genres
+            </button>
+            <template x-for="genre in genres" :key="genre">
+                <button @click="selectedGenre = genre"
+                    :class="{'active': selectedGenre === genre}"
+                    class="genre-tab"
+                    x-text="genre">
+                </button>
+            </template>
+        </div>
+    </div>
+
+    <!-- Featured Artist -->
+    <div x-show="featuredArtist" class="featured-artist">
+        <div class="featured-content">
+            <div class="artist-avatar">
+                <img
+                    :src="featuredArtist.avatar || '/static/img/default-avatar.png'"
+                    :alt="featuredArtist.name">
+            </div>
+            <div class="artist-info">
+                <h2 x-text="featuredArtist.name"></h2>
+                <p class="artist-bio" x-text="featuredArtist.bio"></p>
+                <div class="artist-stats">
+                    <span class="stat">
+                        <i class="fas fa-music"></i>
+                        <span
+                            x-text="`${featuredArtist.track_count || 0} tracks`"></span>
+                    </span>
+                    <span class="stat">
+                        <i class="fas fa-play-circle"></i>
+                        <span
+                            x-text="`${featuredArtist.show_count || 0} shows`"></span>
+                    </span>
+                    <span class="stat">
+                        <i class="fas fa-heart"></i>
+                        <span
+                            x-text="`${featuredArtist.followers || 0} followers`"></span>
+                    </span>
+                </div>
+                <div class="artist-actions">
+                    <button @click="viewArtist(featuredArtist)"
+                        class="btn btn-primary">
+                        <i class="fas fa-user"></i> View Profile
+                    </button>
+                    <button @click="followArtist(featuredArtist)"
+                        class="btn btn-outline"
+                        :class="{'following': isFollowing(featuredArtist)}">
+                        <i class="fas fa-plus"></i>
+                        <span
+                            x-text="isFollowing(featuredArtist) ? 'Following' : 'Follow'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Artists Grid View -->
+    <div x-show="viewMode === 'grid'" class="artists-grid">
+        <template x-for="artist in filteredArtists" :key="artist.id">
+            <div class="artist-card" @click="viewArtist(artist)">
+                <div class="artist-cover">
+                    <img
+                        :src="artist.avatar || '/static/img/default-avatar.png'"
+                        :alt="artist.name">
+                    <div class="artist-overlay">
+                        <button @click.stop="viewArtist(artist)"
+                            class="view-btn">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <div class="artist-actions">
+                            <button @click.stop="followArtist(artist)"
+                                class="action-btn"
+                                :class="{'following': isFollowing(artist)}">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button @click.stop="shareArtist(artist)"
+                                class="action-btn">
+                                <i class="fas fa-share"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="artist-info">
+                    <h3 x-text="artist.name"></h3>
+                    <p class="artist-genre" x-text="artist.genre"></p>
+                    <div class="artist-stats">
+                        <span class="stat">
+                            <i class="fas fa-music"></i>
+                            <span x-text="artist.track_count || 0"></span>
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-play-circle"></i>
+                            <span x-text="artist.show_count || 0"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Artists List View -->
+    <div x-show="viewMode === 'list'" class="artists-list">
+        <div class="list-header">
+            <span class="col-title">Avatar</span>
+            <span class="col-title">Name</span>
+            <span class="col-title">Genre</span>
+            <span class="col-title">Tracks</span>
+            <span class="col-title">Shows</span>
+            <span class="col-title">Actions</span>
+        </div>
+
+        <div class="list-items">
+            <template x-for="artist in filteredArtists" :key="artist.id">
+                <div class="list-item" @click="viewArtist(artist)">
+                    <div class="col-avatar">
+                        <img
+                            :src="artist.avatar || '/static/img/default-avatar.png'"
+                            :alt="artist.name">
+                    </div>
+
+                    <div class="col-name">
+                        <h4 x-text="artist.name"></h4>
+                        <p x-text="artist.bio?.substring(0, 100) + '...'"></p>
+                    </div>
+
+                    <span class="col-genre" x-text="artist.genre"></span>
+                    <span class="col-tracks"
+                        x-text="artist.track_count || 0"></span>
+                    <span class="col-shows"
+                        x-text="artist.show_count || 0"></span>
+
+                    <div class="col-actions">
+                        <button @click.stop="followArtist(artist)"
+                            class="action-btn"
+                            :class="{'following': isFollowing(artist)}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button @click.stop="shareArtist(artist)"
+                            class="action-btn">
+                            <i class="fas fa-share"></i>
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div x-show="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading artists...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div x-show="!isLoading && filteredArtists.length === 0"
+        class="empty-state">
+        <i class="fas fa-users"></i>
+        <h3>No artists found</h3>
+        <p>Try adjusting your filters or search terms</p>
+    </div>
+</div>
+
+<script>
+function artistsLibrary() {
+    return {
+        // State
+        artists: [],
+        filteredArtists: [],
+        featuredArtist: null,
+        genres: [],
+        viewMode: 'grid',
+        searchQuery: '',
+        selectedGenre: 'all',
+        isLoading: true,
+        
+        // Initialize
+        async loadArtists() {
+            try {
+                this.isLoading = true;
+                const response = await fetch('/api/artists');
+                const data = await response.json();
+                this.artists = data.artists || [];
+                this.filteredArtists = [...this.artists];
+                this.featuredArtist = this.artists[0] || null;
+                this.extractGenres();
+                this.filterArtists();
+            } catch (error) {
+                console.error('Error loading artists:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        
+        extractGenres() {
+            const genreSet = new Set();
+            this.artists.forEach(artist => {
+                if (artist.genre) genreSet.add(artist.genre);
+            });
+            this.genres = Array.from(genreSet).sort();
+        },
+        
+        // Filtering
+        filterArtists() {
+            let filtered = [...this.artists];
+            
+            // Search filter
+            if (this.searchQuery) {
+                const query = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(artist => 
+                    artist.name.toLowerCase().includes(query) ||
+                    artist.genre?.toLowerCase().includes(query) ||
+                    artist.bio?.toLowerCase().includes(query)
+                );
+            }
+            
+            // Genre filter
+            if (this.selectedGenre !== 'all') {
+                filtered = filtered.filter(artist => artist.genre === this.selectedGenre);
+            }
+            
+            this.filteredArtists = filtered;
+        },
+        
+        // Artist actions
+        viewArtist(artist) {
+            window.location.href = `/artist/${artist.slug || artist.name.toLowerCase().replace(/\s+/g, '-')}`;
+        },
+        
+        followArtist(artist) {
+            // Implement follow functionality
+            console.log('Following artist:', artist);
+        },
+        
+        shareArtist(artist) {
+            // Implement share functionality
+            console.log('Sharing artist:', artist);
+        },
+        
+        isFollowing(artist) {
+            // Check if artist is followed
+            return false; // Placeholder
+        }
+    };
+}
+</script>
+{% endblock %}

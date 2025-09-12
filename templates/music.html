@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}Music Library - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="music-container" x-data="musicLibrary()" x-init="loadMusic()">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>Music Library</h1>
+        <div class="header-actions">
+            <div class="search-container">
+                <input type="text"
+                    x-model="searchQuery"
+                    @input="filterMusic()"
+                    placeholder="Search music..."
+                    class="search-input">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div class="view-options">
+                <button @click="viewMode = 'grid'"
+                    :class="{'active': viewMode === 'grid'}"
+                    class="view-btn">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button @click="viewMode = 'list'"
+                    :class="{'active': viewMode === 'list'}"
+                    class="view-btn">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+        <div class="filter-group">
+            <label>Genre:</label>
+            <select x-model="selectedGenre" @change="filterMusic()">
+                <option value>All Genres</option>
+                <template x-for="genre in genres" :key="genre">
+                    <option :value="genre" x-text="genre"></option>
+                </template>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Artist:</label>
+            <select x-model="selectedArtist" @change="filterMusic()">
+                <option value>All Artists</option>
+                <template x-for="artist in artists" :key="artist">
+                    <option :value="artist" x-text="artist"></option>
+                </template>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Sort by:</label>
+            <select x-model="sortBy" @change="sortMusic()">
+                <option value="title">Title</option>
+                <option value="artist">Artist</option>
+                <option value="duration">Duration</option>
+                <option value="added_date">Date Added</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Music Grid View -->
+    <div x-show="viewMode === 'grid'" class="music-grid">
+        <template x-for="track in filteredTracks" :key="track.id">
+            <div class="track-card"
+                @click="playTrack(track)"
+                :class="{'playing': currentTrack?.id === track.id}">
+
+                <div class="track-cover">
+                    <img
+                        :src="track.cover_art || '/static/img/default-cover.jpg'"
+                        :alt="track.title">
+                    <div class="track-overlay">
+                        <button @click.stop="playTrack(track)" class="play-btn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div class="track-actions">
+                            <button @click.stop="likeTrack(track)"
+                                class="action-btn"
+                                :class="{'liked': isLiked(track)}">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button @click.stop="addToPlaylist(track)"
+                                class="action-btn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button @click.stop="showTrackMenu(track)"
+                                class="action-btn">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="track-info">
+                    <h3 x-text="track.title"></h3>
+                    <p x-text="track.artist"></p>
+                    <div class="track-meta">
+                        <span class="duration"
+                            x-text="formatDuration(track.duration_seconds)"></span>
+                        <span class="genre" x-text="track.genre"></span>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Music List View -->
+    <div x-show="viewMode === 'list'" class="music-list">
+        <div class="list-header">
+            <span class="col-title">#</span>
+            <span class="col-title">Title</span>
+            <span class="col-title">Artist</span>
+            <span class="col-title">Album</span>
+            <span class="col-title">Duration</span>
+            <span class="col-title">Actions</span>
+        </div>
+
+        <div class="list-items">
+            <template x-for="(track, index) in filteredTracks" :key="track.id">
+                <div class="list-item"
+                    @click="playTrack(track)"
+                    :class="{'playing': currentTrack?.id === track.id}">
+
+                    <span class="col-number" x-text="index + 1"></span>
+
+                    <div class="col-title-info">
+                        <img
+                            :src="track.cover_art || '/static/img/default-cover.jpg'"
+                            class="track-thumb">
+                        <div class="title-details">
+                            <h4 x-text="track.title"></h4>
+                            <p x-text="track.album || 'Single'"></p>
+                        </div>
+                    </div>
+
+                    <span class="col-artist" x-text="track.artist"></span>
+                    <span class="col-album"
+                        x-text="track.album || 'Single'"></span>
+                    <span class="col-duration"
+                        x-text="formatDuration(track.duration_seconds)"></span>
+
+                    <div class="col-actions">
+                        <button @click.stop="likeTrack(track)"
+                            class="action-btn"
+                            :class="{'liked': isLiked(track)}">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button @click.stop="addToPlaylist(track)"
+                            class="action-btn">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button @click.stop="showTrackMenu(track)"
+                            class="action-btn">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div x-show="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading music library...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div x-show="!isLoading && filteredTracks.length === 0" class="empty-state">
+        <i class="fas fa-music"></i>
+        <h3>No music found</h3>
+        <p>Try adjusting your filters or search terms</p>
+    </div>
+</div>
+
+<script>
+function musicLibrary() {
+    return {
+        // State
+        tracks: [],
+        filteredTracks: [],
+        genres: [],
+        artists: [],
+        viewMode: 'grid',
+        searchQuery: '',
+        selectedGenre: '',
+        selectedArtist: '',
+        sortBy: 'title',
+        isLoading: true,
+        currentTrack: null,
+        
+        // Initialize
+        async loadMusic() {
+            try {
+                this.isLoading = true;
+                const response = await fetch('/api/music');
+                const data = await response.json();
+                this.tracks = data.tracks || [];
+                this.filteredTracks = [...this.tracks];
+                this.extractGenresAndArtists();
+                this.sortMusic();
+            } catch (error) {
+                console.error('Error loading music:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        
+        extractGenresAndArtists() {
+            const genreSet = new Set();
+            const artistSet = new Set();
+            
+            this.tracks.forEach(track => {
+                if (track.genre) genreSet.add(track.genre);
+                if (track.artist) artistSet.add(track.artist);
+            });
+            
+            this.genres = Array.from(genreSet).sort();
+            this.artists = Array.from(artistSet).sort();
+        },
+        
+        // Filtering and sorting
+        filterMusic() {
+            let filtered = [...this.tracks];
+            
+            // Search filter
+            if (this.searchQuery) {
+                const query = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(track => 
+                    track.title.toLowerCase().includes(query) ||
+                    track.artist.toLowerCase().includes(query) ||
+                    track.album?.toLowerCase().includes(query) ||
+                    track.genre?.toLowerCase().includes(query)
+                );
+            }
+            
+            // Genre filter
+            if (this.selectedGenre) {
+                filtered = filtered.filter(track => track.genre === this.selectedGenre);
+            }
+            
+            // Artist filter
+            if (this.selectedArtist) {
+                filtered = filtered.filter(track => track.artist === this.selectedArtist);
+            }
+            
+            this.filteredTracks = filtered;
+            this.sortMusic();
+        },
+        
+        sortMusic() {
+            this.filteredTracks.sort((a, b) => {
+                switch (this.sortBy) {
+                    case 'title':
+                        return a.title.localeCompare(b.title);
+                    case 'artist':
+                        return a.artist.localeCompare(b.artist);
+                    case 'duration':
+                        return (b.duration_seconds || 0) - (a.duration_seconds || 0);
+                    case 'added_date':
+                        return new Date(b.added_date || 0) - new Date(a.added_date || 0);
+                    default:
+                        return 0;
+                }
+            });
+        },
+        
+        // Track actions
+        playTrack(track) {
+            this.currentTrack = track;
+            if (window.globalPlayer) {
+                window.globalPlayer.playTrack(track);
+            }
+        },
+        
+        likeTrack(track) {
+            // Implement like functionality
+            console.log('Liking track:', track);
+        },
+        
+        addToPlaylist(track) {
+            // Implement add to playlist
+            console.log('Adding to playlist:', track);
+        },
+        
+        showTrackMenu(track) {
+            // Show track context menu
+            console.log('Showing track menu:', track);
+        },
+        
+        isLiked(track) {
+            // Check if track is liked
+            return false; // Placeholder
+        },
+        
+        // Utility functions
+        formatDuration(seconds) {
+            if (!seconds) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+    };
+}
+</script>
+{% endblock %}
