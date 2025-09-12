@@ -41,11 +41,6 @@
                 class="category-tab">
                 All Shows
             </button>
-            <button @click="selectedCategory = 'live'"
-                :class="{'active': selectedCategory === 'live'}"
-                class="category-tab">
-                Live Shows
-            </button>
             <button @click="selectedCategory = 'episodes'"
                 :class="{'active': selectedCategory === 'episodes'}"
                 class="category-tab">
@@ -55,6 +50,26 @@
                 :class="{'active': selectedCategory === 'clips'}"
                 class="category-tab">
                 Clips
+            </button>
+            <button @click="selectedCategory = 'promos'"
+                :class="{'active': selectedCategory === 'promos'}"
+                class="category-tab">
+                Promos
+            </button>
+            <button @click="selectedCategory = 'music_video'"
+                :class="{'active': selectedCategory === 'music_video'}"
+                class="category-tab">
+                Music Videos
+            </button>
+            <button @click="selectedCategory = 'short_film'"
+                :class="{'active': selectedCategory === 'short_film'}"
+                class="category-tab">
+                Short Films
+            </button>
+            <button @click="selectedCategory = 'broadcast'"
+                :class="{'active': selectedCategory === 'broadcast'}"
+                class="category-tab">
+                Broadcasts
             </button>
         </div>
     </div>
@@ -258,12 +273,18 @@ function showsLibrary() {
             if (this.selectedCategory !== 'all') {
                 filtered = filtered.filter(show => {
                     switch (this.selectedCategory) {
-                        case 'live':
-                            return show.type === 'live' || show.is_live;
                         case 'episodes':
                             return show.type === 'episode';
                         case 'clips':
                             return show.type === 'clip';
+                        case 'promos':
+                            return show.type === 'promo';
+                        case 'music_video':
+                            return show.type === 'music_video';
+                        case 'short_film':
+                            return show.type === 'short_film';
+                        case 'broadcast':
+                            return show.type === 'broadcast';
                         default:
                             return true;
                     }
