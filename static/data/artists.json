@@ -1,6 +1,985 @@
 {
   "artists": [
     {
+      "id": "artist_17",
+      "name": "Ahoy Indie Media",
+      "slug": "ahoy-indie-media",
+      "type": "host",
+      "description": "Show host and content creator: Ahoy Indie Media",
+      "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bepisode%5D%5BAlive%20on%20Central%5D%5BEpisode%202%5D.png",
+      "social_links": {},
+      "genres": [
+        "Episodes",
+        "Broadcast"
+      ],
+      "albums": [],
+      "shows": [
+        {
+          "id": "episode_17",
+          "title": "[Episode] - [Alive on Central - Episode 2]",
+          "type": "episode",
+          "duration": 1800,
+          "category": "Episodes",
+          "published_date": "2024-01-20"
+        },
+        {
+          "id": "episode_18",
+          "title": "[Episode] - [Alive on Central - Episode 3]",
+          "type": "episode",
+          "duration": 1800,
+          "category": "Episodes",
+          "published_date": "2024-01-18"
+        },
+        {
+          "id": "episode_19",
+          "title": "[Episode] - [Alive on Central - Episode 4]",
+          "type": "episode",
+          "duration": 1800,
+          "category": "Episodes",
+          "published_date": "2024-01-15"
+        },
+        {
+          "id": "episode_20",
+          "title": "[Episode] - [Alive on Central - Episode 5]",
+          "type": "episode",
+          "duration": 1800,
+          "category": "Episodes",
+          "published_date": "2024-01-12"
+        },
+        {
+          "id": "broadcast_16",
+          "title": "[Episode] - [Ahoy Cabaret - Episode 1] - [Holiday Spectacular]",
+          "type": "broadcast",
+          "duration": 2400,
+          "category": "Broadcast",
+          "published_date": "2024-01-02"
+        },
+        {
+          "id": "broadcast_28",
+          "title": "[Episode] - [Ahoy Cabaret - Episode 2] - [Best Video]",
+          "type": "broadcast",
+          "duration": 3600,
+          "category": "Broadcast",
+          "published_date": "2024-01-28"
+        },
+        {
+          "id": "episode_17",
+          "title": "[Episode] - [Alive on Central - Episode 2]",
+          "type": "episode",
+          "duration": 1800,
+          "category": "Episodes",
+          "published_date": "2024-01-20"
+        },
+        {
+          "id": "episode_18",
+          "title": "[Episode] - [Alive on Central - Episode 3]",
+          "type": "episode",
+          "duration": 1800,
+          "category": "Episodes",
+          "published_date": "2024-01-18"
+        },
+        {
+          "id": "episode_19",
+          "title": "[Episode] - [Alive on Central - Episode 4]",
+          "type": "episode",
+          "duration": 1800,
+          "category": "Episodes",
+          "published_date": "2024-01-15"
+        },
+        {
+          "id": "episode_20",
+          "title": "[Episode] - [Alive on Central - Episode 5]",
+          "type": "episode",
+          "duration": 1800,
+          "category": "Episodes",
+          "published_date": "2024-01-12"
+        },
+        {
+          "id": "broadcast_16",
+          "title": "[Episode] - [Ahoy Cabaret - Episode 1] - [Holiday Spectacular]",
+          "type": "broadcast",
+          "duration": 2400,
+          "category": "Broadcast",
+          "published_date": "2024-01-02"
+        },
+        {
+          "id": "broadcast_28",
+          "title": "[Episode] - [Ahoy Cabaret - Episode 2] - [Best Video]",
+          "type": "broadcast",
+          "duration": 3600,
+          "category": "Broadcast",
+          "published_date": "2024-01-28"
+        }
+      ],
+      "tracks": [],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.403959",
+      "updated_at": "2025-09-12T10:51:54.403960"
+    },
+    {
+      "id": "artist_19",
+      "name": "Alex Figueroa",
+      "slug": "alex-figueroa",
+      "type": "host",
+      "description": "Show host and content creator: Alex Figueroa",
+      "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bclips%5D%5Bfig-theGnarth%5D.jpg",
+      "social_links": {},
+      "genres": [
+        "Clips"
+      ],
+      "albums": [],
+      "shows": [
+        {
+          "id": "clip_2",
+          "title": "[Alex Figueroa] - [Full Part] - [The Gnarth]",
+          "type": "clip",
+          "duration": 600,
+          "category": "Clips",
+          "published_date": "2024-01-08"
+        },
+        {
+          "id": "clip_2",
+          "title": "[Alex Figueroa] - [Full Part] - [The Gnarth]",
+          "type": "clip",
+          "duration": 600,
+          "category": "Clips",
+          "published_date": "2024-01-08"
+        }
+      ],
+      "tracks": [],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.404386",
+      "updated_at": "2025-09-12T10:51:54.404387"
+    },
+    {
+      "id": "artist_20",
+      "name": "Andrew Leverton",
+      "slug": "andrew-leverton",
+      "type": "host",
+      "description": "Show host and content creator: Andrew Leverton",
+      "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bfullpart%5D%5BAndrewLeverton%5D%5BFormatility%5D.jpg",
+      "social_links": {},
+      "genres": [
+        "Clips"
+      ],
+      "albums": [],
+      "shows": [
+        {
+          "id": "clip_3",
+          "title": "[Tallboyz] - [Full Part] - [Andrew Leverton]-[Formaility]",
+          "type": "clip",
+          "duration": 450,
+          "category": "Clips",
+          "published_date": "2024-01-05"
+        },
+        {
+          "id": "clip_3",
+          "title": "[Tallboyz] - [Full Part] - [Andrew Leverton]-[Formaility]",
+          "type": "clip",
+          "duration": 450,
+          "category": "Clips",
+          "published_date": "2024-01-05"
+        }
+      ],
+      "tracks": [],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.404589",
+      "updated_at": "2025-09-12T10:51:54.404590"
+    },
+    {
+      "id": "artist_4",
+      "name": "Cambell Rice",
+      "slug": "cambell-rice",
+      "type": "musician",
+      "description": "Musician and artist: Cambell Rice",
+      "image": "https://m.media-amazon.com/images/I/61APLxryThL._UXNaN_FMjpg_QL85_.jpg",
+      "social_links": {},
+      "genres": [
+        "Indie"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [
+        {
+          "id": "song_6",
+          "title": "Far From Here",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_7",
+          "title": "Sunflower",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_8",
+          "title": "To Play Guitar in a Huge Room",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_6",
+          "title": "Far From Here",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_7",
+          "title": "Sunflower",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_8",
+          "title": "To Play Guitar in a Huge Room",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.401989",
+      "updated_at": "2025-09-12T10:51:54.401991"
+    },
+    {
+      "id": "artist_9",
+      "name": "Clones of Clarence",
+      "slug": "clones-of-clarence",
+      "type": "musician",
+      "description": "Musician and artist: Clones of Clarence",
+      "image": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/8b/4d/cc/8b4dcc19-b47c-5478-b2de-18587dc0c4b3/artwork.jpg/592x592bf.webp",
+      "social_links": {},
+      "genres": [
+        "Indie"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [
+        {
+          "id": "song_19",
+          "title": "Lost Time",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_20",
+          "title": "Salty Salsa",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_21",
+          "title": "Proj 17",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_22",
+          "title": "3AM",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_19",
+          "title": "Lost Time",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_20",
+          "title": "Salty Salsa",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_21",
+          "title": "Proj 17",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_22",
+          "title": "3AM",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.402762",
+      "updated_at": "2025-09-12T10:51:54.402765"
+    },
+    {
+      "id": "artist_10",
+      "name": "Coral Reefer",
+      "slug": "coral-reefer",
+      "type": "musician",
+      "description": "Musician and artist: Coral Reefer",
+      "image": "https://i.ytimg.com/vi/XDH0X-dF4GM/maxresdefault.jpg",
+      "social_links": {},
+      "genres": [
+        "Indie"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [
+        {
+          "id": "song_23",
+          "title": "Electro",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_23",
+          "title": "Electro",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.402909",
+      "updated_at": "2025-09-12T10:51:54.402910"
+    },
+    {
+      "id": "artist_21",
+      "name": "Dave Gunn",
+      "slug": "dave-gunn",
+      "type": "host",
+      "description": "Show host and content creator: Dave Gunn",
+      "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bclip%5D%5BTallboyz%5D%5BDave%20Gunn%20-%20Hotdog%20Days%5D.png",
+      "social_links": {},
+      "genres": [
+        "Clips"
+      ],
+      "albums": [],
+      "shows": [
+        {
+          "id": "clip_21",
+          "title": "[Tallboyz] - [Dave Gunn]-[30 Days 30 Hotdogs]",
+          "type": "clip",
+          "duration": 180,
+          "category": "Clips",
+          "published_date": "2024-01-03"
+        },
+        {
+          "id": "clip_22",
+          "title": "[Tallboyz] - [Full Part] - [Always Next Time]-[Dave Gunn]",
+          "type": "clip",
+          "duration": 480,
+          "category": "Clips",
+          "published_date": "2024-01-01"
+        },
+        {
+          "id": "clip_21",
+          "title": "[Tallboyz] - [Dave Gunn]-[30 Days 30 Hotdogs]",
+          "type": "clip",
+          "duration": 180,
+          "category": "Clips",
+          "published_date": "2024-01-03"
+        },
+        {
+          "id": "clip_22",
+          "title": "[Tallboyz] - [Full Part] - [Always Next Time]-[Dave Gunn]",
+          "type": "clip",
+          "duration": 480,
+          "category": "Clips",
+          "published_date": "2024-01-01"
+        }
+      ],
+      "tracks": [],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.404795",
+      "updated_at": "2025-09-12T10:51:54.404796"
+    },
+    {
+      "id": "artist_6",
+      "name": "Fella Gazelle",
+      "slug": "fella-gazelle",
+      "type": "musician",
+      "description": "Musician and artist: Fella Gazelle",
+      "image": "https://m.media-amazon.com/images/I/61NpQ4vCxOL._UXNaN_FMjpg_QL85_.jpg",
+      "social_links": {},
+      "genres": [
+        "Indie"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [
+        {
+          "id": "song_13",
+          "title": "Reasons",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_13",
+          "title": "Reasons",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.402269",
+      "updated_at": "2025-09-12T10:51:54.402270"
+    },
+    {
+      "id": "artist_14",
+      "name": "Jake Custer",
+      "slug": "jake-custer",
+      "type": "musician",
+      "description": "Musician and artist: Jake Custer",
+      "image": "https://storage.googleapis.com/ahoy-song-collection/ahoy_jake-custer.jpg",
+      "social_links": {},
+      "genres": [
+        "Indie"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [
+        {
+          "id": "song_43",
+          "title": "Better Halves",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_44",
+          "title": "By Myself",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_45",
+          "title": "I'm Fine",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_46",
+          "title": "It's a Mad,Mad World",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_47",
+          "title": "You Love to See It",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_43",
+          "title": "Better Halves",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_44",
+          "title": "By Myself",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_45",
+          "title": "I'm Fine",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_46",
+          "title": "It's a Mad,Mad World",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_47",
+          "title": "You Love to See It",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.403454",
+      "updated_at": "2025-09-12T10:51:54.403455"
+    },
+    {
+      "id": "artist_8",
+      "name": "Justin Arena",
+      "slug": "justin-arena",
+      "type": "musician",
+      "description": "Musician and artist: Justin Arena",
+      "image": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/ef/9c/aa/ef9caad8-3001-3554-ff16-a8caf4863e91/artwork.jpg/592x592bf.webp",
+      "social_links": {},
+      "genres": [
+        "Indie",
+        "Music Video"
+      ],
+      "albums": [],
+      "shows": [
+        {
+          "id": "music_14",
+          "title": "[Music Video] - [Justin Arena] - [When You Wake Up]",
+          "type": "music_video",
+          "duration": 210,
+          "category": "Music Video",
+          "published_date": "2024-01-14"
+        },
+        {
+          "id": "music_24",
+          "title": "[Music Video] - [Justin Arena] - [Space Cadet]",
+          "type": "music_video",
+          "duration": 195,
+          "category": "Music Video",
+          "published_date": "2024-01-11"
+        },
+        {
+          "id": "music_14",
+          "title": "[Music Video] - [Justin Arena] - [When You Wake Up]",
+          "type": "music_video",
+          "duration": 210,
+          "category": "Music Video",
+          "published_date": "2024-01-14"
+        },
+        {
+          "id": "music_24",
+          "title": "[Music Video] - [Justin Arena] - [Space Cadet]",
+          "type": "music_video",
+          "duration": 195,
+          "category": "Music Video",
+          "published_date": "2024-01-11"
+        }
+      ],
+      "tracks": [
+        {
+          "id": "song_16",
+          "title": "Oceans",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_17",
+          "title": "When You Wake Up",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_18",
+          "title": "Crash The Party",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_31",
+          "title": "Framework",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_32",
+          "title": "Fruit In The Shower",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_33",
+          "title": "No 1",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_16",
+          "title": "Oceans",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_17",
+          "title": "When You Wake Up",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_18",
+          "title": "Crash The Party",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_31",
+          "title": "Framework",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_32",
+          "title": "Fruit In The Shower",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_33",
+          "title": "No 1",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.402587",
+      "updated_at": "2025-09-12T10:51:54.402590"
+    },
+    {
+      "id": "artist_11",
+      "name": "My Own Grenade",
+      "slug": "my-own-grenade",
+      "type": "musician",
+      "description": "Musician and artist: My Own Grenade",
+      "image": "https://ahoycollection.s3.us-east-2.amazonaws.com/my+own+grenade.jpeg",
+      "social_links": {},
+      "genres": [
+        "Indie"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [
+        {
+          "id": "song_24",
+          "title": "My Own Grenade",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_25",
+          "title": "Frustrated",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_26",
+          "title": "My Parents' Couch (Live Cut)",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_27",
+          "title": "Spacegirl With A Headset",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_28",
+          "title": "Special",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_29",
+          "title": "Today Is In My Way",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_24",
+          "title": "My Own Grenade",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_25",
+          "title": "Frustrated",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_26",
+          "title": "My Parents' Couch (Live Cut)",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_27",
+          "title": "Spacegirl With A Headset",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_28",
+          "title": "Special",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_29",
+          "title": "Today Is In My Way",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.403040",
+      "updated_at": "2025-09-12T10:51:54.403042"
+    },
+    {
+      "id": "artist_7",
+      "name": "Riddle M",
+      "slug": "riddle-m",
+      "type": "musician",
+      "description": "Musician and artist: Riddle M",
+      "image": "https://i.ytimg.com/vi/O2SV8BikOjA/maxresdefault.jpg",
+      "social_links": {},
+      "genres": [
+        "Indie"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [
+        {
+          "id": "song_14",
+          "title": "Glued in the Nude",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_15",
+          "title": "Honeydew",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_34",
+          "title": "Daisies",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_35",
+          "title": "Garden Girl",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_36",
+          "title": "Magic Man",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_37",
+          "title": "Melted Side",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_38",
+          "title": "Snout",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_39",
+          "title": "Mustard Seed",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_14",
+          "title": "Glued in the Nude",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_15",
+          "title": "Honeydew",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_34",
+          "title": "Daisies",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_35",
+          "title": "Garden Girl",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_36",
+          "title": "Magic Man",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_37",
+          "title": "Melted Side",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_38",
+          "title": "Snout",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_39",
+          "title": "Mustard Seed",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.402403",
+      "updated_at": "2025-09-12T10:51:54.402405"
+    },
+    {
       "id": "artist_001",
       "name": "Rob Meglio",
       "slug": "rob-meglio",
@@ -24,7 +1003,265 @@
         "culture",
         "host"
       ],
-      "verified": true
+      "verified": true,
+      "shows": [
+        {
+          "id": "promo_7",
+          "title": "[Promo] - [Ahoy Cabaret @ Best Video] - [Rob hangs fliers around the havens]",
+          "type": "promo",
+          "duration": 120,
+          "category": "Promos",
+          "published_date": "2024-01-25"
+        },
+        {
+          "id": "promo_8",
+          "title": "[Promo] - [Meglio] - [How to find the website]",
+          "type": "promo",
+          "duration": 90,
+          "category": "Promos",
+          "published_date": "2024-01-22"
+        },
+        {
+          "id": "short_25",
+          "title": "[Short Film] - [Pal-Bot] - [Rob Meglio]",
+          "type": "short_film",
+          "duration": 900,
+          "category": "Short Film",
+          "published_date": "2024-01-09"
+        },
+        {
+          "id": "promo_26",
+          "title": "[Promo] - [Pal-Bot 2 Trailer]",
+          "type": "promo",
+          "duration": 60,
+          "category": "Promo",
+          "published_date": "2024-01-07"
+        },
+        {
+          "id": "promo_15",
+          "title": "[Promo] - [Ahoy Cabaret @ Best Video] - [Rob Updates]",
+          "type": "promo",
+          "duration": 180,
+          "category": "Promo",
+          "published_date": "2024-01-04"
+        },
+        {
+          "id": "episode_27",
+          "title": "[Episode] - [The Rob Show] - [Coulter Davis Lost Interview]",
+          "type": "episode",
+          "duration": 1200,
+          "category": "Episodes",
+          "published_date": "2024-01-30"
+        },
+        {
+          "id": "promo_7",
+          "title": "[Promo] - [Ahoy Cabaret @ Best Video] - [Rob hangs fliers around the havens]",
+          "type": "promo",
+          "duration": 120,
+          "category": "Promos",
+          "published_date": "2024-01-25"
+        },
+        {
+          "id": "promo_8",
+          "title": "[Promo] - [Meglio] - [How to find the website]",
+          "type": "promo",
+          "duration": 90,
+          "category": "Promos",
+          "published_date": "2024-01-22"
+        },
+        {
+          "id": "short_25",
+          "title": "[Short Film] - [Pal-Bot] - [Rob Meglio]",
+          "type": "short_film",
+          "duration": 900,
+          "category": "Short Film",
+          "published_date": "2024-01-09"
+        },
+        {
+          "id": "promo_26",
+          "title": "[Promo] - [Pal-Bot 2 Trailer]",
+          "type": "promo",
+          "duration": 60,
+          "category": "Promo",
+          "published_date": "2024-01-07"
+        },
+        {
+          "id": "promo_15",
+          "title": "[Promo] - [Ahoy Cabaret @ Best Video] - [Rob Updates]",
+          "type": "promo",
+          "duration": 180,
+          "category": "Promo",
+          "published_date": "2024-01-04"
+        },
+        {
+          "id": "episode_27",
+          "title": "[Episode] - [The Rob Show] - [Coulter Davis Lost Interview]",
+          "type": "episode",
+          "duration": 1200,
+          "category": "Episodes",
+          "published_date": "2024-01-30"
+        }
+      ],
+      "genres": [
+        "Promos",
+        "Short Film",
+        "Promo",
+        "Episodes"
+      ]
+    },
+    {
+      "id": "artist_12",
+      "name": "S.G. Carlson",
+      "slug": "s.g.-carlson",
+      "type": "musician",
+      "description": "Musician and artist: S.G. Carlson",
+      "image": "https://ahoycollection.s3.us-east-2.amazonaws.com/SGCarlson-AhoyIndieMedia.png",
+      "social_links": {},
+      "genres": [
+        "Indie"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [
+        {
+          "id": "song_30",
+          "title": "How I Got Fat While Living Skinny",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_30",
+          "title": "How I Got Fat While Living Skinny",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.403176",
+      "updated_at": "2025-09-12T10:51:54.403177"
+    },
+    {
+      "id": "artist_3",
+      "name": "Samuel Dylan Witch",
+      "slug": "samuel-dylan-witch",
+      "type": "musician",
+      "description": "Musician and artist: Samuel Dylan Witch",
+      "image": "https://i.ytimg.com/vi/XDH0X-dF4GM/maxresdefault.jpg",
+      "social_links": {},
+      "genres": [
+        "Indie",
+        "Music Video"
+      ],
+      "albums": [],
+      "shows": [
+        {
+          "id": "music_13",
+          "title": "[Music Video] - [Samuel Dylan Witch] - [Weary Chest]",
+          "type": "music_video",
+          "duration": 240,
+          "category": "Music Video",
+          "published_date": "2024-01-17"
+        },
+        {
+          "id": "music_13",
+          "title": "[Music Video] - [Samuel Dylan Witch] - [Weary Chest]",
+          "type": "music_video",
+          "duration": 240,
+          "category": "Music Video",
+          "published_date": "2024-01-17"
+        }
+      ],
+      "tracks": [
+        {
+          "id": "song_1",
+          "title": "Seen Better Days",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_2",
+          "title": "Beneath the Willow Tree",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_3",
+          "title": "Put Me on the Run",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_4",
+          "title": "You Know Me",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_5",
+          "title": "Watching Her Fly",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_1",
+          "title": "Seen Better Days",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_2",
+          "title": "Beneath the Willow Tree",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_3",
+          "title": "Put Me on the Run",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_4",
+          "title": "You Know Me",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_5",
+          "title": "Watching Her Fly",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.401838",
+      "updated_at": "2025-09-12T10:51:54.401846"
     },
     {
       "id": "artist_002",
@@ -51,6 +1288,333 @@
         "acoustic"
       ],
       "verified": false
+    },
+    {
+      "id": "artist_15",
+      "name": "Spider in Stereo",
+      "slug": "spider-in-stereo",
+      "type": "musician",
+      "description": "Musician and artist: Spider in Stereo",
+      "image": "https://storage.googleapis.com/ahoy-song-collection/Spider%20in%20Stereo%20-%20Float.jpg",
+      "social_links": {},
+      "genres": [
+        "Indie"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [
+        {
+          "id": "song_48",
+          "title": "Float",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_48",
+          "title": "Float",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.403587",
+      "updated_at": "2025-09-12T10:51:54.403588"
+    },
+    {
+      "id": "artist_18",
+      "name": "Tallboyz",
+      "slug": "tallboyz",
+      "type": "host",
+      "description": "Show host and content creator: Tallboyz",
+      "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bclips%5D%5BquietGunn%5D.jpg",
+      "social_links": {},
+      "genres": [
+        "Clips",
+        "Promos"
+      ],
+      "albums": [],
+      "shows": [
+        {
+          "id": "clip_1",
+          "title": "[Tallboyz] - [Clip] - [Dave Gunn] - [NoMusic]",
+          "type": "clip",
+          "duration": 300,
+          "category": "Clips",
+          "published_date": "2024-01-10"
+        },
+        {
+          "id": "promo_23",
+          "title": "[Promo] - [Tallboyz] - [Obslete Trailer]",
+          "type": "promo",
+          "duration": 150,
+          "category": "Promos",
+          "published_date": "2024-01-19"
+        },
+        {
+          "id": "clip_1",
+          "title": "[Tallboyz] - [Clip] - [Dave Gunn] - [NoMusic]",
+          "type": "clip",
+          "duration": 300,
+          "category": "Clips",
+          "published_date": "2024-01-10"
+        },
+        {
+          "id": "promo_23",
+          "title": "[Promo] - [Tallboyz] - [Obslete Trailer]",
+          "type": "promo",
+          "duration": 150,
+          "category": "Promos",
+          "published_date": "2024-01-19"
+        }
+      ],
+      "tracks": [],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.404177",
+      "updated_at": "2025-09-12T10:51:54.404178"
+    },
+    {
+      "id": "artist_13",
+      "name": "The Tines",
+      "slug": "the-tines",
+      "type": "musician",
+      "description": "Musician and artist: The Tines",
+      "image": "https://ahoycollection.s3.us-east-2.amazonaws.com/ready_theTinesAlbumArtwork.jpg",
+      "social_links": {},
+      "genres": [
+        "Indie"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [
+        {
+          "id": "song_40",
+          "title": "Know By Feel",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_41",
+          "title": "Chokecherries",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_42",
+          "title": "Moon Views",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_40",
+          "title": "Know By Feel",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_41",
+          "title": "Chokecherries",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_42",
+          "title": "Moon Views",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.403321",
+      "updated_at": "2025-09-12T10:51:54.403323"
+    },
+    {
+      "id": "artist_5",
+      "name": "Youth XL",
+      "slug": "youth-xl",
+      "type": "musician",
+      "description": "Musician and artist: Youth XL",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyBXIMTxuYsGbaO23UEDr-TeH57LhPKid4ohwt85HyZgtprWiecvV_iFk0dYCMMJnT3ys&usqp=CAU",
+      "social_links": {},
+      "genres": [
+        "Indie"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [
+        {
+          "id": "song_9",
+          "title": "Summer Bummer",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_10",
+          "title": "Yoga",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_11",
+          "title": "Text Your Friends",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_12",
+          "title": "Gypsy Gia",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_9",
+          "title": "Summer Bummer",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_10",
+          "title": "Yoga",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_11",
+          "title": "Text Your Friends",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_12",
+          "title": "Gypsy Gia",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.402137",
+      "updated_at": "2025-09-12T10:51:54.402138"
+    },
+    {
+      "id": "artist_16",
+      "name": "mintea",
+      "slug": "mintea",
+      "type": "musician",
+      "description": "Musician and artist: mintea",
+      "image": "https://storage.googleapis.com/ahoy-song-collection/mintea%20-%20The%20Lost%20Clause%20-%20Album%20Cover.jpg",
+      "social_links": {},
+      "genres": [
+        "Indie"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [
+        {
+          "id": "song_49",
+          "title": "7eleven",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_50",
+          "title": "weird",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_51",
+          "title": "fairy wings",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_52",
+          "title": "clown girl",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_49",
+          "title": "7eleven",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_50",
+          "title": "weird",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_51",
+          "title": "fairy wings",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        },
+        {
+          "id": "song_52",
+          "title": "clown girl",
+          "album": "Single",
+          "duration": 180,
+          "genre": "Indie",
+          "added_date": "2024-01-15"
+        }
+      ],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-09-12T10:51:54.403717",
+      "updated_at": "2025-09-12T10:51:54.403718"
     }
-  ]
+  ],
+  "total_count": 21,
+  "last_updated": "2025-09-12T10:52:01.881438"
 }

@@ -2,12 +2,41 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{% block title %}Ahoy Indie Media{% endblock %}</title>
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <meta name="description"
+            content="{% block description %}Discover and save indie music, shows, and media. Create boards, save favorites, and explore new artists on Ahoy Indie Media.{% endblock %}">
+        <meta name="keywords"
+            content="indie music, indie shows, music discovery, save music, music boards, indie artists, music platform">
+        <meta name="author" content="Ahoy Indie Media">
+        <meta name="robots" content="index, follow">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ request.url }}">
+        <meta property="og:title"
+            content="{% block og_title %}Ahoy Indie Media - Discover Indie Music & Shows{% endblock %}">
+        <meta property="og:description"
+            content="{% block og_description %}Discover and save indie music, shows, and media. Create boards, save favorites, and explore new artists.{% endblock %}">
+        <meta property="og:image"
+            content="{{ url_for('static', filename='img/logo-ahoy.png') }}">
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="{{ request.url }}">
+        <meta property="twitter:title"
+            content="{% block twitter_title %}Ahoy Indie Media - Discover Indie Music & Shows{% endblock %}">
+        <meta property="twitter:description"
+            content="{% block twitter_description %}Discover and save indie music, shows, and media. Create boards, save favorites, and explore new artists.{% endblock %}">
+        <meta property="twitter:image"
+            content="{{ url_for('static', filename='img/logo-ahoy.png') }}">
 
         <!-- Favicon -->
-        <link rel="icon" type="image/png"
-            href="{{ url_for('static', filename='img/favicon_ahoy.png') }}">
+        <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+        <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon_ahoy.png') }}">
+        <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/favicon_ahoy.png') }}">
+
+        <title>{% block title %}Ahoy Indie Media{% endblock %}</title>
 
         <!-- CSS -->
         <link rel="stylesheet"
@@ -61,6 +90,10 @@
                     <a href="{{ url_for('artists') }}"
                         class="nav-link {% if request.endpoint == 'artists' %}active{% endif %}">
                         <i class="fas fa-users"></i> Artists
+                    </a>
+                    <a href="{{ url_for('my_saves') }}"
+                        class="nav-link {% if request.endpoint == 'my_saves' %}active{% endif %}">
+                        <i class="fas fa-bookmark"></i> My Saves
                     </a>
                 </div>
 
@@ -238,6 +271,51 @@
                 </p>
             </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Ahoy Indie Media</h4>
+                    <p>Discover and save indie music, shows, and media. Create
+                        boards, save favorites, and explore new artists.</p>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{{ url_for('home') }}">Home</a></li>
+                        <li><a href="{{ url_for('music') }}">Music</a></li>
+                        <li><a href="{{ url_for('shows') }}">Shows</a></li>
+                        <li><a href="{{ url_for('artists') }}">Artists</a></li>
+                        <li><a href="{{ url_for('my_saves') }}">My
+                                Saves</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/security">Security Policy</a></li>
+                        <li><a href="/terms">Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Developer</h4>
+                    <ul>
+                        <li><a href="{{ url_for('debug_page') }}">Debug
+                                Console</a></li>
+                        <li><a href="/api/docs">API Documentation</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 Ahoy Indie Media. All rights reserved.</p>
+            </div>
+        </footer>
 
         <!-- JavaScript -->
         <script src="{{ url_for('static', filename='js/app.js') }}"></script>

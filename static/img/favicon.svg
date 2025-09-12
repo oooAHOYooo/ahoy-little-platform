@@ -1,0 +1,36 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="platformGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="letterGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f1f5f9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Platform Base -->
+  <rect x="2" y="24" width="28" height="6" rx="3" fill="url(#platformGradient)" opacity="0.8"/>
+  
+  <!-- Platform Pillars -->
+  <rect x="4" y="20" width="2" height="4" fill="url(#platformGradient)" opacity="0.6"/>
+  <rect x="8" y="18" width="2" height="6" fill="url(#platformGradient)" opacity="0.6"/>
+  <rect x="12" y="16" width="2" height="8" fill="url(#platformGradient)" opacity="0.6"/>
+  <rect x="16" y="14" width="2" height="10" fill="url(#platformGradient)" opacity="0.6"/>
+  <rect x="20" y="16" width="2" height="8" fill="url(#platformGradient)" opacity="0.6"/>
+  <rect x="24" y="18" width="2" height="6" fill="url(#platformGradient)" opacity="0.6"/>
+  <rect x="26" y="20" width="2" height="4" fill="url(#platformGradient)" opacity="0.6"/>
+  
+  <!-- Main Platform -->
+  <rect x="3" y="12" width="26" height="4" rx="2" fill="url(#platformGradient)"/>
+  
+  <!-- Letter A -->
+  <path d="M16 4 L12 16 L14 16 L15.2 12.8 L16.8 12.8 L18 16 L20 16 L16 4 Z M15.4 10.8 L16 8.8 L16.6 10.8 L15.4 10.8 Z" 
+        fill="url(#letterGradient)"/>
+  
+  <!-- Accent dots -->
+  <circle cx="8" cy="8" r="1" fill="url(#letterGradient)" opacity="0.7"/>
+  <circle cx="24" cy="8" r="1" fill="url(#letterGradient)" opacity="0.7"/>
+  <circle cx="16" cy="20" r="1" fill="url(#letterGradient)" opacity="0.5"/>
+</svg>

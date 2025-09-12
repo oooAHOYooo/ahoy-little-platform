@@ -1,0 +1,553 @@
+{% extends "base.html" %}
+
+{% block title %}Debug Console - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="debug-container" x-data="debugConsole()" x-init="loadDebugData()">
+    <!-- Debug Header -->
+    <div class="debug-header">
+        <h1>🐛 Debug Console</h1>
+        <div class="debug-controls">
+            <button @click="refreshLogs()" class="btn btn-primary">
+                <i class="fas fa-refresh"></i> Refresh
+            </button>
+            <button @click="clearLogs()" class="btn btn-outline">
+                <i class="fas fa-trash"></i> Clear
+            </button>
+            <button @click="exportLogs()" class="btn btn-outline">
+                <i class="fas fa-download"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <!-- Debug Tabs -->
+    <div class="debug-tabs">
+        <button @click="activeTab = 'logs'"
+            :class="{'active': activeTab === 'logs'}"
+            class="debug-tab">
+            <i class="fas fa-list"></i> Server Logs
+        </button>
+        <button @click="activeTab = 'console'"
+            :class="{'active': activeTab === 'console'}"
+            class="debug-tab">
+            <i class="fas fa-terminal"></i> Console
+        </button>
+        <button @click="activeTab = 'api'"
+            :class="{'active': activeTab === 'api'}"
+            class="debug-tab">
+            <i class="fas fa-code"></i> API Tests
+        </button>
+        <button @click="activeTab = 'data'"
+            :class="{'active': activeTab === 'data'}"
+            class="debug-tab">
+            <i class="fas fa-database"></i> Data
+        </button>
+    </div>
+
+    <!-- Server Logs Tab -->
+    <div x-show="activeTab === 'logs'" class="debug-panel">
+        <div class="panel-header">
+            <h3>Server Logs</h3>
+            <div class="log-filters">
+                <select x-model="logLevel" @change="filterLogs()">
+                    <option value="all">All Levels</option>
+                    <option value="error">Errors Only</option>
+                    <option value="warning">Warnings</option>
+                    <option value="info">Info</option>
+                </select>
+            </div>
+        </div>
+        <div class="log-container">
+            <template x-for="log in filteredLogs" :key="log.id">
+                <div class="log-entry" :class="log.level">
+                    <div class="log-header">
+                        <span class="log-time" x-text="log.timestamp"></span>
+                        <span class="log-level"
+                            x-text="log.level.toUpperCase()"></span>
+                        <span class="log-source" x-text="log.source"></span>
+                    </div>
+                    <div class="log-message" x-text="log.message"></div>
+                    <div x-show="log.details" class="log-details">
+                        <pre x-text="log.details"></pre>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Console Tab -->
+    <div x-show="activeTab === 'console'" class="debug-panel">
+        <div class="panel-header">
+            <h3>Browser Console</h3>
+            <button @click="captureConsole()" class="btn btn-sm">
+                <i class="fas fa-camera"></i> Capture
+            </button>
+        </div>
+        <div class="console-container">
+            <div class="console-output" x-html="consoleOutput"></div>
+        </div>
+    </div>
+
+    <!-- API Tests Tab -->
+    <div x-show="activeTab === 'api'" class="debug-panel">
+        <div class="panel-header">
+            <h3>API Tests</h3>
+            <button @click="runAllTests()" class="btn btn-primary">
+                <i class="fas fa-play"></i> Run All Tests
+            </button>
+        </div>
+        <div class="test-results">
+            <template x-for="test in apiTests" :key="test.name">
+                <div class="test-item" :class="test.status">
+                    <div class="test-header">
+                        <span class="test-name" x-text="test.name"></span>
+                        <span class="test-status" x-text="test.status"></span>
+                        <button @click="runTest(test)" class="btn btn-sm">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div x-show="test.result" class="test-result">
+                        <pre x-text="test.result"></pre>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Data Tab -->
+    <div x-show="activeTab === 'data'" class="debug-panel">
+        <div class="panel-header">
+            <h3>Data Overview</h3>
+            <button @click="refreshData()" class="btn btn-primary">
+                <i class="fas fa-refresh"></i> Refresh
+            </button>
+        </div>
+        <div class="data-stats">
+            <div class="stat-card">
+                <h4>Music Tracks</h4>
+                <span class="stat-number" x-text="dataStats.music"></span>
+            </div>
+            <div class="stat-card">
+                <h4>Shows</h4>
+                <span class="stat-number" x-text="dataStats.shows"></span>
+            </div>
+            <div class="stat-card">
+                <h4>Artists</h4>
+                <span class="stat-number" x-text="dataStats.artists"></span>
+            </div>
+            <div class="stat-card">
+                <h4>Users</h4>
+                <span class="stat-number" x-text="dataStats.users"></span>
+            </div>
+        </div>
+        <div class="data-preview">
+            <h4>Recent Data</h4>
+            <pre x-text="dataPreview"></pre>
+        </div>
+    </div>
+</div>
+
+<style>
+.debug-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-lg);
+}
+
+.debug-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.debug-controls {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.debug-tabs {
+    display: flex;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.debug-tab {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.debug-tab:hover {
+    color: var(--text-primary);
+    background: var(--background-hover);
+}
+
+.debug-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.debug-panel {
+    background: var(--background-light);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    min-height: 400px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.log-container {
+    max-height: 500px;
+    overflow-y: auto;
+    background: var(--background-dark);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-sm);
+}
+
+.log-entry {
+    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--border-color);
+}
+
+.log-entry.error {
+    border-left-color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.log-entry.warning {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.log-entry.info {
+    border-left-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.log-header {
+    display: flex;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.log-level {
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.log-message {
+    font-family: monospace;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.log-details {
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.console-container {
+    background: var(--background-dark);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    min-height: 300px;
+    font-family: monospace;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.test-results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.test-item {
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.test-item.passed {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.test-item.failed {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.test-item.running {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.test-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+}
+
+.test-name {
+    font-weight: 600;
+}
+
+.test-status {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.test-result {
+    margin-top: var(--spacing-sm);
+    font-family: monospace;
+    font-size: var(--font-size-xs);
+    background: var(--background-dark);
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius);
+    white-space: pre-wrap;
+}
+
+.data-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.stat-card {
+    background: var(--background-medium);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    text-align: center;
+}
+
+.stat-card h4 {
+    margin: 0 0 var(--spacing-xs) 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.stat-number {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.data-preview {
+    background: var(--background-dark);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    font-family: monospace;
+    font-size: var(--font-size-xs);
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+}
+</style>
+
+<script>
+function debugConsole() {
+    return {
+        activeTab: 'logs',
+        logs: [],
+        filteredLogs: [],
+        logLevel: 'all',
+        consoleOutput: '',
+        apiTests: [
+            { name: 'Save Track', endpoint: '/api/saves/save', method: 'POST', status: 'pending' },
+            { name: 'Get Music', endpoint: '/api/music', method: 'GET', status: 'pending' },
+            { name: 'Get Shows', endpoint: '/api/shows', method: 'GET', status: 'pending' },
+            { name: 'Get Boards', endpoint: '/api/boards', method: 'GET', status: 'pending' },
+            { name: 'Check Auth', endpoint: '/api/user/profile', method: 'GET', status: 'pending' }
+        ],
+        dataStats: {
+            music: 0,
+            shows: 0,
+            artists: 0,
+            users: 0
+        },
+        dataPreview: '',
+
+        async loadDebugData() {
+            await this.loadLogs();
+            await this.loadDataStats();
+            this.captureConsole();
+        },
+
+        async loadLogs() {
+            try {
+                const response = await fetch('/api/debug/logs');
+                const data = await response.json();
+                this.logs = data.logs || [];
+                this.filterLogs();
+            } catch (error) {
+                this.addLog('error', 'Failed to load logs', error.message);
+            }
+        },
+
+        async loadDataStats() {
+            try {
+                const [musicRes, showsRes, artistsRes, usersRes] = await Promise.all([
+                    fetch('/api/music'),
+                    fetch('/api/shows'),
+                    fetch('/api/artists'),
+                    fetch('/api/debug/users')
+                ]);
+
+                const musicData = await musicRes.json();
+                const showsData = await showsRes.json();
+                const artistsData = await artistsRes.json();
+                const usersData = await usersRes.json();
+
+                this.dataStats = {
+                    music: musicData.tracks?.length || 0,
+                    shows: showsData.shows?.length || 0,
+                    artists: artistsData.artists?.length || 0,
+                    users: usersData.users?.length || 0
+                };
+
+                this.dataPreview = JSON.stringify({
+                    music: musicData.tracks?.slice(0, 2) || [],
+                    shows: showsData.shows?.slice(0, 2) || [],
+                    artists: artistsData.artists?.slice(0, 2) || []
+                }, null, 2);
+            } catch (error) {
+                this.addLog('error', 'Failed to load data stats', error.message);
+            }
+        },
+
+        addLog(level, message, details = null) {
+            const log = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleTimeString(),
+                level,
+                source: 'Debug Console',
+                message,
+                details
+            };
+            this.logs.unshift(log);
+            this.filterLogs();
+        },
+
+        filterLogs() {
+            if (this.logLevel === 'all') {
+                this.filteredLogs = [...this.logs];
+            } else {
+                this.filteredLogs = this.logs.filter(log => log.level === this.logLevel);
+            }
+        },
+
+        refreshLogs() {
+            this.loadLogs();
+            this.addLog('info', 'Logs refreshed');
+        },
+
+        clearLogs() {
+            this.logs = [];
+            this.filteredLogs = [];
+            this.addLog('info', 'Logs cleared');
+        },
+
+        exportLogs() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                logs: this.logs,
+                stats: this.dataStats
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `debug-logs-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        },
+
+        captureConsole() {
+            // Capture console output
+            const originalLog = console.log;
+            const originalError = console.error;
+            const originalWarn = console.warn;
+
+            console.log = (...args) => {
+                this.consoleOutput += `[LOG] ${args.join(' ')}\n`;
+                originalLog.apply(console, args);
+            };
+
+            console.error = (...args) => {
+                this.consoleOutput += `[ERROR] ${args.join(' ')}\n`;
+                originalError.apply(console, args);
+            };
+
+            console.warn = (...args) => {
+                this.consoleOutput += `[WARN] ${args.join(' ')}\n`;
+                originalWarn.apply(console, args);
+            };
+        },
+
+        async runTest(test) {
+            test.status = 'running';
+            test.result = '';
+
+            try {
+                const response = await fetch(test.endpoint, {
+                    method: test.method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: test.method === 'POST' ? JSON.stringify({
+                        type: 'track',
+                        id: 'test_id',
+                        data: { title: 'Test Track', artist: 'Test Artist' }
+                    }) : undefined
+                });
+
+                const result = await response.json();
+                test.status = response.ok ? 'passed' : 'failed';
+                test.result = JSON.stringify(result, null, 2);
+            } catch (error) {
+                test.status = 'failed';
+                test.result = error.message;
+            }
+        },
+
+        async runAllTests() {
+            for (const test of this.apiTests) {
+                await this.runTest(test);
+                await new Promise(resolve => setTimeout(resolve, 500)); // Delay between tests
+            }
+        },
+
+        refreshData() {
+            this.loadDataStats();
+            this.addLog('info', 'Data refreshed');
+        }
+    };
+}
+</script>
+{% endblock %}

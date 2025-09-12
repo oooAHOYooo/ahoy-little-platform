@@ -1,1 +1,50 @@
-{}
+{
+  "testuser": {
+    "user_id": "0068310d-fd1d-4705-9f8b-3b3b5aa1db36",
+    "username": "testuser",
+    "password": "db245b093a2acc0939578a5058531da5bd8c893e7a8e3665d511efbfbbdfc494",
+    "email": "test@example.com",
+    "display_name": "Test User",
+    "created_at": "2025-09-12T10:20:57.363527",
+    "last_login": "2025-09-12T10:25:31.712293",
+    "profile": {
+      "username": "testuser",
+      "display_name": "Test User",
+      "email": "test@example.com",
+      "avatar_url": "/static/img/default-avatar.png",
+      "bio": "",
+      "location": "",
+      "website": "",
+      "created_at": "2025-09-12T10:20:57.363527",
+      "preferences": {
+        "theme": "default",
+        "autoplay": true,
+        "notifications": true,
+        "privacy": "public"
+      }
+    },
+    "saves": {
+      "saved_tracks": [],
+      "saved_shows": [],
+      "saved_artists": [],
+      "liked_content": [],
+      "recently_played": [],
+      "playlists": [],
+      "collections": []
+    },
+    "activity": {
+      "total_plays": 0,
+      "total_saves": 0,
+      "total_playlists": 0,
+      "last_active": "2025-09-12T10:25:31.712302"
+    },
+    "subscription": {
+      "type": "free",
+      "expires_at": null,
+      "features": [
+        "basic_saves",
+        "basic_playlists"
+      ]
+    }
+  }
+}

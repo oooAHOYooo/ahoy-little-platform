@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Security Policy - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="policy-container">
+    <div class="policy-header">
+        <h1>Security Policy</h1>
+        <p class="policy-updated">Last updated: December 2024</p>
+    </div>
+
+    <div class="policy-content">
+        <section class="policy-section">
+            <h2>1. Security Overview</h2>
+            <p>At Ahoy Indie Media, we take the security of your data and our
+                platform seriously. This security policy outlines our commitment
+                to protecting your information and maintaining a secure
+                environment for all users.</p>
+        </section>
+
+        <section class="policy-section">
+            <h2>2. Data Protection Measures</h2>
+
+            <h3>Encryption</h3>
+            <ul>
+                <li><strong>Data in Transit:</strong> All data transmitted
+                    between your device and our servers is encrypted using TLS
+                    1.3</li>
+                <li><strong>Data at Rest:</strong> Sensitive data is encrypted
+                    using AES-256 encryption</li>
+                <li><strong>Password Security:</strong> User passwords are
+                    hashed using industry-standard algorithms</li>
+            </ul>
+
+            <h3>Access Controls</h3>
+            <ul>
+                <li><strong>Authentication:</strong> Multi-factor authentication
+                    available for enhanced security</li>
+                <li><strong>Authorization:</strong> Role-based access controls
+                    limit data access to authorized personnel</li>
+                <li><strong>Session Management:</strong> Secure session handling
+                    with automatic timeout</li>
+            </ul>
+
+            <h3>Infrastructure Security</h3>
+            <ul>
+                <li><strong>Server Security:</strong> Regular security updates
+                    and patches</li>
+                <li><strong>Network Security:</strong> Firewalls and intrusion
+                    detection systems</li>
+                <li><strong>Monitoring:</strong> 24/7 security monitoring and
+                    alerting</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>3. User Account Security</h2>
+
+            <h3>Password Requirements</h3>
+            <ul>
+                <li>Minimum 8 characters in length</li>
+                <li>Must contain uppercase and lowercase letters</li>
+                <li>Must contain at least one number</li>
+                <li>Must contain at least one special character</li>
+            </ul>
+
+            <h3>Account Protection</h3>
+            <ul>
+                <li><strong>Login Monitoring:</strong> We monitor for suspicious
+                    login attempts</li>
+                <li><strong>Account Lockout:</strong> Temporary account lockout
+                    after multiple failed login attempts</li>
+                <li><strong>Email Verification:</strong> Email verification
+                    required for account activation</li>
+            </ul>
+
+            <h3>Best Practices for Users</h3>
+            <ul>
+                <li>Use strong, unique passwords</li>
+                <li>Enable two-factor authentication when available</li>
+                <li>Log out from shared or public computers</li>
+                <li>Keep your contact information up to date</li>
+                <li>Report suspicious activity immediately</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>4. Data Handling and Storage</h2>
+
+            <h3>Data Minimization</h3>
+            <p>We only collect and store data that is necessary for providing
+                our services and improving user experience.</p>
+
+            <h3>Data Retention</h3>
+            <ul>
+                <li><strong>Account Data:</strong> Retained while your account
+                    is active</li>
+                <li><strong>Usage Data:</strong> Anonymized and retained for
+                    analytics purposes</li>
+                <li><strong>Logs:</strong> Security logs retained for 90
+                    days</li>
+            </ul>
+
+            <h3>Data Deletion</h3>
+            <p>When you delete your account, we will permanently remove your
+                personal data within 30 days, except where retention is required
+                by law.</p>
+        </section>
+
+        <section class="policy-section">
+            <h2>5. Third-Party Security</h2>
+
+            <h3>Service Providers</h3>
+            <p>We carefully vet all third-party service providers and ensure
+                they meet our security standards. All service providers are
+                required to:</p>
+            <ul>
+                <li>Implement appropriate security measures</li>
+                <li>Comply with data protection regulations</li>
+                <li>Provide regular security assessments</li>
+                <li>Maintain confidentiality of user data</li>
+            </ul>
+
+            <h3>API Security</h3>
+            <ul>
+                <li><strong>Rate Limiting:</strong> API endpoints are protected
+                    against abuse</li>
+                <li><strong>Authentication:</strong> API access requires proper
+                    authentication</li>
+                <li><strong>Input Validation:</strong> All API inputs are
+                    validated and sanitized</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>6. Incident Response</h2>
+
+            <h3>Security Incident Process</h3>
+            <ol>
+                <li><strong>Detection:</strong> Automated monitoring and user
+                    reports</li>
+                <li><strong>Assessment:</strong> Immediate evaluation of the
+                    incident</li>
+                <li><strong>Containment:</strong> Steps to prevent further
+                    damage</li>
+                <li><strong>Investigation:</strong> Detailed analysis of the
+                    incident</li>
+                <li><strong>Recovery:</strong> Restoration of normal
+                    operations</li>
+                <li><strong>Lessons Learned:</strong> Process improvement based
+                    on findings</li>
+            </ol>
+
+            <h3>User Notification</h3>
+            <p>In the event of a security incident that may affect your data, we
+                will notify affected users within 72 hours of discovery.</p>
+        </section>
+
+        <section class="policy-section">
+            <h2>7. Vulnerability Management</h2>
+
+            <h3>Regular Security Assessments</h3>
+            <ul>
+                <li>Automated vulnerability scanning</li>
+                <li>Penetration testing by third-party experts</li>
+                <li>Code security reviews</li>
+                <li>Dependency vulnerability monitoring</li>
+            </ul>
+
+            <h3>Bug Bounty Program</h3>
+            <p>We encourage responsible disclosure of security vulnerabilities.
+                If you discover a security issue, please report it to
+                security@ahoyindie.com.</p>
+        </section>
+
+        <section class="policy-section">
+            <h2>8. Compliance and Standards</h2>
+
+            <h3>Security Standards</h3>
+            <ul>
+                <li>OWASP Top 10 compliance</li>
+                <li>Industry best practices for web application security</li>
+                <li>Regular security training for development team</li>
+                <li>Secure coding practices and code reviews</li>
+            </ul>
+
+            <h3>Data Protection Regulations</h3>
+            <p>We comply with applicable data protection regulations, including
+                GDPR, CCPA, and other relevant privacy laws.</p>
+        </section>
+
+        <section class="policy-section">
+            <h2>9. Security Monitoring</h2>
+
+            <h3>Continuous Monitoring</h3>
+            <ul>
+                <li>Real-time security event monitoring</li>
+                <li>Automated threat detection</li>
+                <li>Regular security log analysis</li>
+                <li>Performance and availability monitoring</li>
+            </ul>
+
+            <h3>Alerting and Response</h3>
+            <ul>
+                <li>Immediate alerts for critical security events</li>
+                <li>24/7 on-call security team</li>
+                <li>Escalation procedures for different threat levels</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>10. Contact Information</h2>
+            <p>For security-related questions, concerns, or to report a security
+                issue:</p>
+
+            <div class="contact-info">
+                <p><strong>Security Email:</strong> security@ahoyindie.com</p>
+                <p><strong>General Support:</strong> support@ahoyindie.com</p>
+                <p><strong>Emergency Contact:</strong> Available through our
+                    support channels</p>
+            </div>
+
+            <h3>Security Resources</h3>
+            <ul>
+                <li>Regular security updates and advisories</li>
+                <li>Security best practices documentation</li>
+                <li>User security education materials</li>
+            </ul>
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -33,53 +33,50 @@
         </div>
     </div>
 
-    <!-- Genre Filter -->
-    <div class="genre-filter">
-        <div class="genre-tabs">
-            <button @click="selectedGenre = 'all'"
-                :class="{'active': selectedGenre === 'all'}"
-                class="genre-tab">
-                All Genres
+    <!-- Type Filter -->
+    <div class="type-filter">
+        <div class="filter-tabs">
+            <button @click="selectedType = 'all'"
+                :class="{'active': selectedType === 'all'}"
+                class="filter-tab">
+                All Artists
             </button>
-            <template x-for="genre in genres" :key="genre">
-                <button @click="selectedGenre = genre"
-                    :class="{'active': selectedGenre === genre}"
-                    class="genre-tab"
-                    x-text="genre">
-                </button>
-            </template>
+            <button @click="selectedType = 'musician'"
+                :class="{'active': selectedType === 'musician'}"
+                class="filter-tab">
+                Musicians
+            </button>
+            <button @click="selectedType = 'host'"
+                :class="{'active': selectedType === 'host'}"
+                class="filter-tab">
+                Hosts
+            </button>
         </div>
     </div>
 
     <!-- Featured Artist -->
     <div x-show="featuredArtist" class="featured-artist">
         <div class="featured-content">
-            <div class="artist-avatar">
+            <div class="featured-avatar">
                 <img
-                    :src="featuredArtist.avatar || '/static/img/default-avatar.png'"
-                    :alt="featuredArtist.name">
+                    :src="featuredArtist.image || '/static/img/default-avatar.png'"
+                    :alt="featuredArtist.name"
+                    class="artist-image">
+                <div class="artist-badge" x-text="featuredArtist.type"></div>
             </div>
-            <div class="artist-info">
+            <div class="featured-info">
                 <h2 x-text="featuredArtist.name"></h2>
-                <p class="artist-bio" x-text="featuredArtist.bio"></p>
-                <div class="artist-stats">
-                    <span class="stat">
-                        <i class="fas fa-music"></i>
-                        <span
-                            x-text="`${featuredArtist.track_count || 0} tracks`"></span>
-                    </span>
-                    <span class="stat">
-                        <i class="fas fa-play-circle"></i>
-                        <span
-                            x-text="`${featuredArtist.show_count || 0} shows`"></span>
-                    </span>
-                    <span class="stat">
-                        <i class="fas fa-heart"></i>
-                        <span
-                            x-text="`${featuredArtist.followers || 0} followers`"></span>
+                <p x-text="featuredArtist.description"></p>
+                <div class="featured-meta">
+                    <span class="genre"
+                        x-text="featuredArtist.genres?.join(', ') || 'Various'"></span>
+                    <span class="followers"
+                        x-text="`${featuredArtist.followers || 0} followers`"></span>
+                    <span class="verified" x-show="featuredArtist.verified">
+                        <i class="fas fa-check-circle"></i> Verified
                     </span>
                 </div>
-                <div class="artist-actions">
+                <div class="featured-actions">
                     <button @click="viewArtist(featuredArtist)"
                         class="btn btn-primary">
                         <i class="fas fa-user"></i> View Profile
@@ -91,6 +88,10 @@
                         <span
                             x-text="isFollowing(featuredArtist) ? 'Following' : 'Follow'"></span>
                     </button>
+                    <button @click="shareArtist(featuredArtist)"
+                        class="btn btn-outline">
+                        <i class="fas fa-share"></i> Share
+                    </button>
                 </div>
             </div>
         </div>
@@ -101,9 +102,9 @@
         <template x-for="artist in filteredArtists" :key="artist.id">
             <div class="artist-card" @click="viewArtist(artist)">
                 <div class="artist-cover">
-                    <img
-                        :src="artist.avatar || '/static/img/default-avatar.png'"
-                        :alt="artist.name">
+                    <img :src="artist.image || '/static/img/default-avatar.png'"
+                        :alt="artist.name"
+                        class="artist-image">
                     <div class="artist-overlay">
                         <button @click.stop="viewArtist(artist)"
                             class="view-btn">
@@ -111,29 +112,42 @@
                         </button>
                         <div class="artist-actions">
                             <button @click.stop="followArtist(artist)"
-                                class="action-btn"
-                                :class="{'following': isFollowing(artist)}">
+                                class="action-btn follow-btn"
+                                :class="{'following': isFollowing(artist)}"
+                                :title="isFollowing(artist) ? 'Unfollow' : 'Follow'">
                                 <i class="fas fa-plus"></i>
                             </button>
                             <button @click.stop="shareArtist(artist)"
-                                class="action-btn">
+                                class="action-btn share-btn"
+                                title="Share artist">
                                 <i class="fas fa-share"></i>
                             </button>
+                            <button @click.stop="showAddToBoard(artist)"
+                                class="action-btn add-btn"
+                                title="Add to board">
+                                <i class="fas fa-plus"></i>
+                            </button>
                         </div>
+                        <div class="artist-badge" x-text="artist.type"></div>
                     </div>
                 </div>
 
                 <div class="artist-info">
                     <h3 x-text="artist.name"></h3>
-                    <p class="artist-genre" x-text="artist.genre"></p>
+                    <p class="artist-genre"
+                        x-text="artist.genres?.join(', ') || 'Various'"></p>
                     <div class="artist-stats">
                         <span class="stat">
                             <i class="fas fa-music"></i>
-                            <span x-text="artist.track_count || 0"></span>
+                            <span x-text="artist.tracks?.length || 0"></span>
                         </span>
                         <span class="stat">
                             <i class="fas fa-play-circle"></i>
-                            <span x-text="artist.show_count || 0"></span>
+                            <span x-text="artist.shows?.length || 0"></span>
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-heart"></i>
+                            <span x-text="artist.followers || 0"></span>
                         </span>
                     </div>
                 </div>
@@ -144,12 +158,14 @@
     <!-- Artists List View -->
     <div x-show="viewMode === 'list'" class="artists-list">
         <div class="list-header">
-            <span class="col-title">Avatar</span>
-            <span class="col-title">Name</span>
-            <span class="col-title">Genre</span>
-            <span class="col-title">Tracks</span>
-            <span class="col-title">Shows</span>
-            <span class="col-title">Actions</span>
+            <span class="col-avatar">Avatar</span>
+            <span class="col-name">Name</span>
+            <span class="col-type">Type</span>
+            <span class="col-genre">Genre</span>
+            <span class="col-tracks">Tracks</span>
+            <span class="col-shows">Shows</span>
+            <span class="col-followers">Followers</span>
+            <span class="col-actions">Actions</span>
         </div>
 
         <div class="list-items">
@@ -157,20 +173,27 @@
                 <div class="list-item" @click="viewArtist(artist)">
                     <div class="col-avatar">
                         <img
-                            :src="artist.avatar || '/static/img/default-avatar.png'"
-                            :alt="artist.name">
+                            :src="artist.image || '/static/img/default-avatar.png'"
+                            :alt="artist.name"
+                            class="artist-thumbnail">
+                        <div class="artist-badge" x-text="artist.type"></div>
                     </div>
 
                     <div class="col-name">
                         <h4 x-text="artist.name"></h4>
-                        <p x-text="artist.bio?.substring(0, 100) + '...'"></p>
+                        <p
+                            x-text="artist.description?.substring(0, 50) + '...'"></p>
                     </div>
 
-                    <span class="col-genre" x-text="artist.genre"></span>
+                    <span class="col-type" x-text="artist.type"></span>
+                    <span class="col-genre"
+                        x-text="artist.genres?.join(', ') || 'Various'"></span>
                     <span class="col-tracks"
-                        x-text="artist.track_count || 0"></span>
+                        x-text="artist.tracks?.length || 0"></span>
                     <span class="col-shows"
-                        x-text="artist.show_count || 0"></span>
+                        x-text="artist.shows?.length || 0"></span>
+                    <span class="col-followers"
+                        x-text="artist.followers || 0"></span>
 
                     <div class="col-actions">
                         <button @click.stop="followArtist(artist)"
@@ -182,16 +205,14 @@
                             class="action-btn">
                             <i class="fas fa-share"></i>
                         </button>
+                        <button @click.stop="showAddToBoard(artist)"
+                            class="action-btn">
+                            <i class="fas fa-plus"></i>
+                        </button>
                     </div>
                 </div>
             </template>
         </div>
-    </div>
-
-    <!-- Loading State -->
-    <div x-show="isLoading" class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading artists...</p>
     </div>
 
     <!-- Empty State -->
@@ -203,6 +224,92 @@
     </div>
 </div>
 
+<!-- Add to Board Modal -->
+<div x-show="showAddToBoardModal" class="modal-overlay"
+    @click="showAddToBoardModal = false">
+    <div class="modal-content" @click.stop>
+        <div class="modal-header">
+            <h3>Add to Board</h3>
+            <button @click="showAddToBoardModal = false" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="board-list">
+                <template x-for="board in boards" :key="board.id">
+                    <div class="board-option" @click="addToBoard(board)">
+                        <div class="board-color"
+                            :style="`background-color: ${board.color}`"></div>
+                        <div class="board-info">
+                            <h4 x-text="board.name"></h4>
+                            <p
+                                x-text="board.description || 'No description'"></p>
+                            <span class="board-count"
+                                x-text="`${board.total_items} items`"></span>
+                        </div>
+                    </div>
+                </template>
+
+                <div class="create-board-option"
+                    @click="showCreateBoardModal = true">
+                    <div class="board-color"
+                        style="background: linear-gradient(45deg, #6366f1, #8b5cf6)"></div>
+                    <div class="board-info">
+                        <h4>Create New Board</h4>
+                        <p>Start a new collection</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Board Modal -->
+<div x-show="showCreateBoardModal" class="modal-overlay"
+    @click="showCreateBoardModal = false">
+    <div class="modal-content" @click.stop>
+        <div class="modal-header">
+            <h3>Create Board</h3>
+            <button @click="showCreateBoardModal = false" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form @submit.prevent="createBoard()">
+                <div class="form-group">
+                    <label for="boardName">Board Name</label>
+                    <input type="text" id="boardName" x-model="newBoard.name"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="boardDescription">Description</label>
+                    <textarea id="boardDescription"
+                        x-model="newBoard.description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <div class="color-picker">
+                        <template
+                            x-for="color in ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899']"
+                            :key="color">
+                            <div class="color-option"
+                                :class="{'active': newBoard.color === color}"
+                                :style="`background-color: ${color}`"
+                                @click="newBoard.color = color"></div>
+                        </template>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" @click="showCreateBoardModal = false"
+                        class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create
+                        Board</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 function artistsLibrary() {
     return {
@@ -210,11 +317,21 @@ function artistsLibrary() {
         artists: [],
         filteredArtists: [],
         featuredArtist: null,
-        genres: [],
         viewMode: 'grid',
         searchQuery: '',
-        selectedGenre: 'all',
+        selectedType: 'all',
         isLoading: true,
+        
+        // Board management
+        showAddToBoardModal: false,
+        showCreateBoardModal: false,
+        selectedArtist: null,
+        boards: [],
+        newBoard: {
+            name: '',
+            description: '',
+            color: '#6366f1'
+        },
         
         // Initialize
         async loadArtists() {
@@ -225,21 +342,15 @@ function artistsLibrary() {
                 this.artists = data.artists || [];
                 this.filteredArtists = [...this.artists];
                 this.featuredArtist = this.artists[0] || null;
-                this.extractGenres();
                 this.filterArtists();
+                
+                console.log('Loaded artists:', this.artists.length);
+                console.log('First artist:', this.artists[0]);
             } catch (error) {
                 console.error('Error loading artists:', error);
             } finally {
                 this.isLoading = false;
             }
-        },
-        
-        extractGenres() {
-            const genreSet = new Set();
-            this.artists.forEach(artist => {
-                if (artist.genre) genreSet.add(artist.genre);
-            });
-            this.genres = Array.from(genreSet).sort();
         },
         
         // Filtering
@@ -251,14 +362,14 @@ function artistsLibrary() {
                 const query = this.searchQuery.toLowerCase();
                 filtered = filtered.filter(artist => 
                     artist.name.toLowerCase().includes(query) ||
-                    artist.genre?.toLowerCase().includes(query) ||
-                    artist.bio?.toLowerCase().includes(query)
+                    artist.description?.toLowerCase().includes(query) ||
+                    artist.genres?.some(genre => genre.toLowerCase().includes(query))
                 );
             }
             
-            // Genre filter
-            if (this.selectedGenre !== 'all') {
-                filtered = filtered.filter(artist => artist.genre === this.selectedGenre);
+            // Type filter
+            if (this.selectedType !== 'all') {
+                filtered = filtered.filter(artist => artist.type === this.selectedType);
             }
             
             this.filteredArtists = filtered;
@@ -266,22 +377,201 @@ function artistsLibrary() {
         
         // Artist actions
         viewArtist(artist) {
-            window.location.href = `/artist/${artist.slug || artist.name.toLowerCase().replace(/\s+/g, '-')}`;
+            // Navigate to artist profile page
+            window.location.href = `/artist/${artist.slug}`;
         },
         
-        followArtist(artist) {
-            // Implement follow functionality
-            console.log('Following artist:', artist);
+        async followArtist(artist) {
+            try {
+                const isCurrentlyFollowing = this.isFollowing(artist);
+                const response = await fetch(isCurrentlyFollowing ? '/api/artists/unfollow' : '/api/artists/follow', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        artist_id: artist.id
+                    })
+                });
+                
+                if (response.ok) {
+                    artist.following = !isCurrentlyFollowing;
+                    if (isCurrentlyFollowing) {
+                        artist.followers = Math.max(0, (artist.followers || 0) - 1);
+                    } else {
+                        artist.followers = (artist.followers || 0) + 1;
+                    }
+                }
+            } catch (error) {
+                console.error('Error following artist:', error);
+            }
         },
         
         shareArtist(artist) {
             // Implement share functionality
-            console.log('Sharing artist:', artist);
+            if (navigator.share) {
+                navigator.share({
+                    title: artist.name,
+                    text: artist.description,
+                    url: window.location.origin + `/artist/${artist.slug}`
+                });
+            } else {
+                // Fallback to copying URL
+                navigator.clipboard.writeText(window.location.origin + `/artist/${artist.slug}`);
+                this.showNotification('Artist link copied to clipboard!', 'success');
+            }
         },
         
         isFollowing(artist) {
-            // Check if artist is followed
-            return false; // Placeholder
+            return artist.following || false;
+        },
+        
+        showAddToBoard(artist) {
+            this.selectedArtist = artist;
+            this.loadBoards();
+            this.showAddToBoardModal = true;
+        },
+        
+        async loadBoards() {
+            try {
+                const response = await fetch('/api/boards');
+                const data = await response.json();
+                this.boards = data.boards || [];
+            } catch (error) {
+                console.error('Error loading boards:', error);
+            }
+        },
+        
+        async addToBoard(board) {
+            if (!this.selectedArtist) return;
+            
+            try {
+                const response = await fetch(`/api/boards/${board.id}/add`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: 'artist',
+                        id: this.selectedArtist.id,
+                        data: this.selectedArtist
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    this.showAddToBoardModal = false;
+                    this.selectedArtist = null;
+                    
+                    if (result.guest) {
+                        this.showNotification('Added to board! (Guest mode - create account to keep permanently)', 'info');
+                        this.showUpgradePrompt();
+                    } else {
+                        this.showNotification('Added to board!', 'success');
+                    }
+                } else {
+                    this.showNotification(result.error || 'Failed to add to board', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding to board:', error);
+                this.showNotification('Failed to add to board', 'error');
+            }
+        },
+        
+        async createBoard() {
+            try {
+                const response = await fetch('/api/boards', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(this.newBoard)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    this.boards.push(result.board);
+                    this.showCreateBoardModal = false;
+                    this.newBoard = { name: '', description: '', color: '#6366f1' };
+                    
+                    if (result.guest) {
+                        this.showNotification('Board created! (Guest mode - create account to keep permanently)', 'info');
+                        this.showUpgradePrompt();
+                    } else {
+                        this.showNotification('Board created!', 'success');
+                    }
+                } else {
+                    this.showNotification(result.error || 'Failed to create board', 'error');
+                }
+            } catch (error) {
+                console.error('Error creating board:', error);
+                this.showNotification('Failed to create board', 'error');
+            }
+        },
+        
+        showUpgradePrompt() {
+            // Check if we've already shown the upgrade prompt in this session
+            if (sessionStorage.getItem('upgradePromptShown')) {
+                return;
+            }
+            
+            // Mark that we've shown the prompt
+            sessionStorage.setItem('upgradePromptShown', 'true');
+            
+            // Show upgrade prompt for guest users
+            const prompt = document.createElement('div');
+            prompt.className = 'upgrade-prompt';
+            prompt.innerHTML = `
+                <div class="upgrade-content">
+                    <div class="upgrade-icon">👥</div>
+                    <h3>Keep Your Artists Forever!</h3>
+                    <p>You're saving content as a guest. Create a free account to keep your boards and saves permanently.</p>
+                    <div class="upgrade-actions">
+                        <button onclick="window.location.href='/register'" class="btn btn-primary">Create Account</button>
+                        <button onclick="this.closest('.upgrade-prompt').remove()" class="btn btn-outline">Maybe Later</button>
+                    </div>
+                </div>
+            `;
+            prompt.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--background-light);
+                border-radius: 12px;
+                padding: 24px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                z-index: 1001;
+                max-width: 400px;
+                text-align: center;
+            `;
+            document.body.appendChild(prompt);
+            
+            // Auto-remove after 15 seconds
+            setTimeout(() => {
+                if (prompt.parentNode) {
+                    prompt.remove();
+                }
+            }, 15000);
+        },
+        
+        showNotification(message, type = 'info') {
+            // Simple notification system
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#6366f1'};
+                color: white;
+                border-radius: 8px;
+                z-index: 1000;
+                font-weight: 500;
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
     };
 }

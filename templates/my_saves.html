@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+
+{% block title %}My Saves - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="my-saves-container" x-data="mySavesLibrary()"
+    x-init="loadUserData()">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>My Saves</h1>
+        <div class="header-actions">
+            <button @click="showCreatePlaylist = true" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Playlist
+            </button>
+            <div class="user-stats" x-show="userStats">
+                <span class="stat">
+                    <i class="fas fa-music"></i>
+                    <span x-text="userStats.saved_tracks || 0"></span> Tracks
+                </span>
+                <span class="stat">
+                    <i class="fas fa-play"></i>
+                    <span x-text="userStats.saved_shows || 0"></span> Shows
+                </span>
+                <span class="stat">
+                    <i class="fas fa-list"></i>
+                    <span x-text="userStats.playlists || 0"></span> Playlists
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="saves-nav">
+        <button @click="activeTab = 'saved'"
+            :class="{'active': activeTab === 'saved'}"
+            class="nav-tab">
+            <i class="fas fa-bookmark"></i> Saved Content
+        </button>
+        <button @click="activeTab = 'playlists'"
+            :class="{'active': activeTab === 'playlists'}"
+            class="nav-tab">
+            <i class="fas fa-list"></i> Playlists
+        </button>
+        <button @click="activeTab = 'liked'"
+            :class="{'active': activeTab === 'liked'}"
+            class="nav-tab">
+            <i class="fas fa-heart"></i> Liked
+        </button>
+        <button @click="activeTab = 'recent'"
+            :class="{'active': activeTab === 'recent'}"
+            class="nav-tab">
+            <i class="fas fa-clock"></i> Recently Played
+        </button>
+    </div>
+
+    <!-- Saved Content Tab -->
+    <div x-show="activeTab === 'saved'" class="saves-content">
+        <div class="content-filters">
+            <button @click="savedFilter = 'all'"
+                :class="{'active': savedFilter === 'all'}"
+                class="filter-btn">All</button>
+            <button @click="savedFilter = 'track'"
+                :class="{'active': savedFilter === 'track'}"
+                class="filter-btn">Tracks</button>
+            <button @click="savedFilter = 'show'"
+                :class="{'active': savedFilter === 'show'}"
+                class="filter-btn">Shows</button>
+            <button @click="savedFilter = 'artist'"
+                :class="{'active': savedFilter === 'artist'}"
+                class="filter-btn">Artists</button>
+        </div>
+
+        <div class="saved-grid">
+            <template x-for="item in filteredSavedContent" :key="item.id">
+                <div class="saved-item" @click="playContent(item)">
+                    <div class="item-cover">
+                        <img
+                            :src="item.cover_art || item.thumbnail || '/static/img/default-cover.jpg'"
+                            :alt="item.title || item.name">
+                        <div class="item-overlay">
+                            <button @click.stop="playContent(item)"
+                                class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <div class="item-actions">
+                                <button @click.stop="unsaveContent(item)"
+                                    class="action-btn">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                                <button @click.stop="showAddToPlaylist(item)"
+                                    class="action-btn">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item-info">
+                        <h3 x-text="item.title || item.name"></h3>
+                        <p x-text="item.artist || item.host"></p>
+                        <div class="item-meta">
+                            <span class="saved-date"
+                                x-text="formatDate(item.saved_at)"></span>
+                            <span class="item-type"
+                                x-text="item.type || 'content'"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div x-show="filteredSavedContent.length === 0" class="empty-state">
+            <i class="fas fa-bookmark"></i>
+            <h3>No saved content</h3>
+            <p>Start saving tracks, shows, and artists you love!</p>
+        </div>
+    </div>
+
+    <!-- Playlists Tab -->
+    <div x-show="activeTab === 'playlists'" class="playlists-content">
+        <div class="playlists-grid">
+            <template x-for="playlist in playlists" :key="playlist.id">
+                <div class="playlist-card" @click="viewPlaylist(playlist)">
+                    <div class="playlist-cover">
+                        <img
+                            :src="playlist.cover_art || '/static/img/default-playlist-cover.jpg'"
+                            :alt="playlist.name">
+                        <div class="playlist-overlay">
+                            <button @click.stop="playPlaylist(playlist)"
+                                class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <div class="playlist-actions">
+                                <button @click.stop="editPlaylist(playlist)"
+                                    class="action-btn">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button @click.stop="deletePlaylist(playlist)"
+                                    class="action-btn">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="playlist-info">
+                        <h3 x-text="playlist.name"></h3>
+                        <p
+                            x-text="playlist.description || 'No description'"></p>
+                        <div class="playlist-meta">
+                            <span
+                                x-text="playlist.total_items + ' items'"></span>
+                            <span
+                                x-text="formatDate(playlist.updated_at)"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div x-show="playlists.length === 0" class="empty-state">
+            <i class="fas fa-list"></i>
+            <h3>No playlists yet</h3>
+            <p>Create your first playlist to organize your favorite content!</p>
+        </div>
+    </div>
+
+    <!-- Liked Content Tab -->
+    <div x-show="activeTab === 'liked'" class="liked-content">
+        <div class="liked-grid">
+            <template x-for="item in likedContent"
+                :key="item.id + '-' + item.type">
+                <div class="liked-item" @click="playContent(item)">
+                    <div class="item-cover">
+                        <img
+                            :src="item.data?.cover_art || item.data?.thumbnail || '/static/img/default-cover.jpg'"
+                            :alt="item.data?.title || item.data?.name">
+                        <div class="item-overlay">
+                            <button @click.stop="playContent(item)"
+                                class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <div class="item-actions">
+                                <button @click.stop="unlikeContent(item)"
+                                    class="action-btn">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item-info">
+                        <h3 x-text="item.data?.title || item.data?.name"></h3>
+                        <p x-text="item.data?.artist || item.data?.host"></p>
+                        <div class="item-meta">
+                            <span class="liked-date"
+                                x-text="formatDate(item.liked_at)"></span>
+                            <span class="item-type" x-text="item.type"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div x-show="likedContent.length === 0" class="empty-state">
+            <i class="fas fa-heart"></i>
+            <h3>No liked content</h3>
+            <p>Like tracks, shows, and artists to see them here!</p>
+        </div>
+    </div>
+
+    <!-- Recently Played Tab -->
+    <div x-show="activeTab === 'recent'" class="recent-content">
+        <div class="recent-list">
+            <template x-for="item in recentlyPlayed"
+                :key="item.id + '-' + item.type">
+                <div class="recent-item" @click="playContent(item)">
+                    <div class="item-cover">
+                        <img
+                            :src="item.data?.cover_art || item.data?.thumbnail || '/static/img/default-cover.jpg'"
+                            :alt="item.data?.title || item.data?.name">
+                    </div>
+                    <div class="item-info">
+                        <h3 x-text="item.data?.title || item.data?.name"></h3>
+                        <p x-text="item.data?.artist || item.data?.host"></p>
+                        <div class="item-meta">
+                            <span class="played-date"
+                                x-text="formatDate(item.played_at)"></span>
+                            <span class="item-type" x-text="item.type"></span>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button @click.stop="playContent(item)"
+                            class="play-btn-small">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div x-show="recentlyPlayed.length === 0" class="empty-state">
+            <i class="fas fa-clock"></i>
+            <h3>No recent activity</h3>
+            <p>Start playing content to see your recent activity here!</p>
+        </div>
+    </div>
+
+    <!-- Create Playlist Modal -->
+    <div x-show="showCreatePlaylist" class="modal-overlay"
+        @click="showCreatePlaylist = false">
+        <div class="modal-content" @click.stop>
+            <div class="modal-header">
+                <h3>Create New Playlist</h3>
+                <button @click="showCreatePlaylist = false" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Playlist Name</label>
+                    <input type="text" x-model="newPlaylist.name"
+                        placeholder="Enter playlist name">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea x-model="newPlaylist.description"
+                        placeholder="Enter playlist description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" x-model="newPlaylist.is_public">
+                        Make this playlist public
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button @click="showCreatePlaylist = false"
+                    class="btn btn-outline">Cancel</button>
+                <button @click="createPlaylist()" class="btn btn-primary">Create
+                    Playlist</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to Playlist Modal -->
+    <div x-show="showAddToPlaylistModal" class="modal-overlay"
+        @click="showAddToPlaylistModal = false">
+        <div class="modal-content" @click.stop>
+            <div class="modal-header">
+                <h3>Add to Playlist</h3>
+                <button @click="showAddToPlaylistModal = false"
+                    class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="playlist-list">
+                    <template x-for="playlist in playlists" :key="playlist.id">
+                        <div class="playlist-option"
+                            @click="addToPlaylist(playlist)">
+                            <div class="playlist-info">
+                                <h4 x-text="playlist.name"></h4>
+                                <p x-text="playlist.total_items + ' items'"></p>
+                            </div>
+                            <button class="add-btn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function mySavesLibrary() {
+    return {
+        // State
+        activeTab: 'saved',
+        savedFilter: 'all',
+        savedContent: [],
+        playlists: [],
+        likedContent: [],
+        recentlyPlayed: [],
+        userStats: null,
+        showCreatePlaylist: false,
+        showAddToPlaylistModal: false,
+        newPlaylist: {
+            name: '',
+            description: '',
+            is_public: false
+        },
+        selectedContent: null,
+        
+        // Computed
+        get filteredSavedContent() {
+            if (this.savedFilter === 'all') {
+                return this.savedContent;
+            }
+            return this.savedContent.filter(item => item.type === this.savedFilter);
+        },
+        
+        // Initialize
+        async loadUserData() {
+            try {
+                await Promise.all([
+                    this.loadSavedContent(),
+                    this.loadPlaylists(),
+                    this.loadLikedContent(),
+                    this.loadRecentlyPlayed(),
+                    this.loadUserStats()
+                ]);
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        },
+        
+        async loadSavedContent() {
+            try {
+                const response = await fetch('/api/saves/track');
+                const data = await response.json();
+                this.savedContent = data.content || [];
+            } catch (error) {
+                console.error('Error loading saved content:', error);
+            }
+        },
+        
+        async loadPlaylists() {
+            try {
+                const response = await fetch('/api/playlists');
+                const data = await response.json();
+                this.playlists = data.playlists || [];
+            } catch (error) {
+                console.error('Error loading playlists:', error);
+            }
+        },
+        
+        async loadLikedContent() {
+            try {
+                const response = await fetch('/api/likes');
+                const data = await response.json();
+                this.likedContent = data.liked_content || [];
+            } catch (error) {
+                console.error('Error loading liked content:', error);
+            }
+        },
+        
+        async loadRecentlyPlayed() {
+            try {
+                const response = await fetch('/api/recently-played');
+                const data = await response.json();
+                this.recentlyPlayed = data.recently_played || [];
+            } catch (error) {
+                console.error('Error loading recently played:', error);
+            }
+        },
+        
+        async loadUserStats() {
+            try {
+                const response = await fetch('/api/user/stats');
+                const data = await response.json();
+                this.userStats = data.stats;
+            } catch (error) {
+                console.error('Error loading user stats:', error);
+            }
+        },
+        
+        // Content actions
+        async playContent(item) {
+            if (window.globalPlayer) {
+                window.globalPlayer.playTrack(item);
+            }
+        },
+        
+        async unsaveContent(item) {
+            try {
+                const response = await fetch('/api/saves/unsave', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: item.type || 'track',
+                        id: item.id
+                    })
+                });
+                
+                if (response.ok) {
+                    this.savedContent = this.savedContent.filter(i => i.id !== item.id);
+                }
+            } catch (error) {
+                console.error('Error unsaving content:', error);
+            }
+        },
+        
+        async unlikeContent(item) {
+            try {
+                const response = await fetch('/api/likes/unlike', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: item.type,
+                        id: item.id
+                    })
+                });
+                
+                if (response.ok) {
+                    this.likedContent = this.likedContent.filter(i => !(i.id === item.id && i.type === item.type));
+                }
+            } catch (error) {
+                console.error('Error unliking content:', error);
+            }
+        },
+        
+        // Playlist actions
+        async createPlaylist() {
+            try {
+                const response = await fetch('/api/playlists', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(this.newPlaylist)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.playlists.push(data.playlist);
+                    this.showCreatePlaylist = false;
+                    this.newPlaylist = { name: '', description: '', is_public: false };
+                }
+            } catch (error) {
+                console.error('Error creating playlist:', error);
+            }
+        },
+        
+        async addToPlaylist(playlist) {
+            if (!this.selectedContent) return;
+            
+            try {
+                const response = await fetch(`/api/playlists/${playlist.id}/add`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: this.selectedContent.type || 'track',
+                        id: this.selectedContent.id,
+                        data: this.selectedContent
+                    })
+                });
+                
+                if (response.ok) {
+                    this.showAddToPlaylistModal = false;
+                    this.selectedContent = null;
+                }
+            } catch (error) {
+                console.error('Error adding to playlist:', error);
+            }
+        },
+        
+        showAddToPlaylist(item) {
+            this.selectedContent = item;
+            this.showAddToPlaylistModal = true;
+        },
+        
+        viewPlaylist(playlist) {
+            // Navigate to playlist view
+            window.location.href = `/playlist/${playlist.id}`;
+        },
+        
+        playPlaylist(playlist) {
+            // Play first item in playlist
+            if (playlist.tracks && playlist.tracks.length > 0) {
+                this.playContent(playlist.tracks[0]);
+            }
+        },
+        
+        editPlaylist(playlist) {
+            // Open edit modal
+            console.log('Edit playlist:', playlist);
+        },
+        
+        async deletePlaylist(playlist) {
+            if (!confirm('Are you sure you want to delete this playlist?')) return;
+            
+            try {
+                const response = await fetch(`/api/playlists/${playlist.id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    this.playlists = this.playlists.filter(p => p.id !== playlist.id);
+                }
+            } catch (error) {
+                console.error('Error deleting playlist:', error);
+            }
+        },
+        
+        // Utility functions
+        formatDate(dateString) {
+            if (!dateString) return '';
+            return new Date(dateString).toLocaleDateString();
+        }
+    };
+}
+</script>
+{% endblock %}
