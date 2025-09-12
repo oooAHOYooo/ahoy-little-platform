@@ -23,12 +23,21 @@ def find_available_port(start_port=5001, end_port=5010):
     return None
 
 if __name__ == '__main__':
-    # Environment detection
-    is_production = os.environ.get('RENDER') == 'true' or os.environ.get('FLASK_ENV') == 'production'
+    # Environment detection - Render always sets PORT, so use that as primary indicator
+    port_env = os.environ.get('PORT')
+    is_production = (
+        port_env is not None or  # Render always sets PORT
+        os.environ.get('RENDER') == 'true' or 
+        os.environ.get('FLASK_ENV') == 'production'
+    )
     
     if is_production:
         # Production settings for Render.com
         print("🚀 Starting Ahoy Indie Media in PRODUCTION mode...")
+        print(f"🔍 Environment variables:")
+        print(f"   PORT: {os.environ.get('PORT', 'NOT SET')}")
+        print(f"   RENDER: {os.environ.get('RENDER', 'NOT SET')}")
+        print(f"   FLASK_ENV: {os.environ.get('FLASK_ENV', 'NOT SET')}")
         
         # Get port from Render environment variable
         port = int(os.environ.get('PORT', 10000))

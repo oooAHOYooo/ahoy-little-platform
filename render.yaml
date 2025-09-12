@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: python run.py
+    startCommand: python start.py
     envVars:
       - key: FLASK_ENV
         value: production
