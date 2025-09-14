@@ -4,20 +4,10 @@
 
 {% block content %}
 <div class="artists-container" x-data="artistsLibrary()" x-init="loadArtists()">
-    <!-- Header -->
-    <div class="page-header">
-        <h1>Artists</h1>
-        <div class="header-actions">
-            <div class="search-container">
-                <input type="text"
-                    x-model="searchQuery"
-                    @input="filterArtists()"
-                    placeholder="Search artists..."
-                    class="search-input">
-                <button class="search-btn">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
+    <!-- Compact Header -->
+    <div class="page-header-compact">
+        <div class="header-main">
+            <h1>Artists</h1>
             <div class="view-options">
                 <button @click="viewMode = 'grid'"
                     :class="{'active': viewMode === 'grid'}"
@@ -30,6 +20,16 @@
                     <i class="fas fa-list"></i>
                 </button>
             </div>
+        </div>
+        <div class="search-container">
+            <input type="text"
+                x-model="searchQuery"
+                @input="filterArtists()"
+                placeholder="Search artists..."
+                class="search-input">
+            <button class="search-btn">
+                <i class="fas fa-search"></i>
+            </button>
         </div>
     </div>
 
@@ -54,43 +54,48 @@
         </div>
     </div>
 
-    <!-- Featured Artist -->
-    <div x-show="featuredArtist" class="featured-artist">
-        <div class="featured-content">
-            <div class="featured-avatar">
+    <!-- Featured Artist - Compact -->
+    <div x-show="featuredArtist" class="featured-artist-compact">
+        <div class="featured-content-compact">
+            <div class="featured-avatar-compact">
                 <img
                     :src="featuredArtist.image || '/static/img/default-avatar.png'"
                     :alt="featuredArtist.name"
-                    class="artist-image">
-                <div class="artist-badge" x-text="featuredArtist.type"></div>
+                    class="artist-image-compact">
+                <div class="artist-badge-compact"
+                    x-text="featuredArtist.type"></div>
             </div>
-            <div class="featured-info">
-                <h2 x-text="featuredArtist.name"></h2>
-                <p x-text="featuredArtist.description"></p>
-                <div class="featured-meta">
-                    <span class="genre"
-                        x-text="featuredArtist.genres?.join(', ') || 'Various'"></span>
-                    <span class="followers"
-                        x-text="`${featuredArtist.followers || 0} followers`"></span>
-                    <span class="verified" x-show="featuredArtist.verified">
-                        <i class="fas fa-check-circle"></i> Verified
-                    </span>
+            <div class="featured-info-compact">
+                <div class="featured-header">
+                    <h2 x-text="featuredArtist.name"></h2>
+                    <div class="featured-meta-compact">
+                        <span class="genre-compact"
+                            x-text="featuredArtist.genres?.join(', ') || 'Various'"></span>
+                        <span class="followers-compact"
+                            x-text="`${featuredArtist.followers || 0} followers`"></span>
+                        <span class="verified-compact"
+                            x-show="featuredArtist.verified">
+                            <i class="fas fa-check-circle"></i>
+                        </span>
+                    </div>
                 </div>
-                <div class="featured-actions">
+                <p class="featured-description-compact"
+                    x-text="featuredArtist.description"></p>
+                <div class="featured-actions-compact">
                     <button @click="viewArtist(featuredArtist)"
-                        class="btn btn-primary">
+                        class="btn btn-primary btn-sm">
                         <i class="fas fa-user"></i> View Profile
                     </button>
                     <button @click="followArtist(featuredArtist)"
-                        class="btn btn-outline"
+                        class="btn btn-outline btn-sm"
                         :class="{'following': isFollowing(featuredArtist)}">
                         <i class="fas fa-plus"></i>
                         <span
                             x-text="isFollowing(featuredArtist) ? 'Following' : 'Follow'"></span>
                     </button>
                     <button @click="shareArtist(featuredArtist)"
-                        class="btn btn-outline">
-                        <i class="fas fa-share"></i> Share
+                        class="btn btn-outline btn-sm">
+                        <i class="fas fa-share"></i>
                     </button>
                 </div>
             </div>
