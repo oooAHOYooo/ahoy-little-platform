@@ -4,12 +4,14 @@ services:
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 app:app
+    startCommand: gunicorn -c gunicorn.conf.py app:app
     envVars:
       - key: FLASK_ENV
         value: production
       - key: RENDER
         value: true
+      - key: PYTHONUNBUFFERED
+        value: 1
       - key: SECRET_KEY
         generateValue: true
     healthCheckPath: /
