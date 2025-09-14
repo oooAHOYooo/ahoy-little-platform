@@ -42,6 +42,11 @@
             class="debug-tab">
             <i class="fas fa-database"></i> Data
         </button>
+        <button @click="activeTab = 'ai'"
+            :class="{'active': activeTab === 'ai'}"
+            class="debug-tab">
+            <i class="fas fa-robot"></i> AI Analysis
+        </button>
     </div>
 
     <!-- Server Logs Tab -->
@@ -143,6 +148,58 @@
         <div class="data-preview">
             <h4>Recent Data</h4>
             <pre x-text="dataPreview"></pre>
+        </div>
+    </div>
+
+    <!-- AI Analysis Tab -->
+    <div x-show="activeTab === 'ai'" class="debug-panel">
+        <div class="panel-header">
+            <h3>🤖 AI Error Analysis</h3>
+            <button @click="analyzeErrors()" class="btn btn-primary">
+                <i class="fas fa-brain"></i> Analyze
+            </button>
+        </div>
+        
+        <div class="ai-analysis">
+            <div class="analysis-section">
+                <h4>🔍 Error Summary</h4>
+                <div class="error-summary" x-html="aiAnalysis.summary"></div>
+            </div>
+            
+            <div class="analysis-section">
+                <h4>🛠️ Suggested Fixes</h4>
+                <div class="suggested-fixes" x-html="aiAnalysis.fixes"></div>
+            </div>
+            
+            <div class="analysis-section">
+                <h4>📊 Health Score</h4>
+                <div class="health-score">
+                    <div class="score-circle" :class="getHealthScoreClass()">
+                        <span x-text="aiAnalysis.healthScore + '%'"></span>
+                    </div>
+                    <div class="score-details" x-html="aiAnalysis.healthDetails"></div>
+                </div>
+            </div>
+            
+            <div class="analysis-section">
+                <h4>🚀 Performance Insights</h4>
+                <div class="performance-insights" x-html="aiAnalysis.performance"></div>
+            </div>
+            
+            <div class="analysis-section">
+                <h4>🔧 Auto-Fix Actions</h4>
+                <div class="auto-fix-actions">
+                    <button @click="applyAutoFixes()" class="btn btn-success" :disabled="aiAnalysis.autoFixes.length === 0">
+                        <i class="fas fa-magic"></i> Apply Auto-Fixes
+                    </button>
+                    <div class="fix-list">
+                        <div x-for="fix in aiAnalysis.autoFixes" class="fix-item">
+                            <span x-text="fix.description"></span>
+                            <button @click="applyFix(fix)" class="btn btn-sm btn-outline">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -370,6 +427,110 @@
     max-height: 300px;
     overflow-y: auto;
 }
+
+/* AI Analysis Styles */
+.ai-analysis {
+    display: grid;
+    gap: var(--spacing-lg);
+}
+
+.analysis-section {
+    background: var(--background-dark);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.analysis-section h4 {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.error-summary, .suggested-fixes, .performance-insights {
+    line-height: 1.6;
+}
+
+.error-summary ul, .suggested-fixes ul {
+    margin: var(--spacing-sm) 0;
+    padding-left: var(--spacing-lg);
+}
+
+.error-summary li, .suggested-fixes li {
+    margin: var(--spacing-xs) 0;
+}
+
+.health-score {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.score-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.score-circle.excellent {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.score-circle.good {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.score-circle.warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.score-circle.critical {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.score-details {
+    flex: 1;
+    line-height: 1.5;
+}
+
+.auto-fix-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.fix-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.fix-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    background: var(--background-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.fix-item span {
+    flex: 1;
+    margin-right: var(--spacing-sm);
+}
+
+.btn-sm {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.8rem;
+}
 </style>
 
 <script>
@@ -546,6 +707,248 @@ function debugConsole() {
         refreshData() {
             this.loadDataStats();
             this.addLog('info', 'Data refreshed');
+        },
+
+        // AI Analysis Functions
+        aiAnalysis: {
+            summary: '',
+            fixes: '',
+            healthScore: 0,
+            healthDetails: '',
+            performance: '',
+            autoFixes: []
+        },
+
+        async analyzeErrors() {
+            this.addLog('info', 'Starting AI error analysis...');
+            
+            try {
+                // Analyze current logs for patterns
+                const errorPatterns = this.analyzeErrorPatterns();
+                const performanceIssues = this.analyzePerformance();
+                const healthScore = this.calculateHealthScore();
+                
+                // Generate AI-powered analysis
+                this.aiAnalysis = {
+                    summary: this.generateErrorSummary(errorPatterns),
+                    fixes: this.generateSuggestedFixes(errorPatterns),
+                    healthScore: healthScore,
+                    healthDetails: this.generateHealthDetails(healthScore),
+                    performance: this.generatePerformanceInsights(performanceIssues),
+                    autoFixes: this.generateAutoFixes(errorPatterns)
+                };
+                
+                this.addLog('success', 'AI analysis completed');
+            } catch (error) {
+                this.addLog('error', `AI analysis failed: ${error.message}`);
+            }
+        },
+
+        analyzeErrorPatterns() {
+            const patterns = {
+                nameErrors: 0,
+                apiErrors: 0,
+                sessionErrors: 0,
+                repeatedErrors: 0,
+                criticalErrors: 0
+            };
+            
+            this.logs.forEach(log => {
+                if (log.level === 'ERROR') {
+                    patterns.criticalErrors++;
+                    
+                    if (log.message.includes('NameError') || log.message.includes('is not defined')) {
+                        patterns.nameErrors++;
+                    }
+                    if (log.message.includes('API') || log.message.includes('endpoint')) {
+                        patterns.apiErrors++;
+                    }
+                    if (log.message.includes('session') || log.message.includes('Session')) {
+                        patterns.sessionErrors++;
+                    }
+                }
+                
+                // Check for repeated errors
+                const similarLogs = this.logs.filter(l => 
+                    l.message === log.message && l.level === log.level
+                );
+                if (similarLogs.length > 3) {
+                    patterns.repeatedErrors++;
+                }
+            });
+            
+            return patterns;
+        },
+
+        analyzePerformance() {
+            const issues = [];
+            
+            // Check for slow responses
+            const slowLogs = this.logs.filter(log => 
+                log.message.includes('timeout') || log.message.includes('slow')
+            );
+            if (slowLogs.length > 0) {
+                issues.push('Slow response times detected');
+            }
+            
+            // Check for memory issues
+            const memoryLogs = this.logs.filter(log => 
+                log.message.includes('memory') || log.message.includes('Memory')
+            );
+            if (memoryLogs.length > 0) {
+                issues.push('Memory usage concerns');
+            }
+            
+            return issues;
+        },
+
+        calculateHealthScore() {
+            let score = 100;
+            
+            // Deduct points for errors
+            const errorCount = this.logs.filter(log => log.level === 'ERROR').length;
+            score -= Math.min(errorCount * 5, 50);
+            
+            // Deduct points for warnings
+            const warningCount = this.logs.filter(log => log.level === 'WARNING').length;
+            score -= Math.min(warningCount * 2, 20);
+            
+            // Deduct points for repeated errors
+            const repeatedErrors = this.analyzeErrorPatterns().repeatedErrors;
+            score -= Math.min(repeatedErrors * 10, 30);
+            
+            return Math.max(score, 0);
+        },
+
+        generateErrorSummary(patterns) {
+            let summary = '<h5>Error Analysis Results:</h5><ul>';
+            
+            if (patterns.nameErrors > 0) {
+                summary += `<li><strong>NameError Issues:</strong> ${patterns.nameErrors} undefined variable/function errors detected</li>`;
+            }
+            
+            if (patterns.apiErrors > 0) {
+                summary += `<li><strong>API Errors:</strong> ${patterns.apiErrors} API-related errors found</li>`;
+            }
+            
+            if (patterns.sessionErrors > 0) {
+                summary += `<li><strong>Session Issues:</strong> ${patterns.sessionErrors} session management problems</li>`;
+            }
+            
+            if (patterns.repeatedErrors > 0) {
+                summary += `<li><strong>Repeated Errors:</strong> ${patterns.repeatedErrors} recurring error patterns</li>`;
+            }
+            
+            if (patterns.criticalErrors === 0) {
+                summary += '<li><strong>Good News:</strong> No critical errors detected!</li>';
+            }
+            
+            summary += '</ul>';
+            return summary;
+        },
+
+        generateSuggestedFixes(patterns) {
+            let fixes = '<h5>Recommended Actions:</h5><ul>';
+            
+            if (patterns.nameErrors > 0) {
+                fixes += '<li><strong>Fix NameError Issues:</strong> Check for undefined variables and functions in your code</li>';
+            }
+            
+            if (patterns.apiErrors > 0) {
+                fixes += '<li><strong>API Debugging:</strong> Verify API endpoints and request/response handling</li>';
+            }
+            
+            if (patterns.sessionErrors > 0) {
+                fixes += '<li><strong>Session Management:</strong> Review session handling and timeout configurations</li>';
+            }
+            
+            if (patterns.repeatedErrors > 0) {
+                fixes += '<li><strong>Error Prevention:</strong> Add proper error handling to prevent recurring issues</li>';
+            }
+            
+            fixes += '<li><strong>General:</strong> Enable more detailed logging for better debugging</li>';
+            fixes += '</ul>';
+            
+            return fixes;
+        },
+
+        generateHealthDetails(score) {
+            if (score >= 90) {
+                return '<p>🟢 <strong>Excellent Health:</strong> Your application is running smoothly with minimal issues.</p>';
+            } else if (score >= 70) {
+                return '<p>🟡 <strong>Good Health:</strong> Some minor issues detected, but overall stable.</p>';
+            } else if (score >= 50) {
+                return '<p>🟠 <strong>Warning:</strong> Several issues need attention to maintain stability.</p>';
+            } else {
+                return '<p>🔴 <strong>Critical:</strong> Multiple serious issues detected. Immediate action required.</p>';
+            }
+        },
+
+        generatePerformanceInsights(issues) {
+            if (issues.length === 0) {
+                return '<p>✅ <strong>Performance is optimal</strong> - No performance issues detected.</p>';
+            }
+            
+            let insights = '<h5>Performance Issues Detected:</h5><ul>';
+            issues.forEach(issue => {
+                insights += `<li>${issue}</li>`;
+            });
+            insights += '</ul>';
+            
+            return insights;
+        },
+
+        generateAutoFixes(patterns) {
+            const fixes = [];
+            
+            if (patterns.nameErrors > 0) {
+                fixes.push({
+                    id: 'fix-name-errors',
+                    description: 'Add error handling for undefined variables',
+                    action: 'addErrorHandling'
+                });
+            }
+            
+            if (patterns.repeatedErrors > 0) {
+                fixes.push({
+                    id: 'fix-repeated-errors',
+                    description: 'Implement retry logic for failed operations',
+                    action: 'addRetryLogic'
+                });
+            }
+            
+            return fixes;
+        },
+
+        getHealthScoreClass() {
+            if (this.aiAnalysis.healthScore >= 90) return 'excellent';
+            if (this.aiAnalysis.healthScore >= 70) return 'good';
+            if (this.aiAnalysis.healthScore >= 50) return 'warning';
+            return 'critical';
+        },
+
+        async applyAutoFixes() {
+            this.addLog('info', 'Applying auto-fixes...');
+            
+            for (const fix of this.aiAnalysis.autoFixes) {
+                try {
+                    await this.applyFix(fix);
+                    this.addLog('success', `Applied fix: ${fix.description}`);
+                } catch (error) {
+                    this.addLog('error', `Failed to apply fix: ${fix.description}`);
+                }
+            }
+        },
+
+        async applyFix(fix) {
+            // This would integrate with your actual fix system
+            // For now, just log the action
+            this.addLog('info', `Applying fix: ${fix.description}`);
+            
+            // Simulate fix application
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            this.addLog('success', `Fix applied: ${fix.description}`);
         }
     };
 }

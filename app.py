@@ -1086,7 +1086,7 @@ def get_debug_logs():
             'level': 'error',
             'source': 'API',
             'message': 'Save operation failed',
-            'details': 'Traceback (most recent call last):\n  File "app.py", line 123\n    save_content()\nNameError: name \'save_content\' is not defined'
+            'details': 'Mock error for testing - This is not a real error'
         },
         {
             'id': 3,
