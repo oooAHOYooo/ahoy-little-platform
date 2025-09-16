@@ -131,6 +131,50 @@
                         <i class="fas fa-bookmark"></i>
                     </a>
 
+                    <!-- User Section -->
+                    <div class="nav-user" x-show="!isLoggedIn">
+                        <button @click="showLogin = true" class="nav-item"
+                            title="Login">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </button>
+                        <button @click="showRegister = true" class="nav-item"
+                            title="Sign Up">
+                            <i class="fas fa-user-plus"></i>
+                        </button>
+                    </div>
+
+                    <div class="nav-user" x-show="isLoggedIn">
+                        <div class="nav-dropdown" x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="nav-item nav-dropdown-toggle"
+                                title="User Menu">
+                                <img
+                                    :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                                    :alt="userProfile.display_name || 'User'"
+                                    class="user-avatar">
+                                <span
+                                    x-text="userProfile.display_name || 'User'"></span>
+                            </button>
+                            <div x-show="open" @click.away="open = false"
+                                class="nav-dropdown-menu">
+                                <a href="{{ url_for('my_saves') }}"
+                                    class="dropdown-item">
+                                    <i class="fas fa-bookmark"></i> My Saves
+                                </a>
+                                <a href="#" class="dropdown-item">
+                                    <i class="fas fa-user"></i> Profile
+                                </a>
+                                <a href="#" class="dropdown-item">
+                                    <i class="fas fa-cog"></i> Settings
+                                </a>
+                                <hr class="dropdown-divider">
+                                <button @click="logout()" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Settings Menu -->
                     <div class="nav-dropdown" x-data="{ open: false }">
                         <button @click="open = !open"
@@ -485,6 +529,89 @@
                 </div>
             </div>
         </footer>
+
+        <!-- Login Modal -->
+        <div x-show="showLogin" x-cloak class="modal-overlay"
+            @click.away="showLogin = false">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>Login to Ahoy Indie Media</h3>
+                    <button @click="showLogin = false" class="modal-close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form @submit.prevent="login()">
+                        <div class="form-group">
+                            <label for="login-username">Username</label>
+                            <input type="text" id="login-username"
+                                x-model="loginForm.username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password"
+                                x-model="loginForm.password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary"
+                            :disabled="isLoading">
+                            <span x-show="!isLoading">Login</span>
+                            <span x-show="isLoading">Logging in...</span>
+                        </button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <p>Don't have an account?
+                        <a href="#"
+                            @click="showLogin = false; showRegister = true">Sign
+                            up</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Modal -->
+        <div x-show="showRegister" x-cloak class="modal-overlay"
+            @click.away="showRegister = false">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>Create Your Ahoy Account</h3>
+                    <button @click="showRegister = false"
+                        class="modal-close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form @submit.prevent="register()">
+                        <div class="form-group">
+                            <label for="register-username">Username</label>
+                            <input type="text" id="register-username"
+                                x-model="registerForm.username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-email">Email</label>
+                            <input type="email" id="register-email"
+                                x-model="registerForm.email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Password</label>
+                            <input type="password" id="register-password"
+                                x-model="registerForm.password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary"
+                            :disabled="isLoading">
+                            <span x-show="!isLoading">Sign Up</span>
+                            <span x-show="isLoading">Creating account...</span>
+                        </button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <p>Already have an account?
+                        <a href="#"
+                            @click="showRegister = false; showLogin = true">Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
 
         <!-- JavaScript -->
         <script src="{{ url_for('static', filename='js/app.js') }}"></script>

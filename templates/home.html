@@ -9,9 +9,9 @@
         <div class="hero-feed"
             :style="`transform: translateX(${heroOffset}px)`">
             <template x-for="(item, index) in heroItems" :key="item.id">
-                <div class="hero-item"
+                <div class="hero-item" x-show="item.cover_art || item.thumbnail"
                     :class="{'active': currentHeroIndex === index}"
-                    :style="`background-image: url(${item.cover_art})`"
+                    :style="`background-image: url(${item.cover_art || item.thumbnail})`"
                     @click="playItem(item, index)">
                     <div class="hero-overlay">
                         <div class="hero-content">
@@ -52,7 +52,8 @@
                 <div class="item-header">
                     <h3><i class="fas fa-star"></i> Artist Spotlight</h3>
                 </div>
-                <div class="artist-compact" x-show="featuredArtist"
+                <div class="artist-compact"
+                    x-show="featuredArtist && (featuredArtist.image || featuredArtist.avatar)"
                     @click="viewArtist(featuredArtist)">
                     <img
                         :src="featuredArtist?.image || '/static/img/default-avatar.png'"
@@ -76,6 +77,7 @@
                     <template x-for="(item, index) in feedItems.slice(0, 4)"
                         :key="item.id">
                         <div class="playing-item"
+                            x-show="item.cover_art || item.thumbnail"
                             :class="{'playing': currentIndex === index}"
                             @click="playItem(item, index)">
                             <img :src="item.cover_art" :alt="item.title">
@@ -101,7 +103,8 @@
                 <div class="shows-list">
                     <template x-for="show in featuredShows.slice(0, 3)"
                         :key="show.id">
-                        <div class="show-item" @click="playShow(show)">
+                        <div class="show-item" x-show="show.thumbnail"
+                            @click="playShow(show)">
                             <img :src="show.thumbnail" :alt="show.title">
                             <div class="show-details">
                                 <h4 x-text="show.title"></h4>

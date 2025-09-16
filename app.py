@@ -285,6 +285,17 @@ def api_shows():
     shows_data = load_json_data('shows.json', {'shows': []})
     return jsonify(shows_data)
 
+@app.route('/api/show/<show_id>')
+def api_show(show_id):
+    """Get individual show by ID"""
+    shows_data = load_json_data('shows.json', {'shows': []})
+    show = next((s for s in shows_data.get('shows', []) if s.get('id') == show_id), None)
+    
+    if not show:
+        return jsonify({'error': 'Show not found'}), 404
+    
+    return jsonify(show)
+
 @app.route('/api/artists')
 def api_artists():
     """Get artists directory"""
