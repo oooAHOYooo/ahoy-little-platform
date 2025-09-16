@@ -19,7 +19,7 @@
         <meta property="og:description"
             content="{% block og_description %}Discover and save indie music, shows, and media. Create boards, save favorites, and explore new artists.{% endblock %}">
         <meta property="og:image"
-            content="{{ url_for('static', filename='img/logo-ahoy.png') }}">
+            content="{{ url_for('static', filename='img/ahoy_logo.png') }}">
 
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image">
@@ -29,7 +29,7 @@
         <meta property="twitter:description"
             content="{% block twitter_description %}Discover and save indie music, shows, and media. Create boards, save favorites, and explore new artists.{% endblock %}">
         <meta property="twitter:image"
-            content="{{ url_for('static', filename='img/logo-ahoy.png') }}">
+            content="{{ url_for('static', filename='img/ahoy_logo.png') }}">
 
         <!-- Favicon -->
         <link rel="icon" type="image/svg+xml"
@@ -67,100 +67,207 @@
         <!-- Navigation -->
         <nav class="navbar" x-data="navbar()" x-init="init()">
             <div class="nav-container">
+
                 <!-- Logo -->
                 <div class="nav-logo">
                     <a href="{{ url_for('home') }}">
                         <img
-                            src="{{ url_for('static', filename='img/logo-ahoy.png') }}"
+                            src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
                             alt="Ahoy Indie Media">
+                        <span class="app-name">Ahoy</span>
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
-                <div class="nav-links">
-                    <a href="{{ url_for('home') }}"
-                        class="nav-link {% if request.endpoint == 'home' %}active{% endif %}">
-                        <i class="fas fa-home"></i> Home
-                    </a>
+                <!-- Main Features (3 primary features) -->
+                <div class="nav-features">
                     <a href="{{ url_for('music') }}"
-                        class="nav-link {% if request.endpoint == 'music' %}active{% endif %}">
-                        <i class="fas fa-music"></i> Music
+                        class="feature-btn {% if request.endpoint == 'music' %}active{% endif %}"
+                        title="Music Library">
+                        <i class="fas fa-music"></i>
+                        <span>Music</span>
                     </a>
                     <a href="{{ url_for('shows') }}"
-                        class="nav-link {% if request.endpoint == 'shows' %}active{% endif %}">
-                        <i class="fas fa-play-circle"></i> Shows
+                        class="feature-btn {% if request.endpoint == 'shows' %}active{% endif %}"
+                        title="Live Shows">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Shows</span>
                     </a>
                     <a href="{{ url_for('artists') }}"
-                        class="nav-link {% if request.endpoint == 'artists' %}active{% endif %}">
-                        <i class="fas fa-users"></i> Artists
-                    </a>
-                    <a href="{{ url_for('my_saves') }}"
-                        class="nav-link {% if request.endpoint == 'my_saves' %}active{% endif %}">
-                        <i class="fas fa-bookmark"></i> My Saves
+                        class="feature-btn {% if request.endpoint == 'artists' %}active{% endif %}"
+                        title="Artists">
+                        <i class="fas fa-users"></i>
+                        <span>Artists</span>
                     </a>
                 </div>
 
                 <!-- Search Bar -->
                 <div class="nav-search">
                     <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
                         <input type="text"
                             placeholder="Search music, shows, artists..."
                             x-model="searchQuery"
                             @keyup.enter="performSearch()"
                             class="search-input">
-                        <button @click="performSearch()" class="search-btn">
-                            <i class="fas fa-search"></i>
+                        <button @click="clearSearch()" class="search-clear"
+                            x-show="searchQuery">
+                            <i class="fas fa-times"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- User Menu -->
-                <div class="nav-user">
-                    <template x-if="!isLoggedIn">
-                        <div class="auth-buttons">
-                            <button @click="showLogin = true"
-                                class="btn btn-outline">Login</button>
-                            <button @click="showRegister = true"
-                                class="btn btn-primary">Join Ahoy</button>
-                        </div>
-                    </template>
+                <!-- App Menu -->
+                <div class="nav-menu">
+                    <!-- Home -->
+                    <a href="{{ url_for('home') }}"
+                        class="nav-item {% if request.endpoint == 'home' %}active{% endif %}"
+                        title="Home">
+                        <i class="fas fa-home"></i>
+                    </a>
 
-                    <template x-if="isLoggedIn">
-                        <div class="user-menu" x-data="{ open: false }">
-                            <button @click="open = !open" class="user-avatar">
-                                <img
-                                    :src="userProfile.avatar || '/static/img/default-avatar.png'"
-                                    :alt="userProfile.username">
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
+                    <!-- My Saves -->
+                    <a href="{{ url_for('my_saves') }}"
+                        class="nav-item {% if request.endpoint == 'my_saves' %}active{% endif %}"
+                        title="My Saves">
+                        <i class="fas fa-bookmark"></i>
+                    </a>
 
-                            <div x-show="open" @click.away="open = false"
-                                class="user-dropdown">
-                                <div class="user-info">
-                                    <h4 x-text="userProfile.username"></h4>
-                                    <p x-text="userProfile.email"></p>
+                    <!-- Settings Menu -->
+                    <div class="nav-dropdown" x-data="{ open: false }">
+                        <button @click="open = !open"
+                            class="nav-item nav-dropdown-toggle"
+                            title="Settings">
+                            <i class="fas fa-cog"></i>
+                        </button>
+
+                        <div x-show="open"
+                            @click.away="open = false"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95"
+                            class="nav-dropdown-menu settings-menu">
+
+                            <div class="dropdown-section">
+                                <h4>App Settings</h4>
+                                <div class="setting-item">
+                                    <label class="setting-label">
+                                        <span>Dark Mode</span>
+                                        <input type="checkbox"
+                                            x-model="darkMode"
+                                            @change="toggleDarkMode()">
+                                        <span class="toggle-switch"></span>
+                                    </label>
                                 </div>
-                                <div class="dropdown-divider"></div>
-                                <a href="#" @click="openLibrary()"
-                                    class="dropdown-item">
-                                    <i class="fas fa-folder"></i> My Library
+                                <div class="setting-item">
+                                    <label class="setting-label">
+                                        <span>Auto-play</span>
+                                        <input type="checkbox"
+                                            x-model="autoPlay"
+                                            @change="toggleAutoPlay()">
+                                        <span class="toggle-switch"></span>
+                                    </label>
+                                </div>
+                                <div class="setting-item">
+                                    <label class="setting-label">
+                                        <span>Notifications</span>
+                                        <input type="checkbox"
+                                            x-model="notifications"
+                                            @change="toggleNotifications()">
+                                        <span class="toggle-switch"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="dropdown-divider"></div>
+
+                            <div class="dropdown-section">
+                                <h4>Account</h4>
+                                <template x-if="!isLoggedIn">
+                                    <div class="auth-section">
+                                        <button
+                                            @click="showLogin = true; open = false"
+                                            class="dropdown-item">
+                                            <i class="fas fa-sign-in-alt"></i>
+                                            Login
+                                        </button>
+                                        <button
+                                            @click="showRegister = true; open = false"
+                                            class="dropdown-item">
+                                            <i class="fas fa-user-plus"></i>
+                                            Sign Up
+                                        </button>
+                                    </div>
+                                </template>
+                                <template x-if="isLoggedIn">
+                                    <div class="user-section">
+                                        <div class="user-info">
+                                            <img
+                                                :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                                                :alt="userProfile.username"
+                                                class="user-avatar-small">
+                                            <div>
+                                                <div class="user-name"
+                                                    x-text="userProfile.username"></div>
+                                                <div class="user-email"
+                                                    x-text="userProfile.email"></div>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown-divider"></div>
+                                        <a href="#"
+                                            @click="openLibrary(); open = false"
+                                            class="dropdown-item">
+                                            <i class="fas fa-folder"></i> My
+                                            Library
+                                        </a>
+                                        <a href="#"
+                                            @click="openPlaylists(); open = false"
+                                            class="dropdown-item">
+                                            <i class="fas fa-list"></i> My
+                                            Playlists
+                                        </a>
+                                        <a href="#"
+                                            @click="openLiked(); open = false"
+                                            class="dropdown-item">
+                                            <i class="fas fa-heart"></i> Liked
+                                            Items
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a href="#"
+                                            @click="logout(); open = false"
+                                            class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt"></i>
+                                            Logout
+                                        </a>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="dropdown-divider"></div>
+
+                            <div class="dropdown-section">
+                                <h4>Help & Support</h4>
+                                <a href="#" class="dropdown-item">
+                                    <i class="fas fa-question-circle"></i> Help
+                                    Center
                                 </a>
-                                <a href="#" @click="openPlaylists()"
-                                    class="dropdown-item">
-                                    <i class="fas fa-list"></i> My Playlists
+                                <a href="#" class="dropdown-item">
+                                    <i class="fas fa-bug"></i> Report Bug
                                 </a>
-                                <a href="#" @click="openLiked()"
-                                    class="dropdown-item">
-                                    <i class="fas fa-heart"></i> Liked Items
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a href="#" @click="logout()"
-                                    class="dropdown-item">
-                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                <a href="#" class="dropdown-item">
+                                    <i class="fas fa-info-circle"></i> About
                                 </a>
                             </div>
                         </div>
-                    </template>
+                    </div>
+
+                    <!-- Fullscreen Toggle -->
+                    <button @click="toggleFullscreen()" class="nav-item"
+                        title="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                    </button>
                 </div>
             </div>
         </nav>
@@ -172,29 +279,60 @@
 
         <!-- Global Player -->
         <div class="global-player" x-data="globalPlayer()"
-            x-show="currentTrack">
+            x-show="currentTrack"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="transform translate-y-full"
+            x-transition:enter-end="transform translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="transform translate-y-0"
+            x-transition:leave-end="transform translate-y-full">
             <div class="player-container">
                 <div class="player-info">
-                    <img
-                        :src="currentTrack?.cover_art || '/static/img/default-cover.jpg'"
-                        :alt="currentTrack?.title"
-                        class="player-cover">
+                    <div class="player-cover-container">
+                        <img
+                            :src="currentTrack?.cover_art || '/static/img/default-cover.jpg'"
+                            :alt="currentTrack?.title"
+                            class="player-cover"
+                            :class="{'spinning': isPlaying}">
+                        <div class="play-overlay" x-show="!isPlaying">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
                     <div class="player-details">
-                        <h4 x-text="currentTrack?.title"></h4>
-                        <p x-text="currentTrack?.artist"></p>
+                        <h4
+                            x-text="currentTrack?.title || 'Unknown Title'"></h4>
+                        <p
+                            x-text="currentTrack?.artist || 'Unknown Artist'"></p>
+                        <div class="player-meta">
+                            <span class="track-type"
+                                x-text="currentTrack?.type?.toUpperCase() || 'MUSIC'"></span>
+                            <span class="track-duration"
+                                x-text="formatTime(currentTrack?.duration_seconds || 0)"></span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="player-controls">
-                    <button @click="previousTrack()" class="control-btn">
+                    <button @click="previousTrack()" class="control-btn"
+                        title="Previous">
                         <i class="fas fa-step-backward"></i>
                     </button>
-                    <button @click="togglePlay()" class="control-btn play-btn">
+                    <button @click="togglePlay()" class="control-btn play-btn"
+                        :title="isPlaying ? 'Pause' : 'Play'">
                         <i
                             :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
                     </button>
-                    <button @click="nextTrack()" class="control-btn">
+                    <button @click="nextTrack()" class="control-btn"
+                        title="Next">
                         <i class="fas fa-step-forward"></i>
+                    </button>
+                    <button @click="toggleShuffle()" class="control-btn"
+                        :class="{'active': isShuffled}" title="Shuffle">
+                        <i class="fas fa-random"></i>
+                    </button>
+                    <button @click="toggleRepeat()" class="control-btn"
+                        :class="{'active': isRepeated}" title="Repeat">
+                        <i class="fas fa-redo"></i>
                     </button>
                 </div>
 
@@ -204,20 +342,33 @@
                     <div class="progress-bar" @click="seekTo($event)">
                         <div class="progress-fill"
                             :style="`width: ${progressPercent}%`"></div>
+                        <div class="progress-handle"
+                            :style="`left: ${progressPercent}%`"></div>
                     </div>
                     <span class="time-total"
-                        x-text="formatTime(currentTrack?.duration || 0)"></span>
+                        x-text="formatTime(currentTrack?.duration_seconds || 0)"></span>
                 </div>
 
                 <div class="player-actions">
                     <button @click="toggleLike()" class="action-btn"
-                        :class="{'liked': isLiked}">
+                        :class="{'liked': isLiked}" title="Like">
                         <i class="fas fa-heart"></i>
                     </button>
-                    <button @click="addToPlaylist()" class="action-btn">
+                    <button @click="toggleSave()" class="action-btn"
+                        :class="{'saved': isSaved}" title="Save">
+                        <i class="fas fa-bookmark"></i>
+                    </button>
+                    <button @click="addToPlaylist()" class="action-btn"
+                        title="Add to Playlist">
                         <i class="fas fa-plus"></i>
                     </button>
-                    <button @click="openFullPlayer()" class="action-btn">
+                    <button @click="toggleMute()" class="action-btn"
+                        :class="{'muted': isMuted}" title="Mute">
+                        <i
+                            :class="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
+                    </button>
+                    <button @click="openFullPlayer()" class="action-btn"
+                        title="Full Player">
                         <i class="fas fa-expand"></i>
                     </button>
                 </div>
@@ -278,18 +429,31 @@
         <!-- Footer -->
         <footer class="site-footer">
             <div class="footer-content">
-                <div class="footer-section">
-                    <h4>Ahoy Indie Media</h4>
-                    <p>Discover and save indie music, shows, and media. Create
-                        boards, save favorites, and explore new artists.</p>
+                <div class="footer-section footer-brand">
+                    <div class="footer-logo">
+                        <img
+                            src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+                            alt="Ahoy Indie Media">
+                        <h4>Ahoy Indie Media</h4>
+                    </div>
+                    <p>Discover and experience live indie music, shows, and
+                        exclusive performances from emerging artists.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" title="Twitter"><i
+                                class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link" title="Instagram"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link" title="YouTube"><i
+                                class="fab fa-youtube"></i></a>
+                    </div>
                 </div>
 
                 <div class="footer-section">
-                    <h4>Quick Links</h4>
+                    <h4>Explore</h4>
                     <ul>
-                        <li><a href="{{ url_for('home') }}">Home</a></li>
-                        <li><a href="{{ url_for('music') }}">Music</a></li>
-                        <li><a href="{{ url_for('shows') }}">Shows</a></li>
+                        <li><a href="{{ url_for('music') }}">Music
+                                Library</a></li>
+                        <li><a href="{{ url_for('shows') }}">Live Shows</a></li>
                         <li><a href="{{ url_for('artists') }}">Artists</a></li>
                         <li><a href="{{ url_for('my_saves') }}">My
                                 Saves</a></li>
@@ -297,26 +461,25 @@
                 </div>
 
                 <div class="footer-section">
-                    <h4>Legal</h4>
+                    <h4>Support</h4>
                     <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact Us</a></li>
                         <li><a href="/privacy">Privacy Policy</a></li>
-                        <li><a href="/security">Security Policy</a></li>
                         <li><a href="/terms">Terms of Service</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Developer</h4>
-                    <ul>
-                        <li><a href="{{ url_for('debug_page') }}">Debug
-                                Console</a></li>
-                        <li><a href="/api/docs">API Documentation</a></li>
                     </ul>
                 </div>
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2024 Ahoy Indie Media. All rights reserved.</p>
+                <div class="footer-bottom-content">
+                    <p>&copy; 2024 Ahoy Indie Media. All rights reserved.</p>
+                    <div class="footer-bottom-links">
+                        <a href="#">Accessibility</a>
+                        <a href="#">Sitemap</a>
+                        <a href="/debug">Debug</a>
+                    </div>
+                </div>
             </div>
         </footer>
 

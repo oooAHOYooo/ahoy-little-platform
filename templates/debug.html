@@ -1,956 +1,317 @@
 {% extends "base.html" %}
 
-{% block title %}Debug Console - Ahoy Indie Media{% endblock %}
+{% block title %}Debug - Ahoy Indie Media{% endblock %}
 
 {% block content %}
-<div class="debug-container" x-data="debugConsole()" x-init="loadDebugData()">
-    <!-- Debug Header -->
-    <div class="debug-header">
-        <h1>🐛 Debug Console</h1>
-        <div class="debug-controls">
-            <button @click="refreshLogs()" class="btn btn-primary">
-                <i class="fas fa-refresh"></i> Refresh
-            </button>
-            <button @click="clearLogs()" class="btn btn-outline">
-                <i class="fas fa-trash"></i> Clear
-            </button>
-            <button @click="exportLogs()" class="btn btn-outline">
-                <i class="fas fa-download"></i> Export
-            </button>
+<div class="debug-page" x-data="debugPage()" x-init="loadSampleAccounts()">
+    <!-- Hero Section -->
+    <section class="hero-compact">
+        <div class="container">
+            <h1>Debug & Sample Accounts</h1>
+            <p>Test accounts and development tools for Ahoy Indie Media</p>
         </div>
-    </div>
+    </section>
 
-    <!-- Debug Tabs -->
-    <div class="debug-tabs">
-        <button @click="activeTab = 'logs'"
-            :class="{'active': activeTab === 'logs'}"
-            class="debug-tab">
-            <i class="fas fa-list"></i> Server Logs
-        </button>
-        <button @click="activeTab = 'console'"
-            :class="{'active': activeTab === 'console'}"
-            class="debug-tab">
-            <i class="fas fa-terminal"></i> Console
-        </button>
-        <button @click="activeTab = 'api'"
-            :class="{'active': activeTab === 'api'}"
-            class="debug-tab">
-            <i class="fas fa-code"></i> API Tests
-        </button>
-        <button @click="activeTab = 'data'"
-            :class="{'active': activeTab === 'data'}"
-            class="debug-tab">
-            <i class="fas fa-database"></i> Data
-        </button>
-        <button @click="activeTab = 'ai'"
-            :class="{'active': activeTab === 'ai'}"
-            class="debug-tab">
-            <i class="fas fa-robot"></i> AI Analysis
-        </button>
-    </div>
-
-    <!-- Server Logs Tab -->
-    <div x-show="activeTab === 'logs'" class="debug-panel">
-        <div class="panel-header">
-            <h3>Server Logs</h3>
-            <div class="log-filters">
-                <select x-model="logLevel" @change="filterLogs()">
-                    <option value="all">All Levels</option>
-                    <option value="error">Errors Only</option>
-                    <option value="warning">Warnings</option>
-                    <option value="info">Info</option>
-                </select>
-            </div>
+    <!-- Sample Accounts Section -->
+    <section class="debug-section">
+        <div class="section-header">
+            <h2><i class="fas fa-users"></i> Sample Accounts</h2>
+            <p>Use these accounts to test different user experiences</p>
         </div>
-        <div class="log-container">
-            <template x-for="log in filteredLogs" :key="log.id">
-                <div class="log-entry" :class="log.level">
-                    <div class="log-header">
-                        <span class="log-time" x-text="log.timestamp"></span>
-                        <span class="log-level"
-                            x-text="log.level.toUpperCase()"></span>
-                        <span class="log-source" x-text="log.source"></span>
+
+        <div class="accounts-grid">
+            <template x-for="account in sampleAccounts" :key="account.username">
+                <div class="account-card">
+                    <div class="account-avatar">
+                        <img :src="account.avatar" :alt="account.display_name">
                     </div>
-                    <div class="log-message" x-text="log.message"></div>
-                    <div x-show="log.details" class="log-details">
-                        <pre x-text="log.details"></pre>
-                    </div>
-                </div>
-            </template>
-        </div>
-    </div>
-
-    <!-- Console Tab -->
-    <div x-show="activeTab === 'console'" class="debug-panel">
-        <div class="panel-header">
-            <h3>Browser Console</h3>
-            <button @click="captureConsole()" class="btn btn-sm">
-                <i class="fas fa-camera"></i> Capture
-            </button>
-        </div>
-        <div class="console-container">
-            <div class="console-output" x-html="consoleOutput"></div>
-        </div>
-    </div>
-
-    <!-- API Tests Tab -->
-    <div x-show="activeTab === 'api'" class="debug-panel">
-        <div class="panel-header">
-            <h3>API Tests</h3>
-            <button @click="runAllTests()" class="btn btn-primary">
-                <i class="fas fa-play"></i> Run All Tests
-            </button>
-        </div>
-        <div class="test-results">
-            <template x-for="test in apiTests" :key="test.name">
-                <div class="test-item" :class="test.status">
-                    <div class="test-header">
-                        <span class="test-name" x-text="test.name"></span>
-                        <span class="test-status" x-text="test.status"></span>
-                        <button @click="runTest(test)" class="btn btn-sm">
-                            <i class="fas fa-play"></i>
-                        </button>
-                    </div>
-                    <div x-show="test.result" class="test-result">
-                        <pre x-text="test.result"></pre>
-                    </div>
-                </div>
-            </template>
-        </div>
-    </div>
-
-    <!-- Data Tab -->
-    <div x-show="activeTab === 'data'" class="debug-panel">
-        <div class="panel-header">
-            <h3>Data Overview</h3>
-            <button @click="refreshData()" class="btn btn-primary">
-                <i class="fas fa-refresh"></i> Refresh
-            </button>
-        </div>
-        <div class="data-stats">
-            <div class="stat-card">
-                <h4>Music Tracks</h4>
-                <span class="stat-number" x-text="dataStats.music"></span>
-            </div>
-            <div class="stat-card">
-                <h4>Shows</h4>
-                <span class="stat-number" x-text="dataStats.shows"></span>
-            </div>
-            <div class="stat-card">
-                <h4>Artists</h4>
-                <span class="stat-number" x-text="dataStats.artists"></span>
-            </div>
-            <div class="stat-card">
-                <h4>Users</h4>
-                <span class="stat-number" x-text="dataStats.users"></span>
-            </div>
-        </div>
-        <div class="data-preview">
-            <h4>Recent Data</h4>
-            <pre x-text="dataPreview"></pre>
-        </div>
-    </div>
-
-    <!-- AI Analysis Tab -->
-    <div x-show="activeTab === 'ai'" class="debug-panel">
-        <div class="panel-header">
-            <h3>🤖 AI Error Analysis</h3>
-            <button @click="analyzeErrors()" class="btn btn-primary">
-                <i class="fas fa-brain"></i> Analyze
-            </button>
-        </div>
-        
-        <div class="ai-analysis">
-            <div class="analysis-section">
-                <h4>🔍 Error Summary</h4>
-                <div class="error-summary" x-html="aiAnalysis.summary"></div>
-            </div>
-            
-            <div class="analysis-section">
-                <h4>🛠️ Suggested Fixes</h4>
-                <div class="suggested-fixes" x-html="aiAnalysis.fixes"></div>
-            </div>
-            
-            <div class="analysis-section">
-                <h4>📊 Health Score</h4>
-                <div class="health-score">
-                    <div class="score-circle" :class="getHealthScoreClass()">
-                        <span x-text="aiAnalysis.healthScore + '%'"></span>
-                    </div>
-                    <div class="score-details" x-html="aiAnalysis.healthDetails"></div>
-                </div>
-            </div>
-            
-            <div class="analysis-section">
-                <h4>🚀 Performance Insights</h4>
-                <div class="performance-insights" x-html="aiAnalysis.performance"></div>
-            </div>
-            
-            <div class="analysis-section">
-                <h4>🔧 Auto-Fix Actions</h4>
-                <div class="auto-fix-actions">
-                    <button @click="applyAutoFixes()" class="btn btn-success" :disabled="aiAnalysis.autoFixes.length === 0">
-                        <i class="fas fa-magic"></i> Apply Auto-Fixes
-                    </button>
-                    <div class="fix-list">
-                        <div x-for="fix in aiAnalysis.autoFixes" class="fix-item">
-                            <span x-text="fix.description"></span>
-                            <button @click="applyFix(fix)" class="btn btn-sm btn-outline">Apply</button>
+                    <div class="account-info">
+                        <h3 x-text="account.display_name"></h3>
+                        <p class="account-username"
+                            x-text="'@' + account.username"></p>
+                        <p class="account-email" x-text="account.email"></p>
+                        <div class="account-stats">
+                            <span class="stat">
+                                <i class="fas fa-music"></i>
+                                <span
+                                    x-text="account.stats.saved_tracks"></span>
+                                tracks
+                            </span>
+                            <span class="stat">
+                                <i class="fas fa-play-circle"></i>
+                                <span x-text="account.stats.saved_shows"></span>
+                                shows
+                            </span>
+                            <span class="stat">
+                                <i class="fas fa-heart"></i>
+                                <span
+                                    x-text="account.stats.liked_content"></span>
+                                liked
+                            </span>
                         </div>
                     </div>
+                    <div class="account-actions">
+                        <button @click="loginAs(account)"
+                            class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                        <button @click="viewProfile(account)"
+                            class="btn btn-outline">
+                            <i class="fas fa-user"></i> Profile
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </section>
+
+    <!-- Development Tools Section -->
+    <section class="debug-section">
+        <div class="section-header">
+            <h2><i class="fas fa-tools"></i> Development Tools</h2>
+            <p>Tools for testing and development</p>
+        </div>
+
+        <div class="tools-grid">
+            <div class="tool-card">
+                <div class="tool-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <h3>Data Management</h3>
+                <p>View and manage application data</p>
+                <div class="tool-actions">
+                    <button @click="viewData('users')" class="btn btn-outline">
+                        <i class="fas fa-users"></i> Users
+                    </button>
+                    <button @click="viewData('music')" class="btn btn-outline">
+                        <i class="fas fa-music"></i> Music
+                    </button>
+                    <button @click="viewData('shows')" class="btn btn-outline">
+                        <i class="fas fa-video"></i> Shows
+                    </button>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <h3>System Status</h3>
+                <p>Check application health and performance</p>
+                <div class="tool-actions">
+                    <button @click="checkSystemStatus()"
+                        class="btn btn-outline">
+                        <i class="fas fa-heartbeat"></i> Health Check
+                    </button>
+                    <button @click="viewLogs()" class="btn btn-outline">
+                        <i class="fas fa-file-alt"></i> Logs
+                    </button>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-icon">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <h3>API Testing</h3>
+                <p>Test API endpoints and responses</p>
+                <div class="tool-actions">
+                    <button @click="testAPI('now-playing')"
+                        class="btn btn-outline">
+                        <i class="fas fa-play"></i> Now Playing
+                    </button>
+                    <button @click="testAPI('search')" class="btn btn-outline">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <button @click="testAPI('artists')" class="btn btn-outline">
+                        <i class="fas fa-users"></i> Artists
+                    </button>
                 </div>
             </div>
         </div>
+    </section>
+
+    <!-- Current Session Info -->
+    <section class="debug-section" x-show="currentUser">
+        <div class="section-header">
+            <h2><i class="fas fa-user-circle"></i> Current Session</h2>
+        </div>
+
+        <div class="session-info">
+            <div class="session-card">
+                <h3>Logged in as: <span
+                        x-text="currentUser.display_name"></span></h3>
+                <p>Username: <span x-text="currentUser.username"></span></p>
+                <p>Email: <span x-text="currentUser.email"></span></p>
+                <p>Last Login: <span
+                        x-text="formatDate(currentUser.last_login)"></span></p>
+                <div class="session-actions">
+                    <button @click="logout()" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                    <button @click="refreshSession()" class="btn btn-outline">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Viewer Modal -->
+    <div x-show="showDataModal" x-cloak class="modal-overlay"
+        @click.away="showDataModal = false">
+        <div class="modal large-modal">
+            <div class="modal-header">
+                <h3 x-text="'Data Viewer - ' + currentDataType"></h3>
+                <button @click="showDataModal = false" class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-content">
+                <pre x-text="JSON.stringify(currentData, null, 2)"></pre>
+            </div>
+        </div>
     </div>
+
+    <!-- Loading State -->
+    <section x-show="isLoading" class="loading-section">
+        <div class="spinner"></div>
+        <p>Loading debug information...</p>
+    </section>
 </div>
 
-<style>
-.debug-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: var(--spacing-lg);
-}
-
-.debug-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-md);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.debug-controls {
-    display: flex;
-    gap: var(--spacing-sm);
-}
-
-.debug-tabs {
-    display: flex;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.debug-tab {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: none;
-    background: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.3s ease;
-}
-
-.debug-tab:hover {
-    color: var(--text-primary);
-    background: var(--background-hover);
-}
-
-.debug-tab.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-}
-
-.debug-panel {
-    background: var(--background-light);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    min-height: 400px;
-}
-
-.panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.log-container {
-    max-height: 500px;
-    overflow-y: auto;
-    background: var(--background-dark);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-sm);
-}
-
-.log-entry {
-    margin-bottom: var(--spacing-sm);
-    padding: var(--spacing-sm);
-    border-radius: var(--border-radius);
-    border-left: 4px solid var(--border-color);
-}
-
-.log-entry.error {
-    border-left-color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
-}
-
-.log-entry.warning {
-    border-left-color: #f59e0b;
-    background: rgba(245, 158, 11, 0.1);
-}
-
-.log-entry.info {
-    border-left-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
-}
-
-.log-header {
-    display: flex;
-    gap: var(--spacing-sm);
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-xs);
-}
-
-.log-level {
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.log-message {
-    font-family: monospace;
-    font-size: var(--font-size-sm);
-    color: var(--text-primary);
-}
-
-.log-details {
-    margin-top: var(--spacing-xs);
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-}
-
-.console-container {
-    background: var(--background-dark);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-md);
-    min-height: 300px;
-    font-family: monospace;
-    font-size: var(--font-size-sm);
-    color: var(--text-primary);
-    white-space: pre-wrap;
-    overflow-y: auto;
-    max-height: 400px;
-}
-
-.test-results {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.test-item {
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-}
-
-.test-item.passed {
-    border-color: #10b981;
-    background: rgba(16, 185, 129, 0.1);
-}
-
-.test-item.failed {
-    border-color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
-}
-
-.test-item.running {
-    border-color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
-}
-
-.test-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-xs);
-}
-
-.test-name {
-    font-weight: 600;
-}
-
-.test-status {
-    font-size: var(--font-size-xs);
-    text-transform: uppercase;
-    font-weight: 600;
-}
-
-.test-result {
-    margin-top: var(--spacing-sm);
-    font-family: monospace;
-    font-size: var(--font-size-xs);
-    background: var(--background-dark);
-    padding: var(--spacing-sm);
-    border-radius: var(--border-radius);
-    white-space: pre-wrap;
-}
-
-.data-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
-}
-
-.stat-card {
-    background: var(--background-medium);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius);
-    text-align: center;
-}
-
-.stat-card h4 {
-    margin: 0 0 var(--spacing-xs) 0;
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-}
-
-.stat-number {
-    font-size: var(--font-size-xl);
-    font-weight: 700;
-    color: var(--primary-color);
-}
-
-.data-preview {
-    background: var(--background-dark);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius);
-    font-family: monospace;
-    font-size: var(--font-size-xs);
-    color: var(--text-primary);
-    white-space: pre-wrap;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-/* AI Analysis Styles */
-.ai-analysis {
-    display: grid;
-    gap: var(--spacing-lg);
-}
-
-.analysis-section {
-    background: var(--background-dark);
-    padding: var(--spacing-lg);
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-}
-
-.analysis-section h4 {
-    margin-bottom: var(--spacing-md);
-    color: var(--text-primary);
-    font-size: 1.1rem;
-}
-
-.error-summary, .suggested-fixes, .performance-insights {
-    line-height: 1.6;
-}
-
-.error-summary ul, .suggested-fixes ul {
-    margin: var(--spacing-sm) 0;
-    padding-left: var(--spacing-lg);
-}
-
-.error-summary li, .suggested-fixes li {
-    margin: var(--spacing-xs) 0;
-}
-
-.health-score {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-lg);
-}
-
-.score-circle {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 1.2rem;
-    color: white;
-    transition: all 0.3s ease;
-}
-
-.score-circle.excellent {
-    background: linear-gradient(135deg, #10b981, #059669);
-}
-
-.score-circle.good {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-}
-
-.score-circle.warning {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-}
-
-.score-circle.critical {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-}
-
-.score-details {
-    flex: 1;
-    line-height: 1.5;
-}
-
-.auto-fix-actions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.fix-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-}
-
-.fix-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-sm);
-    background: var(--background-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-}
-
-.fix-item span {
-    flex: 1;
-    margin-right: var(--spacing-sm);
-}
-
-.btn-sm {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: 0.8rem;
-}
-</style>
-
 <script>
-function debugConsole() {
+function debugPage() {
     return {
-        activeTab: 'logs',
-        logs: [],
-        filteredLogs: [],
-        logLevel: 'all',
-        consoleOutput: '',
-        apiTests: [
-            { name: 'Save Track', endpoint: '/api/saves/save', method: 'POST', status: 'pending' },
-            { name: 'Get Music', endpoint: '/api/music', method: 'GET', status: 'pending' },
-            { name: 'Get Shows', endpoint: '/api/shows', method: 'GET', status: 'pending' },
-            { name: 'Get Boards', endpoint: '/api/boards', method: 'GET', status: 'pending' },
-            { name: 'Check Auth', endpoint: '/api/user/profile', method: 'GET', status: 'pending' }
-        ],
-        dataStats: {
-            music: 0,
-            shows: 0,
-            artists: 0,
-            users: 0
-        },
-        dataPreview: '',
-
-        async loadDebugData() {
-            await this.loadLogs();
-            await this.loadDataStats();
-            this.captureConsole();
-        },
-
-        async loadLogs() {
+        // State
+        isLoading: true,
+        sampleAccounts: [],
+        currentUser: null,
+        showDataModal: false,
+        currentData: null,
+        currentDataType: '',
+        
+        // Initialize
+        async loadSampleAccounts() {
             try {
-                const response = await fetch('/api/debug/logs');
+                this.isLoading = true;
+                const response = await fetch('/api/debug/sample-accounts');
                 const data = await response.json();
-                this.logs = data.logs || [];
-                this.filterLogs();
+                this.sampleAccounts = data.accounts || [];
+                this.checkCurrentSession();
             } catch (error) {
-                this.addLog('error', 'Failed to load logs', error.message);
+                console.error('Error loading sample accounts:', error);
+            } finally {
+                this.isLoading = false;
             }
         },
-
-        async loadDataStats() {
+        
+        checkCurrentSession() {
+            // Check if user is logged in
+            const userData = window.ahoyApp?.user;
+            if (userData) {
+                this.currentUser = userData;
+            }
+        },
+        
+        // Account actions
+        async loginAs(account) {
             try {
-                const [musicRes, showsRes, artistsRes, usersRes] = await Promise.all([
-                    fetch('/api/music'),
-                    fetch('/api/shows'),
-                    fetch('/api/artists'),
-                    fetch('/api/debug/users')
-                ]);
-
-                const musicData = await musicRes.json();
-                const showsData = await showsRes.json();
-                const artistsData = await artistsRes.json();
-                const usersData = await usersRes.json();
-
-                this.dataStats = {
-                    music: musicData.tracks?.length || 0,
-                    shows: showsData.shows?.length || 0,
-                    artists: artistsData.artists?.length || 0,
-                    users: usersData.users?.length || 0
-                };
-
-                this.dataPreview = JSON.stringify({
-                    music: musicData.tracks?.slice(0, 2) || [],
-                    shows: showsData.shows?.slice(0, 2) || [],
-                    artists: artistsData.artists?.slice(0, 2) || []
-                }, null, 2);
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: account.username,
+                        password: account.password
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.currentUser = data.user;
+                    window.location.reload();
+                } else {
+                    alert('Login failed. Please try again.');
+                }
             } catch (error) {
-                this.addLog('error', 'Failed to load data stats', error.message);
+                console.error('Login error:', error);
+                alert('Login failed. Please try again.');
             }
         },
-
-        addLog(level, message, details = null) {
-            const log = {
-                id: Date.now(),
-                timestamp: new Date().toLocaleTimeString(),
-                level,
-                source: 'Debug Console',
-                message,
-                details
-            };
-            this.logs.unshift(log);
-            this.filterLogs();
+        
+        viewProfile(account) {
+            // Navigate to user profile or show account details
+            console.log('View profile for:', account.username);
         },
-
-        filterLogs() {
-            if (this.logLevel === 'all') {
-                this.filteredLogs = [...this.logs];
-            } else {
-                this.filteredLogs = this.logs.filter(log => log.level === this.logLevel);
-            }
-        },
-
-        refreshLogs() {
-            this.loadLogs();
-            this.addLog('info', 'Logs refreshed');
-        },
-
-        clearLogs() {
-            this.logs = [];
-            this.filteredLogs = [];
-            this.addLog('info', 'Logs cleared');
-        },
-
-        exportLogs() {
-            const data = {
-                timestamp: new Date().toISOString(),
-                logs: this.logs,
-                stats: this.dataStats
-            };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `debug-logs-${Date.now()}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        },
-
-        captureConsole() {
-            // Capture console output
-            const originalLog = console.log;
-            const originalError = console.error;
-            const originalWarn = console.warn;
-
-            console.log = (...args) => {
-                this.consoleOutput += `[LOG] ${args.join(' ')}\n`;
-                originalLog.apply(console, args);
-            };
-
-            console.error = (...args) => {
-                this.consoleOutput += `[ERROR] ${args.join(' ')}\n`;
-                originalError.apply(console, args);
-            };
-
-            console.warn = (...args) => {
-                this.consoleOutput += `[WARN] ${args.join(' ')}\n`;
-                originalWarn.apply(console, args);
-            };
-        },
-
-        async runTest(test) {
-            test.status = 'running';
-            test.result = '';
-
+        
+        // Development tools
+        async viewData(dataType) {
             try {
-                const response = await fetch(test.endpoint, {
-                    method: test.method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: test.method === 'POST' ? JSON.stringify({
-                        type: 'track',
-                        id: 'test_id',
-                        data: { title: 'Test Track', artist: 'Test Artist' }
-                    }) : undefined
-                });
-
-                const result = await response.json();
-                test.status = response.ok ? 'passed' : 'failed';
-                test.result = JSON.stringify(result, null, 2);
+                const response = await fetch(`/api/debug/data/${dataType}`);
+                const data = await response.json();
+                this.currentData = data;
+                this.currentDataType = dataType;
+                this.showDataModal = true;
             } catch (error) {
-                test.status = 'failed';
-                test.result = error.message;
+                console.error('Error loading data:', error);
+                alert('Failed to load data');
             }
         },
-
-        async runAllTests() {
-            for (const test of this.apiTests) {
-                await this.runTest(test);
-                await new Promise(resolve => setTimeout(resolve, 500)); // Delay between tests
-            }
-        },
-
-        refreshData() {
-            this.loadDataStats();
-            this.addLog('info', 'Data refreshed');
-        },
-
-        // AI Analysis Functions
-        aiAnalysis: {
-            summary: '',
-            fixes: '',
-            healthScore: 0,
-            healthDetails: '',
-            performance: '',
-            autoFixes: []
-        },
-
-        async analyzeErrors() {
-            this.addLog('info', 'Starting AI error analysis...');
-            
+        
+        async checkSystemStatus() {
             try {
-                // Analyze current logs for patterns
-                const errorPatterns = this.analyzeErrorPatterns();
-                const performanceIssues = this.analyzePerformance();
-                const healthScore = this.calculateHealthScore();
-                
-                // Generate AI-powered analysis
-                this.aiAnalysis = {
-                    summary: this.generateErrorSummary(errorPatterns),
-                    fixes: this.generateSuggestedFixes(errorPatterns),
-                    healthScore: healthScore,
-                    healthDetails: this.generateHealthDetails(healthScore),
-                    performance: this.generatePerformanceInsights(performanceIssues),
-                    autoFixes: this.generateAutoFixes(errorPatterns)
-                };
-                
-                this.addLog('success', 'AI analysis completed');
+                const response = await fetch('/api/debug/status');
+                const data = await response.json();
+                this.currentData = data;
+                this.currentDataType = 'System Status';
+                this.showDataModal = true;
             } catch (error) {
-                this.addLog('error', `AI analysis failed: ${error.message}`);
+                console.error('Error checking status:', error);
+                alert('Failed to check system status');
             }
         },
-
-        analyzeErrorPatterns() {
-            const patterns = {
-                nameErrors: 0,
-                apiErrors: 0,
-                sessionErrors: 0,
-                repeatedErrors: 0,
-                criticalErrors: 0
-            };
-            
-            this.logs.forEach(log => {
-                if (log.level === 'ERROR') {
-                    patterns.criticalErrors++;
-                    
-                    if (log.message.includes('NameError') || log.message.includes('is not defined')) {
-                        patterns.nameErrors++;
-                    }
-                    if (log.message.includes('API') || log.message.includes('endpoint')) {
-                        patterns.apiErrors++;
-                    }
-                    if (log.message.includes('session') || log.message.includes('Session')) {
-                        patterns.sessionErrors++;
-                    }
-                }
-                
-                // Check for repeated errors
-                const similarLogs = this.logs.filter(l => 
-                    l.message === log.message && l.level === log.level
-                );
-                if (similarLogs.length > 3) {
-                    patterns.repeatedErrors++;
-                }
-            });
-            
-            return patterns;
+        
+        viewLogs() {
+            // Placeholder for log viewing
+            console.log('View logs functionality');
+            alert('Log viewing not implemented yet');
         },
-
-        analyzePerformance() {
-            const issues = [];
-            
-            // Check for slow responses
-            const slowLogs = this.logs.filter(log => 
-                log.message.includes('timeout') || log.message.includes('slow')
-            );
-            if (slowLogs.length > 0) {
-                issues.push('Slow response times detected');
-            }
-            
-            // Check for memory issues
-            const memoryLogs = this.logs.filter(log => 
-                log.message.includes('memory') || log.message.includes('Memory')
-            );
-            if (memoryLogs.length > 0) {
-                issues.push('Memory usage concerns');
-            }
-            
-            return issues;
-        },
-
-        calculateHealthScore() {
-            let score = 100;
-            
-            // Deduct points for errors
-            const errorCount = this.logs.filter(log => log.level === 'ERROR').length;
-            score -= Math.min(errorCount * 5, 50);
-            
-            // Deduct points for warnings
-            const warningCount = this.logs.filter(log => log.level === 'WARNING').length;
-            score -= Math.min(warningCount * 2, 20);
-            
-            // Deduct points for repeated errors
-            const repeatedErrors = this.analyzeErrorPatterns().repeatedErrors;
-            score -= Math.min(repeatedErrors * 10, 30);
-            
-            return Math.max(score, 0);
-        },
-
-        generateErrorSummary(patterns) {
-            let summary = '<h5>Error Analysis Results:</h5><ul>';
-            
-            if (patterns.nameErrors > 0) {
-                summary += `<li><strong>NameError Issues:</strong> ${patterns.nameErrors} undefined variable/function errors detected</li>`;
-            }
-            
-            if (patterns.apiErrors > 0) {
-                summary += `<li><strong>API Errors:</strong> ${patterns.apiErrors} API-related errors found</li>`;
-            }
-            
-            if (patterns.sessionErrors > 0) {
-                summary += `<li><strong>Session Issues:</strong> ${patterns.sessionErrors} session management problems</li>`;
-            }
-            
-            if (patterns.repeatedErrors > 0) {
-                summary += `<li><strong>Repeated Errors:</strong> ${patterns.repeatedErrors} recurring error patterns</li>`;
-            }
-            
-            if (patterns.criticalErrors === 0) {
-                summary += '<li><strong>Good News:</strong> No critical errors detected!</li>';
-            }
-            
-            summary += '</ul>';
-            return summary;
-        },
-
-        generateSuggestedFixes(patterns) {
-            let fixes = '<h5>Recommended Actions:</h5><ul>';
-            
-            if (patterns.nameErrors > 0) {
-                fixes += '<li><strong>Fix NameError Issues:</strong> Check for undefined variables and functions in your code</li>';
-            }
-            
-            if (patterns.apiErrors > 0) {
-                fixes += '<li><strong>API Debugging:</strong> Verify API endpoints and request/response handling</li>';
-            }
-            
-            if (patterns.sessionErrors > 0) {
-                fixes += '<li><strong>Session Management:</strong> Review session handling and timeout configurations</li>';
-            }
-            
-            if (patterns.repeatedErrors > 0) {
-                fixes += '<li><strong>Error Prevention:</strong> Add proper error handling to prevent recurring issues</li>';
-            }
-            
-            fixes += '<li><strong>General:</strong> Enable more detailed logging for better debugging</li>';
-            fixes += '</ul>';
-            
-            return fixes;
-        },
-
-        generateHealthDetails(score) {
-            if (score >= 90) {
-                return '<p>🟢 <strong>Excellent Health:</strong> Your application is running smoothly with minimal issues.</p>';
-            } else if (score >= 70) {
-                return '<p>🟡 <strong>Good Health:</strong> Some minor issues detected, but overall stable.</p>';
-            } else if (score >= 50) {
-                return '<p>🟠 <strong>Warning:</strong> Several issues need attention to maintain stability.</p>';
-            } else {
-                return '<p>🔴 <strong>Critical:</strong> Multiple serious issues detected. Immediate action required.</p>';
+        
+        async testAPI(endpoint) {
+            try {
+                const response = await fetch(`/api/${endpoint}`);
+                const data = await response.json();
+                this.currentData = data;
+                this.currentDataType = `API Test - ${endpoint}`;
+                this.showDataModal = true;
+            } catch (error) {
+                console.error('API test error:', error);
+                alert('API test failed');
             }
         },
-
-        generatePerformanceInsights(issues) {
-            if (issues.length === 0) {
-                return '<p>✅ <strong>Performance is optimal</strong> - No performance issues detected.</p>';
-            }
-            
-            let insights = '<h5>Performance Issues Detected:</h5><ul>';
-            issues.forEach(issue => {
-                insights += `<li>${issue}</li>`;
-            });
-            insights += '</ul>';
-            
-            return insights;
-        },
-
-        generateAutoFixes(patterns) {
-            const fixes = [];
-            
-            if (patterns.nameErrors > 0) {
-                fixes.push({
-                    id: 'fix-name-errors',
-                    description: 'Add error handling for undefined variables',
-                    action: 'addErrorHandling'
-                });
-            }
-            
-            if (patterns.repeatedErrors > 0) {
-                fixes.push({
-                    id: 'fix-repeated-errors',
-                    description: 'Implement retry logic for failed operations',
-                    action: 'addRetryLogic'
-                });
-            }
-            
-            return fixes;
-        },
-
-        getHealthScoreClass() {
-            if (this.aiAnalysis.healthScore >= 90) return 'excellent';
-            if (this.aiAnalysis.healthScore >= 70) return 'good';
-            if (this.aiAnalysis.healthScore >= 50) return 'warning';
-            return 'critical';
-        },
-
-        async applyAutoFixes() {
-            this.addLog('info', 'Applying auto-fixes...');
-            
-            for (const fix of this.aiAnalysis.autoFixes) {
-                try {
-                    await this.applyFix(fix);
-                    this.addLog('success', `Applied fix: ${fix.description}`);
-                } catch (error) {
-                    this.addLog('error', `Failed to apply fix: ${fix.description}`);
-                }
+        
+        async logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                this.currentUser = null;
+                window.location.reload();
+            } catch (error) {
+                console.error('Logout error:', error);
             }
         },
-
-        async applyFix(fix) {
-            // This would integrate with your actual fix system
-            // For now, just log the action
-            this.addLog('info', `Applying fix: ${fix.description}`);
-            
-            // Simulate fix application
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            this.addLog('success', `Fix applied: ${fix.description}`);
+        
+        refreshSession() {
+            window.location.reload();
+        },
+        
+        // Utility functions
+        formatDate(dateString) {
+            if (!dateString) return 'Unknown';
+            return new Date(dateString).toLocaleDateString();
         }
-    };
+    }
 }
 </script>
 {% endblock %}

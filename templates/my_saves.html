@@ -51,6 +51,11 @@
             class="nav-tab">
             <i class="fas fa-clock"></i> Recently Played
         </button>
+        <button @click="activeTab = 'boards'"
+            :class="{'active': activeTab === 'boards'}"
+            class="nav-tab">
+            <i class="fas fa-th-large"></i> Boards
+        </button>
     </div>
 
     <!-- Saved Content Tab -->
@@ -243,6 +248,62 @@
         </div>
     </div>
 
+    <!-- Boards Tab -->
+    <div x-show="activeTab === 'boards'" class="boards-content">
+        <div class="boards-header">
+            <h2>My Boards</h2>
+            <button @click="showCreateBoard = true" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Board
+            </button>
+        </div>
+
+        <div class="boards-grid">
+            <template x-for="board in userBoards" :key="board.id">
+                <div class="board-card" @click="viewBoard(board)">
+                    <div class="board-cover"
+                        :style="`background-color: ${board.color || '#6366f1'}`">
+                        <div class="board-overlay">
+                            <div class="board-actions">
+                                <button @click.stop="editBoard(board)"
+                                    class="action-btn" title="Edit board">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button @click.stop="deleteBoard(board)"
+                                    class="action-btn" title="Delete board">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="board-icon">
+                            <i class="fas fa-th-large"></i>
+                        </div>
+                        <div class="board-item-count"
+                            x-text="`${board.total_items || 0} items`"></div>
+                    </div>
+                    <div class="board-info">
+                        <h3 x-text="board.name"></h3>
+                        <p x-text="board.description || 'No description'"></p>
+                        <div class="board-meta">
+                            <span class="board-date"
+                                x-text="formatDate(board.created_at)"></span>
+                            <span class="board-visibility"
+                                x-text="board.is_public ? 'Public' : 'Private'"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div x-show="userBoards.length === 0" class="empty-state">
+            <i class="fas fa-th-large"></i>
+            <h3>No boards yet</h3>
+            <p>Create your first board to organize your favorite content!</p>
+            <button @click="showCreateBoard = true" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Board
+            </button>
+        </div>
+    </div>
+
     <!-- Create Playlist Modal -->
     <div x-show="showCreatePlaylist" class="modal-overlay"
         @click="showCreatePlaylist = false">
@@ -309,6 +370,79 @@
             </div>
         </div>
     </div>
+
+    <!-- Create Board Modal -->
+    <div x-show="showCreateBoard" class="modal-overlay"
+        @click="showCreateBoard = false">
+        <div class="modal-content" @click.stop>
+            <div class="modal-header">
+                <h3>Create New Board</h3>
+                <button @click="showCreateBoard = false" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Board Name</label>
+                    <input type="text" x-model="newBoard.name"
+                        placeholder="Enter board name">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea x-model="newBoard.description"
+                        placeholder="Enter board description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <div class="color-picker">
+                        <button type="button"
+                            @click="newBoard.color = '#6366f1'"
+                            :class="{'active': newBoard.color === '#6366f1'}"
+                            class="color-option"
+                            style="background: #6366f1;"></button>
+                        <button type="button"
+                            @click="newBoard.color = '#ef4444'"
+                            :class="{'active': newBoard.color === '#ef4444'}"
+                            class="color-option"
+                            style="background: #ef4444;"></button>
+                        <button type="button"
+                            @click="newBoard.color = '#10b981'"
+                            :class="{'active': newBoard.color === '#10b981'}"
+                            class="color-option"
+                            style="background: #10b981;"></button>
+                        <button type="button"
+                            @click="newBoard.color = '#f59e0b'"
+                            :class="{'active': newBoard.color === '#f59e0b'}"
+                            class="color-option"
+                            style="background: #f59e0b;"></button>
+                        <button type="button"
+                            @click="newBoard.color = '#8b5cf6'"
+                            :class="{'active': newBoard.color === '#8b5cf6'}"
+                            class="color-option"
+                            style="background: #8b5cf6;"></button>
+                        <button type="button"
+                            @click="newBoard.color = '#06b6d4'"
+                            :class="{'active': newBoard.color === '#06b6d4'}"
+                            class="color-option"
+                            style="background: #06b6d4;"></button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" x-model="newBoard.is_public">
+                        <span class="checkmark"></span>
+                        Make this board public
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button @click="showCreateBoard = false"
+                    class="btn btn-outline">Cancel</button>
+                <button @click="createBoard()" class="btn btn-primary">Create
+                    Board</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -321,12 +455,20 @@ function mySavesLibrary() {
         playlists: [],
         likedContent: [],
         recentlyPlayed: [],
+        userBoards: [],
         userStats: null,
         showCreatePlaylist: false,
+        showCreateBoard: false,
         showAddToPlaylistModal: false,
         newPlaylist: {
             name: '',
             description: '',
+            is_public: false
+        },
+        newBoard: {
+            name: '',
+            description: '',
+            color: '#6366f1',
             is_public: false
         },
         selectedContent: null,
@@ -347,7 +489,8 @@ function mySavesLibrary() {
                     this.loadPlaylists(),
                     this.loadLikedContent(),
                     this.loadRecentlyPlayed(),
-                    this.loadUserStats()
+                    this.loadUserStats(),
+                    this.loadUserBoards()
                 ]);
             } catch (error) {
                 console.error('Error loading user data:', error);
@@ -401,6 +544,16 @@ function mySavesLibrary() {
                 this.userStats = data.stats;
             } catch (error) {
                 console.error('Error loading user stats:', error);
+            }
+        },
+        
+        async loadUserBoards() {
+            try {
+                const response = await fetch('/api/boards');
+                const data = await response.json();
+                this.userBoards = data.boards || [];
+            } catch (error) {
+                console.error('Error loading user boards:', error);
             }
         },
         
@@ -527,6 +680,57 @@ function mySavesLibrary() {
                 }
             } catch (error) {
                 console.error('Error deleting playlist:', error);
+            }
+        },
+        
+        // Board actions
+        async createBoard() {
+            try {
+                const response = await fetch('/api/boards', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(this.newBoard)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.userBoards.push(data.board);
+                    this.showCreateBoard = false;
+                    this.newBoard = {
+                        name: '',
+                        description: '',
+                        color: '#6366f1',
+                        is_public: false
+                    };
+                }
+            } catch (error) {
+                console.error('Error creating board:', error);
+            }
+        },
+        
+        viewBoard(board) {
+            // Navigate to board view
+            window.location.href = `/board/${board.id}`;
+        },
+        
+        editBoard(board) {
+            // Navigate to board edit
+            window.location.href = `/board/${board.id}/edit`;
+        },
+        
+        async deleteBoard(board) {
+            if (confirm(`Are you sure you want to delete "${board.name}"?`)) {
+                try {
+                    const response = await fetch(`/api/boards/${board.id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        this.userBoards = this.userBoards.filter(b => b.id !== board.id);
+                    }
+                } catch (error) {
+                    console.error('Error deleting board:', error);
+                }
             }
         },
         

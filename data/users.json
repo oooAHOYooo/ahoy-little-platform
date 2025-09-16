@@ -46,5 +46,201 @@
         "basic_playlists"
       ]
     }
+  },
+  "musiclover": {
+    "user_id": "013bab07-b09f-4dcf-9406-46c962de995f",
+    "username": "musiclover",
+    "password": "15d81416935187b523e7984489d21869acda7ac99327611a36eb218033f2261b",
+    "email": "musiclover@ahoy.com",
+    "display_name": "Music Lover",
+    "created_at": "2025-09-15T14:58:15.184378",
+    "last_login": "2025-09-15T14:58:15.184378",
+    "profile": {
+      "username": "musiclover",
+      "display_name": "Music Lover",
+      "email": "musiclover@ahoy.com",
+      "avatar_url": "/static/img/default-avatar.png",
+      "bio": "Passionate about discovering new indie music and supporting emerging artists.",
+      "location": "",
+      "website": "",
+      "created_at": "2025-09-15T14:58:15.184378",
+      "preferences": {
+        "theme": "default",
+        "autoplay": true,
+        "notifications": true,
+        "privacy": "public"
+      }
+    },
+    "saves": {
+      "saved_tracks": [],
+      "saved_shows": [],
+      "saved_artists": [],
+      "liked_content": [],
+      "recently_played": [],
+      "playlists": [],
+      "collections": [],
+      "boards": []
+    },
+    "activity": {
+      "total_plays": 0,
+      "total_saves": 0,
+      "total_playlists": 0,
+      "last_active": "2025-09-15T14:58:15.184378"
+    },
+    "subscription": {
+      "type": "free",
+      "expires_at": null,
+      "features": [
+        "basic_saves",
+        "basic_playlists"
+      ]
+    }
+  },
+  "indieexplorer": {
+    "user_id": "d635033c-2715-4551-8b8c-6337364bc37c",
+    "username": "indieexplorer",
+    "password": "b6a44eba0f3646416e5e24f93f95ed8e790ea06e0349cd51498b82aa19ad9876",
+    "email": "indie@ahoy.com",
+    "display_name": "Indie Explorer",
+    "created_at": "2025-09-15T14:58:15.185184",
+    "last_login": "2025-09-15T14:58:15.185184",
+    "profile": {
+      "username": "indieexplorer",
+      "display_name": "Indie Explorer",
+      "email": "indie@ahoy.com",
+      "avatar_url": "/static/img/default-avatar.png",
+      "bio": "Always on the hunt for the next great indie discovery.",
+      "location": "",
+      "website": "",
+      "created_at": "2025-09-15T14:58:15.185184",
+      "preferences": {
+        "theme": "default",
+        "autoplay": true,
+        "notifications": true,
+        "privacy": "public"
+      }
+    },
+    "saves": {
+      "saved_tracks": [],
+      "saved_shows": [],
+      "saved_artists": [],
+      "liked_content": [],
+      "recently_played": [],
+      "playlists": [],
+      "collections": [],
+      "boards": []
+    },
+    "activity": {
+      "total_plays": 0,
+      "total_saves": 0,
+      "total_playlists": 0,
+      "last_active": "2025-09-15T14:58:15.185184"
+    },
+    "subscription": {
+      "type": "free",
+      "expires_at": null,
+      "features": [
+        "basic_saves",
+        "basic_playlists"
+      ]
+    }
+  },
+  "showbinger": {
+    "user_id": "2cb2ca01-d658-49e5-81af-4b35f66c943e",
+    "username": "showbinger",
+    "password": "1b5cc34a1f38ec5a919b2c9e818c2ccab0df9f5ec7b853b93b86a77357b11fc8",
+    "email": "shows@ahoy.com",
+    "display_name": "Show Binger",
+    "created_at": "2025-09-15T14:58:15.185667",
+    "last_login": "2025-09-15T14:58:15.185667",
+    "profile": {
+      "username": "showbinger",
+      "display_name": "Show Binger",
+      "email": "shows@ahoy.com",
+      "avatar_url": "/static/img/default-avatar.png",
+      "bio": "Love watching live performances and indie shows.",
+      "location": "",
+      "website": "",
+      "created_at": "2025-09-15T14:58:15.185667",
+      "preferences": {
+        "theme": "default",
+        "autoplay": true,
+        "notifications": true,
+        "privacy": "public"
+      }
+    },
+    "saves": {
+      "saved_tracks": [],
+      "saved_shows": [],
+      "saved_artists": [],
+      "liked_content": [],
+      "recently_played": [],
+      "playlists": [],
+      "collections": [],
+      "boards": []
+    },
+    "activity": {
+      "total_plays": 0,
+      "total_saves": 0,
+      "total_playlists": 0,
+      "last_active": "2025-09-15T14:58:15.185667"
+    },
+    "subscription": {
+      "type": "free",
+      "expires_at": null,
+      "features": [
+        "basic_saves",
+        "basic_playlists"
+      ]
+    }
+  },
+  "newuser": {
+    "user_id": "45d4ab7f-d1ec-4ee7-b2b4-cdd5e415d805",
+    "username": "newuser",
+    "password": "adf279cdcfac7628b81470a7c2cfbaeb58fab1813aa1fd7e0976d177e7a1adbd",
+    "email": "new@ahoy.com",
+    "display_name": "New User",
+    "created_at": "2025-09-15T14:58:15.186255",
+    "last_login": "2025-09-15T14:58:15.186255",
+    "profile": {
+      "username": "newuser",
+      "display_name": "New User",
+      "email": "new@ahoy.com",
+      "avatar_url": "/static/img/default-avatar.png",
+      "bio": "Just getting started with Ahoy Indie Media.",
+      "location": "",
+      "website": "",
+      "created_at": "2025-09-15T14:58:15.186255",
+      "preferences": {
+        "theme": "default",
+        "autoplay": true,
+        "notifications": true,
+        "privacy": "public"
+      }
+    },
+    "saves": {
+      "saved_tracks": [],
+      "saved_shows": [],
+      "saved_artists": [],
+      "liked_content": [],
+      "recently_played": [],
+      "playlists": [],
+      "collections": [],
+      "boards": []
+    },
+    "activity": {
+      "total_plays": 0,
+      "total_saves": 0,
+      "total_playlists": 0,
+      "last_active": "2025-09-15T14:58:15.186255"
+    },
+    "subscription": {
+      "type": "free",
+      "expires_at": null,
+      "features": [
+        "basic_saves",
+        "basic_playlists"
+      ]
+    }
   }
 }

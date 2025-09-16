@@ -6,12 +6,14 @@ window.ahoyApp = {
     isLoggedIn: false,
     currentTrack: null,
     isPlaying: false,
+    currentTime: 0,
     volume: 1,
     isMuted: false,
     playlist: [],
     currentIndex: 0,
     isShuffled: false,
-    isRepeated: false
+    isRepeated: false,
+    isLiked: false
 };
 
 // Navbar component for Alpine.js
@@ -22,6 +24,10 @@ function navbar() {
         showLogin: false,
         showRegister: false,
         isLoading: false,
+        searchQuery: '',
+        darkMode: false,
+        autoPlay: false,
+        notifications: true,
         loginForm: {
             username: '',
             password: ''
@@ -39,6 +45,8 @@ function navbar() {
             console.log('Navbar initialized - showLogin:', this.showLogin, 'showRegister:', this.showRegister);
             // Check auth status when component initializes
             this.checkAuthStatus();
+            // Load settings from localStorage
+            this.loadSettings();
         },
         
         async checkAuthStatus() {
@@ -131,8 +139,97 @@ function navbar() {
         },
         
         performSearch() {
-            // This will be implemented when we add search functionality
-            console.log('Search functionality coming soon');
+            if (this.searchQuery.trim()) {
+                // Redirect to search results or update current page
+                window.location.href = `/search?q=${encodeURIComponent(this.searchQuery)}`;
+            }
+        },
+        
+        clearSearch() {
+            this.searchQuery = '';
+        },
+        
+        loadSettings() {
+            // Load settings from localStorage
+            const savedSettings = localStorage.getItem('ahoy_settings');
+            if (savedSettings) {
+                try {
+                    const settings = JSON.parse(savedSettings);
+                    this.darkMode = settings.darkMode || false;
+                    this.autoPlay = settings.autoPlay || false;
+                    this.notifications = settings.notifications !== false;
+                    this.applySettings();
+                } catch (error) {
+                    console.error('Error loading settings:', error);
+                }
+            }
+        },
+        
+        saveSettings() {
+            const settings = {
+                darkMode: this.darkMode,
+                autoPlay: this.autoPlay,
+                notifications: this.notifications
+            };
+            localStorage.setItem('ahoy_settings', JSON.stringify(settings));
+        },
+        
+        applySettings() {
+            // Apply dark mode
+            if (this.darkMode) {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+        },
+        
+        toggleDarkMode() {
+            this.darkMode = !this.darkMode;
+            this.applySettings();
+            this.saveSettings();
+        },
+        
+        toggleAutoPlay() {
+            this.autoPlay = !this.autoPlay;
+            this.saveSettings();
+            // Notify other components about the change
+            window.dispatchEvent(new CustomEvent('autoplay-changed', { 
+                detail: { enabled: this.autoPlay } 
+            }));
+        },
+        
+        toggleNotifications() {
+            this.notifications = !this.notifications;
+            this.saveSettings();
+            // Request notification permission if enabling
+            if (this.notifications && 'Notification' in window) {
+                Notification.requestPermission();
+            }
+        },
+        
+        toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log('Error attempting to enable fullscreen:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        },
+        
+        openLibrary() {
+            // Implement library functionality
+            console.log('Opening library...');
+        },
+        
+        openPlaylists() {
+            // Implement playlists functionality
+            console.log('Opening playlists...');
+        },
+        
+        openLiked() {
+            // Implement liked items functionality
+            console.log('Opening liked items...');
         }
     }
 }
@@ -632,6 +729,192 @@ window.addEventListener('unhandledrejection', function(event) {
     console.error('Unhandled promise rejection:', event.reason);
     showNotification('An error occurred. Please try again.', 'error');
 });
+
+// Global Player Component
+function globalPlayer() {
+    return {
+        // State
+        currentTrack: null,
+        isPlaying: false,
+        currentTime: 0,
+        volume: 1,
+        isMuted: false,
+        isShuffled: false,
+        isRepeated: false,
+        isLiked: false,
+        isSaved: false,
+        playlist: [],
+        currentIndex: 0,
+        progressPercent: 0,
+        
+        // Initialize
+        init() {
+            this.syncWithGlobalState();
+            this.setupMediaEventListeners();
+        },
+        
+        syncWithGlobalState() {
+            this.currentTrack = window.ahoyApp.currentTrack;
+            this.isPlaying = window.ahoyApp.isPlaying;
+            this.currentTime = window.ahoyApp.currentTime;
+            this.volume = window.ahoyApp.volume;
+            this.isMuted = window.ahoyApp.isMuted;
+            this.isShuffled = window.ahoyApp.isShuffled;
+            this.isRepeated = window.ahoyApp.isRepeated;
+            this.isLiked = window.ahoyApp.isLiked;
+            this.playlist = window.ahoyApp.playlist;
+            this.currentIndex = window.ahoyApp.currentIndex;
+            
+            if (this.currentTrack && this.currentTrack.duration_seconds) {
+                this.progressPercent = (this.currentTime / this.currentTrack.duration_seconds) * 100;
+            }
+        },
+        
+        setupMediaEventListeners() {
+            // Listen for media events from the global media player
+            document.addEventListener('play', (event) => {
+                if (event.target.tagName === 'AUDIO' || event.target.tagName === 'VIDEO') {
+                    this.isPlaying = true;
+                    window.ahoyApp.isPlaying = true;
+                }
+            });
+            
+            document.addEventListener('pause', (event) => {
+                if (event.target.tagName === 'AUDIO' || event.target.tagName === 'VIDEO') {
+                    this.isPlaying = false;
+                    window.ahoyApp.isPlaying = false;
+                }
+            });
+            
+            document.addEventListener('timeupdate', (event) => {
+                if (event.target.tagName === 'AUDIO' || event.target.tagName === 'VIDEO') {
+                    this.currentTime = event.target.currentTime;
+                    window.ahoyApp.currentTime = event.target.currentTime;
+                    
+                    if (this.currentTrack && this.currentTrack.duration_seconds) {
+                        this.progressPercent = (this.currentTime / this.currentTrack.duration_seconds) * 100;
+                    }
+                }
+            });
+            
+            document.addEventListener('ended', (event) => {
+                if (event.target.tagName === 'AUDIO' || event.target.tagName === 'VIDEO') {
+                    this.isPlaying = false;
+                    window.ahoyApp.isPlaying = false;
+                    this.nextTrack();
+                }
+            });
+        },
+        
+        // Player controls
+        togglePlay() {
+            if (window.globalPlayer) {
+                if (this.isPlaying) {
+                    window.globalPlayer.pauseTrack();
+                } else {
+                    window.globalPlayer.resumeTrack();
+                }
+            }
+        },
+        
+        previousTrack() {
+            if (window.globalPlayer) {
+                window.globalPlayer.previousTrack();
+            }
+        },
+        
+        nextTrack() {
+            if (window.globalPlayer) {
+                window.globalPlayer.nextTrack();
+            }
+        },
+        
+        toggleShuffle() {
+            this.isShuffled = !this.isShuffled;
+            window.ahoyApp.isShuffled = this.isShuffled;
+            
+            if (this.isShuffled && this.playlist.length > 0) {
+                this.shufflePlaylist();
+            }
+        },
+        
+        toggleRepeat() {
+            this.isRepeated = !this.isRepeated;
+            window.ahoyApp.isRepeated = this.isRepeated;
+        },
+        
+        toggleMute() {
+            this.isMuted = !this.isMuted;
+            window.ahoyApp.isMuted = this.isMuted;
+            
+            const mediaElement = document.querySelector('#global-media-player');
+            if (mediaElement) {
+                mediaElement.muted = this.isMuted;
+            }
+        },
+        
+        toggleLike() {
+            this.isLiked = !this.isLiked;
+            window.ahoyApp.isLiked = this.isLiked;
+            // TODO: Implement actual like functionality
+        },
+        
+        toggleSave() {
+            this.isSaved = !this.isSaved;
+            window.ahoyApp.isSaved = this.isSaved;
+            // TODO: Implement actual save functionality
+            console.log('Save toggled:', this.isSaved, this.currentTrack);
+        },
+        
+        addToPlaylist() {
+            // TODO: Implement add to playlist functionality
+            console.log('Add to playlist:', this.currentTrack);
+        },
+        
+        openFullPlayer() {
+            if (this.currentTrack) {
+                const mediaType = this.currentTrack.type || 'music';
+                window.location.href = `/player?id=${this.currentTrack.id}&type=${mediaType}`;
+            }
+        },
+        
+        seekTo(event) {
+            if (!this.currentTrack) return;
+            
+            const progressBar = event.currentTarget;
+            const rect = progressBar.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const percentage = clickX / rect.width;
+            const newTime = percentage * (this.currentTrack.duration_seconds || 0);
+            
+            const mediaElement = document.querySelector('#global-media-player');
+            if (mediaElement) {
+                mediaElement.currentTime = newTime;
+                this.currentTime = newTime;
+                window.ahoyApp.currentTime = newTime;
+            }
+        },
+        
+        shufflePlaylist() {
+            const playlist = [...this.playlist];
+            for (let i = playlist.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
+            }
+            this.playlist = playlist;
+            window.ahoyApp.playlist = playlist;
+        },
+        
+        // Utility functions
+        formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '0:00';
+            
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+    };
+}
 
 // Export functions for global use
 window.ahoyApp = {

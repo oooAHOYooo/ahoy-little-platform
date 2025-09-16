@@ -3,22 +3,146 @@
 {% block title %}Shows & Videos - Ahoy Indie Media{% endblock %}
 
 {% block content %}
-<div class="shows-container" x-data="showsLibrary()" x-init="loadShows()">
-    <!-- Header -->
-    <div class="page-header">
-        <h1>Shows & Videos</h1>
-        <div class="header-actions">
-            <div class="search-container">
+<div class="shows-page" x-data="showsPage()" x-init="init()">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1><i class="fas fa-play-circle"></i> Shows & Videos</h1>
+            <p>Discover amazing live performances, music videos, and exclusive
+                content</p>
+            <div class="hero-actions">
+                <button @click="playRandomShow()"
+                    class="btn btn-primary btn-large">
+                    <i class="fas fa-play"></i> Watch Random Show
+                </button>
+                <button @click="scrollToFeatured()"
+                    class="btn btn-outline btn-large">
+                    <i class="fas fa-star"></i> Featured Content
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search & Filters -->
+    <section class="search-section">
+        <div class="search-container">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
                 <input type="text"
                     x-model="searchQuery"
                     @input="filterShows()"
-                    placeholder="Search shows..."
+                    placeholder="Search shows, hosts, or descriptions..."
                     class="search-input">
-                <button class="search-btn">
-                    <i class="fas fa-search"></i>
+                <button @click="clearSearch()" class="search-clear"
+                    x-show="searchQuery">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="view-options">
+            <div class="filter-tabs">
+                <button @click="setCategory('all')"
+                    :class="{'active': selectedCategory === 'all'}"
+                    class="filter-tab">
+                    All Shows
+                </button>
+                <button @click="setCategory('episode')"
+                    :class="{'active': selectedCategory === 'episode'}"
+                    class="filter-tab">
+                    Episodes
+                </button>
+                <button @click="setCategory('clip')"
+                    :class="{'active': selectedCategory === 'clip'}"
+                    class="filter-tab">
+                    Clips
+                </button>
+                <button @click="setCategory('music_video')"
+                    :class="{'active': selectedCategory === 'music_video'}"
+                    class="filter-tab">
+                    Music Videos
+                </button>
+                <button @click="setCategory('broadcast')"
+                    :class="{'active': selectedCategory === 'broadcast'}"
+                    class="filter-tab">
+                    Live Broadcasts
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Show -->
+    <section class="featured-show-section" id="featured">
+        <div class="section-header">
+            <h2><i class="fas fa-star"></i> Featured Show</h2>
+            <button @click="refreshFeatured()" class="btn btn-outline btn-sm">
+                <i class="fas fa-refresh"></i> New Featured
+            </button>
+        </div>
+
+        <div class="featured-show" x-show="featuredShow">
+            <div class="featured-content">
+                <div class="featured-video">
+                    <img :src="featuredShow.thumbnail"
+                        :alt="featuredShow.title">
+                    <div class="play-overlay">
+                        <button @click="playShow(featuredShow)"
+                            class="play-btn-large">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="show-badges">
+                        <span class="show-type"
+                            x-text="featuredShow.type?.toUpperCase()"></span>
+                        <span class="show-duration"
+                            x-text="formatDuration(featuredShow.duration_seconds)"></span>
+                    </div>
+                </div>
+                <div class="featured-info">
+                    <h3 x-text="featuredShow.title"></h3>
+                    <p class="show-host" x-text="featuredShow.host"></p>
+                    <p class="show-description"
+                        x-text="featuredShow.description"></p>
+                    <div class="show-stats">
+                        <div class="stat">
+                            <i class="fas fa-eye"></i>
+                            <span
+                                x-text="`${featuredShow.views || 0} views`"></span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-calendar"></i>
+                            <span
+                                x-text="formatDate(featuredShow.published_date)"></span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-clock"></i>
+                            <span
+                                x-text="formatDuration(featuredShow.duration_seconds)"></span>
+                        </div>
+                    </div>
+                    <div class="featured-actions">
+                        <button @click="playShow(featuredShow)"
+                            class="btn btn-primary">
+                            <i class="fas fa-play"></i> Watch Now
+                        </button>
+                        <button @click="likeShow(featuredShow)"
+                            class="btn btn-outline"
+                            :class="{'liked': isLiked(featuredShow)}">
+                            <i class="fas fa-heart"></i> Like
+                        </button>
+                        <button @click="saveShow(featuredShow)"
+                            class="btn btn-outline"
+                            :class="{'saved': isSaved(featuredShow)}">
+                            <i class="fas fa-bookmark"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shows Grid -->
+    <section class="shows-grid-section">
+        <div class="section-header">
+            <h2><i class="fas fa-th"></i> All Shows</h2>
+            <div class="view-controls">
                 <button @click="viewMode = 'grid'"
                     :class="{'active': viewMode === 'grid'}"
                     class="view-btn">
@@ -31,330 +155,136 @@
                 </button>
             </div>
         </div>
-    </div>
 
-    <!-- Categories -->
-    <div class="categories-section">
-        <div class="category-tabs">
-            <button @click="selectedCategory = 'all'"
-                :class="{'active': selectedCategory === 'all'}"
-                class="category-tab">
-                All Shows
-            </button>
-            <button @click="selectedCategory = 'episodes'"
-                :class="{'active': selectedCategory === 'episodes'}"
-                class="category-tab">
-                Episodes
-            </button>
-            <button @click="selectedCategory = 'clips'"
-                :class="{'active': selectedCategory === 'clips'}"
-                class="category-tab">
-                Clips
-            </button>
-            <button @click="selectedCategory = 'promos'"
-                :class="{'active': selectedCategory === 'promos'}"
-                class="category-tab">
-                Promos
-            </button>
-            <button @click="selectedCategory = 'music_video'"
-                :class="{'active': selectedCategory === 'music_video'}"
-                class="category-tab">
-                Music Videos
-            </button>
-            <button @click="selectedCategory = 'short_film'"
-                :class="{'active': selectedCategory === 'short_film'}"
-                class="category-tab">
-                Short Films
-            </button>
-            <button @click="selectedCategory = 'broadcast'"
-                :class="{'active': selectedCategory === 'broadcast'}"
-                class="category-tab">
-                Broadcasts
-            </button>
-        </div>
-    </div>
-
-    <!-- Featured Show -->
-    <div x-show="featuredShow" class="featured-show">
-        <div class="featured-content">
-            <div class="featured-video">
-                <img :src="featuredShow.thumbnail" :alt="featuredShow.title">
-                <div class="play-overlay">
-                    <button @click="playShow(featuredShow)"
-                        class="play-btn-large">
-                        <i class="fas fa-play"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="featured-info">
-                <h2 x-text="featuredShow.title"></h2>
-                <p x-text="featuredShow.description"></p>
-                <div class="featured-meta">
-                    <span class="host" x-text="featuredShow.host"></span>
-                    <span class="duration"
-                        x-text="formatDuration(featuredShow.duration_seconds)"></span>
-                    <span class="views"
-                        x-text="`${featuredShow.views || 0} views`"></span>
-                </div>
-                <div class="featured-actions">
-                    <button @click="playShow(featuredShow)"
-                        class="btn btn-primary">
-                        <i class="fas fa-play"></i> Watch Now
-                    </button>
-                    <button @click="likeShow(featuredShow)"
-                        class="btn btn-outline"
-                        :class="{'liked': isLiked(featuredShow)}">
-                        <i class="fas fa-heart"></i> Like
-                    </button>
-                    <button @click="shareShow(featuredShow)"
-                        class="btn btn-outline">
-                        <i class="fas fa-share"></i> Share
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Shows Grid View -->
-    <div x-show="viewMode === 'grid'" class="shows-grid">
-        <template x-for="show in filteredShows" :key="show.id">
-            <div class="show-card" @click="playShow(show)">
-                <div class="show-thumbnail">
-                    <img :src="show.thumbnail" :alt="show.title">
-                    <div class="show-overlay">
-                        <button @click.stop="playShow(show)" class="play-btn">
-                            <i class="fas fa-play"></i>
-                        </button>
-                        <div class="show-actions">
-                            <button @click.stop="saveShow(show)"
-                                class="action-btn save-btn"
-                                :class="{'saved': isSaved(show)}"
-                                :title="isSaved(show) ? 'Remove from saves' : 'Save show'">
-                                <i class="fas fa-bookmark"></i>
+        <!-- Grid View -->
+        <div x-show="viewMode === 'grid'" class="shows-grid">
+            <template x-for="show in filteredShows" :key="show.id">
+                <div class="show-card" @click="playShow(show)">
+                    <div class="show-thumbnail">
+                        <img :src="show.thumbnail" :alt="show.title">
+                        <div class="show-overlay">
+                            <button @click.stop="playShow(show)"
+                                class="play-btn">
+                                <i class="fas fa-play"></i>
                             </button>
-                            <button @click.stop="showAddToBoard(show)"
-                                class="action-btn add-btn"
-                                title="Add to board">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button @click.stop="likeShow(show)"
-                                class="action-btn like-btn"
-                                :class="{'liked': isLiked(show)}"
-                                :title="isLiked(show) ? 'Unlike' : 'Like'">
-                                <i class="fas fa-heart"></i>
-                            </button>
+                            <div class="show-actions">
+                                <button @click.stop="likeShow(show)"
+                                    class="action-btn"
+                                    :class="{'liked': isLiked(show)}"
+                                    title="Like">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <button @click.stop="saveShow(show)"
+                                    class="action-btn"
+                                    :class="{'saved': isSaved(show)}"
+                                    title="Save">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="show-duration"
                             x-text="formatDuration(show.duration_seconds)"></div>
+                        <div class="show-type-badge"
+                            x-text="show.type?.toUpperCase()"></div>
                     </div>
-                </div>
-
-                <div class="show-info">
-                    <h3 x-text="show.title"></h3>
-                    <p x-text="show.host"></p>
-                    <div class="show-meta">
-                        <span class="views"
-                            x-text="`${show.views || 0} views`"></span>
-                        <span class="date"
-                            x-text="formatDate(show.published_date)"></span>
-                    </div>
-                    <div class="show-actions">
-                        <button @click.stop="likeShow(show)"
-                            class="action-btn"
-                            :class="{'liked': isLiked(show)}">
-                            <i class="fas fa-heart"></i>
-                        </button>
-                        <button @click.stop="addToPlaylist(show)"
-                            class="action-btn">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        <button @click.stop="shareShow(show)"
-                            class="action-btn">
-                            <i class="fas fa-share"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </template>
-    </div>
-
-    <!-- Shows List View -->
-    <div x-show="viewMode === 'list'" class="shows-list">
-        <div class="list-header">
-            <span class="col-title">Thumbnail</span>
-            <span class="col-title">Title</span>
-            <span class="col-title">Host</span>
-            <span class="col-title">Duration</span>
-            <span class="col-title">Views</span>
-            <span class="col-title">Actions</span>
-        </div>
-
-        <div class="list-items">
-            <template x-for="show in filteredShows" :key="show.id">
-                <div class="list-item" @click="playShow(show)">
-                    <div class="col-thumbnail">
-                        <img :src="show.thumbnail" :alt="show.title">
-                        <div class="play-overlay">
-                            <i class="fas fa-play"></i>
-                        </div>
-                    </div>
-
-                    <div class="col-title-info">
+                    <div class="show-info">
                         <h4 x-text="show.title"></h4>
-                        <p
-                            x-text="show.description?.substring(0, 100) + '...'"></p>
-                    </div>
-
-                    <span class="col-host" x-text="show.host"></span>
-                    <span class="col-duration"
-                        x-text="formatDuration(show.duration_seconds)"></span>
-                    <span class="col-views"
-                        x-text="`${show.views || 0} views`"></span>
-
-                    <div class="col-actions">
-                        <button @click.stop="likeShow(show)"
-                            class="action-btn"
-                            :class="{'liked': isLiked(show)}">
-                            <i class="fas fa-heart"></i>
-                        </button>
-                        <button @click.stop="addToPlaylist(show)"
-                            class="action-btn">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        <button @click.stop="shareShow(show)"
-                            class="action-btn">
-                            <i class="fas fa-share"></i>
-                        </button>
+                        <p class="show-host" x-text="show.host"></p>
+                        <div class="show-meta">
+                            <span class="views"
+                                x-text="`${show.views || 0} views`"></span>
+                            <span class="date"
+                                x-text="formatDate(show.published_date)"></span>
+                        </div>
                     </div>
                 </div>
             </template>
         </div>
-    </div>
 
-    <!-- Loading State -->
-    <div x-show="isLoading" class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading shows...</p>
-    </div>
-
-    <!-- Empty State -->
-    <div x-show="!isLoading && filteredShows.length === 0" class="empty-state">
-        <i class="fas fa-play-circle"></i>
-        <h3>No shows found</h3>
-        <p>Try adjusting your filters or search terms</p>
-    </div>
-</div>
-
-<!-- Add to Board Modal -->
-<div x-show="showAddToBoardModal" class="modal-overlay"
-    @click="showAddToBoardModal = false">
-    <div class="modal-content" @click.stop>
-        <div class="modal-header">
-            <h3>Add to Board</h3>
-            <button @click="showAddToBoardModal = false" class="modal-close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="board-list">
-                <template x-for="board in boards" :key="board.id">
-                    <div class="board-option" @click="addToBoard(board)">
-                        <div class="board-color"
-                            :style="`background-color: ${board.color}`"></div>
-                        <div class="board-info">
-                            <h4 x-text="board.name"></h4>
+        <!-- List View -->
+        <div x-show="viewMode === 'list'" class="shows-list">
+            <div class="list-header">
+                <span class="col-thumbnail">Thumbnail</span>
+                <span class="col-title">Title</span>
+                <span class="col-host">Host</span>
+                <span class="col-duration">Duration</span>
+                <span class="col-views">Views</span>
+                <span class="col-actions">Actions</span>
+            </div>
+            <div class="list-items">
+                <template x-for="show in filteredShows" :key="show.id">
+                    <div class="list-item" @click="playShow(show)">
+                        <div class="col-thumbnail">
+                            <img :src="show.thumbnail" :alt="show.title">
+                            <div class="play-overlay">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                        <div class="col-title">
+                            <h4 x-text="show.title"></h4>
                             <p
-                                x-text="board.description || 'No description'"></p>
-                            <span class="board-count"
-                                x-text="`${board.total_items} items`"></span>
+                                x-text="show.description?.substring(0, 100) + '...'"></p>
+                        </div>
+                        <span class="col-host" x-text="show.host"></span>
+                        <span class="col-duration"
+                            x-text="formatDuration(show.duration_seconds)"></span>
+                        <span class="col-views"
+                            x-text="`${show.views || 0} views`"></span>
+                        <div class="col-actions">
+                            <button @click.stop="likeShow(show)"
+                                class="action-btn"
+                                :class="{'liked': isLiked(show)}">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button @click.stop="saveShow(show)"
+                                class="action-btn"
+                                :class="{'saved': isSaved(show)}">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
                         </div>
                     </div>
                 </template>
-
-                <div class="create-board-option"
-                    @click="showCreateBoardModal = true">
-                    <div class="board-color"
-                        style="background: linear-gradient(45deg, #6366f1, #8b5cf6)"></div>
-                    <div class="board-info">
-                        <h4>Create New Board</h4>
-                        <p>Start a new collection</p>
-                    </div>
-                </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- Create Board Modal -->
-<div x-show="showCreateBoardModal" class="modal-overlay"
-    @click="showCreateBoardModal = false">
-    <div class="modal-content" @click.stop>
-        <div class="modal-header">
-            <h3>Create Board</h3>
-            <button @click="showCreateBoardModal = false" class="modal-close">
-                <i class="fas fa-times"></i>
-            </button>
+    <!-- Loading State -->
+    <section x-show="isLoading" class="loading-section">
+        <div class="spinner"></div>
+        <p>Loading shows...</p>
+    </section>
+
+    <!-- Empty State -->
+    <section x-show="!isLoading && filteredShows.length === 0"
+        class="empty-section">
+        <div class="empty-content">
+            <i class="fas fa-play-circle"></i>
+            <h3>No shows found</h3>
+            <p>Try adjusting your search or filters</p>
+            <button @click="clearFilters()" class="btn btn-primary">Clear
+                Filters</button>
         </div>
-        <div class="modal-body">
-            <form @submit.prevent="createBoard()">
-                <div class="form-group">
-                    <label for="boardName">Board Name</label>
-                    <input type="text" id="boardName" x-model="newBoard.name"
-                        required>
-                </div>
-                <div class="form-group">
-                    <label for="boardDescription">Description</label>
-                    <textarea id="boardDescription"
-                        x-model="newBoard.description" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Color</label>
-                    <div class="color-picker">
-                        <template
-                            x-for="color in ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899']"
-                            :key="color">
-                            <div class="color-option"
-                                :class="{'active': newBoard.color === color}"
-                                :style="`background-color: ${color}`"
-                                @click="newBoard.color = color"></div>
-                        </template>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="button" @click="showCreateBoardModal = false"
-                        class="btn btn-outline">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create
-                        Board</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    </section>
 </div>
 
 <script>
-function showsLibrary() {
+function showsPage() {
     return {
         // State
         shows: [],
         filteredShows: [],
         featuredShow: null,
-        viewMode: 'grid',
         searchQuery: '',
         selectedCategory: 'all',
+        viewMode: 'grid',
         isLoading: true,
         
-        // Board management
-        showAddToBoardModal: false,
-        showCreateBoardModal: false,
-        selectedShow: null,
-        boards: [],
-        newBoard: {
-            name: '',
-            description: '',
-            color: '#6366f1'
+        // Initialize
+        async init() {
+            await this.loadShows();
         },
         
-        // Initialize
+        // Data loading
         async loadShows() {
             try {
                 this.isLoading = true;
@@ -387,67 +317,49 @@ function showsLibrary() {
             
             // Category filter
             if (this.selectedCategory !== 'all') {
-                filtered = filtered.filter(show => {
-                    switch (this.selectedCategory) {
-                        case 'episodes':
-                            return show.type === 'episode';
-                        case 'clips':
-                            return show.type === 'clip';
-                        case 'promos':
-                            return show.type === 'promo';
-                        case 'music_video':
-                            return show.type === 'music_video';
-                        case 'short_film':
-                            return show.type === 'short_film';
-                        case 'broadcast':
-                            return show.type === 'broadcast';
-                        default:
-                            return true;
-                    }
-                });
+                filtered = filtered.filter(show => show.type === this.selectedCategory);
             }
             
             this.filteredShows = filtered;
         },
         
-        // Show actions
+        setCategory(category) {
+            this.selectedCategory = category;
+            this.filterShows();
+        },
+        
+        clearSearch() {
+            this.searchQuery = '';
+            this.filterShows();
+        },
+        
+        clearFilters() {
+            this.searchQuery = '';
+            this.selectedCategory = 'all';
+            this.filterShows();
+        },
+        
+        // Actions
         playShow(show) {
-            if (window.globalPlayer) {
-                window.globalPlayer.playTrack(show);
+            window.location.href = `/player?id=${show.id}&type=show`;
+        },
+        
+        playRandomShow() {
+            if (this.shows.length > 0) {
+                const randomShow = this.shows[Math.floor(Math.random() * this.shows.length)];
+                this.playShow(randomShow);
             }
         },
         
-        async saveShow(show) {
-            try {
-                const isCurrentlySaved = this.isSaved(show);
-                const response = await fetch(isCurrentlySaved ? '/api/saves/unsave' : '/api/saves/save', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        type: 'show',
-                        id: show.id,
-                        data: show
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    // Update UI state
-                    show.saved = !isCurrentlySaved;
-                    
-                    if (result.guest) {
-                        this.showNotification('Saved show! (Guest mode - create account to keep permanently)', 'info');
-                        this.showUpgradePrompt();
-                    } else {
-                        this.showNotification('Saved show!', 'success');
-                    }
-                } else {
-                    this.showNotification(result.error || 'Failed to save show', 'error');
-                }
-            } catch (error) {
-                console.error('Error saving show:', error);
-                this.showNotification('Failed to save show', 'error');
+        scrollToFeatured() {
+            document.getElementById('featured').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        },
+        
+        refreshFeatured() {
+            if (this.shows.length > 0) {
+                this.featuredShow = this.shows[Math.floor(Math.random() * this.shows.length)];
             }
         },
         
@@ -465,123 +377,60 @@ function showsLibrary() {
                 });
                 
                 if (response.ok) {
-                    // Update UI state
                     show.liked = !isCurrentlyLiked;
+                    this.showNotification(isCurrentlyLiked ? 'Unliked show' : 'Liked show', 'success');
                 }
             } catch (error) {
                 console.error('Error liking show:', error);
+                this.showNotification('Failed to like show', 'error');
             }
         },
         
-        addToPlaylist(show) {
-            // Implement add to playlist
-            console.log('Adding to playlist:', show);
-        },
-        
-        shareShow(show) {
-            // Implement share functionality
-            console.log('Sharing show:', show);
-        },
-        
-        isSaved(show) {
-            return show.saved || false;
+        async saveShow(show) {
+            try {
+                const isCurrentlySaved = this.isSaved(show);
+                const response = await fetch(isCurrentlySaved ? '/api/saves/unsave' : '/api/saves/save', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: 'show',
+                        id: show.id,
+                        data: show
+                    })
+                });
+                
+                if (response.ok) {
+                    show.saved = !isCurrentlySaved;
+                    this.showNotification(isCurrentlySaved ? 'Removed from saves' : 'Saved show', 'success');
+                }
+            } catch (error) {
+                console.error('Error saving show:', error);
+                this.showNotification('Failed to save show', 'error');
+            }
         },
         
         isLiked(show) {
             return show.liked || false;
         },
         
-        showAddToBoard(show) {
-            this.selectedShow = show;
-            this.loadBoards();
-            this.showAddToBoardModal = true;
+        isSaved(show) {
+            return show.saved || false;
         },
         
-        async loadBoards() {
-            try {
-                const response = await fetch('/api/boards');
-                const data = await response.json();
-                this.boards = data.boards || [];
-            } catch (error) {
-                console.error('Error loading boards:', error);
-            }
+        // Utility functions
+        formatDuration(seconds) {
+            if (!seconds) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
         },
         
-        async addToBoard(board) {
-            if (!this.selectedShow) return;
-            
-            try {
-                const response = await fetch(`/api/boards/${board.id}/add`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        type: 'show',
-                        id: this.selectedShow.id,
-                        data: this.selectedShow
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    this.showAddToBoardModal = false;
-                    this.selectedShow = null;
-                    
-                    if (result.guest) {
-                        this.showNotification('Added to board! (Guest mode - create account to keep permanently)', 'info');
-                        this.showUpgradePrompt();
-                    } else {
-                        this.showNotification('Added to board!', 'success');
-                    }
-                } else {
-                    this.showNotification(result.error || 'Failed to add to board', 'error');
-                }
-            } catch (error) {
-                console.error('Error adding to board:', error);
-                this.showNotification('Failed to add to board', 'error');
-            }
-        },
-        
-        showUpgradePrompt() {
-            // Show upgrade prompt for guest users
-            const prompt = document.createElement('div');
-            prompt.className = 'upgrade-prompt';
-            prompt.innerHTML = `
-                <div class="upgrade-content">
-                    <div class="upgrade-icon">🎬</div>
-                    <h3>Keep Your Shows Forever!</h3>
-                    <p>You're saving content as a guest. Create a free account to keep your boards and saves permanently.</p>
-                    <div class="upgrade-actions">
-                        <button onclick="window.location.href='/register'" class="btn btn-primary">Create Account</button>
-                        <button onclick="this.closest('.upgrade-prompt').remove()" class="btn btn-outline">Maybe Later</button>
-                    </div>
-                </div>
-            `;
-            prompt.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: var(--background-light);
-                border-radius: 12px;
-                padding: 24px;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-                z-index: 1001;
-                max-width: 400px;
-                text-align: center;
-            `;
-            document.body.appendChild(prompt);
-            
-            // Auto-remove after 10 seconds
-            setTimeout(() => {
-                if (prompt.parentNode) {
-                    prompt.remove();
-                }
-            }, 10000);
+        formatDate(dateString) {
+            if (!dateString) return '';
+            return new Date(dateString).toLocaleDateString();
         },
         
         showNotification(message, type = 'info') {
-            // Simple notification system
             const notification = document.createElement('div');
             notification.className = `notification notification-${type}`;
             notification.textContent = message;
@@ -601,56 +450,8 @@ function showsLibrary() {
             setTimeout(() => {
                 notification.remove();
             }, 3000);
-        },
-        
-        async createBoard() {
-            try {
-                const response = await fetch('/api/boards', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(this.newBoard)
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    this.boards.push(result.board);
-                    this.showCreateBoardModal = false;
-                    this.newBoard = { name: '', description: '', color: '#6366f1' };
-                    
-                    if (result.guest) {
-                        this.showNotification('Board created! (Guest mode - create account to keep permanently)', 'info');
-                        this.showUpgradePrompt();
-                    } else {
-                        this.showNotification('Board created!', 'success');
-                    }
-                } else {
-                    this.showNotification(result.error || 'Failed to create board', 'error');
-                }
-            } catch (error) {
-                console.error('Error creating board:', error);
-                this.showNotification('Failed to create board', 'error');
-            }
-        },
-        
-        isLiked(show) {
-            // Check if show is liked
-            return false; // Placeholder
-        },
-        
-        // Utility functions
-        formatDuration(seconds) {
-            if (!seconds) return '0:00';
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        },
-        
-        formatDate(dateString) {
-            if (!dateString) return '';
-            return new Date(dateString).toLocaleDateString();
         }
-    };
+    }
 }
 </script>
 {% endblock %}

@@ -1,339 +1,151 @@
 {% extends "base.html" %}
 
-{% block title %}Ahoy Indie Media - Discover{% endblock %}
+{% block title %}Ahoy Indie Media - Music Hub{% endblock %}
 
 {% block content %}
-<div class="home-container" x-data="homePage()" x-init="loadNowPlaying()">
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1>Ahoy Indie Media</h1>
-            <p>Discover curated music, shows, and content from independent
-                creators</p>
-            <div class="hero-actions">
-                <button @click="playRandom()" class="btn btn-primary btn-large">
-                    <i class="fas fa-play"></i> Start Discovering
-                </button>
-                <button @click="scrollToFeed()"
-                    class="btn btn-outline btn-large">
-                    <i class="fas fa-arrow-down"></i> Explore Feed
-                </button>
-            </div>
+<div class="home-page" x-data="homePage()" x-init="init()">
+    <!-- TV-Style Hero Feed -->
+    <section class="tv-hero">
+        <div class="hero-feed"
+            :style="`transform: translateX(${heroOffset}px)`">
+            <template x-for="(item, index) in heroItems" :key="item.id">
+                <div class="hero-item"
+                    :class="{'active': currentHeroIndex === index}"
+                    :style="`background-image: url(${item.cover_art})`"
+                    @click="playItem(item, index)">
+                    <div class="hero-overlay">
+                        <div class="hero-content">
+                            <div class="hero-badge"
+                                x-text="item.type?.toUpperCase()"></div>
+                            <h1 x-text="item.title"></h1>
+                            <p x-text="item.artist"></p>
+                            <button class="hero-play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <div class="hero-controls">
+            <button @click="prevHero()" class="hero-nav">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button @click="nextHero()" class="hero-nav">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="hero-indicators">
+            <template x-for="(item, index) in heroItems" :key="item.id">
+                <button @click="setHeroIndex(index)"
+                    :class="{'active': currentHeroIndex === index}"
+                    class="hero-dot"></button>
+            </template>
         </div>
     </section>
 
-    <!-- Now Playing Feed (TikTok-style) -->
-    <section class="now-playing-section" id="now-playing">
-        <div class="section-header">
-            <h2>Now Playing</h2>
-            <p>30-second previews of our curated content</p>
-        </div>
+    <!-- Compact Discovery Grid -->
+    <section class="discovery-grid">
+        <div class="grid-container">
+            <!-- Featured Artist Compact -->
+            <div class="grid-item artist-spotlight">
+                <div class="item-header">
+                    <h3><i class="fas fa-star"></i> Artist Spotlight</h3>
+                </div>
+                <div class="artist-compact" x-show="featuredArtist"
+                    @click="viewArtist(featuredArtist)">
+                    <img
+                        :src="featuredArtist?.image || '/static/img/default-avatar.png'"
+                        :alt="featuredArtist?.name">
+                    <div class="artist-info">
+                        <h4 x-text="featuredArtist?.name"></h4>
+                        <p x-text="featuredArtist?.genre"></p>
+                    </div>
+                </div>
+            </div>
 
-        <div class="feed-container" x-show="!isLoading">
-            <div class="feed-scroll"
-                @scroll="handleScroll($event)"
-                x-ref="feedScroll">
-                <div class="feed-items"
-                    :style="`transform: translateX(${scrollOffset}px)`">
-                    <template x-for="(item, index) in feedItems" :key="item.id">
-                        <div class="feed-item"
-                            :class="{'active': currentIndex === index}"
-                            @click="playItem(item, index)"
-                            :style="`background-image: url(${item.cover_art})`">
-
-                            <!-- Video Preview Overlay -->
-                            <div class="preview-overlay"
-                                x-show="item.type === 'show'">
-                                <video :src="item.preview_url"
-                                    :ref="`video-${index}`"
-                                    @loadeddata="onVideoLoaded($event, index)"
-                                    @timeupdate="onVideoTimeUpdate($event, index)"
-                                    muted
-                                    loop
-                                    preload="metadata">
-                                </video>
+            <!-- Now Playing Compact -->
+            <div class="grid-item now-playing-compact">
+                <div class="item-header">
+                    <h3><i class="fas fa-music"></i> Now Playing</h3>
+                    <button @click="playRandom()" class="shuffle-btn">
+                        <i class="fas fa-random"></i>
+                    </button>
+                </div>
+                <div class="playing-list">
+                    <template x-for="(item, index) in feedItems.slice(0, 4)"
+                        :key="item.id">
+                        <div class="playing-item"
+                            :class="{'playing': currentIndex === index}"
+                            @click="playItem(item, index)">
+                            <img :src="item.cover_art" :alt="item.title">
+                            <div class="item-details">
+                                <h4 x-text="item.title"></h4>
+                                <p x-text="item.artist"></p>
                             </div>
-
-                            <!-- Audio Preview Overlay -->
-                            <div class="preview-overlay"
-                                x-show="item.type === 'music'">
-                                <audio :src="item.preview_url"
-                                    :ref="`audio-${index}`"
-                                    @loadeddata="onAudioLoaded($event, index)"
-                                    @timeupdate="onAudioTimeUpdate($event, index)"
-                                    preload="metadata">
-                                </audio>
-                            </div>
-
-                            <!-- Content Info -->
-                            <div class="item-info">
-                                <div class="item-header">
-                                    <span class="item-type"
-                                        x-text="item.type.toUpperCase()"></span>
-                                    <span class="item-duration"
-                                        x-text="formatDuration(item.duration)"></span>
-                                </div>
-
-                                <div class="item-content">
-                                    <h3 x-text="item.title"></h3>
-                                    <p x-text="item.artist"></p>
-                                </div>
-
-                                <div class="item-actions">
-                                    <button @click.stop="likeItem(item)"
-                                        class="action-btn"
-                                        :class="{'liked': isLiked(item)}">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                    <button @click.stop="addToPlaylist(item)"
-                                        class="action-btn">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                    <button @click.stop="shareItem(item)"
-                                        class="action-btn">
-                                        <i class="fas fa-share"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Progress Bar -->
-                            <div class="progress-bar">
-                                <div class="progress-fill"
-                                    :style="`width: ${getProgressPercent(index)}%`"></div>
-                            </div>
-
-                            <!-- Play Button Overlay -->
-                            <div class="play-overlay"
-                                x-show="currentIndex !== index">
-                                <button class="play-btn-large">
-                                    <i class="fas fa-play"></i>
-                                </button>
+                            <div class="play-indicator"
+                                x-show="currentIndex === index">
+                                <i class="fas fa-play"></i>
                             </div>
                         </div>
                     </template>
                 </div>
             </div>
 
-            <!-- Navigation Arrows -->
-            <button @click="scrollLeft()"
-                class="nav-arrow nav-arrow-left"
-                :disabled="scrollOffset >= 0">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button @click="scrollRight()"
-                class="nav-arrow nav-arrow-right"
-                :disabled="scrollOffset <= maxScrollOffset">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-
-        <!-- Loading State -->
-        <div x-show="isLoading" class="loading-state">
-            <div class="spinner"></div>
-            <p>Loading amazing content...</p>
-        </div>
-    </section>
-
-    <!-- Featured Content -->
-    <section class="featured-section">
-        <div class="section-header">
-            <h2>Featured This Week</h2>
-            <a href="#" class="view-all">View All</a>
-        </div>
-
-        <div class="featured-grid">
-            <div class="featured-item featured-large">
-                <div class="featured-cover"
-                    :style="`background-image: url(${featuredContent?.large?.cover_art})`">
-                    <div class="featured-overlay">
-                        <button @click="playItem(featuredContent?.large)"
-                            class="play-btn">
-                            <i class="fas fa-play"></i>
-                        </button>
-                    </div>
+            <!-- Live Shows Compact -->
+            <div class="grid-item shows-compact">
+                <div class="item-header">
+                    <h3><i class="fas fa-play-circle"></i> Live Now</h3>
+                    <a href="/shows" class="view-all-btn">All</a>
                 </div>
-                <div class="featured-info">
-                    <h3 x-text="featuredContent?.large?.title"></h3>
-                    <p x-text="featuredContent?.large?.artist"></p>
+                <div class="shows-list">
+                    <template x-for="show in featuredShows.slice(0, 3)"
+                        :key="show.id">
+                        <div class="show-item" @click="playShow(show)">
+                            <img :src="show.thumbnail" :alt="show.title">
+                            <div class="show-details">
+                                <h4 x-text="show.title"></h4>
+                                <p x-text="show.host"></p>
+                            </div>
+                            <div class="play-overlay">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </div>
 
-            <div class="featured-item">
-                <div class="featured-cover"
-                    :style="`background-image: url(${featuredContent?.small1?.cover_art})`">
-                    <div class="featured-overlay">
-                        <button @click="playItem(featuredContent?.small1)"
-                            class="play-btn">
-                            <i class="fas fa-play"></i>
-                        </button>
-                    </div>
+            <!-- Quick Actions Compact -->
+            <div class="grid-item quick-actions">
+                <div class="item-header">
+                    <h3><i class="fas fa-th-large"></i> Explore</h3>
                 </div>
-                <div class="featured-info">
-                    <h4 x-text="featuredContent?.small1?.title"></h4>
-                    <p x-text="featuredContent?.small1?.artist"></p>
-                </div>
-            </div>
-
-            <div class="featured-item">
-                <div class="featured-cover"
-                    :style="`background-image: url(${featuredContent?.small2?.cover_art})`">
-                    <div class="featured-overlay">
-                        <button @click="playItem(featuredContent?.small2)"
-                            class="play-btn">
-                            <i class="fas fa-play"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="featured-info">
-                    <h4 x-text="featuredContent?.small2?.title"></h4>
-                    <p x-text="featuredContent?.small2?.artist"></p>
+                <div class="action-grid">
+                    <a href="/music" class="action-card">
+                        <i class="fas fa-music"></i>
+                        <span>Music</span>
+                    </a>
+                    <a href="/shows" class="action-card">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Shows</span>
+                    </a>
+                    <a href="/artists" class="action-card">
+                        <i class="fas fa-users"></i>
+                        <span>Artists</span>
+                    </a>
+                    <a href="/my_saves" class="action-card">
+                        <i class="fas fa-bookmark"></i>
+                        <span>Saves</span>
+                    </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Quick Access -->
-    <section class="quick-access-section">
-        <div class="section-header">
-            <h2>Quick Access</h2>
-        </div>
-
-        <div class="quick-access-grid">
-            <a href="{{ url_for('music') }}" class="quick-access-item">
-                <div class="quick-access-icon">
-                    <i class="fas fa-music"></i>
-                </div>
-                <h3>Music Library</h3>
-                <p>Browse all tracks</p>
-            </a>
-
-            <a href="{{ url_for('shows') }}" class="quick-access-item">
-                <div class="quick-access-icon">
-                    <i class="fas fa-play-circle"></i>
-                </div>
-                <h3>Shows & Videos</h3>
-                <p>Watch live shows</p>
-            </a>
-
-            <a href="{{ url_for('artists') }}" class="quick-access-item">
-                <div class="quick-access-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <h3>Artists</h3>
-                <p>Discover creators</p>
-            </a>
-
-            <a href="#" @click="openDailyPlaylist()" class="quick-access-item">
-                <div class="quick-access-icon">
-                    <i class="fas fa-calendar-day"></i>
-                </div>
-                <h3>Daily Playlist</h3>
-                <p>Today's curated mix</p>
-            </a>
-        </div>
-    </section>
-
-    <!-- Morning Announcements -->
-    <section class="announcements-section">
-        <div class="section-header">
-            <h2><i class="fas fa-bullhorn"></i> Morning Announcements</h2>
-            <p>Latest updates and highlights from the platform</p>
-        </div>
-
-        <div class="announcements-container">
-            <div class="announcement-card featured">
-                <div class="announcement-icon">
-                    <i class="fas fa-star"></i>
-                </div>
-                <div class="announcement-content">
-                    <h3>New Artist Spotlight</h3>
-                    <p>Discover our featured artist of the week with exclusive tracks and behind-the-scenes content.</p>
-                    <div class="announcement-meta">
-                        <span class="announcement-time">2 hours ago</span>
-                        <span class="announcement-tag">Featured</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="announcement-card">
-                <div class="announcement-icon">
-                    <i class="fas fa-music"></i>
-                </div>
-                <div class="announcement-content">
-                    <h3>Weekly Playlist Update</h3>
-                    <p>Fresh tracks added to our curated playlists. Check out the latest indie discoveries.</p>
-                    <div class="announcement-meta">
-                        <span class="announcement-time">5 hours ago</span>
-                        <span class="announcement-tag">Music</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="announcement-card">
-                <div class="announcement-icon">
-                    <i class="fas fa-video"></i>
-                </div>
-                <div class="announcement-content">
-                    <h3>Live Show Schedule</h3>
-                    <p>New live shows added to this week's schedule. Don't miss out on exclusive performances.</p>
-                    <div class="announcement-meta">
-                        <span class="announcement-time">1 day ago</span>
-                        <span class="announcement-tag">Shows</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="announcement-card">
-                <div class="announcement-icon">
-                    <i class="fas fa-cog"></i>
-                </div>
-                <div class="announcement-content">
-                    <h3>Platform Updates</h3>
-                    <p>New features and improvements including enhanced mobile experience and faster loading times.</p>
-                    <div class="announcement-meta">
-                        <span class="announcement-time">2 days ago</span>
-                        <span class="announcement-tag">Updates</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="announcement-card">
-                <div class="announcement-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="announcement-content">
-                    <h3>Community Highlights</h3>
-                    <p>See what our community is discovering and sharing. Join the conversation!</p>
-                    <div class="announcement-meta">
-                        <span class="announcement-time">3 days ago</span>
-                        <span class="announcement-tag">Community</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="announcement-card">
-                <div class="announcement-icon">
-                    <i class="fas fa-gift"></i>
-                </div>
-                <div class="announcement-content">
-                    <h3>Exclusive Content</h3>
-                    <p>New exclusive tracks and shows available only to registered users. Sign up to access!</p>
-                    <div class="announcement-meta">
-                        <span class="announcement-time">1 week ago</span>
-                        <span class="announcement-tag">Exclusive</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="announcements-actions">
-            <button class="btn btn-outline">
-                <i class="fas fa-bell"></i> Subscribe to Updates
-            </button>
-            <button class="btn btn-primary">
-                <i class="fas fa-arrow-right"></i> View All Announcements
-            </button>
-        </div>
+    <!-- Loading State -->
+    <section x-show="isLoading" class="loading-section">
+        <div class="spinner"></div>
+        <p>Loading awesome content...</p>
     </section>
 </div>
 
@@ -341,201 +153,143 @@
 function homePage() {
     return {
         // State
-        feedItems: [],
-        currentIndex: 0,
-        scrollOffset: 0,
-        maxScrollOffset: 0,
         isLoading: true,
-        featuredContent: {},
-        
-        // Auto-play timer
-        autoPlayTimer: null,
-        previewDuration: 30000, // 30 seconds
+        feedItems: [],
+        featuredArtist: null,
+        featuredShows: [],
+        heroItems: [],
+        currentIndex: 0,
+        currentHeroIndex: 0,
+        heroOffset: 0,
+        heroInterval: null,
         
         // Initialize
+        async init() {
+            await this.loadAllData();
+            this.isLoading = false;
+            this.startHeroRotation();
+        },
+        
+        // Data loading
+        async loadAllData() {
+            try {
+                await Promise.all([
+                    this.loadNowPlaying(),
+                    this.loadFeaturedArtist(),
+                    this.loadFeaturedShows()
+                ]);
+                this.prepareHeroItems();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        },
+        
         async loadNowPlaying() {
             try {
-                this.isLoading = true;
                 const response = await fetch('/api/now-playing');
                 const data = await response.json();
                 this.feedItems = data.feed || [];
-                this.maxScrollOffset = -(this.feedItems.length * 300) + window.innerWidth;
-                this.loadFeaturedContent();
-                this.startAutoPlay();
             } catch (error) {
                 console.error('Error loading now playing:', error);
-                // Show a friendly message if there's an error
-                this.feedItems = [];
-            } finally {
-                this.isLoading = false;
             }
         },
         
-        async loadFeaturedContent() {
+        async loadFeaturedArtist() {
             try {
-                const [musicRes, showsRes] = await Promise.all([
-                    fetch('/api/music'),
-                    fetch('/api/shows')
-                ]);
-                const musicData = await musicRes.json();
-                const showsData = await showsRes.json();
-                
-                this.featuredContent = {
-                    large: musicData.tracks?.[0] || {},
-                    small1: showsData.shows?.[0] || {},
-                    small2: musicData.tracks?.[1] || {}
-                };
+                const response = await fetch('/api/artists');
+                const data = await response.json();
+                const artists = data.artists || [];
+                this.featuredArtist = artists[Math.floor(Math.random() * artists.length)];
             } catch (error) {
-                console.error('Error loading featured content:', error);
+                console.error('Error loading featured artist:', error);
             }
         },
         
-        // Auto-play functionality
-        startAutoPlay() {
-            if (this.autoPlayTimer) {
-                clearInterval(this.autoPlayTimer);
-            }
-            
-            this.autoPlayTimer = setInterval(() => {
-                this.nextItem();
-            }, this.previewDuration);
-        },
-        
-        stopAutoPlay() {
-            if (this.autoPlayTimer) {
-                clearInterval(this.autoPlayTimer);
-                this.autoPlayTimer = null;
+        async loadFeaturedShows() {
+            try {
+                const response = await fetch('/api/shows');
+                const data = await response.json();
+                const shows = data.shows || [];
+                this.featuredShows = shows.sort(() => 0.5 - Math.random()).slice(0, 3);
+            } catch (error) {
+                console.error('Error loading featured shows:', error);
             }
         },
         
-        // Navigation
-        nextItem() {
-            if (this.currentIndex < this.feedItems.length - 1) {
-                this.currentIndex++;
-                this.scrollToItem(this.currentIndex);
+        prepareHeroItems() {
+            // Mix music and shows for hero feed
+            const musicItems = this.feedItems.slice(0, 4);
+            const showItems = this.featuredShows.slice(0, 2);
+            this.heroItems = [...musicItems, ...showItems].sort(() => 0.5 - Math.random());
+        },
+        
+        startHeroRotation() {
+            this.heroInterval = setInterval(() => {
+                this.nextHero();
+            }, 5000); // Change every 5 seconds
+        },
+        
+        stopHeroRotation() {
+            if (this.heroInterval) {
+                clearInterval(this.heroInterval);
+                this.heroInterval = null;
+            }
+        },
+        
+        // Hero navigation
+        nextHero() {
+            if (this.currentHeroIndex < this.heroItems.length - 1) {
+                this.currentHeroIndex++;
             } else {
-                this.currentIndex = 0;
-                this.scrollToItem(0);
+                this.currentHeroIndex = 0;
             }
+            this.updateHeroOffset();
         },
         
-        prevItem() {
-            if (this.currentIndex > 0) {
-                this.currentIndex--;
-                this.scrollToItem(this.currentIndex);
+        prevHero() {
+            if (this.currentHeroIndex > 0) {
+                this.currentHeroIndex--;
             } else {
-                this.currentIndex = this.feedItems.length - 1;
-                this.scrollToItem(this.currentIndex);
+                this.currentHeroIndex = this.heroItems.length - 1;
+            }
+            this.updateHeroOffset();
+        },
+        
+        setHeroIndex(index) {
+            this.currentHeroIndex = index;
+            this.updateHeroOffset();
+        },
+        
+        updateHeroOffset() {
+            this.heroOffset = -this.currentHeroIndex * 100;
+        },
+        
+        // Actions
+        playRandom() {
+            if (this.feedItems.length > 0) {
+                const randomIndex = Math.floor(Math.random() * this.feedItems.length);
+                this.playItem(this.feedItems[randomIndex], randomIndex);
             }
         },
         
-        scrollToItem(index) {
-            const itemWidth = 300;
-            this.scrollOffset = -index * itemWidth;
-        },
-        
-        scrollLeft() {
-            if (this.scrollOffset < 0) {
-                this.scrollOffset = Math.min(0, this.scrollOffset + 300);
-            }
-        },
-        
-        scrollRight() {
-            if (this.scrollOffset > this.maxScrollOffset) {
-                this.scrollOffset = Math.max(this.maxScrollOffset, this.scrollOffset - 300);
-            }
-        },
-        
-        handleScroll(event) {
-            // Handle manual scrolling
-            this.stopAutoPlay();
-        },
-        
-        // Media handling
         playItem(item, index) {
-            if (index !== undefined) {
-                this.currentIndex = index;
-                this.scrollToItem(index);
-            }
-            
-            // Play the item in global player
+            this.currentIndex = index;
+            this.stopHeroRotation();
             if (window.globalPlayer) {
                 window.globalPlayer.playTrack(item);
             }
+            // Restart rotation after a delay
+            setTimeout(() => this.startHeroRotation(), 10000);
         },
         
-        playRandom() {
-            const randomIndex = Math.floor(Math.random() * this.feedItems.length);
-            this.playItem(this.feedItems[randomIndex], randomIndex);
+        playShow(show) {
+            window.location.href = `/player?id=${show.id}&type=show`;
         },
         
-        scrollToFeed() {
-            document.getElementById('now-playing').scrollIntoView({ 
-                behavior: 'smooth' 
-            });
-        },
-        
-        // Media event handlers
-        onVideoLoaded(event, index) {
-            if (index === this.currentIndex) {
-                event.target.play();
-            }
-        },
-        
-        onAudioLoaded(event, index) {
-            if (index === this.currentIndex) {
-                event.target.play();
-            }
-        },
-        
-        onVideoTimeUpdate(event, index) {
-            // Handle video progress
-        },
-        
-        onAudioTimeUpdate(event, index) {
-            // Handle audio progress
-        },
-        
-        getProgressPercent(index) {
-            if (index !== this.currentIndex) return 0;
-            // Calculate progress based on current time
-            return 0; // Placeholder
-        },
-        
-        // User actions
-        likeItem(item) {
-            // Implement like functionality
-            console.log('Liking item:', item);
-        },
-        
-        addToPlaylist(item) {
-            // Implement add to playlist
-            console.log('Adding to playlist:', item);
-        },
-        
-        shareItem(item) {
-            // Implement share functionality
-            console.log('Sharing item:', item);
-        },
-        
-        openDailyPlaylist() {
-            // Load and play daily playlist
-            console.log('Opening daily playlist');
-        },
-        
-        isLiked(item) {
-            // Check if item is liked
-            return false; // Placeholder
-        },
-        
-        // Utility functions
-        formatDuration(seconds) {
-            if (!seconds) return '0:00';
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        viewArtist(artist) {
+            window.location.href = `/artists`;
         }
-    };
+    }
 }
 </script>
 {% endblock %}

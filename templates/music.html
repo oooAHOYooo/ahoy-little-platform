@@ -109,12 +109,11 @@
                 </div>
 
                 <div class="track-info">
-                    <h3 x-text="track.title"></h3>
+                    <h4 x-text="track.title"></h4>
                     <p x-text="track.artist"></p>
                     <div class="track-meta">
-                        <span class="duration"
-                            x-text="formatDuration(track.duration_seconds)"></span>
-                        <span class="genre" x-text="track.genre"></span>
+                        <span class="track-type"
+                            x-text="track.type?.toUpperCase() || 'MUSIC'"></span>
                     </div>
                 </div>
             </div>
@@ -124,12 +123,11 @@
     <!-- Music List View -->
     <div x-show="viewMode === 'list'" class="music-list">
         <div class="list-header">
-            <span class="col-title">#</span>
+            <span class="col-cover"></span>
             <span class="col-title">Title</span>
-            <span class="col-title">Artist</span>
-            <span class="col-title">Album</span>
-            <span class="col-title">Duration</span>
-            <span class="col-title">Actions</span>
+            <span class="col-artist">Artist</span>
+            <span class="col-type">Type</span>
+            <span class="col-actions">Actions</span>
         </div>
 
         <div class="list-items">
@@ -138,37 +136,38 @@
                     @click="playTrack(track)"
                     :class="{'playing': currentTrack?.id === track.id}">
 
-                    <span class="col-number" x-text="index + 1"></span>
-
-                    <div class="col-title-info">
+                    <div class="col-cover">
                         <img
                             :src="track.cover_art || '/static/img/default-cover.jpg'"
-                            class="track-thumb">
-                        <div class="title-details">
-                            <h4 x-text="track.title"></h4>
-                            <p x-text="track.album || 'Single'"></p>
-                        </div>
+                            :alt="track.title">
+                    </div>
+
+                    <div class="col-title">
+                        <h4 x-text="track.title"></h4>
+                        <p x-text="track.album || 'Single'"></p>
                     </div>
 
                     <span class="col-artist" x-text="track.artist"></span>
-                    <span class="col-album"
-                        x-text="track.album || 'Single'"></span>
-                    <span class="col-duration"
-                        x-text="formatDuration(track.duration_seconds)"></span>
+                    <span class="col-type"
+                        x-text="track.type?.toUpperCase() || 'MUSIC'"></span>
 
                     <div class="col-actions">
+                        <button @click.stop="saveTrack(track)"
+                            class="action-btn"
+                            :class="{'saved': isSaved(track)}"
+                            title="Save track">
+                            <i class="fas fa-bookmark"></i>
+                        </button>
                         <button @click.stop="likeTrack(track)"
                             class="action-btn"
-                            :class="{'liked': isLiked(track)}">
+                            :class="{'liked': isLiked(track)}"
+                            title="Like track">
                             <i class="fas fa-heart"></i>
                         </button>
                         <button @click.stop="addToPlaylist(track)"
-                            class="action-btn">
+                            class="action-btn"
+                            title="Add to playlist">
                             <i class="fas fa-plus"></i>
-                        </button>
-                        <button @click.stop="showTrackMenu(track)"
-                            class="action-btn">
-                            <i class="fas fa-ellipsis-h"></i>
                         </button>
                     </div>
                 </div>

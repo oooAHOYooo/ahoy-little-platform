@@ -105,45 +105,173 @@ def my_saves():
 # API Endpoints
 @app.route('/api/now-playing')
 def api_now_playing():
-    """Get curated now playing feed with 30s previews"""
+    """Get curated now playing feed with 30s previews - randomized on each request"""
     music_data = load_json_data('music.json', {'tracks': []})
     shows_data = load_json_data('shows.json', {'shows': []})
     
     # Combine and curate content for discovery feed
     feed_items = []
     
-    # Add featured music (with preview clips)
-    for track in music_data.get('tracks', [])[:5]:
-        if track.get('preview_url'):  # Only include if has preview
-            feed_items.append({
-                'id': track['id'],
-                'type': 'music',
-                'title': track['title'],
-                'artist': track['artist'],
-                'preview_url': track['preview_url'],
-                'cover_art': track['cover_art'],
-                'duration': 30,  # Preview length
-                'full_url': track['audio_url']
-            })
+    # Get all available tracks and shows
+    all_tracks = music_data.get('tracks', [])
+    all_shows = shows_data.get('shows', [])
     
-    # Add featured shows
-    for show in shows_data.get('shows', [])[:3]:
-        if show.get('trailer_url'):
-            feed_items.append({
-                'id': show['id'],
-                'type': 'show',
-                'title': show['title'],
-                'artist': show.get('host', 'Ahoy Indie Media'),
-                'preview_url': show['trailer_url'],
-                'cover_art': show['thumbnail'],
-                'duration': 30,
-                'full_url': show['video_url']
-            })
+    # Filter for content with preview URLs
+    tracks_with_preview = [t for t in all_tracks if t.get('preview_url')]
+    shows_with_preview = [s for s in all_shows if s.get('trailer_url')]
     
-    # Shuffle for discovery
+    # Randomly select tracks (up to 8)
+    selected_tracks = random.sample(tracks_with_preview, min(len(tracks_with_preview), 8))
+    for track in selected_tracks:
+        feed_items.append({
+            'id': track['id'],
+            'type': 'music',
+            'title': track['title'],
+            'artist': track['artist'],
+            'preview_url': track['preview_url'],
+            'cover_art': track['cover_art'],
+            'duration': 30,  # Preview length
+            'full_url': track['audio_url'],
+            'duration_seconds': track.get('duration_seconds', 180),
+            'description': track.get('description', ''),
+            'genre': track.get('genre', '')
+        })
+    
+    # Randomly select shows (up to 5)
+    selected_shows = random.sample(shows_with_preview, min(len(shows_with_preview), 5))
+    for show in selected_shows:
+        feed_items.append({
+            'id': show['id'],
+            'type': 'show',
+            'title': show['title'],
+            'artist': show.get('host', 'Ahoy Indie Media'),
+            'preview_url': show['trailer_url'],
+            'cover_art': show['thumbnail'],
+            'duration': 30,
+            'full_url': show['video_url'],
+            'duration_seconds': show.get('duration_seconds', 300),
+            'description': show.get('description', ''),
+            'genre': show.get('genre', '')
+        })
+    
+    # Shuffle for discovery - this will be different on each request
     random.shuffle(feed_items)
     
+    # Limit to 12 items for better performance
+    feed_items = feed_items[:12]
+    
     return jsonify({'feed': feed_items})
+
+@app.route('/api/weather')
+def api_weather():
+    """Get weather information for user's location"""
+    import requests
+    from datetime import datetime
+    
+    # For demo purposes, we'll use a default location (San Francisco)
+    # In a real app, you'd get this from user's location or settings
+    lat = request.args.get('lat', '37.7749')
+    lon = request.args.get('lon', '-122.4194')
+    
+    # Mock weather data for demo (in production, use a real weather API)
+    weather_conditions = [
+        {'condition': 'sunny', 'temp': 72, 'description': 'Sunny', 'icon': '☀️'},
+        {'condition': 'cloudy', 'temp': 65, 'description': 'Cloudy', 'icon': '☁️'},
+        {'condition': 'rainy', 'temp': 58, 'description': 'Rainy', 'icon': '🌧️'},
+        {'condition': 'partly_cloudy', 'temp': 68, 'description': 'Partly Cloudy', 'icon': '⛅'},
+        {'condition': 'foggy', 'temp': 62, 'description': 'Foggy', 'icon': '🌫️'}
+    ]
+    
+    # Select random weather for demo
+    weather = random.choice(weather_conditions)
+    
+    return jsonify({
+        'temperature': weather['temp'],
+        'condition': weather['condition'],
+        'description': weather['description'],
+        'icon': weather['icon'],
+        'location': 'San Francisco, CA',
+        'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/api/agenda')
+def api_agenda():
+    """Get agenda data for the current day"""
+    from datetime import datetime, timedelta
+    import random
+    
+    today = datetime.now()
+    
+    # Mock agenda items
+    agenda_items = [
+        {
+            'id': 1,
+            'time': '09:00',
+            'title': 'Morning Music Discovery',
+            'description': 'Explore new indie tracks',
+            'type': 'music',
+            'priority': 'high'
+        },
+        {
+            'id': 2,
+            'time': '14:00',
+            'title': 'Live Show: Indie Spotlight',
+            'description': 'Watch today\'s featured performance',
+            'type': 'show',
+            'priority': 'medium'
+        },
+        {
+            'id': 3,
+            'time': '19:00',
+            'title': 'Evening Playlist',
+            'description': 'Wind down with curated tracks',
+            'type': 'music',
+            'priority': 'low'
+        }
+    ]
+    
+    # Add some random events
+    random_events = [
+        {'time': '11:30', 'title': 'Artist Interview', 'description': 'Exclusive artist chat', 'type': 'show'},
+        {'time': '16:00', 'title': 'New Release Alert', 'description': 'Fresh tracks just dropped', 'type': 'music'},
+        {'time': '20:30', 'title': 'Community Chat', 'description': 'Connect with other fans', 'type': 'community'}
+    ]
+    
+    # Add 1-2 random events
+    selected_events = random.sample(random_events, random.randint(1, 2))
+    agenda_items.extend(selected_events)
+    
+    # Sort by time
+    agenda_items.sort(key=lambda x: x['time'])
+    
+    return jsonify({
+        'date': today.strftime('%A, %B %d, %Y'),
+        'day_of_week': today.strftime('%A'),
+        'items': agenda_items
+    })
+
+@app.route('/api/user/homepage-layout', methods=['GET', 'POST'])
+def api_homepage_layout():
+    """Get or save user's custom homepage layout"""
+    if request.method == 'GET':
+        # Return default layout for now
+        default_layout = {
+            'widgets': [
+                {'id': 'weather', 'position': 0, 'enabled': True},
+                {'id': 'agenda', 'position': 1, 'enabled': True},
+                {'id': 'featured', 'position': 2, 'enabled': True},
+                {'id': 'now_playing', 'position': 3, 'enabled': True},
+                {'id': 'quick_actions', 'position': 4, 'enabled': True},
+                {'id': 'recent_activity', 'position': 5, 'enabled': True}
+            ]
+        }
+        return jsonify(default_layout)
+    
+    elif request.method == 'POST':
+        # Save user's layout (in a real app, save to database)
+        layout_data = request.get_json()
+        # For demo, just return success
+        return jsonify({'success': True, 'message': 'Layout saved successfully'})
 
 @app.route('/api/music')
 def api_music():
@@ -1171,6 +1299,106 @@ def find_available_port(start_port=5001, end_port=5010):
             # Port is in use, try next one
             continue
     return None
+
+@app.route('/api/debug/sample-accounts')
+def debug_sample_accounts():
+    """Get sample accounts for testing"""
+    sample_accounts = [
+        {
+            'username': 'musiclover',
+            'password': 'music123',
+            'display_name': 'Music Lover',
+            'email': 'musiclover@ahoy.com',
+            'avatar': '/static/img/default-avatar.png',
+            'stats': {
+                'saved_tracks': 45,
+                'saved_shows': 12,
+                'liked_content': 78,
+                'playlists': 8
+            }
+        },
+        {
+            'username': 'indieexplorer',
+            'password': 'indie123',
+            'display_name': 'Indie Explorer',
+            'email': 'indie@ahoy.com',
+            'avatar': '/static/img/default-avatar.png',
+            'stats': {
+                'saved_tracks': 23,
+                'saved_shows': 18,
+                'liked_content': 56,
+                'playlists': 5
+            }
+        },
+        {
+            'username': 'showbinger',
+            'password': 'shows123',
+            'display_name': 'Show Binger',
+            'email': 'shows@ahoy.com',
+            'avatar': '/static/img/default-avatar.png',
+            'stats': {
+                'saved_tracks': 12,
+                'saved_shows': 35,
+                'liked_content': 42,
+                'playlists': 3
+            }
+        },
+        {
+            'username': 'newuser',
+            'password': 'new123',
+            'display_name': 'New User',
+            'email': 'new@ahoy.com',
+            'avatar': '/static/img/default-avatar.png',
+            'stats': {
+                'saved_tracks': 0,
+                'saved_shows': 0,
+                'liked_content': 0,
+                'playlists': 0
+            }
+        }
+    ]
+    
+    return jsonify({'accounts': sample_accounts})
+
+@app.route('/api/debug/data/<data_type>')
+def debug_data_viewer(data_type):
+    """View application data for debugging"""
+    if data_type == 'users':
+        users = user_manager.users
+        return jsonify(users)
+    elif data_type == 'music':
+        music_data = load_json_data('music.json', {'tracks': []})
+        return jsonify(music_data)
+    elif data_type == 'shows':
+        shows_data = load_json_data('shows.json', {'shows': []})
+        return jsonify(shows_data)
+    elif data_type == 'artists':
+        artists_data = load_json_data('artists.json', {'artists': []})
+        return jsonify(artists_data)
+    else:
+        return jsonify({'error': 'Unknown data type'}), 400
+
+@app.route('/api/debug/status')
+def debug_system_status():
+    """Get system status for debugging"""
+    import os
+    
+    status = {
+        'timestamp': datetime.now().isoformat(),
+        'app': {
+            'users_count': len(user_manager.users),
+            'session_count': len(session),
+            'cache_status': 'active'
+        },
+        'data_files': {
+            'users_file': os.path.exists('data/users.json'),
+            'music_file': os.path.exists('static/data/music.json'),
+            'shows_file': os.path.exists('static/data/shows.json'),
+            'artists_file': os.path.exists('static/data/artists.json')
+        }
+    }
+    
+    return jsonify(status)
 
 if __name__ == '__main__':
     # Create data directories
