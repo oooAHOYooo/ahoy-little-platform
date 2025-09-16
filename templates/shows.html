@@ -89,10 +89,6 @@
                         </button>
                     </div>
                     <div class="show-badges">
-                        <span class="show-type"
-                            x-text="featuredShow.type?.toUpperCase()"></span>
-                        <span class="show-duration"
-                            x-text="formatDuration(featuredShow.duration_seconds)"></span>
                     </div>
                 </div>
                 <div class="featured-info">
@@ -110,11 +106,6 @@
                             <i class="fas fa-calendar"></i>
                             <span
                                 x-text="formatDate(featuredShow.published_date)"></span>
-                        </div>
-                        <div class="stat">
-                            <i class="fas fa-clock"></i>
-                            <span
-                                x-text="formatDuration(featuredShow.duration_seconds)"></span>
                         </div>
                     </div>
                     <div class="featured-actions">
@@ -182,10 +173,6 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="show-duration"
-                            x-text="formatDuration(show.duration_seconds)"></div>
-                        <div class="show-type-badge"
-                            x-text="show.type?.toUpperCase()"></div>
                     </div>
                     <div class="show-info">
                         <h4 x-text="show.title"></h4>
@@ -207,7 +194,6 @@
                 <span class="col-thumbnail">Thumbnail</span>
                 <span class="col-title">Title</span>
                 <span class="col-host">Host</span>
-                <span class="col-duration">Duration</span>
                 <span class="col-views">Views</span>
                 <span class="col-actions">Actions</span>
             </div>
@@ -226,8 +212,6 @@
                                 x-text="show.description?.substring(0, 100) + '...'"></p>
                         </div>
                         <span class="col-host" x-text="show.host"></span>
-                        <span class="col-duration"
-                            x-text="formatDuration(show.duration_seconds)"></span>
                         <span class="col-views"
                             x-text="`${show.views || 0} views`"></span>
                         <div class="col-actions">
@@ -418,12 +402,6 @@ function showsPage() {
         },
         
         // Utility functions
-        formatDuration(seconds) {
-            if (!seconds) return '0:00';
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        },
         
         formatDate(dateString) {
             if (!dateString) return '';

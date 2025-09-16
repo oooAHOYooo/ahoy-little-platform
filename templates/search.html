@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="search-results-page" x-data="searchResults()" x-init="init()">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="search-header">
+            <div class="search-input-container">
+                <input type="text" 
+                    x-model="searchQuery" 
+                    @keyup.enter="performSearch()"
+                    placeholder="Search music, shows, artists..."
+                    class="search-input-large">
+                <button @click="performSearch()" class="search-btn-large">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div class="search-stats" x-show="searchResults.length > 0">
+                <span x-text="`${searchResults.length} results for "${searchQuery}"`"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="search-filters" x-show="searchResults.length > 0">
+        <div class="filter-group">
+            <label>Filter by:</label>
+            <select x-model="selectedFilter" @change="filterResults()">
+                <option value="all">All Results</option>
+                <option value="music">Music</option>
+                <option value="shows">Shows</option>
+                <option value="artists">Artists</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Sort by:</label>
+            <select x-model="sortBy" @change="sortResults()">
+                <option value="relevance">Relevance</option>
+                <option value="title">Title</option>
+                <option value="artist">Artist</option>
+                <option value="date">Date</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    <div class="search-results" x-show="searchResults.length > 0">
+        <div class="results-list">
+            <template x-for="item in filteredResults" :key="item.id + '-' + item.type">
+                <div class="result-item" @click="playContent(item)">
+                    <div class="result-cover">
+                        <img :src="item.cover_art || item.thumbnail || item.image || '/static/img/default-cover.jpg'" 
+                             :alt="item.title || item.name">
+                        <div class="result-overlay">
+                            <button @click.stop="playContent(item)" class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="result-info">
+                        <div class="result-header">
+                            <h3 x-text="item.title || item.name"></h3>
+                            <div class="result-actions">
+                                <button @click.stop="saveContent(item)" 
+                                    class="action-btn"
+                                    :class="{'saved': isSaved(item)}"
+                                    :title="isSaved(item) ? 'Remove from saves' : 'Save'">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                                <button @click.stop="likeContent(item)" 
+                                    class="action-btn"
+                                    :class="{'liked': isLiked(item)}"
+                                    :title="isLiked(item) ? 'Unlike' : 'Like'">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <p class="result-artist" x-text="item.artist || item.host"></p>
+                        <p class="result-description" x-text="item.description || item.album"></p>
+                        <div class="result-meta">
+                            <span class="result-type" x-text="item.type?.toUpperCase() || 'CONTENT'"></span>
+                            <span class="result-date" x-text="formatDate(item.created_at || item.release_date)"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- No Results -->
+    <div x-show="searchResults.length === 0 && hasSearched" class="no-results">
+        <div class="no-results-content">
+            <i class="fas fa-search"></i>
+            <h3>No results found</h3>
+            <p>Try searching for something else or check your spelling.</p>
+            <div class="search-suggestions">
+                <h4>Popular searches:</h4>
+                <div class="suggestion-tags">
+                    <button @click="searchSuggestion('indie rock')" class="suggestion-tag">Indie Rock</button>
+                    <button @click="searchSuggestion('acoustic')" class="suggestion-tag">Acoustic</button>
+                    <button @click="searchSuggestion('live performance')" class="suggestion-tag">Live Performance</button>
+                    <button @click="searchSuggestion('new artist')" class="suggestion-tag">New Artist</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div x-show="isLoading" class="loading-section">
+        <div class="spinner"></div>
+        <p>Searching...</p>
+    </div>
+</div>
+
+<script>
+function searchResults() {
+    return {
+        // State
+        searchQuery: '',
+        searchResults: [],
+        filteredResults: [],
+        selectedFilter: 'all',
+        sortBy: 'relevance',
+        isLoading: false,
+        hasSearched: false,
+
+        // Initialize
+        init() {
+            // Get search query from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            this.searchQuery = urlParams.get('q') || '';
+            if (this.searchQuery) {
+                this.performSearch();
+            }
+        },
+
+        // Search functionality
+        async performSearch() {
+            if (!this.searchQuery.trim()) return;
+            
+            this.isLoading = true;
+            this.hasSearched = true;
+            
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(this.searchQuery)}`);
+                const data = await response.json();
+                this.searchResults = data.results || [];
+                this.filteredResults = [...this.searchResults];
+                this.sortResults();
+            } catch (error) {
+                console.error('Error performing search:', error);
+                this.searchResults = [];
+                this.filteredResults = [];
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        // Filter results
+        filterResults() {
+            if (this.selectedFilter === 'all') {
+                this.filteredResults = [...this.searchResults];
+            } else {
+                this.filteredResults = this.searchResults.filter(item => 
+                    item.type === this.selectedFilter
+                );
+            }
+            this.sortResults();
+        },
+
+        // Sort results
+        sortResults() {
+            this.filteredResults.sort((a, b) => {
+                switch (this.sortBy) {
+                    case 'title':
+                        return (a.title || a.name || '').localeCompare(b.title || b.name || '');
+                    case 'artist':
+                        return (a.artist || a.host || '').localeCompare(b.artist || b.host || '');
+                    case 'date':
+                        return new Date(b.created_at || b.release_date || 0) - new Date(a.created_at || a.release_date || 0);
+                    case 'relevance':
+                    default:
+                        return 0; // Keep original order for relevance
+                }
+            });
+        },
+
+        // Content actions
+        playContent(item) {
+            if (window.globalPlayer) {
+                window.globalPlayer.playTrack(item);
+            }
+        },
+
+        async saveContent(item) {
+            try {
+                const response = await fetch('/api/saves/save', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: item.type || 'music',
+                        id: item.id,
+                        data: item
+                    })
+                });
+                
+                if (response.ok) {
+                    // Update UI to show saved state
+                    item.saved = !item.saved;
+                }
+            } catch (error) {
+                console.error('Error saving content:', error);
+            }
+        },
+
+        async likeContent(item) {
+            try {
+                const response = await fetch('/api/likes/like', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: item.type || 'music',
+                        id: item.id,
+                        data: item
+                    })
+                });
+                
+                if (response.ok) {
+                    // Update UI to show liked state
+                    item.liked = !item.liked;
+                }
+            } catch (error) {
+                console.error('Error liking content:', error);
+            }
+        },
+
+        isSaved(item) {
+            return item.saved || false;
+        },
+
+        isLiked(item) {
+            return item.liked || false;
+        },
+
+        searchSuggestion(suggestion) {
+            this.searchQuery = suggestion;
+            this.performSearch();
+        },
+
+        // Utility functions
+        formatDate(dateString) {
+            if (!dateString) return '';
+            return new Date(dateString).toLocaleDateString();
+        }
+    }
+}
+</script>
+{% endblock %}

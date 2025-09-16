@@ -72,8 +72,6 @@
             <h2 x-text="currentMedia?.title"></h2>
             <p class="artist-name" x-text="currentMedia?.artist"></p>
             <div class="media-meta">
-                <span class="duration"
-                    x-text="formatDuration(currentMedia?.duration_seconds)"></span>
                 <span class="genre" x-text="currentMedia?.genre"></span>
                 <span class="views"
                     x-text="`${currentMedia?.views || 0} views`"></span>
@@ -107,15 +105,12 @@
         </div>
 
         <div class="progress-section">
-            <span class="time-current" x-text="formatTime(currentTime)"></span>
             <div class="progress-bar" @click="seekTo($event)">
                 <div class="progress-fill"
                     :style="`width: ${progressPercent}%`"></div>
                 <div class="progress-handle"
                     :style="`left: ${progressPercent}%`"></div>
             </div>
-            <span class="time-total"
-                x-text="formatTime(currentMedia?.duration_seconds || 0)"></span>
         </div>
 
         <div class="volume-section">
@@ -151,8 +146,6 @@
                         <h4 x-text="item.title"></h4>
                         <p x-text="item.artist"></p>
                     </div>
-                    <div class="item-duration"
-                        x-text="formatDuration(item.duration_seconds)"></div>
                 </div>
             </template>
         </div>

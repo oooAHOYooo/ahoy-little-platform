@@ -1382,7 +1382,7 @@ def debug_data_viewer(data_type):
 def debug_system_status():
     """Get system status for debugging"""
     import os
-    
+
     status = {
         'timestamp': datetime.now().isoformat(),
         'app': {
@@ -1397,8 +1397,71 @@ def debug_system_status():
             'artists_file': os.path.exists('static/data/artists.json')
         }
     }
-    
+
     return jsonify(status)
+
+@app.route('/search')
+def search_page():
+    """Search results page"""
+    return render_template('search.html')
+
+@app.route('/api/search')
+def search_api():
+    """Search API endpoint"""
+    query = request.args.get('q', '').strip().lower()
+    
+    if not query:
+        return jsonify({'results': []})
+    
+    results = []
+    
+    try:
+        # Search music
+        music_data = load_json_data('music.json', {'tracks': []})
+        for track in music_data.get('tracks', []):
+            if (query in track.get('title', '').lower() or 
+                query in track.get('artist', '').lower() or 
+                query in track.get('album', '').lower() or 
+                query in track.get('genre', '').lower()):
+                results.append({
+                    **track,
+                    'type': 'music',
+                    'id': track.get('id', f"music_{len(results)}")
+                })
+        
+        # Search shows
+        shows_data = load_json_data('shows.json', {'shows': []})
+        for show in shows_data.get('shows', []):
+            if (query in show.get('title', '').lower() or 
+                query in show.get('host', '').lower() or 
+                query in show.get('description', '').lower()):
+                results.append({
+                    **show,
+                    'type': 'show',
+                    'id': show.get('id', f"show_{len(results)}")
+                })
+        
+        # Search artists
+        artists_data = load_json_data('artists.json', {'artists': []})
+        for artist in artists_data.get('artists', []):
+            if (query in artist.get('name', '').lower() or 
+                query in artist.get('description', '').lower() or 
+                query in ' '.join(artist.get('genres', [])).lower()):
+                results.append({
+                    **artist,
+                    'type': 'artist',
+                    'id': artist.get('id', f"artist_{len(results)}")
+                })
+        
+        # Shuffle results for variety
+        import random
+        random.shuffle(results)
+        
+    except Exception as e:
+        print(f"Error in search: {e}")
+        return jsonify({'error': 'Search failed'}), 500
+    
+    return jsonify({'results': results})
 
 if __name__ == '__main__':
     # Create data directories

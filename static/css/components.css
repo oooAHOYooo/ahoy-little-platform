@@ -7702,7 +7702,7 @@
 
 .list-header {
     display: grid;
-    grid-template-columns: 60px 1fr 120px 100px 60px;
+    grid-template-columns: 60px 1fr 120px 60px;
     gap: var(--spacing-md);
     padding: var(--spacing-md) var(--spacing-lg);
     background: var(--background-dark);
@@ -7714,7 +7714,7 @@
 
 .list-item {
     display: grid;
-    grid-template-columns: 60px 1fr 120px 100px 60px;
+    grid-template-columns: 60px 1fr 120px 60px;
     gap: var(--spacing-md);
     padding: var(--spacing-md) var(--spacing-lg);
     border-bottom: 1px solid var(--border-color);
@@ -8089,11 +8089,7 @@
 
     .list-header,
     .list-item {
-        grid-template-columns: 50px 1fr 100px 60px;
-    }
-
-    .col-type {
-        display: none;
+        grid-template-columns: 50px 1fr 60px;
     }
 
     .artists-list .list-header,

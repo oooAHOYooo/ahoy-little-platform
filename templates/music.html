@@ -60,7 +60,6 @@
             <select x-model="sortBy" @change="sortMusic()">
                 <option value="title">Title</option>
                 <option value="artist">Artist</option>
-                <option value="duration">Duration</option>
                 <option value="added_date">Date Added</option>
             </select>
         </div>
@@ -112,8 +111,6 @@
                     <h4 x-text="track.title"></h4>
                     <p x-text="track.artist"></p>
                     <div class="track-meta">
-                        <span class="track-type"
-                            x-text="track.type?.toUpperCase() || 'MUSIC'"></span>
                     </div>
                 </div>
             </div>
@@ -126,7 +123,6 @@
             <span class="col-cover"></span>
             <span class="col-title">Title</span>
             <span class="col-artist">Artist</span>
-            <span class="col-type">Type</span>
             <span class="col-actions">Actions</span>
         </div>
 
@@ -148,8 +144,6 @@
                     </div>
 
                     <span class="col-artist" x-text="track.artist"></span>
-                    <span class="col-type"
-                        x-text="track.type?.toUpperCase() || 'MUSIC'"></span>
 
                     <div class="col-actions">
                         <button @click.stop="saveTrack(track)"
@@ -394,8 +388,6 @@ function musicLibrary() {
                         return a.title.localeCompare(b.title);
                     case 'artist':
                         return a.artist.localeCompare(b.artist);
-                    case 'duration':
-                        return (b.duration_seconds || 0) - (a.duration_seconds || 0);
                     case 'added_date':
                         return new Date(b.added_date || 0) - new Date(a.added_date || 0);
                     default:
@@ -660,12 +652,6 @@ function musicLibrary() {
         },
         
         // Utility functions
-        formatDuration(seconds) {
-            if (!seconds) return '0:00';
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
     };
 }
 </script>

@@ -110,8 +110,6 @@
                     <div class="track-info">
                         <h3 x-text="track.title"></h3>
                         <p x-text="track.album || 'Single'"></p>
-                        <span class="duration"
-                            x-text="formatDuration(track.duration_seconds)"></span>
                     </div>
                 </div>
             </template>
@@ -141,8 +139,6 @@
                         </div>
                         <span class="col-album"
                             x-text="track.album || 'Single'"></span>
-                        <span class="col-duration"
-                            x-text="formatDuration(track.duration_seconds)"></span>
                         <div class="col-actions">
                             <button @click.stop="likeTrack(track)"
                                 class="action-btn"
@@ -176,8 +172,6 @@
                                 class="play-btn">
                                 <i class="fas fa-play"></i>
                             </button>
-                            <div class="show-duration"
-                                x-text="formatDuration(show.duration_seconds)"></div>
                         </div>
                     </div>
                     <div class="show-info">
@@ -317,12 +311,6 @@ function artistProfile() {
         },
         
         // Utility functions
-        formatDuration(seconds) {
-            if (!seconds) return '0:00';
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        },
         
         formatDate(dateString) {
             if (!dateString) return '';

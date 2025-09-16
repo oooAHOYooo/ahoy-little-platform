@@ -140,9 +140,13 @@ function navbar() {
         
         performSearch() {
             if (this.searchQuery.trim()) {
-                // Redirect to search results or update current page
+                // Redirect to search results page
                 window.location.href = `/search?q=${encodeURIComponent(this.searchQuery)}`;
             }
+        },
+        
+        clearSearch() {
+            this.searchQuery = '';
         },
         
         clearSearch() {
@@ -593,21 +597,7 @@ function loadUserState() {
 }
 
 // Utility functions
-function formatTime(seconds) {
-    if (!seconds || isNaN(seconds)) return '0:00';
-    
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
 
-function formatDuration(seconds) {
-    if (!seconds || isNaN(seconds)) return '0:00';
-    
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
 
 function debounce(func, wait) {
     let timeout;
@@ -894,6 +884,26 @@ function globalPlayer() {
                 window.ahoyApp.currentTime = newTime;
             }
         },
+
+        seekForward() {
+            const mediaElement = document.querySelector('#global-media-player');
+            if (mediaElement) {
+                const newTime = Math.min(mediaElement.currentTime + 15, mediaElement.duration || 0);
+                mediaElement.currentTime = newTime;
+                this.currentTime = newTime;
+                window.ahoyApp.currentTime = newTime;
+            }
+        },
+
+        seekBackward() {
+            const mediaElement = document.querySelector('#global-media-player');
+            if (mediaElement) {
+                const newTime = Math.max(mediaElement.currentTime - 15, 0);
+                mediaElement.currentTime = newTime;
+                this.currentTime = newTime;
+                window.ahoyApp.currentTime = newTime;
+            }
+        },
         
         shufflePlaylist() {
             const playlist = [...this.playlist];
@@ -919,8 +929,6 @@ function globalPlayer() {
 // Export functions for global use
 window.ahoyApp = {
     ...window.ahoyApp,
-    formatTime,
-    formatDuration,
     debounce,
     throttle,
     apiRequest,

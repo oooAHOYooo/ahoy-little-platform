@@ -74,7 +74,6 @@
                         <img
                             src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
                             alt="Ahoy Indie Media">
-                        <span class="app-name">Ahoy</span>
                     </a>
                 </div>
 
@@ -304,10 +303,6 @@
                         <p
                             x-text="currentTrack?.artist || 'Unknown Artist'"></p>
                         <div class="player-meta">
-                            <span class="track-type"
-                                x-text="currentTrack?.type?.toUpperCase() || 'MUSIC'"></span>
-                            <span class="track-duration"
-                                x-text="formatTime(currentTrack?.duration_seconds || 0)"></span>
                         </div>
                     </div>
                 </div>
@@ -317,10 +312,18 @@
                         title="Previous">
                         <i class="fas fa-step-backward"></i>
                     </button>
+                    <button @click="seekBackward()" class="control-btn"
+                        title="15 seconds back">
+                        <i class="fas fa-backward"></i>
+                    </button>
                     <button @click="togglePlay()" class="control-btn play-btn"
                         :title="isPlaying ? 'Pause' : 'Play'">
                         <i
                             :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+                    </button>
+                    <button @click="seekForward()" class="control-btn"
+                        title="15 seconds forward">
+                        <i class="fas fa-forward"></i>
                     </button>
                     <button @click="nextTrack()" class="control-btn"
                         title="Next">
