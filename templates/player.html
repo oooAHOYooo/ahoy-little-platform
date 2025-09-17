@@ -49,8 +49,6 @@
                     <h1 class="video-title"
                         x-text="currentMedia?.title || 'Untitled'"></h1>
                     <div class="video-stats">
-                        <span class="view-count"
-                            x-text="`${currentMedia?.views || 0} views`"></span>
                         <span class="upload-date"
                             x-text="formatDate(currentMedia?.published_date)"></span>
                     </div>
@@ -103,8 +101,6 @@
             <p class="artist-name" x-text="currentMedia?.artist"></p>
             <div class="media-meta">
                 <span class="genre" x-text="currentMedia?.genre"></span>
-                <span class="views"
-                    x-text="`${currentMedia?.views || 0} views`"></span>
             </div>
             <p class="description" x-text="currentMedia?.description"></p>
         </div>

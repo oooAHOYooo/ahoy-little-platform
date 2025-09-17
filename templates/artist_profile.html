@@ -30,11 +30,6 @@
                                 <span
                                     x-text="`${artist?.show_count || 0} shows`"></span>
                             </span>
-                            <span class="stat">
-                                <i class="fas fa-heart"></i>
-                                <span
-                                    x-text="`${artist?.followers || 0} followers`"></span>
-                            </span>
                         </div>
                         <div class="artist-actions">
                             <button @click="followArtist()"
@@ -179,8 +174,6 @@
                         <p
                             x-text="show.description?.substring(0, 100) + '...'"></p>
                         <div class="show-meta">
-                            <span class="views"
-                                x-text="`${show.views || 0} views`"></span>
                             <span class="date"
                                 x-text="formatDate(show.published_date)"></span>
                         </div>
@@ -223,16 +216,6 @@
                         <span class="stat-number"
                             x-text="artist?.show_count || 0"></span>
                         <span class="stat-label">Shows</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number"
-                            x-text="artist?.followers || 0"></span>
-                        <span class="stat-label">Followers</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number"
-                            x-text="artist?.total_plays || 0"></span>
-                        <span class="stat-label">Total Plays</span>
                     </div>
                 </div>
             </div>

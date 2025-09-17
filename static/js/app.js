@@ -411,9 +411,18 @@ function playMedia(track) {
     let mediaElement = document.querySelector('#global-media-player');
     
     if (!mediaElement) {
-        mediaElement = document.createElement('audio');
+        // Create appropriate element based on track type
+        if (track.type === 'show') {
+            mediaElement = document.createElement('video');
+            mediaElement.controls = true;
+            mediaElement.style.width = '100%';
+            mediaElement.style.maxWidth = '800px';
+            mediaElement.style.height = 'auto';
+        } else {
+            mediaElement = document.createElement('audio');
+            mediaElement.style.display = 'none';
+        }
         mediaElement.id = 'global-media-player';
-        mediaElement.style.display = 'none';
         document.body.appendChild(mediaElement);
     }
     

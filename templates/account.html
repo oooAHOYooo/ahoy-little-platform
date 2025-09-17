@@ -121,8 +121,6 @@
                                         <h4 x-text="item.title"></h4>
                                         <p
                                             x-text="item.artist || item.creator"></p>
-                                        <span class="content-stats"
-                                            x-text="item.plays + ' plays'"></span>
                                     </div>
                                 </div>
                             </template>
@@ -425,14 +423,12 @@ function accountPage() {
                     id: 1,
                     title: 'Summer Nights',
                     artist: 'Indie Artist',
-                    plays: 45,
                     cover_art: '/static/img/default-cover.jpg'
                 },
                 {
                     id: 2,
                     title: 'City Lights',
                     artist: 'Urban Vibes',
-                    plays: 32,
                     cover_art: '/static/img/default-cover.jpg'
                 }
             ];

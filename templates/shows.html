@@ -98,11 +98,6 @@
                         x-text="featuredShow.description"></p>
                     <div class="show-stats">
                         <div class="stat">
-                            <i class="fas fa-eye"></i>
-                            <span
-                                x-text="`${featuredShow.views || 0} views`"></span>
-                        </div>
-                        <div class="stat">
                             <i class="fas fa-calendar"></i>
                             <span
                                 x-text="formatDate(featuredShow.published_date)"></span>
@@ -178,8 +173,6 @@
                         <h4 x-text="show.title"></h4>
                         <p class="show-host" x-text="show.host"></p>
                         <div class="show-meta">
-                            <span class="views"
-                                x-text="`${show.views || 0} views`"></span>
                             <span class="date"
                                 x-text="formatDate(show.published_date)"></span>
                         </div>
@@ -194,7 +187,6 @@
                 <span class="col-thumbnail">Thumbnail</span>
                 <span class="col-title">Title</span>
                 <span class="col-host">Host</span>
-                <span class="col-views">Views</span>
                 <span class="col-actions">Actions</span>
             </div>
             <div class="list-items">
@@ -212,8 +204,6 @@
                                 x-text="show.description?.substring(0, 100) + '...'"></p>
                         </div>
                         <span class="col-host" x-text="show.host"></span>
-                        <span class="col-views"
-                            x-text="`${show.views || 0} views`"></span>
                         <div class="col-actions">
                             <button @click.stop="likeShow(show)"
                                 class="action-btn"
