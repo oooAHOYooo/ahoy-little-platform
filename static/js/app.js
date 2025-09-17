@@ -21,28 +21,14 @@ function navbar() {
     return {
         isLoggedIn: false,
         userProfile: {},
-        showLogin: false,
-        showRegister: false,
         isLoading: false,
         searchQuery: '',
         darkMode: false,
         autoPlay: false,
         notifications: true,
-        loginForm: {
-            username: '',
-            password: ''
-        },
-        registerForm: {
-            username: '',
-            email: '',
-            password: ''
-        },
         
         init() {
-            // Ensure modals are hidden on init
-            this.showLogin = false;
-            this.showRegister = false;
-            console.log('Navbar initialized - showLogin:', this.showLogin, 'showRegister:', this.showRegister);
+            console.log('Navbar initialized');
             // Check auth status when component initializes
             this.checkAuthStatus();
             // Load settings from localStorage
@@ -66,77 +52,20 @@ function navbar() {
             }
         },
         
-        async login() {
-            this.isLoading = true;
-            try {
-                const response = await fetch('/api/user/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(this.loginForm)
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    this.isLoggedIn = true;
-                    this.userProfile = data.user;
-                    this.showLogin = false;
-                    this.loginForm = { username: '', password: '' };
-                    // Refresh the page to update all components
-                    window.location.reload();
-                } else {
-                    const error = await response.json();
-                    alert(error.message || 'Login failed');
-                }
-            } catch (error) {
-                alert('Login failed. Please try again.');
-            } finally {
-                this.isLoading = false;
-            }
-        },
-        
-        async register() {
-            this.isLoading = true;
-            try {
-                const response = await fetch('/api/user/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(this.registerForm)
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    this.isLoggedIn = true;
-                    this.userProfile = data.user;
-                    this.showRegister = false;
-                    this.registerForm = { username: '', email: '', password: '' };
-                    // Refresh the page to update all components
-                    window.location.reload();
-                } else {
-                    const error = await response.json();
-                    alert(error.message || 'Registration failed');
-                }
-            } catch (error) {
-                alert('Registration failed. Please try again.');
-            } finally {
-                this.isLoading = false;
-            }
-        },
         
         async logout() {
             try {
                 await fetch('/api/user/logout', { method: 'POST' });
                 this.isLoggedIn = false;
                 this.userProfile = {};
+                this.showNotification('You have been signed out', 'info');
                 // Refresh the page to update all components
                 window.location.reload();
             } catch (error) {
                 console.error('Logout failed:', error);
             }
         },
+        
         
         performSearch() {
             if (this.searchQuery.trim()) {
@@ -388,21 +317,50 @@ function setupEventListeners() {
 }
 
 function handleKeyboardShortcuts(event) {
+    // Check if user is typing in input fields
+    const isInputActive = event.target.matches('input, textarea, select, [contenteditable="true"]') || 
+                         event.target.closest('input, textarea, select, [contenteditable="true"]');
+    
+    // Disable all shortcuts if user is typing
+    if (isInputActive) {
+        return;
+    }
+    
     // Space bar - play/pause
-    if (event.code === 'Space' && !event.target.matches('input, textarea')) {
+    if (event.code === 'Space') {
         event.preventDefault();
         togglePlayPause();
     }
     
-    // Arrow keys - next/previous
+    // Arrow keys - next/previous (for hero slides when not in global player)
     if (event.code === 'ArrowRight') {
         event.preventDefault();
-        window.globalPlayer.nextTrack();
+        // Check if we're on the homepage and hero is visible
+        const heroFeed = document.querySelector('.hero-feed');
+        if (heroFeed && heroFeed.offsetParent !== null) {
+            // Navigate hero slides
+            if (window.homePage && typeof window.homePage.nextHero === 'function') {
+                window.homePage.nextHero();
+            }
+        } else {
+            // Navigate global player
+            window.globalPlayer.nextTrack();
+        }
     }
     
     if (event.code === 'ArrowLeft') {
         event.preventDefault();
-        window.globalPlayer.previousTrack();
+        // Check if we're on the homepage and hero is visible
+        const heroFeed = document.querySelector('.hero-feed');
+        if (heroFeed && heroFeed.offsetParent !== null) {
+            // Navigate hero slides
+            if (window.homePage && typeof window.homePage.prevHero === 'function') {
+                window.homePage.prevHero();
+            }
+        } else {
+            // Navigate global player
+            window.globalPlayer.previousTrack();
+        }
     }
     
     // M key - mute/unmute

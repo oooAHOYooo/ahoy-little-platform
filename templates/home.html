@@ -7,7 +7,10 @@
     <!-- TV-Style Hero Feed -->
     <section class="tv-hero">
         <div class="hero-feed"
-            :style="`transform: translateX(${heroOffset}px)`">
+            :style="`transform: translateX(${heroOffset}px)`"
+            @touchstart="handleTouchStart"
+            @touchmove="handleTouchMove"
+            @touchend="handleTouchEnd">
             <template x-for="(item, index) in heroItems" :key="item.id">
                 <div class="hero-item" x-show="item.cover_art || item.thumbnail"
                     :class="{'active': currentHeroIndex === index}"
@@ -165,12 +168,23 @@ function homePage() {
         currentHeroIndex: 0,
         heroOffset: 0,
         heroInterval: null,
+        touchStartX: 0,
+        touchStartY: 0,
+        isDragging: false,
         
         // Initialize
         async init() {
             await this.loadAllData();
             this.isLoading = false;
             this.startHeroRotation();
+            
+            // Add resize listener to recalculate hero offset
+            window.addEventListener('resize', () => {
+                this.updateHeroOffset();
+            });
+            
+            // Expose functions globally for keyboard navigation
+            window.homePage = this;
         },
         
         // Data loading
@@ -224,6 +238,11 @@ function homePage() {
             const musicItems = this.feedItems.slice(0, 4);
             const showItems = this.featuredShows.slice(0, 2);
             this.heroItems = [...musicItems, ...showItems].sort(() => 0.5 - Math.random());
+            
+            // Calculate initial hero offset after items are set
+            setTimeout(() => {
+                this.updateHeroOffset();
+            }, 100);
         },
         
         startHeroRotation() {
@@ -264,7 +283,64 @@ function homePage() {
         },
         
         updateHeroOffset() {
-            this.heroOffset = -this.currentHeroIndex * 100;
+            // Get the width of the hero container to calculate proper offset
+            const heroContainer = document.querySelector('.tv-hero');
+            if (heroContainer) {
+                const containerWidth = heroContainer.offsetWidth;
+                this.heroOffset = -this.currentHeroIndex * containerWidth;
+            } else {
+                // Fallback to 100% if container not found
+                this.heroOffset = -this.currentHeroIndex * 100;
+            }
+        },
+        
+        // Touch handling for mobile swipe
+        handleTouchStart(event) {
+            this.touchStartX = event.touches[0].clientX;
+            this.touchStartY = event.touches[0].clientY;
+            this.isDragging = false;
+            this.stopHeroRotation();
+        },
+        
+        handleTouchMove(event) {
+            if (!this.touchStartX) return;
+            
+            const touchX = event.touches[0].clientX;
+            const touchY = event.touches[0].clientY;
+            const diffX = this.touchStartX - touchX;
+            const diffY = this.touchStartY - touchY;
+            
+            // Only consider it a drag if horizontal movement is greater than vertical
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                this.isDragging = true;
+                event.preventDefault();
+            }
+        },
+        
+        handleTouchEnd(event) {
+            if (!this.isDragging || !this.touchStartX) {
+                this.startHeroRotation();
+                return;
+            }
+            
+            const touchX = event.changedTouches[0].clientX;
+            const diffX = this.touchStartX - touchX;
+            const threshold = 50; // Minimum swipe distance
+            
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    // Swiped left - go to next
+                    this.nextHero();
+                } else {
+                    // Swiped right - go to previous
+                    this.prevHero();
+                }
+            }
+            
+            this.touchStartX = 0;
+            this.touchStartY = 0;
+            this.isDragging = false;
+            this.startHeroRotation();
         },
         
         // Actions

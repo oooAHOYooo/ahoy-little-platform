@@ -1,0 +1,603 @@
+{% extends "base.html" %}
+
+{% block title %}My Account - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="account-page" x-data="accountPage()" x-init="init()">
+    <!-- Account Header -->
+    <div class="account-header">
+        <div class="account-hero">
+            <div class="account-avatar">
+                <img
+                    :src="userProfile.avatar_url || '/static/img/default-avatar.png'"
+                    :alt="userProfile.display_name || 'User'">
+                <button @click="editAvatar()" class="avatar-edit-btn"
+                    title="Change Avatar">
+                    <i class="fas fa-camera"></i>
+                </button>
+            </div>
+            <div class="account-info">
+                <h1 x-text="userProfile.display_name || 'User'"></h1>
+                <p class="account-username"
+                    x-text="'@' + (userProfile.username || 'username')"></p>
+                <p class="account-email"
+                    x-text="userProfile.email || 'No email'"></p>
+                <div class="account-stats">
+                    <div class="stat-item">
+                        <span class="stat-number"
+                            x-text="userStats.total_saves || 0"></span>
+                        <span class="stat-label">Saves</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"
+                            x-text="userStats.total_plays || 0"></span>
+                        <span class="stat-label">Plays</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"
+                            x-text="userStats.playlists || 0"></span>
+                        <span class="stat-label">Playlists</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"
+                            x-text="userStats.boards || 0"></span>
+                        <span class="stat-label">Boards</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Content -->
+    <div class="account-content">
+        <!-- Navigation Tabs -->
+        <div class="account-tabs">
+            <button @click="activeTab = 'overview'"
+                :class="{'active': activeTab === 'overview'}"
+                class="account-tab">
+                <i class="fas fa-chart-line"></i>
+                Overview
+            </button>
+            <button @click="activeTab = 'activity'"
+                :class="{'active': activeTab === 'activity'}"
+                class="account-tab">
+                <i class="fas fa-history"></i>
+                Activity
+            </button>
+            <button @click="activeTab = 'saves'"
+                :class="{'active': activeTab === 'saves'}"
+                class="account-tab">
+                <i class="fas fa-bookmark"></i>
+                My Saves
+            </button>
+            <button @click="activeTab = 'playlists'"
+                :class="{'active': activeTab === 'playlists'}"
+                class="account-tab">
+                <i class="fas fa-list"></i>
+                Playlists
+            </button>
+            <button @click="activeTab = 'settings'"
+                :class="{'active': activeTab === 'settings'}"
+                class="account-tab">
+                <i class="fas fa-cog"></i>
+                Settings
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="account-tab-content">
+            <!-- Overview Tab -->
+            <div x-show="activeTab === 'overview'" class="tab-panel">
+                <div class="overview-grid">
+                    <div class="overview-card">
+                        <h3>Recent Activity</h3>
+                        <div class="activity-list">
+                            <template x-for="item in recentActivity"
+                                :key="item.id">
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i
+                                            :class="getActivityIcon(item.type)"></i>
+                                    </div>
+                                    <div class="activity-details">
+                                        <p x-text="item.description"></p>
+                                        <span class="activity-time"
+                                            x-text="formatTimeAgo(item.timestamp)"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="overview-card">
+                        <h3>Top Content</h3>
+                        <div class="top-content">
+                            <template x-for="item in topContent" :key="item.id">
+                                <div class="content-item">
+                                    <img
+                                        :src="item.cover_art || item.thumbnail || '/static/img/default-cover.jpg'"
+                                        :alt="item.title" class="content-thumb">
+                                    <div class="content-info">
+                                        <h4 x-text="item.title"></h4>
+                                        <p
+                                            x-text="item.artist || item.creator"></p>
+                                        <span class="content-stats"
+                                            x-text="item.plays + ' plays'"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="overview-card">
+                        <h3>Account Details</h3>
+                        <div class="account-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Member Since:</span>
+                                <span
+                                    x-text="formatDate(userProfile.created_at)"></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Last Login:</span>
+                                <span
+                                    x-text="formatDate(userProfile.last_login)"></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Account Type:</span>
+                                <span class="account-type"
+                                    x-text="userProfile.subscription?.type || 'Free'"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Tab -->
+            <div x-show="activeTab === 'activity'" class="tab-panel">
+                <div class="activity-timeline">
+                    <h3>Activity Timeline</h3>
+                    <div class="timeline">
+                        <template x-for="item in activityTimeline"
+                            :key="item.id">
+                            <div class="timeline-item">
+                                <div class="timeline-marker">
+                                    <i :class="getActivityIcon(item.type)"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4 x-text="item.title"></h4>
+                                    <p x-text="item.description"></p>
+                                    <span class="timeline-time"
+                                        x-text="formatDateTime(item.timestamp)"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saves Tab -->
+            <div x-show="activeTab === 'saves'" class="tab-panel">
+                <div class="saves-content">
+                    <h3>My Saved Content</h3>
+                    <div class="saves-stats">
+                        <div class="save-stat">
+                            <span class="stat-number"
+                                x-text="userStats.saved_tracks || 0"></span>
+                            <span class="stat-label">Tracks</span>
+                        </div>
+                        <div class="save-stat">
+                            <span class="stat-number"
+                                x-text="userStats.saved_shows || 0"></span>
+                            <span class="stat-label">Shows</span>
+                        </div>
+                        <div class="save-stat">
+                            <span class="stat-number"
+                                x-text="userStats.saved_artists || 0"></span>
+                            <span class="stat-label">Artists</span>
+                        </div>
+                    </div>
+                    <div class="saves-actions">
+                        <a href="/my_saves" class="btn btn-primary">
+                            <i class="fas fa-external-link-alt"></i>
+                            View All Saves
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Playlists Tab -->
+            <div x-show="activeTab === 'playlists'" class="tab-panel">
+                <div class="playlists-content">
+                    <div class="playlists-header">
+                        <h3>My Playlists & Boards</h3>
+                        <button @click="createPlaylist()"
+                            class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Create New
+                        </button>
+                    </div>
+                    <div class="playlists-grid">
+                        <template x-for="playlist in userPlaylists"
+                            :key="playlist.id">
+                            <div class="playlist-card">
+                                <div class="playlist-cover">
+                                    <img
+                                        :src="playlist.cover_art || '/static/img/default-playlist-cover.jpg'"
+                                        :alt="playlist.name">
+                                    <div class="playlist-overlay">
+                                        <button @click="playPlaylist(playlist)"
+                                            class="play-btn">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="playlist-info">
+                                    <h4 x-text="playlist.name"></h4>
+                                    <p
+                                        x-text="playlist.total_items + ' items'"></p>
+                                    <span class="playlist-date"
+                                        x-text="formatDate(playlist.created_at)"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div x-show="activeTab === 'settings'" class="tab-panel">
+                <div class="settings-content">
+                    <h3>Account Settings</h3>
+                    <form @submit.prevent="updateProfile()"
+                        class="settings-form">
+                        <div class="form-section">
+                            <h4>Profile Information</h4>
+                            <div class="form-group">
+                                <label for="display_name">Display Name</label>
+                                <input type="text" id="display_name"
+                                    x-model="profileForm.display_name"
+                                    placeholder="Enter your display name">
+                            </div>
+                            <div class="form-group">
+                                <label for="bio">Bio</label>
+                                <textarea id="bio" x-model="profileForm.bio"
+                                    placeholder="Tell us about yourself"
+                                    rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <input type="text" id="location"
+                                    x-model="profileForm.location"
+                                    placeholder="Where are you from?">
+                            </div>
+                            <div class="form-group">
+                                <label for="website">Website</label>
+                                <input type="url" id="website"
+                                    x-model="profileForm.website"
+                                    placeholder="https://yourwebsite.com">
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4>Preferences</h4>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox"
+                                        x-model="profileForm.autoplay">
+                                    <span class="checkmark"></span>
+                                    Autoplay content
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox"
+                                        x-model="profileForm.notifications">
+                                    <span class="checkmark"></span>
+                                    Email notifications
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="privacy">Privacy Level</label>
+                                <select id="privacy"
+                                    x-model="profileForm.privacy">
+                                    <option value="public">Public</option>
+                                    <option value="friends">Friends
+                                        Only</option>
+                                    <option value="private">Private</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary"
+                                :disabled="isUpdating">
+                                <span x-show="!isUpdating">Save Changes</span>
+                                <span x-show="isUpdating">Saving...</span>
+                            </button>
+                            <button type="button" @click="resetForm()"
+                                class="btn btn-secondary">
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function accountPage() {
+    return {
+        userProfile: {},
+        userStats: {},
+        userPlaylists: [],
+        recentActivity: [],
+        topContent: [],
+        activityTimeline: [],
+        activeTab: 'overview',
+        isUpdating: false,
+        profileForm: {
+            display_name: '',
+            bio: '',
+            location: '',
+            website: '',
+            autoplay: true,
+            notifications: true,
+            privacy: 'public'
+        },
+        
+        async init() {
+            await this.loadUserData();
+            this.loadUserStats();
+            this.loadUserPlaylists();
+            this.loadRecentActivity();
+            this.loadTopContent();
+            this.loadActivityTimeline();
+        },
+        
+        async loadUserData() {
+            try {
+                const response = await fetch('/api/user/profile');
+                if (response.ok) {
+                    this.userProfile = await response.json();
+                    this.populateForm();
+                } else {
+                    // Redirect to login if not authenticated
+                    window.location.href = '/auth';
+                }
+            } catch (error) {
+                console.error('Failed to load user data:', error);
+                window.location.href = '/auth';
+            }
+        },
+        
+        async loadUserStats() {
+            try {
+                const response = await fetch('/api/user/stats');
+                if (response.ok) {
+                    this.userStats = await response.json();
+                }
+            } catch (error) {
+                console.error('Failed to load user stats:', error);
+            }
+        },
+        
+        async loadUserPlaylists() {
+            try {
+                const response = await fetch('/api/user/playlists');
+                if (response.ok) {
+                    this.userPlaylists = await response.json();
+                }
+            } catch (error) {
+                console.error('Failed to load playlists:', error);
+            }
+        },
+        
+        loadRecentActivity() {
+            // Mock recent activity data
+            this.recentActivity = [
+                {
+                    id: 1,
+                    type: 'play',
+                    description: 'Played "Indie Vibes" playlist',
+                    timestamp: new Date(Date.now() - 1000 * 60 * 30) // 30 minutes ago
+                },
+                {
+                    id: 2,
+                    type: 'save',
+                    description: 'Saved "Summer Nights" track',
+                    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2) // 2 hours ago
+                },
+                {
+                    id: 3,
+                    type: 'create',
+                    description: 'Created "My Favorites" board',
+                    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24) // 1 day ago
+                }
+            ];
+        },
+        
+        loadTopContent() {
+            // Mock top content data
+            this.topContent = [
+                {
+                    id: 1,
+                    title: 'Summer Nights',
+                    artist: 'Indie Artist',
+                    plays: 45,
+                    cover_art: '/static/img/default-cover.jpg'
+                },
+                {
+                    id: 2,
+                    title: 'City Lights',
+                    artist: 'Urban Vibes',
+                    plays: 32,
+                    cover_art: '/static/img/default-cover.jpg'
+                }
+            ];
+        },
+        
+        loadActivityTimeline() {
+            // Mock activity timeline
+            this.activityTimeline = [
+                {
+                    id: 1,
+                    type: 'play',
+                    title: 'Played Music',
+                    description: 'Listened to "Summer Nights" by Indie Artist',
+                    timestamp: new Date(Date.now() - 1000 * 60 * 30)
+                },
+                {
+                    id: 2,
+                    type: 'save',
+                    title: 'Saved Content',
+                    description: 'Added "City Lights" to your favorites',
+                    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2)
+                },
+                {
+                    id: 3,
+                    type: 'create',
+                    title: 'Created Board',
+                    description: 'Made a new board called "My Favorites"',
+                    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24)
+                }
+            ];
+        },
+        
+        populateForm() {
+            this.profileForm = {
+                display_name: this.userProfile.display_name || '',
+                bio: this.userProfile.bio || '',
+                location: this.userProfile.location || '',
+                website: this.userProfile.website || '',
+                autoplay: this.userProfile.preferences?.autoplay || true,
+                notifications: this.userProfile.preferences?.notifications || true,
+                privacy: this.userProfile.preferences?.privacy || 'public'
+            };
+        },
+        
+        async updateProfile() {
+            this.isUpdating = true;
+            try {
+                const response = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.profileForm)
+                });
+                
+                if (response.ok) {
+                    this.showNotification('Profile updated successfully!', 'success');
+                    await this.loadUserData();
+                } else {
+                    this.showNotification('Failed to update profile', 'error');
+                }
+            } catch (error) {
+                this.showNotification('Failed to update profile', 'error');
+            } finally {
+                this.isUpdating = false;
+            }
+        },
+        
+        resetForm() {
+            this.populateForm();
+        },
+        
+        getActivityIcon(type) {
+            const icons = {
+                'play': 'fas fa-play',
+                'save': 'fas fa-bookmark',
+                'create': 'fas fa-plus',
+                'like': 'fas fa-heart'
+            };
+            return icons[type] || 'fas fa-circle';
+        },
+        
+        formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        },
+        
+        formatDateTime(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        },
+        
+        formatTimeAgo(date) {
+            if (!date) return '';
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / (1000 * 60));
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            return `${days}d ago`;
+        },
+        
+        editAvatar() {
+            this.showNotification('Avatar editing coming soon!', 'info');
+        },
+        
+        createPlaylist() {
+            this.showNotification('Playlist creation coming soon!', 'info');
+        },
+        
+        playPlaylist(playlist) {
+            this.showNotification(`Playing ${playlist.name}`, 'info');
+        },
+        
+        showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            const colors = {
+                success: '#10b981',
+                error: '#ef4444',
+                info: '#3b82f6',
+                warning: '#f59e0b'
+            };
+            notification.style.backgroundColor = colors[type] || colors.info;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+    };
+}
+</script>
+{% endblock %}

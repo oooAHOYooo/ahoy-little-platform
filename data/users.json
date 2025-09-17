@@ -242,5 +242,152 @@
         "basic_playlists"
       ]
     }
+  },
+  "newuser123": {
+    "user_id": "dac5b266-8086-4cf6-a45f-4404046957ed",
+    "username": "newuser123",
+    "password": "d81ef0e7eaee74f6ae1e63995679e5b259e3f61925f67e5d73fc36bf07d42f72",
+    "email": "newuser@example.com",
+    "display_name": "newuser123",
+    "created_at": "2025-09-17T14:21:38.237167",
+    "last_login": "2025-09-17T14:21:38.237167",
+    "profile": {
+      "username": "newuser123",
+      "display_name": "newuser123",
+      "email": "newuser@example.com",
+      "avatar_url": "/static/img/default-avatar.png",
+      "bio": "",
+      "location": "",
+      "website": "",
+      "created_at": "2025-09-17T14:21:38.237167",
+      "preferences": {
+        "theme": "default",
+        "autoplay": true,
+        "notifications": true,
+        "privacy": "public"
+      }
+    },
+    "saves": {
+      "saved_tracks": [],
+      "saved_shows": [],
+      "saved_artists": [],
+      "liked_content": [],
+      "recently_played": [],
+      "playlists": [],
+      "collections": [],
+      "boards": []
+    },
+    "activity": {
+      "total_plays": 0,
+      "total_saves": 0,
+      "total_playlists": 0,
+      "last_active": "2025-09-17T14:21:38.237167"
+    },
+    "subscription": {
+      "type": "free",
+      "expires_at": null,
+      "features": [
+        "basic_saves",
+        "basic_playlists"
+      ]
+    }
+  },
+  "freshuser": {
+    "user_id": "59661d0d-249e-4105-ae3d-47ecb5b9778c",
+    "username": "freshuser",
+    "password": "b785b5d94973cedcedf286ca93ee93bafdf01533fdb9ea43323aa2d341765211",
+    "email": "fresh@example.com",
+    "display_name": "freshuser",
+    "created_at": "2025-09-17T14:22:23.563855",
+    "last_login": "2025-09-17T14:45:39.773589",
+    "profile": {
+      "username": "freshuser",
+      "display_name": "freshuser",
+      "email": "fresh@example.com",
+      "avatar_url": "/static/img/default-avatar.png",
+      "bio": "",
+      "location": "",
+      "website": "",
+      "created_at": "2025-09-17T14:22:23.563855",
+      "preferences": {
+        "theme": "default",
+        "autoplay": true,
+        "notifications": true,
+        "privacy": "public"
+      }
+    },
+    "saves": {
+      "saved_tracks": [],
+      "saved_shows": [],
+      "saved_artists": [],
+      "liked_content": [],
+      "recently_played": [],
+      "playlists": [],
+      "collections": [],
+      "boards": []
+    },
+    "activity": {
+      "total_plays": 0,
+      "total_saves": 0,
+      "total_playlists": 0,
+      "last_active": "2025-09-17T14:45:39.773603"
+    },
+    "subscription": {
+      "type": "free",
+      "expires_at": null,
+      "features": [
+        "basic_saves",
+        "basic_playlists"
+      ]
+    }
+  },
+  "agbabbby": {
+    "user_id": "b360a846-fd5b-49ef-86b2-701642c19bfb",
+    "username": "agbabbby",
+    "password": "36310644039a1ccc30be572d4715af46a70711688df063aecf12545048f58ae1",
+    "email": "alex@ahoy.ooo",
+    "display_name": "agbabbby",
+    "created_at": "2025-09-17T14:41:27.793226",
+    "last_login": "2025-09-17T14:41:27.793226",
+    "profile": {
+      "username": "agbabbby",
+      "display_name": "agbabbby",
+      "email": "alex@ahoy.ooo",
+      "avatar_url": "/static/img/default-avatar.png",
+      "bio": "",
+      "location": "",
+      "website": "",
+      "created_at": "2025-09-17T14:41:27.793226",
+      "preferences": {
+        "theme": "default",
+        "autoplay": true,
+        "notifications": true,
+        "privacy": "public"
+      }
+    },
+    "saves": {
+      "saved_tracks": [],
+      "saved_shows": [],
+      "saved_artists": [],
+      "liked_content": [],
+      "recently_played": [],
+      "playlists": [],
+      "collections": [],
+      "boards": []
+    },
+    "activity": {
+      "total_plays": 0,
+      "total_saves": 0,
+      "total_playlists": 0,
+      "last_active": "2025-09-17T14:41:27.793226"
+    },
+    "subscription": {
+      "type": "free",
+      "expires_at": null,
+      "features": [
+        "basic_saves",
+        "basic_playlists"
+      ]
+    }
   }
 }

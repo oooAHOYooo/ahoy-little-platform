@@ -9,11 +9,11 @@
         <button @click="goBack()" class="back-btn">
             <i class="fas fa-arrow-left"></i>
         </button>
-        <div class="player-title">
+        <div class="player-title" x-show="mediaType === 'music'">
             <h1 x-text="currentMedia?.title || 'Now Playing'"></h1>
             <p x-text="currentMedia?.artist || 'Unknown Artist'"></p>
         </div>
-        <div class="player-actions">
+        <div class="player-actions" x-show="mediaType === 'music'">
             <button @click="toggleLike()"
                 class="action-btn"
                 :class="{'liked': isLiked}">
@@ -42,6 +42,36 @@
                 x-ref="videoPlayer">
                 Your browser does not support the video tag.
             </video>
+
+            <!-- YouTube Theater Style Title -->
+            <div class="video-theater-info">
+                <div class="video-title-section">
+                    <h1 class="video-title"
+                        x-text="currentMedia?.title || 'Untitled'"></h1>
+                    <div class="video-stats">
+                        <span class="view-count"
+                            x-text="`${currentMedia?.views || 0} views`"></span>
+                        <span class="upload-date"
+                            x-text="formatDate(currentMedia?.published_date)"></span>
+                    </div>
+                </div>
+                <div class="video-actions">
+                    <button @click="toggleLike()" class="action-btn like-btn"
+                        :class="{'liked': isLiked}">
+                        <i class="fas fa-heart"></i>
+                        <span x-text="currentMedia?.likes || 0"></span>
+                    </button>
+                    <button @click="shareMedia()" class="action-btn share-btn">
+                        <i class="fas fa-share"></i>
+                        <span>Share</span>
+                    </button>
+                    <button @click="addToPlaylist()"
+                        class="action-btn save-btn">
+                        <i class="fas fa-bookmark"></i>
+                        <span>Save</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Audio Player (for music) -->
@@ -380,6 +410,16 @@ function fullPlayer() {
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
             return `${mins}:${secs.toString().padStart(2, '0')}`;
+        },
+        
+        formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
         },
         
         shufflePlaylist() {

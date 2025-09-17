@@ -629,6 +629,51 @@ def user_profile():
     """Get user profile"""
     return jsonify(session.get('user_data', {}).get('profile', {}))
 
+@app.route('/api/user/profile', methods=['PUT'])
+@auth_required
+def update_user_profile():
+    """Update user profile"""
+    username = session.get('username')
+    data = request.json
+    success = user_manager.update_user_profile(username, data)
+    
+    if success:
+        # Update session data
+        user = user_manager.get_user(username)
+        if user:
+            session['user_data'] = user
+        return jsonify({'success': True})
+    else:
+        return jsonify({'error': 'Failed to update profile'}), 400
+
+@app.route('/api/user/stats')
+@auth_required
+def get_user_stats():
+    """Get user statistics"""
+    username = session.get('username')
+    stats = user_manager.get_user_stats(username)
+    return jsonify(stats)
+
+@app.route('/api/user/playlists')
+@auth_required
+def get_user_playlists():
+    """Get user playlists and boards"""
+    username = session.get('username')
+    playlists = user_manager.get_user_playlists(username)
+    boards = user_manager.get_user_boards(username)
+    
+    # Combine playlists and boards
+    all_items = []
+    for playlist in playlists:
+        all_items.append({**playlist, 'type': 'playlist'})
+    for board in boards:
+        all_items.append({**board, 'type': 'board'})
+    
+    # Sort by creation date
+    all_items.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    
+    return jsonify(all_items)
+
 # Enhanced Saves and Playlists System
 @app.route('/api/saves/save', methods=['POST'])
 def save_content():
@@ -926,13 +971,6 @@ def get_recently_played():
     recently_played = user['saves'].get('recently_played', [])
     return jsonify({'recently_played': recently_played})
 
-@app.route('/api/user/stats')
-@auth_required
-def get_user_stats():
-    """Get user statistics"""
-    username = session.get('username')
-    stats = user_manager.get_user_stats(username)
-    return jsonify({'stats': stats})
 
 # Pinterest-style Boards/Collections System
 @app.route('/api/boards', methods=['GET', 'POST'])
@@ -1240,10 +1278,28 @@ def get_debug_logs():
 
 @app.route('/api/debug/users')
 def get_debug_users():
-    """Get user count for debug"""
+    """Get user details for debug"""
     try:
         users = user_manager.load_users()
-        return jsonify({'users': list(users.keys())})
+        user_list = []
+        for username, user_data in users.items():
+            user_list.append({
+                'username': username,
+                'display_name': user_data.get('display_name', username),
+                'email': user_data.get('email', ''),
+                'created_at': user_data.get('created_at', ''),
+                'last_login': user_data.get('last_login', ''),
+                'total_saves': user_data.get('activity', {}).get('total_saves', 0),
+                'total_plays': user_data.get('activity', {}).get('total_plays', 0)
+            })
+        
+        # Sort by creation date (newest first)
+        user_list.sort(key=lambda x: x['created_at'], reverse=True)
+        
+        return jsonify({
+            'total_users': len(user_list),
+            'users': user_list
+        })
     except Exception as e:
         return jsonify({'users': [], 'error': str(e)})
 
@@ -1415,6 +1471,16 @@ def debug_system_status():
 def search_page():
     """Search results page"""
     return render_template('search.html')
+
+@app.route('/auth')
+def auth_page():
+    """Authentication page"""
+    return render_template('auth.html')
+
+@app.route('/account')
+def account_page():
+    """User account/profile page"""
+    return render_template('account.html')
 
 @app.route('/api/search')
 def search_api():
