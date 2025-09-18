@@ -145,35 +145,18 @@
                     </div>
 
                     <div class="nav-user" x-show="isLoggedIn">
-                        <div class="nav-dropdown" x-data="{ open: false }">
-                            <button @click="open = !open"
-                                class="nav-item nav-dropdown-toggle"
-                                title="User Menu">
-                                <img
-                                    :src="userProfile.avatar || '/static/img/default-avatar.png'"
-                                    :alt="userProfile.display_name || 'User'"
-                                    class="user-avatar">
-                                <span
-                                    x-text="userProfile.display_name || 'User'"></span>
-                            </button>
-                            <div x-show="open" @click.away="open = false"
-                                class="nav-dropdown-menu">
-                                <a href="/account" class="dropdown-item">
-                                    <i class="fas fa-user"></i> My Account
-                                </a>
-                                <a href="{{ url_for('my_saves') }}"
-                                    class="dropdown-item">
-                                    <i class="fas fa-bookmark"></i> My Saves
-                                </a>
-                                <a href="#" class="dropdown-item">
-                                    <i class="fas fa-cog"></i> Settings
-                                </a>
-                                <hr class="dropdown-divider">
-                                <button @click="logout()" class="dropdown-item">
-                                    <i class="fas fa-sign-out-alt"></i> Logout
-                                </button>
-                            </div>
-                        </div>
+                        <a href="/account" class="nav-item nav-username"
+                            title="My Account">
+                            <img
+                                :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                                :alt="userProfile.display_name || 'User'"
+                                class="user-avatar">
+                            <span
+                                x-text="userProfile.display_name || 'User'"></span>
+                        </a>
+                        <a href="/settings" class="nav-item" title="Settings">
+                            <i class="fas fa-cog"></i>
+                        </a>
                     </div>
 
                     <!-- Settings Menu -->

@@ -15,10 +15,6 @@
                     class="btn btn-primary btn-large">
                     <i class="fas fa-play"></i> Watch Random Show
                 </button>
-                <button @click="scrollToFeatured()"
-                    class="btn btn-outline btn-large">
-                    <i class="fas fa-star"></i> Featured Content
-                </button>
             </div>
         </div>
     </section>
@@ -64,62 +60,6 @@
                     class="filter-tab">
                     Live Broadcasts
                 </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Show -->
-    <section class="featured-show-section" id="featured">
-        <div class="section-header">
-            <h2><i class="fas fa-star"></i> Featured Show</h2>
-            <button @click="refreshFeatured()" class="btn btn-outline btn-sm">
-                <i class="fas fa-refresh"></i> New Featured
-            </button>
-        </div>
-
-        <div class="featured-show" x-show="featuredShow">
-            <div class="featured-content">
-                <div class="featured-video">
-                    <img :src="featuredShow.thumbnail"
-                        :alt="featuredShow.title">
-                    <div class="play-overlay">
-                        <button @click="playShow(featuredShow)"
-                            class="play-btn-large">
-                            <i class="fas fa-play"></i>
-                        </button>
-                    </div>
-                    <div class="show-badges">
-                    </div>
-                </div>
-                <div class="featured-info">
-                    <h3 x-text="featuredShow.title"></h3>
-                    <p class="show-host" x-text="featuredShow.host"></p>
-                    <p class="show-description"
-                        x-text="featuredShow.description"></p>
-                    <div class="show-stats">
-                        <div class="stat">
-                            <i class="fas fa-calendar"></i>
-                            <span
-                                x-text="formatDate(featuredShow.published_date)"></span>
-                        </div>
-                    </div>
-                    <div class="featured-actions">
-                        <button @click="playShow(featuredShow)"
-                            class="btn btn-primary">
-                            <i class="fas fa-play"></i> Watch Now
-                        </button>
-                        <button @click="likeShow(featuredShow)"
-                            class="btn btn-outline"
-                            :class="{'liked': isLiked(featuredShow)}">
-                            <i class="fas fa-heart"></i> Like
-                        </button>
-                        <button @click="saveShow(featuredShow)"
-                            class="btn btn-outline"
-                            :class="{'saved': isSaved(featuredShow)}">
-                            <i class="fas fa-bookmark"></i> Save
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
@@ -172,10 +112,6 @@
                     <div class="show-info">
                         <h4 x-text="show.title"></h4>
                         <p class="show-host" x-text="show.host"></p>
-                        <div class="show-meta">
-                            <span class="date"
-                                x-text="formatDate(show.published_date)"></span>
-                        </div>
                     </div>
                 </div>
             </template>

@@ -5,6 +5,52 @@
 {% block content %}
 <div class="my-saves-container" x-data="mySavesLibrary()"
     x-init="loadUserData()">
+    <!-- Xbox/Skate 4 Style Profile Header -->
+    <div class="profile-hero">
+        <div class="profile-background"></div>
+        <div class="profile-content">
+            <div class="profile-avatar-section">
+                <div class="profile-avatar-large"
+                    @click="showAvatarCustomizer = true">
+                    <img
+                        :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                        :alt="userProfile.display_name || 'User'"
+                        class="avatar-image">
+                    <div class="avatar-edit-overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                <button @click="showAvatarCustomizer = true"
+                    class="avatar-edit-btn">
+                    <i class="fas fa-edit"></i> Customize
+                </button>
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-username"
+                    x-text="userProfile.display_name || 'User'"></h1>
+                <p class="profile-tagline"
+                    x-text="userProfile.bio || 'Music & Show Enthusiast'"></p>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-number"
+                            x-text="userStats.saved_tracks || 0"></span>
+                        <span class="stat-label">Tracks</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"
+                            x-text="userStats.saved_shows || 0"></span>
+                        <span class="stat-label">Shows</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"
+                            x-text="userStats.boards || 0"></span>
+                        <span class="stat-label">Boards</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
     <div class="page-header">
         <h1>My Saves</h1>
@@ -12,20 +58,6 @@
             <button @click="showCreatePlaylist = true" class="btn btn-primary">
                 <i class="fas fa-plus"></i> New Playlist
             </button>
-            <div class="user-stats" x-show="userStats">
-                <span class="stat">
-                    <i class="fas fa-music"></i>
-                    <span x-text="userStats.saved_tracks || 0"></span> Tracks
-                </span>
-                <span class="stat">
-                    <i class="fas fa-play"></i>
-                    <span x-text="userStats.saved_shows || 0"></span> Shows
-                </span>
-                <span class="stat">
-                    <i class="fas fa-list"></i>
-                    <span x-text="userStats.playlists || 0"></span> Playlists
-                </span>
-            </div>
         </div>
     </div>
 
@@ -36,10 +68,10 @@
             class="nav-tab">
             <i class="fas fa-bookmark"></i> Saved Content
         </button>
-        <button @click="activeTab = 'playlists'"
-            :class="{'active': activeTab === 'playlists'}"
+        <button @click="activeTab = 'boards'"
+            :class="{'active': activeTab === 'boards'}"
             class="nav-tab">
-            <i class="fas fa-list"></i> Playlists
+            <i class="fas fa-th-large"></i> Boards
         </button>
         <button @click="activeTab = 'liked'"
             :class="{'active': activeTab === 'liked'}"
@@ -118,51 +150,51 @@
         </div>
     </div>
 
-    <!-- Playlists Tab -->
-    <div x-show="activeTab === 'playlists'" class="playlists-content">
-        <div class="playlists-grid">
-            <template x-for="playlist in playlists" :key="playlist.id">
-                <div class="playlist-card" @click="viewPlaylist(playlist)">
-                    <div class="playlist-cover">
+    <!-- Boards Tab -->
+    <div x-show="activeTab === 'boards'" class="boards-content">
+        <div class="boards-grid">
+            <template x-for="board in boards" :key="board.id">
+                <div class="board-card" @click="viewBoard(board)">
+                    <div class="board-cover">
                         <img
-                            :src="playlist.cover_art || '/static/img/default-playlist-cover.jpg'"
-                            :alt="playlist.name">
-                        <div class="playlist-overlay">
-                            <button @click.stop="playPlaylist(playlist)"
+                            :src="board.cover_art || '/static/img/default-board-cover.jpg'"
+                            :alt="board.name">
+                        <div class="board-overlay">
+                            <button @click.stop="playPlaylist(board)"
                                 class="play-btn">
                                 <i class="fas fa-play"></i>
                             </button>
-                            <div class="playlist-actions">
-                                <button @click.stop="editPlaylist(playlist)"
+                            <div class="board-actions">
+                                <button @click.stop="editPlaylist(board)"
                                     class="action-btn">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button @click.stop="deletePlaylist(playlist)"
+                                <button @click.stop="deletePlaylist(board)"
                                     class="action-btn">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <div class="playlist-info">
-                        <h3 x-text="playlist.name"></h3>
+                    <div class="board-info">
+                        <h3 x-text="board.name"></h3>
                         <p
-                            x-text="playlist.description || 'No description'"></p>
-                        <div class="playlist-meta">
+                            x-text="board.description || 'No description'"></p>
+                        <div class="board-meta">
                             <span
-                                x-text="playlist.total_items + ' items'"></span>
+                                x-text="board.total_items + ' items'"></span>
                             <span
-                                x-text="formatDate(playlist.updated_at)"></span>
+                                x-text="formatDate(board.updated_at)"></span>
                         </div>
                     </div>
                 </div>
             </template>
         </div>
 
-        <div x-show="playlists.length === 0" class="empty-state">
+        <div x-show="boards.length === 0" class="empty-state">
             <i class="fas fa-list"></i>
-            <h3>No playlists yet</h3>
-            <p>Create your first playlist to organize your favorite content!</p>
+            <h3>No boards yet</h3>
+            <p>Create your first board to organize your favorite content!</p>
         </div>
     </div>
 
@@ -314,17 +346,17 @@
                 <div class="form-group">
                     <label>Playlist Name</label>
                     <input type="text" x-model="newPlaylist.name"
-                        placeholder="Enter playlist name">
+                        placeholder="Enter board name">
                 </div>
                 <div class="form-group">
                     <label>Description</label>
                     <textarea x-model="newPlaylist.description"
-                        placeholder="Enter playlist description"></textarea>
+                        placeholder="Enter board description"></textarea>
                 </div>
                 <div class="form-group">
                     <label>
                         <input type="checkbox" x-model="newPlaylist.is_public">
-                        Make this playlist public
+                        Make this board public
                     </label>
                 </div>
             </div>
@@ -349,13 +381,13 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="playlist-list">
-                    <template x-for="playlist in playlists" :key="playlist.id">
-                        <div class="playlist-option"
-                            @click="addToPlaylist(playlist)">
-                            <div class="playlist-info">
-                                <h4 x-text="playlist.name"></h4>
-                                <p x-text="playlist.total_items + ' items'"></p>
+                <div class="board-list">
+                    <template x-for="board in boards" :key="board.id">
+                        <div class="board-option"
+                            @click="addToPlaylist(board)">
+                            <div class="board-info">
+                                <h4 x-text="board.name"></h4>
+                                <p x-text="board.total_items + ' items'"></p>
                             </div>
                             <button class="add-btn">
                                 <i class="fas fa-plus"></i>
@@ -448,9 +480,11 @@ function mySavesLibrary() {
         activeTab: 'saved',
         savedFilter: 'all',
         savedContent: [],
-        playlists: [],
+        boards: [],
         likedContent: [],
         recentlyPlayed: [],
+        showAvatarCustomizer: false,
+            selectedAvatar: '/static/img/lego-avatar-red.svg',
         userBoards: [],
         userStats: null,
         showCreatePlaylist: false,
@@ -505,11 +539,11 @@ function mySavesLibrary() {
         
         async loadPlaylists() {
             try {
-                const response = await fetch('/api/playlists');
+                const response = await fetch('/api/boards');
                 const data = await response.json();
-                this.playlists = data.playlists || [];
+                this.boards = data.boards || [];
             } catch (error) {
-                console.error('Error loading playlists:', error);
+                console.error('Error loading boards:', error);
             }
         },
         
@@ -601,7 +635,7 @@ function mySavesLibrary() {
         // Playlist actions
         async createPlaylist() {
             try {
-                const response = await fetch('/api/playlists', {
+                const response = await fetch('/api/boards', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(this.newPlaylist)
@@ -609,20 +643,20 @@ function mySavesLibrary() {
                 
                 if (response.ok) {
                     const data = await response.json();
-                    this.playlists.push(data.playlist);
+                    this.boards.push(data.board);
                     this.showCreatePlaylist = false;
                     this.newPlaylist = { name: '', description: '', is_public: false };
                 }
             } catch (error) {
-                console.error('Error creating playlist:', error);
+                console.error('Error creating board:', error);
             }
         },
         
-        async addToPlaylist(playlist) {
+        async addToPlaylist(board) {
             if (!this.selectedContent) return;
             
             try {
-                const response = await fetch(`/api/playlists/${playlist.id}/add`, {
+                const response = await fetch(`/api/boards/${board.id}/add`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -637,7 +671,7 @@ function mySavesLibrary() {
                     this.selectedContent = null;
                 }
             } catch (error) {
-                console.error('Error adding to playlist:', error);
+                console.error('Error adding to board:', error);
             }
         },
         
@@ -646,36 +680,36 @@ function mySavesLibrary() {
             this.showAddToPlaylistModal = true;
         },
         
-        viewPlaylist(playlist) {
-            // Navigate to playlist view
-            window.location.href = `/playlist/${playlist.id}`;
+        viewPlaylist(board) {
+            // Navigate to board view
+            window.location.href = `/board/${board.id}`;
         },
         
-        playPlaylist(playlist) {
-            // Play first item in playlist
-            if (playlist.tracks && playlist.tracks.length > 0) {
-                this.playContent(playlist.tracks[0]);
+        playPlaylist(board) {
+            // Play first item in board
+            if (board.tracks && board.tracks.length > 0) {
+                this.playContent(board.tracks[0]);
             }
         },
         
-        editPlaylist(playlist) {
+        editPlaylist(board) {
             // Open edit modal
-            console.log('Edit playlist:', playlist);
+            console.log('Edit board:', board);
         },
         
-        async deletePlaylist(playlist) {
-            if (!confirm('Are you sure you want to delete this playlist?')) return;
+        async deletePlaylist(board) {
+            if (!confirm('Are you sure you want to delete this board?')) return;
             
             try {
-                const response = await fetch(`/api/playlists/${playlist.id}`, {
+                const response = await fetch(`/api/boards/${board.id}`, {
                     method: 'DELETE'
                 });
                 
                 if (response.ok) {
-                    this.playlists = this.playlists.filter(p => p.id !== playlist.id);
+                    this.boards = this.boards.filter(p => p.id !== board.id);
                 }
             } catch (error) {
-                console.error('Error deleting playlist:', error);
+                console.error('Error deleting board:', error);
             }
         },
         
@@ -730,6 +764,46 @@ function mySavesLibrary() {
             }
         },
         
+        // Avatar functions
+        async saveAvatar() {
+            try {
+                const response = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ avatar: this.selectedAvatar })
+                });
+                
+                if (response.ok) {
+                    this.userProfile.avatar = this.selectedAvatar;
+                    this.showAvatarCustomizer = false;
+                    this.showNotification('Avatar updated!', 'success');
+                }
+            } catch (error) {
+                console.error('Error saving avatar:', error);
+                this.showNotification('Failed to save avatar', 'error');
+            }
+        },
+
+        showNotification(message, type = 'info') {
+            // Simple notification system
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--primary-color);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        },
+
         // Utility functions
         formatDate(dateString) {
             if (!dateString) return '';
@@ -738,4 +812,130 @@ function mySavesLibrary() {
     };
 }
 </script>
+
+<!-- Avatar Customizer Modal -->
+<div x-show="showAvatarCustomizer"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="modal-overlay"
+    @click="showAvatarCustomizer = false">
+    <div class="modal-content avatar-modal" @click.stop>
+        <div class="modal-header">
+            <h3>Customize Avatar</h3>
+            <button @click="showAvatarCustomizer = false" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="avatar-preview">
+                <div class="avatar-preview-large">
+                    <img :src="selectedAvatar" alt="Avatar Preview"
+                        class="preview-image">
+                </div>
+            </div>
+            <div class="avatar-options">
+                <h4>Choose Your Lego Color</h4>
+                <div class="avatar-grid">
+                    <div class="avatar-option"
+                        :class="{'selected': selectedAvatar === '/static/img/lego-avatar-red.svg'}"
+                        @click="selectedAvatar = '/static/img/lego-avatar-red.svg'">
+                        <img src="/static/img/lego-avatar-red.svg"
+                            alt="Red Lego">
+                        <span class="color-name">Red</span>
+                    </div>
+                    <div class="avatar-option"
+                        :class="{'selected': selectedAvatar === '/static/img/lego-avatar-orange.svg'}"
+                        @click="selectedAvatar = '/static/img/lego-avatar-orange.svg'">
+                        <img src="/static/img/lego-avatar-orange.svg"
+                            alt="Orange Lego">
+                        <span class="color-name">Orange</span>
+                    </div>
+                    <div class="avatar-option"
+                        :class="{'selected': selectedAvatar === '/static/img/lego-avatar-yellow.svg'}"
+                        @click="selectedAvatar = '/static/img/lego-avatar-yellow.svg'">
+                        <img src="/static/img/lego-avatar-yellow.svg"
+                            alt="Yellow Lego">
+                        <span class="color-name">Yellow</span>
+                    </div>
+                    <div class="avatar-option"
+                        :class="{'selected': selectedAvatar === '/static/img/lego-avatar-green.svg'}"
+                        @click="selectedAvatar = '/static/img/lego-avatar-green.svg'">
+                        <img src="/static/img/lego-avatar-green.svg"
+                            alt="Green Lego">
+                        <span class="color-name">Green</span>
+                    </div>
+                    <div class="avatar-option"
+                        :class="{'selected': selectedAvatar === '/static/img/lego-avatar-teal.svg'}"
+                        @click="selectedAvatar = '/static/img/lego-avatar-teal.svg'">
+                        <img src="/static/img/lego-avatar-teal.svg"
+                            alt="Teal Lego">
+                        <span class="color-name">Teal</span>
+                    </div>
+                    <div class="avatar-option"
+                        :class="{'selected': selectedAvatar === '/static/img/lego-avatar-cyan.svg'}"
+                        @click="selectedAvatar = '/static/img/lego-avatar-cyan.svg'">
+                        <img src="/static/img/lego-avatar-cyan.svg"
+                            alt="Cyan Lego">
+                        <span class="color-name">Cyan</span>
+                    </div>
+                    <div class="avatar-option"
+                        :class="{'selected': selectedAvatar === '/static/img/lego-avatar-blue.svg'}"
+                        @click="selectedAvatar = '/static/img/lego-avatar-blue.svg'">
+                        <img src="/static/img/lego-avatar-blue.svg"
+                            alt="Blue Lego">
+                        <span class="color-name">Blue</span>
+                    </div>
+                    <div class="avatar-option"
+                        :class="{'selected': selectedAvatar === '/static/img/lego-avatar-indigo.svg'}"
+                        @click="selectedAvatar = '/static/img/lego-avatar-indigo.svg'">
+                        <img src="/static/img/lego-avatar-indigo.svg"
+                            alt="Indigo Lego">
+                        <span class="color-name">Indigo</span>
+                    </div>
+                    <div class="avatar-option"
+                        :class="{'selected': selectedAvatar === '/static/img/lego-avatar-purple.svg'}"
+                        @click="selectedAvatar = '/static/img/lego-avatar-purple.svg'">
+                        <img src="/static/img/lego-avatar-purple.svg"
+                            alt="Purple Lego">
+                        <span class="color-name">Purple</span>
+                    </div>
+                    <div class="avatar-option"
+                        :class="{'selected': selectedAvatar === '/static/img/lego-avatar-pink.svg'}"
+                        @click="selectedAvatar = '/static/img/lego-avatar-pink.svg'">
+                        <img src="/static/img/lego-avatar-pink.svg"
+                            alt="Pink Lego">
+                        <span class="color-name">Pink</span>
+                    </div>
+                    <div class="avatar-option"
+                        :class="{'selected': selectedAvatar === '/static/img/lego-avatar-lime.svg'}"
+                        @click="selectedAvatar = '/static/img/lego-avatar-lime.svg'">
+                        <img src="/static/img/lego-avatar-lime.svg"
+                            alt="Lime Lego">
+                        <span class="color-name">Lime</span>
+                    </div>
+                    <div class="avatar-option"
+                        :class="{'selected': selectedAvatar === '/static/img/lego-avatar-rose.svg'}"
+                        @click="selectedAvatar = '/static/img/lego-avatar-rose.svg'">
+                        <img src="/static/img/lego-avatar-rose.svg"
+                            alt="Rose Lego">
+                        <span class="color-name">Rose</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button @click="saveAvatar()" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Avatar
+                </button>
+                <button @click="showAvatarCustomizer = false"
+                    class="btn btn-secondary">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

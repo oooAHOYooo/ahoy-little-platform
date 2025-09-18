@@ -44,9 +44,20 @@
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password"
-                            x-model="authForm.password"
-                            placeholder="Enter your password" required>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input :type="showPassword ? 'text' : 'password'"
+                                id="password"
+                                x-model="authForm.password"
+                                placeholder="Enter your password" required
+                                class="auth-input">
+                            <button type="button"
+                                @click="showPassword = !showPassword"
+                                class="password-toggle">
+                                <i
+                                    :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="form-options">
                         <label class="checkbox-label">
@@ -67,31 +78,93 @@
 
             <!-- Register Form -->
             <div x-show="authMode === 'register'" class="auth-form-container">
+                <div class="fun-header">
+                    <h3>🎉 Join the Ahoy Community!</h3>
+                    <p>Let's create your musical journey together</p>
+                </div>
                 <form @submit.prevent="register()" class="auth-form">
                     <div class="form-group">
                         <label for="reg-username">Username</label>
-                        <input type="text" id="reg-username"
-                            x-model="authForm.username"
-                            placeholder="Choose a username" required>
+                        <div class="input-with-icon">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" id="reg-username"
+                                x-model="authForm.username"
+                                placeholder="Choose a cool username" required
+                                class="auth-input">
+                        </div>
+                        <div class="input-feedback" x-show="authForm.username">
+                            <span x-show="authForm.username.length < 3"
+                                class="feedback-error">Username too short</span>
+                            <span x-show="authForm.username.length >= 3"
+                                class="feedback-success">Looking good! ✨</span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="reg-email">Email</label>
-                        <input type="email" id="reg-email"
-                            x-model="authForm.email"
-                            placeholder="Enter your email" required>
+                        <div class="input-with-icon">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" id="reg-email"
+                                x-model="authForm.email"
+                                placeholder="your@email.com" required
+                                class="auth-input">
+                        </div>
+                        <div class="input-feedback" x-show="authForm.email">
+                            <span x-show="!isValidEmail(authForm.email)"
+                                class="feedback-error">Please enter a valid
+                                email</span>
+                            <span x-show="isValidEmail(authForm.email)"
+                                class="feedback-success">Perfect! 📧</span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="reg-password">Password</label>
-                        <input type="password" id="reg-password"
-                            x-model="authForm.password"
-                            placeholder="Create a password" required>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input :type="showPassword ? 'text' : 'password'"
+                                id="reg-password"
+                                x-model="authForm.password"
+                                placeholder="Create a strong password" required
+                                class="auth-input">
+                            <button type="button"
+                                @click="showPassword = !showPassword"
+                                class="password-toggle">
+                                <i
+                                    :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength"
+                            x-show="authForm.password">
+                            <div class="strength-bar">
+                                <div class="strength-fill"
+                                    :class="getPasswordStrength(authForm.password).class"
+                                    :style="`width: ${getPasswordStrength(authForm.password).width}%`"></div>
+                            </div>
+                            <span class="strength-text"
+                                x-text="getPasswordStrength(authForm.password).text"></span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="reg-confirm-password">Confirm
                             Password</label>
-                        <input type="password" id="reg-confirm-password"
-                            x-model="authForm.confirmPassword"
-                            placeholder="Confirm your password" required>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input :type="showPassword ? 'text' : 'password'"
+                                id="reg-confirm-password"
+                                x-model="authForm.confirmPassword"
+                                placeholder="Confirm your password" required
+                                class="auth-input">
+                        </div>
+                        <div class="input-feedback"
+                            x-show="authForm.confirmPassword">
+                            <span
+                                x-show="authForm.password !== authForm.confirmPassword"
+                                class="feedback-error">Passwords don't
+                                match</span>
+                            <span
+                                x-show="authForm.password === authForm.confirmPassword && authForm.password"
+                                class="feedback-success">Passwords match!
+                                🔒</span>
+                        </div>
                     </div>
                     <div class="form-options">
                         <label class="checkbox-label">
@@ -104,10 +177,14 @@
                                 Policy</a>
                         </label>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-full"
-                        :disabled="isLoading">
-                        <span x-show="!isLoading">Create Account</span>
-                        <span x-show="isLoading">Creating account...</span>
+                    <button type="submit"
+                        class="btn btn-primary btn-full fun-button"
+                        :disabled="isLoading || !isFormValid()">
+                        <i class="fas fa-rocket" x-show="!isLoading"></i>
+                        <i class="fas fa-spinner fa-spin"
+                            x-show="isLoading"></i>
+                        <span x-show="!isLoading">Launch My Account! 🚀</span>
+                        <span x-show="isLoading">Creating your space...</span>
                     </button>
                 </form>
             </div>
@@ -147,6 +224,7 @@ function authPage() {
     return {
         authMode: 'login', // 'login' or 'register'
         isLoading: false,
+        showPassword: false,
         authForm: {
             username: '',
             email: '',
@@ -170,6 +248,42 @@ function authPage() {
                 }
             } catch (error) {
                 // User is not logged in, stay on auth page
+            }
+        },
+
+        // Form validation functions
+        isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        },
+
+        getPasswordStrength(password) {
+            if (!password) return { width: 0, class: '', text: '' };
+            
+            let score = 0;
+            if (password.length >= 8) score += 25;
+            if (password.match(/[a-z]/)) score += 25;
+            if (password.match(/[A-Z]/)) score += 25;
+            if (password.match(/[0-9]/)) score += 25;
+            if (password.match(/[^a-zA-Z0-9]/)) score += 25;
+            
+            if (score < 25) return { width: 20, class: 'strength-weak', text: 'Too weak 😰' };
+            if (score < 50) return { width: 40, class: 'strength-fair', text: 'Getting better 💪' };
+            if (score < 75) return { width: 60, class: 'strength-good', text: 'Good strength! 🔥' };
+            if (score < 100) return { width: 80, class: 'strength-strong', text: 'Very strong! 💪' };
+            return { width: 100, class: 'strength-excellent', text: 'Excellent! 🚀' };
+        },
+
+        isFormValid() {
+            if (this.authMode === 'login') {
+                return this.authForm.username && this.authForm.password;
+            } else {
+                return this.authForm.username && 
+                       this.authForm.email && 
+                       this.isValidEmail(this.authForm.email) &&
+                       this.authForm.password && 
+                       this.authForm.password === this.authForm.confirmPassword &&
+                       this.authForm.agreeTerms;
             }
         },
         

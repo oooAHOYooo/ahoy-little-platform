@@ -1,0 +1,415 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="settings-page" x-data="settingsPage()" x-init="init()">
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1><i class="fas fa-cog"></i> Settings</h1>
+            <p>Customize your Ahoy experience</p>
+        </div>
+
+        <div class="settings-content">
+            <!-- Video Settings -->
+            <div class="settings-section">
+                <h2><i class="fas fa-video"></i> Video Settings</h2>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label>Brightness</label>
+                        <div class="dial-container">
+                            <div class="dial"
+                                :style="`transform: rotate(${videoSettings.brightness * 1.8 - 90}deg)`"
+                                @mousedown="startDialDrag($event, 'brightness')"
+                                @touchstart="startDialDrag($event, 'brightness')">
+                                <div class="dial-handle"></div>
+                            </div>
+                            <span class="dial-value"
+                                x-text="Math.round(videoSettings.brightness)"></span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Contrast</label>
+                        <div class="dial-container">
+                            <div class="dial"
+                                :style="`transform: rotate(${videoSettings.contrast * 1.8 - 90}deg)`"
+                                @mousedown="startDialDrag($event, 'contrast')"
+                                @touchstart="startDialDrag($event, 'contrast')">
+                                <div class="dial-handle"></div>
+                            </div>
+                            <span class="dial-value"
+                                x-text="Math.round(videoSettings.contrast)"></span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Saturation</label>
+                        <div class="dial-container">
+                            <div class="dial"
+                                :style="`transform: rotate(${videoSettings.saturation * 1.8 - 90}deg)`"
+                                @mousedown="startDialDrag($event, 'saturation')"
+                                @touchstart="startDialDrag($event, 'saturation')">
+                                <div class="dial-handle"></div>
+                            </div>
+                            <span class="dial-value"
+                                x-text="Math.round(videoSettings.saturation)"></span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Hue</label>
+                        <div class="dial-container">
+                            <div class="dial"
+                                :style="`transform: rotate(${videoSettings.hue * 3.6 - 90}deg)`"
+                                @mousedown="startDialDrag($event, 'hue')"
+                                @touchstart="startDialDrag($event, 'hue')">
+                                <div class="dial-handle"></div>
+                            </div>
+                            <span class="dial-value"
+                                x-text="Math.round(videoSettings.hue)"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Settings -->
+            <div class="settings-section">
+                <h2><i class="fas fa-volume-up"></i> Audio Settings</h2>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label>Master Volume</label>
+                        <div class="dial-container">
+                            <div class="dial"
+                                :style="`transform: rotate(${audioSettings.masterVolume * 1.8 - 90}deg)`"
+                                @mousedown="startDialDrag($event, 'masterVolume')"
+                                @touchstart="startDialDrag($event, 'masterVolume')">
+                                <div class="dial-handle"></div>
+                            </div>
+                            <span class="dial-value"
+                                x-text="Math.round(audioSettings.masterVolume)"></span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Music Volume</label>
+                        <div class="dial-container">
+                            <div class="dial"
+                                :style="`transform: rotate(${audioSettings.musicVolume * 1.8 - 90}deg)`"
+                                @mousedown="startDialDrag($event, 'musicVolume')"
+                                @touchstart="startDialDrag($event, 'musicVolume')">
+                                <div class="dial-handle"></div>
+                            </div>
+                            <span class="dial-value"
+                                x-text="Math.round(audioSettings.musicVolume)"></span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Effects Volume</label>
+                        <div class="dial-container">
+                            <div class="dial"
+                                :style="`transform: rotate(${audioSettings.effectsVolume * 1.8 - 90}deg)`"
+                                @mousedown="startDialDrag($event, 'effectsVolume')"
+                                @touchstart="startDialDrag($event, 'effectsVolume')">
+                                <div class="dial-handle"></div>
+                            </div>
+                            <span class="dial-value"
+                                x-text="Math.round(audioSettings.effectsVolume)"></span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Bass</label>
+                        <div class="dial-container">
+                            <div class="dial"
+                                :style="`transform: rotate(${audioSettings.bass * 1.8 - 90}deg)`"
+                                @mousedown="startDialDrag($event, 'bass')"
+                                @touchstart="startDialDrag($event, 'bass')">
+                                <div class="dial-handle"></div>
+                            </div>
+                            <span class="dial-value"
+                                x-text="Math.round(audioSettings.bass)"></span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Treble</label>
+                        <div class="dial-container">
+                            <div class="dial"
+                                :style="`transform: rotate(${audioSettings.treble * 1.8 - 90}deg)`"
+                                @mousedown="startDialDrag($event, 'treble')"
+                                @touchstart="startDialDrag($event, 'treble')">
+                                <div class="dial-handle"></div>
+                            </div>
+                            <span class="dial-value"
+                                x-text="Math.round(audioSettings.treble)"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Playback Settings -->
+            <div class="settings-section">
+                <h2><i class="fas fa-play-circle"></i> Playback Settings</h2>
+                <div class="settings-options">
+                    <div class="setting-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                x-model="playbackSettings.autoplay">
+                            <span class="checkmark"></span>
+                            Autoplay
+                        </label>
+                    </div>
+                    <div class="setting-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                x-model="playbackSettings.shuffle">
+                            <span class="checkmark"></span>
+                            Shuffle by default
+                        </label>
+                    </div>
+                    <div class="setting-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                x-model="playbackSettings.repeat">
+                            <span class="checkmark"></span>
+                            Repeat playlist
+                        </label>
+                    </div>
+                    <div class="setting-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                x-model="playbackSettings.highQuality">
+                            <span class="checkmark"></span>
+                            High quality streaming
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interface Settings -->
+            <div class="settings-section">
+                <h2><i class="fas fa-palette"></i> Interface Settings</h2>
+                <div class="settings-options">
+                    <div class="setting-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                x-model="interfaceSettings.darkMode">
+                            <span class="checkmark"></span>
+                            Dark mode
+                        </label>
+                    </div>
+                    <div class="setting-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                x-model="interfaceSettings.animations">
+                            <span class="checkmark"></span>
+                            Enable animations
+                        </label>
+                    </div>
+                    <div class="setting-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                x-model="interfaceSettings.notifications">
+                            <span class="checkmark"></span>
+                            Show notifications
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reset Button -->
+            <div class="settings-actions">
+                <button @click="resetSettings()" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> Reset to Defaults
+                </button>
+                <button @click="saveSettings()" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function settingsPage() {
+    return {
+        videoSettings: {
+            brightness: 50,
+            contrast: 50,
+            saturation: 50,
+            hue: 0
+        },
+        audioSettings: {
+            masterVolume: 75,
+            musicVolume: 80,
+            effectsVolume: 70,
+            bass: 50,
+            treble: 50
+        },
+        playbackSettings: {
+            autoplay: true,
+            shuffle: false,
+            repeat: false,
+            highQuality: true
+        },
+        interfaceSettings: {
+            darkMode: true,
+            animations: true,
+            notifications: true
+        },
+        isDragging: false,
+        dragProperty: null,
+
+        init() {
+            this.loadSettings();
+            this.applyVideoFilters();
+            this.applyAudioSettings();
+        },
+
+        loadSettings() {
+            // Load from localStorage
+            const saved = localStorage.getItem('ahoySettings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                this.videoSettings = { ...this.videoSettings, ...settings.videoSettings };
+                this.audioSettings = { ...this.audioSettings, ...settings.audioSettings };
+                this.playbackSettings = { ...this.playbackSettings, ...settings.playbackSettings };
+                this.interfaceSettings = { ...this.interfaceSettings, ...settings.interfaceSettings };
+            }
+        },
+
+        saveSettings() {
+            const settings = {
+                videoSettings: this.videoSettings,
+                audioSettings: this.audioSettings,
+                playbackSettings: this.playbackSettings,
+                interfaceSettings: this.interfaceSettings
+            };
+            localStorage.setItem('ahoySettings', JSON.stringify(settings));
+            this.applyVideoFilters();
+            this.applyAudioSettings();
+            this.showNotification('Settings saved!', 'success');
+        },
+
+        applyVideoFilters() {
+            // Apply video filters to all video elements
+            const videos = document.querySelectorAll('video');
+            videos.forEach(video => {
+                const brightness = this.videoSettings.brightness;
+                const contrast = this.videoSettings.contrast;
+                const saturation = this.videoSettings.saturation;
+                const hue = this.videoSettings.hue;
+                
+                video.style.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg)`;
+            });
+        },
+
+        applyAudioSettings() {
+            // Apply audio settings to all audio elements
+            const audios = document.querySelectorAll('audio');
+            audios.forEach(audio => {
+                audio.volume = this.audioSettings.masterVolume / 100;
+            });
+            
+            // Apply to global player if it exists
+            if (window.globalPlayer && window.globalPlayer.mediaElement) {
+                window.globalPlayer.mediaElement.volume = this.audioSettings.masterVolume / 100;
+            }
+        },
+
+        resetSettings() {
+            this.videoSettings = { brightness: 50, contrast: 50, saturation: 50, hue: 0 };
+            this.audioSettings = { masterVolume: 75, musicVolume: 80, effectsVolume: 70, bass: 50, treble: 50 };
+            this.playbackSettings = { autoplay: true, shuffle: false, repeat: false, highQuality: true };
+            this.interfaceSettings = { darkMode: true, animations: true, notifications: true };
+            this.applyVideoSettings();
+            this.applyAudioSettings();
+            this.showNotification('Settings reset to defaults', 'info');
+        },
+
+        startDialDrag(event, property) {
+            this.isDragging = true;
+            this.dragProperty = property;
+            event.preventDefault();
+            
+            const handleMouseMove = (e) => this.handleDialDrag(e);
+            const handleMouseUp = () => this.stopDialDrag();
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            document.addEventListener('touchmove', handleMouseMove);
+            document.addEventListener('touchend', handleMouseUp);
+        },
+
+        handleDialDrag(event) {
+            if (!this.isDragging) return;
+            
+            const dial = event.target.closest('.dial');
+            const rect = dial.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const angle = Math.atan2(event.clientY - centerY, event.clientX - centerX);
+            const degrees = (angle * 180 / Math.PI + 90 + 360) % 360;
+            
+            let value;
+            if (this.dragProperty === 'hue') {
+                value = Math.max(0, Math.min(100, degrees / 3.6));
+            } else {
+                value = Math.max(0, Math.min(100, degrees / 1.8));
+            }
+            
+            this.videoSettings[this.dragProperty] = value;
+            this.audioSettings[this.dragProperty] = value;
+            this.applyVideoSettings();
+            this.applyAudioSettings();
+        },
+
+        stopDialDrag() {
+            this.isDragging = false;
+            this.dragProperty = null;
+            document.removeEventListener('mousemove', this.handleDialDrag);
+            document.removeEventListener('mouseup', this.stopDialDrag);
+            document.removeEventListener('touchmove', this.handleDialDrag);
+            document.removeEventListener('touchend', this.stopDialDrag);
+        },
+
+        applyVideoSettings() {
+            const video = document.querySelector('video');
+            if (video) {
+                video.style.filter = `brightness(${this.videoSettings.brightness}%) contrast(${this.videoSettings.contrast}%) saturate(${this.videoSettings.saturation}%) hue-rotate(${this.videoSettings.hue * 3.6}deg)`;
+            }
+        },
+
+        applyAudioSettings() {
+            const audio = document.querySelector('audio');
+            if (audio) {
+                audio.volume = this.audioSettings.masterVolume / 100;
+            }
+        },
+
+        showNotification(message, type = 'info') {
+            // Simple notification system
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--primary-color);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+    };
+}
+</script>
+{% endblock %}

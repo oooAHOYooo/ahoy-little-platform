@@ -4,18 +4,33 @@
 
 {% block content %}
 <div class="music-container" x-data="musicLibrary()" x-init="loadMusic()">
-    <!-- Header -->
-    <div class="page-header">
-        <h1>Music Library</h1>
-        <div class="header-actions">
-            <div class="search-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1><i class="fas fa-music"></i> Music Library</h1>
+            <p>Discover amazing tracks, albums, and artists</p>
+            <div class="hero-actions">
+                <button @click="playRandomTrack()"
+                    class="btn btn-primary btn-large">
+                    <i class="fas fa-play"></i> Play Random
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search & Filters -->
+    <section class="search-section">
+        <div class="search-container">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
                 <input type="text"
                     x-model="searchQuery"
                     @input="filterMusic()"
-                    placeholder="Search music..."
+                    placeholder="Search music, artists, or genres..."
                     class="search-input">
-                <button class="search-btn">
-                    <i class="fas fa-search"></i>
+                <button @click="clearSearch()" class="search-clear"
+                    x-show="searchQuery">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="view-options">
@@ -31,7 +46,7 @@
                 </button>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Filters -->
     <div class="filters-section">
@@ -402,6 +417,24 @@ function musicLibrary() {
             if (window.globalPlayer) {
                 window.globalPlayer.playTrack(track);
             }
+        },
+
+        playRandomTrack() {
+            if (this.filteredTracks.length > 0) {
+                const randomIndex = Math.floor(Math.random() * this.filteredTracks.length);
+                this.playTrack(this.filteredTracks[randomIndex]);
+            }
+        },
+
+
+        likeTrack(track) {
+            // Toggle like status
+            console.log('Like track:', track);
+        },
+
+        isLiked(track) {
+            // Check if track is liked
+            return false;
         },
         
         async saveTrack(track) {

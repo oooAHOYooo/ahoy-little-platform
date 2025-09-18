@@ -1482,6 +1482,11 @@ def account_page():
     """User account/profile page"""
     return render_template('account.html')
 
+@app.route('/settings')
+def settings_page():
+    """Settings page"""
+    return render_template('settings.html')
+
 @app.route('/api/search')
 def search_api():
     """Search API endpoint"""

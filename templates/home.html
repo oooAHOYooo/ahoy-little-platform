@@ -354,8 +354,18 @@ function homePage() {
         playItem(item, index) {
             this.currentIndex = index;
             this.stopHeroRotation();
-            if (window.globalPlayer) {
-                window.globalPlayer.playTrack(item);
+            
+            // Navigate to the item page based on type
+            if (item.type === 'show') {
+                window.location.href = `/shows?highlight=${item.id}`;
+            } else if (item.type === 'music') {
+                window.location.href = `/music?highlight=${item.id}`;
+            } else if (item.artist) {
+                // If it has an artist, it's likely music
+                window.location.href = `/music?highlight=${item.id}`;
+            } else {
+                // Default to shows if no type specified
+                window.location.href = `/shows?highlight=${item.id}`;
             }
             // Restart rotation after a delay
             setTimeout(() => this.startHeroRotation(), 10000);

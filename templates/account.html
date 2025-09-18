@@ -35,11 +35,6 @@
                     </div>
                     <div class="stat-item">
                         <span class="stat-number"
-                            x-text="userStats.playlists || 0"></span>
-                        <span class="stat-label">Playlists</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number"
                             x-text="userStats.boards || 0"></span>
                         <span class="stat-label">Boards</span>
                     </div>
@@ -322,6 +317,118 @@
             </div>
         </div>
     </div>
+
+    <!-- Avatar Customizer Modal -->
+    <div x-show="showAvatarCustomizer" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="modal-overlay"
+         @click="showAvatarCustomizer = false">
+        <div class="modal-content avatar-modal" @click.stop>
+            <div class="modal-header">
+                <h3>Choose Your Lego Color</h3>
+                <button @click="showAvatarCustomizer = false" class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="avatar-preview">
+                    <div class="avatar-preview-large">
+                        <img :src="selectedAvatar" alt="Avatar Preview" class="preview-image">
+                    </div>
+                </div>
+                <div class="avatar-options">
+                    <h4>Pick Your Color</h4>
+                    <div class="avatar-grid">
+                        <div class="avatar-option" 
+                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-red.svg'}"
+                             @click="selectedAvatar = '/static/img/lego-avatar-red.svg'">
+                            <img src="/static/img/lego-avatar-red.svg" alt="Red Lego">
+                            <span class="color-name">Red</span>
+                        </div>
+                        <div class="avatar-option" 
+                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-orange.svg'}"
+                             @click="selectedAvatar = '/static/img/lego-avatar-orange.svg'">
+                            <img src="/static/img/lego-avatar-orange.svg" alt="Orange Lego">
+                            <span class="color-name">Orange</span>
+                        </div>
+                        <div class="avatar-option" 
+                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-yellow.svg'}"
+                             @click="selectedAvatar = '/static/img/lego-avatar-yellow.svg'">
+                            <img src="/static/img/lego-avatar-yellow.svg" alt="Yellow Lego">
+                            <span class="color-name">Yellow</span>
+                        </div>
+                        <div class="avatar-option" 
+                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-green.svg'}"
+                             @click="selectedAvatar = '/static/img/lego-avatar-green.svg'">
+                            <img src="/static/img/lego-avatar-green.svg" alt="Green Lego">
+                            <span class="color-name">Green</span>
+                        </div>
+                        <div class="avatar-option" 
+                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-teal.svg'}"
+                             @click="selectedAvatar = '/static/img/lego-avatar-teal.svg'">
+                            <img src="/static/img/lego-avatar-teal.svg" alt="Teal Lego">
+                            <span class="color-name">Teal</span>
+                        </div>
+                        <div class="avatar-option" 
+                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-cyan.svg'}"
+                             @click="selectedAvatar = '/static/img/lego-avatar-cyan.svg'">
+                            <img src="/static/img/lego-avatar-cyan.svg" alt="Cyan Lego">
+                            <span class="color-name">Cyan</span>
+                        </div>
+                        <div class="avatar-option" 
+                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-blue.svg'}"
+                             @click="selectedAvatar = '/static/img/lego-avatar-blue.svg'">
+                            <img src="/static/img/lego-avatar-blue.svg" alt="Blue Lego">
+                            <span class="color-name">Blue</span>
+                        </div>
+                        <div class="avatar-option" 
+                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-indigo.svg'}"
+                             @click="selectedAvatar = '/static/img/lego-avatar-indigo.svg'">
+                            <img src="/static/img/lego-avatar-indigo.svg" alt="Indigo Lego">
+                            <span class="color-name">Indigo</span>
+                        </div>
+                        <div class="avatar-option" 
+                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-purple.svg'}"
+                             @click="selectedAvatar = '/static/img/lego-avatar-purple.svg'">
+                            <img src="/static/img/lego-avatar-purple.svg" alt="Purple Lego">
+                            <span class="color-name">Purple</span>
+                        </div>
+                        <div class="avatar-option" 
+                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-pink.svg'}"
+                             @click="selectedAvatar = '/static/img/lego-avatar-pink.svg'">
+                            <img src="/static/img/lego-avatar-pink.svg" alt="Pink Lego">
+                            <span class="color-name">Pink</span>
+                        </div>
+                        <div class="avatar-option" 
+                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-lime.svg'}"
+                             @click="selectedAvatar = '/static/img/lego-avatar-lime.svg'">
+                            <img src="/static/img/lego-avatar-lime.svg" alt="Lime Lego">
+                            <span class="color-name">Lime</span>
+                        </div>
+                        <div class="avatar-option" 
+                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-rose.svg'}"
+                             @click="selectedAvatar = '/static/img/lego-avatar-rose.svg'">
+                            <img src="/static/img/lego-avatar-rose.svg" alt="Rose Lego">
+                            <span class="color-name">Rose</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button @click="saveAvatar()" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Avatar
+                    </button>
+                    <button @click="showAvatarCustomizer = false" class="btn btn-secondary">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -329,7 +436,9 @@ function accountPage() {
     return {
         userProfile: {},
         userStats: {},
-        userPlaylists: [],
+        userBoards: [],
+        showAvatarCustomizer: false,
+        selectedAvatar: '/static/img/lego-avatar-red.svg',
         recentActivity: [],
         topContent: [],
         activityTimeline: [],
@@ -359,6 +468,7 @@ function accountPage() {
                 const response = await fetch('/api/user/profile');
                 if (response.ok) {
                     this.userProfile = await response.json();
+                    this.selectedAvatar = this.userProfile.avatar_url || '/static/img/lego-avatar-red.svg';
                     this.populateForm();
                 } else {
                     // Redirect to login if not authenticated
@@ -417,48 +527,13 @@ function accountPage() {
         },
         
         loadTopContent() {
-            // Mock top content data
-            this.topContent = [
-                {
-                    id: 1,
-                    title: 'Summer Nights',
-                    artist: 'Indie Artist',
-                    cover_art: '/static/img/default-cover.jpg'
-                },
-                {
-                    id: 2,
-                    title: 'City Lights',
-                    artist: 'Urban Vibes',
-                    cover_art: '/static/img/default-cover.jpg'
-                }
-            ];
+            // Load real user data - no mock data
+            this.topContent = [];
         },
         
         loadActivityTimeline() {
-            // Mock activity timeline
-            this.activityTimeline = [
-                {
-                    id: 1,
-                    type: 'play',
-                    title: 'Played Music',
-                    description: 'Listened to "Summer Nights" by Indie Artist',
-                    timestamp: new Date(Date.now() - 1000 * 60 * 30)
-                },
-                {
-                    id: 2,
-                    type: 'save',
-                    title: 'Saved Content',
-                    description: 'Added "City Lights" to your favorites',
-                    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2)
-                },
-                {
-                    id: 3,
-                    type: 'create',
-                    title: 'Created Board',
-                    description: 'Made a new board called "My Favorites"',
-                    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24)
-                }
-            ];
+            // Load real user activity - no mock data
+            this.activityTimeline = [];
         },
         
         populateForm() {
@@ -499,6 +574,31 @@ function accountPage() {
         
         resetForm() {
             this.populateForm();
+        },
+
+        editAvatar() {
+            this.showAvatarCustomizer = true;
+        },
+
+        async saveAvatar() {
+            try {
+                const response = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ avatar_url: this.selectedAvatar })
+                });
+
+                if (response.ok) {
+                    this.userProfile.avatar_url = this.selectedAvatar;
+                    this.showAvatarCustomizer = false;
+                    this.showNotification('Avatar updated!', 'success');
+                } else {
+                    this.showNotification('Failed to save avatar', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving avatar:', error);
+                this.showNotification('Failed to save avatar', 'error');
+            }
         },
         
         getActivityIcon(type) {
