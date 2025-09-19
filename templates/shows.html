@@ -4,65 +4,98 @@
 
 {% block content %}
 <div class="shows-page" x-data="showsPage()" x-init="init()">
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1><i class="fas fa-play-circle"></i> Shows & Videos</h1>
-            <p>Discover live performances, music videos, and exclusive
-                content</p>
-            <div class="hero-actions">
-                <button @click="playRandomShow()"
-                    class="btn btn-primary btn-large">
-                    <i class="fas fa-play"></i> Watch Random Show
-                </button>
-            </div>
-        </div>
-    </section>
+    <div class="shows-container">
+        <!-- Unified Header Section -->
+        <section class="unified-header">
+            <div class="header-content">
+                <div class="header-title">
+                    <div class="hero-media" x-show="featuredShow">
+                        <img :data-src="featuredShow.thumbnail"
+                            :alt="featuredShow.title"
+                            class="hero-thumbnail image-placeholder">
+                        <div class="hero-media-overlay">
+                            <button @click="playShow(featuredShow)"
+                                class="hero-play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <h1><i class="fas fa-play-circle"></i> Shows & Videos</h1>
+                    <p>Discover live performances, music videos, and exclusive
+                        content</p>
+                </div>
 
-    <!-- Search & Filters -->
-    <section class="search-section">
-        <div class="search-container">
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text"
-                    x-model="searchQuery"
-                    @input="filterShows()"
-                    placeholder="Search shows, hosts, or descriptions..."
-                    class="search-input">
-                <button @click="clearSearch()" class="search-clear"
-                    x-show="searchQuery">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="search-controls">
-                <div class="filter-tabs">
-                    <button @click="setCategory('all')"
-                        :class="{'active': selectedCategory === 'all'}"
-                        class="filter-tab">
-                        All Shows
-                    </button>
-                    <button @click="setCategory('episode')"
-                        :class="{'active': selectedCategory === 'episode'}"
-                        class="filter-tab">
-                        Episodes
-                    </button>
-                    <button @click="setCategory('clip')"
-                        :class="{'active': selectedCategory === 'clip'}"
-                        class="filter-tab">
-                        Clips
-                    </button>
-                    <button @click="setCategory('music_video')"
-                        :class="{'active': selectedCategory === 'music_video'}"
-                        class="filter-tab">
-                        Music Videos
-                    </button>
-                    <button @click="setCategory('broadcast')"
-                        :class="{'active': selectedCategory === 'broadcast'}"
-                        class="filter-tab">
-                        Live Broadcasts
+                <div class="header-search">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text"
+                            x-model="searchQuery"
+                            @input="filterShows()"
+                            placeholder="Search shows, hosts, or descriptions..."
+                            class="search-input">
+                        <button @click="clearSearch()" class="search-clear"
+                            x-show="searchQuery">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="header-filters">
+                    <div class="filter-tabs">
+                        <button @click="setCategory('all')"
+                            :class="{'active': selectedCategory === 'all'}"
+                            class="filter-tab">
+                            All Shows
+                        </button>
+                        <button @click="setCategory('episode')"
+                            :class="{'active': selectedCategory === 'episode'}"
+                            class="filter-tab">
+                            Episodes
+                        </button>
+                        <button @click="setCategory('clip')"
+                            :class="{'active': selectedCategory === 'clip'}"
+                            class="filter-tab">
+                            Clips
+                        </button>
+                        <button @click="setCategory('music_video')"
+                            :class="{'active': selectedCategory === 'music_video'}"
+                            class="filter-tab">
+                            Music Videos
+                        </button>
+                        <button @click="setCategory('broadcast')"
+                            :class="{'active': selectedCategory === 'broadcast'}"
+                            class="filter-tab">
+                            Live Broadcasts
+                        </button>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <div class="view-options">
+                        <button @click="viewMode = 'grid'"
+                            :class="{'active': viewMode === 'grid'}"
+                            class="view-btn">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button @click="viewMode = 'list'"
+                            :class="{'active': viewMode === 'list'}"
+                            class="view-btn">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                    <button @click="playRandomShow()"
+                        class="btn btn-primary btn-large">
+                        <i class="fas fa-play"></i> Watch Random Show
                     </button>
                 </div>
-                <div class="view-options">
+            </div>
+        </section>
+
+        <!-- Shows Grid -->
+        <section class="shows-grid-section">
+            <div class="section-header">
+                <h2><i class="fas fa-th"></i> All Shows</h2>
+                <div class="view-controls">
                     <button @click="viewMode = 'grid'"
                         :class="{'active': viewMode === 'grid'}"
                         class="view-btn">
@@ -75,120 +108,103 @@
                     </button>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Shows Grid -->
-    <section class="shows-grid-section">
-        <div class="section-header">
-            <h2><i class="fas fa-th"></i> All Shows</h2>
-            <div class="view-controls">
-                <button @click="viewMode = 'grid'"
-                    :class="{'active': viewMode === 'grid'}"
-                    class="view-btn">
-                    <i class="fas fa-th"></i>
-                </button>
-                <button @click="viewMode = 'list'"
-                    :class="{'active': viewMode === 'list'}"
-                    class="view-btn">
-                    <i class="fas fa-list"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Grid View -->
-        <div x-show="viewMode === 'grid'" class="shows-grid">
-            <template x-for="show in filteredShows" :key="show.id">
-                <div class="show-card" @click="playShow(show)">
-                    <div class="show-thumbnail">
-                        <img :src="show.thumbnail" :alt="show.title">
-                        <div class="show-overlay">
-                            <button @click.stop="playShow(show)"
-                                class="play-btn">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <div class="show-actions">
-                                <button @click.stop="likeShow(show)"
-                                    class="action-btn"
-                                    :class="{'liked': isLiked(show)}"
-                                    title="Like">
-                                    <i class="fas fa-heart"></i>
-                                </button>
-                                <button @click.stop="saveShow(show)"
-                                    class="action-btn"
-                                    :class="{'saved': isSaved(show)}"
-                                    title="Save">
-                                    <i class="fas fa-bookmark"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="show-info">
-                        <h4 x-text="show.title"></h4>
-                        <p class="show-host" x-text="show.host"></p>
-                    </div>
-                </div>
-            </template>
-        </div>
-
-        <!-- List View -->
-        <div x-show="viewMode === 'list'" class="shows-list">
-            <div class="list-header">
-                <span class="col-thumbnail">Thumbnail</span>
-                <span class="col-title">Title</span>
-                <span class="col-host">Host</span>
-                <span class="col-actions">Actions</span>
-            </div>
-            <div class="list-items">
+            <!-- Grid View -->
+            <div x-show="viewMode === 'grid'" class="shows-grid">
                 <template x-for="show in filteredShows" :key="show.id">
-                    <div class="list-item" @click="playShow(show)">
-                        <div class="col-thumbnail">
-                            <img :src="show.thumbnail" :alt="show.title">
-                            <div class="play-overlay">
-                                <i class="fas fa-play"></i>
+                    <div class="show-card" @click="playShow(show)">
+                        <div class="show-thumbnail">
+                            <img :data-src="show.thumbnail" :alt="show.title"
+                                class="image-placeholder">
+                            <div class="show-overlay">
+                                <button @click.stop="playShow(show)"
+                                    class="play-btn">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <div class="show-actions">
+                                    <button @click.stop="likeShow(show)"
+                                        class="action-btn"
+                                        :class="{'liked': isLiked(show)}"
+                                        title="Like">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button @click.stop="saveShow(show)"
+                                        class="action-btn"
+                                        :class="{'saved': isSaved(show)}"
+                                        title="Save">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-title">
+                        <div class="show-info">
                             <h4 x-text="show.title"></h4>
-                            <p
-                                x-text="show.description?.substring(0, 100) + '...'"></p>
-                        </div>
-                        <span class="col-host" x-text="show.host"></span>
-                        <div class="col-actions">
-                            <button @click.stop="likeShow(show)"
-                                class="action-btn"
-                                :class="{'liked': isLiked(show)}">
-                                <i class="fas fa-heart"></i>
-                            </button>
-                            <button @click.stop="saveShow(show)"
-                                class="action-btn"
-                                :class="{'saved': isSaved(show)}">
-                                <i class="fas fa-bookmark"></i>
-                            </button>
+                            <p class="show-host" x-text="show.host"></p>
                         </div>
                     </div>
                 </template>
             </div>
-        </div>
-    </section>
 
-    <!-- Loading State -->
-    <section x-show="isLoading" class="loading-section">
-        <div class="spinner"></div>
-        <p>Loading shows...</p>
-    </section>
+            <!-- List View -->
+            <div x-show="viewMode === 'list'" class="shows-list">
+                <div class="list-header">
+                    <span class="col-thumbnail">Thumbnail</span>
+                    <span class="col-title">Title</span>
+                    <span class="col-host">Host</span>
+                    <span class="col-actions">Actions</span>
+                </div>
+                <div class="list-items">
+                    <template x-for="show in filteredShows" :key="show.id">
+                        <div class="list-item" @click="playShow(show)">
+                            <div class="col-thumbnail">
+                                <img :data-src="show.thumbnail"
+                                    :alt="show.title" class="image-placeholder">
+                                <div class="play-overlay">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="col-title">
+                                <h4 x-text="show.title"></h4>
+                                <p
+                                    x-text="show.description?.substring(0, 100) + '...'"></p>
+                            </div>
+                            <span class="col-host" x-text="show.host"></span>
+                            <div class="col-actions">
+                                <button @click.stop="likeShow(show)"
+                                    class="action-btn"
+                                    :class="{'liked': isLiked(show)}">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <button @click.stop="saveShow(show)"
+                                    class="action-btn"
+                                    :class="{'saved': isSaved(show)}">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
 
-    <!-- Empty State -->
-    <section x-show="!isLoading && filteredShows.length === 0"
-        class="empty-section">
-        <div class="empty-content">
-            <i class="fas fa-play-circle"></i>
-            <h3>No shows found</h3>
-            <p>Try adjusting your search or filters</p>
-            <button @click="clearFilters()" class="btn btn-primary">Clear
-                Filters</button>
-        </div>
-    </section>
+        <!-- Loading State -->
+        <section x-show="isLoading" class="loading-section">
+            <div class="spinner"></div>
+            <p>Loading shows...</p>
+        </section>
+
+        <!-- Empty State -->
+        <section x-show="!isLoading && filteredShows.length === 0"
+            class="empty-section">
+            <div class="empty-content">
+                <i class="fas fa-play-circle"></i>
+                <h3>No shows found</h3>
+                <p>Try adjusting your search or filters</p>
+                <button @click="clearFilters()" class="btn btn-primary">Clear
+                    Filters</button>
+            </div>
+        </section>
+    </div>
 </div>
 
 <script>
@@ -216,8 +232,18 @@ function showsPage() {
                 const data = await response.json();
                 this.shows = data.shows || [];
                 this.filteredShows = [...this.shows];
-                this.featuredShow = this.shows[0] || null;
+                // Set a random featured show
+                if (this.shows.length > 0) {
+                    this.featuredShow = this.shows[Math.floor(Math.random() * this.shows.length)];
+                }
                 this.filterShows();
+                
+                // Refresh images after data loads
+                this.$nextTick(() => {
+                    if (window.imageOptimizer) {
+                        window.imageOptimizer.refresh();
+                    }
+                });
             } catch (error) {
                 console.error('Error loading shows:', error);
             } finally {

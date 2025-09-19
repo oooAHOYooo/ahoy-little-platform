@@ -22,7 +22,8 @@
                                 x-text="item.type?.toUpperCase()"></div>
                             <h1 x-text="item.title"></h1>
                             <p x-text="item.artist"></p>
-                            <button class="hero-play-btn">
+                            <button @click.stop="playItem(item, index)"
+                                class="hero-play-btn">
                                 <i class="fas fa-play"></i>
                             </button>
                         </div>
@@ -66,7 +67,8 @@
                             x-show="item.cover_art || item.thumbnail"
                             :class="{'playing': currentIndex === index}"
                             @click="playItem(item, index)">
-                            <img :src="item.cover_art" :alt="item.title">
+                            <img :data-src="item.cover_art" :alt="item.title"
+                                class="image-placeholder">
                             <div class="item-details">
                                 <h4 x-text="item.title"></h4>
                                 <p x-text="item.artist"></p>
@@ -91,7 +93,8 @@
                         :key="show.id">
                         <div class="show-item" x-show="show.thumbnail"
                             @click="playShow(show)">
-                            <img :src="show.thumbnail" :alt="show.title">
+                            <img :data-src="show.thumbnail" :alt="show.title"
+                                class="image-placeholder">
                             <div class="show-details">
                                 <h4 x-text="show.title"></h4>
                                 <p x-text="show.host"></p>
@@ -381,14 +384,19 @@ function homePage() {
             this.currentIndex = index;
             this.stopHeroRotation();
             
-            // Navigate to the item page based on type
-            if (item.type === 'show') {
-                window.location.href = `/shows?highlight=${item.id}`;
-            } else if (item.type === 'music') {
+            // Try to play directly if it's music and global player is available
+            if (item.type === 'music' || item.artist) {
+                if (window.globalPlayer) {
+                    window.globalPlayer.playTrack(item);
+                    // Restart rotation after a delay
+                    setTimeout(() => this.startHeroRotation(), 10000);
+                    return;
+                }
+                // Fallback to navigation
                 window.location.href = `/music?highlight=${item.id}`;
-            } else if (item.artist) {
-                // If it has an artist, it's likely music
-                window.location.href = `/music?highlight=${item.id}`;
+            } else if (item.type === 'show') {
+                // For shows, navigate to player
+                window.location.href = `/player?id=${item.id}&type=show`;
             } else {
                 // Default to shows if no type specified
                 window.location.href = `/shows?highlight=${item.id}`;

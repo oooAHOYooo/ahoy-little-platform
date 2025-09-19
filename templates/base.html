@@ -508,6 +508,169 @@
         <script
             src="{{ url_for('static', filename='js/playlist-manager.js') }}"></script>
 
+        <!-- Image Optimization Script -->
+        <script>
+        // Image optimization and lazy loading
+        class ImageOptimizer {
+            constructor() {
+                this.imageCache = new Map();
+                this.observer = null;
+                this.init();
+            }
+
+            init() {
+                // Set up intersection observer for lazy loading
+                if ('IntersectionObserver' in window) {
+                    this.observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                this.loadImage(entry.target);
+                                this.observer.unobserve(entry.target);
+                            }
+                        });
+                    }, {
+                        rootMargin: '50px 0px',
+                        threshold: 0.01
+                    });
+                }
+
+                // Process existing images
+                this.processImages();
+            }
+
+            processImages() {
+                const images = document.querySelectorAll('img[data-src], img[src]');
+                images.forEach(img => {
+                    if (img.dataset.src) {
+                        // Lazy load
+                        if (this.observer) {
+                            this.observer.observe(img);
+                        } else {
+                            this.loadImage(img);
+                        }
+                    } else {
+                        // Optimize existing images
+                        this.optimizeImage(img);
+                    }
+                });
+            }
+
+            loadImage(img) {
+                const src = img.dataset.src;
+                if (!src) return;
+
+                // Check cache first
+                if (this.imageCache.has(src)) {
+                    this.setImageSource(img, this.imageCache.get(src));
+                    return;
+                }
+
+                // Show loading state
+                img.classList.add('loading');
+                
+                // Create new image to test loading
+                const testImg = new Image();
+                
+                testImg.onload = () => {
+                    this.imageCache.set(src, src);
+                    this.setImageSource(img, src);
+                    img.classList.remove('loading');
+                    img.classList.add('loaded');
+                };
+
+                testImg.onerror = () => {
+                    this.handleImageError(img, src);
+                };
+
+                // Add timeout
+                setTimeout(() => {
+                    if (!img.classList.contains('loaded') && !img.classList.contains('error')) {
+                        this.handleImageError(img, src);
+                    }
+                }, 10000);
+
+                testImg.src = src;
+            }
+
+            setImageSource(img, src) {
+                img.src = src;
+                img.removeAttribute('data-src');
+            }
+
+            handleImageError(img, src) {
+                img.classList.remove('loading');
+                img.classList.add('error');
+                
+                // Try to find a fallback image
+                const fallbackSrc = this.getFallbackImage(img);
+                if (fallbackSrc && fallbackSrc !== src) {
+                    img.src = fallbackSrc;
+                    img.classList.remove('error');
+                    img.classList.add('loaded');
+                }
+            }
+
+            getFallbackImage(img) {
+                // Check for common fallback patterns
+                const alt = img.alt || '';
+                
+                if (alt.includes('artist') || alt.includes('avatar')) {
+                    return '/static/img/default-avatar.png';
+                } else if (alt.includes('show') || alt.includes('video')) {
+                    return '/static/img/default-cover.jpg';
+                } else if (alt.includes('track') || alt.includes('music')) {
+                    return '/static/img/default-cover.jpg';
+                } else if (alt.includes('playlist')) {
+                    return '/static/img/default-playlist-cover.jpg';
+                }
+                
+                return '/static/img/default-cover.jpg';
+            }
+
+            optimizeImage(img) {
+                // Add loading states to existing images
+                if (!img.complete) {
+                    img.classList.add('loading');
+                    img.onload = () => {
+                        img.classList.remove('loading');
+                        img.classList.add('loaded');
+                    };
+                    img.onerror = () => {
+                        img.classList.remove('loading');
+                        img.classList.add('error');
+                        this.handleImageError(img, img.src);
+                    };
+                } else {
+                    img.classList.add('loaded');
+                }
+            }
+
+            // Method to refresh images (useful for dynamic content)
+            refresh() {
+                this.processImages();
+            }
+        }
+
+        // Initialize image optimizer when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.imageOptimizer = new ImageOptimizer();
+        });
+
+        // Utility function for Alpine.js components
+        window.optimizeImage = function(src, fallback = null) {
+            if (!src) return fallback || '/static/img/default-cover.jpg';
+            
+            // Add query parameters for optimization
+            const url = new URL(src, window.location.origin);
+            url.searchParams.set('w', '400'); // Max width
+            url.searchParams.set('h', '400'); // Max height
+            url.searchParams.set('q', '80');  // Quality
+            url.searchParams.set('f', 'webp'); // Format
+            
+            return url.toString();
+        };
+        </script>
+
         {% block extra_scripts %}{% endblock %}
     </body>
 </html>

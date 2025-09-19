@@ -4,36 +4,61 @@
 
 {% block content %}
 <div class="music-container" x-data="musicLibrary()" x-init="loadMusic()">
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1><i class="fas fa-music"></i> Music Library</h1>
-            <p>Discover tracks, albums, and artists</p>
-            <div class="hero-actions">
-                <button @click="playRandomTrack()"
-                    class="btn btn-primary btn-large">
-                    <i class="fas fa-play"></i> Play Random
-                </button>
+    <!-- Unified Header Section -->
+    <section class="unified-header">
+        <div class="header-content">
+            <div class="header-title">
+                <h1><i class="fas fa-music"></i> Music Library</h1>
+                <p>Discover tracks, albums, and artists</p>
             </div>
-        </div>
-    </section>
 
-    <!-- Search & Filters -->
-    <section class="search-section">
-        <div class="search-container">
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text"
-                    x-model="searchQuery"
-                    @input="filterMusic()"
-                    placeholder="Search music, artists, or genres..."
-                    class="search-input">
-                <button @click="clearSearch()" class="search-clear"
-                    x-show="searchQuery">
-                    <i class="fas fa-times"></i>
-                </button>
+            <div class="header-search">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text"
+                        x-model="searchQuery"
+                        @input="filterMusic()"
+                        placeholder="Search music, artists, or genres..."
+                        class="search-input">
+                    <button @click="clearSearch()" class="search-clear"
+                        x-show="searchQuery">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
-            <div class="search-controls">
+
+            <div class="header-filters">
+                <div class="filter-group">
+                    <label>Genre:</label>
+                    <select x-model="selectedGenre" @change="filterMusic()">
+                        <option value>All Genres</option>
+                        <template x-for="genre in genres" :key="genre">
+                            <option :value="genre" x-text="genre"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Artist:</label>
+                    <select x-model="selectedArtist" @change="filterMusic()">
+                        <option value>All Artists</option>
+                        <template x-for="artist in artists" :key="artist">
+                            <option :value="artist" x-text="artist"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Sort by:</label>
+                    <select x-model="sortBy" @change="sortMusic()">
+                        <option value="title">Title</option>
+                        <option value="artist">Artist</option>
+                        <option value="added_date">Date Added</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="header-actions">
                 <div class="view-options">
                     <button @click="viewMode = 'grid'"
                         :class="{'active': viewMode === 'grid'}"
@@ -46,41 +71,13 @@
                         <i class="fas fa-list"></i>
                     </button>
                 </div>
+                <button @click="playRandomTrack()"
+                    class="btn btn-primary btn-large">
+                    <i class="fas fa-play"></i> Play Random
+                </button>
             </div>
         </div>
     </section>
-
-    <!-- Filters -->
-    <div class="filters-section">
-        <div class="filter-group">
-            <label>Genre:</label>
-            <select x-model="selectedGenre" @change="filterMusic()">
-                <option value>All Genres</option>
-                <template x-for="genre in genres" :key="genre">
-                    <option :value="genre" x-text="genre"></option>
-                </template>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label>Artist:</label>
-            <select x-model="selectedArtist" @change="filterMusic()">
-                <option value>All Artists</option>
-                <template x-for="artist in artists" :key="artist">
-                    <option :value="artist" x-text="artist"></option>
-                </template>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label>Sort by:</label>
-            <select x-model="sortBy" @change="sortMusic()">
-                <option value="title">Title</option>
-                <option value="artist">Artist</option>
-                <option value="added_date">Date Added</option>
-            </select>
-        </div>
-    </div>
 
     <!-- Music Grid View -->
     <div x-show="viewMode === 'grid'" class="music-grid">
@@ -91,8 +88,9 @@
 
                 <div class="track-cover">
                     <img
-                        :src="track.cover_art || '/static/img/default-cover.jpg'"
-                        :alt="track.title">
+                        :data-src="track.cover_art || '/static/img/default-cover.jpg'"
+                        :alt="track.title"
+                        class="image-placeholder">
                     <div class="track-overlay">
                         <button @click.stop="playTrack(track)" class="play-btn">
                             <i class="fas fa-play"></i>
@@ -151,8 +149,9 @@
 
                     <div class="col-cover">
                         <img
-                            :src="track.cover_art || '/static/img/default-cover.jpg'"
-                            :alt="track.title">
+                            :data-src="track.cover_art || '/static/img/default-cover.jpg'"
+                            :alt="track.title"
+                            class="image-placeholder">
                     </div>
 
                     <div class="col-title">
@@ -346,6 +345,13 @@ function musicLibrary() {
                 this.filteredTracks = [...this.tracks];
                 this.extractGenresAndArtists();
                 this.sortMusic();
+                
+                // Refresh images after data loads
+                this.$nextTick(() => {
+                    if (window.imageOptimizer) {
+                        window.imageOptimizer.refresh();
+                    }
+                });
                 
                 // Add debugging
                 console.log('Loaded tracks:', this.tracks.length);
