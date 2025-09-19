@@ -106,7 +106,7 @@
                             </button>
                             <button @click.stop="showAddToBoard(track)"
                                 class="action-btn add-btn"
-                                title="Add to board">
+                                title="Add to playlist">
                                 <i class="fas fa-plus"></i>
                             </button>
                             <button @click.stop="likeTrack(track)"
@@ -210,14 +210,15 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="board-list">
-                    <template x-for="board in boards" :key="board.id">
-                        <div class="board-option" @click="addToBoard(board)">
-                            <div class="board-color"
-                                :style="`background-color: ${board.color}`"></div>
-                            <div class="board-info">
-                                <h4 x-text="board.name"></h4>
-                                <p x-text="board.total_items + ' items'"></p>
+                <div class="playlist-list">
+                    <template x-for="playlist in playlists" :key="playlist.id">
+                        <div class="playlist-option"
+                            @click="addToBoard(playlist)">
+                            <div class="playlist-color"
+                                :style="`background-color: ${playlist.color}`"></div>
+                            <div class="playlist-info">
+                                <h4 x-text="playlist.name"></h4>
+                                <p x-text="playlist.total_items + ' items'"></p>
                             </div>
                             <button class="add-btn">
                                 <i class="fas fa-plus"></i>
@@ -225,11 +226,11 @@
                         </div>
                     </template>
 
-                    <div class="create-board-option"
+                    <div class="create-playlist-option"
                         @click="showCreateBoardModal = true">
-                        <div class="board-color"
+                        <div class="playlist-color"
                             style="background: linear-gradient(45deg, #6366f1, #8b5cf6);"></div>
-                        <div class="board-info">
+                        <div class="playlist-info">
                             <h4>Create New Board</h4>
                             <p>Start a new collection</p>
                         </div>
@@ -256,12 +257,12 @@
                 <div class="form-group">
                     <label>Board Name</label>
                     <input type="text" x-model="newBoard.name"
-                        placeholder="Enter board name">
+                        placeholder="Enter playlist name">
                 </div>
                 <div class="form-group">
                     <label>Description</label>
                     <textarea x-model="newBoard.description"
-                        placeholder="Enter board description"></textarea>
+                        placeholder="Enter playlist description"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Color</label>
@@ -295,7 +296,7 @@
                 <div class="form-group">
                     <label>
                         <input type="checkbox" x-model="newBoard.is_public">
-                        Make this board public
+                        Make this playlist public
                     </label>
                 </div>
             </div>
@@ -327,7 +328,7 @@ function musicLibrary() {
         showAddToBoardModal: false,
         showCreateBoardModal: false,
         selectedTrack: null,
-        boards: [],
+        playlists: [],
         newBoard: {
             name: '',
             description: '',
@@ -515,19 +516,19 @@ function musicLibrary() {
         
         async loadBoards() {
             try {
-                const response = await fetch('/api/boards');
+                const response = await fetch('/api/playlists');
                 const data = await response.json();
-                this.boards = data.boards || [];
+                this.playlists = data.playlists || [];
             } catch (error) {
-                console.error('Error loading boards:', error);
+                console.error('Error loading playlists:', error);
             }
         },
         
-        async addToBoard(board) {
+        async addToBoard(playlist) {
             if (!this.selectedTrack) return;
             
             try {
-                const response = await fetch(`/api/boards/${board.id}/add`, {
+                const response = await fetch(`/api/playlists/${playlist.id}/add`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -544,23 +545,23 @@ function musicLibrary() {
                     this.selectedTrack = null;
                     
                     if (result.guest) {
-                        this.showNotification('Added to board! (Guest mode - create account to keep permanently)', 'info');
+                        this.showNotification('Added to playlist! (Guest mode - create account to keep permanently)', 'info');
                         this.showUpgradePrompt();
                     } else {
-                        this.showNotification('Added to board!', 'success');
+                        this.showNotification('Added to playlist!', 'success');
                     }
                 } else {
-                    this.showNotification(result.error || 'Failed to add to board', 'error');
+                    this.showNotification(result.error || 'Failed to add to playlist', 'error');
                 }
             } catch (error) {
-                console.error('Error adding to board:', error);
-                this.showNotification('Failed to add to board', 'error');
+                console.error('Error adding to playlist:', error);
+                this.showNotification('Failed to add to playlist', 'error');
             }
         },
         
         async createBoard() {
             try {
-                const response = await fetch('/api/boards', {
+                const response = await fetch('/api/playlists', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(this.newBoard)
@@ -568,14 +569,14 @@ function musicLibrary() {
                 
                 if (response.ok) {
                     const data = await response.json();
-                    this.boards.push(data.board);
+                    this.playlists.push(data.playlist);
                     this.showCreateBoardModal = false;
                     this.newBoard = { name: '', description: '', color: '#6366f1', is_public: false };
                     this.showNotification('Board created!', 'success');
                 }
             } catch (error) {
-                console.error('Error creating board:', error);
-                this.showNotification('Failed to create board', 'error');
+                console.error('Error creating playlist:', error);
+                this.showNotification('Failed to create playlist', 'error');
             }
         },
         
@@ -610,7 +611,7 @@ function musicLibrary() {
                 <div class="upgrade-content">
                     <div class="upgrade-icon">🎵</div>
                     <h3>Keep Your Music Forever!</h3>
-                    <p>You're saving content as a guest. Create a free account to keep your boards and saves permanently.</p>
+                    <p>You're saving content as a guest. Create a free account to keep your playlists and saves permanently.</p>
                     <div class="upgrade-actions">
                         <button onclick="window.location.href='/register'" class="btn btn-primary">Create Account</button>
                         <button onclick="this.closest('.upgrade-prompt').remove()" class="btn btn-outline">Maybe Later</button>
@@ -662,7 +663,7 @@ function musicLibrary() {
                 
                 if (migrateResponse.ok) {
                     this.showNotification(result.message, 'success');
-                    // Reload boards
+                    // Reload playlists
                     this.loadBoards();
                 } else {
                     this.showNotification('Failed to migrate data', 'error');

@@ -389,8 +389,8 @@ function artistsPage() {
                     url: window.location.origin + `/artist/${artist.slug || artist.id}`
                 });
             } else {
-                navigator.clipboard.writeText(window.location.origin + `/artist/${artist.slug || artist.id}`);
-                this.showNotification('Artist link copied to clipboard!', 'success');
+                navigator.clipplaylist.writeText(window.location.origin + `/artist/${artist.slug || artist.id}`);
+                this.showNotification('Artist link copied to clipplaylist!', 'success');
             }
         },
         

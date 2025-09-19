@@ -38,7 +38,7 @@
                     </div>
                     <div class="stat-item">
                         <span class="stat-number"
-                            x-text="userStats.boards || 0"></span>
+                            x-text="userStats.playlists || 0"></span>
                         <span class="stat-label">Boards</span>
                     </div>
                 </div>
@@ -342,7 +342,8 @@
             <div class="modal-body">
                 <div class="avatar-preview">
                     <div class="avatar-preview-large">
-                        <div class="avatar-anchor-preview" :class="selectedAvatar">
+                        <div class="avatar-anchor-preview"
+                            :class="selectedAvatar">
                             <i class="fas fa-anchor"></i>
                         </div>
                     </div>
@@ -551,7 +552,7 @@ function accountPage() {
                 {
                     id: 3,
                     type: 'create',
-                    description: 'Created "My Favorites" board',
+                    description: 'Created "My Favorites" playlist',
                     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24) // 1 day ago
                 }
             ];

@@ -746,17 +746,17 @@ def get_user_stats():
 @app.route('/api/user/playlists')
 @auth_required
 def get_user_playlists():
-    """Get user playlists and boards"""
+    """Get user playlists and playlists"""
     username = session.get('username')
     playlists = user_manager.get_user_playlists(username)
-    boards = user_manager.get_user_boards(username)
+    playlists = user_manager.get_user_playlists(username)
     
-    # Combine playlists and boards
+    # Combine playlists and playlists
     all_items = []
     for playlist in playlists:
         all_items.append({**playlist, 'type': 'playlist'})
-    for board in boards:
-        all_items.append({**board, 'type': 'board'})
+    for playlist in playlists:
+        all_items.append({**playlist, 'type': 'playlist'})
     
     # Sort by creation date
     all_items.sort(key=lambda x: x.get('created_at', ''), reverse=True)
@@ -895,100 +895,6 @@ def get_saved_content(content_type):
     
     return jsonify({'content': full_content, 'guest': guest_mode})
 
-@app.route('/api/playlists', methods=['GET', 'POST'])
-@auth_required
-def manage_playlists():
-    """Get all playlists or create new playlist"""
-    username = session.get('username')
-    
-    if request.method == 'POST':
-        data = request.json
-        name = data.get('name')
-        description = data.get('description', '')
-        is_public = data.get('is_public', False)
-        
-        playlist_id = user_manager.create_playlist(username, name, description, is_public)
-        
-        if playlist_id:
-            playlist = user_manager.get_playlist(username, playlist_id)
-            return jsonify({'success': True, 'playlist': playlist})
-        else:
-            return jsonify({'error': 'Failed to create playlist'}), 400
-    
-    playlists = user_manager.get_user_playlists(username)
-    return jsonify({'playlists': playlists})
-
-@app.route('/api/playlists/<playlist_id>', methods=['GET', 'PUT', 'DELETE'])
-@auth_required
-def manage_playlist(playlist_id):
-    """Get, update, or delete specific playlist"""
-    username = session.get('username')
-    
-    if request.method == 'GET':
-        playlist = user_manager.get_playlist(username, playlist_id)
-        if playlist:
-            return jsonify({'playlist': playlist})
-        else:
-            return jsonify({'error': 'Playlist not found'}), 404
-    
-    elif request.method == 'PUT':
-        data = request.json
-        playlist = user_manager.get_playlist(username, playlist_id)
-        
-        if not playlist:
-            return jsonify({'error': 'Playlist not found'}), 404
-        
-        # Update playlist metadata
-        playlist['name'] = data.get('name', playlist['name'])
-        playlist['description'] = data.get('description', playlist['description'])
-        playlist['is_public'] = data.get('is_public', playlist['is_public'])
-        playlist['updated_at'] = datetime.now().isoformat()
-        
-        user_manager.save_users()  # Save changes
-        return jsonify({'success': True, 'playlist': playlist})
-    
-    elif request.method == 'DELETE':
-        success = user_manager.delete_playlist(username, playlist_id)
-        if success:
-            return jsonify({'success': True})
-        else:
-            return jsonify({'error': 'Failed to delete playlist'}), 400
-
-@app.route('/api/playlists/<playlist_id>/add', methods=['POST'])
-@auth_required
-def add_to_playlist(playlist_id):
-    """Add content to playlist"""
-    username = session.get('username')
-    data = request.json
-    content_type = data.get('type')
-    content_id = data.get('id')
-    content_data = data.get('data', {})
-    
-    success = user_manager.add_to_playlist(username, playlist_id, content_type, content_id, content_data)
-    
-    if success:
-        playlist = user_manager.get_playlist(username, playlist_id)
-        return jsonify({'success': True, 'playlist': playlist})
-    else:
-        return jsonify({'error': 'Failed to add to playlist'}), 400
-
-@app.route('/api/playlists/<playlist_id>/remove', methods=['POST'])
-@auth_required
-def remove_from_playlist(playlist_id):
-    """Remove content from playlist"""
-    username = session.get('username')
-    data = request.json
-    content_type = data.get('type')
-    content_id = data.get('id')
-    
-    success = user_manager.remove_from_playlist(username, playlist_id, content_type, content_id)
-    
-    if success:
-        playlist = user_manager.get_playlist(username, playlist_id)
-        return jsonify({'success': True, 'playlist': playlist})
-    else:
-        return jsonify({'error': 'Failed to remove from playlist'}), 400
-
 @app.route('/api/likes/like', methods=['POST'])
 @auth_required
 def like_content():
@@ -1060,27 +966,26 @@ def get_recently_played():
     recently_played = user['saves'].get('recently_played', [])
     return jsonify({'recently_played': recently_played})
 
-
 # Pinterest-style Boards/Collections System
-@app.route('/api/boards', methods=['GET', 'POST'])
-def manage_boards():
-    """Get all boards or create new board - works for both guests and users"""
+@app.route('/api/playlists', methods=['GET', 'POST'])
+def manage_playlists():
+    """Get all playlists or create new playlist - works for both guests and users"""
     username = session.get('username')
     
     if not username:
         # For guest users, use session-based storage
-        if 'guest_boards' not in session:
-            session['guest_boards'] = []
+        if 'guest_playlists' not in session:
+            session['guest_playlists'] = []
         
         if request.method == 'POST':
             data = request.json
-            board_id = str(uuid.uuid4())
-            board = {
-                'id': board_id,
+            playlist_id = str(uuid.uuid4())
+            playlist = {
+                'id': playlist_id,
                 'name': data.get('name'),
                 'description': data.get('description', ''),
                 'color': data.get('color', '#6366f1'),
-                'is_public': False,  # Guests can't create public boards
+                'is_public': False,  # Guests can't create public playlists
                 'created_at': datetime.now().isoformat(),
                 'updated_at': datetime.now().isoformat(),
                 'tracks': [],
@@ -1092,12 +997,12 @@ def manage_boards():
                 'is_guest': True
             }
             
-            session['guest_boards'].append(board)
+            session['guest_playlists'].append(playlist)
             session.modified = True
             
-            return jsonify({'success': True, 'board': board, 'guest': True})
+            return jsonify({'success': True, 'playlist': playlist, 'guest': True})
         
-        return jsonify({'boards': session['guest_boards'], 'guest': True})
+        return jsonify({'playlists': session['guest_playlists'], 'guest': True})
     
     # For logged-in users, use the user manager
     if request.method == 'POST':
@@ -1107,52 +1012,52 @@ def manage_boards():
         color = data.get('color', '#6366f1')
         is_public = data.get('is_public', False)
         
-        board_id = user_manager.create_board(username, name, description, color, is_public)
+        playlist_id = user_manager.create_playlist(username, name, description, color, is_public)
         
-        if board_id:
-            board = user_manager.get_board(username, board_id)
-            return jsonify({'success': True, 'board': board, 'guest': False})
+        if playlist_id:
+            playlist = user_manager.get_playlist(username, playlist_id)
+            return jsonify({'success': True, 'playlist': playlist, 'guest': False})
         else:
-            return jsonify({'error': 'Failed to create board'}), 400
+            return jsonify({'error': 'Failed to create playlist'}), 400
     
-    boards = user_manager.get_user_boards(username)
-    return jsonify({'boards': boards, 'guest': False})
+    playlists = user_manager.get_user_playlists(username)
+    return jsonify({'playlists': playlists, 'guest': False})
 
-@app.route('/api/boards/<board_id>', methods=['GET', 'PUT', 'DELETE'])
-def manage_board(board_id):
-    """Get, update, or delete specific board"""
+@app.route('/api/playlists/<playlist_id>', methods=['GET', 'PUT', 'DELETE'])
+def manage_playlist(playlist_id):
+    """Get, update, or delete specific playlist"""
     username = session.get('username')
     
     if not username:
         return jsonify({'error': 'Authentication required'}), 401
     
     if request.method == 'GET':
-        board = user_manager.get_board(username, board_id)
-        if board:
-            return jsonify({'board': board})
+        playlist = user_manager.get_playlist(username, playlist_id)
+        if playlist:
+            return jsonify({'playlist': playlist})
         else:
             return jsonify({'error': 'Board not found'}), 404
     
     elif request.method == 'PUT':
         data = request.json
-        success = user_manager.update_board(username, board_id, data)
+        success = user_manager.update_playlist(username, playlist_id, data)
         
         if success:
-            board = user_manager.get_board(username, board_id)
-            return jsonify({'success': True, 'board': board})
+            playlist = user_manager.get_playlist(username, playlist_id)
+            return jsonify({'success': True, 'playlist': playlist})
         else:
-            return jsonify({'error': 'Failed to update board'}), 400
+            return jsonify({'error': 'Failed to update playlist'}), 400
     
     elif request.method == 'DELETE':
-        success = user_manager.delete_board(username, board_id)
+        success = user_manager.delete_playlist(username, playlist_id)
         if success:
             return jsonify({'success': True})
         else:
-            return jsonify({'error': 'Failed to delete board'}), 400
+            return jsonify({'error': 'Failed to delete playlist'}), 400
 
-@app.route('/api/boards/<board_id>/add', methods=['POST'])
-def add_to_board(board_id):
-    """Add content to board - works for both guests and users"""
+@app.route('/api/playlists/<playlist_id>/add', methods=['POST'])
+def add_to_playlist(playlist_id):
+    """Add content to playlist - works for both guests and users"""
     username = session.get('username')
     data = request.json
     content_type = data.get('type')
@@ -1161,46 +1066,46 @@ def add_to_board(board_id):
     
     if not username:
         # For guest users, use session-based storage
-        if 'guest_boards' not in session:
-            session['guest_boards'] = []
+        if 'guest_playlists' not in session:
+            session['guest_playlists'] = []
         
-        # Find the board
-        board = next((b for b in session['guest_boards'] if b['id'] == board_id), None)
-        if not board:
+        # Find the playlist
+        playlist = next((b for b in session['guest_playlists'] if b['id'] == playlist_id), None)
+        if not playlist:
             return jsonify({'error': 'Board not found'}), 404
         
-        # Check if already in board
-        content_list = board.get(content_type + 's', [])
+        # Check if already in playlist
+        content_list = playlist.get(content_type + 's', [])
         if any(item['id'] == content_id for item in content_list):
-            return jsonify({'success': True, 'board': board, 'guest': True, 'message': 'Already in board'})
+            return jsonify({'success': True, 'playlist': playlist, 'guest': True, 'message': 'Already in playlist'})
         
-        # Add to board
+        # Add to playlist
         item = {
             'id': content_id,
             'added_at': datetime.now().isoformat(),
             'data': content_data
         }
         
-        board[content_type + 's'].append(item)
-        board['total_items'] = sum(len(board.get(key, [])) for key in ['tracks', 'shows', 'artists'])
-        board['updated_at'] = datetime.now().isoformat()
+        playlist[content_type + 's'].append(item)
+        playlist['total_items'] = sum(len(playlist.get(key, [])) for key in ['tracks', 'shows', 'artists'])
+        playlist['updated_at'] = datetime.now().isoformat()
         
         session.modified = True
         
-        return jsonify({'success': True, 'board': board, 'guest': True})
+        return jsonify({'success': True, 'playlist': playlist, 'guest': True})
     
     # For logged-in users, use the user manager
-    success = user_manager.add_to_board(username, board_id, content_type, content_id, content_data)
+    success = user_manager.add_to_playlist(username, playlist_id, content_type, content_id, content_data)
     
     if success:
-        board = user_manager.get_board(username, board_id)
-        return jsonify({'success': True, 'board': board, 'guest': False})
+        playlist = user_manager.get_playlist(username, playlist_id)
+        return jsonify({'success': True, 'playlist': playlist, 'guest': False})
     else:
-        return jsonify({'error': 'Failed to add to board'}), 400
+        return jsonify({'error': 'Failed to add to playlist'}), 400
 
-@app.route('/api/boards/<board_id>/remove', methods=['POST'])
-def remove_from_board(board_id):
-    """Remove content from board"""
+@app.route('/api/playlists/<playlist_id>/remove', methods=['POST'])
+def remove_from_playlist(playlist_id):
+    """Remove content from playlist"""
     username = session.get('username')
     
     if not username:
@@ -1210,13 +1115,13 @@ def remove_from_board(board_id):
     content_type = data.get('type')
     content_id = data.get('id')
     
-    success = user_manager.remove_from_board(username, board_id, content_type, content_id)
+    success = user_manager.remove_from_playlist(username, playlist_id, content_type, content_id)
     
     if success:
-        board = user_manager.get_board(username, board_id)
-        return jsonify({'success': True, 'board': board})
+        playlist = user_manager.get_playlist(username, playlist_id)
+        return jsonify({'success': True, 'playlist': playlist})
     else:
-        return jsonify({'error': 'Failed to remove from board'}), 400
+        return jsonify({'error': 'Failed to remove from playlist'}), 400
 
 @app.route('/api/migrate-guest-data', methods=['POST'])
 @auth_required
@@ -1230,7 +1135,7 @@ def migrate_guest_data():
     
     migrated_items = {
         'saves': 0,
-        'boards': 0,
+        'playlists': 0,
         'likes': 0
     }
     
@@ -1246,28 +1151,28 @@ def migrate_guest_data():
             if success:
                 migrated_items['saves'] += 1
     
-    # Migrate guest boards
-    if 'guest_boards' in data:
-        for board_data in data['guest_boards']:
-            board_id = user_manager.create_board(
+    # Migrate guest playlists
+    if 'guest_playlists' in data:
+        for playlist_data in data['guest_playlists']:
+            playlist_id = user_manager.create_playlist(
                 username,
-                board_data['name'],
-                board_data['description'],
-                board_data['color'],
-                False  # Guest boards become private
+                playlist_data['name'],
+                playlist_data['description'],
+                playlist_data['color'],
+                False  # Guest playlists become private
             )
-            if board_id:
-                # Add all content from guest board
+            if playlist_id:
+                # Add all content from guest playlist
                 for content_type in ['tracks', 'shows', 'artists']:
-                    for item in board_data.get(content_type, []):
-                        user_manager.add_to_board(
+                    for item in playlist_data.get(content_type, []):
+                        user_manager.add_to_playlist(
                             username,
-                            board_id,
+                            playlist_id,
                             content_type[:-1],  # Remove 's' from plural
                             item['id'],
                             item.get('data', {})
                         )
-                migrated_items['boards'] += 1
+                migrated_items['playlists'] += 1
     
     # Migrate guest likes
     if 'guest_likes' in data:
@@ -1284,7 +1189,7 @@ def migrate_guest_data():
     return jsonify({
         'success': True,
         'migrated': migrated_items,
-        'message': f"Migrated {migrated_items['saves']} saves, {migrated_items['boards']} boards, and {migrated_items['likes']} likes"
+        'message': f"Migrated {migrated_items['saves']} saves, {migrated_items['playlists']} playlists, and {migrated_items['likes']} likes"
     })
 
 @app.route('/api/guest-data', methods=['GET'])
@@ -1295,7 +1200,7 @@ def get_guest_data():
     
     guest_data = {
         'saves': session.get('guest_saves', []),
-        'boards': session.get('guest_boards', []),
+        'playlists': session.get('guest_playlists', []),
         'likes': session.get('guest_likes', [])
     }
     

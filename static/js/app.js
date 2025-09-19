@@ -306,8 +306,8 @@ function initializeGlobalPlayer() {
 }
 
 function setupEventListeners() {
-    // Global keyboard shortcuts
-    document.addEventListener('keydown', handleKeyboardShortcuts);
+    // Global keyplaylist shortcuts
+    document.addEventListener('keydown', handleKeyplaylistShortcuts);
     
     // Window events
     window.addEventListener('beforeunload', saveUserState);
@@ -316,7 +316,7 @@ function setupEventListeners() {
     setupMediaEventListeners();
 }
 
-function handleKeyboardShortcuts(event) {
+function handleKeyplaylistShortcuts(event) {
     // Check if user is typing in input fields
     const isInputActive = event.target.matches('input, textarea, select, [contenteditable="true"]') || 
                          event.target.closest('input, textarea, select, [contenteditable="true"]');

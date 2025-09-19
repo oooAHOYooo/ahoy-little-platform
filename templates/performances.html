@@ -6,67 +6,146 @@
 <div class="performances-page" x-data="performancesPage()" x-init="init()">
     <!-- Hero Section -->
     <section class="hero-section">
-        <div class="hero-content">
-            <h1><i class="fas fa-theater-masks"></i> Live Performances</h1>
-            <p>Discover amazing live performances, concerts, and exclusive
-                events</p>
-            <div class="hero-actions">
-                <button @click="playRandomPerformance()"
-                    class="btn btn-primary btn-large">
-                    <i class="fas fa-play"></i> Watch Random Performance
-                </button>
-                <button @click="scrollToFeatured()"
-                    class="btn btn-outline btn-large">
-                    <i class="fas fa-star"></i> Featured Performance
-                </button>
+        <div class="container">
+            <div class="hero-content">
+                <h1><i class="fas fa-theater-masks"></i> Live Performances</h1>
+                <p>Discover amazing live performances, concerts, and exclusive
+                    events</p>
+                <div class="hero-actions">
+                    <button @click="playRandomPerformance()"
+                        class="btn btn-primary btn-large">
+                        <i class="fas fa-play"></i> Watch Random Performance
+                    </button>
+                    <button @click="scrollToFeatured()"
+                        class="btn btn-outline btn-large">
+                        <i class="fas fa-star"></i> Featured Performance
+                    </button>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Search & Filters -->
     <section class="search-section">
-        <div class="search-container">
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text"
-                    x-model="searchQuery"
-                    @input="filterPerformances()"
-                    placeholder="Search performances, artists, or venues..."
-                    class="search-input">
-                <button @click="clearSearch()" class="search-clear"
-                    x-show="searchQuery">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="search-controls">
-                <div class="filter-tabs">
-                    <button @click="setCategory('all')"
-                        :class="{'active': selectedCategory === 'all'}"
-                        class="filter-tab">
-                        All Performances
-                    </button>
-                    <button @click="setCategory('concert')"
-                        :class="{'active': selectedCategory === 'concert'}"
-                        class="filter-tab">
-                        Concerts
-                    </button>
-                    <button @click="setCategory('acoustic')"
-                        :class="{'active': selectedCategory === 'acoustic'}"
-                        class="filter-tab">
-                        Acoustic
-                    </button>
-                    <button @click="setCategory('festival')"
-                        :class="{'active': selectedCategory === 'festival'}"
-                        class="filter-tab">
-                        Festival
-                    </button>
-                    <button @click="setCategory('intimate')"
-                        :class="{'active': selectedCategory === 'intimate'}"
-                        class="filter-tab">
-                        Intimate
+        <div class="container">
+            <div class="search-container">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text"
+                        x-model="searchQuery"
+                        @input="filterPerformances()"
+                        placeholder="Search performances, artists, or venues..."
+                        class="search-input">
+                    <button @click="clearSearch()" class="search-clear"
+                        x-show="searchQuery">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <div class="view-options">
+                <div class="search-controls">
+                    <div class="filter-tabs">
+                        <button @click="setCategory('all')"
+                            :class="{'active': selectedCategory === 'all'}"
+                            class="filter-tab">
+                            All Performances
+                        </button>
+                        <button @click="setCategory('concert')"
+                            :class="{'active': selectedCategory === 'concert'}"
+                            class="filter-tab">
+                            Concerts
+                        </button>
+                        <button @click="setCategory('acoustic')"
+                            :class="{'active': selectedCategory === 'acoustic'}"
+                            class="filter-tab">
+                            Acoustic
+                        </button>
+                        <button @click="setCategory('festival')"
+                            :class="{'active': selectedCategory === 'festival'}"
+                            class="filter-tab">
+                            Festival
+                        </button>
+                        <button @click="setCategory('intimate')"
+                            :class="{'active': selectedCategory === 'intimate'}"
+                            class="filter-tab">
+                            Intimate
+                        </button>
+                    </div>
+                    <div class="view-options">
+                        <button @click="viewMode = 'grid'"
+                            :class="{'active': viewMode === 'grid'}"
+                            class="view-btn">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button @click="viewMode = 'list'"
+                            :class="{'active': viewMode === 'list'}"
+                            class="view-btn">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Performance -->
+    <section class="featured-performance-section" id="featured">
+        <div class="container">
+            <div class="featured-performance" x-show="featuredPerformance">
+                <div class="featured-video">
+                    <img
+                        :src="featuredPerformance?.thumbnail || '/static/img/default-cover.jpg'"
+                        :alt="featuredPerformance?.title">
+                    <div class="featured-overlay">
+                        <button @click="playPerformance(featuredPerformance)"
+                            class="play-btn-large">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="featured-badge">
+                        <i class="fas fa-star"></i> Featured
+                    </div>
+                </div>
+                <div class="featured-info">
+                    <div class="featured-header">
+                        <h3 x-text="featuredPerformance?.title"></h3>
+                        <div class="featured-meta">
+                            <span class="performance-artist"
+                                x-text="featuredPerformance?.artist"></span>
+                            <span class="performance-venue"
+                                x-text="featuredPerformance?.venue"></span>
+                            <span class="performance-date"
+                                x-text="formatDate(featuredPerformance?.date)"></span>
+                        </div>
+                    </div>
+                    <p class="featured-description"
+                        x-text="featuredPerformance?.description"></p>
+                    <div class="featured-actions">
+                        <button @click="playPerformance(featuredPerformance)"
+                            class="btn btn-primary">
+                            <i class="fas fa-play"></i> Watch Now
+                        </button>
+                        <button @click="savePerformance(featuredPerformance)"
+                            class="btn btn-outline"
+                            :class="{'saved': isSaved(featuredPerformance)}">
+                            <i class="fas fa-bookmark"></i>
+                            <span
+                                x-text="isSaved(featuredPerformance) ? 'Saved' : 'Save'"></span>
+                        </button>
+                        <button @click="sharePerformance(featuredPerformance)"
+                            class="btn btn-outline">
+                            <i class="fas fa-share"></i> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Performances Grid -->
+    <section class="performances-grid-section">
+        <div class="container">
+            <div class="section-header">
+                <h2><i class="fas fa-th"></i> All Performances</h2>
+                <div class="view-controls">
                     <button @click="viewMode = 'grid'"
                         :class="{'active': viewMode === 'grid'}"
                         class="view-btn">
@@ -79,180 +158,114 @@
                     </button>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Featured Performance -->
-    <section class="featured-performance-section" id="featured">
-        <div class="featured-performance" x-show="featuredPerformance">
-            <div class="featured-video">
-                <img
-                    :src="featuredPerformance?.thumbnail || '/static/img/default-cover.jpg'"
-                    :alt="featuredPerformance?.title">
-                <div class="featured-overlay">
-                    <button @click="playPerformance(featuredPerformance)"
-                        class="play-btn-large">
-                        <i class="fas fa-play"></i>
-                    </button>
-                </div>
-                <div class="featured-badge">
-                    <i class="fas fa-star"></i> Featured
-                </div>
-            </div>
-            <div class="featured-info">
-                <div class="featured-header">
-                    <h3 x-text="featuredPerformance?.title"></h3>
-                    <div class="featured-meta">
-                        <span class="performance-artist"
-                            x-text="featuredPerformance?.artist"></span>
-                        <span class="performance-venue"
-                            x-text="featuredPerformance?.venue"></span>
-                        <span class="performance-date"
-                            x-text="formatDate(featuredPerformance?.date)"></span>
+            <div x-show="viewMode === 'grid'" class="performances-grid">
+                <template x-for="performance in filteredPerformances"
+                    :key="performance.id">
+                    <div class="performance-card"
+                        @click="playPerformance(performance)">
+                        <div class="performance-cover">
+                            <img
+                                :src="performance.thumbnail || '/static/img/default-cover.jpg'"
+                                :alt="performance.title"
+                                class="performance-image">
+                            <div class="performance-overlay">
+                                <button
+                                    @click.stop="playPerformance(performance)"
+                                    class="play-btn">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <div class="performance-actions">
+                                    <button
+                                        @click.stop="savePerformance(performance)"
+                                        class="action-btn"
+                                        :class="{'saved': isSaved(performance)}">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                    <button
+                                        @click.stop="sharePerformance(performance)"
+                                        class="action-btn">
+                                        <i class="fas fa-share"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="performance-duration"
+                                x-text="formatDuration(performance.duration)"></div>
+                        </div>
+                        <div class="performance-info">
+                            <h4 x-text="performance.title"></h4>
+                            <p class="performance-artist"
+                                x-text="performance.artist"></p>
+                            <p class="performance-venue"
+                                x-text="performance.venue"></p>
+                            <div class="performance-meta">
+                                <span class="performance-date"
+                                    x-text="formatDate(performance.date)"></span>
+                                <span class="performance-category"
+                                    x-text="performance.category"></span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <p class="featured-description"
-                    x-text="featuredPerformance?.description"></p>
-                <div class="featured-actions">
-                    <button @click="playPerformance(featuredPerformance)"
-                        class="btn btn-primary">
-                        <i class="fas fa-play"></i> Watch Now
-                    </button>
-                    <button @click="savePerformance(featuredPerformance)"
-                        class="btn btn-outline"
-                        :class="{'saved': isSaved(featuredPerformance)}">
-                        <i class="fas fa-bookmark"></i>
-                        <span
-                            x-text="isSaved(featuredPerformance) ? 'Saved' : 'Save'"></span>
-                    </button>
-                    <button @click="sharePerformance(featuredPerformance)"
-                        class="btn btn-outline">
-                        <i class="fas fa-share"></i> Share
-                    </button>
-                </div>
+                </template>
             </div>
-        </div>
-    </section>
 
-    <!-- Performances Grid -->
-    <section class="performances-grid-section">
-        <div class="section-header">
-            <h2><i class="fas fa-th"></i> All Performances</h2>
-            <div class="view-controls">
-                <button @click="viewMode = 'grid'"
-                    :class="{'active': viewMode === 'grid'}"
-                    class="view-btn">
-                    <i class="fas fa-th"></i>
-                </button>
-                <button @click="viewMode = 'list'"
-                    :class="{'active': viewMode === 'list'}"
-                    class="view-btn">
-                    <i class="fas fa-list"></i>
-                </button>
-            </div>
-        </div>
-
-        <div x-show="viewMode === 'grid'" class="performances-grid">
-            <template x-for="performance in filteredPerformances"
-                :key="performance.id">
-                <div class="performance-card"
-                    @click="playPerformance(performance)">
-                    <div class="performance-cover">
-                        <img
-                            :src="performance.thumbnail || '/static/img/default-cover.jpg'"
-                            :alt="performance.title"
-                            class="performance-image">
-                        <div class="performance-overlay">
-                            <button @click.stop="playPerformance(performance)"
-                                class="play-btn">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <div class="performance-actions">
+            <div x-show="viewMode === 'list'" class="performances-list">
+                <div class="list-header">
+                    <span class="col-thumbnail">Thumbnail</span>
+                    <span class="col-title">Title</span>
+                    <span class="col-artist">Artist</span>
+                    <span class="col-venue">Venue</span>
+                    <span class="col-date">Date</span>
+                    <span class="col-actions">Actions</span>
+                </div>
+                <div class="list-items">
+                    <template x-for="performance in filteredPerformances"
+                        :key="performance.id">
+                        <div class="list-item"
+                            @click="playPerformance(performance)">
+                            <div class="col-thumbnail">
+                                <img
+                                    :src="performance.thumbnail || '/static/img/default-cover.jpg'"
+                                    :alt="performance.title"
+                                    class="performance-thumbnail">
+                            </div>
+                            <div class="col-info">
+                                <h4 x-text="performance.title"></h4>
+                                <p
+                                    x-text="performance.description?.substring(0, 100) + '...'"></p>
+                            </div>
+                            <span class="col-artist"
+                                x-text="performance.artist"></span>
+                            <span class="col-venue"
+                                x-text="performance.venue"></span>
+                            <span class="col-date"
+                                x-text="formatDate(performance.date)"></span>
+                            <div class="col-actions">
+                                <button
+                                    @click.stop="playPerformance(performance)"
+                                    class="action-btn">
+                                    <i class="fas fa-play"></i>
+                                </button>
                                 <button
                                     @click.stop="savePerformance(performance)"
                                     class="action-btn"
                                     :class="{'saved': isSaved(performance)}">
                                     <i class="fas fa-bookmark"></i>
                                 </button>
-                                <button
-                                    @click.stop="sharePerformance(performance)"
-                                    class="action-btn">
-                                    <i class="fas fa-share"></i>
-                                </button>
                             </div>
                         </div>
-                        <div class="performance-duration"
-                            x-text="formatDuration(performance.duration)"></div>
-                    </div>
-                    <div class="performance-info">
-                        <h4 x-text="performance.title"></h4>
-                        <p class="performance-artist"
-                            x-text="performance.artist"></p>
-                        <p class="performance-venue"
-                            x-text="performance.venue"></p>
-                        <div class="performance-meta">
-                            <span class="performance-date"
-                                x-text="formatDate(performance.date)"></span>
-                            <span class="performance-category"
-                                x-text="performance.category"></span>
-                        </div>
-                    </div>
+                    </template>
                 </div>
-            </template>
-        </div>
-
-        <div x-show="viewMode === 'list'" class="performances-list">
-            <div class="list-header">
-                <span class="col-thumbnail">Thumbnail</span>
-                <span class="col-title">Title</span>
-                <span class="col-artist">Artist</span>
-                <span class="col-venue">Venue</span>
-                <span class="col-date">Date</span>
-                <span class="col-actions">Actions</span>
-            </div>
-            <div class="list-items">
-                <template x-for="performance in filteredPerformances"
-                    :key="performance.id">
-                    <div class="list-item"
-                        @click="playPerformance(performance)">
-                        <div class="col-thumbnail">
-                            <img
-                                :src="performance.thumbnail || '/static/img/default-cover.jpg'"
-                                :alt="performance.title"
-                                class="performance-thumbnail">
-                        </div>
-                        <div class="col-info">
-                            <h4 x-text="performance.title"></h4>
-                            <p
-                                x-text="performance.description?.substring(0, 100) + '...'"></p>
-                        </div>
-                        <span class="col-artist"
-                            x-text="performance.artist"></span>
-                        <span class="col-venue"
-                            x-text="performance.venue"></span>
-                        <span class="col-date"
-                            x-text="formatDate(performance.date)"></span>
-                        <div class="col-actions">
-                            <button @click.stop="playPerformance(performance)"
-                                class="action-btn">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <button @click.stop="savePerformance(performance)"
-                                class="action-btn"
-                                :class="{'saved': isSaved(performance)}">
-                                <i class="fas fa-bookmark"></i>
-                            </button>
-                        </div>
-                    </div>
-                </template>
             </div>
         </div>
     </section>
 
     <!-- Loading State -->
     <section x-show="isLoading" class="loading-section">
-        <div class="spinner"></div>
-        <p>Loading amazing performances...</p>
+        <div class="container">
+            <div class="spinner"></div>
+            <p>Loading amazing performances...</p>
+        </div>
     </section>
 </div>
 
