@@ -416,18 +416,115 @@
     },
     "saves": {
       "saved_tracks": [],
-      "saved_shows": [],
+      "saved_shows": [
+        {
+          "id": "clip_22",
+          "type": "show",
+          "saved_at": "2025-09-18T23:41:22.666159",
+          "data": {
+            "category": "Clips",
+            "description": "Dave Gunn's full part 'Always Next Time' - a complete skateboarding showcase.",
+            "duration_seconds": 480,
+            "host": "Dave Gunn",
+            "host_slug": "dave-gunn",
+            "id": "clip_22",
+            "is_live": false,
+            "published_date": "2024-01-01",
+            "tags": [
+              "clip",
+              "tallboyz",
+              "dave-gunn",
+              "full-part",
+              "skateboarding"
+            ],
+            "thumbnail": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bclips%5D%5BAlways%20Next%20Time%5D%5BDave%20Gunn%5D.jpg",
+            "title": "[Tallboyz] - [Full Part] - [Always Next Time]-[Dave Gunn]",
+            "trailer_url": "https://storage.googleapis.com/ahoy-videos/clips/%5Bclips%5D-%5Bfull%20part%5D-%5BAlways%20Next%20Time%5D%20-%20%5BDave%5D.mp4",
+            "type": "clip",
+            "video_url": "https://storage.googleapis.com/ahoy-videos/clips/%5Bclips%5D-%5Bfull%20part%5D-%5BAlways%20Next%20Time%5D%20-%20%5BDave%5D.mp4",
+            "views": 2400,
+            "liked": true
+          }
+        }
+      ],
       "saved_artists": [],
-      "liked_content": [],
+      "liked_content": [
+        {
+          "id": "clip_22",
+          "type": "show",
+          "liked_at": "2025-09-18T23:41:21.332628",
+          "data": {
+            "category": "Clips",
+            "description": "Dave Gunn's full part 'Always Next Time' - a complete skateboarding showcase.",
+            "duration_seconds": 480,
+            "host": "Dave Gunn",
+            "host_slug": "dave-gunn",
+            "id": "clip_22",
+            "is_live": false,
+            "published_date": "2024-01-01",
+            "tags": [
+              "clip",
+              "tallboyz",
+              "dave-gunn",
+              "full-part",
+              "skateboarding"
+            ],
+            "thumbnail": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bclips%5D%5BAlways%20Next%20Time%5D%5BDave%20Gunn%5D.jpg",
+            "title": "[Tallboyz] - [Full Part] - [Always Next Time]-[Dave Gunn]",
+            "trailer_url": "https://storage.googleapis.com/ahoy-videos/clips/%5Bclips%5D-%5Bfull%20part%5D-%5BAlways%20Next%20Time%5D%20-%20%5BDave%5D.mp4",
+            "type": "clip",
+            "video_url": "https://storage.googleapis.com/ahoy-videos/clips/%5Bclips%5D-%5Bfull%20part%5D-%5BAlways%20Next%20Time%5D%20-%20%5BDave%5D.mp4",
+            "views": 2400
+          }
+        }
+      ],
       "recently_played": [],
       "playlists": [],
       "collections": [],
-      "boards": []
+      "boards": [
+        {
+          "id": "1d620ec0-c26d-42f9-b7f7-92b8375bf97c",
+          "name": "Yo",
+          "description": "Yo",
+          "color": "#6366f1",
+          "is_public": false,
+          "created_at": "2025-09-18T23:42:21.250821",
+          "updated_at": "2025-09-18T23:42:23.585569",
+          "tracks": [
+            {
+              "id": "song_25",
+              "added_at": "2025-09-18T23:42:23.585557",
+              "data": {
+                "added_date": "2024-01-15",
+                "album": "Single",
+                "artist": "My Own Grenade",
+                "artist_slug": "my-own-grenade",
+                "audio_url": "https://ahoycollection.s3.us-east-2.amazonaws.com/My_Own_Grenade_-_Frustrated.mp3",
+                "cover_art": "https://ahoycollection.s3.us-east-2.amazonaws.com/my+own+grenade.jpeg",
+                "duration_seconds": 180,
+                "genre": "Indie",
+                "id": "song_25",
+                "preview_url": "https://ahoycollection.s3.us-east-2.amazonaws.com/My_Own_Grenade_-_Frustrated.mp3",
+                "tags": [
+                  "indie",
+                  "my-own-grenade"
+                ],
+                "title": "Frustrated"
+              }
+            }
+          ],
+          "shows": [],
+          "artists": [],
+          "total_items": 1,
+          "cover_art": null,
+          "tags": []
+        }
+      ]
     },
     "activity": {
       "total_plays": 0,
-      "total_saves": 0,
-      "total_playlists": 0,
+      "total_saves": 1,
+      "total_playlists": 1,
       "last_active": "2025-09-18T12:02:23.815005"
     },
     "subscription": {

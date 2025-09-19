@@ -11,6 +11,9 @@
                 <img
                     :src="userProfile.avatar_url || '/static/img/default-avatar.png'"
                     :alt="userProfile.display_name || 'User'">
+                <div class="avatar-edit-overlay">
+                    <i class="fas fa-camera"></i>
+                </div>
                 <button @click="editAvatar()" class="avatar-edit-btn"
                     title="Change Avatar">
                     <i class="fas fa-camera"></i>
@@ -319,101 +322,128 @@
     </div>
 
     <!-- Avatar Customizer Modal -->
-    <div x-show="showAvatarCustomizer" 
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="modal-overlay"
-         @click="showAvatarCustomizer = false">
+    <div x-show="showAvatarCustomizer"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="modal-overlay"
+        @click="showAvatarCustomizer = false">
         <div class="modal-content avatar-modal" @click.stop>
             <div class="modal-header">
                 <h3>Choose Your Lego Color</h3>
-                <button @click="showAvatarCustomizer = false" class="modal-close">
+                <button @click="showAvatarCustomizer = false"
+                    class="modal-close">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="avatar-preview">
                     <div class="avatar-preview-large">
-                        <img :src="selectedAvatar" alt="Avatar Preview" class="preview-image">
+                        <div class="avatar-anchor-preview" :class="selectedAvatar">
+                            <i class="fas fa-anchor"></i>
+                        </div>
                     </div>
                 </div>
                 <div class="avatar-options">
-                    <h4>Pick Your Color</h4>
+                    <h4>Pick Your Anchor Color</h4>
                     <div class="avatar-grid">
-                        <div class="avatar-option" 
-                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-red.svg'}"
-                             @click="selectedAvatar = '/static/img/lego-avatar-red.svg'">
-                            <img src="/static/img/lego-avatar-red.svg" alt="Red Lego">
+                        <div class="avatar-option"
+                            :class="{'selected': selectedAvatar === 'red'}"
+                            @click="selectedAvatar = 'red'">
+                            <div class="avatar-anchor red">
+                                <i class="fas fa-anchor"></i>
+                            </div>
                             <span class="color-name">Red</span>
                         </div>
-                        <div class="avatar-option" 
-                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-orange.svg'}"
-                             @click="selectedAvatar = '/static/img/lego-avatar-orange.svg'">
-                            <img src="/static/img/lego-avatar-orange.svg" alt="Orange Lego">
+                        <div class="avatar-option"
+                            :class="{'selected': selectedAvatar === 'orange'}"
+                            @click="selectedAvatar = 'orange'">
+                            <div class="avatar-anchor orange">
+                                <i class="fas fa-anchor"></i>
+                            </div>
                             <span class="color-name">Orange</span>
                         </div>
-                        <div class="avatar-option" 
-                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-yellow.svg'}"
-                             @click="selectedAvatar = '/static/img/lego-avatar-yellow.svg'">
-                            <img src="/static/img/lego-avatar-yellow.svg" alt="Yellow Lego">
+                        <div class="avatar-option"
+                            :class="{'selected': selectedAvatar === 'yellow'}"
+                            @click="selectedAvatar = 'yellow'">
+                            <div class="avatar-anchor yellow">
+                                <i class="fas fa-anchor"></i>
+                            </div>
                             <span class="color-name">Yellow</span>
                         </div>
-                        <div class="avatar-option" 
-                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-green.svg'}"
-                             @click="selectedAvatar = '/static/img/lego-avatar-green.svg'">
-                            <img src="/static/img/lego-avatar-green.svg" alt="Green Lego">
+                        <div class="avatar-option"
+                            :class="{'selected': selectedAvatar === 'green'}"
+                            @click="selectedAvatar = 'green'">
+                            <div class="avatar-anchor green">
+                                <i class="fas fa-anchor"></i>
+                            </div>
                             <span class="color-name">Green</span>
                         </div>
-                        <div class="avatar-option" 
-                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-teal.svg'}"
-                             @click="selectedAvatar = '/static/img/lego-avatar-teal.svg'">
-                            <img src="/static/img/lego-avatar-teal.svg" alt="Teal Lego">
+                        <div class="avatar-option"
+                            :class="{'selected': selectedAvatar === 'teal'}"
+                            @click="selectedAvatar = 'teal'">
+                            <div class="avatar-anchor teal">
+                                <i class="fas fa-anchor"></i>
+                            </div>
                             <span class="color-name">Teal</span>
                         </div>
-                        <div class="avatar-option" 
-                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-cyan.svg'}"
-                             @click="selectedAvatar = '/static/img/lego-avatar-cyan.svg'">
-                            <img src="/static/img/lego-avatar-cyan.svg" alt="Cyan Lego">
+                        <div class="avatar-option"
+                            :class="{'selected': selectedAvatar === 'cyan'}"
+                            @click="selectedAvatar = 'cyan'">
+                            <div class="avatar-anchor cyan">
+                                <i class="fas fa-anchor"></i>
+                            </div>
                             <span class="color-name">Cyan</span>
                         </div>
-                        <div class="avatar-option" 
-                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-blue.svg'}"
-                             @click="selectedAvatar = '/static/img/lego-avatar-blue.svg'">
-                            <img src="/static/img/lego-avatar-blue.svg" alt="Blue Lego">
+                        <div class="avatar-option"
+                            :class="{'selected': selectedAvatar === 'blue'}"
+                            @click="selectedAvatar = 'blue'">
+                            <div class="avatar-anchor blue">
+                                <i class="fas fa-anchor"></i>
+                            </div>
                             <span class="color-name">Blue</span>
                         </div>
-                        <div class="avatar-option" 
-                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-indigo.svg'}"
-                             @click="selectedAvatar = '/static/img/lego-avatar-indigo.svg'">
-                            <img src="/static/img/lego-avatar-indigo.svg" alt="Indigo Lego">
+                        <div class="avatar-option"
+                            :class="{'selected': selectedAvatar === 'indigo'}"
+                            @click="selectedAvatar = 'indigo'">
+                            <div class="avatar-anchor indigo">
+                                <i class="fas fa-anchor"></i>
+                            </div>
                             <span class="color-name">Indigo</span>
                         </div>
-                        <div class="avatar-option" 
-                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-purple.svg'}"
-                             @click="selectedAvatar = '/static/img/lego-avatar-purple.svg'">
-                            <img src="/static/img/lego-avatar-purple.svg" alt="Purple Lego">
+                        <div class="avatar-option"
+                            :class="{'selected': selectedAvatar === 'purple'}"
+                            @click="selectedAvatar = 'purple'">
+                            <div class="avatar-anchor purple">
+                                <i class="fas fa-anchor"></i>
+                            </div>
                             <span class="color-name">Purple</span>
                         </div>
-                        <div class="avatar-option" 
-                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-pink.svg'}"
-                             @click="selectedAvatar = '/static/img/lego-avatar-pink.svg'">
-                            <img src="/static/img/lego-avatar-pink.svg" alt="Pink Lego">
+                        <div class="avatar-option"
+                            :class="{'selected': selectedAvatar === 'pink'}"
+                            @click="selectedAvatar = 'pink'">
+                            <div class="avatar-anchor pink">
+                                <i class="fas fa-anchor"></i>
+                            </div>
                             <span class="color-name">Pink</span>
                         </div>
-                        <div class="avatar-option" 
-                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-lime.svg'}"
-                             @click="selectedAvatar = '/static/img/lego-avatar-lime.svg'">
-                            <img src="/static/img/lego-avatar-lime.svg" alt="Lime Lego">
+                        <div class="avatar-option"
+                            :class="{'selected': selectedAvatar === 'lime'}"
+                            @click="selectedAvatar = 'lime'">
+                            <div class="avatar-anchor lime">
+                                <i class="fas fa-anchor"></i>
+                            </div>
                             <span class="color-name">Lime</span>
                         </div>
-                        <div class="avatar-option" 
-                             :class="{'selected': selectedAvatar === '/static/img/lego-avatar-rose.svg'}"
-                             @click="selectedAvatar = '/static/img/lego-avatar-rose.svg'">
-                            <img src="/static/img/lego-avatar-rose.svg" alt="Rose Lego">
+                        <div class="avatar-option"
+                            :class="{'selected': selectedAvatar === 'rose'}"
+                            @click="selectedAvatar = 'rose'">
+                            <div class="avatar-anchor rose">
+                                <i class="fas fa-anchor"></i>
+                            </div>
                             <span class="color-name">Rose</span>
                         </div>
                     </div>
@@ -422,7 +452,8 @@
                     <button @click="saveAvatar()" class="btn btn-primary">
                         <i class="fas fa-save"></i> Save Avatar
                     </button>
-                    <button @click="showAvatarCustomizer = false" class="btn btn-secondary">
+                    <button @click="showAvatarCustomizer = false"
+                        class="btn btn-secondary">
                         Cancel
                     </button>
                 </div>
@@ -438,7 +469,7 @@ function accountPage() {
         userStats: {},
         userBoards: [],
         showAvatarCustomizer: false,
-        selectedAvatar: '/static/img/lego-avatar-red.svg',
+        selectedAvatar: 'red',
         recentActivity: [],
         topContent: [],
         activityTimeline: [],
@@ -468,7 +499,7 @@ function accountPage() {
                 const response = await fetch('/api/user/profile');
                 if (response.ok) {
                     this.userProfile = await response.json();
-                    this.selectedAvatar = this.userProfile.avatar_url || '/static/img/lego-avatar-red.svg';
+                    this.selectedAvatar = this.userProfile.avatar_url || 'red';
                     this.populateForm();
                 } else {
                     // Redirect to login if not authenticated

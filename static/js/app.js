@@ -407,6 +407,13 @@ function setupMediaEventListeners() {
 }
 
 function playMedia(track) {
+    // Set current track in global state
+    window.ahoyApp.currentTrack = track;
+    window.ahoyApp.isPlaying = true;
+    
+    // Update global player UI
+    updateGlobalPlayerUI();
+    
     // Create or update audio/video element
     let mediaElement = document.querySelector('#global-media-player');
     

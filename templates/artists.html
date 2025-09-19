@@ -331,9 +331,9 @@ function artistsPage() {
         
         // Actions
         viewArtist(artist) {
-            // For now, just show a notification since we don't have individual artist pages
-            this.showNotification(`Viewing ${artist.name}'s profile`, 'info');
-            // In the future: window.location.href = `/artist/${artist.slug}`;
+            // Navigate to individual artist profile page
+            const artistSlug = artist.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            window.location.href = `/artist/${artistSlug}`;
         },
         
         viewRandomArtist() {

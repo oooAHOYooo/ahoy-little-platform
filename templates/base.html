@@ -328,9 +328,19 @@
                     <div class="player-details">
                         <h4
                             x-text="currentTrack?.title || 'Unknown Title'"></h4>
-                        <p
+                        <p x-show="currentTrack?.type === 'show'"
+                            x-text="currentTrack?.host || currentTrack?.creator || 'Unknown Host'"></p>
+                        <p x-show="currentTrack?.type !== 'show'"
                             x-text="currentTrack?.artist || 'Unknown Artist'"></p>
                         <div class="player-meta">
+                            <span x-show="currentTrack?.type === 'show'"
+                                class="media-type">
+                                <i class="fas fa-play-circle"></i> Video
+                            </span>
+                            <span x-show="currentTrack?.type !== 'show'"
+                                class="media-type">
+                                <i class="fas fa-music"></i> Music
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -466,6 +476,8 @@
                         <li><a href="{{ url_for('music') }}">Music</a></li>
                         <li><a href="{{ url_for('shows') }}">Shows</a></li>
                         <li><a href="{{ url_for('artists') }}">Artists</a></li>
+                        <li><a
+                                href="{{ url_for('performances') }}">Performances</a></li>
                         <li><a href="{{ url_for('my_saves') }}">My
                                 Saves</a></li>
                     </ul>

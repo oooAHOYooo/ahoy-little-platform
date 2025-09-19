@@ -85,6 +85,13 @@ def artists():
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
+@app.route('/performances')
+def performances():
+    """Performances page"""
+    response = make_response(render_template('performances.html'))
+    response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
+    return response
+
 @app.route('/player')
 def player():
     """Full-screen player page"""
@@ -95,7 +102,21 @@ def player():
 @app.route('/artist/<artist_name>')
 def artist_profile(artist_name):
     """Individual artist profile page"""
-    return render_template('artist_profile.html', artist_name=artist_name)
+    # Load artist data
+    artists_data = load_json_data('artists.json', {'artists': []})
+    artist = None
+    
+    # Find artist by name (case-insensitive)
+    for a in artists_data.get('artists', []):
+        if a.get('name', '').lower() == artist_name.lower():
+            artist = a
+            break
+    
+    if not artist:
+        # Return 404 if artist not found
+        return render_template('404.html'), 404
+    
+    return render_template('artist_detail.html', artist=artist)
 
 @app.route('/my-saves')
 def my_saves():
@@ -302,6 +323,32 @@ def api_artists():
     artists_data = load_json_data('artists.json', {'artists': []})
     return jsonify(artists_data)
 
+@app.route('/api/performances')
+def api_performances():
+    """Get performances data"""
+    # For now, return shows data as performances
+    shows_data = load_json_data('shows.json', {'shows': []})
+    performances = []
+    
+    for show in shows_data.get('shows', []):
+        # Convert shows to performances format
+        performance = {
+            'id': show.get('id'),
+            'title': show.get('title'),
+            'artist': show.get('host') or show.get('artist'),
+            'venue': show.get('venue', 'Unknown Venue'),
+            'date': show.get('published_date'),
+            'thumbnail': show.get('thumbnail'),
+            'video_url': show.get('video_url') or show.get('mp4_link'),
+            'description': show.get('description'),
+            'category': show.get('category', 'concert'),
+            'duration': show.get('duration_seconds', 0),
+            'featured': show.get('featured', False)
+        }
+        performances.append(performance)
+    
+    return jsonify({'performances': performances})
+
 @app.route('/api/artist/<artist_name>')
 def api_artist_profile(artist_name):
     """Get specific artist data"""
@@ -328,6 +375,48 @@ def api_artist_profile(artist_name):
         'tracks': artist_tracks,
         'shows': artist_shows
     })
+
+@app.route('/api/artists/<int:artist_id>/music')
+def api_artist_music(artist_id):
+    """Get artist's music tracks"""
+    music_data = load_json_data('music.json', {'tracks': []})
+    artists_data = load_json_data('artists.json', {'artists': []})
+    
+    # Find artist by ID
+    artist = None
+    for a in artists_data.get('artists', []):
+        if a.get('id') == artist_id:
+            artist = a
+            break
+    
+    if not artist:
+        return jsonify({'error': 'Artist not found'}), 404
+    
+    # Get artist's tracks
+    artist_tracks = [t for t in music_data.get('tracks', []) if t.get('artist_id') == artist_id or t.get('artist') == artist.get('name')]
+    
+    return jsonify(artist_tracks)
+
+@app.route('/api/artists/<int:artist_id>/shows')
+def api_artist_shows(artist_id):
+    """Get artist's shows"""
+    shows_data = load_json_data('shows.json', {'shows': []})
+    artists_data = load_json_data('artists.json', {'artists': []})
+    
+    # Find artist by ID
+    artist = None
+    for a in artists_data.get('artists', []):
+        if a.get('id') == artist_id:
+            artist = a
+            break
+    
+    if not artist:
+        return jsonify({'error': 'Artist not found'}), 404
+    
+    # Get artist's shows
+    artist_shows = [s for s in shows_data.get('shows', []) if s.get('host_id') == artist_id or s.get('host') == artist.get('name')]
+    
+    return jsonify(artist_shows)
 
 @app.route('/api/daily-playlist')
 def api_daily_playlist():

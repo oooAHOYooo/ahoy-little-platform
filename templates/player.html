@@ -4,29 +4,6 @@
 
 {% block content %}
 <div class="player-container" x-data="fullPlayer()" x-init="loadMedia()">
-    <!-- Player Header -->
-    <div class="player-header">
-        <button @click="goBack()" class="back-btn">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        <div class="player-title" x-show="mediaType === 'music'">
-            <h1 x-text="currentMedia?.title || 'Now Playing'"></h1>
-            <p x-text="currentMedia?.artist || 'Unknown Artist'"></p>
-        </div>
-        <div class="player-actions" x-show="mediaType === 'music'">
-            <button @click="toggleLike()"
-                class="action-btn"
-                :class="{'liked': isLiked}">
-                <i class="fas fa-heart"></i>
-            </button>
-            <button @click="addToPlaylist()" class="action-btn">
-                <i class="fas fa-plus"></i>
-            </button>
-            <button @click="shareMedia()" class="action-btn">
-                <i class="fas fa-share"></i>
-            </button>
-        </div>
-    </div>
 
     <!-- Main Player Area -->
     <div class="player-main">
@@ -387,10 +364,6 @@ function fullPlayer() {
         
         shareMedia() {
             // Implement share functionality
-        },
-        
-        goBack() {
-            window.history.back();
         },
         
         // Utility functions

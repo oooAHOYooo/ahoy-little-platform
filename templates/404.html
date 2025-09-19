@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-container">
+        <div class="error-content">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h1 class="error-title">404</h1>
+            <h2 class="error-subtitle">Page Not Found</h2>
+            <p class="error-description">
+                Oops! The page you're looking for doesn't exist or has been
+                moved.
+            </p>
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary">
+                    <i class="fas fa-home"></i> Go to Homepage
+                </a>
+                <button onclick="history.back()" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Go Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--background-primary);
+    padding: var(--spacing-lg);
+}
+
+.error-container {
+    max-width: 600px;
+    text-align: center;
+}
+
+.error-content {
+    background: var(--background-light);
+    padding: var(--spacing-2xl);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.error-icon {
+    font-size: 4rem;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-lg);
+}
+
+.error-title {
+    font-size: 6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1;
+}
+
+.error-subtitle {
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: var(--spacing-sm) 0 var(--spacing-lg) 0;
+}
+
+.error-description {
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-2xl);
+    line-height: 1.6;
+}
+
+.error-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-actions .btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-weight: 600;
+    border-radius: var(--border-radius-lg);
+    transition: all 0.3s ease;
+}
+
+.error-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+    .error-content {
+        padding: var(--spacing-xl);
+    }
+    
+    .error-title {
+        font-size: 4rem;
+    }
+    
+    .error-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .error-actions .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+</style>
+{% endblock %}
