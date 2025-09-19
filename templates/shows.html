@@ -8,7 +8,7 @@
     <section class="hero-section">
         <div class="hero-content">
             <h1><i class="fas fa-play-circle"></i> Shows & Videos</h1>
-            <p>Discover amazing live performances, music videos, and exclusive
+            <p>Discover live performances, music videos, and exclusive
                 content</p>
             <div class="hero-actions">
                 <button @click="playRandomShow()"
@@ -34,32 +34,46 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="filter-tabs">
-                <button @click="setCategory('all')"
-                    :class="{'active': selectedCategory === 'all'}"
-                    class="filter-tab">
-                    All Shows
-                </button>
-                <button @click="setCategory('episode')"
-                    :class="{'active': selectedCategory === 'episode'}"
-                    class="filter-tab">
-                    Episodes
-                </button>
-                <button @click="setCategory('clip')"
-                    :class="{'active': selectedCategory === 'clip'}"
-                    class="filter-tab">
-                    Clips
-                </button>
-                <button @click="setCategory('music_video')"
-                    :class="{'active': selectedCategory === 'music_video'}"
-                    class="filter-tab">
-                    Music Videos
-                </button>
-                <button @click="setCategory('broadcast')"
-                    :class="{'active': selectedCategory === 'broadcast'}"
-                    class="filter-tab">
-                    Live Broadcasts
-                </button>
+            <div class="search-controls">
+                <div class="filter-tabs">
+                    <button @click="setCategory('all')"
+                        :class="{'active': selectedCategory === 'all'}"
+                        class="filter-tab">
+                        All Shows
+                    </button>
+                    <button @click="setCategory('episode')"
+                        :class="{'active': selectedCategory === 'episode'}"
+                        class="filter-tab">
+                        Episodes
+                    </button>
+                    <button @click="setCategory('clip')"
+                        :class="{'active': selectedCategory === 'clip'}"
+                        class="filter-tab">
+                        Clips
+                    </button>
+                    <button @click="setCategory('music_video')"
+                        :class="{'active': selectedCategory === 'music_video'}"
+                        class="filter-tab">
+                        Music Videos
+                    </button>
+                    <button @click="setCategory('broadcast')"
+                        :class="{'active': selectedCategory === 'broadcast'}"
+                        class="filter-tab">
+                        Live Broadcasts
+                    </button>
+                </div>
+                <div class="view-options">
+                    <button @click="viewMode = 'grid'"
+                        :class="{'active': viewMode === 'grid'}"
+                        class="view-btn">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button @click="viewMode = 'list'"
+                        :class="{'active': viewMode === 'list'}"
+                        class="view-btn">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </section>

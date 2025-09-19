@@ -8,7 +8,7 @@
     <section class="hero-section">
         <div class="hero-content">
             <h1><i class="fas fa-music"></i> Music Library</h1>
-            <p>Discover amazing tracks, albums, and artists</p>
+            <p>Discover tracks, albums, and artists</p>
             <div class="hero-actions">
                 <button @click="playRandomTrack()"
                     class="btn btn-primary btn-large">
@@ -33,17 +33,19 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="view-options">
-                <button @click="viewMode = 'grid'"
-                    :class="{'active': viewMode === 'grid'}"
-                    class="view-btn">
-                    <i class="fas fa-th"></i>
-                </button>
-                <button @click="viewMode = 'list'"
-                    :class="{'active': viewMode === 'list'}"
-                    class="view-btn">
-                    <i class="fas fa-list"></i>
-                </button>
+            <div class="search-controls">
+                <div class="view-options">
+                    <button @click="viewMode = 'grid'"
+                        :class="{'active': viewMode === 'grid'}"
+                        class="view-btn">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button @click="viewMode = 'list'"
+                        :class="{'active': viewMode === 'list'}"
+                        class="view-btn">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </section>

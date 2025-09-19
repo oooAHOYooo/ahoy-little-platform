@@ -8,15 +8,12 @@
     <section class="hero-section">
         <div class="hero-content">
             <h1><i class="fas fa-users"></i> Artists</h1>
-            <p>Discover amazing indie musicians, hosts, and creative talent</p>
+            <p>Discover indie musicians, show hosts, atheletes, filmmakers, and
+                more.</p>
             <div class="hero-actions">
                 <button @click="viewRandomArtist()"
                     class="btn btn-primary btn-large">
                     <i class="fas fa-user"></i> Discover Random Artist
-                </button>
-                <button @click="scrollToFeatured()"
-                    class="btn btn-outline btn-large">
-                    <i class="fas fa-star"></i> Featured Artist
                 </button>
             </div>
         </div>
@@ -37,27 +34,41 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="filter-tabs">
-                <button @click="setType('all')"
-                    :class="{'active': selectedType === 'all'}"
-                    class="filter-tab">
-                    All Artists
-                </button>
-                <button @click="setType('musician')"
-                    :class="{'active': selectedType === 'musician'}"
-                    class="filter-tab">
-                    Musicians
-                </button>
-                <button @click="setType('host')"
-                    :class="{'active': selectedType === 'host'}"
-                    class="filter-tab">
-                    Hosts
-                </button>
-                <button @click="setType('producer')"
-                    :class="{'active': selectedType === 'producer'}"
-                    class="filter-tab">
-                    Producers
-                </button>
+            <div class="search-controls">
+                <div class="filter-tabs">
+                    <button @click="setType('all')"
+                        :class="{'active': selectedType === 'all'}"
+                        class="filter-tab">
+                        All Artists
+                    </button>
+                    <button @click="setType('musician')"
+                        :class="{'active': selectedType === 'musician'}"
+                        class="filter-tab">
+                        Musicians
+                    </button>
+                    <button @click="setType('host')"
+                        :class="{'active': selectedType === 'host'}"
+                        class="filter-tab">
+                        Hosts
+                    </button>
+                    <button @click="setType('producer')"
+                        :class="{'active': selectedType === 'producer'}"
+                        class="filter-tab">
+                        Producers
+                    </button>
+                </div>
+                <div class="view-options">
+                    <button @click="viewMode = 'grid'"
+                        :class="{'active': viewMode === 'grid'}"
+                        class="view-btn">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button @click="viewMode = 'list'"
+                        :class="{'active': viewMode === 'list'}"
+                        class="view-btn">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </section>
