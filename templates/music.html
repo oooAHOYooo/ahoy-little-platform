@@ -8,8 +8,10 @@
     <section class="unified-header">
         <div class="header-content">
             <div class="header-title">
-                <h1><i class="fas fa-music"></i> Music Library</h1>
-                <p>Discover tracks, albums, and artists</p>
+                <div class="title-text">
+                    <h1><i class="fas fa-music"></i> Music Library</h1>
+                    <p>Discover tracks, albums, and artists</p>
+                </div>
             </div>
 
             <div class="header-search">
@@ -28,16 +30,6 @@
             </div>
 
             <div class="header-filters">
-                <div class="filter-group">
-                    <label>Genre:</label>
-                    <select x-model="selectedGenre" @change="filterMusic()">
-                        <option value>All Genres</option>
-                        <template x-for="genre in genres" :key="genre">
-                            <option :value="genre" x-text="genre"></option>
-                        </template>
-                    </select>
-                </div>
-
                 <div class="filter-group">
                     <label>Artist:</label>
                     <select x-model="selectedArtist" @change="filterMusic()">
@@ -315,11 +307,9 @@ function musicLibrary() {
         // State
         tracks: [],
         filteredTracks: [],
-        genres: [],
         artists: [],
         viewMode: 'grid',
         searchQuery: '',
-        selectedGenre: '',
         selectedArtist: '',
         sortBy: 'title',
         isLoading: true,
@@ -343,7 +333,7 @@ function musicLibrary() {
                 const data = await response.json();
                 this.tracks = data.tracks || [];
                 this.filteredTracks = [...this.tracks];
-                this.extractGenresAndArtists();
+                this.extractArtists();
                 this.sortMusic();
                 
                 // Refresh images after data loads
@@ -363,16 +353,13 @@ function musicLibrary() {
             }
         },
         
-        extractGenresAndArtists() {
-            const genreSet = new Set();
+        extractArtists() {
             const artistSet = new Set();
             
             this.tracks.forEach(track => {
-                if (track.genre) genreSet.add(track.genre);
                 if (track.artist) artistSet.add(track.artist);
             });
             
-            this.genres = Array.from(genreSet).sort();
             this.artists = Array.from(artistSet).sort();
         },
         
@@ -386,14 +373,8 @@ function musicLibrary() {
                 filtered = filtered.filter(track => 
                     track.title.toLowerCase().includes(query) ||
                     track.artist.toLowerCase().includes(query) ||
-                    track.album?.toLowerCase().includes(query) ||
-                    track.genre?.toLowerCase().includes(query)
+                    track.album?.toLowerCase().includes(query)
                 );
-            }
-            
-            // Genre filter
-            if (this.selectedGenre) {
-                filtered = filtered.filter(track => track.genre === this.selectedGenre);
             }
             
             // Artist filter

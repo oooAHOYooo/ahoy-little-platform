@@ -212,6 +212,12 @@ img.loading {
     gap: var(--spacing-lg);
 }
 
+.header-title .title-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
 .header-title h1 {
     font-size: var(--font-size-4xl);
     margin: 0;
