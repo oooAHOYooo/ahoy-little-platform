@@ -1,0 +1,1329 @@
+{% extends "base.html" %}
+
+{% block title %}Sitemap & App Structure - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="sitemap-container">
+    <!-- Header -->
+    <section class="unified-header">
+        <div class="header-content">
+            <div class="header-title">
+                <div class="title-text">
+                    <h1><i class="fas fa-sitemap"></i> App Structure & Sitemap</h1>
+                    <p>Complete documentation of Ahoy Indie Media's architecture and functionality</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="sitemap-content">
+        
+        <!-- Quick Navigation -->
+        <section class="quick-nav">
+            <h2>Quick Navigation</h2>
+            <div class="nav-grid">
+                <a href="#pages" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Pages</span>
+                </a>
+                <a href="#api" class="nav-item">
+                    <i class="fas fa-code"></i>
+                    <span>API Endpoints</span>
+                </a>
+                <a href="#data" class="nav-item">
+                    <i class="fas fa-database"></i>
+                    <span>Data Structure</span>
+                </a>
+                <a href="#frontend" class="nav-item">
+                    <i class="fas fa-laptop"></i>
+                    <span>Frontend</span>
+                </a>
+                <a href="#features" class="nav-item">
+                    <i class="fas fa-star"></i>
+                    <span>Features</span>
+                </a>
+                <a href="#tech" class="nav-item">
+                    <i class="fas fa-cogs"></i>
+                    <span>Tech Stack</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Page Structure -->
+        <section id="pages" class="sitemap-section">
+            <h2><i class="fas fa-file-alt"></i> Page Structure</h2>
+            
+            <div class="page-category">
+                <h3>Main Pages</h3>
+                <div class="page-list">
+                    <div class="page-item">
+                        <strong><a href="/">Home (/)</a></strong>
+                        <p>Main discovery page with Now Playing feed, curated content, and personalized recommendations</p>
+                        <div class="page-features">
+                            <span class="feature-tag">Now Playing Feed</span>
+                            <span class="feature-tag">Weather Widget</span>
+                            <span class="feature-tag">Daily Playlist</span>
+                            <span class="feature-tag">Quick Actions</span>
+                        </div>
+                    </div>
+
+                    <div class="page-item">
+                        <strong><a href="/music">Music Library (/music)</a></strong>
+                        <p>Browse, search, and play music tracks with filtering and sorting capabilities</p>
+                        <div class="page-features">
+                            <span class="feature-tag">Grid/List View</span>
+                            <span class="feature-tag">Search & Filter</span>
+                            <span class="feature-tag">Save & Like</span>
+                            <span class="feature-tag">Add to Playlist</span>
+                        </div>
+                    </div>
+
+                    <div class="page-item">
+                        <strong><a href="/shows">Shows & Videos (/shows)</a></strong>
+                        <p>Video content including live performances, music videos, and exclusive content</p>
+                        <div class="page-features">
+                            <span class="feature-tag">Video Player</span>
+                            <span class="feature-tag">Category Filters</span>
+                            <span class="feature-tag">Featured Content</span>
+                            <span class="feature-tag">Save & Like</span>
+                        </div>
+                    </div>
+
+                    <div class="page-item">
+                        <strong><a href="/artists">Artists (/artists)</a></strong>
+                        <p>Directory of indie musicians, hosts, and creators with detailed profiles</p>
+                        <div class="page-features">
+                            <span class="feature-tag">Artist Profiles</span>
+                            <span class="feature-tag">Type Filtering</span>
+                            <span class="feature-tag">Search by Genre</span>
+                            <span class="feature-tag">Follow Artists</span>
+                        </div>
+                    </div>
+
+                    <div class="page-item">
+                        <strong><a href="/performances">Performances (/performances)</a></strong>
+                        <p>Live performance listings and event information</p>
+                        <div class="page-features">
+                            <span class="feature-tag">Event Listings</span>
+                            <span class="feature-tag">Performance Details</span>
+                            <span class="feature-tag">Artist Links</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-category">
+                <h3>User Pages</h3>
+                <div class="page-list">
+                    <div class="page-item">
+                        <strong><a href="/my-saves">My Saves (/my-saves)</a></strong>
+                        <p>User's saved content including tracks, shows, artists, and playlists</p>
+                        <div class="page-features">
+                            <span class="feature-tag">Saved Tracks</span>
+                            <span class="feature-tag">Saved Shows</span>
+                            <span class="feature-tag">Playlists</span>
+                            <span class="feature-tag">Export/Sync</span>
+                        </div>
+                    </div>
+
+                    <div class="page-item">
+                        <strong><a href="/account">Account (/account)</a></strong>
+                        <p>User profile management and account settings</p>
+                        <div class="page-features">
+                            <span class="feature-tag">Profile Settings</span>
+                            <span class="feature-tag">Avatar Upload</span>
+                            <span class="feature-tag">Statistics</span>
+                            <span class="feature-tag">Data Migration</span>
+                        </div>
+                    </div>
+
+                    <div class="page-item">
+                        <strong><a href="/settings">Settings (/settings)</a></strong>
+                        <p>Application preferences and user settings</p>
+                        <div class="page-features">
+                            <span class="feature-tag">Dark Mode</span>
+                            <span class="feature-tag">Auto-play</span>
+                            <span class="feature-tag">Notifications</span>
+                            <span class="feature-tag">Privacy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-category">
+                <h3>Utility Pages</h3>
+                <div class="page-list">
+                    <div class="page-item">
+                        <strong><a href="/player">Media Player (/player)</a></strong>
+                        <p>Full-screen media player for music and video content</p>
+                        <div class="page-features">
+                            <span class="feature-tag">Audio Player</span>
+                            <span class="feature-tag">Video Player</span>
+                            <span class="feature-tag">Playlist Queue</span>
+                            <span class="feature-tag">Controls</span>
+                        </div>
+                    </div>
+
+                    <div class="page-item">
+                        <strong><a href="/search">Search (/search)</a></strong>
+                        <p>Universal search across all content types</p>
+                        <div class="page-features">
+                            <span class="feature-tag">Multi-type Search</span>
+                            <span class="feature-tag">Filter Results</span>
+                            <span class="feature-tag">Search History</span>
+                        </div>
+                    </div>
+
+                    <div class="page-item">
+                        <strong><a href="/auth">Authentication (/auth)</a></strong>
+                        <p>User login and registration interface</p>
+                        <div class="page-features">
+                            <span class="feature-tag">Login Form</span>
+                            <span class="feature-tag">Registration</span>
+                            <span class="feature-tag">Guest Mode</span>
+                        </div>
+                    </div>
+
+                    <div class="page-item">
+                        <strong><a href="/debug">Debug Console (/debug)</a></strong>
+                        <p>Development and debugging tools (admin only)</p>
+                        <div class="page-features">
+                            <span class="feature-tag">System Status</span>
+                            <span class="feature-tag">User Management</span>
+                            <span class="feature-tag">Data Viewer</span>
+                            <span class="feature-tag">Test Tools</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-category">
+                <h3>Individual Content Pages</h3>
+                <div class="page-list">
+                    <div class="page-item">
+                        <strong>Artist Profiles (/artist/&lt;name&gt;)</strong>
+                        <p>Individual artist pages with detailed information and content</p>
+                        <div class="page-features">
+                            <span class="feature-tag">Bio & Info</span>
+                            <span class="feature-tag">Discography</span>
+                            <span class="feature-tag">Shows</span>
+                            <span class="feature-tag">Social Links</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-category">
+                <h3>Legal Pages</h3>
+                <div class="page-list">
+                    <div class="page-item">
+                        <strong><a href="/privacy">Privacy Policy (/privacy)</a></strong>
+                        <p>Privacy policy and data handling information</p>
+                    </div>
+                    <div class="page-item">
+                        <strong><a href="/security">Security Policy (/security)</a></strong>
+                        <p>Security practices and user safety information</p>
+                    </div>
+                    <div class="page-item">
+                        <strong><a href="/terms">Terms of Service (/terms)</a></strong>
+                        <p>Terms of service and usage guidelines</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Structure -->
+        <section id="api" class="sitemap-section">
+            <h2><i class="fas fa-code"></i> API Endpoints</h2>
+
+            <div class="api-category">
+                <h3>Content APIs</h3>
+                <div class="api-list">
+                    <div class="api-item">
+                        <strong>GET /api/music</strong>
+                        <p>Retrieve all music tracks with metadata</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="data-source">static/data/music.json</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>GET /api/shows</strong>
+                        <p>Retrieve all show/video content</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="data-source">static/data/shows.json</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>GET /api/artists</strong>
+                        <p>Retrieve artist directory</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="data-source">static/data/artists.json</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>GET /api/artist/&lt;name&gt;</strong>
+                        <p>Get specific artist profile data</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="data-source">static/data/artists.json</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>GET /api/now-playing</strong>
+                        <p>Curated now playing feed with randomized content</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="data-source">Aggregated from all content sources</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>GET /api/daily-playlist</strong>
+                        <p>Generate seeded daily playlist based on date</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="data-source">Algorithm-generated from music.json</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-category">
+                <h3>User Management APIs</h3>
+                <div class="api-list">
+                    <div class="api-item">
+                        <strong>POST /api/auth/login</strong>
+                        <p>User authentication and session creation</p>
+                        <div class="api-details">
+                            <span class="method post">POST</span>
+                            <span class="auth-required">No Auth</span>
+                            <span class="data-source">data/users.json</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>POST /api/auth/register</strong>
+                        <p>User registration and account creation</p>
+                        <div class="api-details">
+                            <span class="method post">POST</span>
+                            <span class="auth-required">No Auth</span>
+                            <span class="data-source">data/users.json</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>GET /api/user/profile</strong>
+                        <p>Get user profile information</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="auth-required">Auth Required</span>
+                            <span class="data-source">data/users.json</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>PUT /api/user/profile</strong>
+                        <p>Update user profile information</p>
+                        <div class="api-details">
+                            <span class="method put">PUT</span>
+                            <span class="auth-required">Auth Required</span>
+                            <span class="data-source">data/users.json</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-category">
+                <h3>Save & Like APIs</h3>
+                <div class="api-list">
+                    <div class="api-item">
+                        <strong>POST /api/saves/save</strong>
+                        <p>Save content (works for guests and users)</p>
+                        <div class="api-details">
+                            <span class="method post">POST</span>
+                            <span class="auth-required">Guest/User</span>
+                            <span class="data-source">Session/User data</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>POST /api/saves/unsave</strong>
+                        <p>Remove saved content</p>
+                        <div class="api-details">
+                            <span class="method post">POST</span>
+                            <span class="auth-required">Guest/User</span>
+                            <span class="data-source">Session/User data</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>GET /api/saves/&lt;type&gt;</strong>
+                        <p>Get saved content by type</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="auth-required">Guest/User</span>
+                            <span class="data-source">Session/User data</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>POST /api/likes/like</strong>
+                        <p>Like content</p>
+                        <div class="api-details">
+                            <span class="method post">POST</span>
+                            <span class="auth-required">Auth Required</span>
+                            <span class="data-source">data/users.json</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-category">
+                <h3>Playlist Management APIs</h3>
+                <div class="api-list">
+                    <div class="api-item">
+                        <strong>GET/POST /api/playlists</strong>
+                        <p>Get all playlists or create new playlist</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="method post">POST</span>
+                            <span class="auth-required">Guest/User</span>
+                            <span class="data-source">Session/User data</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>GET/PUT/DELETE /api/playlists/&lt;id&gt;</strong>
+                        <p>Manage specific playlist</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="method put">PUT</span>
+                            <span class="method delete">DELETE</span>
+                            <span class="auth-required">Guest/User</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>POST /api/playlists/&lt;id&gt;/add</strong>
+                        <p>Add content to playlist</p>
+                        <div class="api-details">
+                            <span class="method post">POST</span>
+                            <span class="auth-required">Guest/User</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-category">
+                <h3>Utility APIs</h3>
+                <div class="api-list">
+                    <div class="api-item">
+                        <strong>GET /api/search</strong>
+                        <p>Universal search across all content</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="data-source">All JSON data sources</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>GET /api/weather</strong>
+                        <p>Weather information for user location</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="data-source">External weather API</span>
+                        </div>
+                    </div>
+
+                    <div class="api-item">
+                        <strong>GET /api/agenda</strong>
+                        <p>Daily agenda and events</p>
+                        <div class="api-details">
+                            <span class="method get">GET</span>
+                            <span class="data-source">Generated algorithm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Structure -->
+        <section id="data" class="sitemap-section">
+            <h2><i class="fas fa-database"></i> Data Structure</h2>
+
+            <div class="data-category">
+                <h3>Static Content Data</h3>
+                <div class="data-list">
+                    <div class="data-item">
+                        <strong>static/data/music.json</strong>
+                        <p>Music tracks database with metadata</p>
+                        <div class="data-schema">
+                            <div class="schema-field">
+                                <code>id</code> - Unique track identifier
+                            </div>
+                            <div class="schema-field">
+                                <code>title</code> - Track title
+                            </div>
+                            <div class="schema-field">
+                                <code>artist</code> - Artist name
+                            </div>
+                            <div class="schema-field">
+                                <code>album</code> - Album name (optional)
+                            </div>
+                            <div class="schema-field">
+                                <code>genre</code> - Music genre
+                            </div>
+                            <div class="schema-field">
+                                <code>duration</code> - Track duration
+                            </div>
+                            <div class="schema-field">
+                                <code>cover_art</code> - Album cover URL
+                            </div>
+                            <div class="schema-field">
+                                <code>preview_url</code> - 30s preview URL
+                            </div>
+                            <div class="schema-field">
+                                <code>added_date</code> - Date added to library
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-item">
+                        <strong>static/data/shows.json</strong>
+                        <p>Shows and video content database</p>
+                        <div class="data-schema">
+                            <div class="schema-field">
+                                <code>id</code> - Unique show identifier
+                            </div>
+                            <div class="schema-field">
+                                <code>title</code> - Show title
+                            </div>
+                            <div class="schema-field">
+                                <code>host</code> - Host/creator name
+                            </div>
+                            <div class="schema-field">
+                                <code>type</code> - Content type (episode, clip, music_video, broadcast)
+                            </div>
+                            <div class="schema-field">
+                                <code>description</code> - Show description
+                            </div>
+                            <div class="schema-field">
+                                <code>thumbnail</code> - Video thumbnail URL
+                            </div>
+                            <div class="schema-field">
+                                <code>duration</code> - Video duration
+                            </div>
+                            <div class="schema-field">
+                                <code>publish_date</code> - Publication date
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-item">
+                        <strong>static/data/artists.json</strong>
+                        <p>Artist directory and profiles</p>
+                        <div class="data-schema">
+                            <div class="schema-field">
+                                <code>id</code> - Unique artist identifier
+                            </div>
+                            <div class="schema-field">
+                                <code>name</code> - Artist name
+                            </div>
+                            <div class="schema-field">
+                                <code>type</code> - Artist type (musician, host, producer)
+                            </div>
+                            <div class="schema-field">
+                                <code>genres</code> - Array of genres
+                            </div>
+                            <div class="schema-field">
+                                <code>description</code> - Artist bio
+                            </div>
+                            <div class="schema-field">
+                                <code>image</code> - Artist profile image
+                            </div>
+                            <div class="schema-field">
+                                <code>social_links</code> - Social media links
+                            </div>
+                            <div class="schema-field">
+                                <code>location</code> - Geographic location
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-category">
+                <h3>User Data</h3>
+                <div class="data-list">
+                    <div class="data-item">
+                        <strong>data/users.json</strong>
+                        <p>User accounts and profiles</p>
+                        <div class="data-schema">
+                            <div class="schema-field">
+                                <code>username</code> - Unique username
+                            </div>
+                            <div class="schema-field">
+                                <code>email</code> - User email
+                            </div>
+                            <div class="schema-field">
+                                <code>password_hash</code> - Hashed password
+                            </div>
+                            <div class="schema-field">
+                                <code>display_name</code> - Display name
+                            </div>
+                            <div class="schema-field">
+                                <code>avatar</code> - Profile avatar URL
+                            </div>
+                            <div class="schema-field">
+                                <code>saved_content</code> - User's saved items
+                            </div>
+                            <div class="schema-field">
+                                <code>playlists</code> - User's playlists
+                            </div>
+                            <div class="schema-field">
+                                <code>liked_content</code> - Liked items
+                            </div>
+                            <div class="schema-field">
+                                <code>created_date</code> - Account creation date
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-item">
+                        <strong>data/user_activity.json</strong>
+                        <p>User activity tracking and analytics</p>
+                        <div class="data-schema">
+                            <div class="schema-field">
+                                <code>user_id</code> - User identifier
+                            </div>
+                            <div class="schema-field">
+                                <code>activity_type</code> - Type of activity
+                            </div>
+                            <div class="schema-field">
+                                <code>content_id</code> - Related content ID
+                            </div>
+                            <div class="schema-field">
+                                <code>timestamp</code> - Activity timestamp
+                            </div>
+                            <div class="schema-field">
+                                <code>metadata</code> - Additional activity data
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Frontend Structure -->
+        <section id="frontend" class="sitemap-section">
+            <h2><i class="fas fa-laptop"></i> Frontend Architecture</h2>
+
+            <div class="frontend-category">
+                <h3>JavaScript Modules</h3>
+                <div class="js-list">
+                    <div class="js-item">
+                        <strong>static/js/app.js</strong>
+                        <p>Main application JavaScript with global functions</p>
+                        <div class="js-features">
+                            <span class="js-feature">Navigation handler</span>
+                            <span class="js-feature">Search functionality</span>
+                            <span class="js-feature">User authentication</span>
+                            <span class="js-feature">Global state management</span>
+                        </div>
+                    </div>
+
+                    <div class="js-item">
+                        <strong>static/js/player.js</strong>
+                        <p>Media player functionality for audio and video</p>
+                        <div class="js-features">
+                            <span class="js-feature">Audio player controls</span>
+                            <span class="js-feature">Video player controls</span>
+                            <span class="js-feature">Playlist queue</span>
+                            <span class="js-feature">Progress tracking</span>
+                        </div>
+                    </div>
+
+                    <div class="js-item">
+                        <strong>static/js/playlist-manager.js</strong>
+                        <p>Playlist creation and management</p>
+                        <div class="js-features">
+                            <span class="js-feature">Create playlists</span>
+                            <span class="js-feature">Add/remove tracks</span>
+                            <span class="js-feature">Reorder items</span>
+                            <span class="js-feature">Share playlists</span>
+                        </div>
+                    </div>
+
+                    <div class="js-item">
+                        <strong>static/js/unified-hero.js</strong>
+                        <p>Unified hero carousel system for subpages</p>
+                        <div class="js-features">
+                            <span class="js-feature">Content carousel</span>
+                            <span class="js-feature">Touch/swipe support</span>
+                            <span class="js-feature">Auto-rotation</span>
+                            <span class="js-feature">Dynamic content loading</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="frontend-category">
+                <h3>CSS Architecture</h3>
+                <div class="css-list">
+                    <div class="css-item">
+                        <strong>static/css/main.css</strong>
+                        <p>Main stylesheet with base styles and layout</p>
+                        <div class="css-features">
+                            <span class="css-feature">CSS Variables</span>
+                            <span class="css-feature">Navigation styles</span>
+                            <span class="css-feature">Grid system</span>
+                            <span class="css-feature">Responsive design</span>
+                        </div>
+                    </div>
+
+                    <div class="css-item">
+                        <strong>static/css/components.css</strong>
+                        <p>Component-specific styles and UI elements</p>
+                        <div class="css-features">
+                            <span class="css-feature">Card components</span>
+                            <span class="css-feature">Form elements</span>
+                            <span class="css-feature">Media players</span>
+                            <span class="css-feature">Interactive elements</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="frontend-category">
+                <h3>Template System</h3>
+                <div class="template-info">
+                    <p>The application uses <strong>Jinja2 templating</strong> with Flask, featuring:</p>
+                    <ul>
+                        <li><strong>base.html</strong> - Main template with navigation and layout</li>
+                        <li><strong>Page templates</strong> - Individual page layouts extending base</li>
+                        <li><strong>Component reuse</strong> - Shared UI components across pages</li>
+                        <li><strong>Alpine.js integration</strong> - Reactive components and interactions</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Features -->
+        <section id="features" class="sitemap-section">
+            <h2><i class="fas fa-star"></i> Key Features</h2>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <h3>Music Discovery</h3>
+                    <ul>
+                        <li>Curated Now Playing feed</li>
+                        <li>Daily algorithmic playlists</li>
+                        <li>Genre-based filtering</li>
+                        <li>Artist recommendations</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h3>Video Content</h3>
+                    <ul>
+                        <li>Live performance videos</li>
+                        <li>Music video library</li>
+                        <li>Exclusive content</li>
+                        <li>Category-based browsing</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Artist Profiles</h3>
+                    <ul>
+                        <li>Detailed artist information</li>
+                        <li>Discography and shows</li>
+                        <li>Social media integration</li>
+                        <li>Follow functionality</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <h3>Playlist Management</h3>
+                    <ul>
+                        <li>Create custom playlists</li>
+                        <li>Save favorite content</li>
+                        <li>Cross-platform sync</li>
+                        <li>Share with others</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Universal Search</h3>
+                    <ul>
+                        <li>Search across all content</li>
+                        <li>Filter by type</li>
+                        <li>Real-time results</li>
+                        <li>Search history</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Mobile Experience</h3>
+                    <ul>
+                        <li>Responsive design</li>
+                        <li>Touch-optimized controls</li>
+                        <li>Seamless navigation</li>
+                        <li>Offline functionality</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                    <h3>User Management</h3>
+                    <ul>
+                        <li>Guest mode support</li>
+                        <li>User accounts</li>
+                        <li>Data migration</li>
+                        <li>Privacy controls</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <h3>Data Persistence</h3>
+                    <ul>
+                        <li>Session-based storage</li>
+                        <li>User data sync</li>
+                        <li>Backup & restore</li>
+                        <li>Cross-device access</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technology Stack -->
+        <section id="tech" class="sitemap-section">
+            <h2><i class="fas fa-cogs"></i> Technology Stack</h2>
+
+            <div class="tech-grid">
+                <div class="tech-category">
+                    <h3>Backend</h3>
+                    <div class="tech-list">
+                        <div class="tech-item">
+                            <strong>Flask</strong>
+                            <span>Python web framework</span>
+                        </div>
+                        <div class="tech-item">
+                            <strong>Jinja2</strong>
+                            <span>Template engine</span>
+                        </div>
+                        <div class="tech-item">
+                            <strong>JSON</strong>
+                            <span>Data storage format</span>
+                        </div>
+                        <div class="tech-item">
+                            <strong>Session Management</strong>
+                            <span>User state handling</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tech-category">
+                    <h3>Frontend</h3>
+                    <div class="tech-list">
+                        <div class="tech-item">
+                            <strong>Alpine.js</strong>
+                            <span>Reactive framework</span>
+                        </div>
+                        <div class="tech-item">
+                            <strong>CSS3</strong>
+                            <span>Modern styling</span>
+                        </div>
+                        <div class="tech-item">
+                            <strong>HTML5</strong>
+                            <span>Semantic markup</span>
+                        </div>
+                        <div class="tech-item">
+                            <strong>Font Awesome</strong>
+                            <span>Icon library</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tech-category">
+                    <h3>Deployment</h3>
+                    <div class="tech-list">
+                        <div class="tech-item">
+                            <strong>Gunicorn</strong>
+                            <span>WSGI server</span>
+                        </div>
+                        <div class="tech-item">
+                            <strong>Docker</strong>
+                            <span>Containerization</span>
+                        </div>
+                        <div class="tech-item">
+                            <strong>Render</strong>
+                            <span>Cloud hosting</span>
+                        </div>
+                        <div class="tech-item">
+                            <strong>Environment Variables</strong>
+                            <span>Configuration management</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tech-category">
+                    <h3>Development</h3>
+                    <div class="tech-list">
+                        <div class="tech-item">
+                            <strong>Python 3.9+</strong>
+                            <span>Programming language</span>
+                        </div>
+                        <div class="tech-item">
+                            <strong>Git</strong>
+                            <span>Version control</span>
+                        </div>
+                        <div class="tech-item">
+                            <strong>pip</strong>
+                            <span>Package management</span>
+                        </div>
+                        <div class="tech-item">
+                            <strong>Virtual Environment</strong>
+                            <span>Dependency isolation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="architecture-info">
+                <h3>Architecture Pattern</h3>
+                <p>The application follows a <strong>Model-View-Controller (MVC)</strong> pattern:</p>
+                <ul>
+                    <li><strong>Model</strong> - JSON data files and user management system</li>
+                    <li><strong>View</strong> - Jinja2 templates with Alpine.js components</li>
+                    <li><strong>Controller</strong> - Flask route handlers and API endpoints</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Development Information -->
+        <section class="dev-info">
+            <h2><i class="fas fa-code-branch"></i> Development Information</h2>
+            
+            <div class="dev-grid">
+                <div class="dev-item">
+                    <h3>Project Structure</h3>
+                    <div class="file-tree">
+                        <div class="tree-item">📁 ahoy-little-platform/</div>
+                        <div class="tree-item level-1">📄 app.py <span class="file-desc">Main Flask application</span></div>
+                        <div class="tree-item level-1">📄 user_manager.py <span class="file-desc">User management system</span></div>
+                        <div class="tree-item level-1">📁 templates/ <span class="file-desc">Jinja2 templates</span></div>
+                        <div class="tree-item level-1">📁 static/ <span class="file-desc">CSS, JS, images, data</span></div>
+                        <div class="tree-item level-1">📁 data/ <span class="file-desc">User and activity data</span></div>
+                        <div class="tree-item level-1">📁 scripts/ <span class="file-desc">Utility scripts</span></div>
+                        <div class="tree-item level-1">📄 requirements.txt <span class="file-desc">Python dependencies</span></div>
+                        <div class="tree-item level-1">📄 Dockerfile <span class="file-desc">Container configuration</span></div>
+                    </div>
+                </div>
+
+                <div class="dev-item">
+                    <h3>Getting Started</h3>
+                    <ol>
+                        <li>Clone the repository</li>
+                        <li>Install dependencies: <code>pip install -r requirements.txt</code></li>
+                        <li>Run the application: <code>python app.py</code></li>
+                        <li>Access at <code>http://localhost:5000</code></li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+/* Sitemap-specific styles */
+.sitemap-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.sitemap-content {
+    padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.quick-nav {
+    margin-bottom: var(--spacing-2xl);
+}
+
+.nav-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    background: var(--background-medium);
+    border-radius: var(--border-radius-lg);
+    text-decoration: none;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.nav-item:hover {
+    background: var(--background-light);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+}
+
+.nav-item i {
+    font-size: 2rem;
+}
+
+.sitemap-section {
+    margin-bottom: var(--spacing-2xl);
+    padding-bottom: var(--spacing-2xl);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sitemap-section:last-child {
+    border-bottom: none;
+}
+
+.sitemap-section h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    color: var(--primary-color);
+    font-size: var(--font-size-2xl);
+}
+
+.page-category, .api-category, .data-category, .frontend-category {
+    margin-bottom: var(--spacing-xl);
+}
+
+.page-category h3, .api-category h3, .data-category h3, .frontend-category h3 {
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-primary);
+    font-size: var(--font-size-xl);
+}
+
+.page-item, .api-item, .data-item, .js-item, .css-item {
+    background: var(--background-medium);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: var(--spacing-md);
+    border: 1px solid var(--border-color);
+}
+
+.page-item strong a, .page-item strong {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: var(--font-size-lg);
+}
+
+.page-item strong a:hover {
+    text-decoration: underline;
+}
+
+.page-features, .js-features, .css-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-md);
+}
+
+.feature-tag, .js-feature, .css-feature {
+    background: var(--primary-color);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+.api-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.method {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.method.get { background: #10b981; color: white; }
+.method.post { background: #3b82f6; color: white; }
+.method.put { background: #f59e0b; color: white; }
+.method.delete { background: #ef4444; color: white; }
+
+.auth-required {
+    background: var(--background-light);
+    color: var(--text-secondary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-xs);
+    border: 1px solid var(--border-color);
+}
+
+.data-source {
+    background: var(--accent-color);
+    color: var(--background-dark);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+.data-schema {
+    margin-top: var(--spacing-md);
+    background: var(--background-light);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+}
+
+.schema-field {
+    margin-bottom: var(--spacing-xs);
+    font-family: 'Courier New', monospace;
+    font-size: var(--font-size-sm);
+}
+
+.schema-field code {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.feature-card {
+    background: var(--background-medium);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--spacing-lg) auto;
+}
+
+.feature-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.feature-card h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.feature-card ul {
+    text-align: left;
+    list-style: none;
+    padding: 0;
+}
+
+.feature-card li {
+    padding: var(--spacing-xs) 0;
+    color: var(--text-secondary);
+    position: relative;
+    padding-left: var(--spacing-lg);
+}
+
+.feature-card li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.tech-category {
+    background: var(--background-medium);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.tech-category h3 {
+    margin-bottom: var(--spacing-lg);
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.tech-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tech-item:last-child {
+    border-bottom: none;
+}
+
+.tech-item strong {
+    color: var(--text-primary);
+}
+
+.tech-item span {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.architecture-info, .template-info, .dev-grid {
+    background: var(--background-medium);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    margin-top: var(--spacing-xl);
+    border: 1px solid var(--border-color);
+}
+
+.dev-info {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-2xl);
+    border-top: 2px solid var(--primary-color);
+}
+
+.dev-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: var(--spacing-lg);
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.dev-item {
+    background: var(--background-medium);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.file-tree {
+    font-family: 'Courier New', monospace;
+    margin-top: var(--spacing-md);
+}
+
+.tree-item {
+    padding: var(--spacing-xs) 0;
+    color: var(--text-secondary);
+}
+
+.tree-item.level-1 {
+    padding-left: var(--spacing-lg);
+}
+
+.file-desc {
+    color: var(--text-muted);
+    font-style: italic;
+    margin-left: var(--spacing-sm);
+}
+
+.dev-item code {
+    background: var(--background-light);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: var(--font-size-sm);
+    color: var(--primary-color);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .sitemap-content {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+    
+    .nav-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .features-grid, .tech-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dev-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .page-features, .js-features, .css-features {
+        flex-direction: column;
+    }
+    
+    .api-details {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

@@ -95,7 +95,8 @@ ahoy-super-platform/
 │   ├── js/
 │   │   ├── app.js                 # Main JavaScript
 │   │   ├── player.js              # Media player logic
-│   │   └── playlist-manager.js    # Playlist management
+│   │   ├── playlist-manager.js    # Playlist management
+│   │   └── unified-hero.js        # Hero carousel system
 │   ├── img/                       # Images and assets
 │   └── data/                      # JSON data files
 │       ├── music.json             # Music tracks
@@ -109,8 +110,25 @@ ahoy-super-platform/
     ├── shows.html                 # Shows/video content
     ├── artists.html               # Artist directory
     ├── player.html                # Full-screen player
+    ├── sitemap.html               # App structure documentation
     └── artist_profile.html        # Individual artist page
 ```
+
+## 📋 App Structure & Documentation
+
+For a comprehensive overview of the application's architecture, API endpoints, data structure, and functionality, visit the **[App Structure & Sitemap](/sitemap)** page. This documentation includes:
+
+- **Complete page hierarchy** with features and functionality
+- **Detailed API endpoint reference** with parameters and data sources
+- **Data structure documentation** with JSON schemas
+- **Frontend architecture** including JavaScript modules and CSS organization
+- **Technology stack overview** and development information
+- **Feature breakdown** and user functionality guides
+
+Access this documentation:
+- **In-app**: Settings menu → "App Structure" 
+- **Direct URL**: `/sitemap`
+- **Mobile**: User menu → "App Structure"
 
 ## API Endpoints
 

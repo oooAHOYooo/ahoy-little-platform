@@ -83,7 +83,80 @@
                     </a>
                 </div>
 
-                <!-- Main Features (3 primary features) -->
+                <!-- Mobile Left Menu (Features & Navigation) -->
+                <div class="mobile-left-menu mobile-only" x-data="{ leftMenuOpen: false }">
+                    <button @click="leftMenuOpen = !leftMenuOpen" 
+                            class="mobile-menu-button"
+                            :class="{'active': leftMenuOpen}"
+                            title="Main Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <div x-show="leftMenuOpen" 
+                         x-transition
+                         @click.away="leftMenuOpen = false"
+                         class="mobile-dropdown-menu mobile-left-dropdown">
+                        
+                        <!-- Search in mobile menu -->
+                        <div class="mobile-search">
+                            <div class="search-container">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text"
+                                    placeholder="Search music, shows, artists..."
+                                    x-model="searchQuery"
+                                    @keyup.enter="performSearch()"
+                                    class="search-input">
+                                <button @click="clearSearch()" class="search-clear"
+                                    x-show="searchQuery">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Main Navigation -->
+                        <div class="menu-section">
+                            <h4>Explore</h4>
+                            <a href="{{ url_for('home') }}" 
+                               class="mobile-menu-item {% if request.endpoint == 'home' %}active{% endif %}"
+                               @click="leftMenuOpen = false">
+                                <i class="fas fa-home"></i>
+                                <span>Home</span>
+                            </a>
+                            <a href="{{ url_for('music') }}" 
+                               class="mobile-menu-item {% if request.endpoint == 'music' %}active{% endif %}"
+                               @click="leftMenuOpen = false">
+                                <i class="fas fa-music"></i>
+                                <span>Music</span>
+                            </a>
+                            <a href="{{ url_for('shows') }}" 
+                               class="mobile-menu-item {% if request.endpoint == 'shows' %}active{% endif %}"
+                               @click="leftMenuOpen = false">
+                                <i class="fas fa-play-circle"></i>
+                                <span>Shows</span>
+                            </a>
+                            <a href="{{ url_for('artists') }}" 
+                               class="mobile-menu-item {% if request.endpoint == 'artists' %}active{% endif %}"
+                               @click="leftMenuOpen = false">
+                                <i class="fas fa-users"></i>
+                                <span>Artists</span>
+                            </a>
+                            <a href="{{ url_for('performances') }}" 
+                               class="mobile-menu-item {% if request.endpoint == 'performances' %}active{% endif %}"
+                               @click="leftMenuOpen = false">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Performances</span>
+                            </a>
+                            <a href="{{ url_for('my_saves') }}" 
+                               class="mobile-menu-item {% if request.endpoint == 'my_saves' %}active{% endif %}"
+                               @click="leftMenuOpen = false">
+                                <i class="fas fa-bookmark"></i>
+                                <span>My Saves</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Features (hidden on mobile) -->
                 <div class="nav-features">
                     <a href="{{ url_for('music') }}"
                         class="feature-btn {% if request.endpoint == 'music' %}active{% endif %}"
@@ -158,6 +231,101 @@
                             <i class="fas fa-cog"></i>
                         </a>
                     </div>
+                </div>
+
+                <!-- Mobile Right Menu (User & Settings) -->
+                <div class="mobile-right-menu mobile-only" x-data="{ rightMenuOpen: false }">
+                    <button @click="rightMenuOpen = !rightMenuOpen" 
+                            class="mobile-menu-button"
+                            :class="{'active': rightMenuOpen}"
+                            title="User & Settings Menu">
+                        <i class="fas fa-user" x-show="!isLoggedIn"></i>
+                        <img x-show="isLoggedIn"
+                             :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                             :alt="userProfile.display_name || 'User'"
+                             class="mobile-user-avatar">
+                    </button>
+                    
+                    <div x-show="rightMenuOpen" 
+                         x-transition
+                         @click.away="rightMenuOpen = false"
+                         class="mobile-dropdown-menu mobile-right-dropdown">
+                        
+                        <!-- User Profile Section -->
+                        <div x-show="isLoggedIn" class="menu-section user-profile-section">
+                            <div class="user-profile-header">
+                                <img :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                                     :alt="userProfile.display_name || 'User'"
+                                     class="profile-avatar">
+                                <div class="profile-info">
+                                    <h4 x-text="userProfile.display_name || 'User'"></h4>
+                                    <p x-text="userProfile.email || ''"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Section -->
+                        <div class="menu-section">
+                            <h4>Account</h4>
+                            <a x-show="isLoggedIn" href="/account"
+                                class="mobile-menu-item {% if request.endpoint == 'account' %}active{% endif %}"
+                                @click="rightMenuOpen = false">
+                                <i class="fas fa-user-circle"></i>
+                                <span>My Profile</span>
+                            </a>
+                            <a x-show="isLoggedIn" href="/settings"
+                                class="mobile-menu-item {% if request.endpoint == 'settings' %}active{% endif %}"
+                                @click="rightMenuOpen = false">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a x-show="!isLoggedIn" href="/auth"
+                                class="mobile-menu-item"
+                                @click="rightMenuOpen = false">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span>Sign In</span>
+                            </a>
+                        </div>
+
+                        <!-- App Info Section -->
+                        <div class="menu-section">
+                            <h4>Information</h4>
+                            <a href="{{ url_for('sitemap_page') }}"
+                                class="mobile-menu-item {% if request.endpoint == 'sitemap_page' %}active{% endif %}"
+                                @click="rightMenuOpen = false">
+                                <i class="fas fa-sitemap"></i>
+                                <span>App Structure</span>
+                            </a>
+                            <a href="/privacy"
+                                class="mobile-menu-item"
+                                @click="rightMenuOpen = false">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Privacy</span>
+                            </a>
+                            <a href="/terms"
+                                class="mobile-menu-item"
+                                @click="rightMenuOpen = false">
+                                <i class="fas fa-file-contract"></i>
+                                <span>Terms</span>
+                            </a>
+                            <a href="/debug"
+                                class="mobile-menu-item"
+                                @click="rightMenuOpen = false">
+                                <i class="fas fa-bug"></i>
+                                <span>Debug</span>
+                            </a>
+                        </div>
+
+                        <!-- Sign Out Section -->
+                        <div x-show="isLoggedIn" class="menu-section">
+                            <button @click="logout(); rightMenuOpen = false"
+                                    class="mobile-menu-item logout-button">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                     <!-- Settings Menu -->
                     <div class="nav-dropdown" x-data="{ open: false }">
@@ -276,6 +444,9 @@
 
                             <div class="dropdown-section">
                                 <h4>Help & Support</h4>
+                                <a href="{{ url_for('sitemap_page') }}" class="dropdown-item">
+                                    <i class="fas fa-sitemap"></i> App Structure
+                                </a>
                                 <a href="#" class="dropdown-item">
                                     <i class="fas fa-question-circle"></i> Help
                                     Center
@@ -476,28 +647,34 @@
                         <li><a href="{{ url_for('music') }}">Music</a></li>
                         <li><a href="{{ url_for('shows') }}">Shows</a></li>
                         <li><a href="{{ url_for('artists') }}">Artists</a></li>
-                        <li><a
-                                href="{{ url_for('performances') }}">Performances</a></li>
-                        <li><a href="{{ url_for('my_saves') }}">My
-                                Saves</a></li>
+                        <li><a href="{{ url_for('my_saves') }}">My Saves</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-section">
-                    <h4>Support</h4>
+                    <h4>Resources</h4>
                     <ul>
+                        <li><a href="{{ url_for('sitemap_page') }}">App Structure</a></li>
                         <li><a href="/privacy">Privacy</a></li>
                         <li><a href="/terms">Terms</a></li>
                         <li><a href="/debug">Debug</a></li>
-                        <li><a href="/api/debug/users"
-                                target="_blank">Users</a></li>
                     </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>About</h4>
+                    <p>Discover and organize independent music, shows, and content with Ahoy Indie Media.</p>
                 </div>
             </div>
 
             <div class="footer-bottom">
                 <div class="footer-bottom-content">
-                    <p>&copy; 2024 All rights reserved.</p>
+                    <p>&copy; 2024 Ahoy Indie Media. All rights reserved.</p>
+                    <div class="footer-links">
+                        <a href="{{ url_for('sitemap_page') }}">Sitemap</a>
+                        <a href="/privacy">Privacy</a>
+                        <a href="/terms">Terms</a>
+                    </div>
                 </div>
             </div>
         </footer>

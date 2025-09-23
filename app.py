@@ -1481,6 +1481,13 @@ def settings_page():
     """Settings page"""
     return render_template('settings.html')
 
+@app.route('/sitemap')
+def sitemap_page():
+    """Sitemap and app structure documentation page"""
+    response = make_response(render_template('sitemap.html'))
+    response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
+    return response
+
 @app.route('/api/search')
 def search_api():
     """Search API endpoint"""
