@@ -10,20 +10,12 @@
         <div class="profile-background"></div>
         <div class="profile-content">
             <div class="profile-avatar-section">
-                <div class="profile-avatar-large"
-                    @click="showAvatarCustomizer = true">
+                <div class="profile-avatar-large">
                     <img
                         :src="userProfile.avatar || '/static/img/default-avatar.png'"
                         :alt="userProfile.display_name || 'User'"
                         class="avatar-image">
-                    <div class="avatar-edit-overlay">
-                        <i class="fas fa-camera"></i>
-                    </div>
                 </div>
-                <button @click="showAvatarCustomizer = true"
-                    class="avatar-edit-btn">
-                    <i class="fas fa-edit"></i> Customize
-                </button>
             </div>
             <div class="profile-info">
                 <h1 class="profile-username"
@@ -484,8 +476,6 @@ function mySavesLibrary() {
         playlists: [],
         likedContent: [],
         recentlyPlayed: [],
-        showAvatarCustomizer: false,
-            selectedAvatar: 'red',
         userBoards: [],
         userStats: null,
         showCreatePlaylist: false,
@@ -765,25 +755,6 @@ function mySavesLibrary() {
             }
         },
         
-        // Avatar functions
-        async saveAvatar() {
-            try {
-                const response = await fetch('/api/user/profile', {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ avatar: this.selectedAvatar })
-                });
-                
-                if (response.ok) {
-                    this.userProfile.avatar = this.selectedAvatar;
-                    this.showAvatarCustomizer = false;
-                    this.showNotification('Avatar updated!', 'success');
-                }
-            } catch (error) {
-                console.error('Error saving avatar:', error);
-                this.showNotification('Failed to save avatar', 'error');
-            }
-        },
 
         showNotification(message, type = 'info') {
             // Simple notification system
@@ -814,142 +785,4 @@ function mySavesLibrary() {
 }
 </script>
 
-<!-- Avatar Customizer Modal -->
-<div x-show="showAvatarCustomizer"
-    x-transition:enter="transition ease-out duration-300"
-    x-transition:enter-start="opacity-0"
-    x-transition:enter-end="opacity-100"
-    x-transition:leave="transition ease-in duration-200"
-    x-transition:leave-start="opacity-100"
-    x-transition:leave-end="opacity-0"
-    class="modal-overlay"
-    @click="showAvatarCustomizer = false">
-    <div class="modal-content avatar-modal" @click.stop>
-        <div class="modal-header">
-            <h3>Customize Avatar</h3>
-            <button @click="showAvatarCustomizer = false" class="modal-close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="avatar-preview">
-                <div class="avatar-preview-large">
-                    <div class="avatar-anchor-preview" :class="selectedAvatar">
-                        <i class="fas fa-anchor"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="avatar-options">
-                <h4>Choose Your Anchor Color</h4>
-                <div class="avatar-grid">
-                    <div class="avatar-option"
-                        :class="{'selected': selectedAvatar === 'red'}"
-                        @click="selectedAvatar = 'red'">
-                        <div class="avatar-anchor red">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                        <span class="color-name">Red</span>
-                    </div>
-                    <div class="avatar-option"
-                        :class="{'selected': selectedAvatar === 'orange'}"
-                        @click="selectedAvatar = 'orange'">
-                        <div class="avatar-anchor orange">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                        <span class="color-name">Orange</span>
-                    </div>
-                    <div class="avatar-option"
-                        :class="{'selected': selectedAvatar === 'yellow'}"
-                        @click="selectedAvatar = 'yellow'">
-                        <div class="avatar-anchor yellow">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                        <span class="color-name">Yellow</span>
-                    </div>
-                    <div class="avatar-option"
-                        :class="{'selected': selectedAvatar === 'green'}"
-                        @click="selectedAvatar = 'green'">
-                        <div class="avatar-anchor green">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                        <span class="color-name">Green</span>
-                    </div>
-                    <div class="avatar-option"
-                        :class="{'selected': selectedAvatar === 'teal'}"
-                        @click="selectedAvatar = 'teal'">
-                        <div class="avatar-anchor teal">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                        <span class="color-name">Teal</span>
-                    </div>
-                    <div class="avatar-option"
-                        :class="{'selected': selectedAvatar === 'cyan'}"
-                        @click="selectedAvatar = 'cyan'">
-                        <div class="avatar-anchor cyan">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                        <span class="color-name">Cyan</span>
-                    </div>
-                    <div class="avatar-option"
-                        :class="{'selected': selectedAvatar === 'blue'}"
-                        @click="selectedAvatar = 'blue'">
-                        <div class="avatar-anchor blue">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                        <span class="color-name">Blue</span>
-                    </div>
-                    <div class="avatar-option"
-                        :class="{'selected': selectedAvatar === 'indigo'}"
-                        @click="selectedAvatar = 'indigo'">
-                        <div class="avatar-anchor indigo">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                        <span class="color-name">Indigo</span>
-                    </div>
-                    <div class="avatar-option"
-                        :class="{'selected': selectedAvatar === 'purple'}"
-                        @click="selectedAvatar = 'purple'">
-                        <div class="avatar-anchor purple">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                        <span class="color-name">Purple</span>
-                    </div>
-                    <div class="avatar-option"
-                        :class="{'selected': selectedAvatar === 'pink'}"
-                        @click="selectedAvatar = 'pink'">
-                        <div class="avatar-anchor pink">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                        <span class="color-name">Pink</span>
-                    </div>
-                    <div class="avatar-option"
-                        :class="{'selected': selectedAvatar === 'lime'}"
-                        @click="selectedAvatar = 'lime'">
-                        <div class="avatar-anchor lime">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                        <span class="color-name">Lime</span>
-                    </div>
-                    <div class="avatar-option"
-                        :class="{'selected': selectedAvatar === 'rose'}"
-                        @click="selectedAvatar = 'rose'">
-                        <div class="avatar-anchor rose">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                        <span class="color-name">Rose</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button @click="saveAvatar()" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Save Avatar
-                </button>
-                <button @click="showAvatarCustomizer = false"
-                    class="btn btn-secondary">
-                    Cancel
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

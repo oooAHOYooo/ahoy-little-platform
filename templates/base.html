@@ -641,35 +641,63 @@
         <!-- Footer -->
         <footer class="site-footer">
             <div class="footer-content">
-                <div class="footer-section">
-                    <h4>Explore</h4>
-                    <ul>
-                        <li><a href="{{ url_for('music') }}">Music</a></li>
-                        <li><a href="{{ url_for('shows') }}">Shows</a></li>
-                        <li><a href="{{ url_for('artists') }}">Artists</a></li>
-                        <li><a href="{{ url_for('my_saves') }}">My Saves</a></li>
-                    </ul>
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}" alt="Ahoy Indie Media">
+                    </div>
+                    <p class="footer-tagline">Your gateway to independent music discovery and organization</p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link" title="Follow us on Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Follow us on Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Follow us on TikTok">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Subscribe to our YouTube">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
                 </div>
 
-                <div class="footer-section">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li><a href="{{ url_for('sitemap_page') }}">App Structure</a></li>
-                        <li><a href="/privacy">Privacy</a></li>
-                        <li><a href="/terms">Terms</a></li>
-                        <li><a href="/debug">Debug</a></li>
-                    </ul>
-                </div>
+                <div class="footer-sections">
+                    <div class="footer-section">
+                        <h4>Discover</h4>
+                        <ul>
+                            <li><a href="{{ url_for('music') }}">Music</a></li>
+                            <li><a href="{{ url_for('shows') }}">Shows</a></li>
+                            <li><a href="{{ url_for('artists') }}">Artists</a></li>
+                            <li><a href="{{ url_for('my_saves') }}">My Saves</a></li>
+                        </ul>
+                    </div>
 
-                <div class="footer-section">
-                    <h4>About</h4>
-                    <p>Discover and organize independent music, shows, and content with Ahoy Indie Media.</p>
+                    <div class="footer-section">
+                        <h4>Platform</h4>
+                        <ul>
+                            <li><a href="{{ url_for('sitemap_page') }}">App Structure</a></li>
+                            <li><a href="/privacy">Privacy Policy</a></li>
+                            <li><a href="/terms">Terms of Service</a></li>
+                            <li><a href="/debug">Debug Info</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-section">
+                        <h4>Support</h4>
+                        <ul>
+                            <li><a href="#">Help Center</a></li>
+                            <li><a href="#">Contact Us</a></li>
+                            <li><a href="#">Feature Requests</a></li>
+                            <li><a href="#">Community</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
             <div class="footer-bottom">
                 <div class="footer-bottom-content">
-                    <p>&copy; 2024 Ahoy Indie Media. All rights reserved.</p>
+                    <p>&copy; 2025 Ahoy Indie Media. All rights reserved.</p>
                     <div class="footer-links">
                         <a href="{{ url_for('sitemap_page') }}">Sitemap</a>
                         <a href="/privacy">Privacy</a>
