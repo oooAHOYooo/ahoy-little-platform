@@ -80,6 +80,102 @@
                 </div>
             </div>
         </div>
+
+        <!-- Feedback Section -->
+        <div class="feedback-section">
+            <div class="section-header">
+                <h2>User Feedback</h2>
+                <button @click="loadFeedback()"
+                    class="btn btn-sm btn-primary">Refresh</button>
+            </div>
+
+            <div class="feedback-stats">
+                <div class="stat-card">
+                    <h3>Total Feedback</h3>
+                    <span class="stat-number"
+                        x-text="feedbackStats.total">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>New</h3>
+                    <span class="stat-number"
+                        x-text="feedbackStats.new">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg Rating</h3>
+                    <span class="stat-number"
+                        x-text="feedbackStats.avgRating">0</span>
+                </div>
+            </div>
+
+            <div class="feedback-list">
+                <template x-for="feedback in feedbackList" :key="feedback.id">
+                    <div class="feedback-item"
+                        :class="'status-' + feedback.status">
+                        <div class="feedback-header">
+                            <div class="feedback-meta">
+                                <strong
+                                    x-text="feedback.subject || 'No Subject'"></strong>
+                                <span class="feedback-type"
+                                    x-text="feedback.feedback_type"></span>
+                                <span class="feedback-rating">
+                                    <template x-for="i in 5" :key="i">
+                                        <i class="fas fa-star"
+                                            :class="{'active': i <= feedback.rating}"></i>
+                                    </template>
+                                </span>
+                            </div>
+                            <div class="feedback-actions">
+                                <select
+                                    @change="updateFeedbackStatus(feedback.id, $event.target.value)"
+                                    :value="feedback.status"
+                                    class="status-select">
+                                    <option value="new">New</option>
+                                    <option value="reviewed">Reviewed</option>
+                                    <option value="in_progress">In
+                                        Progress</option>
+                                    <option value="resolved">Resolved</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="feedback-content">
+                            <p x-text="feedback.message"></p>
+                            <div x-show="feedback.suggestions"
+                                class="feedback-details">
+                                <strong>Suggestions:</strong>
+                                <p x-text="feedback.suggestions"></p>
+                            </div>
+                            <div x-show="feedback.bugs"
+                                class="feedback-details">
+                                <strong>Bug Report:</strong>
+                                <p x-text="feedback.bugs"></p>
+                            </div>
+                            <div x-show="feedback.feature_requests"
+                                class="feedback-details">
+                                <strong>Feature Request:</strong>
+                                <p x-text="feedback.feature_requests"></p>
+                            </div>
+                        </div>
+                        <div class="feedback-footer">
+                            <div class="feedback-info">
+                                <span x-text="feedback.username"></span>
+                                <span
+                                    x-text="formatDate(feedback.timestamp)"></span>
+                                <span x-show="feedback.contact_email"
+                                    x-text="feedback.contact_email"></span>
+                            </div>
+                            <div class="feedback-ratings">
+                                <span>UI: <strong
+                                        x-text="feedback.ui_rating"></strong></span>
+                                <span>Perf: <strong
+                                        x-text="feedback.performance_rating"></strong></span>
+                                <span>Content: <strong
+                                        x-text="feedback.content_rating"></strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
     </div>
 
     <!-- Reset Password Modal -->
@@ -147,6 +243,12 @@ function adminPage() {
         showDeleteModal: false,
         selectedUser: null,
         newPassword: '',
+        feedbackList: [],
+        feedbackStats: {
+            total: 0,
+            new: 0,
+            avgRating: 0
+        },
 
         async loadUsers() {
             try {
@@ -261,6 +363,60 @@ function adminPage() {
             } catch (error) {
                 console.error('Error deleting user:', error);
                 alert('Failed to delete user');
+            }
+        },
+
+        async loadFeedback() {
+            try {
+                const response = await fetch('/api/feedback');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.feedbackList = data.feedback;
+                    this.calculateFeedbackStats();
+                } else {
+                    console.error('Failed to load feedback');
+                }
+            } catch (error) {
+                console.error('Error loading feedback:', error);
+            }
+        },
+
+        calculateFeedbackStats() {
+            this.feedbackStats.total = this.feedbackList.length;
+            this.feedbackStats.new = this.feedbackList.filter(f => f.status === 'new').length;
+            
+            const ratings = this.feedbackList.filter(f => f.rating > 0).map(f => f.rating);
+            if (ratings.length > 0) {
+                this.feedbackStats.avgRating = (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1);
+            } else {
+                this.feedbackStats.avgRating = 0;
+            }
+        },
+
+        async updateFeedbackStatus(feedbackId, newStatus) {
+            try {
+                const response = await fetch(`/api/feedback/${feedbackId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (response.ok) {
+                    // Update local feedback list
+                    const feedback = this.feedbackList.find(f => f.id === feedbackId);
+                    if (feedback) {
+                        feedback.status = newStatus;
+                        this.calculateFeedbackStats();
+                    }
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error updating feedback status:', error);
+                alert('Failed to update feedback status');
             }
         }
     }
@@ -499,6 +655,151 @@ function adminPage() {
     margin-top: var(--spacing-sm);
 }
 
+/* Feedback Management Styles */
+.feedback-section {
+    margin-top: var(--spacing-xl);
+}
+
+.feedback-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.feedback-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.feedback-item {
+    background: var(--background-light);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    transition: all 0.2s ease;
+}
+
+.feedback-item.status-new {
+    border-left: 4px solid #3b82f6;
+}
+
+.feedback-item.status-reviewed {
+    border-left: 4px solid #f59e0b;
+}
+
+.feedback-item.status-in_progress {
+    border-left: 4px solid #10b981;
+}
+
+.feedback-item.status-resolved {
+    border-left: 4px solid #6b7280;
+}
+
+.feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-md);
+}
+
+.feedback-meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.feedback-meta strong {
+    font-size: var(--font-size-md);
+    color: var(--text-primary);
+}
+
+.feedback-type {
+    background: var(--primary-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: var(--font-size-xs);
+    text-transform: capitalize;
+    width: fit-content;
+}
+
+.feedback-rating {
+    display: flex;
+    gap: 2px;
+}
+
+.feedback-rating i {
+    color: var(--border-color);
+    font-size: var(--font-size-sm);
+}
+
+.feedback-rating i.active {
+    color: #fbbf24;
+}
+
+.feedback-actions {
+    display: flex;
+    align-items: center;
+}
+
+.status-select {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-xs);
+    background: var(--background-light);
+}
+
+.feedback-content {
+    margin-bottom: var(--spacing-md);
+}
+
+.feedback-content p {
+    margin: 0 0 var(--spacing-sm) 0;
+    line-height: 1.6;
+}
+
+.feedback-details {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
+    background: var(--background-hover);
+    border-radius: var(--border-radius);
+}
+
+.feedback-details strong {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    color: var(--primary-color);
+}
+
+.feedback-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--border-color);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.feedback-info {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.feedback-ratings {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.feedback-ratings span {
+    background: var(--background-hover);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
 @media (max-width: 768px) {
     .table-header,
     .table-row {
@@ -514,6 +815,18 @@ function adminPage() {
     .col-actions {
         display: flex;
         gap: var(--spacing-xs);
+    }
+    
+    .feedback-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    
+    .feedback-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
     }
 }
 </style>

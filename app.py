@@ -1565,6 +1565,115 @@ def admin_reset_password(username):
     
     return jsonify({'success': True, 'message': f'Password reset for {username}'})
 
+@app.route('/api/feedback', methods=['POST'])
+def submit_feedback():
+    """Submit user feedback"""
+    try:
+        data = request.json
+        feedback_data = {
+            'id': str(uuid.uuid4()),
+            'timestamp': datetime.now().isoformat(),
+            'user_agent': request.headers.get('User-Agent', ''),
+            'ip_address': request.remote_addr,
+            'username': session.get('username', 'anonymous'),
+            'feedback_type': data.get('type', 'general'),
+            'rating': data.get('rating', 0),
+            'ui_rating': data.get('ui_rating', 0),
+            'performance_rating': data.get('performance_rating', 0),
+            'content_rating': data.get('content_rating', 0),
+            'subject': data.get('subject', ''),
+            'message': data.get('message', ''),
+            'suggestions': data.get('suggestions', ''),
+            'bugs': data.get('bugs', ''),
+            'feature_requests': data.get('feature_requests', ''),
+            'contact_email': data.get('contact_email', ''),
+            'anonymous': data.get('anonymous', False),
+            'status': 'new'
+        }
+        
+        # Load existing feedback
+        feedback_file = 'data/feedback.json'
+        try:
+            with open(feedback_file, 'r') as f:
+                feedback_list = json.load(f)
+        except FileNotFoundError:
+            feedback_list = []
+        
+        # Add new feedback
+        feedback_list.append(feedback_data)
+        
+        # Save feedback
+        os.makedirs(os.path.dirname(feedback_file), exist_ok=True)
+        with open(feedback_file, 'w') as f:
+            json.dump(feedback_list, f, indent=2)
+        
+        return jsonify({'success': True, 'message': 'Thank you for your feedback!'})
+        
+    except Exception as e:
+        print(f"Error submitting feedback: {e}")
+        return jsonify({'error': 'Failed to submit feedback'}), 500
+
+@app.route('/api/feedback', methods=['GET'])
+def get_feedback():
+    """Get feedback (admin only)"""
+    admin_username = session.get('username')
+    if not admin_username or admin_username != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    try:
+        feedback_file = 'data/feedback.json'
+        with open(feedback_file, 'r') as f:
+            feedback_list = json.load(f)
+        
+        # Sort by timestamp (newest first)
+        feedback_list.sort(key=lambda x: x['timestamp'], reverse=True)
+        
+        return jsonify({'feedback': feedback_list})
+        
+    except FileNotFoundError:
+        return jsonify({'feedback': []})
+    except Exception as e:
+        print(f"Error loading feedback: {e}")
+        return jsonify({'error': 'Failed to load feedback'}), 500
+
+@app.route('/api/feedback/<feedback_id>/status', methods=['PUT'])
+def update_feedback_status():
+    """Update feedback status (admin only)"""
+    admin_username = session.get('username')
+    if not admin_username or admin_username != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    try:
+        data = request.json
+        feedback_id = request.view_args['feedback_id']
+        new_status = data.get('status')
+        
+        if not new_status:
+            return jsonify({'error': 'Status required'}), 400
+        
+        feedback_file = 'data/feedback.json'
+        with open(feedback_file, 'r') as f:
+            feedback_list = json.load(f)
+        
+        # Find and update feedback
+        for feedback in feedback_list:
+            if feedback['id'] == feedback_id:
+                feedback['status'] = new_status
+                feedback['updated_at'] = datetime.now().isoformat()
+                break
+        else:
+            return jsonify({'error': 'Feedback not found'}), 404
+        
+        # Save updated feedback
+        with open(feedback_file, 'w') as f:
+            json.dump(feedback_list, f, indent=2)
+        
+        return jsonify({'success': True, 'message': 'Status updated'})
+        
+    except Exception as e:
+        print(f"Error updating feedback status: {e}")
+        return jsonify({'error': 'Failed to update status'}), 500
+
 @app.route('/api/search')
 def search_api():
     """Search API endpoint"""

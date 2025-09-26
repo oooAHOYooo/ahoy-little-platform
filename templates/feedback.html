@@ -1,0 +1,757 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="feedback-page" x-data="feedbackPage()">
+    <div class="feedback-header">
+        <h1>Share Your Feedback</h1>
+        <p>Help us improve Ahoy Indie Media by sharing your thoughts about the
+            UI, performance, and overall experience</p>
+    </div>
+
+    <div class="feedback-container">
+        <div class="feedback-form-section">
+            <form @submit.prevent="submitFeedback()" class="feedback-form">
+                <!-- Feedback Type -->
+                <div class="form-section">
+                    <h3>What type of feedback are you sharing?</h3>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="type" value="general"
+                                x-model="formData.type">
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <strong>General Feedback</strong>
+                                <small>Overall thoughts and impressions</small>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="type" value="ui"
+                                x-model="formData.type">
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <strong>UI/Design</strong>
+                                <small>Visual design, layout, and user
+                                    interface</small>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="type" value="performance"
+                                x-model="formData.type">
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <strong>Performance</strong>
+                                <small>Speed, loading times, and
+                                    responsiveness</small>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="type" value="bug"
+                                x-model="formData.type">
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <strong>Bug Report</strong>
+                                <small>Something isn't working as
+                                    expected</small>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="type" value="feature"
+                                x-model="formData.type">
+                            <span class="radio-custom"></span>
+                            <div class="radio-content">
+                                <strong>Feature Request</strong>
+                                <small>Suggestions for new functionality</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Overall Rating -->
+                <div class="form-section">
+                    <h3>Overall Rating</h3>
+                    <div class="rating-container">
+                        <div class="star-rating">
+                            <template x-for="i in 5" :key="i">
+                                <button type="button"
+                                    @click="formData.rating = i"
+                                    :class="{'active': i <= formData.rating}"
+                                    class="star-btn">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                            </template>
+                        </div>
+                        <div class="rating-labels">
+                            <span x-show="formData.rating === 0">Click to
+                                rate</span>
+                            <span x-show="formData.rating === 1">Poor</span>
+                            <span x-show="formData.rating === 2">Fair</span>
+                            <span x-show="formData.rating === 3">Good</span>
+                            <span x-show="formData.rating === 4">Very
+                                Good</span>
+                            <span
+                                x-show="formData.rating === 5">Excellent</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Ratings -->
+                <div class="form-section">
+                    <h3>Detailed Ratings</h3>
+                    <div class="rating-grid">
+                        <div class="rating-item">
+                            <label>User Interface</label>
+                            <div class="star-rating small">
+                                <template x-for="i in 5" :key="i">
+                                    <button type="button"
+                                        @click="formData.ui_rating = i"
+                                        :class="{'active': i <= formData.ui_rating}"
+                                        class="star-btn">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="rating-item">
+                            <label>Performance</label>
+                            <div class="star-rating small">
+                                <template x-for="i in 5" :key="i">
+                                    <button type="button"
+                                        @click="formData.performance_rating = i"
+                                        :class="{'active': i <= formData.performance_rating}"
+                                        class="star-btn">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="rating-item">
+                            <label>Content Quality</label>
+                            <div class="star-rating small">
+                                <template x-for="i in 5" :key="i">
+                                    <button type="button"
+                                        @click="formData.content_rating = i"
+                                        :class="{'active': i <= formData.content_rating}"
+                                        class="star-btn">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subject -->
+                <div class="form-section">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" x-model="formData.subject"
+                        placeholder="Brief summary of your feedback"
+                        class="form-input">
+                </div>
+
+                <!-- Main Message -->
+                <div class="form-section">
+                    <label for="message">Your Feedback</label>
+                    <textarea id="message" x-model="formData.message"
+                        placeholder="Tell us what you think about the app, what you like, what could be improved, or any specific issues you've encountered..."
+                        rows="6" class="form-textarea" required></textarea>
+                </div>
+
+                <!-- Specific Sections -->
+                <div class="form-section" x-show="formData.type === 'ui'">
+                    <label for="ui_feedback">UI/Design Specific Feedback</label>
+                    <textarea id="ui_feedback" x-model="formData.suggestions"
+                        placeholder="What do you think about the visual design, colors, layout, navigation, buttons, etc.?"
+                        rows="4" class="form-textarea"></textarea>
+                </div>
+
+                <div class="form-section"
+                    x-show="formData.type === 'performance'">
+                    <label for="performance_feedback">Performance Specific
+                        Feedback</label>
+                    <textarea id="performance_feedback"
+                        x-model="formData.suggestions"
+                        placeholder="How fast does the app load? Are there any slow pages or features? Any lag or delays?"
+                        rows="4" class="form-textarea"></textarea>
+                </div>
+
+                <div class="form-section" x-show="formData.type === 'bug'">
+                    <label for="bug_feedback">Bug Details</label>
+                    <textarea id="bug_feedback" x-model="formData.bugs"
+                        placeholder="Describe the bug: What happened? What did you expect? Steps to reproduce the issue..."
+                        rows="4" class="form-textarea"></textarea>
+                </div>
+
+                <div class="form-section" x-show="formData.type === 'feature'">
+                    <label for="feature_feedback">Feature Request
+                        Details</label>
+                    <textarea id="feature_feedback"
+                        x-model="formData.feature_requests"
+                        placeholder="What new feature would you like to see? How would it improve your experience?"
+                        rows="4" class="form-textarea"></textarea>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="form-section">
+                    <h3>Contact Information (Optional)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contact_email">Email</label>
+                            <input type="email" id="contact_email"
+                                x-model="formData.contact_email"
+                                placeholder="your@email.com" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-option">
+                                <input type="checkbox"
+                                    x-model="formData.anonymous">
+                                <span class="checkbox-custom"></span>
+                                Submit anonymously
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" :disabled="isSubmitting"
+                        class="btn btn-primary btn-large">
+                        <i class="fas fa-paper-plane"
+                            x-show="!isSubmitting"></i>
+                        <i class="fas fa-spinner fa-spin"
+                            x-show="isSubmitting"></i>
+                        <span
+                            x-text="isSubmitting ? 'Submitting...' : 'Submit Feedback'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Feedback Guidelines -->
+        <div class="feedback-guidelines">
+            <h3>Feedback Guidelines</h3>
+            <ul>
+                <li><strong>Be specific:</strong> The more details you provide,
+                    the better we can understand and address your feedback</li>
+                <li><strong>Be constructive:</strong> We appreciate both
+                    positive feedback and suggestions for improvement</li>
+                <li><strong>Include context:</strong> Let us know what
+                    device/browser you're using and what you were trying to
+                    do</li>
+                <li><strong>Be honest:</strong> Your honest opinion helps us
+                    make the app better for everyone</li>
+            </ul>
+
+            <div class="guidelines-note">
+                <i class="fas fa-info-circle"></i>
+                <p>All feedback is reviewed by our team. We may reach out for
+                    clarification if you provide contact information.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div x-show="showSuccessModal" class="modal-overlay"
+        @click="closeSuccessModal()">
+        <div class="modal-content success-modal" @click.stop>
+            <div class="modal-header">
+                <h3>Thank You!</h3>
+                <button @click="closeSuccessModal()"
+                    class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <p>Your feedback has been submitted successfully. We really
+                    appreciate you taking the time to help us improve!</p>
+                <p>We'll review your feedback and use it to make Ahoy Indie
+                    Media even better.</p>
+            </div>
+            <div class="modal-footer">
+                <button @click="closeSuccessModal()"
+                    class="btn btn-primary">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function feedbackPage() {
+    return {
+        formData: {
+            type: 'general',
+            rating: 0,
+            ui_rating: 0,
+            performance_rating: 0,
+            content_rating: 0,
+            subject: '',
+            message: '',
+            suggestions: '',
+            bugs: '',
+            feature_requests: '',
+            contact_email: '',
+            anonymous: false
+        },
+        isSubmitting: false,
+        showSuccessModal: false,
+
+        async submitFeedback() {
+            if (!this.formData.message.trim()) {
+                alert('Please provide your feedback message');
+                return;
+            }
+
+            this.isSubmitting = true;
+
+            try {
+                const response = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.formData)
+                });
+
+                if (response.ok) {
+                    this.showSuccessModal = true;
+                    this.resetForm();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error submitting feedback:', error);
+                alert('Failed to submit feedback. Please try again.');
+            } finally {
+                this.isSubmitting = false;
+            }
+        },
+
+        resetForm() {
+            this.formData = {
+                type: 'general',
+                rating: 0,
+                ui_rating: 0,
+                performance_rating: 0,
+                content_rating: 0,
+                subject: '',
+                message: '',
+                suggestions: '',
+                bugs: '',
+                feature_requests: '',
+                contact_email: '',
+                anonymous: false
+            };
+        },
+
+        closeSuccessModal() {
+            this.showSuccessModal = false;
+        }
+    }
+}
+</script>
+
+<style>
+.feedback-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+.feedback-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.feedback-header h1 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-sm);
+}
+
+.feedback-container {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: var(--spacing-xl);
+}
+
+.feedback-form-section {
+    background: var(--background-light);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.feedback-guidelines {
+    background: var(--background-dark);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    height: fit-content;
+}
+
+.feedback-guidelines h3 {
+    margin-top: 0;
+    color: var(--primary-color);
+}
+
+.feedback-guidelines ul {
+    list-style: none;
+    padding: 0;
+}
+
+.feedback-guidelines li {
+    margin-bottom: var(--spacing-sm);
+    padding-left: var(--spacing-md);
+    position: relative;
+}
+
+.feedback-guidelines li::before {
+    content: "•";
+    color: var(--primary-color);
+    position: absolute;
+    left: 0;
+}
+
+.guidelines-note {
+    background: rgba(59, 130, 246, 0.1);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin-top: var(--spacing-lg);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+}
+
+.guidelines-note i {
+    color: var(--primary-color);
+    margin-top: 2px;
+}
+
+.form-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.form-section h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.radio-option:hover {
+    background: var(--background-hover);
+}
+
+.radio-option input[type="radio"] {
+    display: none;
+}
+
+.radio-option input[type="radio"]:checked + .radio-custom {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.radio-option input[type="radio"]:checked + .radio-custom::after {
+    opacity: 1;
+}
+
+.radio-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    margin-right: var(--spacing-md);
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.radio-custom::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.radio-content strong {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.radio-content small {
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+}
+
+.rating-container {
+    text-align: center;
+}
+
+.star-rating {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+}
+
+.star-rating.small {
+    gap: 2px;
+}
+
+.star-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--border-color);
+    cursor: pointer;
+    transition: color 0.2s ease;
+    padding: 0;
+}
+
+.star-btn:hover,
+.star-btn.active {
+    color: #fbbf24;
+}
+
+.rating-labels {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.rating-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+}
+
+.rating-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    background: var(--background-hover);
+    border-radius: var(--border-radius);
+}
+
+.rating-item label {
+    font-weight: 500;
+    margin: 0;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--spacing-md);
+    align-items: end;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: var(--spacing-xs);
+    font-weight: 500;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.checkbox-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+}
+
+.checkbox-option input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-option input[type="checkbox"]:checked + .checkbox-custom {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.checkbox-option input[type="checkbox"]:checked + .checkbox-custom::after {
+    opacity: 1;
+}
+
+.checkbox-custom {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 3px;
+    margin-right: var(--spacing-sm);
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.checkbox-custom::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 10px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.form-actions {
+    text-align: center;
+    margin-top: var(--spacing-xl);
+}
+
+.btn {
+    padding: var(--spacing-md) var(--spacing-xl);
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--primary-dark);
+}
+
+.btn-large {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    font-size: var(--font-size-md);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--background-light);
+    border-radius: var(--border-radius);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.success-modal .modal-body {
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+
+.success-icon {
+    font-size: 3rem;
+    color: #10b981;
+    margin-bottom: var(--spacing-lg);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    padding: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .feedback-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .rating-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+}
+</style>
+{% endblock %}

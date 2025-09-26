@@ -136,40 +136,79 @@
             <div class="grid-item playlists-widget">
                 <div class="item-header">
                     <h3><i class="fas fa-list-music"></i> Playlists</h3>
+                    <button @click="togglePlaylistForm()"
+                        class="add-playlist-btn"
+                        x-show="isLoggedIn">
+                        <i class="fas fa-plus"></i>
+                    </button>
                 </div>
                 <div class="playlists-content">
-                    <p class="playlists-description">User-created and curated
-                        playlists</p>
-                    <div class="playlists-preview">
-                        <div class="playlist-item">
-                            <div class="playlist-cover">
-                                <i class="fas fa-music"></i>
-                            </div>
-                            <div class="playlist-info">
-                                <h4>Indie Vibes</h4>
-                                <p>12 tracks</p>
-                            </div>
-                        </div>
-                        <div class="playlist-item">
-                            <div class="playlist-cover">
-                                <i class="fas fa-play-circle"></i>
-                            </div>
-                            <div class="playlist-info">
-                                <h4>Live Sessions</h4>
-                                <p>8 shows</p>
-                            </div>
-                        </div>
-                        <div class="playlist-item">
-                            <div class="playlist-cover">
-                                <i class="fas fa-star"></i>
-                            </div>
-                            <div class="playlist-info">
-                                <h4>Featured Mix</h4>
-                                <p>15 tracks</p>
-                            </div>
+                    <!-- Quick Create Form (when logged in) -->
+                    <div class="playlist-quick-create"
+                        x-show="isLoggedIn && showPlaylistForm">
+                        <div class="quick-create-form">
+                            <input type="text" x-model="newPlaylistName"
+                                placeholder="Playlist name..."
+                                class="playlist-input-small"
+                                @keyup.enter="createNewPlaylist()">
+                            <button @click="createNewPlaylist()"
+                                class="btn btn-primary btn-small"
+                                :disabled="!newPlaylistName.trim()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button @click="clearPlaylistForm()"
+                                class="btn btn-secondary btn-small">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                     </div>
-                    <a href="/my_saves" class="view-all-btn">
+
+                    <!-- Empty State for Guests -->
+                    <div class="playlists-empty" x-show="!isLoggedIn">
+                        <div class="empty-state">
+                            <i class="fas fa-plus-circle"></i>
+                            <h4>Create Your First Playlist</h4>
+                            <p>Start building your personal music collection</p>
+                            <button @click="showCreateAccountModal()"
+                                class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Create Account
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Empty State for Logged-in Users -->
+                    <div class="playlists-empty"
+                        x-show="isLoggedIn && userPlaylists.length === 0 && !showPlaylistForm">
+                        <div class="empty-state">
+                            <i class="fas fa-plus-circle"></i>
+                            <h4>No Playlists Yet</h4>
+                            <p>Click the + button to create your first
+                                playlist</p>
+                        </div>
+                    </div>
+
+                    <!-- Playlist List -->
+                    <div class="playlists-preview"
+                        x-show="isLoggedIn && userPlaylists.length > 0">
+                        <template x-for="playlist in userPlaylists.slice(0, 3)"
+                            :key="playlist.id">
+                            <div class="playlist-item"
+                                @click="viewPlaylist(playlist.id)">
+                                <div class="playlist-cover">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                                <div class="playlist-info">
+                                    <h4 x-text="playlist.name"></h4>
+                                    <p
+                                        x-text="playlist.total_items + ' items'"></p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- View All Link -->
+                    <a href="/my_saves" class="view-all-btn"
+                        x-show="isLoggedIn && userPlaylists.length > 0">
                         <i class="fas fa-arrow-right"></i> View All Playlists
                     </a>
                 </div>
@@ -187,7 +226,8 @@
                         <h2>Ahoy New Haven</h2>
                         <p>Discover live shows, poetry readings, and indie
                             performances in New Haven</p>
-                        <p class="beta-notice">Custom built web app beta - help us improve!</p>
+                        <p class="beta-notice">Custom built web app beta - help
+                            us improve!</p>
                     </div>
                 </div>
 
@@ -249,6 +289,52 @@
         <div class="spinner"></div>
         <p>Loading awesome content...</p>
     </section>
+
+    <!-- Create Account Modal -->
+    <div x-show="showCreateAccountModal" class="modal-overlay"
+        @click="closeCreateAccountModal()">
+        <div class="modal-content create-account-modal" @click.stop>
+            <div class="modal-header">
+                <h3>Save Your Work</h3>
+                <button @click="closeCreateAccountModal()"
+                    class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="save-warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h4>Don't Lose Your Work!</h4>
+                <p>You're creating playlists and saving content, but without an
+                    account, your work will be lost when you leave this
+                    page.</p>
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <i class="fas fa-check"></i>
+                        <span>Save playlists permanently</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-check"></i>
+                        <span>Access your content anywhere</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-check"></i>
+                        <span>Sync across devices</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-check"></i>
+                        <span>Get personalized recommendations</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button @click="closeCreateAccountModal()"
+                    class="btn btn-secondary">Continue as Guest</button>
+                <button @click="goToAuth()" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Create Free Account
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -267,12 +353,26 @@ function homePage() {
         touchStartX: 0,
         touchStartY: 0,
         isDragging: false,
+        userPlaylists: [],
+        hasUnsavedWork: false,
+        showCreateAccountModal: false,
+        newPlaylistName: '',
+        newPlaylistDescription: '',
+        showPlaylistForm: false,
         
         // Initialize
         async init() {
             await this.loadAllData();
             this.isLoading = false;
             this.startHeroRotation();
+            
+            // Load user playlists if logged in
+            if (window.ahoyApp && window.ahoyApp.isLoggedIn) {
+                await this.loadUserPlaylists();
+            }
+            
+            // Set up save warning system
+            this.setupSaveWarning();
             
             // Add resize listener to recalculate hero offset
             window.addEventListener('resize', () => {
@@ -478,6 +578,151 @@ function homePage() {
         
         viewArtist(artist) {
             window.location.href = `/artists`;
+        },
+
+        // Playlist management
+        async loadUserPlaylists() {
+            try {
+                const response = await fetch('/api/playlists');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.userPlaylists = data.playlists || [];
+                }
+            } catch (error) {
+                console.error('Error loading user playlists:', error);
+            }
+        },
+
+        createPlaylist() {
+            if (!window.ahoyApp || !window.ahoyApp.isLoggedIn) {
+                this.showCreateAccountModal = true;
+                return;
+            }
+            
+            // Redirect to my saves page to create playlist
+            window.location.href = '/my_saves';
+        },
+
+        viewPlaylist(playlistId) {
+            if (!window.ahoyApp || !window.ahoyApp.isLoggedIn) {
+                this.showCreateAccountModal = true;
+                return;
+            }
+            
+            // Redirect to my saves page to view playlist
+            window.location.href = '/my_saves';
+        },
+
+        showCreateAccountModal() {
+            this.showCreateAccountModal = true;
+        },
+
+        closeCreateAccountModal() {
+            this.showCreateAccountModal = false;
+        },
+
+        goToAuth() {
+            window.location.href = '/auth';
+        },
+
+        // Save warning system
+        setupSaveWarning() {
+            // Track when user creates content
+            this.trackUserActivity();
+            
+            // Warn before leaving page
+            window.addEventListener('beforeunload', (e) => {
+                if (this.hasUnsavedWork) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved work. Are you sure you want to leave?';
+                    return e.returnValue;
+                }
+            });
+        },
+
+        trackUserActivity() {
+            // Listen for save/unsave actions
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('[data-save-action]') || e.target.closest('[data-unsave-action]')) {
+                    this.hasUnsavedWork = true;
+                }
+            });
+
+            // Listen for playlist creation
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('[data-create-playlist]')) {
+                    this.hasUnsavedWork = true;
+                }
+            });
+        },
+
+        // Check if user is logged in
+        get isLoggedIn() {
+            return window.ahoyApp && window.ahoyApp.isLoggedIn;
+        },
+
+        // New playlist creation
+        async createNewPlaylist() {
+            if (!this.newPlaylistName.trim()) {
+                return;
+            }
+
+            if (!window.ahoyApp || !window.ahoyApp.isLoggedIn) {
+                this.showCreateAccountModal = true;
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/playlists', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: this.newPlaylistName.trim(),
+                        description: this.newPlaylistDescription.trim(),
+                        color: '#6366f1',
+                        is_public: false
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        // Clear form and close
+                        this.clearPlaylistForm();
+                        // Reload playlists
+                        await this.loadUserPlaylists();
+                        // Show success message
+                        if (window.ahoyApp && window.ahoyApp.showNotification) {
+                            window.ahoyApp.showNotification('Playlist created successfully!', 'success');
+                        }
+                    }
+                } else {
+                    const error = await response.json();
+                    if (window.ahoyApp && window.ahoyApp.showNotification) {
+                        window.ahoyApp.showNotification('Failed to create playlist: ' + error.error, 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Error creating playlist:', error);
+                if (window.ahoyApp && window.ahoyApp.showNotification) {
+                    window.ahoyApp.showNotification('Failed to create playlist', 'error');
+                }
+            }
+        },
+
+        clearPlaylistForm() {
+            this.newPlaylistName = '';
+            this.newPlaylistDescription = '';
+            this.showPlaylistForm = false;
+        },
+
+        togglePlaylistForm() {
+            this.showPlaylistForm = !this.showPlaylistForm;
+            if (!this.showPlaylistForm) {
+                this.clearPlaylistForm();
+            }
         }
     }
 }
