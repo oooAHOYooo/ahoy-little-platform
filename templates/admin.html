@@ -1,0 +1,520 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - User Management{% endblock %}
+
+{% block content %}
+<div class="admin-page" x-data="adminPage()" x-init="loadUsers()">
+    <div class="admin-header">
+        <h1>Admin Panel - User Management</h1>
+        <p>Manage users, reset passwords, and view user statistics</p>
+    </div>
+
+    <div class="admin-stats">
+        <div class="stat-card">
+            <h3>Total Users</h3>
+            <span class="stat-number" x-text="totalUsers">0</span>
+        </div>
+        <div class="stat-card">
+            <h3>Active Users</h3>
+            <span class="stat-number" x-text="activeUsers">0</span>
+        </div>
+        <div class="stat-card">
+            <h3>Total Saves</h3>
+            <span class="stat-number" x-text="totalSaves">0</span>
+        </div>
+    </div>
+
+    <div class="admin-content">
+        <div class="users-section">
+            <div class="section-header">
+                <h2>Users</h2>
+                <div class="search-box">
+                    <input type="text" x-model="searchQuery"
+                        placeholder="Search users..."
+                        @input="filterUsers()" class="search-input">
+                </div>
+            </div>
+
+            <div class="users-table">
+                <div class="table-header">
+                    <div class="col-username">Username</div>
+                    <div class="col-email">Email</div>
+                    <div class="col-created">Created</div>
+                    <div class="col-last-login">Last Login</div>
+                    <div class="col-activity">Activity</div>
+                    <div class="col-actions">Actions</div>
+                </div>
+
+                <div class="table-body">
+                    <template x-for="user in filteredUsers"
+                        :key="user.username">
+                        <div class="table-row">
+                            <div class="col-username">
+                                <strong x-text="user.username"></strong>
+                                <div class="display-name"
+                                    x-text="user.display_name"></div>
+                            </div>
+                            <div class="col-email" x-text="user.email"></div>
+                            <div class="col-created"
+                                x-text="formatDate(user.created_at)"></div>
+                            <div class="col-last-login"
+                                x-text="formatDate(user.last_login)"></div>
+                            <div class="col-activity">
+                                <div class="activity-stats">
+                                    <span>Saves: <strong
+                                            x-text="user.activity.total_saves || 0"></strong></span>
+                                    <span>Plays: <strong
+                                            x-text="user.activity.total_plays || 0"></strong></span>
+                                </div>
+                            </div>
+                            <div class="col-actions">
+                                <button @click="resetPassword(user.username)"
+                                    class="btn btn-sm btn-warning">Reset
+                                    Password</button>
+                                <button @click="deleteUser(user.username)"
+                                    class="btn btn-sm btn-danger"
+                                    :disabled="user.username === 'admin'">Delete</button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div x-show="showResetModal" class="modal-overlay"
+        @click="closeResetModal()">
+        <div class="modal-content" @click.stop>
+            <div class="modal-header">
+                <h3>Reset Password</h3>
+                <button @click="closeResetModal()"
+                    class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Reset password for user: <strong
+                        x-text="selectedUser?.username"></strong></p>
+                <div class="form-group">
+                    <label for="newPassword">New Password:</label>
+                    <input type="password" id="newPassword"
+                        x-model="newPassword"
+                        class="form-input" placeholder="Enter new password">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button @click="closeResetModal()"
+                    class="btn btn-secondary">Cancel</button>
+                <button @click="confirmResetPassword()"
+                    class="btn btn-primary">Reset Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete User Modal -->
+    <div x-show="showDeleteModal" class="modal-overlay"
+        @click="closeDeleteModal()">
+        <div class="modal-content" @click.stop>
+            <div class="modal-header">
+                <h3>Delete User</h3>
+                <button @click="closeDeleteModal()"
+                    class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete user: <strong
+                        x-text="selectedUser?.username"></strong>?</p>
+                <p class="warning-text">This action cannot be undone!</p>
+            </div>
+            <div class="modal-footer">
+                <button @click="closeDeleteModal()"
+                    class="btn btn-secondary">Cancel</button>
+                <button @click="confirmDeleteUser()"
+                    class="btn btn-danger">Delete User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function adminPage() {
+    return {
+        users: [],
+        filteredUsers: [],
+        searchQuery: '',
+        totalUsers: 0,
+        activeUsers: 0,
+        totalSaves: 0,
+        showResetModal: false,
+        showDeleteModal: false,
+        selectedUser: null,
+        newPassword: '',
+
+        async loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.users = data.users;
+                    this.filteredUsers = data.users;
+                    this.calculateStats();
+                } else {
+                    console.error('Failed to load users');
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        },
+
+        calculateStats() {
+            this.totalUsers = this.users.length;
+            this.activeUsers = this.users.filter(user => {
+                const lastLogin = new Date(user.last_login);
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                return lastLogin > thirtyDaysAgo;
+            }).length;
+            this.totalSaves = this.users.reduce((sum, user) => sum + (user.activity.total_saves || 0), 0);
+        },
+
+        filterUsers() {
+            if (!this.searchQuery) {
+                this.filteredUsers = this.users;
+                return;
+            }
+            
+            const query = this.searchQuery.toLowerCase();
+            this.filteredUsers = this.users.filter(user => 
+                user.username.toLowerCase().includes(query) ||
+                user.email.toLowerCase().includes(query) ||
+                user.display_name.toLowerCase().includes(query)
+            );
+        },
+
+        formatDate(dateString) {
+            if (!dateString) return 'Never';
+            return new Date(dateString).toLocaleDateString();
+        },
+
+        resetPassword(username) {
+            this.selectedUser = this.users.find(u => u.username === username);
+            this.newPassword = '';
+            this.showResetModal = true;
+        },
+
+        closeResetModal() {
+            this.showResetModal = false;
+            this.selectedUser = null;
+            this.newPassword = '';
+        },
+
+        async confirmResetPassword() {
+            if (!this.newPassword) {
+                alert('Please enter a new password');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/users/${this.selectedUser.username}/reset-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password: this.newPassword })
+                });
+
+                if (response.ok) {
+                    alert('Password reset successfully');
+                    this.closeResetModal();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error resetting password:', error);
+                alert('Failed to reset password');
+            }
+        },
+
+        deleteUser(username) {
+            this.selectedUser = this.users.find(u => u.username === username);
+            this.showDeleteModal = true;
+        },
+
+        closeDeleteModal() {
+            this.showDeleteModal = false;
+            this.selectedUser = null;
+        },
+
+        async confirmDeleteUser() {
+            try {
+                const response = await fetch(`/api/admin/users/${this.selectedUser.username}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('User deleted successfully');
+                    this.loadUsers(); // Reload users
+                    this.closeDeleteModal();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('Failed to delete user');
+            }
+        }
+    }
+}
+</script>
+
+<style>
+.admin-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+.admin-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.admin-header h1 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-sm);
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.stat-card {
+    background: var(--background-light);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.stat-card h3 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-input {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    width: 250px;
+}
+
+.users-table {
+    background: var(--background-light);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--background-dark);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.table-body {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+}
+
+.table-row:hover {
+    background: var(--background-hover);
+}
+
+.col-username .display-name {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.activity-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--font-size-xs);
+}
+
+.activity-stats span {
+    color: var(--text-secondary);
+}
+
+.btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    margin-right: var(--spacing-xs);
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+.btn-warning {
+    background: #f59e0b;
+    color: white;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-secondary {
+    background: var(--text-secondary);
+    color: white;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--background-light);
+    border-radius: var(--border-radius);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.modal-body {
+    padding: var(--spacing-lg);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+}
+
+.warning-text {
+    color: #ef4444;
+    font-weight: 500;
+    margin-top: var(--spacing-sm);
+}
+
+@media (max-width: 768px) {
+    .table-header,
+    .table-row {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
+    }
+    
+    .table-header > div,
+    .table-row > div {
+        padding: var(--spacing-xs) 0;
+    }
+    
+    .col-actions {
+        display: flex;
+        gap: var(--spacing-xs);
+    }
+}
+</style>
+{% endblock %}

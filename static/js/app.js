@@ -640,7 +640,7 @@ function showNotification(message, type = 'info') {
     // Style the notification
     Object.assign(notification.style, {
         position: 'fixed',
-        top: '20px',
+        bottom: '60px',
         right: '20px',
         padding: '12px 20px',
         borderRadius: '8px',

@@ -314,6 +314,13 @@
                                 <i class="fas fa-bug"></i>
                                 <span>Debug</span>
                             </a>
+                            <a href="/admin"
+                                class="mobile-menu-item"
+                                @click="rightMenuOpen = false"
+                                x-show="userProfile.username === 'admin'">
+                                <i class="fas fa-user-shield"></i>
+                                <span>Admin</span>
+                            </a>
                         </div>
 
                         <!-- Sign Out Section -->
@@ -646,50 +653,26 @@
                         <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}" alt="Ahoy Indie Media">
                     </div>
                     <p class="footer-tagline">Your gateway to independent music discovery and organization</p>
-                    <div class="footer-social">
-                        <a href="#" class="social-link" title="Follow us on Twitter">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="social-link" title="Follow us on Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="social-link" title="Follow us on TikTok">
-                            <i class="fab fa-tiktok"></i>
-                        </a>
-                        <a href="#" class="social-link" title="Subscribe to our YouTube">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                    </div>
                 </div>
 
                 <div class="footer-sections">
                     <div class="footer-section">
-                        <h4>Discover</h4>
+                        <h4>App</h4>
                         <ul>
                             <li><a href="{{ url_for('music') }}">Music</a></li>
                             <li><a href="{{ url_for('shows') }}">Shows</a></li>
                             <li><a href="{{ url_for('artists') }}">Artists</a></li>
                             <li><a href="{{ url_for('my_saves') }}">My Saves</a></li>
+                            <li><a href="/feedback">Feedback</a></li>
                         </ul>
                     </div>
 
                     <div class="footer-section">
-                        <h4>Platform</h4>
+                        <h4>Legal</h4>
                         <ul>
-                            <li><a href="{{ url_for('sitemap_page') }}">App Structure</a></li>
                             <li><a href="/privacy">Privacy Policy</a></li>
                             <li><a href="/terms">Terms of Service</a></li>
-                            <li><a href="/debug">Debug Info</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="footer-section">
-                        <h4>Support</h4>
-                        <ul>
-                            <li><a href="#">Help Center</a></li>
-                            <li><a href="#">Contact Us</a></li>
-                            <li><a href="#">Feature Requests</a></li>
-                            <li><a href="#">Community</a></li>
+                            <li><a href="{{ url_for('sitemap_page') }}">Sitemap</a></li>
                         </ul>
                     </div>
                 </div>
@@ -698,14 +681,14 @@
             <div class="footer-bottom">
                 <div class="footer-bottom-content">
                     <p>&copy; 2025 Ahoy Indie Media. All rights reserved.</p>
-                    <div class="footer-links">
-                        <a href="{{ url_for('sitemap_page') }}">Sitemap</a>
-                        <a href="/privacy">Privacy</a>
-                        <a href="/terms">Terms</a>
-                    </div>
                 </div>
             </div>
         </footer>
+
+        <!-- Debug Message -->
+        <div class="debug-message">
+            <span>Beta v1.0 - Debug Mode</span>
+        </div>
 
         <!-- JavaScript -->
         <script src="{{ url_for('static', filename='js/app.js') }}"></script>

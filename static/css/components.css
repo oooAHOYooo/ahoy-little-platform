@@ -10727,6 +10727,281 @@ img.loading {
     }
 }
 
+/* New Haven Events Promotional Banner */
+.newhaven-promo-section {
+    background: #F4C430;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+    padding: var(--spacing-2xl) 0;
+    margin: var(--spacing-xl) 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.newhaven-promo-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #000;
+}
+
+.promo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+}
+
+.promo-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+    align-items: center;
+    text-align: center;
+}
+
+.promo-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+}
+
+.promo-icon {
+    width: 80px;
+    height: 80px;
+    background: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #F4C430;
+    font-size: var(--font-size-3xl);
+    border: 3px solid #000;
+    flex-shrink: 0;
+}
+
+.promo-title h2 {
+    margin: 0 0 var(--spacing-sm) 0;
+    font-size: var(--font-size-3xl);
+    color: #000;
+    font-weight: 700;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.promo-title p {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    color: #000;
+    line-height: 1.6;
+    font-weight: 500;
+}
+
+.beta-notice {
+    margin: var(--spacing-sm) 0 0 0 !important;
+    font-size: var(--font-size-sm) !important;
+    color: #000 !important;
+    font-weight: 600 !important;
+    font-style: italic;
+}
+
+.promo-events {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    width: 100%;
+    max-width: 800px;
+}
+
+.event-card {
+    background: #000;
+    border: 3px solid #000;
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.event-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #F4C430;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border-color: #000;
+}
+
+.event-card:hover::before {
+    transform: scaleX(1);
+}
+
+.event-card.featured {
+    background: #000;
+    color: #F4C430;
+    border-color: #000;
+}
+
+.event-card.featured::before {
+    background: #F4C430;
+    transform: scaleX(1);
+}
+
+.event-date-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background: #F4C430;
+    border-radius: var(--border-radius-lg);
+    color: #000;
+    flex-shrink: 0;
+    border: 3px solid #000;
+    transition: all 0.3s ease;
+}
+
+.event-card:hover .event-date-badge {
+    background: #000;
+    color: #F4C430;
+    border-color: #000;
+    transform: scale(1.1);
+}
+
+.event-card.featured .event-date-badge {
+    background: #F4C430;
+    color: #000;
+    border-color: #000;
+}
+
+.event-day {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.event-month {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.event-info {
+    flex: 1;
+    text-align: left;
+}
+
+.event-info h3 {
+    margin: 0 0 var(--spacing-sm) 0;
+    font-size: var(--font-size-lg);
+    color: #F4C430;
+    font-weight: 600;
+}
+
+.event-card.featured .event-info h3 {
+    color: #F4C430;
+}
+
+.event-venue {
+    margin: 0 0 var(--spacing-xs) 0;
+    font-size: var(--font-size-sm);
+    color: #F4C430;
+    font-weight: 500;
+}
+
+.event-card.featured .event-venue {
+    color: #F4C430;
+}
+
+.event-time {
+    margin: 0 0 var(--spacing-xs) 0;
+    font-size: var(--font-size-sm);
+    color: #000;
+    font-weight: 600;
+}
+
+.event-card.featured .event-time {
+    color: #000;
+}
+
+.event-description {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    color: #000;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.event-card.featured .event-description {
+    color: #fff;
+}
+
+.promo-actions {
+    display: flex;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.promo-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    min-width: 200px;
+    justify-content: center;
+}
+
+.promo-btn.primary {
+    background: #000;
+    color: #F4C430;
+    border: 3px solid #000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.promo-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    background: #F4C430;
+    color: #000;
+}
+
+.promo-btn.secondary {
+    background: transparent;
+    color: #000;
+    border: 3px solid #000;
+}
+
+.promo-btn.secondary:hover {
+    background: #000;
+    border-color: #000;
+    color: #F4C430;
+    transform: translateY(-2px);
+}
+
 /* Playlists Widget */
 .playlists-widget {
     background: var(--background-light);
@@ -10813,6 +11088,91 @@ img.loading {
     background: var(--primary-color);
     color: white;
     transform: translateX(4px);
+}
+
+/* Mobile Responsive for New Haven Promotional Banner */
+@media (max-width: 768px) {
+    .newhaven-promo-section {
+        padding: var(--spacing-xl) 0;
+        margin: var(--spacing-lg) 0;
+    }
+
+    .promo-container {
+        padding: 0 var(--spacing-md);
+    }
+
+    .promo-header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        text-align: center;
+    }
+
+    .promo-icon {
+        width: 60px;
+        height: 60px;
+        font-size: var(--font-size-2xl);
+    }
+
+    .promo-title h2 {
+        font-size: var(--font-size-2xl);
+        color: #000;
+    }
+
+    .promo-title p {
+        font-size: var(--font-size-base);
+        color: #000;
+    }
+
+    .promo-events {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .event-card {
+        padding: var(--spacing-md);
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-sm);
+    }
+
+    .event-date-badge {
+        width: 50px;
+        height: 50px;
+    }
+
+    .event-day {
+        font-size: var(--font-size-lg);
+    }
+
+    .event-month {
+        font-size: var(--font-size-xs);
+    }
+
+    .event-info {
+        text-align: center;
+    }
+
+    .event-info h3 {
+        font-size: var(--font-size-base);
+    }
+
+    .event-venue,
+    .event-time,
+    .event-description {
+        font-size: var(--font-size-xs);
+    }
+
+    .promo-actions {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        width: 100%;
+    }
+
+    .promo-btn {
+        width: 100%;
+        min-width: auto;
+        padding: var(--spacing-sm) var(--spacing-lg);
+    }
 }
 
 /* Mobile Responsive for Playlists Widget */
@@ -11454,4 +11814,20 @@ img.loading {
 
 .player-meta .media-type i {
     font-size: 0.7rem;
+}
+
+/* Debug Message */
+.debug-message {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #000;
+    color: #F4C430;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    z-index: 1000;
+    border: 2px solid #F4C430;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }

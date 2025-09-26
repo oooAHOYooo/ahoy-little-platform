@@ -1488,6 +1488,83 @@ def sitemap_page():
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
+@app.route('/admin')
+def admin_page():
+    """Admin page for user management"""
+    # Simple admin check - in production, use proper authentication
+    admin_username = session.get('username')
+    if not admin_username or admin_username != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    return render_template('admin.html')
+
+@app.route('/feedback')
+def feedback_page():
+    """Feedback form page"""
+    return render_template('feedback.html')
+
+@app.route('/api/admin/users', methods=['GET'])
+def admin_get_users():
+    """Get all users for admin management"""
+    admin_username = session.get('username')
+    if not admin_username or admin_username != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    users = user_manager.users
+    # Return user list without passwords
+    user_list = []
+    for username, user_data in users.items():
+        user_list.append({
+            'username': username,
+            'email': user_data.get('email', ''),
+            'display_name': user_data.get('display_name', username),
+            'created_at': user_data.get('created_at', ''),
+            'last_login': user_data.get('last_login', ''),
+            'activity': user_data.get('activity', {}),
+            'profile': user_data.get('profile', {})
+        })
+    
+    return jsonify({'users': user_list})
+
+@app.route('/api/admin/users/<username>', methods=['DELETE'])
+def admin_delete_user(username):
+    """Delete a user"""
+    admin_username = session.get('username')
+    if not admin_username or admin_username != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    if username not in user_manager.users:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Don't allow admin to delete themselves
+    if username == 'admin':
+        return jsonify({'error': 'Cannot delete admin user'}), 400
+    
+    del user_manager.users[username]
+    user_manager.save_users()
+    
+    return jsonify({'success': True, 'message': f'User {username} deleted'})
+
+@app.route('/api/admin/users/<username>/reset-password', methods=['POST'])
+def admin_reset_password(username):
+    """Reset user password"""
+    admin_username = session.get('username')
+    if not admin_username or admin_username != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    
+    if username not in user_manager.users:
+        return jsonify({'error': 'User not found'}), 404
+    
+    data = request.json
+    new_password = data.get('password')
+    if not new_password:
+        return jsonify({'error': 'Password required'}), 400
+    
+    user_manager.users[username]['password'] = user_manager.hash_password(new_password)
+    user_manager.save_users()
+    
+    return jsonify({'success': True, 'message': f'Password reset for {username}'})
+
 @app.route('/api/search')
 def search_api():
     """Search API endpoint"""
