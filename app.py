@@ -25,6 +25,11 @@ limiter.init_app(app)
 init_cors(app)
 login_manager.login_view = "auth.login"
 
+# Health check endpoint
+@app.get("/api/healthz")
+def healthz():
+    return {"ok": True}
+
 # Enable compression (optional)
 try:
     from flask_compress import Compress

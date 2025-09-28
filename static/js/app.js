@@ -933,7 +933,7 @@ document.addEventListener("click", async (e) => {
 });
 
 // Optional: hydrate bookmark state on page load (call from your page init if desired)
-export async function hydrateBookmarksState() {
+window.hydrateBookmarksState = async function hydrateBookmarksState() {
   try {
     const me = await api("/api/activity/me", "GET");
     const set = new Set(me.bookmarks || []);
@@ -958,3 +958,20 @@ window.ahoyApp = {
     showNotification,
     api
 };
+
+// Boot watchdog: clears the loading screen even if a request fails
+(function boot() {
+  function clearLoader() {
+    const loader = document.getElementById("app-loader") || document.getElementById("loading-indicator");
+    if (loader) loader.style.display = "none";
+  }
+  window.addEventListener("DOMContentLoaded", async () => {
+    // try to hydrate bookmarks; even on failure, clear loader so UI is usable
+    try { await window.hydrateBookmarksState(); } catch (e) { console.warn(e); }
+    // If your app does additional bootstrapping, call it here in try/catch too.
+    clearLoader();
+  });
+
+  // Safety net: if DOMContentLoaded didn't fire, force-clear loader after 5s
+  setTimeout(clearLoader, 5000);
+})();
