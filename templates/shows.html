@@ -126,19 +126,10 @@
                                     <i class="fas fa-play"></i>
                                 </button>
                                 <div class="show-actions">
-                                    <button @click.stop="likeShow(show)"
-                                        class="action-btn"
-                                        :class="{'liked': isLiked(show)}"
-                                        title="Like"
-                                        :data-like="true"
-                                        :data-id="show.id"
-                                        data-kind="show">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
                                     <button @click.stop="saveShow(show)"
                                         class="action-btn"
-                                        :class="{'saved': isSaved(show)}"
-                                        title="Save"
+                                        :class="{'bookmarked': isSaved(show)}"
+                                        title="Bookmark"
                                         :data-bookmark="true"
                                         :data-id="show.id"
                                         data-kind="show">
@@ -180,17 +171,9 @@
                             </div>
                             <span class="col-host" x-text="show.host"></span>
                             <div class="col-actions">
-                                <button @click.stop="likeShow(show)"
-                                    class="action-btn"
-                                    :class="{'liked': isLiked(show)}"
-                                    :data-like="true"
-                                    :data-id="show.id"
-                                    data-kind="show">
-                                    <i class="fas fa-heart"></i>
-                                </button>
                                 <button @click.stop="saveShow(show)"
                                     class="action-btn"
-                                    :class="{'saved': isSaved(show)}"
+                                    :class="{'bookmarked': isSaved(show)}"
                                     :data-bookmark="true"
                                     :data-id="show.id"
                                     data-kind="show">
@@ -329,54 +312,27 @@ function showsPage() {
             }
         },
         
-        async likeShow(show) {
-            try {
-                const isCurrentlyLiked = this.isLiked(show);
-                const response = await fetch(isCurrentlyLiked ? '/api/likes/unlike' : '/api/likes/like', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        type: 'show',
-                        id: show.id,
-                        data: show
-                    })
-                });
-                
-                if (response.ok) {
-                    show.liked = !isCurrentlyLiked;
-                    this.showNotification(isCurrentlyLiked ? 'Unliked show' : 'Liked show', 'success');
-                }
-            } catch (error) {
-                console.error('Error liking show:', error);
-                this.showNotification('Failed to like show', 'error');
-            }
-        },
-        
         async saveShow(show) {
             try {
                 const isCurrentlySaved = this.isSaved(show);
-                const response = await fetch(isCurrentlySaved ? '/api/saves/unsave' : '/api/saves/save', {
+                const response = await fetch('/api/activity/bookmark', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        type: 'show',
                         id: show.id,
-                        data: show
+                        kind: 'show'
                     })
                 });
                 
                 if (response.ok) {
-                    show.saved = !isCurrentlySaved;
-                    this.showNotification(isCurrentlySaved ? 'Removed from saves' : 'Saved show', 'success');
+                    const result = await response.json();
+                    show.saved = result.status === 'bookmarked';
+                    this.showNotification(result.status === 'bookmarked' ? 'Bookmarked show' : 'Removed from bookmarks', 'success');
                 }
             } catch (error) {
-                console.error('Error saving show:', error);
-                this.showNotification('Failed to save show', 'error');
+                console.error('Error bookmarking show:', error);
+                this.showNotification('Failed to bookmark show', 'error');
             }
-        },
-        
-        isLiked(show) {
-            return show.liked || false;
         },
         
         isSaved(show) {

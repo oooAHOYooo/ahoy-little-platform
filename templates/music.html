@@ -90,8 +90,8 @@
                         <div class="track-actions">
                             <button @click.stop="saveTrack(track)"
                                 class="action-btn save-btn"
-                                :class="{'saved': isSaved(track)}"
-                                :title="isSaved(track) ? 'Remove from saves' : 'Save track'"
+                                :class="{'bookmarked': isSaved(track)}"
+                                :title="isSaved(track) ? 'Remove from bookmarks' : 'Bookmark track'"
                                 :data-bookmark="true"
                                 :data-id="track.id"
                                 data-kind="track">
@@ -101,15 +101,6 @@
                                 class="action-btn add-btn"
                                 title="Add to playlist">
                                 <i class="fas fa-plus"></i>
-                            </button>
-                            <button @click.stop="likeTrack(track)"
-                                class="action-btn like-btn"
-                                :class="{'liked': isLiked(track)}"
-                                :title="isLiked(track) ? 'Unlike' : 'Like'"
-                                :data-like="true"
-                                :data-id="track.id"
-                                data-kind="track">
-                                <i class="fas fa-heart"></i>
                             </button>
                             <button @click.stop="showTrackMenu(track)"
                                 class="action-btn menu-btn"
@@ -162,21 +153,12 @@
                     <div class="col-actions">
                         <button @click.stop="saveTrack(track)"
                             class="action-btn"
-                            :class="{'saved': isSaved(track)}"
-                            title="Save track"
+                            :class="{'bookmarked': isSaved(track)}"
+                            title="Bookmark track"
                             :data-bookmark="true"
                             :data-id="track.id"
                             data-kind="track">
                             <i class="fas fa-bookmark"></i>
-                        </button>
-                        <button @click.stop="likeTrack(track)"
-                            class="action-btn"
-                            :class="{'liked': isLiked(track)}"
-                            title="Like track"
-                            :data-like="true"
-                            :data-id="track.id"
-                            data-kind="track">
-                            <i class="fas fa-heart"></i>
                         </button>
                         <button @click.stop="addToPlaylist(track)"
                             class="action-btn"
@@ -429,50 +411,18 @@ function musicLibrary() {
         },
 
 
-        async likeTrack(track) {
-            try {
-                const isCurrentlyLiked = this.isLiked(track);
-                const response = await fetch(isCurrentlyLiked ? '/api/likes/unlike' : '/api/likes/like', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        type: 'track',
-                        id: track.id,
-                        data: track
-                    })
-                });
-                
-                if (response.ok) {
-                    // Update UI state
-                    track.liked = !isCurrentlyLiked;
-                    this.showNotification(isCurrentlyLiked ? 'Unliked track' : 'Liked track', 'success');
-                } else {
-                    this.showNotification('Failed to like track', 'error');
-                }
-            } catch (error) {
-                console.error('Error liking track:', error);
-                this.showNotification('Failed to like track', 'error');
-            }
-        },
-
-        isLiked(track) {
-            // Check if track is liked
-            return track.liked || false;
-        },
-        
         async saveTrack(track) {
             try {
-                console.log('Saving track:', track);
+                console.log('Bookmarking track:', track);
                 const isCurrentlySaved = this.isSaved(track);
                 console.log('Currently saved:', isCurrentlySaved);
                 
-                const response = await fetch(isCurrentlySaved ? '/api/saves/unsave' : '/api/saves/save', {
+                const response = await fetch('/api/activity/bookmark', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        type: 'track',
                         id: track.id,
-                        data: track
+                        kind: 'track'
                     })
                 });
                 
@@ -482,43 +432,16 @@ function musicLibrary() {
                 
                 if (response.ok) {
                     // Update UI state
-                    track.saved = !isCurrentlySaved;
+                    track.saved = result.status === 'bookmarked';
                     
-                    if (result.guest) {
-                        this.showNotification('Saved track! (Guest mode - create account to keep permanently)', 'info');
-                        this.showUpgradePrompt();
-                    } else {
-                        this.showNotification('Saved track!', 'success');
-                    }
+                    this.showNotification(result.status === 'bookmarked' ? 'Bookmarked track!' : 'Removed from bookmarks', 'success');
                 } else {
-                    console.error('Save failed:', result);
-                    this.showNotification(result.error || 'Failed to save track', 'error');
+                    console.error('Bookmark failed:', result);
+                    this.showNotification(result.error || 'Failed to bookmark track', 'error');
                 }
             } catch (error) {
-                console.error('Error saving track:', error);
-                this.showNotification('Failed to save track: ' + error.message, 'error');
-            }
-        },
-        
-        async likeTrack(track) {
-            try {
-                const isCurrentlyLiked = this.isLiked(track);
-                const response = await fetch(isCurrentlyLiked ? '/api/likes/unlike' : '/api/likes/like', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        type: 'track',
-                        id: track.id,
-                        data: track
-                    })
-                });
-                
-                if (response.ok) {
-                    // Update UI state
-                    track.liked = !isCurrentlyLiked;
-                }
-            } catch (error) {
-                console.error('Error liking track:', error);
+                console.error('Error bookmarking track:', error);
+                this.showNotification('Failed to bookmark track: ' + error.message, 'error');
             }
         },
         
@@ -701,10 +624,6 @@ function musicLibrary() {
         
         isSaved(track) {
             return track.saved || false;
-        },
-        
-        isLiked(track) {
-            return track.liked || false;
         },
         
         // Utility functions

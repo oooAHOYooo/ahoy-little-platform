@@ -58,27 +58,17 @@
         <button @click="activeTab = 'saved'"
             :class="{'active': activeTab === 'saved'}"
             class="nav-tab">
-            <i class="fas fa-bookmark"></i> Saved Content
+            <i class="fas fa-bookmark"></i> Bookmarks
         </button>
         <button @click="activeTab = 'playlists'"
             :class="{'active': activeTab === 'playlists'}"
             class="nav-tab">
             <i class="fas fa-th-large"></i> Boards
-        </button>
-        <button @click="activeTab = 'liked'"
-            :class="{'active': activeTab === 'liked'}"
-            class="nav-tab">
-            <i class="fas fa-heart"></i> Liked
         </button>
         <button @click="activeTab = 'recent'"
             :class="{'active': activeTab === 'recent'}"
             class="nav-tab">
             <i class="fas fa-clock"></i> Recently Played
-        </button>
-        <button @click="activeTab = 'playlists'"
-            :class="{'active': activeTab === 'playlists'}"
-            class="nav-tab">
-            <i class="fas fa-th-large"></i> Boards
         </button>
     </div>
 
@@ -136,9 +126,11 @@
         </div>
 
         <div x-show="filteredSavedContent.length === 0" class="empty-state">
-            <i class="fas fa-bookmark"></i>
-            <h3>No saved content</h3>
-            <p>Start saving tracks, shows, and artists you love!</p>
+            <div class="icon">🔖</div>
+            <h3>No bookmarks yet</h3>
+            <p>Click the bookmark icon on any show, track, or artist to save it
+                here.</p>
+            <a class="btn" href="/shows">Browse Shows</a>
         </div>
     </div>
 
@@ -187,48 +179,6 @@
             <i class="fas fa-list"></i>
             <h3>No playlists yet</h3>
             <p>Create your first playlist to organize your favorite content!</p>
-        </div>
-    </div>
-
-    <!-- Liked Content Tab -->
-    <div x-show="activeTab === 'liked'" class="liked-content">
-        <div class="liked-grid">
-            <template x-for="item in likedContent"
-                :key="item.id + '-' + item.type">
-                <div class="liked-item" @click="playContent(item)">
-                    <div class="item-cover">
-                        <img
-                            :src="item.data?.cover_art || item.data?.thumbnail || '/static/img/default-cover.jpg'"
-                            :alt="item.data?.title || item.data?.name">
-                        <div class="item-overlay">
-                            <button @click.stop="playContent(item)"
-                                class="play-btn">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <div class="item-actions">
-                                <button @click.stop="unlikeContent(item)"
-                                    class="action-btn">
-                                    <i class="fas fa-heart"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="item-info">
-                        <h3 x-text="item.data?.title || item.data?.name"></h3>
-                        <p x-text="item.data?.artist || item.data?.host"></p>
-                        <div class="item-meta">
-                            <span class="liked-date"
-                                x-text="formatDate(item.liked_at)"></span>
-                        </div>
-                    </div>
-                </div>
-            </template>
-        </div>
-
-        <div x-show="likedContent.length === 0" class="empty-state">
-            <i class="fas fa-heart"></i>
-            <h3>No liked content</h3>
-            <p>Like tracks, shows, and artists to see them here!</p>
         </div>
     </div>
 
@@ -439,7 +389,6 @@ function mySavesLibrary() {
         savedFilter: 'all',
         savedContent: [],
         playlists: [],
-        likedContent: [],
         recentlyPlayed: [],
         userPlaylists: [],
         userStats: null,
@@ -466,7 +415,6 @@ function mySavesLibrary() {
                 await Promise.all([
                     this.loadSavedContent(),
                     this.loadPlaylists(),
-                    this.loadLikedContent(),
                     this.loadRecentlyPlayed(),
                     this.loadUserStats(),
                     this.loadUserPlaylists()
@@ -478,9 +426,13 @@ function mySavesLibrary() {
         
         async loadSavedContent() {
             try {
-                const response = await fetch('/api/saves/track');
+                const response = await fetch('/api/activity/me');
                 const data = await response.json();
-                this.savedContent = data.content || [];
+                // Convert bookmarks to saved content format
+                this.savedContent = (data.bookmarks || []).map(bookmark => {
+                    const [kind, id] = bookmark.split(':');
+                    return { id, type: kind, saved_at: new Date().toISOString() };
+                });
             } catch (error) {
                 console.error('Error loading saved content:', error);
             }
@@ -496,15 +448,6 @@ function mySavesLibrary() {
             }
         },
         
-        async loadLikedContent() {
-            try {
-                const response = await fetch('/api/likes');
-                const data = await response.json();
-                this.likedContent = data.liked_content || [];
-            } catch (error) {
-                console.error('Error loading liked content:', error);
-            }
-        },
         
         async loadRecentlyPlayed() {
             try {
@@ -545,12 +488,12 @@ function mySavesLibrary() {
         
         async unsaveContent(item) {
             try {
-                const response = await fetch('/api/saves/unsave', {
+                const response = await fetch('/api/activity/bookmark', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        type: item.type || 'track',
-                        id: item.id
+                        id: item.id,
+                        kind: item.type || 'track'
                     })
                 });
                 
@@ -559,25 +502,6 @@ function mySavesLibrary() {
                 }
             } catch (error) {
                 console.error('Error unsaving content:', error);
-            }
-        },
-        
-        async unlikeContent(item) {
-            try {
-                const response = await fetch('/api/likes/unlike', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        type: item.type,
-                        id: item.id
-                    })
-                });
-                
-                if (response.ok) {
-                    this.likedContent = this.likedContent.filter(i => !(i.id === item.id && i.type === item.type));
-                }
-            } catch (error) {
-                console.error('Error unliking content:', error);
             }
         },
         

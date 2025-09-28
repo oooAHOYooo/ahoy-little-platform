@@ -8,35 +8,24 @@ bp = Blueprint("activity", __name__, url_prefix="/api/activity")
 DATA_PATH = os.path.join("data", "user_activity.json")
 
 def _user_bucket(store, username):
-    return store.setdefault(username, {"likes": [], "bookmarks": [], "history": []})
+    # Migrate legacy shape that had "likes"
+    bucket = store.setdefault(username, {"bookmarks": [], "history": []})
+    if "likes" in bucket:
+        # fold all likes into bookmarks (idempotent)
+        for key in bucket.get("likes", []):
+            if key not in bucket["bookmarks"]:
+                bucket["bookmarks"].append(key)
+        bucket.pop("likes", None)
+    return bucket
 
 @bp.get("/me")
 @login_required
 def me_activity():
     store = read_json(DATA_PATH, {})
     bucket = _user_bucket(store, current_user.id)
-    return jsonify(bucket)
-
-@bp.post("/like")
-@limiter.limit("60/minute")
-@login_required
-def like_toggle():
-    body = request.get_json(silent=True) or {}
-    item_id = (body.get("id") or "").strip()
-    kind = (body.get("kind") or "track").strip()
-    if not item_id:
-        return jsonify({"error": "missing id"}), 400
-    store = read_json(DATA_PATH, {})
-    bucket = _user_bucket(store, current_user.id)
-    key = f"{kind}:{item_id}"
-    if key in bucket["likes"]:
-        bucket["likes"].remove(key)
-        status = "unliked"
-    else:
-        bucket["likes"].append(key)
-        status = "liked"
+    # ensure migration saved
     write_json(DATA_PATH, store)
-    return jsonify({"ok": True, "status": status, "id": item_id, "kind": kind})
+    return jsonify(bucket)
 
 @bp.post("/bookmark")
 @limiter.limit("60/minute")
@@ -47,15 +36,18 @@ def bookmark_toggle():
     kind = (body.get("kind") or "track").strip()
     if not item_id:
         return jsonify({"error": "missing id"}), 400
+
     store = read_json(DATA_PATH, {})
     bucket = _user_bucket(store, current_user.id)
     key = f"{kind}:{item_id}"
+
     if key in bucket["bookmarks"]:
         bucket["bookmarks"].remove(key)
         status = "removed"
     else:
         bucket["bookmarks"].append(key)
         status = "bookmarked"
+
     write_json(DATA_PATH, store)
     return jsonify({"ok": True, "status": status, "id": item_id, "kind": kind})
 
@@ -68,9 +60,12 @@ def mark_played():
     kind = (body.get("kind") or "track").strip()
     if not item_id:
         return jsonify({"error": "missing id"}), 400
+
     store = read_json(DATA_PATH, {})
     bucket = _user_bucket(store, current_user.id)
+
     bucket["history"].append({"id": item_id, "kind": kind, "ts": int(time.time())})
     bucket["history"] = bucket["history"][-500:]
+
     write_json(DATA_PATH, store)
     return jsonify({"ok": True})

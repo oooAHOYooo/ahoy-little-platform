@@ -909,35 +909,44 @@ async function api(url, method="GET", payload=null) {
     try { return await res.json(); } catch { return {}; }
 }
 
-// Like / bookmark toggle (event delegation)
+// Event delegation for a single save mechanic: BOOKMARK
 document.addEventListener("click", async (e) => {
-    const likeBtn = e.target.closest("[data-like]");
-    const bmBtn   = e.target.closest("[data-bookmark]");
-    try {
-        if (likeBtn) {
-            e.preventDefault();
-            const id = likeBtn.dataset.id;
-            const kind = likeBtn.dataset.kind || "track";
-            if (!id) return;
-            likeBtn.classList.add("is-loading");
-            const { status } = await api("/api/activity/like", "POST", { id, kind });
-            likeBtn.classList.toggle("liked", status === "liked");
-            likeBtn.classList.remove("is-loading");
-        }
-        if (bmBtn) {
-            e.preventDefault();
-            const id = bmBtn.dataset.id;
-            const kind = bmBtn.dataset.kind || "track";
-            if (!id) return;
-            bmBtn.classList.add("is-loading");
-            const { status } = await api("/api/activity/bookmark", "POST", { id, kind });
-            bmBtn.classList.toggle("bookmarked", status === "bookmarked");
-            bmBtn.classList.remove("is-loading");
-        }
-    } catch (err) {
-        console.error(err);
-    }
+  // If any old templates still emit data-like, treat them as bookmarks too.
+  const bmBtn = e.target.closest("[data-bookmark]") || e.target.closest("[data-like]");
+  if (!bmBtn) return;
+
+  e.preventDefault();
+  const id = bmBtn.dataset.id;
+  const kind = bmBtn.dataset.kind || "track";
+  if (!id) return;
+
+  try {
+    bmBtn.classList.add("is-loading");
+    const { status } = await api("/api/activity/bookmark", "POST", { id, kind });
+    bmBtn.classList.toggle("bookmarked", status === "bookmarked");
+  } catch (err) {
+    console.error(err);
+    // TODO: toast "Please sign in to save"
+  } finally {
+    bmBtn.classList.remove("is-loading");
+  }
 });
+
+// Optional: hydrate bookmark state on page load (call from your page init if desired)
+export async function hydrateBookmarksState() {
+  try {
+    const me = await api("/api/activity/me", "GET");
+    const set = new Set(me.bookmarks || []);
+    document.querySelectorAll("[data-bookmark], [data-like]").forEach(btn => {
+      const id = btn.dataset.id;
+      const kind = btn.dataset.kind || "track";
+      const key = `${kind}:${id}`;
+      btn.classList.toggle("bookmarked", set.has(key));
+    });
+  } catch (e) {
+    // not logged in or request failed — ignore
+  }
+}
 
 // Export functions for global use
 window.ahoyApp = {
