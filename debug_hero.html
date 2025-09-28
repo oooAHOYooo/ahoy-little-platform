@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hero Debug</title>
+        <script defer
+            src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <style>
+        .hero-item {
+            width: 100%;
+            height: 300px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+        .hero-feed {
+            display: flex;
+            transition: transform 0.3s ease;
+        }
+        .hero-controls {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        .hero-nav {
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .hero-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        .hero-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+        }
+        .hero-dot.active {
+            background: white;
+        }
+    </style>
+    </head>
+    <body>
+        <div x-data="heroDebug()" x-init="init()">
+            <h1>Hero Debug Test</h1>
+            <p>Hero Items: <span x-text="heroItems.length"></span></p>
+            <p>Current Index: <span x-text="currentHeroIndex"></span></p>
+            <p>Hero Offset: <span x-text="heroOffset"></span></p>
+
+            <div
+                style="position: relative; width: 100%; height: 300px; overflow: hidden; border: 2px solid #ccc;">
+                <div class="hero-feed"
+                    :style="`transform: translateX(${heroOffset}px)`">
+                    <template x-for="(item, index) in heroItems" :key="item.id">
+                        <div class="hero-item"
+                            :style="`background-image: url(${item.cover_art || item.thumbnail})`"
+                            x-text="item.title">
+                        </div>
+                    </template>
+                </div>
+
+                <div class="hero-controls">
+                    <button @click="prevHero()" class="hero-nav">←</button>
+                    <button @click="nextHero()" class="hero-nav">→</button>
+                </div>
+
+                <div class="hero-indicators">
+                    <template x-for="(item, index) in heroItems" :key="item.id">
+                        <button @click="setHeroIndex(index)"
+                            :class="{'active': currentHeroIndex === index}"
+                            class="hero-dot"></button>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        function heroDebug() {
+            return {
+                heroItems: [],
+                currentHeroIndex: 0,
+                heroOffset: 0,
+                
+                async init() {
+                    await this.loadData();
+                    this.updateHeroOffset();
+                },
+                
+                async loadData() {
+                    try {
+                        const response = await fetch('/api/now-playing');
+                        const data = await response.json();
+                        this.heroItems = data.feed || [];
+                        console.log('Loaded hero items:', this.heroItems);
+                    } catch (error) {
+                        console.error('Error loading data:', error);
+                    }
+                },
+                
+                nextHero() {
+                    if (this.currentHeroIndex < this.heroItems.length - 1) {
+                        this.currentHeroIndex++;
+                    } else {
+                        this.currentHeroIndex = 0;
+                    }
+                    this.updateHeroOffset();
+                },
+                
+                prevHero() {
+                    if (this.currentHeroIndex > 0) {
+                        this.currentHeroIndex--;
+                    } else {
+                        this.currentHeroIndex = this.heroItems.length - 1;
+                    }
+                    this.updateHeroOffset();
+                },
+                
+                setHeroIndex(index) {
+                    this.currentHeroIndex = index;
+                    this.updateHeroOffset();
+                },
+                
+                updateHeroOffset() {
+                    const container = document.querySelector('.hero-feed').parentElement;
+                    if (container) {
+                        const containerWidth = container.offsetWidth;
+                        this.heroOffset = -this.currentHeroIndex * containerWidth;
+                        console.log('Updated offset:', this.heroOffset, 'Container width:', containerWidth);
+                    }
+                }
+            }
+        }
+    </script>
+    </body>
+</html>

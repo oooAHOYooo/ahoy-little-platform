@@ -7,5 +7,14 @@
       "track:demo-track-1"
     ],
     "history": []
+  },
+  "testuser2": {
+    "likes": [
+      "track:demo-track-1"
+    ],
+    "bookmarks": [
+      "track:demo-track-1"
+    ],
+    "history": []
   }
 }

@@ -1,0 +1,180 @@
+{
+  "project_overview": {
+    "name": "Ahoy Indie Media - Flask Platform",
+    "description": "Indie music discovery and organization platform",
+    "tech_stack": ["Flask", "Alpine.js", "JavaScript", "CSS", "JSON file storage"],
+    "current_status": "Fully functional with authentication, playlists, likes, bookmarks",
+    "last_updated": "2025-09-28"
+  },
+  "architecture": {
+    "backend": {
+      "framework": "Flask 2.3.3",
+      "authentication": "Flask-Login with bcrypt password hashing",
+      "rate_limiting": "Flask-Limiter (60/min for likes, 120/min for history)",
+      "cors": "Flask-CORS with credentials support",
+      "storage": "Thread-safe JSON file storage with atomic operations",
+      "blueprints": [
+        "auth (login/register/logout)",
+        "activity (likes/bookmarks/history)", 
+        "playlists (CRUD operations)"
+      ]
+    },
+    "frontend": {
+      "framework": "Alpine.js for reactivity",
+      "styling": "Custom CSS with responsive design",
+      "javascript": "Vanilla JS with fetch API and credentials: include",
+      "components": [
+        "Global player",
+        "Hero carousel",
+        "Playlist manager",
+        "Like/bookmark buttons"
+      ]
+    }
+  },
+  "api_endpoints": {
+    "authentication": {
+      "POST /api/auth/register": "User registration with bcrypt hashing",
+      "POST /api/auth/login": "User login with session management",
+      "POST /api/auth/logout": "User logout"
+    },
+    "activity": {
+      "POST /api/activity/like": "Like/unlike content (tracks/shows/artists)",
+      "POST /api/activity/bookmark": "Bookmark/unbookmark content",
+      "GET /api/activity/me": "Get user's activity data",
+      "POST /api/activity/played": "Mark content as played"
+    },
+    "playlists": {
+      "GET /api/playlists": "List user's playlists",
+      "POST /api/playlists": "Create new playlist",
+      "PUT /api/playlists/<id>": "Update playlist",
+      "DELETE /api/playlists/<id>": "Delete playlist",
+      "POST /api/playlists/<id>/items": "Add item to playlist",
+      "DELETE /api/playlists/<id>/items": "Remove item from playlist"
+    },
+    "content": {
+      "GET /api/now-playing": "Get curated music feed",
+      "GET /api/music": "Get all music tracks",
+      "GET /api/shows": "Get all shows/videos",
+      "GET /api/artists": "Get all artists",
+      "GET /api/search": "Universal search"
+    }
+  },
+  "data_structure": {
+    "users": {
+      "file": "data/users.json",
+      "structure": {
+        "username": "string",
+        "pw_hash": "bcrypt hash",
+        "created_at": "ISO timestamp"
+      }
+    },
+    "activity": {
+      "file": "data/user_activity.json", 
+      "structure": {
+        "username": {
+          "likes": ["kind:id strings"],
+          "bookmarks": ["kind:id strings"],
+          "history": [{"id": "string", "kind": "string", "ts": "timestamp"}]
+        }
+      }
+    },
+    "playlists": {
+      "file": "data/playlists.json",
+      "structure": {
+        "username": {
+          "lists": [{
+            "id": "uuid",
+            "name": "string",
+            "description": "string", 
+            "items": ["kind:id strings"]
+          }]
+        }
+      }
+    }
+  },
+  "current_issues": {
+    "hero_section": {
+      "status": "Not working",
+      "description": "Hero carousel on homepage not functioning",
+      "symptoms": "Hero items not displaying or rotating",
+      "investigation_needed": [
+        "Check if /api/now-playing returns data",
+        "Verify Alpine.js homePage() function loads",
+        "Check for JavaScript console errors",
+        "Verify heroItems array is populated"
+      ]
+    }
+  },
+  "testing_status": {
+    "smoke_tests": "All passing",
+    "pytest": "6 tests passing",
+    "api_endpoints": "All functional",
+    "authentication": "Working with sessions",
+    "data_persistence": "Working with file locking"
+  },
+  "deployment": {
+    "environment": "Development",
+    "server": "Flask development server",
+    "port": "5000",
+    "dependencies": "All installed and working",
+    "ci_cd": "GitHub Actions configured"
+  },
+  "file_structure": {
+    "core_files": [
+      "app.py (main Flask app)",
+      "config.py (environment-based config)",
+      "extensions.py (Flask extensions)",
+      "storage.py (thread-safe JSON storage)"
+    ],
+    "blueprints": [
+      "blueprints/__init__.py",
+      "blueprints/auth.py",
+      "blueprints/activity.py", 
+      "blueprints/playlists.py"
+    ],
+    "templates": [
+      "templates/base.html",
+      "templates/home.html (with hero section)",
+      "templates/music.html",
+      "templates/shows.html",
+      "templates/artists.html"
+    ],
+    "static": [
+      "static/js/app.js (main JS with credentials)",
+      "static/js/player.js (media player)",
+      "static/js/playlist-manager.js (playlist functions)",
+      "static/css/main.css",
+      "static/css/components.css"
+    ],
+    "data": [
+      "data/users.json",
+      "data/user_activity.json", 
+      "data/playlists.json",
+      "static/data/music.json",
+      "static/data/shows.json",
+      "static/data/artists.json"
+    ]
+  },
+  "debug_commands": {
+    "start_server": "export FLASK_ENV=development && export SECRET_KEY=dev-secret && flask run",
+    "test_api": "curl -X POST http://127.0.0.1:5000/api/auth/register -H 'Content-Type: application/json' -d '{\"username\":\"test\",\"password\":\"secret\"}'",
+    "check_hero_data": "curl http://127.0.0.1:5000/api/now-playing",
+    "run_tests": "pytest -q"
+  },
+  "next_steps": {
+    "immediate": [
+      "Debug hero section not working",
+      "Check browser console for JavaScript errors",
+      "Verify /api/now-playing endpoint returns data",
+      "Test Alpine.js homePage() function initialization"
+    ],
+    "long_term": [
+      "Add database support (PostgreSQL/SQLite)",
+      "Implement Redis for rate limiting",
+      "Add file upload for user avatars",
+      "Implement real-time notifications",
+      "Add admin dashboard",
+      "Optimize for production deployment"
+    ]
+  }
+}

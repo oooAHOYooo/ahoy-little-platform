@@ -1,1 +1,1 @@
-# Blueprints package
+# makes 'blueprints' a package

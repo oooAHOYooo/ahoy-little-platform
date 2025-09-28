@@ -1256,6 +1256,11 @@ def debug_page():
     """Debug console page"""
     return render_template('debug.html')
 
+@app.route('/debug_hero')
+def debug_hero():
+    """Debug hero carousel page"""
+    return send_from_directory('.', 'debug_hero.html')
+
 @app.route('/api/debug/logs')
 def get_debug_logs():
     """Get debug logs"""
