@@ -1,1 +1,11 @@
-{}
+{
+  "alex": {
+    "likes": [
+      "track:demo-track-1"
+    ],
+    "bookmarks": [
+      "track:demo-track-1"
+    ],
+    "history": []
+  }
+}

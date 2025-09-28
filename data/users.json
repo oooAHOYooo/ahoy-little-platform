@@ -535,5 +535,8 @@
         "basic_playlists"
       ]
     }
+  },
+  "alex": {
+    "pw_hash": "$2b$12$Pm6tDw1GpYFUYc.CPxoJfeXu1D31YJWFgcNtofpCfG61/twOpQzzG"
   }
 }

@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+*.env
+production.env
+cookies.txt
+data/users.json
+data/user_activity.json
+data/playlists.json
+dist/
+build/

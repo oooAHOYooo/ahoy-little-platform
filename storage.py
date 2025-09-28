@@ -1,5 +1,4 @@
 import json, os, threading
-
 _lock = threading.RLock()
 
 def read_json(path, default):

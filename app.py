@@ -8,8 +8,22 @@ import hashlib
 from functools import wraps
 from user_manager import user_manager
 
+from dotenv import load_dotenv
+load_dotenv()
+
+from config import get_config
+from extensions import bcrypt, login_manager, limiter, init_cors
+from blueprints.auth import bp as auth_bp
+from blueprints.activity import bp as activity_bp
+from blueprints.playlists import bp as playlists_bp
+
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'ahoy-indie-media-secret-2025')
+app.config.from_object(get_config())
+bcrypt.init_app(app)
+login_manager.init_app(app)
+limiter.init_app(app)
+init_cors(app)
+login_manager.login_view = "auth.login"
 
 # Enable compression (optional)
 try:
@@ -27,8 +41,7 @@ USERS_FILE = 'data/users.json'
 ACTIVITY_FILE = 'data/user_activity.json'
 
 # Register blueprints
-from blueprints.activity import bp as activity_bp
-from blueprints.playlists import bp as playlists_bp
+app.register_blueprint(auth_bp)
 app.register_blueprint(activity_bp)
 app.register_blueprint(playlists_bp)
 

@@ -1,11 +1,11 @@
 // Ahoy Indie Media - Playlist Manager JavaScript
 
 async function api(url, method="GET", payload=null) {
-    const opts = { method, headers: { "Content-Type": "application/json" } };
+    const opts = { method, headers: { "Content-Type": "application/json" }, credentials: "include" };
     if (payload) opts.body = JSON.stringify(payload);
     const res = await fetch(url, opts);
     if (!res.ok) throw new Error(`API ${method} ${url} -> ${res.status}`);
-    return res.json().catch(() => ({}));
+    try { return await res.json(); } catch { return {}; }
 }
 
 export async function loadPlaylists() {
