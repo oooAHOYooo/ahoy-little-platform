@@ -26,6 +26,12 @@ CACHE_TIMEOUT = 300  # 5 minutes
 USERS_FILE = 'data/users.json'
 ACTIVITY_FILE = 'data/user_activity.json'
 
+# Register blueprints
+from blueprints.activity import bp as activity_bp
+from blueprints.playlists import bp as playlists_bp
+app.register_blueprint(activity_bp)
+app.register_blueprint(playlists_bp)
+
 def load_json_data(filename, default=None):
     """Load JSON data from file with fallback"""
     try:
@@ -1036,7 +1042,7 @@ def manage_playlist(playlist_id):
         if playlist:
             return jsonify({'playlist': playlist})
         else:
-            return jsonify({'error': 'Board not found'}), 404
+            return jsonify({'error': 'Playlist not found'}), 404
     
     elif request.method == 'PUT':
         data = request.json

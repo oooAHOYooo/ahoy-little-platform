@@ -268,34 +268,34 @@
         </div>
     </div>
 
-    <!-- Boards Tab -->
+    <!-- Playlists Tab -->
     <div x-show="activeTab === 'playlists'" class="playlists-content">
         <div class="playlists-header">
-            <h2>My Boards</h2>
-            <button @click="showCreateBoard = true" class="btn btn-primary">
-                <i class="fas fa-plus"></i> New Board
+            <h2>My Playlists</h2>
+            <button @click="showCreatePlaylist = true" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Playlist
             </button>
         </div>
 
         <div class="playlists-grid">
-            <template x-for="playlist in userBoards" :key="playlist.id">
-                <div class="playlist-card" @click="viewBoard(playlist)">
+            <template x-for="playlist in userPlaylists" :key="playlist.id">
+                <div class="playlist-card" @click="viewPlaylist(playlist)">
                     <div class="playlist-cover"
                         :style="`background-color: ${playlist.color || '#6366f1'}`">
                         <div class="playlist-overlay">
                             <div class="playlist-actions">
-                                <button @click.stop="editBoard(playlist)"
+                                <button @click.stop="editPlaylist(playlist)"
                                     class="action-btn" title="Edit playlist">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button @click.stop="deleteBoard(playlist)"
+                                <button @click.stop="deletePlaylist(playlist)"
                                     class="action-btn" title="Delete playlist">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="playlist-icon">
-                            <i class="fas fa-th-large"></i>
+                            <i class="fas fa-music"></i>
                         </div>
                         <div class="playlist-item-count"
                             x-text="`${playlist.total_items || 0} items`"></div>
@@ -315,12 +315,12 @@
             </template>
         </div>
 
-        <div x-show="userBoards.length === 0" class="empty-state">
-            <i class="fas fa-th-large"></i>
+        <div x-show="userPlaylists.length === 0" class="empty-state">
+            <i class="fas fa-music"></i>
             <h3>No playlists yet</h3>
             <p>Create your first playlist to organize your favorite content!</p>
-            <button @click="showCreateBoard = true" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Create Board
+            <button @click="showCreatePlaylist = true" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Playlist
             </button>
         </div>
     </div>
@@ -392,75 +392,40 @@
         </div>
     </div>
 
-    <!-- Create Board Modal -->
-    <div x-show="showCreateBoard" class="modal-overlay"
-        @click="showCreateBoard = false">
+    <!-- Create Playlist Modal -->
+    <div x-show="showCreatePlaylist" class="modal-overlay"
+        @click="showCreatePlaylist = false">
         <div class="modal-content" @click.stop>
             <div class="modal-header">
-                <h3>Create New Board</h3>
-                <button @click="showCreateBoard = false" class="close-btn">
+                <h3>Create New Playlist</h3>
+                <button @click="showCreatePlaylist = false" class="close-btn">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Board Name</label>
-                    <input type="text" x-model="newBoard.name"
+                    <label>Playlist Name</label>
+                    <input type="text" x-model="newPlaylist.name"
                         placeholder="Enter playlist name">
                 </div>
                 <div class="form-group">
                     <label>Description</label>
-                    <textarea x-model="newBoard.description"
+                    <textarea x-model="newPlaylist.description"
                         placeholder="Enter playlist description"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Color</label>
-                    <div class="color-picker">
-                        <button type="button"
-                            @click="newBoard.color = '#6366f1'"
-                            :class="{'active': newBoard.color === '#6366f1'}"
-                            class="color-option"
-                            style="background: #6366f1;"></button>
-                        <button type="button"
-                            @click="newBoard.color = '#ef4444'"
-                            :class="{'active': newBoard.color === '#ef4444'}"
-                            class="color-option"
-                            style="background: #ef4444;"></button>
-                        <button type="button"
-                            @click="newBoard.color = '#10b981'"
-                            :class="{'active': newBoard.color === '#10b981'}"
-                            class="color-option"
-                            style="background: #10b981;"></button>
-                        <button type="button"
-                            @click="newBoard.color = '#f59e0b'"
-                            :class="{'active': newBoard.color === '#f59e0b'}"
-                            class="color-option"
-                            style="background: #f59e0b;"></button>
-                        <button type="button"
-                            @click="newBoard.color = '#8b5cf6'"
-                            :class="{'active': newBoard.color === '#8b5cf6'}"
-                            class="color-option"
-                            style="background: #8b5cf6;"></button>
-                        <button type="button"
-                            @click="newBoard.color = '#06b6d4'"
-                            :class="{'active': newBoard.color === '#06b6d4'}"
-                            class="color-option"
-                            style="background: #06b6d4;"></button>
-                    </div>
-                </div>
-                <div class="form-group">
                     <label class="checkbox-label">
-                        <input type="checkbox" x-model="newBoard.is_public">
+                        <input type="checkbox" x-model="newPlaylist.is_public">
                         <span class="checkmark"></span>
                         Make this playlist public
                     </label>
                 </div>
             </div>
             <div class="modal-footer">
-                <button @click="showCreateBoard = false"
+                <button @click="showCreatePlaylist = false"
                     class="btn btn-outline">Cancel</button>
-                <button @click="createBoard()" class="btn btn-primary">Create
-                    Board</button>
+                <button @click="createPlaylist()" class="btn btn-primary">Create
+                    Playlist</button>
             </div>
         </div>
     </div>
@@ -476,20 +441,13 @@ function mySavesLibrary() {
         playlists: [],
         likedContent: [],
         recentlyPlayed: [],
-        userBoards: [],
+        userPlaylists: [],
         userStats: null,
         showCreatePlaylist: false,
-        showCreateBoard: false,
         showAddToPlaylistModal: false,
         newPlaylist: {
             name: '',
             description: '',
-            is_public: false
-        },
-        newBoard: {
-            name: '',
-            description: '',
-            color: '#6366f1',
             is_public: false
         },
         selectedContent: null,
@@ -511,7 +469,7 @@ function mySavesLibrary() {
                     this.loadLikedContent(),
                     this.loadRecentlyPlayed(),
                     this.loadUserStats(),
-                    this.loadUserBoards()
+                    this.loadUserPlaylists()
                 ]);
             } catch (error) {
                 console.error('Error loading user data:', error);
@@ -568,11 +526,11 @@ function mySavesLibrary() {
             }
         },
         
-        async loadUserBoards() {
+        async loadUserPlaylists() {
             try {
                 const response = await fetch('/api/playlists');
                 const data = await response.json();
-                this.userBoards = data.playlists || [];
+                this.userPlaylists = data.playlists || [];
             } catch (error) {
                 console.error('Error loading user playlists:', error);
             }
@@ -704,23 +662,22 @@ function mySavesLibrary() {
             }
         },
         
-        // Board actions
-        async createBoard() {
+        // Playlist actions
+        async createPlaylist() {
             try {
                 const response = await fetch('/api/playlists', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(this.newBoard)
+                    body: JSON.stringify(this.newPlaylist)
                 });
                 
                 if (response.ok) {
                     const data = await response.json();
-                    this.userBoards.push(data.playlist);
-                    this.showCreateBoard = false;
-                    this.newBoard = {
+                    this.userPlaylists.push(data.playlist);
+                    this.showCreatePlaylist = false;
+                    this.newPlaylist = {
                         name: '',
                         description: '',
-                        color: '#6366f1',
                         is_public: false
                     };
                 }
@@ -729,17 +686,17 @@ function mySavesLibrary() {
             }
         },
         
-        viewBoard(playlist) {
+        viewPlaylist(playlist) {
             // Navigate to playlist view
             window.location.href = `/playlist/${playlist.id}`;
         },
         
-        editBoard(playlist) {
+        editPlaylist(playlist) {
             // Navigate to playlist edit
             window.location.href = `/playlist/${playlist.id}/edit`;
         },
         
-        async deleteBoard(playlist) {
+        async deletePlaylist(playlist) {
             if (confirm(`Are you sure you want to delete "${playlist.name}"?`)) {
                 try {
                     const response = await fetch(`/api/playlists/${playlist.id}`, {

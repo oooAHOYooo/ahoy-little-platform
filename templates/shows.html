@@ -129,13 +129,19 @@
                                     <button @click.stop="likeShow(show)"
                                         class="action-btn"
                                         :class="{'liked': isLiked(show)}"
-                                        title="Like">
+                                        title="Like"
+                                        :data-like="true"
+                                        :data-id="show.id"
+                                        data-kind="show">
                                         <i class="fas fa-heart"></i>
                                     </button>
                                     <button @click.stop="saveShow(show)"
                                         class="action-btn"
                                         :class="{'saved': isSaved(show)}"
-                                        title="Save">
+                                        title="Save"
+                                        :data-bookmark="true"
+                                        :data-id="show.id"
+                                        data-kind="show">
                                         <i class="fas fa-bookmark"></i>
                                     </button>
                                 </div>
@@ -176,12 +182,18 @@
                             <div class="col-actions">
                                 <button @click.stop="likeShow(show)"
                                     class="action-btn"
-                                    :class="{'liked': isLiked(show)}">
+                                    :class="{'liked': isLiked(show)}"
+                                    :data-like="true"
+                                    :data-id="show.id"
+                                    data-kind="show">
                                     <i class="fas fa-heart"></i>
                                 </button>
                                 <button @click.stop="saveShow(show)"
                                     class="action-btn"
-                                    :class="{'saved': isSaved(show)}">
+                                    :class="{'saved': isSaved(show)}"
+                                    :data-bookmark="true"
+                                    :data-id="show.id"
+                                    data-kind="show">
                                     <i class="fas fa-bookmark"></i>
                                 </button>
                             </div>

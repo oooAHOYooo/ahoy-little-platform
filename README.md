@@ -293,6 +293,122 @@ For questions or support:
 - **Documentation**: Check this README
 - **Community**: Join our Discord server
 
+## Development Log
+
+### December 19, 2024 - Major Feature Implementation: Working Likes/Bookmarks & Playlists
+
+**Problem Identified:**
+- Like and bookmark features were not working due to missing API contracts
+- Frontend buttons were using local state only, not persisting to backend
+- Playlist functionality was incomplete with "boards" vs "playlists" terminology confusion
+- No reliable REST endpoints for user activity persistence
+
+**Backend Changes:**
+
+1. **Created `storage.py`** - Thread-safe JSON storage module
+   - Implements file locking to prevent data corruption during concurrent writes
+   - Provides `read_json()` and `write_json()` functions with atomic operations
+   - Ensures data integrity across multiple user sessions
+
+2. **Created `blueprints/activity.py`** - New activity management API
+   - `GET /api/activity/me` - Retrieve user's likes, bookmarks, and play history
+   - `POST /api/activity/like` - Toggle like status for tracks/shows/artists
+   - `POST /api/activity/bookmark` - Toggle bookmark status for content
+   - `POST /api/activity/played` - Mark content as played (updates history)
+   - Uses session-based authentication with proper error handling
+
+3. **Created `blueprints/playlists.py`** - Complete playlist CRUD API
+   - `GET /api/playlists` - List all user playlists
+   - `POST /api/playlists` - Create new playlist with name/description
+   - `PUT /api/playlists/<id>` - Update playlist metadata
+   - `DELETE /api/playlists/<id>` - Delete playlist
+   - `POST /api/playlists/<id>/items` - Add content to playlist
+   - `DELETE /api/playlists/<id>/items` - Remove content from playlist
+   - Full CRUD operations with proper validation
+
+4. **Updated `app.py`** - Registered new blueprints
+   - Added blueprint imports and registration
+   - Integrated with existing session-based authentication
+   - Maintains backward compatibility with existing endpoints
+
+**Frontend Changes:**
+
+1. **Updated `static/js/app.js`** - Enhanced with new API integration
+   - Added `api()` helper function for consistent API calls
+   - Implemented event delegation for like/bookmark buttons
+   - Added automatic UI state updates with CSS class toggling
+   - Integrated error handling with user notifications
+
+2. **Replaced `static/js/playlist-manager.js`** - Complete rewrite
+   - New modular approach with proper API calls
+   - Exported functions for playlist management
+   - Added form submission handling for playlist creation
+   - Integrated with global notification system
+
+3. **Updated HTML Templates** - Added data attributes for API integration
+   - **`templates/music.html`**: Added `data-like`, `data-bookmark`, `data-id`, `data-kind` attributes
+   - **`templates/shows.html`**: Added same data attributes for show content
+   - All like/save buttons now properly wired to backend APIs
+
+**Data Structure Changes:**
+
+1. **New Data Files:**
+   - `data/user_activity.json` - Stores user likes, bookmarks, and play history
+   - `data/playlists.json` - Stores user playlists and playlist items
+   - Both files use thread-safe JSON operations
+
+2. **Removed Legacy Code:**
+   - Eliminated all "boards" terminology and replaced with "playlists"
+   - Removed unused board-related functions from `user_manager.py`
+   - Cleaned up template references to old board system
+
+**Key Features Now Working:**
+
+✅ **Likes & Bookmarks:**
+- Persistent storage across page refreshes
+- Works for both tracks and shows
+- Immediate visual feedback with CSS classes
+- Proper error handling and user notifications
+
+✅ **Playlist Management:**
+- Create, edit, delete playlists
+- Add/remove content from playlists
+- Persistent storage per user
+- Full CRUD operations via API
+
+✅ **Data Persistence:**
+- Thread-safe JSON file operations
+- User-specific data organization
+- Atomic write operations prevent data corruption
+
+**Testing:**
+- Created `test_likes_playlists.py` for API endpoint testing
+- All endpoints properly authenticated and validated
+- Data files created and updated correctly
+
+**Technical Improvements:**
+- Event delegation for better performance
+- Proper error handling throughout
+- Consistent API response format
+- Thread-safe file operations
+- Clean separation of concerns
+
+**Files Modified:**
+- `storage.py` (new)
+- `blueprints/activity.py` (new)
+- `blueprints/playlists.py` (new)
+- `blueprints/__init__.py` (new)
+- `app.py` (updated)
+- `static/js/app.js` (updated)
+- `static/js/playlist-manager.js` (replaced)
+- `templates/music.html` (updated)
+- `templates/shows.html` (updated)
+- `test_likes_playlists.py` (new)
+
+**Result:** The platform now has fully functional likes, bookmarks, and playlist management that persists across sessions and provides immediate user feedback.
+
+---
+
 ## Changelog
 
 ### Version 1.0.0

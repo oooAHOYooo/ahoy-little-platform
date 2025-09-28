@@ -374,14 +374,14 @@ class UserManager:
         self.save_users()
         return True
     
-    def create_board(self, username: str, name: str, description: str = "", color: str = "#6366f1", is_public: bool = False) -> Optional[str]:
-        """Create a new board/collection"""
+    def create_playlist(self, username: str, name: str, description: str = "", color: str = "#6366f1", is_public: bool = False) -> Optional[str]:
+        """Create a new playlist"""
         if username not in self.users:
             return None
         
-        board_id = str(uuid.uuid4())
-        board = {
-            'id': board_id,
+        playlist_id = str(uuid.uuid4())
+        playlist = {
+            'id': playlist_id,
             'name': name,
             'description': description,
             'color': color,
@@ -397,26 +397,26 @@ class UserManager:
         }
         
         user = self.users[username]
-        user['saves']['boards'].append(board)
+        user['saves']['playlists'].append(playlist)
         user['activity']['total_playlists'] += 1
         self.save_users()
-        return board_id
+        return playlist_id
     
-    def add_to_board(self, username: str, board_id: str, content_type: str, content_id: str, content_data: Dict[str, Any] = None) -> bool:
-        """Add content to board"""
+    def add_to_playlist(self, username: str, playlist_id: str, content_type: str, content_id: str, content_data: Dict[str, Any] = None) -> bool:
+        """Add content to playlist"""
         if username not in self.users:
             return False
         
         user = self.users[username]
-        board = next((b for b in user['saves']['boards'] if b['id'] == board_id), None)
+        playlist = next((p for p in user['saves']['playlists'] if p['id'] == playlist_id), None)
         
-        if not board:
+        if not playlist:
             return False
         
-        # Check if already in board
-        content_list = board.get(content_type + 's', [])
+        # Check if already in playlist
+        content_list = playlist.get(content_type + 's', [])
         if any(item['id'] == content_id for item in content_list):
-            return True  # Already in board
+            return True  # Already in playlist
         
         item = {
             'id': content_id,
@@ -424,79 +424,32 @@ class UserManager:
             'data': content_data or {}
         }
         
-        board[content_type + 's'].append(item)
-        board['total_items'] = sum(len(board.get(key, [])) for key in ['tracks', 'shows', 'artists'])
-        board['updated_at'] = datetime.now().isoformat()
+        playlist[content_type + 's'].append(item)
+        playlist['total_items'] = sum(len(playlist.get(key, [])) for key in ['tracks', 'shows', 'artists'])
+        playlist['updated_at'] = datetime.now().isoformat()
         
         self.save_users()
         return True
     
-    def remove_from_board(self, username: str, board_id: str, content_type: str, content_id: str) -> bool:
-        """Remove content from board"""
+    def remove_from_playlist(self, username: str, playlist_id: str, content_type: str, content_id: str) -> bool:
+        """Remove content from playlist"""
         if username not in self.users:
             return False
         
         user = self.users[username]
-        board = next((b for b in user['saves']['boards'] if b['id'] == board_id), None)
+        playlist = next((p for p in user['saves']['playlists'] if p['id'] == playlist_id), None)
         
-        if not board:
+        if not playlist:
             return False
         
-        content_list = board.get(content_type + 's', [])
-        board[content_type + 's'] = [item for item in content_list if item['id'] != content_id]
-        board['total_items'] = sum(len(board.get(key, [])) for key in ['tracks', 'shows', 'artists'])
-        board['updated_at'] = datetime.now().isoformat()
+        content_list = playlist.get(content_type + 's', [])
+        playlist[content_type + 's'] = [item for item in content_list if item['id'] != content_id]
+        playlist['total_items'] = sum(len(playlist.get(key, [])) for key in ['tracks', 'shows', 'artists'])
+        playlist['updated_at'] = datetime.now().isoformat()
         
         self.save_users()
         return True
     
-    def get_board(self, username: str, board_id: str) -> Optional[Dict[str, Any]]:
-        """Get specific board"""
-        if username not in self.users:
-            return None
-        
-        user = self.users[username]
-        return next((b for b in user['saves']['boards'] if b['id'] == board_id), None)
-    
-    def get_user_boards(self, username: str) -> List[Dict[str, Any]]:
-        """Get all user boards"""
-        if username not in self.users:
-            return []
-        
-        user = self.users[username]
-        return user['saves'].get('boards', [])
-    
-    def update_board(self, username: str, board_id: str, updates: Dict[str, Any]) -> bool:
-        """Update board metadata"""
-        if username not in self.users:
-            return False
-        
-        user = self.users[username]
-        board = next((b for b in user['saves']['boards'] if b['id'] == board_id), None)
-        
-        if not board:
-            return False
-        
-        # Update allowed fields
-        allowed_fields = ['name', 'description', 'color', 'is_public', 'tags', 'cover_art']
-        for field in allowed_fields:
-            if field in updates:
-                board[field] = updates[field]
-        
-        board['updated_at'] = datetime.now().isoformat()
-        self.save_users()
-        return True
-    
-    def delete_board(self, username: str, board_id: str) -> bool:
-        """Delete board"""
-        if username not in self.users:
-            return False
-        
-        user = self.users[username]
-        user['saves']['boards'] = [b for b in user['saves']['boards'] if b['id'] != board_id]
-        user['activity']['total_playlists'] = max(0, user['activity']['total_playlists'] - 1)
-        self.save_users()
-        return True
     
     def get_user_stats(self, username: str) -> Dict[str, Any]:
         """Get user statistics"""
@@ -514,7 +467,6 @@ class UserManager:
             'liked_content': len(user['saves'].get('liked_content', [])),
             'recently_played': len(user['saves'].get('recently_played', [])),
             'playlists': len(user['saves'].get('playlists', [])),
-            'boards': len(user['saves'].get('boards', []))
         }
 
 # Global user manager instance

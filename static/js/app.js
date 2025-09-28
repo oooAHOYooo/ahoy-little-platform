@@ -900,6 +900,44 @@ function globalPlayer() {
     };
 }
 
+// Simple fetch wrapper for new APIs
+async function api(url, method="GET", payload=null) {
+    const opts = { method, headers: { "Content-Type": "application/json" } };
+    if (payload) opts.body = JSON.stringify(payload);
+    const res = await fetch(url, opts);
+    if (!res.ok) throw new Error(`API ${method} ${url} -> ${res.status}`);
+    return res.json().catch(() => ({}));
+}
+
+// Like / bookmark toggle (event delegation)
+document.addEventListener("click", async (e) => {
+    const likeBtn = e.target.closest("[data-like]");
+    const bmBtn   = e.target.closest("[data-bookmark]");
+    try {
+        if (likeBtn) {
+            e.preventDefault();
+            const id = likeBtn.dataset.id;
+            const kind = likeBtn.dataset.kind || "track";
+            likeBtn.classList.toggle("is-loading", true);
+            const { status } = await api("/api/activity/like", "POST", { id, kind });
+            likeBtn.classList.toggle("liked", status === "liked");
+            likeBtn.classList.toggle("is-loading", false);
+        }
+        if (bmBtn) {
+            e.preventDefault();
+            const id = bmBtn.dataset.id;
+            const kind = bmBtn.dataset.kind || "track";
+            bmBtn.classList.toggle("is-loading", true);
+            const { status } = await api("/api/activity/bookmark", "POST", { id, kind });
+            bmBtn.classList.toggle("bookmarked", status === "bookmarked");
+            bmBtn.classList.toggle("is-loading", false);
+        }
+    } catch (err) {
+        console.error(err);
+        showNotification("Please log in to use Likes/Bookmarks", "error");
+    }
+});
+
 // Export functions for global use
 window.ahoyApp = {
     ...window.ahoyApp,
@@ -907,5 +945,6 @@ window.ahoyApp = {
     throttle,
     apiRequest,
     performSearch,
-    showNotification
+    showNotification,
+    api
 };

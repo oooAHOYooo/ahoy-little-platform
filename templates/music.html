@@ -91,7 +91,10 @@
                             <button @click.stop="saveTrack(track)"
                                 class="action-btn save-btn"
                                 :class="{'saved': isSaved(track)}"
-                                :title="isSaved(track) ? 'Remove from saves' : 'Save track'">
+                                :title="isSaved(track) ? 'Remove from saves' : 'Save track'"
+                                :data-bookmark="true"
+                                :data-id="track.id"
+                                data-kind="track">
                                 <i class="fas fa-bookmark"></i>
                             </button>
                             <button @click.stop="showAddToBoard(track)"
@@ -102,7 +105,10 @@
                             <button @click.stop="likeTrack(track)"
                                 class="action-btn like-btn"
                                 :class="{'liked': isLiked(track)}"
-                                :title="isLiked(track) ? 'Unlike' : 'Like'">
+                                :title="isLiked(track) ? 'Unlike' : 'Like'"
+                                :data-like="true"
+                                :data-id="track.id"
+                                data-kind="track">
                                 <i class="fas fa-heart"></i>
                             </button>
                             <button @click.stop="showTrackMenu(track)"
@@ -157,13 +163,19 @@
                         <button @click.stop="saveTrack(track)"
                             class="action-btn"
                             :class="{'saved': isSaved(track)}"
-                            title="Save track">
+                            title="Save track"
+                            :data-bookmark="true"
+                            :data-id="track.id"
+                            data-kind="track">
                             <i class="fas fa-bookmark"></i>
                         </button>
                         <button @click.stop="likeTrack(track)"
                             class="action-btn"
                             :class="{'liked': isLiked(track)}"
-                            title="Like track">
+                            title="Like track"
+                            :data-like="true"
+                            :data-id="track.id"
+                            data-kind="track">
                             <i class="fas fa-heart"></i>
                         </button>
                         <button @click.stop="addToPlaylist(track)"
@@ -417,14 +429,35 @@ function musicLibrary() {
         },
 
 
-        likeTrack(track) {
-            // Toggle like status
-            console.log('Like track:', track);
+        async likeTrack(track) {
+            try {
+                const isCurrentlyLiked = this.isLiked(track);
+                const response = await fetch(isCurrentlyLiked ? '/api/likes/unlike' : '/api/likes/like', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        type: 'track',
+                        id: track.id,
+                        data: track
+                    })
+                });
+                
+                if (response.ok) {
+                    // Update UI state
+                    track.liked = !isCurrentlyLiked;
+                    this.showNotification(isCurrentlyLiked ? 'Unliked track' : 'Liked track', 'success');
+                } else {
+                    this.showNotification('Failed to like track', 'error');
+                }
+            } catch (error) {
+                console.error('Error liking track:', error);
+                this.showNotification('Failed to like track', 'error');
+            }
         },
 
         isLiked(track) {
             // Check if track is liked
-            return false;
+            return track.liked || false;
         },
         
         async saveTrack(track) {
@@ -495,13 +528,13 @@ function musicLibrary() {
             this.showAddToPlaylistModal = true;
         },
         
-        showAddToBoard(track) {
+        showAddToPlaylist(track) {
             this.selectedTrack = track;
-            this.loadBoards();
-            this.showAddToBoardModal = true;
+            this.loadPlaylists();
+            this.showAddToPlaylistModal = true;
         },
         
-        async loadBoards() {
+        async loadPlaylists() {
             try {
                 const response = await fetch('/api/playlists');
                 const data = await response.json();
@@ -511,7 +544,7 @@ function musicLibrary() {
             }
         },
         
-        async addToBoard(playlist) {
+        async addToPlaylist(playlist) {
             if (!this.selectedTrack) return;
             
             try {
