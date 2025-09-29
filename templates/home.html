@@ -66,9 +66,8 @@
                         <div class="playing-item"
                             x-show="item.cover_art || item.thumbnail"
                             :class="{'playing': currentIndex === index}"
+                            :style="`background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${item.cover_art || item.thumbnail}); background-size: cover; background-position: center;`"
                             @click="playItem(item, index)">
-                            <img :data-src="item.cover_art" :alt="item.title"
-                                class="image-placeholder">
                             <div class="item-details">
                                 <h4 x-text="item.title"></h4>
                                 <p x-text="item.artist"></p>
@@ -88,18 +87,20 @@
                     <h3><i class="fas fa-play-circle"></i> Live Now</h3>
                     <a href="/shows" class="view-all-btn">All</a>
                 </div>
-                <div class="shows-list">
-                    <template x-for="show in featuredShows.slice(0, 3)"
+                <div class="playing-list">
+                    <template x-for="(show, index) in featuredShows.slice(0, 4)"
                         :key="show.id">
-                        <div class="show-item" x-show="show.thumbnail"
-                            @click="playShow(show)">
-                            <img :data-src="show.thumbnail" :alt="show.title"
-                                class="image-placeholder">
-                            <div class="show-details">
+                        <div class="playing-item"
+                            x-show="show.thumbnail"
+                            :class="{'playing': currentShowIndex === index}"
+                            :style="`background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${show.thumbnail}); background-size: cover; background-position: center;`"
+                            @click="playShow(show, index)">
+                            <div class="item-details">
                                 <h4 x-text="show.title"></h4>
                                 <p x-text="show.host"></p>
                             </div>
-                            <div class="play-overlay">
+                            <div class="play-indicator"
+                                x-show="currentShowIndex === index">
                                 <i class="fas fa-play"></i>
                             </div>
                         </div>
@@ -125,91 +126,62 @@
                         <i class="fas fa-users"></i>
                         <span>Artists</span>
                     </a>
-                    <a href="/my-saves" class="action-card">
+                    <a href="/bookmarks" class="action-card">
                         <i class="fas fa-bookmark"></i>
-                        <span>Saves</span>
+                        <span>Bookmarks</span>
                     </a>
                 </div>
             </div>
 
-            <!-- Playlists Widget -->
-            <div class="grid-item playlists-widget">
+            <!-- My Bookmarks Widget -->
+            <div class="grid-item bookmarks-widget" x-data="homeBookmarksWidget()" x-init="loadBookmarks()">
                 <div class="item-header">
-                    <h3><i class="fas fa-list-music"></i> Playlists</h3>
-                    <button @click="togglePlaylistForm()"
-                        class="add-playlist-btn"
-                        x-show="isLoggedIn">
-                        <i class="fas fa-plus"></i>
-                    </button>
+                    <h3><i class="fas fa-bookmark"></i> My Bookmarks</h3>
+                    <a href="/bookmarks" class="view-all-btn" x-show="bookmarksList().length > 0">
+                        <span x-text="bookmarksList().length"></span>
+                    </a>
                 </div>
-                <div class="playlists-content">
-                    <!-- Quick Create Form (when logged in) -->
-                    <div class="playlist-quick-create"
-                        x-show="isLoggedIn && showPlaylistForm">
-                        <div class="quick-create-form">
-                            <input type="text" x-model="newPlaylistName"
-                                placeholder="Playlist name..."
-                                class="playlist-input-small"
-                                @keyup.enter="createNewPlaylist()">
-                            <button @click="createNewPlaylist()"
-                                class="btn btn-primary btn-small"
-                                :disabled="!newPlaylistName.trim()">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button @click="clearPlaylistForm()"
-                                class="btn btn-secondary btn-small">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Empty State for Guests -->
-                    <div class="playlists-empty" x-show="!isLoggedIn">
+                <div class="bookmarks-content">
+                    <!-- Empty State -->
+                    <div class="bookmarks-empty" x-show="bookmarksList().length === 0">
                         <div class="empty-state">
-                            <i class="fas fa-plus-circle"></i>
-                            <h4>Create Your First Playlist</h4>
-                            <p>Start building your personal music collection</p>
-                            <button @click="showCreateAccountModal()"
-                                class="btn btn-primary">
-                                <i class="fas fa-user-plus"></i> Create Account
-                            </button>
+                            <i class="fas fa-bookmark"></i>
+                            <h4>No Bookmarks Yet</h4>
+                            <p>Start bookmarking your favorite tracks, shows, and artists!</p>
+                            <div class="bookmark-tips">
+                                <a href="/music" class="tip-link">
+                                    <i class="fas fa-music"></i> Browse Music
+                                </a>
+                                <a href="/shows" class="tip-link">
+                                    <i class="fas fa-tv"></i> Watch Shows
+                                </a>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Empty State for Logged-in Users -->
-                    <div class="playlists-empty"
-                        x-show="isLoggedIn && userPlaylists.length === 0 && !showPlaylistForm">
-                        <div class="empty-state">
-                            <i class="fas fa-plus-circle"></i>
-                            <h4>No Playlists Yet</h4>
-                            <p>Click the + button to create your first
-                                playlist</p>
-                        </div>
-                    </div>
-
-                    <!-- Playlist List -->
-                    <div class="playlists-preview"
-                        x-show="isLoggedIn && userPlaylists.length > 0">
-                        <template x-for="playlist in userPlaylists.slice(0, 3)"
-                            :key="playlist.id">
-                            <div class="playlist-item"
-                                @click="viewPlaylist(playlist.id)">
-                                <div class="playlist-cover">
-                                    <i class="fas fa-music"></i>
+                    <!-- Bookmarks Preview -->
+                    <div class="bookmarks-preview" x-show="bookmarksList().length > 0">
+                        <template x-for="bookmark in bookmarksList().slice(0, 4)" :key="bookmark.key">
+                            <div class="bookmark-item"
+                                :style="`background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url(${bookmark.artwork || '/static/img/default-cover.jpg'}); background-size: cover; background-position: center;`"
+                                @click="playBookmark(bookmark)">
+                                <div class="bookmark-type-badge">
+                                    <i :class="bookmark.type === 'track' ? 'fas fa-music' : bookmark.type === 'show' ? 'fas fa-tv' : 'fas fa-user-music'"></i>
                                 </div>
-                                <div class="playlist-info">
-                                    <h4 x-text="playlist.name"></h4>
-                                    <p
-                                        x-text="playlist.total_items + ' items'"></p>
+                                <div class="bookmark-info">
+                                    <h4 x-text="bookmark.title"></h4>
+                                    <p x-text="bookmark.type"></p>
+                                </div>
+                                <div class="bookmark-play-overlay">
+                                    <i class="fas fa-play"></i>
                                 </div>
                             </div>
                         </template>
                     </div>
 
                     <!-- View All Link -->
-                    <a href="/my-saves" class="view-all-btn"
-                        x-show="isLoggedIn && userPlaylists.length > 0">
-                        <i class="fas fa-arrow-right"></i> View All Playlists
+                    <a href="/bookmarks" class="view-all-btn bookmark-view-all" x-show="bookmarksList().length > 4">
+                        <i class="fas fa-arrow-right"></i> View All Bookmarks
                     </a>
                 </div>
             </div>
@@ -347,6 +319,7 @@ function homePage() {
         featuredShows: [],
         heroItems: [],
         currentIndex: 0,
+        currentShowIndex: 0,
         currentHeroIndex: 0,
         heroOffset: 0,
         heroInterval: null,
@@ -572,7 +545,10 @@ function homePage() {
             setTimeout(() => this.startHeroRotation(), 10000);
         },
         
-        playShow(show) {
+        playShow(show, index = null) {
+            if (index !== null) {
+                this.currentShowIndex = index;
+            }
             window.location.href = `/player?id=${show.id}&type=show`;
         },
         
@@ -725,6 +701,69 @@ function homePage() {
             }
         }
     }
+}
+
+// Home Bookmarks Widget
+function homeBookmarksWidget() {
+    return {
+        bookmarks: {},
+        
+        loadBookmarks() {
+            // Wait for bookmark system to be ready
+            setTimeout(() => {
+                this.refreshBookmarks();
+            }, 500);
+            
+            // Listen for bookmark changes
+            document.addEventListener('bookmarks:changed', () => {
+                this.refreshBookmarks();
+            });
+        },
+        
+        refreshBookmarks() {
+            this.bookmarks = {};
+            if (window.AhoyBookmarks) {
+                const items = window.AhoyBookmarks.all();
+                items.forEach(item => {
+                    this.bookmarks[item.key] = item;
+                });
+            } else {
+                // Fallback to localStorage
+                try {
+                    const rawData = localStorage.getItem('ahoy.bookmarks.v1');
+                    if (rawData) {
+                        const data = JSON.parse(rawData);
+                        if (data.items) {
+                            Object.values(data.items).forEach(item => {
+                                this.bookmarks[item.key] = item;
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error reading bookmarks:', e);
+                }
+            }
+        },
+        
+        bookmarksList() {
+            return Object.values(this.bookmarks || {});
+        },
+        
+        playBookmark(bookmark) {
+            if (bookmark.type === 'track') {
+                // Play music track
+                document.dispatchEvent(new CustomEvent('play-track', {
+                    detail: { track: bookmark }
+                }));
+            } else if (bookmark.type === 'show') {
+                // Navigate to show player
+                window.location.href = `/player?id=${bookmark.id}&type=show`;
+            } else if (bookmark.type === 'artist') {
+                // Navigate to artist page
+                window.location.href = `/artists/${bookmark.id}`;
+            }
+        }
+    };
 }
 </script>
 {% endblock %}
