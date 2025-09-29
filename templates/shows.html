@@ -129,14 +129,14 @@
                                     <i class="fas fa-play"></i>
                                 </button>
                                 <div class="show-actions">
-                                    <button @click.stop="saveShow(show)"
-                                        class="action-btn"
-                                        :class="{'bookmarked': isSaved(show)}"
-                                        title="Bookmark"
-                                        :data-bookmark="true"
-                                        :data-id="show.id"
-                                        data-kind="show">
-                                        <i class="fas fa-bookmark"></i>
+                                    <button class="action-btn bm-btn"
+                                        @click.stop="toggleBookmark({ type: 'show', id: show.id, title: show.title, artwork: show.thumbnail })"
+                                        :aria-pressed="isBookmarked('show', show.id)">
+                                        <span aria-hidden="true">
+                                            <i x-show="isBookmarked('show', show.id)" class="fas fa-bookmark"></i>
+                                            <i x-show="!isBookmarked('show', show.id)" class="far fa-bookmark"></i>
+                                        </span>
+                                        <span class="sr-only" x-text="isBookmarked('show', show.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
                                     </button>
                                 </div>
                             </div>
@@ -175,13 +175,14 @@
                             </div>
                             <span class="col-host" x-text="show.host"></span>
                             <div class="col-actions">
-                                <button @click.stop="saveShow(show)"
-                                    class="action-btn"
-                                    :class="{'bookmarked': isSaved(show)}"
-                                    :data-bookmark="true"
-                                    :data-id="show.id"
-                                    data-kind="show">
-                                    <i class="fas fa-bookmark"></i>
+                                <button class="action-btn bm-btn"
+                                    @click.stop="toggleBookmark({ type: 'show', id: show.id, title: show.title, artwork: show.thumbnail })"
+                                    :aria-pressed="isBookmarked('show', show.id)">
+                                    <span aria-hidden="true">
+                                        <i x-show="isBookmarked('show', show.id)" class="fas fa-bookmark"></i>
+                                        <i x-show="!isBookmarked('show', show.id)" class="far fa-bookmark"></i>
+                                    </span>
+                                    <span class="sr-only" x-text="isBookmarked('show', show.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
                                 </button>
                             </div>
                         </div>
@@ -314,7 +315,7 @@ function showsPage() {
         async saveShow(show) {
             try {
                 const isCurrentlySaved = this.isSaved(show);
-                const response = await fetch('/api/activity/bookmark', {
+                const response = await fetch('/api/bookmarks', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -365,6 +366,20 @@ function showsPage() {
             setTimeout(() => {
                 notification.remove();
             }, 3000);
+        },
+        
+        // Bookmark methods
+        toggleBookmark(item) {
+            if (window.AhoyBookmarks) {
+                window.AhoyBookmarks.toggle(item);
+            }
+        },
+        
+        isBookmarked(type, id) {
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.isBookmarked(type, id);
+            }
+            return false;
         }
     }
 }

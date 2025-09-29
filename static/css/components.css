@@ -5448,11 +5448,11 @@ img.loading {
 }
 
 /* Enhanced Action Buttons */
-.save-btn {
+.save-btn, .bm-btn {
     background: rgba(0, 0, 0, 0.7);
 }
 
-.save-btn.saved {
+.save-btn.saved, .bm-btn.is-bookmarked {
     background: var(--primary-color);
     color: white;
 }

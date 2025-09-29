@@ -146,11 +146,11 @@
                                 <i class="fas fa-calendar-alt"></i>
                                 <span>Performances</span>
                             </a>
-                            <a href="/my-saves" 
-                               class="mobile-menu-item {% if request.endpoint == 'my_saves' %}active{% endif %}"
+                            <a href="/bookmarks" 
+                               class="mobile-menu-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
                                @click="leftMenuOpen = false">
                                 <i class="fas fa-bookmark"></i>
-                                <span>My Saves</span>
+                                <span>My Bookmarks</span>
                             </a>
                         </div>
                     </div>
@@ -203,10 +203,10 @@
                         <i class="fas fa-home"></i>
                     </a>
 
-                    <!-- My Saves -->
-                    <a href="/my-saves"
-                        class="nav-item {% if request.endpoint == 'my_saves' %}active{% endif %}"
-                        title="My Saves">
+                    <!-- My Bookmarks -->
+                    <a href="/bookmarks"
+                        class="nav-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
+                        title="My Bookmarks">
                         <i class="fas fa-bookmark"></i>
                     </a>
 
@@ -532,7 +532,7 @@
                             <li><a href="{{ url_for('music') }}">Music</a></li>
                             <li><a href="{{ url_for('shows') }}">Shows</a></li>
                             <li><a href="{{ url_for('artists') }}">Artists</a></li>
-                            <li><a href="/my-saves">My Saves</a></li>
+                            <li><a href="/bookmarks">My Bookmarks</a></li>
                             <li><a href="/settings">Settings</a></li>
                             <li><a href="/feedback">Feedback</a></li>
                         </ul>
@@ -563,6 +563,9 @@
         </div>
 
         <!-- JavaScript -->
+        <script>window.LOGGED_IN = {{ LOGGED_IN | tojson }};</script>
+        <script src="{{ url_for('static', filename='js/guest-bootstrap.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/bookmarks.js') }}" defer></script>
         <script src="{{ url_for('static', filename='js/app.js') }}"></script>
         <script src="{{ url_for('static', filename='js/player.js') }}"></script>
         <script

@@ -16,9 +16,13 @@ from extensions import bcrypt, login_manager, limiter, init_cors
 from blueprints.auth import bp as auth_bp
 from blueprints.activity import bp as activity_bp
 from blueprints.playlists import bp as playlists_bp
+from blueprints.bookmarks import bp as bookmarks_bp
 
 app = Flask(__name__)
 app.config.from_object(get_config())
+
+# Add secret key for session management (change in production)
+app.secret_key = os.getenv('SECRET_KEY', 'change-me-in-production')
 bcrypt.init_app(app)
 login_manager.init_app(app)
 limiter.init_app(app)
@@ -37,6 +41,8 @@ def debug_report():
 @app.route('/bookmark-test')
 def bookmark_test():
     return render_template('bookmark_test.html')
+
+
 
 # Enable compression (optional)
 try:
@@ -57,6 +63,12 @@ ACTIVITY_FILE = 'data/user_activity.json'
 app.register_blueprint(auth_bp)
 app.register_blueprint(activity_bp)
 app.register_blueprint(playlists_bp)
+app.register_blueprint(bookmarks_bp)
+
+# Context processor to inject login flag into templates
+@app.context_processor
+def inject_login_flag():
+    return {"LOGGED_IN": bool(session.get("username"))}
 
 def load_json_data(filename, default=None):
     """Load JSON data from file with fallback"""
@@ -154,6 +166,23 @@ def artist_profile(artist_name):
 def my_saves():
     """My Saves page - user's saved content and playlists"""
     return render_template('my_saves.html')
+
+@app.route("/bookmarks")
+def bookmarks_page():
+    """Server-rendered bookmarks page (uses Flask + file store for logged-in users)"""
+    # If logged in, read server-side bookmarks so page renders on first paint.
+    uid = None
+    if session.get("username"):
+        uid = f"user:{session['username']}"
+    items = []
+    if uid:
+        from pathlib import Path
+        import json
+        data_path = Path("data/bookmarks.json")
+        if data_path.exists():
+            data = json.loads(data_path.read_text(encoding="utf-8"))
+            items = list(data.get("users", {}).get(uid, {}).get("items", {}).values())
+    return render_template("bookmarks.html", items=items)
 
 # API Endpoints
 @app.route('/api/now-playing')

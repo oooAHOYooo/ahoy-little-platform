@@ -29,14 +29,30 @@ def me_activity():
 
 @bp.post("/bookmark")
 @limiter.limit("60/minute")
-@login_required
 def bookmark_toggle():
     body = request.get_json(silent=True) or {}
     item_id = (body.get("id") or "").strip()
     kind = (body.get("kind") or "track").strip()
+    
+    # Handle both old and new payload formats
+    if not item_id and "item" in body:
+        item = body.get("item", {})
+        item_id = item.get("id", "").strip()
+        kind = item.get("type", "track").strip()
+    
     if not item_id:
         return jsonify({"error": "missing id"}), 400
 
+    # For guests, just return success without persisting
+    try:
+        from flask_login import current_user
+        if not current_user.is_authenticated:
+            return jsonify({"ok": True, "status": "bookmarked", "id": item_id, "kind": kind, "persisted": False})
+    except:
+        # No current_user available (guest)
+        return jsonify({"ok": True, "status": "bookmarked", "id": item_id, "kind": kind, "persisted": False})
+
+    # For logged-in users, use existing logic
     store = read_json(DATA_PATH, {})
     bucket = _user_bucket(store, current_user.id)
     key = f"{kind}:{item_id}"
@@ -49,7 +65,7 @@ def bookmark_toggle():
         status = "bookmarked"
 
     write_json(DATA_PATH, store)
-    return jsonify({"ok": True, "status": status, "id": item_id, "kind": kind})
+    return jsonify({"ok": True, "status": status, "id": item_id, "kind": kind, "persisted": True})
 
 @bp.post("/played")
 @limiter.limit("120/minute")

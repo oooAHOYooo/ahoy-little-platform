@@ -198,14 +198,18 @@ function mySavesLibrary() {
         
         async loadSavedContent() {
             try {
-                // Try server first
-                const response = await fetch('/api/activity/me');
+                // Try server first (guest-safe)
+                const response = await fetch('/api/bookmarks');
+                if (!response.ok) throw new Error('Not available');
                 const data = await response.json();
                 // Convert bookmarks to saved content format
-                this.savedContent = (data.bookmarks || []).map(bookmark => {
-                    const [kind, id] = bookmark.split(':');
-                    return { id, type: kind, saved_at: new Date().toISOString() };
-                });
+                this.savedContent = (data.items || []).map(item => ({
+                    id: item.id,
+                    type: item.type,
+                    title: item.title,
+                    artwork: item.artwork,
+                    saved_at: item.added_at || new Date().toISOString()
+                }));
             } catch (error) {
                 // If server fails, use local storage
                 console.log('Server unavailable, using local storage for bookmarks');
@@ -249,7 +253,7 @@ function mySavesLibrary() {
         
         async unsaveContent(item) {
             try {
-                const response = await fetch('/api/activity/bookmark', {
+                const response = await fetch('/api/bookmarks', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({

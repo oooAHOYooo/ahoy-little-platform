@@ -1,0 +1,13 @@
+{# templates/_bookmark_button.html #}
+{% macro bookmark_button(type, id, title="", artwork="") -%}
+<button class="bm-btn"
+        data-bookmark
+        data-type="{{ type }}"
+        data-id="{{ id }}"
+        data-title="{{ title }}"
+        data-artwork="{{ artwork }}"
+        aria-pressed="false">
+  <span data-bm-icon aria-hidden="true"><i class="far fa-bookmark"></i></span>
+  <span data-bm-label class="sr-only">Bookmark</span>
+</button>
+{%- endmacro %}

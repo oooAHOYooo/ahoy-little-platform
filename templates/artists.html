@@ -109,6 +109,15 @@
                                     class="view-btn">
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                <button class="action-btn bm-btn"
+                                    @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image })"
+                                    :aria-pressed="isBookmarked('artist', artist.id || artist.slug)">
+                                    <span aria-hidden="true">
+                                        <i x-show="isBookmarked('artist', artist.id || artist.slug)" class="fas fa-bookmark"></i>
+                                        <i x-show="!isBookmarked('artist', artist.id || artist.slug)" class="far fa-bookmark"></i>
+                                    </span>
+                                    <span class="sr-only" x-text="isBookmarked('artist', artist.id || artist.slug) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                                </button>
                             </div>
                             <div class="artist-type-badge"
                                 x-text="artist.type?.toUpperCase()"></div>
@@ -152,6 +161,15 @@
                             <span class="col-genre"
                                 x-text="artist.genres?.join(', ') || 'Various'"></span>
                             <div class="col-actions">
+                                <button class="action-btn bm-btn"
+                                    @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image })"
+                                    :aria-pressed="isBookmarked('artist', artist.id || artist.slug)">
+                                    <span aria-hidden="true">
+                                        <i x-show="isBookmarked('artist', artist.id || artist.slug)" class="fas fa-bookmark"></i>
+                                        <i x-show="!isBookmarked('artist', artist.id || artist.slug)" class="far fa-bookmark"></i>
+                                    </span>
+                                    <span class="sr-only" x-text="isBookmarked('artist', artist.id || artist.slug) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                                </button>
                             </div>
                         </div>
                     </template>
@@ -330,6 +348,20 @@ function artistsPage() {
             setTimeout(() => {
                 notification.remove();
             }, 3000);
+        },
+        
+        // Bookmark methods
+        toggleBookmark(item) {
+            if (window.AhoyBookmarks) {
+                window.AhoyBookmarks.toggle(item);
+            }
+        },
+        
+        isBookmarked(type, id) {
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.isBookmarked(type, id);
+            }
+            return false;
         }
     }
 }

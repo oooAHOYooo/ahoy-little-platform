@@ -2654,3 +2654,158 @@ a:hover {
 .animate-slideDown {
     animation: slideDown 0.3s ease;
 }
+
+/* ========================================
+   Bookmarks UI
+   ======================================== */
+
+/* Bookmark button styles */
+.bm-btn {
+    border: 1px solid var(--border-color);
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    background: var(--background-medium);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.bm-btn:hover {
+    background: var(--background-light);
+    border-color: var(--accent-color);
+}
+
+.bm-btn.is-bookmarked {
+    filter: saturate(1.2);
+    transform: scale(1.02);
+    background: var(--background-light);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.bm-btn [data-bm-icon] {
+    font-size: 1.1rem;
+}
+
+/* Bookmark grid layout */
+.bm-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    margin-top: 1rem;
+}
+
+/* Bookmark card */
+.bm-card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.75rem;
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 0.75rem;
+    background: var(--background-medium);
+    transition: all 0.2s ease;
+}
+
+.bm-card:hover {
+    border-color: var(--accent-color);
+    background: var(--background-light);
+}
+
+.bm-card .thumb {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: var(--background-dark);
+}
+
+.bm-meta {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.bm-type {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.bm-title {
+    margin: 0.25rem 0 0.5rem;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+/* Screen reader only text */
+.sr-only {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+}
+
+.empty-state .muted {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+/* Page header styles */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.page-description {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .bm-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .bm-card {
+        grid-template-columns: 60px 1fr;
+        gap: 0.5rem;
+        padding: 0.6rem;
+    }
+    
+    .bm-card .thumb {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .bm-title {
+        font-size: 0.9rem;
+    }
+    
+    .bm-btn {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}

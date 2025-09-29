@@ -1,0 +1,37 @@
+{# templates/bookmarks.html #}
+{% extends "base.html" %}
+{% block content %}
+<div x-data="bookmarkHandler">
+  <div class="page-header">
+    <h1>My Bookmarks</h1>
+    <p class="page-description">Your saved tracks, shows, and artists</p>
+  </div>
+
+  <template x-if="list().length > 0">
+    <div class="bm-grid">
+      <template x-for="bm in list()" :key="bm.key">
+        <article class="bm-card">
+          <img x-show="bm.artwork" :src="bm.artwork" alt="" class="thumb">
+          <div class="bm-meta">
+            <div class="bm-type" x-text="bm.type"></div>
+            <h3 class="bm-title" x-text="bm.title"></h3>
+            <button class="action-btn bm-btn"
+                @click="toggleBookmark(bm)"
+                :aria-pressed="isBookmarked(bm.type, bm.id)">
+                <span aria-hidden="true">
+                    <i x-show="isBookmarked(bm.type, bm.id)" class="fas fa-bookmark"></i>
+                    <i x-show="!isBookmarked(bm.type, bm.id)" class="far fa-bookmark"></i>
+                </span>
+                <span class="sr-only" x-text="isBookmarked(bm.type, bm.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
+            </button>
+          </div>
+        </article>
+      </template>
+    </div>
+  </template>
+  
+  <div class="empty-state" x-show="list().length === 0">
+    <p class="muted">No bookmarks yet. Start bookmarking your favorite tracks, shows, and artists!</p>
+  </div>
+</div>
+{% endblock %}

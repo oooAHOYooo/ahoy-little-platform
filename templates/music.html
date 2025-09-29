@@ -89,13 +89,14 @@
                             <i class="fas fa-play"></i>
                         </button>
                         <div class="track-actions">
-                            <button class="action-btn save-btn"
-                                :class="{'bookmarked': isSaved(track)}"
-                                :title="isSaved(track) ? 'Remove from bookmarks' : 'Bookmark track'"
-                                :data-bookmark="true"
-                                :data-id="track.id"
-                                data-kind="track">
-                                <i class="fas fa-bookmark"></i>
+                            <button class="action-btn save-btn bm-btn"
+                                @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art })"
+                                :aria-pressed="isBookmarked('track', track.id)">
+                                    <span aria-hidden="true">
+                                        <i x-show="isBookmarked('track', track.id)" class="fas fa-bookmark"></i>
+                                        <i x-show="!isBookmarked('track', track.id)" class="far fa-bookmark"></i>
+                                    </span>
+                                <span class="sr-only" x-text="isBookmarked('track', track.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
                             </button>
                         </div>
                     </div>
@@ -142,13 +143,14 @@
                     <span class="col-artist" x-text="track.artist"></span>
 
                     <div class="col-actions">
-                        <button class="action-btn"
-                            :class="{'bookmarked': isSaved(track)}"
-                            title="Bookmark track"
-                            :data-bookmark="true"
-                            :data-id="track.id"
-                            data-kind="track">
-                            <i class="fas fa-bookmark"></i>
+                        <button class="action-btn bm-btn"
+                            @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art })"
+                            :aria-pressed="isBookmarked('track', track.id)">
+                                    <span aria-hidden="true">
+                                        <i x-show="isBookmarked('track', track.id)" class="fas fa-bookmark"></i>
+                                        <i x-show="!isBookmarked('track', track.id)" class="far fa-bookmark"></i>
+                                    </span>
+                            <span class="sr-only" x-text="isBookmarked('track', track.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
                         </button>
                     </div>
                 </div>
@@ -612,6 +614,20 @@ function musicLibrary() {
             const key = `track:${track.id}`;
             const localBookmarks = JSON.parse(localStorage.getItem('ahoy_bookmarks') || '[]');
             return localBookmarks.includes(key);
+        },
+        
+        // Bookmark methods
+        toggleBookmark(item) {
+            if (window.AhoyBookmarks) {
+                window.AhoyBookmarks.toggle(item);
+            }
+        },
+        
+        isBookmarked(type, id) {
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.isBookmarked(type, id);
+            }
+            return false;
         },
         
         // Utility functions

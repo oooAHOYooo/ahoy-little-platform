@@ -643,7 +643,7 @@ function homePage() {
         trackUserActivity() {
             // Listen for save/unsave actions
             document.addEventListener('click', (e) => {
-                if (e.target.closest('[data-save-action]') || e.target.closest('[data-unsave-action]')) {
+                if (e.target.closest('[data-bookmark]') || e.target.closest('[data-bookmark-action]')) {
                     this.hasUnsavedWork = true;
                 }
             });

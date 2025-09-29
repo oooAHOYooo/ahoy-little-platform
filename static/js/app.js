@@ -24,7 +24,7 @@ document.addEventListener("click", async (e) => {
   if (!id) return;
   try {
     bmBtn.classList.add("is-loading");
-    const { status } = await api("/api/activity/bookmark", "POST", { id, kind });
+    const { status } = await api("/api/bookmarks", "POST", { id, kind });
     bmBtn.classList.toggle("bookmarked", status === "bookmarked");
     window.__ahoyToast && window.__ahoyToast("Bookmarked!");
   } catch (err) {
@@ -40,19 +40,37 @@ document.addEventListener("click", async (e) => {
   }
 });
 
+// Safe API helper for 401-tolerant calls
+async function safeGet(url) {
+  try {
+    const r = await fetch(url);
+    if (r.status === 401) return null;
+    if (!r.ok) return null;
+    return await r.json();
+  } catch { return null; }
+}
+
 // Make hydrate function global (no ES module export!)
 window.hydrateBookmarksState = async function hydrateBookmarksState() {
   try {
-    const me = await api("/api/activity/me");
-    const set = new Set(me.bookmarks || []);
+    const r = await fetch('/api/bookmarks', { headers: { 'Content-Type': 'application/json' } });
+    if (!r.ok) return; // guests still get 200 with persisted:false in our blueprint
+    const data = await r.json();
+    // expose for any UI that wants it
+    window.__BOOKMARKS__ = Array.isArray(data.items) ? data.items : [];
+    // optional: trigger a custom event so components can react
+    document.dispatchEvent(new CustomEvent('bookmarks:hydrated', { detail: window.__BOOKMARKS__ }));
+    
+    // Update existing bookmark button states (for backward compatibility)
+    const set = new Set(window.__BOOKMARKS__.map(item => item.key || `${item.type}:${item.id}`));
     document.querySelectorAll("[data-bookmark], [data-like]").forEach(btn => {
       const id = btn.dataset.id;
-      const kind = btn.dataset.kind || "track";
+      const kind = btn.dataset.kind || btn.dataset.type || "track";
       if (!id) return;
       btn.classList.toggle("bookmarked", set.has(`${kind}:${id}`));
     });
-  } catch {
-    // not logged in → ignore
+  } catch (e) {
+    // offline or server down — ignore, the client-side localStorage UI still works
   }
 };
 
