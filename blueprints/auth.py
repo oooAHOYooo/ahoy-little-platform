@@ -47,6 +47,11 @@ def register():
     _save_users(users)
     return jsonify({"ok": True})
 
+@bp.get("/login")
+def login_page():
+    """Handle GET requests to login page (redirects from login_required)"""
+    return jsonify({"error": "login_required", "message": "Please log in to access this resource"}), 401
+
 @bp.post("/login")
 def login():
     data = request.get_json(silent=True) or {}

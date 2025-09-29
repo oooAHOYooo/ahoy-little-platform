@@ -605,32 +605,64 @@
 
         <!-- Simple Image Deduplication Script -->
         <script>
-        // Simple image deduplication to prevent infinite loops
+        // Enhanced image loading to prevent infinite loops
         (function() {
             const loadedImages = new Set();
+            const loadingImages = new Set();
             
             // Track image loads to prevent duplicates
             const originalImageLoad = Image.prototype.onload;
+            const originalImageError = Image.prototype.onerror;
+            
             Image.prototype.onload = function() {
-                if (this.src && !loadedImages.has(this.src)) {
+                if (this.src) {
                     loadedImages.add(this.src);
+                    loadingImages.delete(this.src);
                 }
                 if (originalImageLoad) {
                     originalImageLoad.call(this);
                 }
             };
             
-            // Simple deduplication for existing images
-            document.addEventListener('DOMContentLoaded', () => {
-                const images = document.querySelectorAll('img[src]');
-                images.forEach(img => {
-                    if (img.src && loadedImages.has(img.src)) {
-                        // Image already loaded, skip
-                        return;
+            Image.prototype.onerror = function() {
+                if (this.src) {
+                    loadingImages.delete(this.src);
+                }
+                if (originalImageError) {
+                    originalImageError.call(this);
+                }
+            };
+            
+            // Prevent duplicate image requests
+            const originalFetch = window.fetch;
+            window.fetch = function(url, options) {
+                if (typeof url === 'string' && url.includes('/static/img/')) {
+                    if (loadedImages.has(url) || loadingImages.has(url)) {
+                        return Promise.reject(new Error('Image already loading/loaded'));
                     }
-                    if (img.src) {
-                        loadedImages.add(img.src);
-                    }
+                    loadingImages.add(url);
+                }
+                return originalFetch.call(this, url, options);
+            };
+            
+            // Monitor Alpine.js image updates
+            document.addEventListener('alpine:init', () => {
+                Alpine.directive('src', (el, { expression }, { evaluateLater, effect }) => {
+                    const evaluate = evaluateLater(expression);
+                    effect(() => {
+                        evaluate((src) => {
+                            if (src && typeof src === 'string') {
+                                if (loadedImages.has(src)) {
+                                    el.src = src;
+                                    return;
+                                }
+                                if (!loadingImages.has(src)) {
+                                    loadingImages.add(src);
+                                    el.src = src;
+                                }
+                            }
+                        });
+                    });
                 });
             });
         })();

@@ -2,7 +2,12 @@
 
 // unified API helper
 async function api(url, method="GET", payload=null) {
-  const opts = { method, headers: { "Content-Type": "application/json" }, credentials: "include" };
+  const opts = { 
+    method, 
+    headers: { "Content-Type": "application/json" }, 
+    credentials: "include",
+    redirect: "follow" // Follow redirects automatically
+  };
   if (payload) opts.body = JSON.stringify(payload);
   const res = await fetch(url, opts);
   if (!res.ok) throw new Error(`API ${method} ${url} -> ${res.status}`);
@@ -24,8 +29,8 @@ document.addEventListener("click", async (e) => {
     window.__ahoyToast && window.__ahoyToast("Bookmarked!");
   } catch (err) {
     console.error(err);
-    // Handle 302 redirects (not logged in)
-    if (err.message.includes("302") || err.message.includes("redirect")) {
+    // Handle 302 redirects and 401 errors (not logged in)
+    if (err.message.includes("302") || err.message.includes("redirect") || err.message.includes("401")) {
       window.__ahoyToast && window.__ahoyToast("Please sign in to save bookmarks");
     } else {
       window.__ahoyToast && window.__ahoyToast("Failed to bookmark");
