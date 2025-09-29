@@ -74,10 +74,12 @@
       });
       if (r.ok) {
         const data = await r.json();
-        if (Array.isArray(data.items)) {
+        if (Array.isArray(data.items) && data.persisted) {
+          // Only update from server if persisted (logged in user)
           state.items = toObj(data.items, (x) => x.key);
           saveLocal();
         }
+        // For guests (persisted: false), keep the local state as-is
       }
     } catch {}
   }

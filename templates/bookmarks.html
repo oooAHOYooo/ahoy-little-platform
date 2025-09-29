@@ -4,7 +4,7 @@
 {% block title %}My Bookmarks - Ahoy Indie Media{% endblock %}
 
 {% block content %}
-<div class="bookmarks-container" x-data="bookmarkHandler" x-init="init()">
+<div class="bookmarks-container" x-data="bookmarksPageHandler()" x-init="init()">
     <!-- Unified Header Section -->
     <section class="unified-header">
         <div class="header-content">
@@ -17,6 +17,7 @@
                         <span x-text="list().length"></span>
                         <span x-text="list().length === 1 ? 'item' : 'items'"></span>
                     </div>
+                    
                 </div>
             </div>
         </div>
@@ -155,40 +156,67 @@
 </div>
 
 <script>
-// Enhanced bookmark handler for the bookmarks page
-function enhancedBookmarkHandler() {
+function bookmarksPageHandler() {
     return {
-        // Get the base bookmark functionality
-        ...window.bookmarkHandler ? window.bookmarkHandler() : {},
-        
         filterType: null,
+        bookmarks: {},
         
         init() {
-            // Call parent init if it exists
-            if (this.baseInit) this.baseInit();
             
-            // Force initial load of bookmarks
-            this.loadBookmarks();
+            // Wait a bit for all scripts to load, then load bookmarks
+            setTimeout(() => {
+                this.loadBookmarks();
+            }, 500);
+            
+            // Also retry after a longer delay in case of slow loading
+            setTimeout(() => {
+                if (this.list().length === 0) {
+                    this.loadBookmarks();
+                }
+            }, 2000);
             
             // Listen for bookmark changes
             document.addEventListener('bookmarks:changed', (e) => {
-                this.bookmarks = { ...e.detail.items };
+                console.log('🔖 Bookmarks changed event received:', e.detail);
+                this.loadBookmarks();
+            });
+            
+            // Also listen for storage changes (for guest bookmarks)
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'ahoy.bookmarks.v1') {
+                    this.loadBookmarks();
+                }
             });
         },
         
         loadBookmarks() {
+            this.bookmarks = {};
+            
+            // Try multiple sources for bookmark data
             if (window.AhoyBookmarks) {
-                this.bookmarks = {};
-                window.AhoyBookmarks.all().forEach(item => {
+                const items = window.AhoyBookmarks.all();
+                items.forEach(item => {
                     this.bookmarks[item.key] = item;
                 });
+            } else {
+                // Fallback: try to read directly from localStorage
+                try {
+                    const rawData = localStorage.getItem('ahoy.bookmarks.v1');
+                    if (rawData) {
+                        const data = JSON.parse(rawData);
+                        if (data.items) {
+                            Object.values(data.items).forEach(item => {
+                                this.bookmarks[item.key] = item;
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error reading localStorage:', e);
+                }
             }
         },
         
         list() {
-            if (window.AhoyBookmarks) {
-                return window.AhoyBookmarks.all();
-            }
             return Object.values(this.bookmarks || {});
         },
         
@@ -201,22 +229,21 @@ function enhancedBookmarkHandler() {
         toggleBookmark(item) {
             if (window.AhoyBookmarks) {
                 window.AhoyBookmarks.toggle(item);
-                this.loadBookmarks(); // Refresh the list
+                // Reload after a short delay to ensure state is updated
+                setTimeout(() => {
+                    this.loadBookmarks();
+                }, 100);
             }
         },
         
         playItem(item) {
-            console.log('Playing item:', item);
             if (item.type === 'track') {
-                // Dispatch event to global player for music
                 document.dispatchEvent(new CustomEvent('play-track', {
                     detail: { track: item }
                 }));
             } else if (item.type === 'show') {
-                // Redirect to player page for videos
                 window.location.href = `/player?id=${item.id}&type=show`;
             } else if (item.type === 'artist') {
-                // Redirect to artist profile
                 window.location.href = `/artists/${item.id}`;
             }
         },
@@ -242,11 +269,6 @@ function enhancedBookmarkHandler() {
         }
     };
 }
-
-// Register the enhanced handler
-document.addEventListener('alpine:init', () => {
-    Alpine.data('bookmarkHandler', enhancedBookmarkHandler);
-});
 </script>
 
 <style>
