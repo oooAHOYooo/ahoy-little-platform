@@ -46,11 +46,6 @@
     <!-- Header -->
     <div class="page-header">
         <h1>My Saves</h1>
-        <div class="header-actions">
-            <button @click="showCreatePlaylist = true" class="btn btn-primary">
-                <i class="fas fa-plus"></i> New Playlist
-            </button>
-        </div>
     </div>
 
     <!-- Navigation Tabs -->
@@ -59,11 +54,6 @@
             :class="{'active': activeTab === 'saved'}"
             class="nav-tab">
             <i class="fas fa-bookmark"></i> Bookmarks
-        </button>
-        <button @click="activeTab = 'playlists'"
-            :class="{'active': activeTab === 'playlists'}"
-            class="nav-tab">
-            <i class="fas fa-th-large"></i> Boards
         </button>
         <button @click="activeTab = 'recent'"
             :class="{'active': activeTab === 'recent'}"
@@ -134,54 +124,6 @@
         </div>
     </div>
 
-    <!-- Boards Tab -->
-    <div x-show="activeTab === 'playlists'" class="playlists-content">
-        <div class="playlists-grid">
-            <template x-for="playlist in playlists" :key="playlist.id">
-                <div class="playlist-card" @click="viewBoard(playlist)">
-                    <div class="playlist-cover">
-                        <img
-                            :src="playlist.cover_art || '/static/img/default-playlist-cover.jpg'"
-                            :alt="playlist.name">
-                        <div class="playlist-overlay">
-                            <button @click.stop="playPlaylist(playlist)"
-                                class="play-btn">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <div class="playlist-actions">
-                                <button @click.stop="editPlaylist(playlist)"
-                                    class="action-btn">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button @click.stop="deletePlaylist(playlist)"
-                                    class="action-btn">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="playlist-info">
-                        <h3 x-text="playlist.name"></h3>
-                        <p
-                            x-text="playlist.description || 'No description'"></p>
-                        <div class="playlist-meta">
-                            <span
-                                x-text="playlist.total_items + ' items'"></span>
-                            <span
-                                x-text="formatDate(playlist.updated_at)"></span>
-                        </div>
-                    </div>
-                </div>
-            </template>
-        </div>
-
-        <div x-show="playlists.length === 0" class="empty-state">
-            <i class="fas fa-list"></i>
-            <h3>No playlists yet</h3>
-            <p>Create your first playlist to organize your favorite content!</p>
-        </div>
-    </div>
-
     <!-- Recently Played Tab -->
     <div x-show="activeTab === 'recent'" class="recent-content">
         <div class="recent-list">
@@ -218,167 +160,6 @@
         </div>
     </div>
 
-    <!-- Playlists Tab -->
-    <div x-show="activeTab === 'playlists'" class="playlists-content">
-        <div class="playlists-header">
-            <h2>My Playlists</h2>
-            <button @click="showCreatePlaylist = true" class="btn btn-primary">
-                <i class="fas fa-plus"></i> New Playlist
-            </button>
-        </div>
-
-        <div class="playlists-grid">
-            <template x-for="playlist in userPlaylists" :key="playlist.id">
-                <div class="playlist-card" @click="viewPlaylist(playlist)">
-                    <div class="playlist-cover"
-                        :style="`background-color: ${playlist.color || '#6366f1'}`">
-                        <div class="playlist-overlay">
-                            <div class="playlist-actions">
-                                <button @click.stop="editPlaylist(playlist)"
-                                    class="action-btn" title="Edit playlist">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button @click.stop="deletePlaylist(playlist)"
-                                    class="action-btn" title="Delete playlist">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="playlist-icon">
-                            <i class="fas fa-music"></i>
-                        </div>
-                        <div class="playlist-item-count"
-                            x-text="`${playlist.total_items || 0} items`"></div>
-                    </div>
-                    <div class="playlist-info">
-                        <h3 x-text="playlist.name"></h3>
-                        <p
-                            x-text="playlist.description || 'No description'"></p>
-                        <div class="playlist-meta">
-                            <span class="playlist-date"
-                                x-text="formatDate(playlist.created_at)"></span>
-                            <span class="playlist-visibility"
-                                x-text="playlist.is_public ? 'Public' : 'Private'"></span>
-                        </div>
-                    </div>
-                </div>
-            </template>
-        </div>
-
-        <div x-show="userPlaylists.length === 0" class="empty-state">
-            <i class="fas fa-music"></i>
-            <h3>No playlists yet</h3>
-            <p>Create your first playlist to organize your favorite content!</p>
-            <button @click="showCreatePlaylist = true" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Create Playlist
-            </button>
-        </div>
-    </div>
-
-    <!-- Create Playlist Modal -->
-    <div x-show="showCreatePlaylist" class="modal-overlay"
-        @click="showCreatePlaylist = false">
-        <div class="modal-content" @click.stop>
-            <div class="modal-header">
-                <h3>Create New Playlist</h3>
-                <button @click="showCreatePlaylist = false" class="close-btn">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Playlist Name</label>
-                    <input type="text" x-model="newPlaylist.name"
-                        placeholder="Enter playlist name">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea x-model="newPlaylist.description"
-                        placeholder="Enter playlist description"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" x-model="newPlaylist.is_public">
-                        Make this playlist public
-                    </label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button @click="showCreatePlaylist = false"
-                    class="btn btn-outline">Cancel</button>
-                <button @click="createPlaylist()" class="btn btn-primary">Create
-                    Playlist</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add to Playlist Modal -->
-    <div x-show="showAddToPlaylistModal" class="modal-overlay"
-        @click="showAddToPlaylistModal = false">
-        <div class="modal-content" @click.stop>
-            <div class="modal-header">
-                <h3>Add to Playlist</h3>
-                <button @click="showAddToPlaylistModal = false"
-                    class="close-btn">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="playlist-list">
-                    <template x-for="playlist in playlists" :key="playlist.id">
-                        <div class="playlist-option"
-                            @click="addToPlaylist(playlist)">
-                            <div class="playlist-info">
-                                <h4 x-text="playlist.name"></h4>
-                                <p x-text="playlist.total_items + ' items'"></p>
-                            </div>
-                            <button class="add-btn">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Create Playlist Modal -->
-    <div x-show="showCreatePlaylist" class="modal-overlay"
-        @click="showCreatePlaylist = false">
-        <div class="modal-content" @click.stop>
-            <div class="modal-header">
-                <h3>Create New Playlist</h3>
-                <button @click="showCreatePlaylist = false" class="close-btn">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Playlist Name</label>
-                    <input type="text" x-model="newPlaylist.name"
-                        placeholder="Enter playlist name">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea x-model="newPlaylist.description"
-                        placeholder="Enter playlist description"></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" x-model="newPlaylist.is_public">
-                        <span class="checkmark"></span>
-                        Make this playlist public
-                    </label>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button @click="showCreatePlaylist = false"
-                    class="btn btn-outline">Cancel</button>
-                <button @click="createPlaylist()" class="btn btn-primary">Create
-                    Playlist</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -388,17 +169,8 @@ function mySavesLibrary() {
         activeTab: 'saved',
         savedFilter: 'all',
         savedContent: [],
-        playlists: [],
         recentlyPlayed: [],
-        userPlaylists: [],
         userStats: null,
-        showCreatePlaylist: false,
-        showAddToPlaylistModal: false,
-        newPlaylist: {
-            name: '',
-            description: '',
-            is_public: false
-        },
         selectedContent: null,
         
         // Computed
@@ -414,10 +186,8 @@ function mySavesLibrary() {
             try {
                 await Promise.all([
                     this.loadSavedContent(),
-                    this.loadPlaylists(),
                     this.loadRecentlyPlayed(),
-                    this.loadUserStats(),
-                    this.loadUserPlaylists()
+                    this.loadUserStats()
                 ]);
             } catch (error) {
                 console.error('Error loading user data:', error);
@@ -426,6 +196,7 @@ function mySavesLibrary() {
         
         async loadSavedContent() {
             try {
+                // Try server first
                 const response = await fetch('/api/activity/me');
                 const data = await response.json();
                 // Convert bookmarks to saved content format
@@ -434,19 +205,16 @@ function mySavesLibrary() {
                     return { id, type: kind, saved_at: new Date().toISOString() };
                 });
             } catch (error) {
-                console.error('Error loading saved content:', error);
+                // If server fails, use local storage
+                console.log('Server unavailable, using local storage for bookmarks');
+                const localBookmarks = JSON.parse(localStorage.getItem('ahoy_bookmarks') || '[]');
+                this.savedContent = localBookmarks.map(bookmark => {
+                    const [kind, id] = bookmark.split(':');
+                    return { id, type: kind, saved_at: new Date().toISOString() };
+                });
             }
         },
         
-        async loadPlaylists() {
-            try {
-                const response = await fetch('/api/playlists');
-                const data = await response.json();
-                this.playlists = data.playlists || [];
-            } catch (error) {
-                console.error('Error loading playlists:', error);
-            }
-        },
         
         
         async loadRecentlyPlayed() {
@@ -469,15 +237,6 @@ function mySavesLibrary() {
             }
         },
         
-        async loadUserPlaylists() {
-            try {
-                const response = await fetch('/api/playlists');
-                const data = await response.json();
-                this.userPlaylists = data.playlists || [];
-            } catch (error) {
-                console.error('Error loading user playlists:', error);
-            }
-        },
         
         // Content actions
         async playContent(item) {
@@ -505,136 +264,6 @@ function mySavesLibrary() {
             }
         },
         
-        // Playlist actions
-        async createPlaylist() {
-            try {
-                const response = await fetch('/api/playlists', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(this.newPlaylist)
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    this.playlists.push(data.playlist);
-                    this.showCreatePlaylist = false;
-                    this.newPlaylist = { name: '', description: '', is_public: false };
-                }
-            } catch (error) {
-                console.error('Error creating playlist:', error);
-            }
-        },
-        
-        async addToPlaylist(playlist) {
-            if (!this.selectedContent) return;
-            
-            try {
-                const response = await fetch(`/api/playlists/${playlist.id}/add`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        type: this.selectedContent.type || 'track',
-                        id: this.selectedContent.id,
-                        data: this.selectedContent
-                    })
-                });
-                
-                if (response.ok) {
-                    this.showAddToPlaylistModal = false;
-                    this.selectedContent = null;
-                }
-            } catch (error) {
-                console.error('Error adding to playlist:', error);
-            }
-        },
-        
-        showAddToPlaylist(item) {
-            this.selectedContent = item;
-            this.showAddToPlaylistModal = true;
-        },
-        
-        viewPlaylist(playlist) {
-            // Navigate to playlist view
-            window.location.href = `/playlist/${playlist.id}`;
-        },
-        
-        playPlaylist(playlist) {
-            // Play first item in playlist
-            if (playlist.tracks && playlist.tracks.length > 0) {
-                this.playContent(playlist.tracks[0]);
-            }
-        },
-        
-        editPlaylist(playlist) {
-            // Open edit modal
-            console.log('Edit playlist:', playlist);
-        },
-        
-        async deletePlaylist(playlist) {
-            if (!confirm('Are you sure you want to delete this playlist?')) return;
-            
-            try {
-                const response = await fetch(`/api/playlists/${playlist.id}`, {
-                    method: 'DELETE'
-                });
-                
-                if (response.ok) {
-                    this.playlists = this.playlists.filter(p => p.id !== playlist.id);
-                }
-            } catch (error) {
-                console.error('Error deleting playlist:', error);
-            }
-        },
-        
-        // Playlist actions
-        async createPlaylist() {
-            try {
-                const response = await fetch('/api/playlists', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(this.newPlaylist)
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    this.userPlaylists.push(data.playlist);
-                    this.showCreatePlaylist = false;
-                    this.newPlaylist = {
-                        name: '',
-                        description: '',
-                        is_public: false
-                    };
-                }
-            } catch (error) {
-                console.error('Error creating playlist:', error);
-            }
-        },
-        
-        viewPlaylist(playlist) {
-            // Navigate to playlist view
-            window.location.href = `/playlist/${playlist.id}`;
-        },
-        
-        editPlaylist(playlist) {
-            // Navigate to playlist edit
-            window.location.href = `/playlist/${playlist.id}/edit`;
-        },
-        
-        async deletePlaylist(playlist) {
-            if (confirm(`Are you sure you want to delete "${playlist.name}"?`)) {
-                try {
-                    const response = await fetch(`/api/playlists/${playlist.id}`, {
-                        method: 'DELETE'
-                    });
-                    
-                    if (response.ok) {
-                        this.userBoards = this.userBoards.filter(b => b.id !== playlist.id);
-                    }
-                } catch (error) {
-                    console.error('Error deleting playlist:', error);
-                }
-            }
-        },
         
 
         showNotification(message, type = 'info') {

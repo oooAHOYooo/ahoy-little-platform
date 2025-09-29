@@ -97,16 +97,6 @@
                                 data-kind="track">
                                 <i class="fas fa-bookmark"></i>
                             </button>
-                            <button @click.stop="showAddToBoard(track)"
-                                class="action-btn add-btn"
-                                title="Add to playlist">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button @click.stop="showTrackMenu(track)"
-                                class="action-btn menu-btn"
-                                title="More options">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -159,11 +149,6 @@
                             :data-id="track.id"
                             data-kind="track">
                             <i class="fas fa-bookmark"></i>
-                        </button>
-                        <button @click.stop="addToPlaylist(track)"
-                            class="action-btn"
-                            title="Add to playlist">
-                            <i class="fas fa-plus"></i>
                         </button>
                     </div>
                 </div>

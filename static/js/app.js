@@ -909,7 +909,7 @@ async function api(url, method="GET", payload=null) {
     try { return await res.json(); } catch { return {}; }
 }
 
-// Event delegation for a single save mechanic: BOOKMARK
+// Event delegation for a single save mechanic: BOOKMARK with local storage fallback
 document.addEventListener("click", async (e) => {
   // If any old templates still emit data-like, treat them as bookmarks too.
   const bmBtn = e.target.closest("[data-bookmark]") || e.target.closest("[data-like]");
@@ -922,19 +922,93 @@ document.addEventListener("click", async (e) => {
 
   try {
     bmBtn.classList.add("is-loading");
-    const { status } = await api("/api/activity/bookmark", "POST", { id, kind });
-    bmBtn.classList.toggle("bookmarked", status === "bookmarked");
+    
+    // Try server first
+    try {
+      const { status } = await api("/api/activity/bookmark", "POST", { id, kind });
+      bmBtn.classList.toggle("bookmarked", status === "bookmarked");
+      if (status === "bookmarked") {
+        window.__ahoyToast && window.__ahoyToast("Bookmarked!");
+      }
+    } catch (serverError) {
+      // If server fails (not logged in), use local storage
+      console.log("Server unavailable, using local storage");
+      const key = `${kind}:${id}`;
+      const localBookmarks = JSON.parse(localStorage.getItem('ahoy_bookmarks') || '[]');
+      const isBookmarked = localBookmarks.includes(key);
+      
+      if (isBookmarked) {
+        // Remove from local storage
+        const newBookmarks = localBookmarks.filter(b => b !== key);
+        localStorage.setItem('ahoy_bookmarks', JSON.stringify(newBookmarks));
+        bmBtn.classList.remove("bookmarked");
+        window.__ahoyToast && window.__ahoyToast("Removed from bookmarks");
+      } else {
+        // Add to local storage
+        localBookmarks.push(key);
+        localStorage.setItem('ahoy_bookmarks', JSON.stringify(localBookmarks));
+        bmBtn.classList.add("bookmarked");
+        window.__ahoyToast && window.__ahoyToast("Bookmarked! (Local - create account to sync)");
+        
+        // Show gentle account prompt after 3 bookmarks
+        if (localBookmarks.length === 3) {
+          setTimeout(() => {
+            showAccountPrompt();
+          }, 2000);
+        }
+      }
+    }
   } catch (err) {
     console.error(err);
-    // TODO: toast "Please sign in to save"
+    window.__ahoyToast && window.__ahoyToast("Failed to bookmark");
   } finally {
     bmBtn.classList.remove("is-loading");
   }
 });
 
+// Account prompt function
+function showAccountPrompt() {
+  const prompt = document.createElement('div');
+  prompt.className = 'account-prompt';
+  prompt.innerHTML = `
+    <div class="account-prompt-content">
+      <div class="account-prompt-icon">🔖</div>
+      <h3>Keep Your Bookmarks Forever!</h3>
+      <p>You're saving content locally. Create a free account to sync your bookmarks across devices and never lose them.</p>
+      <div class="account-prompt-actions">
+        <button onclick="window.location.href='/register'" class="btn btn-primary">Create Account</button>
+        <button onclick="this.closest('.account-prompt').remove()" class="btn btn-outline">Maybe Later</button>
+      </div>
+    </div>
+  `;
+  prompt.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--background-light, #fff);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    z-index: 1001;
+    max-width: 400px;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+  `;
+  document.body.appendChild(prompt);
+  
+  // Auto-remove after 15 seconds
+  setTimeout(() => {
+    if (prompt.parentNode) {
+      prompt.remove();
+    }
+  }, 15000);
+}
+
 // Optional: hydrate bookmark state on page load (call from your page init if desired)
 window.hydrateBookmarksState = async function hydrateBookmarksState() {
   try {
+    // Try server first
     const me = await api("/api/activity/me", "GET");
     const set = new Set(me.bookmarks || []);
     document.querySelectorAll("[data-bookmark], [data-like]").forEach(btn => {
@@ -944,7 +1018,16 @@ window.hydrateBookmarksState = async function hydrateBookmarksState() {
       btn.classList.toggle("bookmarked", set.has(key));
     });
   } catch (e) {
-    // not logged in or request failed — ignore
+    // If server fails, use local storage
+    console.log("Server unavailable, using local storage for bookmarks");
+    const localBookmarks = JSON.parse(localStorage.getItem('ahoy_bookmarks') || '[]');
+    const set = new Set(localBookmarks);
+    document.querySelectorAll("[data-bookmark], [data-like]").forEach(btn => {
+      const id = btn.dataset.id;
+      const kind = btn.dataset.kind || "track";
+      const key = `${kind}:${id}`;
+      btn.classList.toggle("bookmarked", set.has(key));
+    });
   }
 }
 
