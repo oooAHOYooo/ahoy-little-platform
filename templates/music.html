@@ -11,6 +11,13 @@
                 <div class="title-text">
                     <h1><i class="fas fa-music"></i> Music Library</h1>
                     <p>Discover tracks, albums, and artists</p>
+                    <div class="header-stats" x-show="bookmarkCount() > 0">
+                        <a href="/bookmarks" class="bookmark-count-badge">
+                            <i class="fas fa-bookmark"></i>
+                            <span x-text="bookmarkCount()"></span>
+                            <span x-text="bookmarkCount() === 1 ? 'saved' : 'saved'"></span>
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -90,10 +97,11 @@
                         </button>
                         <div class="track-actions">
                             <button class="action-btn save-btn bm-btn"
-                                @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art })"
-                                :aria-pressed="isBookmarked('track', track.id)">
+                                @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art }); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
+                                :aria-pressed="isBookmarked('track', track.id)"
+                                :class="{ 'just-bookmarked': isBookmarked('track', track.id) }">
                                     <span aria-hidden="true">
-                                        <i x-show="isBookmarked('track', track.id)" class="fas fa-bookmark"></i>
+                                        <i x-show="isBookmarked('track', track.id)" class="fas fa-bookmark" style="color: var(--accent-color);"></i>
                                         <i x-show="!isBookmarked('track', track.id)" class="far fa-bookmark"></i>
                                     </span>
                                 <span class="sr-only" x-text="isBookmarked('track', track.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
@@ -144,10 +152,11 @@
 
                     <div class="col-actions">
                         <button class="action-btn bm-btn"
-                            @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art })"
-                            :aria-pressed="isBookmarked('track', track.id)">
+                            @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art }); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
+                            :aria-pressed="isBookmarked('track', track.id)"
+                            :class="{ 'just-bookmarked': isBookmarked('track', track.id) }">
                                     <span aria-hidden="true">
-                                        <i x-show="isBookmarked('track', track.id)" class="fas fa-bookmark"></i>
+                                        <i x-show="isBookmarked('track', track.id)" class="fas fa-bookmark" style="color: var(--accent-color);"></i>
                                         <i x-show="!isBookmarked('track', track.id)" class="far fa-bookmark"></i>
                                     </span>
                             <span class="sr-only" x-text="isBookmarked('track', track.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
@@ -380,9 +389,13 @@ function musicLibrary() {
         // Track actions
         playTrack(track) {
             this.currentTrack = track;
-            if (window.globalPlayer) {
-                window.globalPlayer.playTrack(track);
-            }
+            // Dispatch custom event to trigger global player
+            document.dispatchEvent(new CustomEvent('play-track', {
+                detail: { 
+                    track: track,
+                    type: 'track'
+                }
+            }));
         },
 
         playRandomTrack() {
@@ -620,18 +633,37 @@ function musicLibrary() {
         toggleBookmark(item) {
             if (window.AhoyBookmarks) {
                 window.AhoyBookmarks.toggle(item);
+                // Force Alpine.js to re-evaluate bookmark states
+                this.$nextTick(() => {
+                    // Trigger reactivity by updating a dummy property
+                    this.lastBookmarkAction = Date.now();
+                });
             }
         },
         
         isBookmarked(type, id) {
+            // Access lastBookmarkAction to trigger reactivity
+            this.lastBookmarkAction;
             if (window.AhoyBookmarks) {
                 return window.AhoyBookmarks.isBookmarked(type, id);
             }
             return false;
         },
         
+        lastBookmarkAction: 0,
+        
+        bookmarkCount() {
+            // Access lastBookmarkAction to trigger reactivity
+            this.lastBookmarkAction;
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.all().length;
+            }
+            return 0;
+        },
+        
         // Utility functions
     };
 }
+
 </script>
 {% endblock %}

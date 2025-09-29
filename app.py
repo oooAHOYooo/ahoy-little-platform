@@ -184,6 +184,7 @@ def bookmarks_page():
             items = list(data.get("users", {}).get(uid, {}).get("items", {}).values())
     return render_template("bookmarks.html", items=items)
 
+
 # API Endpoints
 @app.route('/api/now-playing')
 def api_now_playing():

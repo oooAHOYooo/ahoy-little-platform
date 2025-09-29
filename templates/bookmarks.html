@@ -1,37 +1,533 @@
 {# templates/bookmarks.html #}
 {% extends "base.html" %}
-{% block content %}
-<div x-data="bookmarkHandler">
-  <div class="page-header">
-    <h1>My Bookmarks</h1>
-    <p class="page-description">Your saved tracks, shows, and artists</p>
-  </div>
 
-  <template x-if="list().length > 0">
-    <div class="bm-grid">
-      <template x-for="bm in list()" :key="bm.key">
-        <article class="bm-card">
-          <img x-show="bm.artwork" :src="bm.artwork" alt="" class="thumb">
-          <div class="bm-meta">
-            <div class="bm-type" x-text="bm.type"></div>
-            <h3 class="bm-title" x-text="bm.title"></h3>
-            <button class="action-btn bm-btn"
-                @click="toggleBookmark(bm)"
-                :aria-pressed="isBookmarked(bm.type, bm.id)">
-                <span aria-hidden="true">
-                    <i x-show="isBookmarked(bm.type, bm.id)" class="fas fa-bookmark"></i>
-                    <i x-show="!isBookmarked(bm.type, bm.id)" class="far fa-bookmark"></i>
-                </span>
-                <span class="sr-only" x-text="isBookmarked(bm.type, bm.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
+{% block title %}My Bookmarks - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="bookmarks-container" x-data="bookmarkHandler" x-init="init()">
+    <!-- Unified Header Section -->
+    <section class="unified-header">
+        <div class="header-content">
+            <div class="header-title">
+                <div class="title-text">
+                    <h1><i class="fas fa-bookmark"></i> My Bookmarks</h1>
+                    <p>Your collection of saved tracks, shows, and artists</p>
+                    <div class="bookmark-count-badge" x-show="list().length > 0">
+                        <i class="fas fa-heart"></i>
+                        <span x-text="list().length"></span>
+                        <span x-text="list().length === 1 ? 'item' : 'items'"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Tabs -->
+    <section class="filter-section" x-show="list().length > 0">
+        <div class="filter-tabs">
+            <button 
+                class="filter-tab" 
+                :class="{ active: !filterType }"
+                @click="filterType = null">
+                <i class="fas fa-th"></i>
+                All
+                <span class="tab-count" x-text="list().length"></span>
             </button>
-          </div>
-        </article>
-      </template>
-    </div>
-  </template>
-  
-  <div class="empty-state" x-show="list().length === 0">
-    <p class="muted">No bookmarks yet. Start bookmarking your favorite tracks, shows, and artists!</p>
-  </div>
+            <button 
+                class="filter-tab" 
+                :class="{ active: filterType === 'track' }"
+                @click="filterType = 'track'"
+                x-show="list().filter(item => item.type === 'track').length > 0">
+                <i class="fas fa-music"></i>
+                Tracks
+                <span class="tab-count" x-text="list().filter(item => item.type === 'track').length"></span>
+            </button>
+            <button 
+                class="filter-tab" 
+                :class="{ active: filterType === 'show' }"
+                @click="filterType = 'show'"
+                x-show="list().filter(item => item.type === 'show').length > 0">
+                <i class="fas fa-tv"></i>
+                Shows
+                <span class="tab-count" x-text="list().filter(item => item.type === 'show').length"></span>
+            </button>
+            <button 
+                class="filter-tab" 
+                :class="{ active: filterType === 'artist' }"
+                @click="filterType = 'artist'"
+                x-show="list().filter(item => item.type === 'artist').length > 0">
+                <i class="fas fa-user-music"></i>
+                Artists
+                <span class="tab-count" x-text="list().filter(item => item.type === 'artist').length"></span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Bookmarks Grid -->
+    <section class="bookmarks-grid-section" x-show="filteredList().length > 0">
+        <div class="bookmarks-grid">
+            <template x-for="item in filteredList()" :key="item.key">
+                <div class="bookmark-card" 
+                     :class="{ 'track-card': item.type === 'track', 'show-card': item.type === 'show', 'artist-card': item.type === 'artist' }"
+                     @click="playItem(item)">
+                    
+                    <!-- Card Image -->
+                    <div class="card-cover">
+                        <img :src="item.artwork || '/static/img/default-cover.jpg'" 
+                             :alt="item.title" 
+                             class="cover-image image-placeholder"
+                             loading="lazy">
+                        
+                        <!-- Card Overlay -->
+                        <div class="card-overlay">
+                            <button @click.stop="playItem(item)" class="play-btn" x-show="item.type === 'track' || item.type === 'show'">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button @click.stop="viewItem(item)" class="view-btn" x-show="item.type === 'artist'">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            
+                            <!-- Bookmark Actions -->
+                            <div class="card-actions">
+                                <button class="action-btn bm-btn remove-btn"
+                                        @click.stop="toggleBookmark(item); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
+                                        title="Remove bookmark">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Info -->
+                    <div class="card-info">
+                        <div class="card-type-badge">
+                            <i :class="item.type === 'track' ? 'fas fa-music' : item.type === 'show' ? 'fas fa-tv' : 'fas fa-user-music'"></i>
+                            <span x-text="item.type"></span>
+                        </div>
+                        <h3 class="card-title" x-text="item.title"></h3>
+                        <p class="card-date" x-text="'Saved ' + formatDate(item.added_at)"></p>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </section>
+    
+    <!-- Empty State -->
+    <section class="empty-state" x-show="list().length === 0">
+        <div class="empty-content">
+            <div class="empty-icon">
+                <i class="fas fa-bookmark"></i>
+                <i class="fas fa-heart"></i>
+            </div>
+            <h2>No bookmarks yet!</h2>
+            <p>Start building your collection by bookmarking your favorite content.</p>
+            
+            <div class="empty-actions">
+                <a href="/music" class="btn btn-primary">
+                    <i class="fas fa-music"></i>
+                    Discover Music
+                </a>
+                <a href="/shows" class="btn btn-secondary">
+                    <i class="fas fa-tv"></i>
+                    Browse Shows
+                </a>
+                <a href="/artists" class="btn btn-secondary">
+                    <i class="fas fa-user-music"></i>
+                    Meet Artists
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filtered Empty State -->
+    <section class="empty-state" x-show="list().length > 0 && filteredList().length === 0">
+        <div class="empty-content">
+            <div class="empty-icon">
+                <i class="fas fa-filter"></i>
+            </div>
+            <h2>No <span x-text="filterType"></span> bookmarks</h2>
+            <p>You haven't bookmarked any <span x-text="filterType"></span>s yet.</p>
+            <button @click="filterType = null" class="btn btn-primary">
+                Show All Bookmarks
+            </button>
+        </div>
+    </section>
 </div>
+
+<script>
+// Enhanced bookmark handler for the bookmarks page
+function enhancedBookmarkHandler() {
+    return {
+        // Get the base bookmark functionality
+        ...window.bookmarkHandler ? window.bookmarkHandler() : {},
+        
+        filterType: null,
+        
+        init() {
+            // Call parent init if it exists
+            if (this.baseInit) this.baseInit();
+            
+            // Force initial load of bookmarks
+            this.loadBookmarks();
+            
+            // Listen for bookmark changes
+            document.addEventListener('bookmarks:changed', (e) => {
+                this.bookmarks = { ...e.detail.items };
+            });
+        },
+        
+        loadBookmarks() {
+            if (window.AhoyBookmarks) {
+                this.bookmarks = {};
+                window.AhoyBookmarks.all().forEach(item => {
+                    this.bookmarks[item.key] = item;
+                });
+            }
+        },
+        
+        list() {
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.all();
+            }
+            return Object.values(this.bookmarks || {});
+        },
+        
+        filteredList() {
+            const items = this.list();
+            if (!this.filterType) return items;
+            return items.filter(item => item.type === this.filterType);
+        },
+        
+        toggleBookmark(item) {
+            if (window.AhoyBookmarks) {
+                window.AhoyBookmarks.toggle(item);
+                this.loadBookmarks(); // Refresh the list
+            }
+        },
+        
+        playItem(item) {
+            console.log('Playing item:', item);
+            if (item.type === 'track') {
+                // Dispatch event to global player for music
+                document.dispatchEvent(new CustomEvent('play-track', {
+                    detail: { track: item }
+                }));
+            } else if (item.type === 'show') {
+                // Redirect to player page for videos
+                window.location.href = `/player?id=${item.id}&type=show`;
+            } else if (item.type === 'artist') {
+                // Redirect to artist profile
+                window.location.href = `/artists/${item.id}`;
+            }
+        },
+        
+        viewItem(item) {
+            if (item.type === 'artist') {
+                window.location.href = `/artists/${item.id}`;
+            }
+        },
+        
+        formatDate(dateString) {
+            if (!dateString) return 'recently';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) return 'today';
+            if (diffDays === 2) return 'yesterday';
+            if (diffDays <= 7) return `${diffDays} days ago`;
+            if (diffDays <= 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+            return date.toLocaleDateString();
+        }
+    };
+}
+
+// Register the enhanced handler
+document.addEventListener('alpine:init', () => {
+    Alpine.data('bookmarkHandler', enhancedBookmarkHandler);
+});
+</script>
+
+<style>
+.bookmarks-container {
+    min-height: 100vh;
+}
+
+.filter-section {
+    margin: 2rem 0;
+    padding: 0 2rem;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-bottom: 1px solid var(--background-light);
+}
+
+.filter-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+}
+
+.filter-tab:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.filter-tab.active {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+    background: rgba(0, 212, 255, 0.1);
+}
+
+.tab-count {
+    background: var(--background-light);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.filter-tab.active .tab-count {
+    background: var(--accent-color);
+    color: var(--background-dark);
+}
+
+.bookmarks-grid-section {
+    padding: 2rem;
+}
+
+.bookmarks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.bookmark-card {
+    background: var(--background-medium);
+    border: 1px solid var(--background-light);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.bookmark-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+    border-color: var(--accent-color);
+}
+
+.card-cover {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.cover-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.bookmark-card:hover .cover-image {
+    transform: scale(1.05);
+}
+
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+    gap: 1rem;
+}
+
+.bookmark-card:hover .card-overlay {
+    opacity: 1;
+}
+
+.play-btn, .view-btn {
+    background: var(--accent-color);
+    color: var(--background-dark);
+    border: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.play-btn:hover, .view-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px var(--accent-color);
+}
+
+.card-actions {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.remove-btn {
+    background: rgba(255, 0, 96, 0.8);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.remove-btn:hover {
+    background: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.card-info {
+    padding: 1.5rem;
+}
+
+.card-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(0, 212, 255, 0.2);
+    color: var(--accent-color);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+.card-title {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.card-date {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+}
+
+.empty-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.empty-icon i:first-child {
+    color: var(--accent-color);
+}
+
+.empty-icon i:last-child {
+    color: var(--primary-color);
+    position: absolute;
+    top: 0.5rem;
+    left: 2rem;
+    font-size: 1.5rem;
+    animation: heartbeat 2s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.empty-state h2 {
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.empty-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.btn-secondary {
+    background: var(--background-light);
+    color: white;
+    border: 1px solid var(--background-light);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+</style>
 {% endblock %}

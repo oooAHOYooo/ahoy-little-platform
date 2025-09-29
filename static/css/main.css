@@ -2809,3 +2809,214 @@ a:hover {
         font-size: 0.8rem;
     }
 }
+
+/* ========================================
+   🔖 BOOKMARK ENHANCEMENTS & ANIMATIONS
+   ======================================== */
+
+/* Enhanced bookmark button styles */
+.bm-btn, .save-btn {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.bm-btn:hover, .save-btn:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 10px var(--accent-color));
+    background: rgba(0, 212, 255, 0.1);
+}
+
+.bm-btn[aria-pressed="true"], .save-btn.bookmarked {
+    color: var(--accent-color);
+    background: rgba(0, 212, 255, 0.15);
+    border-color: var(--accent-color);
+}
+
+.bm-btn:active, .save-btn:active {
+    transform: scale(0.95);
+}
+
+/* Bookmark pulse animation when toggled */
+@keyframes bookmarkPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+        filter: drop-shadow(0 0 20px var(--accent-color));
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.bm-btn.just-bookmarked, .save-btn.just-bookmarked {
+    animation: bookmarkPulse 0.6s ease-out;
+}
+
+/* Sparkle effect on bookmark */
+.bm-btn::before, .save-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, var(--accent-color) 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+    transition: all 0.4s ease-out;
+    pointer-events: none;
+}
+
+.bm-btn.sparkle::before, .save-btn.sparkle::before {
+    animation: sparkle 0.6s ease-out forwards;
+}
+
+@keyframes sparkle {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 0.8;
+    }
+    50% {
+        width: 30px;
+        height: 30px;
+        opacity: 0.4;
+    }
+    100% {
+        width: 60px;
+        height: 60px;
+        opacity: 0;
+    }
+}
+
+/* Bookmark count display */
+.bookmark-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 10px rgba(255, 0, 96, 0.3);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Enhanced bookmark grid for the bookmarks page */
+.bm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.bm-card {
+    background: var(--background-medium);
+    border: 1px solid var(--background-light);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.bm-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+    border-color: var(--accent-color);
+}
+
+.bm-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+}
+
+.bm-card .thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.bm-type {
+    display: inline-block;
+    background: rgba(0, 212, 255, 0.2);
+    color: var(--accent-color);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.bm-title {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+}
+
+/* Empty state styling */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+}
+
+.empty-state h2 {
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.bookmark-tips {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.bookmark-tip {
+    background: var(--background-medium);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--background-light);
+    text-align: center;
+}
+
+.bookmark-tip i {
+    font-size: 2rem;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+}

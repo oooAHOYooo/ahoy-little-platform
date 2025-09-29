@@ -60,6 +60,11 @@
     const key = it.key || keyOf(it.type, it.id);
     const exists = !!state.items[key];
     exists ? removeLocalKey(key) : setLocalItem({ ...it, key });
+    
+    // Trigger a custom event to notify all Alpine.js components
+    document.dispatchEvent(new CustomEvent('bookmarks:changed', { 
+      detail: { items: state.items, action: exists ? 'remove' : 'add', item: it } 
+    }));
 
     try {
       const r = await fetch(API, {
@@ -90,10 +95,26 @@
   document.addEventListener("alpine:init", () => {
     Alpine.data("bookmarkHandler", () => ({
       bookmarks: state.items,
+      animatingItems: new Set(),
+
+      init() {
+        // Listen for bookmark changes
+        document.addEventListener('bookmarks:changed', (e) => {
+          this.bookmarks = { ...e.detail.items };
+          
+          // Add fun animation for the changed item
+          if (e.detail.item) {
+            const itemKey = e.detail.item.key || keyOf(e.detail.item.type, e.detail.item.id);
+            this.animatingItems.add(itemKey);
+            setTimeout(() => {
+              this.animatingItems.delete(itemKey);
+            }, 600);
+          }
+        });
+      },
 
       toggleBookmark(it) {
         window.AhoyBookmarks.toggle(it);
-        this.bookmarks = { ...state.items };
       },
 
       isBookmarked(type, id) {
@@ -102,6 +123,11 @@
 
       list() {
         return window.AhoyBookmarks.all();
+      },
+
+      isAnimating(item) {
+        const key = item.key || keyOf(item.type, item.id);
+        return this.animatingItems.has(key);
       }
     }));
   });

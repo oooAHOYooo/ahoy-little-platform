@@ -565,7 +565,7 @@
         <!-- JavaScript -->
         <script>window.LOGGED_IN = {{ LOGGED_IN | tojson }};</script>
         <script src="{{ url_for('static', filename='js/guest-bootstrap.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/bookmarks.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='js/bookmarks.js') }}"></script>
         <script src="{{ url_for('static', filename='js/app.js') }}"></script>
         <script src="{{ url_for('static', filename='js/player.js') }}"></script>
         <script
@@ -669,6 +669,128 @@
                 });
             });
         })();
+        
+        // Global Player Alpine.js Function
+        function globalPlayer() {
+            return {
+                currentTrack: null,
+                isPlaying: false,
+                currentTime: 0,
+                duration: 0,
+                progressPercent: 0,
+                volume: 50,
+                isMuted: false,
+                audioElement: null,
+                
+                init() {
+                    // Create audio element
+                    this.audioElement = document.createElement('audio');
+                    this.audioElement.style.display = 'none';
+                    document.body.appendChild(this.audioElement);
+                    
+                    // Listen for play events from other components
+                    document.addEventListener('play-track', (e) => {
+                        this.playTrack(e.detail.track);
+                    });
+                    
+                    // Audio event listeners
+                    this.audioElement.addEventListener('loadedmetadata', () => {
+                        this.duration = this.audioElement.duration;
+                    });
+                    
+                    this.audioElement.addEventListener('timeupdate', () => {
+                        this.currentTime = this.audioElement.currentTime;
+                        this.progressPercent = (this.currentTime / this.duration) * 100 || 0;
+                    });
+                    
+                    this.audioElement.addEventListener('ended', () => {
+                        this.isPlaying = false;
+                        this.nextTrack();
+                    });
+                    
+                    this.audioElement.addEventListener('play', () => {
+                        this.isPlaying = true;
+                    });
+                    
+                    this.audioElement.addEventListener('pause', () => {
+                        this.isPlaying = false;
+                    });
+                },
+                
+                playTrack(track) {
+                    console.log('🎵 Global player: Playing track:', track.title);
+                    this.currentTrack = track;
+                    
+                    if (track.audio_url) {
+                        this.audioElement.src = track.audio_url;
+                        this.audioElement.load();
+                        this.audioElement.play().catch(e => {
+                            console.error('Error playing track:', e);
+                        });
+                    }
+                },
+                
+                togglePlay() {
+                    if (this.isPlaying) {
+                        this.audioElement.pause();
+                    } else {
+                        this.audioElement.play().catch(e => {
+                            console.error('Error playing:', e);
+                        });
+                    }
+                },
+                
+                previousTrack() {
+                    console.log('🎵 Previous track');
+                },
+                
+                nextTrack() {
+                    console.log('🎵 Next track');
+                },
+                
+                seekBackward() {
+                    this.audioElement.currentTime = Math.max(0, this.audioElement.currentTime - 15);
+                },
+                
+                seekForward() {
+                    this.audioElement.currentTime = Math.min(this.duration, this.audioElement.currentTime + 15);
+                },
+                
+                seekTo(event) {
+                    const progressBar = event.currentTarget;
+                    const rect = progressBar.getBoundingClientRect();
+                    const clickX = event.clientX - rect.left;
+                    const percentage = clickX / rect.width;
+                    this.audioElement.currentTime = percentage * this.duration;
+                },
+                
+                setVolume(volume) {
+                    this.volume = volume;
+                    this.audioElement.volume = volume / 100;
+                },
+                
+                toggleMute() {
+                    this.isMuted = !this.isMuted;
+                    this.audioElement.muted = this.isMuted;
+                },
+                
+                formatTime(seconds) {
+                    if (!seconds) return '0:00';
+                    const mins = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60);
+                    return `${mins}:${secs.toString().padStart(2, '0')}`;
+                }
+            };
+        }
+        
+        // Also create a global reference for other scripts
+        window.globalPlayer = {
+            playTrack: (track) => {
+                document.dispatchEvent(new CustomEvent('play-track', {
+                    detail: { track: track }
+                }));
+            }
+        };
         </script>
 
         {% block extra_scripts %}{% endblock %}

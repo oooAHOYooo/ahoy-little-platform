@@ -40,10 +40,13 @@
                         <i class="fas fa-share"></i>
                         <span>Share</span>
                     </button>
-                    <button @click="addToPlaylist()"
-                        class="action-btn save-btn">
-                        <i class="fas fa-bookmark"></i>
-                        <span>Save</span>
+                    <button @click="toggleBookmark()" 
+                        class="action-btn bm-btn save-btn"
+                        :class="{ 'just-bookmarked': isBookmarked() }"
+                        :aria-pressed="isBookmarked()">
+                        <i :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'" 
+                           :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
+                        <span x-text="isBookmarked() ? 'Bookmarked' : 'Bookmark'"></span>
                     </button>
                 </div>
             </div>
@@ -74,10 +77,25 @@
 
         <!-- Media Info -->
         <div class="media-info">
-            <h2 x-text="currentMedia?.title"></h2>
-            <p class="artist-name" x-text="currentMedia?.artist"></p>
-            <div class="media-meta">
-                <span class="genre" x-text="currentMedia?.genre"></span>
+            <div class="media-header">
+                <div class="media-text">
+                    <h2 x-text="currentMedia?.title"></h2>
+                    <p class="artist-name" x-text="currentMedia?.artist"></p>
+                    <div class="media-meta">
+                        <span class="genre" x-text="currentMedia?.genre"></span>
+                    </div>
+                </div>
+                <div class="media-actions">
+                    <button @click="toggleBookmark()" 
+                        class="action-btn bm-btn save-btn floating-bookmark"
+                        :class="{ 'just-bookmarked': isBookmarked() }"
+                        :aria-pressed="isBookmarked()"
+                        title="Bookmark this media">
+                        <i :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'" 
+                           :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
+                        <span x-text="isBookmarked() ? 'Bookmarked' : 'Bookmark'"></span>
+                    </button>
+                </div>
             </div>
             <p class="description" x-text="currentMedia?.description"></p>
         </div>
@@ -358,6 +376,26 @@ function fullPlayer() {
             // Implement like functionality
         },
         
+        toggleBookmark() {
+            if (this.currentMedia && window.AhoyBookmarks) {
+                const bookmarkItem = {
+                    type: this.mediaType === 'music' ? 'track' : 'show',
+                    id: this.currentMedia.id,
+                    title: this.currentMedia.title,
+                    artwork: this.currentMedia.cover_art || this.currentMedia.thumbnail
+                };
+                window.AhoyBookmarks.toggle(bookmarkItem);
+            }
+        },
+        
+        isBookmarked() {
+            if (this.currentMedia && window.AhoyBookmarks) {
+                const type = this.mediaType === 'music' ? 'track' : 'show';
+                return window.AhoyBookmarks.isBookmarked(type, this.currentMedia.id);
+            }
+            return false;
+        },
+        
         addToPlaylist() {
             // Implement add to playlist
         },
@@ -401,4 +439,98 @@ function fullPlayer() {
     };
 }
 </script>
+
+<style>
+/* Player-specific bookmark styling */
+.media-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+.media-text {
+    flex: 1;
+}
+
+.media-actions {
+    flex-shrink: 0;
+}
+
+.floating-bookmark {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    color: var(--accent-color);
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.floating-bookmark:hover {
+    background: rgba(0, 212, 255, 0.2);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+}
+
+.floating-bookmark[aria-pressed="true"] {
+    background: linear-gradient(45deg, var(--accent-color), rgba(0, 212, 255, 0.8));
+    color: var(--background-dark);
+    border-color: var(--accent-color);
+}
+
+.floating-bookmark.just-bookmarked {
+    animation: bookmarkSuccess 0.6s ease-out;
+}
+
+@keyframes bookmarkSuccess {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+        background: var(--accent-color);
+        box-shadow: 0 0 30px var(--accent-color);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.video-actions .bm-btn {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    color: var(--accent-color);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.video-actions .bm-btn:hover {
+    background: rgba(0, 212, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.video-actions .bm-btn[aria-pressed="true"] {
+    background: var(--accent-color);
+    color: var(--background-dark);
+    border-color: var(--accent-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .media-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .floating-bookmark {
+        align-self: flex-start;
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}
+</style>
 {% endblock %}
