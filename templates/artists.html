@@ -101,7 +101,7 @@
                     <div class="artist-card" @click="viewArtist(artist)">
                         <div class="artist-cover">
                             <img
-                                :data-src="artist.image || '/static/img/default-avatar.png'"
+                                :src="artist.image || '/static/img/default-avatar.png'"
                                 :alt="artist.name"
                                 class="artist-image image-placeholder">
                             <div class="artist-overlay">
@@ -137,7 +137,7 @@
                         <div class="list-item" @click="viewArtist(artist)">
                             <div class="col-avatar">
                                 <img
-                                    :data-src="artist.image || '/static/img/default-avatar.png'"
+                                    :src="artist.image || '/static/img/default-avatar.png'"
                                     :alt="artist.name"
                                     class="artist-thumbnail image-placeholder">
                                 <div class="artist-type-badge"
@@ -205,12 +205,7 @@ function artistsPage() {
                 this.filteredArtists = [...this.artists];
                 this.filterArtists();
                 
-                // Refresh images after data loads
-                this.$nextTick(() => {
-                    if (window.imageOptimizer) {
-                        window.imageOptimizer.refresh();
-                    }
-                });
+                // Images will load automatically via lazy loading
             } catch (error) {
                 console.error('Error loading artists:', error);
             } finally {

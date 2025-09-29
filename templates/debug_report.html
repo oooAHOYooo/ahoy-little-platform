@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Debug Report - Ahoy Indie Media</title>
+        <link rel="stylesheet" href="/static/css/main.css">
+        <link rel="stylesheet" href="/static/css/components.css">
+        <style>
+        .debug-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .debug-section {
+            background: var(--background-light);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+        .debug-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        .debug-item {
+            background: var(--background);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent-color);
+        }
+        .debug-item.error {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .debug-item.warning {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        .debug-item.success {
+            border-left-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .debug-timestamp {
+            font-size: 0.8em;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+        .debug-message {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .debug-context {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .debug-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        .btn-secondary {
+            background: var(--background-light);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .copy-btn {
+            position: relative;
+        }
+        .copy-btn.copied::after {
+            content: "Copied!";
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--background);
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+        .no-data {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 40px;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="debug-container">
+            <h1>🐛 Debug Report</h1>
+            <p>This page shows detailed error logs and debugging information for
+                the Ahoy Indie Media application.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="error-count">0</div>
+                    <div class="stat-label">Errors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="log-count">0</div>
+                    <div class="stat-label">Logs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="bookmark-count">0</div>
+                    <div class="stat-label">Local Bookmarks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="session-status">Unknown</div>
+                    <div class="stat-label">Session Status</div>
+                </div>
+            </div>
+
+            <div class="debug-actions">
+                <button class="btn btn-primary" onclick="refreshReport()">🔄
+                    Refresh Report</button>
+                <button class="btn btn-secondary copy-btn"
+                    onclick="copyReport()">📋 Copy Full Report</button>
+                <button class="btn btn-secondary" onclick="downloadReport()">💾
+                    Download Report</button>
+                <button class="btn btn-danger" onclick="clearLogs()">🗑️ Clear
+                    Logs</button>
+                <button class="btn btn-primary" onclick="testBookmark()">🔖 Test
+                    Bookmark</button>
+                <a href="/bookmark-test" class="btn btn-secondary">🧪 Bookmark
+                    Test Page</a>
+            </div>
+
+            <div class="debug-section">
+                <h3>❌ Errors</h3>
+                <div id="errors-container">
+                    <div class="no-data">No errors recorded</div>
+                </div>
+            </div>
+
+            <div class="debug-section">
+                <h3>📝 Recent Logs</h3>
+                <div id="logs-container">
+                    <div class="no-data">No logs recorded</div>
+                </div>
+            </div>
+
+            <div class="debug-section">
+                <h3>💾 Local Storage</h3>
+                <div id="storage-container">
+                    <div class="no-data">Loading storage data...</div>
+                </div>
+            </div>
+
+            <div class="debug-section">
+                <h3>🌐 System Information</h3>
+                <div id="system-container">
+                    <div class="no-data">Loading system information...</div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        let debugData = null;
+
+        // Initialize debug system if not available
+        if (!window.ahoyDebug) {
+            window.ahoyDebug = {
+                errors: [],
+                logs: [],
+                addError: function(error, context = {}) {
+                    const errorEntry = {
+                        timestamp: new Date().toISOString(),
+                        message: error.message || error,
+                        stack: error.stack,
+                        context: context,
+                        userAgent: navigator.userAgent,
+                        url: window.location.href
+                    };
+                    this.errors.push(errorEntry);
+                },
+                addLog: function(message, data = {}) {
+                    const logEntry = {
+                        timestamp: new Date().toISOString(),
+                        message: message,
+                        data: data,
+                        url: window.location.href
+                    };
+                    this.logs.push(logEntry);
+                },
+                getReport: function() {
+                    return {
+                        errors: this.errors,
+                        logs: this.logs,
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        url: window.location.href,
+                        localStorage: {
+                            bookmarks: localStorage.getItem('ahoy_bookmarks'),
+                            session: localStorage.getItem('ahoy_session'),
+                            debug_errors: localStorage.getItem('ahoy_debug_errors'),
+                            debug_logs: localStorage.getItem('ahoy_debug_logs')
+                        }
+                    };
+                }
+            };
+
+            // Load existing data from localStorage
+            try {
+                const savedErrors = localStorage.getItem('ahoy_debug_errors');
+                if (savedErrors) {
+                    window.ahoyDebug.errors = JSON.parse(savedErrors);
+                }
+                const savedLogs = localStorage.getItem('ahoy_debug_logs');
+                if (savedLogs) {
+                    window.ahoyDebug.logs = JSON.parse(savedLogs);
+                }
+            } catch (e) {
+                console.warn('Could not load debug data from localStorage:', e);
+            }
+        }
+
+        function refreshReport() {
+            debugData = window.ahoyDebug.getReport();
+            renderReport();
+        }
+
+        function renderReport() {
+            if (!debugData) return;
+
+            // Update stats
+            document.getElementById('error-count').textContent = debugData.errors.length;
+            document.getElementById('log-count').textContent = debugData.logs.length;
+            
+            const bookmarks = JSON.parse(debugData.localStorage.bookmarks || '[]');
+            document.getElementById('bookmark-count').textContent = bookmarks.length;
+            
+            document.getElementById('session-status').textContent = debugData.localStorage.session ? 'Active' : 'None';
+
+            // Render errors
+            const errorsContainer = document.getElementById('errors-container');
+            if (debugData.errors.length === 0) {
+                errorsContainer.innerHTML = '<div class="no-data">No errors recorded</div>';
+            } else {
+                errorsContainer.innerHTML = debugData.errors.map(error => `
+                    <div class="debug-item error">
+                        <div class="debug-timestamp">${error.timestamp}</div>
+                        <div class="debug-message">${error.message}</div>
+                        <div class="debug-context">${JSON.stringify(error.context, null, 2)}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Render logs
+            const logsContainer = document.getElementById('logs-container');
+            if (debugData.logs.length === 0) {
+                logsContainer.innerHTML = '<div class="no-data">No logs recorded</div>';
+            } else {
+                logsContainer.innerHTML = debugData.logs.slice(-20).reverse().map(log => `
+                    <div class="debug-item success">
+                        <div class="debug-timestamp">${log.timestamp}</div>
+                        <div class="debug-message">${log.message}</div>
+                        <div class="debug-context">${JSON.stringify(log.data, null, 2)}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Render storage
+            const storageContainer = document.getElementById('storage-container');
+            storageContainer.innerHTML = Object.entries(debugData.localStorage).map(([key, value]) => `
+                <div class="debug-item">
+                    <div class="debug-message">${key}</div>
+                    <div class="debug-context">${value || 'null'}</div>
+                </div>
+            `).join('');
+
+            // Render system info
+            const systemContainer = document.getElementById('system-container');
+            systemContainer.innerHTML = `
+                <div class="debug-item">
+                    <div class="debug-message">User Agent</div>
+                    <div class="debug-context">${debugData.userAgent}</div>
+                </div>
+                <div class="debug-item">
+                    <div class="debug-message">Current URL</div>
+                    <div class="debug-context">${debugData.url}</div>
+                </div>
+                <div class="debug-item">
+                    <div class="debug-message">Report Generated</div>
+                    <div class="debug-context">${debugData.timestamp}</div>
+                </div>
+            `;
+        }
+
+        function copyReport() {
+            if (!debugData) {
+                alert('No data to copy. Click "Refresh Report" first.');
+                return;
+            }
+
+            const reportText = `# Ahoy Debug Report
+Generated: ${debugData.timestamp}
+URL: ${debugData.url}
+User Agent: ${debugData.userAgent}
+
+## Errors (${debugData.errors.length})
+${debugData.errors.map(error => `
+### ${error.timestamp}
+**Message:** ${error.message}
+**Context:** ${JSON.stringify(error.context, null, 2)}
+**Stack:** ${error.stack || 'N/A'}
+`).join('\n')}
+
+## Logs (${debugData.logs.length})
+${debugData.logs.map(log => `
+### ${log.timestamp}
+**Message:** ${log.message}
+**Data:** ${JSON.stringify(log.data, null, 2)}
+`).join('\n')}
+
+## Local Storage
+${Object.entries(debugData.localStorage).map(([key, value]) => `
+**${key}:** ${value || 'null'}
+`).join('\n')}
+`;
+
+            navigator.clipboard.writeText(reportText).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.classList.add('copied');
+                setTimeout(() => btn.classList.remove('copied'), 2000);
+            }).catch(err => {
+                alert('Failed to copy to clipboard: ' + err.message);
+            });
+        }
+
+        function downloadReport() {
+            if (!debugData) {
+                alert('No data to download. Click "Refresh Report" first.');
+                return;
+            }
+
+            const reportText = `# Ahoy Debug Report
+Generated: ${debugData.timestamp}
+URL: ${debugData.url}
+User Agent: ${debugData.userAgent}
+
+## Errors (${debugData.errors.length})
+${debugData.errors.map(error => `
+### ${error.timestamp}
+**Message:** ${error.message}
+**Context:** ${JSON.stringify(error.context, null, 2)}
+**Stack:** ${error.stack || 'N/A'}
+`).join('\n')}
+
+## Logs (${debugData.logs.length})
+${debugData.logs.map(log => `
+### ${log.timestamp}
+**Message:** ${log.message}
+**Data:** ${JSON.stringify(log.data, null, 2)}
+`).join('\n')}
+
+## Local Storage
+${Object.entries(debugData.localStorage).map(([key, value]) => `
+**${key}:** ${value || 'null'}
+`).join('\n')}
+`;
+
+            const blob = new Blob([reportText], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ahoy-debug-report-${new Date().toISOString().split('T')[0]}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function clearLogs() {
+            if (confirm('Are you sure you want to clear all debug logs? This cannot be undone.')) {
+                if (window.ahoyDebug) {
+                    window.ahoyDebug.errors = [];
+                    window.ahoyDebug.logs = [];
+                    localStorage.removeItem('ahoy_debug_errors');
+                    localStorage.removeItem('ahoy_debug_logs');
+                    refreshReport();
+                }
+            }
+        }
+
+        function testBookmark() {
+            // Test bookmark functionality
+            const testId = 'debug-test-' + Date.now();
+            window.ahoyDebug.addLog('Testing bookmark functionality', { testId });
+            
+            // Simulate bookmark button click
+            const testButton = document.createElement('button');
+            testButton.setAttribute('data-bookmark', 'true');
+            testButton.setAttribute('data-id', testId);
+            testButton.setAttribute('data-kind', 'track');
+            testButton.style.display = 'none';
+            document.body.appendChild(testButton);
+            
+            // Trigger click event
+            testButton.click();
+            
+            // Clean up
+            document.body.removeChild(testButton);
+            
+            // Refresh report to show results
+            setTimeout(() => {
+                refreshReport();
+            }, 1000);
+        }
+
+        // Auto-refresh on load
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshReport();
+        });
+    </script>
+    </body>
+</html>

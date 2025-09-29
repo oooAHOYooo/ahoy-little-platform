@@ -10,7 +10,7 @@
             <div class="header-content">
                 <div class="header-title">
                     <div class="hero-media" x-show="featuredShow">
-                        <img :data-src="featuredShow.thumbnail"
+                        <img :src="featuredShow.thumbnail"
                             :alt="featuredShow.title"
                             class="hero-thumbnail image-placeholder">
                         <div class="hero-media-overlay">
@@ -118,7 +118,7 @@
                 <template x-for="show in filteredShows" :key="show.id">
                     <div class="show-card" @click="playShow(show)">
                         <div class="show-thumbnail">
-                            <img :data-src="show.thumbnail" :alt="show.title"
+                            <img :src="show.thumbnail" :alt="show.title"
                                 class="image-placeholder">
                             <div class="show-overlay">
                                 <button @click.stop="playShow(show)"
@@ -158,7 +158,7 @@
                     <template x-for="show in filteredShows" :key="show.id">
                         <div class="list-item" @click="playShow(show)">
                             <div class="col-thumbnail">
-                                <img :data-src="show.thumbnail"
+                                <img :src="show.thumbnail"
                                     :alt="show.title" class="image-placeholder">
                                 <div class="play-overlay">
                                     <i class="fas fa-play"></i>
@@ -237,12 +237,7 @@ function showsPage() {
                 }
                 this.filterShows();
                 
-                // Refresh images after data loads
-                this.$nextTick(() => {
-                    if (window.imageOptimizer) {
-                        window.imageOptimizer.refresh();
-                    }
-                });
+                // Images will load automatically via lazy loading
             } catch (error) {
                 console.error('Error loading shows:', error);
             } finally {

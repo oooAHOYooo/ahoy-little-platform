@@ -30,6 +30,14 @@ login_manager.login_view = "auth.login"
 def healthz():
     return {"ok": True}
 
+@app.route('/debug-report')
+def debug_report():
+    return render_template('debug_report.html')
+
+@app.route('/bookmark-test')
+def bookmark_test():
+    return render_template('bookmark_test.html')
+
 # Enable compression (optional)
 try:
     from flask_compress import Compress

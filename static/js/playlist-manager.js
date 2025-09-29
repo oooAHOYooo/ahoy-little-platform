@@ -1,3 +1,5 @@
+// Playlist Manager - Global Version
+
 async function api(url, method="GET", payload=null) {
   const opts = { method, headers: { "Content-Type": "application/json" }, credentials: "include" };
   if (payload) opts.body = JSON.stringify(payload);

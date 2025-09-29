@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bookmark Test - Ahoy Indie Media</title>
+        <link rel="stylesheet" href="/static/css/main.css">
+        <link rel="stylesheet" href="/static/css/components.css">
+        <style>
+        .test-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-item {
+            background: var(--background-light);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+        .bookmark-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .bookmark-btn.bookmarked {
+            background: #10b981;
+        }
+        .bookmark-btn.is-loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background: var(--background);
+        }
+        .status.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        .status.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="test-container">
+            <h1>🔖 Bookmark Test Page</h1>
+            <p>This page tests the bookmark functionality. Click the buttons
+                below to test bookmarking.</p>
+
+            <div class="test-item">
+                <h3>Test Track 1</h3>
+                <p>Artist: Test Artist</p>
+                <button class="bookmark-btn" data-bookmark="true"
+                    data-id="test-track-1" data-kind="track">
+                    <i class="fas fa-bookmark"></i> Bookmark Track
+                </button>
+                <div class="status" id="status-1">Ready to test</div>
+            </div>
+
+            <div class="test-item">
+                <h3>Test Show 1</h3>
+                <p>Host: Test Host</p>
+                <button class="bookmark-btn" data-bookmark="true"
+                    data-id="test-show-1" data-kind="show">
+                    <i class="fas fa-bookmark"></i> Bookmark Show
+                </button>
+                <div class="status" id="status-2">Ready to test</div>
+            </div>
+
+            <div class="test-item">
+                <h3>Test Artist 1</h3>
+                <p>Genre: Test Genre</p>
+                <button class="bookmark-btn" data-bookmark="true"
+                    data-id="test-artist-1" data-kind="artist">
+                    <i class="fas fa-bookmark"></i> Bookmark Artist
+                </button>
+                <div class="status" id="status-3">Ready to test</div>
+            </div>
+
+            <div class="test-item">
+                <h3>Debug Information</h3>
+                <div id="debug-info">
+                    <p><strong>Local Storage Bookmarks:</strong> <span
+                            id="bookmark-count">0</span></p>
+                    <p><strong>Debug Logs:</strong> <span
+                            id="log-count">0</span></p>
+                    <p><strong>Errors:</strong> <span
+                            id="error-count">0</span></p>
+                </div>
+                <button class="bookmark-btn"
+                    onclick="refreshDebugInfo()">Refresh Debug Info</button>
+                <button class="bookmark-btn" onclick="clearAllData()">Clear All
+                    Data</button>
+            </div>
+
+            <div class="test-item">
+                <h3>Console Logs</h3>
+                <div id="console-logs"
+                    style="background: #000; color: #0f0; padding: 10px; border-radius: 4px; font-family: monospace; max-height: 200px; overflow-y: auto;">
+                    <div>Console logs will appear here...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load the main app.js for bookmark functionality -->
+        <script src="/static/js/app.js"></script>
+        <script>
+        // Override console.log to show in the page
+        const originalLog = console.log;
+        const originalError = console.error;
+        const consoleDiv = document.getElementById('console-logs');
+        
+        function addToConsole(message, type = 'log') {
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? '#f44' : '#0f0';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleDiv.appendChild(div);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'error');
+        };
+
+        // Update status when bookmarks are clicked
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('[data-bookmark]')) {
+                const btn = e.target.closest('[data-bookmark]');
+                const id = btn.dataset.id;
+                const statusId = 'status-' + (Array.from(document.querySelectorAll('[data-bookmark]')).indexOf(btn) + 1);
+                const statusDiv = document.getElementById(statusId);
+                
+                if (statusDiv) {
+                    statusDiv.textContent = `Testing bookmark for ${id}...`;
+                    statusDiv.className = 'status';
+                }
+            }
+        });
+
+        function refreshDebugInfo() {
+            const bookmarks = JSON.parse(localStorage.getItem('ahoy_bookmarks') || '[]');
+            const errors = window.ahoyDebug ? window.ahoyDebug.errors.length : 0;
+            const logs = window.ahoyDebug ? window.ahoyDebug.logs.length : 0;
+            
+            document.getElementById('bookmark-count').textContent = bookmarks.length;
+            document.getElementById('error-count').textContent = errors;
+            document.getElementById('log-count').textContent = logs;
+            
+            console.log('Debug info refreshed:', { bookmarks: bookmarks.length, errors, logs });
+        }
+
+        function clearAllData() {
+            if (confirm('Clear all bookmark data and debug logs?')) {
+                localStorage.removeItem('ahoy_bookmarks');
+                if (window.ahoyDebug) {
+                    window.ahoyDebug.errors = [];
+                    window.ahoyDebug.logs = [];
+                    localStorage.removeItem('ahoy_debug_errors');
+                    localStorage.removeItem('ahoy_debug_logs');
+                }
+                refreshDebugInfo();
+                console.log('All data cleared');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshDebugInfo();
+            console.log('Bookmark test page loaded');
+        });
+    </script>
+    </body>
+</html>

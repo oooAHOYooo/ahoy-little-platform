@@ -80,16 +80,16 @@
 
                 <div class="track-cover">
                     <img
-                        :data-src="track.cover_art || '/static/img/default-cover.jpg'"
+                        :src="track.cover_art || '/static/img/default-cover.jpg'"
                         :alt="track.title"
-                        class="image-placeholder">
+                        class="image-placeholder"
+                        loading="lazy">
                     <div class="track-overlay">
                         <button @click.stop="playTrack(track)" class="play-btn">
                             <i class="fas fa-play"></i>
                         </button>
                         <div class="track-actions">
-                            <button @click.stop="saveTrack(track)"
-                                class="action-btn save-btn"
+                            <button class="action-btn save-btn"
                                 :class="{'bookmarked': isSaved(track)}"
                                 :title="isSaved(track) ? 'Remove from bookmarks' : 'Bookmark track'"
                                 :data-bookmark="true"
@@ -128,9 +128,10 @@
 
                     <div class="col-cover">
                         <img
-                            :data-src="track.cover_art || '/static/img/default-cover.jpg'"
+                            :src="track.cover_art || '/static/img/default-cover.jpg'"
                             :alt="track.title"
-                            class="image-placeholder">
+                            class="image-placeholder"
+                            loading="lazy">
                     </div>
 
                     <div class="col-title">
@@ -141,8 +142,7 @@
                     <span class="col-artist" x-text="track.artist"></span>
 
                     <div class="col-actions">
-                        <button @click.stop="saveTrack(track)"
-                            class="action-btn"
+                        <button class="action-btn"
                             :class="{'bookmarked': isSaved(track)}"
                             title="Bookmark track"
                             :data-bookmark="true"
@@ -315,12 +315,7 @@ function musicLibrary() {
                 this.extractArtists();
                 this.sortMusic();
                 
-                // Refresh images after data loads
-                this.$nextTick(() => {
-                    if (window.imageOptimizer) {
-                        window.imageOptimizer.refresh();
-                    }
-                });
+                // Images will load automatically
                 
                 // Add debugging
                 console.log('Loaded tracks:', this.tracks.length);
@@ -608,7 +603,15 @@ function musicLibrary() {
         },
         
         isSaved(track) {
-            return track.saved || false;
+            // Check server state first
+            if (track.saved !== undefined) {
+                return track.saved;
+            }
+            
+            // Check local storage
+            const key = `track:${track.id}`;
+            const localBookmarks = JSON.parse(localStorage.getItem('ahoy_bookmarks') || '[]');
+            return localBookmarks.includes(key);
         },
         
         // Utility functions

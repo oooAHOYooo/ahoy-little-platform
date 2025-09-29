@@ -125,7 +125,7 @@
                         <i class="fas fa-users"></i>
                         <span>Artists</span>
                     </a>
-                    <a href="/my_saves" class="action-card">
+                    <a href="/my-saves" class="action-card">
                         <i class="fas fa-bookmark"></i>
                         <span>Saves</span>
                     </a>
@@ -207,7 +207,7 @@
                     </div>
 
                     <!-- View All Link -->
-                    <a href="/my_saves" class="view-all-btn"
+                    <a href="/my-saves" class="view-all-btn"
                         x-show="isLoggedIn && userPlaylists.length > 0">
                         <i class="fas fa-arrow-right"></i> View All Playlists
                     </a>
@@ -600,7 +600,7 @@ function homePage() {
             }
             
             // Redirect to my saves page to create playlist
-            window.location.href = '/my_saves';
+            window.location.href = '/my-saves';
         },
 
         viewPlaylist(playlistId) {
@@ -610,7 +610,7 @@ function homePage() {
             }
             
             // Redirect to my saves page to view playlist
-            window.location.href = '/my_saves';
+            window.location.href = '/my-saves';
         },
 
         showCreateAccountModal() {
