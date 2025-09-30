@@ -26,7 +26,13 @@ document.addEventListener("click", async (e) => {
     bmBtn.classList.add("is-loading");
     const { status } = await api("/api/bookmarks", "POST", { id, kind });
     bmBtn.classList.toggle("bookmarked", status === "bookmarked");
-    window.__ahoyToast && window.__ahoyToast("Bookmarked!");
+    
+    // Show notification for new bookmarks
+    if (status === "bookmarked") {
+      window.__ahoyToast && window.__ahoyToast("Bookmarked!");
+      // Trigger notification system
+      window.__ahoyNotifyNewBookmark && window.__ahoyNotifyNewBookmark();
+    }
   } catch (err) {
     console.error(err);
     // Handle 302 redirects and 401 errors (not logged in)
@@ -104,3 +110,60 @@ window.__ahoyToast = function(msg) {
   // Safety net: if DOMContentLoaded didn't fire, force-clear loader after 5s
   setTimeout(clearLoader, 5000);
 })();
+
+// ========================================
+// 🔔 NOTIFICATION SYSTEM
+// ========================================
+
+// Global notification state
+window.__ahoyNotificationState = {
+  newBookmarkCount: 0,
+  hasNewBookmarks: false,
+  lastBookmarkCount: 0
+};
+
+// Function to notify about new bookmarks
+window.__ahoyNotifyNewBookmark = function() {
+  window.__ahoyNotificationState.newBookmarkCount++;
+  window.__ahoyNotificationState.hasNewBookmarks = true;
+  
+  // Update navbar state if available
+  if (window.navbar && typeof window.navbar === 'function') {
+    const navbar = window.navbar();
+    if (navbar) {
+      navbar.newBookmarkCount = window.__ahoyNotificationState.newBookmarkCount;
+      navbar.hasNewBookmarks = window.__ahoyNotificationState.hasNewBookmarks;
+    }
+  }
+  
+  // Dispatch custom event for other components
+  document.dispatchEvent(new CustomEvent('bookmark:notified', { 
+    detail: { count: window.__ahoyNotificationState.newBookmarkCount } 
+  }));
+};
+
+// Function to clear notifications (when user visits bookmarks page)
+window.__ahoyClearBookmarkNotifications = function() {
+  window.__ahoyNotificationState.newBookmarkCount = 0;
+  window.__ahoyNotificationState.hasNewBookmarks = false;
+  
+  // Update navbar state if available
+  if (window.navbar && typeof window.navbar === 'function') {
+    const navbar = window.navbar();
+    if (navbar) {
+      navbar.newBookmarkCount = 0;
+      navbar.hasNewBookmarks = false;
+    }
+  }
+  
+  // Dispatch custom event
+  document.dispatchEvent(new CustomEvent('bookmark:notifications-cleared'));
+};
+
+// Initialize notification state on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Check if we're on the bookmarks page and clear notifications
+  if (window.location.pathname === '/bookmarks') {
+    window.__ahoyClearBookmarkNotifications();
+  }
+});

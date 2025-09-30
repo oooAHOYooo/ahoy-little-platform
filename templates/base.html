@@ -151,6 +151,7 @@
                                @click="leftMenuOpen = false">
                                 <i class="fas fa-bookmark"></i>
                                 <span>My Bookmarks</span>
+                                <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
                             </a>
                         </div>
                     </div>
@@ -175,6 +176,13 @@
                         title="Artists">
                         <i class="fas fa-users"></i>
                         <span>Artists</span>
+                    </a>
+                    <a href="/bookmarks"
+                        class="feature-btn {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
+                        title="My Bookmarks">
+                        <i class="fas fa-bookmark"></i>
+                        <span>Bookmarks</span>
+                        <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
                     </a>
                 </div>
 
@@ -208,6 +216,7 @@
                         class="nav-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
                         title="My Bookmarks">
                         <i class="fas fa-bookmark"></i>
+                        <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
                     </a>
 
                     <!-- User Section -->
@@ -570,6 +579,61 @@
         <script src="{{ url_for('static', filename='js/player.js') }}"></script>
         <script
             src="{{ url_for('static', filename='js/playlist-manager.js') }}"></script>
+        
+        <!-- Navbar JavaScript -->
+        <script>
+        function navbar() {
+            return {
+                // User state
+                isLoggedIn: window.LOGGED_IN || false,
+                userProfile: window.userProfile || {
+                    display_name: "Guest",
+                    username: "guest",
+                    email: "",
+                    avatar: "/static/img/default-avatar.png"
+                },
+                
+                // Notification state
+                newBookmarkCount: 0,
+                hasNewBookmarks: false,
+                
+                // Search state
+                searchQuery: '',
+                
+                // Initialize
+                init() {
+                    // Listen for bookmark notifications
+                    document.addEventListener('bookmark:notified', (e) => {
+                        this.newBookmarkCount = e.detail.count;
+                        this.hasNewBookmarks = true;
+                    });
+                    
+                    // Listen for notification clearing
+                    document.addEventListener('bookmark:notifications-cleared', () => {
+                        this.newBookmarkCount = 0;
+                        this.hasNewBookmarks = false;
+                    });
+                    
+                    // Initialize from global state if available
+                    if (window.__ahoyNotificationState) {
+                        this.newBookmarkCount = window.__ahoyNotificationState.newBookmarkCount;
+                        this.hasNewBookmarks = window.__ahoyNotificationState.hasNewBookmarks;
+                    }
+                },
+                
+                // Search functionality
+                performSearch() {
+                    if (!this.searchQuery.trim()) return;
+                    const searchUrl = `/search?q=${encodeURIComponent(this.searchQuery)}`;
+                    window.location.href = searchUrl;
+                },
+                
+                clearSearch() {
+                    this.searchQuery = '';
+                }
+            };
+        }
+        </script>
 
         <!-- Image Loading Styles -->
         <style>

@@ -1324,13 +1324,12 @@ a:hover {
     }
 
     .site-footer::before {
-        background: linear-gradient(90deg, 
-            transparent, 
-            rgba(0, 212, 255, 0.8), 
-            rgba(0, 212, 255, 0.4), 
-            rgba(0, 212, 255, 0.8), 
-            transparent
-        );
+        background: linear-gradient(90deg,
+                transparent,
+                rgba(0, 212, 255, 0.8),
+                rgba(0, 212, 255, 0.4),
+                rgba(0, 212, 255, 0.8),
+                transparent);
         height: 2px;
     }
 
@@ -1341,18 +1340,23 @@ a:hover {
         left: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(
-            circle at 50% 100%, 
-            rgba(0, 212, 255, 0.05) 0%, 
-            transparent 50%
-        );
+        background: radial-gradient(circle at 50% 100%,
+                rgba(0, 212, 255, 0.05) 0%,
+                transparent 50%);
         animation: footerGlow 8s ease-in-out infinite alternate;
         pointer-events: none;
     }
 
     @keyframes footerGlow {
-        0% { opacity: 0.3; transform: scale(1); }
-        100% { opacity: 0.6; transform: scale(1.1); }
+        0% {
+            opacity: 0.3;
+            transform: scale(1);
+        }
+
+        100% {
+            opacity: 0.6;
+            transform: scale(1.1);
+        }
     }
 
     .footer-content {
@@ -1517,22 +1521,31 @@ a:hover {
     }
 
     @keyframes debugPulse {
-        0%, 100% { opacity: 0.8; transform: scale(1); }
-        50% { opacity: 1; transform: scale(1.05); }
+
+        0%,
+        100% {
+            opacity: 0.8;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 1;
+            transform: scale(1.05);
+        }
     }
 }
 
-    .footer-bottom-content {
-        flex-direction: column;
-        text-align: center;
-        gap: var(--spacing-sm);
-    }
+.footer-bottom-content {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-sm);
+}
 
-    .footer-links {
-        gap: var(--spacing-md);
-        flex-wrap: wrap;
-        justify-content: center;
-    }
+.footer-links {
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    justify-content: center;
+}
 }
 
 /* Mobile Navigation Dropdown */
@@ -2943,22 +2956,22 @@ a:hover {
         grid-template-columns: 1fr;
         gap: 0.75rem;
     }
-    
+
     .bm-card {
         grid-template-columns: 60px 1fr;
         gap: 0.5rem;
         padding: 0.6rem;
     }
-    
+
     .bm-card .thumb {
         width: 60px;
         height: 60px;
     }
-    
+
     .bm-title {
         font-size: 0.9rem;
     }
-    
+
     .bm-btn {
         padding: 0.3rem 0.5rem;
         font-size: 0.8rem;
@@ -2966,30 +2979,107 @@ a:hover {
 }
 
 /* ========================================
+   🔔 NOTIFICATION SYSTEM
+   ======================================== */
+
+/* Notification Badge */
+.notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 2px 4px;
+    box-shadow: 0 2px 8px rgba(255, 0, 96, 0.4);
+    animation: notificationPulse 2s ease-in-out infinite;
+    z-index: 10;
+}
+
+@keyframes notificationPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(255, 0, 96, 0.4);
+    }
+
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(255, 0, 96, 0.6);
+    }
+}
+
+/* Position the nav-item relatively for absolute positioning of badge */
+.nav-item {
+    position: relative;
+}
+
+/* Mobile menu item notification badge */
+.mobile-menu-item {
+    position: relative;
+}
+
+.mobile-menu-item .notification-badge {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+}
+
+/* Feature button notification badge */
+.feature-btn {
+    position: relative;
+}
+
+.feature-btn .notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 16px;
+    height: 16px;
+    font-size: 9px;
+    padding: 2px 4px;
+}
+
+/* ========================================
    🔖 BOOKMARK ENHANCEMENTS & ANIMATIONS
    ======================================== */
 
 /* Enhanced bookmark button styles */
-.bm-btn, .save-btn {
+.bm-btn,
+.save-btn {
     position: relative;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     border-radius: 8px;
 }
 
-.bm-btn:hover, .save-btn:hover {
+.bm-btn:hover,
+.save-btn:hover {
     transform: scale(1.1);
     filter: drop-shadow(0 0 10px var(--accent-color));
     background: rgba(0, 212, 255, 0.1);
 }
 
-.bm-btn[aria-pressed="true"], .save-btn.bookmarked {
+.bm-btn[aria-pressed="true"],
+.save-btn.bookmarked {
     color: var(--accent-color);
     background: rgba(0, 212, 255, 0.15);
     border-color: var(--accent-color);
 }
 
-.bm-btn:active, .save-btn:active {
+.bm-btn:active,
+.save-btn:active {
     transform: scale(0.95);
 }
 
@@ -2998,21 +3088,25 @@ a:hover {
     0% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.3);
         filter: drop-shadow(0 0 20px var(--accent-color));
     }
+
     100% {
         transform: scale(1);
     }
 }
 
-.bm-btn.just-bookmarked, .save-btn.just-bookmarked {
+.bm-btn.just-bookmarked,
+.save-btn.just-bookmarked {
     animation: bookmarkPulse 0.6s ease-out;
 }
 
 /* Sparkle effect on bookmark */
-.bm-btn::before, .save-btn::before {
+.bm-btn::before,
+.save-btn::before {
     content: '';
     position: absolute;
     top: 50%;
@@ -3027,7 +3121,8 @@ a:hover {
     pointer-events: none;
 }
 
-.bm-btn.sparkle::before, .save-btn.sparkle::before {
+.bm-btn.sparkle::before,
+.save-btn.sparkle::before {
     animation: sparkle 0.6s ease-out forwards;
 }
 
@@ -3037,11 +3132,13 @@ a:hover {
         height: 0;
         opacity: 0.8;
     }
+
     50% {
         width: 30px;
         height: 30px;
         opacity: 0.4;
     }
+
     100% {
         width: 60px;
         height: 60px;
@@ -3065,9 +3162,12 @@ a:hover {
 }
 
 @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-3px);
     }
@@ -3228,6 +3328,16 @@ a:hover {
     flex-direction: column;
 }
 
+/* Bookmarks Widget Specific Styles */
+.bookmarks-widget .bookmarks-content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    /* Allow flex item to shrink */
+}
+
 /* Consistent 2x2 Grid Layout for All Widgets */
 .playing-list {
     display: grid;
@@ -3245,6 +3355,9 @@ a:hover {
     gap: 0.75rem;
     padding: 1rem;
     flex: 1;
+    min-height: 0;
+    /* Allow grid to shrink */
+    overflow: hidden;
 }
 
 /* Enhanced Now Playing Items with Background Images */
@@ -3312,11 +3425,14 @@ a:hover {
 }
 
 @keyframes playingPulse {
-    0%, 100% { 
+
+    0%,
+    100% {
         transform: translate(-50%, -50%) scale(1);
         box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
     }
-    50% { 
+
+    50% {
         transform: translate(-50%, -50%) scale(1.15);
         box-shadow: 0 6px 25px rgba(0, 212, 255, 0.7);
     }
@@ -3380,9 +3496,13 @@ a:hover {
     border-radius: 8px;
     overflow: hidden;
     min-height: 100px;
+    height: 100%;
+    /* Fill available grid space */
     cursor: pointer;
     transition: all 0.3s ease;
     color: white;
+    display: flex;
+    flex-direction: column;
 }
 
 .bookmark-item:hover {
