@@ -26,7 +26,16 @@
 
   function setLocalItem(it) {
     const k = it.key || keyOf(it.type, it.id);
-    state.items[k] = { ...it, key: k, added_at: it.added_at || new Date().toISOString() };
+    const now = new Date().toISOString();
+    state.items[k] = { 
+      ...it, 
+      key: k, 
+      added_at: it.added_at || now,
+      last_accessed: it.last_accessed || now,
+      access_count: it.access_count || 0,
+      nest_id: it.nest_id || null,
+      tags: it.tags || []
+    };
     saveLocal();
   }
   function removeLocalKey(k) {
@@ -84,20 +93,242 @@
     } catch {}
   }
 
+  // Nests system
+  const NESTS_KEY = "ahoy.nests.v1";
+  
+  function loadNests() {
+    try {
+      const raw = localStorage.getItem(NESTS_KEY);
+      if (!raw) return {};
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  }
+  
+  function saveNests(nests) {
+    localStorage.setItem(NESTS_KEY, JSON.stringify(nests));
+  }
+  
+  function createNest(name, description = "", color = "#00d4ff") {
+    const nestId = `nest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const nests = loadNests();
+    nests[nestId] = {
+      id: nestId,
+      name,
+      description,
+      color,
+      created_at: new Date().toISOString(),
+      item_count: 0
+    };
+    saveNests(nests);
+    return nestId;
+  }
+  
+  function updateNest(nestId, updates) {
+    const nests = loadNests();
+    if (nests[nestId]) {
+      nests[nestId] = { ...nests[nestId], ...updates };
+      saveNests(nests);
+    }
+  }
+  
+  function deleteNest(nestId) {
+    const nests = loadNests();
+    delete nests[nestId];
+    saveNests(nests);
+    
+    // Remove nest_id from all bookmarks
+    Object.values(state.items).forEach(item => {
+      if (item.nest_id === nestId) {
+        item.nest_id = null;
+      }
+    });
+    saveLocal();
+  }
+  
+  function addToNest(itemKey, nestId) {
+    if (state.items[itemKey]) {
+      state.items[itemKey].nest_id = nestId;
+      saveLocal();
+      
+      // Update nest count
+      const nests = loadNests();
+      if (nests[nestId]) {
+        nests[nestId].item_count = Object.values(state.items).filter(item => item.nest_id === nestId).length;
+        saveNests(nests);
+      }
+    }
+  }
+  
+  function removeFromNest(itemKey) {
+    if (state.items[itemKey]) {
+      const oldNestId = state.items[itemKey].nest_id;
+      state.items[itemKey].nest_id = null;
+      saveLocal();
+      
+      // Update nest count
+      if (oldNestId) {
+        const nests = loadNests();
+        if (nests[oldNestId]) {
+          nests[oldNestId].item_count = Object.values(state.items).filter(item => item.nest_id === oldNestId).length;
+          saveNests(nests);
+        }
+      }
+    }
+  }
+  
+  // Aging system
+  function getBookmarkAge(item) {
+    const added = new Date(item.added_at);
+    const now = new Date();
+    const diffTime = Math.abs(now - added);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  }
+  
+  function getBookmarkAgeCategory(item) {
+    const age = getBookmarkAge(item);
+    if (age <= 1) return 'new';
+    if (age <= 7) return 'recent';
+    if (age <= 30) return 'older';
+    return 'ancient';
+  }
+  
+  function getBookmarkFadeOpacity(item) {
+    const age = getBookmarkAge(item);
+    const accessCount = item.access_count || 0;
+    
+    // Base opacity on age
+    let opacity = 1;
+    if (age > 30) opacity = 0.6;
+    else if (age > 7) opacity = 0.8;
+    else if (age > 1) opacity = 0.9;
+    
+    // Boost opacity based on access count
+    const accessBoost = Math.min(accessCount * 0.1, 0.3);
+    opacity = Math.min(opacity + accessBoost, 1);
+    
+    return opacity;
+  }
+  
+  function markAccessed(itemKey) {
+    if (state.items[itemKey]) {
+      state.items[itemKey].last_accessed = new Date().toISOString();
+      state.items[itemKey].access_count = (state.items[itemKey].access_count || 0) + 1;
+      saveLocal();
+    }
+  }
+
   // Expose global API
   window.AhoyBookmarks = {
     all: () => Object.values(state.items),
     isBookmarked: (type, id) => !!state.items[keyOf(type, id)],
     toggle,
+    // Nests
+    getNests: () => Object.values(loadNests()),
+    createNest,
+    updateNest,
+    deleteNest,
+    addToNest,
+    removeFromNest,
+    // Aging
+    getBookmarkAge,
+    getBookmarkAgeCategory,
+    getBookmarkFadeOpacity,
+    markAccessed
   };
 
   state.items = loadLocal();
 
   // ✅ Integrate with Alpine.js
   document.addEventListener("alpine:init", () => {
+    // Global bookmark handler for use in bookmark buttons throughout the site
+    Alpine.data("globalBookmarkHandler", () => ({
+      nests: {},
+      showNestMenu: false,
+
+      init() {
+        this.loadNests();
+        
+        // Listen for nest changes
+        document.addEventListener('bookmarks:changed', () => {
+          this.loadNests();
+        });
+      },
+
+      loadNests() {
+        this.nests = {};
+        if (window.AhoyBookmarks) {
+          const nests = window.AhoyBookmarks.getNests();
+          nests.forEach(nest => {
+            this.nests[nest.id] = nest;
+          });
+        }
+      },
+
+      toggleBookmark(type, id, title, artwork) {
+        if (window.AhoyBookmarks) {
+          const item = {
+            type,
+            id,
+            title,
+            artwork,
+            key: keyOf(type, id)
+          };
+          
+          // Check if item is currently bookmarked
+          const wasBookmarked = window.AhoyBookmarks.isBookmarked(type, id);
+          window.AhoyBookmarks.toggle(item);
+          
+          // Show notification for new bookmarks
+          if (!wasBookmarked) {
+            window.__ahoyToast && window.__ahoyToast("Bookmarked!");
+            // Trigger notification system
+            window.__ahoyNotifyNewBookmark && window.__ahoyNotifyNewBookmark();
+          }
+        }
+      },
+
+      isBookmarked(type, id) {
+        if (window.AhoyBookmarks) {
+          return window.AhoyBookmarks.isBookmarked(type, id);
+        }
+        return false;
+      },
+
+      addToNest(type, id, nestId) {
+        if (window.AhoyBookmarks) {
+          const itemKey = keyOf(type, id);
+          window.AhoyBookmarks.addToNest(itemKey, nestId);
+        }
+      },
+
+      removeFromNest(type, id) {
+        if (window.AhoyBookmarks) {
+          const itemKey = keyOf(type, id);
+          window.AhoyBookmarks.removeFromNest(itemKey);
+        }
+      },
+
+      getCurrentNest(type, id) {
+        if (window.AhoyBookmarks) {
+          const itemKey = keyOf(type, id);
+          const item = state.items[itemKey];
+          return item?.nest_id || null;
+        }
+        return null;
+      }
+    }));
+
     Alpine.data("bookmarkHandler", () => ({
       bookmarks: state.items,
       animatingItems: new Set(),
+      nests: {},
+      showNestManager: false,
+      newNestName: '',
+      newNestDescription: '',
+      newNestColor: '#00d4ff',
 
       init() {
         // Listen for bookmark changes
@@ -112,6 +343,17 @@
               this.animatingItems.delete(itemKey);
             }, 600);
           }
+        });
+        
+        // Load nests
+        this.loadNests();
+      },
+
+      loadNests() {
+        this.nests = {};
+        const nests = window.AhoyBookmarks.getNests();
+        nests.forEach(nest => {
+          this.nests[nest.id] = nest;
         });
       },
 
@@ -130,6 +372,84 @@
       isAnimating(item) {
         const key = item.key || keyOf(item.type, item.id);
         return this.animatingItems.has(key);
+      },
+
+      // Nests functionality
+      createNest() {
+        if (!this.newNestName.trim()) return;
+        
+        const nestId = window.AhoyBookmarks.createNest(
+          this.newNestName.trim(),
+          this.newNestDescription.trim(),
+          this.newNestColor
+        );
+        
+        this.loadNests();
+        this.newNestName = '';
+        this.newNestDescription = '';
+        this.newNestColor = '#00d4ff';
+        this.showNestManager = false;
+      },
+
+      deleteNest(nestId) {
+        if (confirm('Are you sure you want to delete this nest? All bookmarks will be moved to "Unorganized".')) {
+          window.AhoyBookmarks.deleteNest(nestId);
+          this.loadNests();
+        }
+      },
+
+      addToNest(itemKey, nestId) {
+        window.AhoyBookmarks.addToNest(itemKey, nestId);
+        this.loadNests();
+      },
+
+      removeFromNest(itemKey) {
+        window.AhoyBookmarks.removeFromNest(itemKey);
+        this.loadNests();
+      },
+
+      getNestName(nestId) {
+        return this.nests[nestId]?.name || 'Unorganized';
+      },
+
+      getNestColor(nestId) {
+        return this.nests[nestId]?.color || '#666';
+      },
+
+      // Aging functionality
+      getBookmarkAge(item) {
+        return window.AhoyBookmarks.getBookmarkAge(item);
+      },
+
+      getBookmarkAgeCategory(item) {
+        return window.AhoyBookmarks.getBookmarkAgeCategory(item);
+      },
+
+      getBookmarkFadeOpacity(item) {
+        return window.AhoyBookmarks.getBookmarkFadeOpacity(item);
+      },
+
+      markAccessed(itemKey) {
+        window.AhoyBookmarks.markAccessed(itemKey);
+      },
+
+      getAgeLabel(item) {
+        const age = this.getBookmarkAge(item);
+        if (age <= 1) return 'New';
+        if (age <= 7) return 'Recent';
+        if (age <= 30) return 'Older';
+        return 'Ancient';
+      },
+
+      getAgeIcon(item) {
+        const category = this.getBookmarkAgeCategory(item);
+        switch (category) {
+          case 'new': return 'fas fa-sparkles';
+          case 'recent': return 'fas fa-clock';
+          case 'older': return 'fas fa-calendar';
+          case 'ancient': return 'fas fa-hourglass-half';
+          default: return 'fas fa-bookmark';
+        }
       }
     }));
   });

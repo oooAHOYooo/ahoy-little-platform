@@ -4,7 +4,8 @@
 {% block title %}My Bookmarks - Ahoy Indie Media{% endblock %}
 
 {% block content %}
-<div class="bookmarks-container" x-data="bookmarksPageHandler()" x-init="init()">
+<div class="bookmarks-container" x-data="bookmarksPageHandler()"
+    x-init="init()">
     <!-- Unified Header Section -->
     <section class="unified-header">
         <div class="header-content">
@@ -12,12 +13,14 @@
                 <div class="title-text">
                     <h1><i class="fas fa-bookmark"></i> My Bookmarks</h1>
                     <p>Your collection of saved tracks, shows, and artists</p>
-                    <div class="bookmark-count-badge" x-show="list().length > 0">
+                    <div class="bookmark-count-badge"
+                        x-show="list().length > 0">
                         <i class="fas fa-heart"></i>
                         <span x-text="list().length"></span>
-                        <span x-text="list().length === 1 ? 'item' : 'items'"></span>
+                        <span
+                            x-text="list().length === 1 ? 'item' : 'items'"></span>
                     </div>
-                    
+
                 </div>
             </div>
         </div>
@@ -26,93 +29,259 @@
     <!-- Filter Tabs -->
     <section class="filter-section" x-show="list().length > 0">
         <div class="filter-tabs">
-            <button 
-                class="filter-tab" 
-                :class="{ active: !filterType }"
-                @click="filterType = null">
+            <button
+                class="filter-tab"
+                :class="{ active: !filterType && !filterNest }"
+                @click="filterType = null; filterNest = null">
                 <i class="fas fa-th"></i>
                 All
                 <span class="tab-count" x-text="list().length"></span>
             </button>
-            <button 
-                class="filter-tab" 
+            <button
+                class="filter-tab"
                 :class="{ active: filterType === 'track' }"
-                @click="filterType = 'track'"
+                @click="filterType = 'track'; filterNest = null"
                 x-show="list().filter(item => item.type === 'track').length > 0">
                 <i class="fas fa-music"></i>
                 Tracks
-                <span class="tab-count" x-text="list().filter(item => item.type === 'track').length"></span>
+                <span class="tab-count"
+                    x-text="list().filter(item => item.type === 'track').length"></span>
             </button>
-            <button 
-                class="filter-tab" 
+            <button
+                class="filter-tab"
                 :class="{ active: filterType === 'show' }"
-                @click="filterType = 'show'"
+                @click="filterType = 'show'; filterNest = null"
                 x-show="list().filter(item => item.type === 'show').length > 0">
                 <i class="fas fa-tv"></i>
                 Shows
-                <span class="tab-count" x-text="list().filter(item => item.type === 'show').length"></span>
+                <span class="tab-count"
+                    x-text="list().filter(item => item.type === 'show').length"></span>
             </button>
-            <button 
-                class="filter-tab" 
+            <button
+                class="filter-tab"
                 :class="{ active: filterType === 'artist' }"
-                @click="filterType = 'artist'"
+                @click="filterType = 'artist'; filterNest = null"
                 x-show="list().filter(item => item.type === 'artist').length > 0">
                 <i class="fas fa-user-music"></i>
                 Artists
-                <span class="tab-count" x-text="list().filter(item => item.type === 'artist').length"></span>
+                <span class="tab-count"
+                    x-text="list().filter(item => item.type === 'artist').length"></span>
+            </button>
+
+            <!-- Nests Filter -->
+            <template x-for="nest in Object.values(nests)" :key="nest.id">
+                <button
+                    class="filter-tab nest-tab"
+                    :class="{ active: filterNest === nest.id }"
+                    :style="`border-left-color: ${nest.color}`"
+                    @click="filterType = null; filterNest = nest.id">
+                    <i class="fas fa-folder"></i>
+                    <span x-text="nest.name"></span>
+                    <span class="tab-count"
+                        x-text="list().filter(item => item.nest_id === nest.id).length"></span>
+                </button>
+            </template>
+
+            <!-- Nest Management -->
+            <button
+                class="filter-tab nest-manager-btn"
+                @click="showNestManager = !showNestManager">
+                <i class="fas fa-plus"></i>
+                <span>Manage Nests</span>
             </button>
         </div>
     </section>
+
+    <!-- Nest Manager Modal -->
+    <div x-show="showNestManager"
+        x-transition
+        class="nest-manager-modal"
+        @click.away="showNestManager = false">
+        <div class="nest-manager-content">
+            <div class="nest-manager-header">
+                <h3><i class="fas fa-folder-plus"></i> Manage Nests</h3>
+                <button @click="showNestManager = false" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Create New Nest -->
+            <div class="create-nest-section">
+                <h4>Create New Nest</h4>
+                <div class="nest-form">
+                    <input type="text"
+                        x-model="newNestName"
+                        placeholder="Nest name (e.g., 'Work Music', 'Chill Vibes')"
+                        class="nest-input">
+                    <input type="text"
+                        x-model="newNestDescription"
+                        placeholder="Description (optional)"
+                        class="nest-input">
+                    <div class="color-picker">
+                        <label>Color:</label>
+                        <input type="color" x-model="newNestColor"
+                            class="color-input">
+                    </div>
+                    <button @click="createNest()"
+                        :disabled="!newNestName.trim()"
+                        class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Create Nest
+                    </button>
+                </div>
+            </div>
+
+            <!-- Existing Nests -->
+            <div class="existing-nests-section"
+                x-show="Object.keys(nests).length > 0">
+                <h4>Your Nests</h4>
+                <div class="nests-list">
+                    <template x-for="nest in Object.values(nests)"
+                        :key="nest.id">
+                        <div class="nest-item">
+                            <div class="nest-info">
+                                <div class="nest-color"
+                                    :style="`background-color: ${nest.color}`"></div>
+                                <div class="nest-details">
+                                    <h5 x-text="nest.name"></h5>
+                                    <p
+                                        x-text="nest.description || 'No description'"></p>
+                                    <span class="nest-count"
+                                        x-text="`${list().filter(item => item.nest_id === nest.id).length} items`"></span>
+                                </div>
+                            </div>
+                            <button @click="deleteNest(nest.id)"
+                                class="delete-nest-btn"
+                                title="Delete nest">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bookmarks Grid -->
     <section class="bookmarks-grid-section" x-show="filteredList().length > 0">
         <div class="bookmarks-grid">
             <template x-for="item in filteredList()" :key="item.key">
-                <div class="bookmark-card" 
-                     :class="{ 'track-card': item.type === 'track', 'show-card': item.type === 'show', 'artist-card': item.type === 'artist' }"
-                     @click="playItem(item)">
-                    
+                <div class="bookmark-card"
+                    :class="{ 
+                       'track-card': item.type === 'track', 
+                       'show-card': item.type === 'show', 
+                       'artist-card': item.type === 'artist',
+                       'age-new': getBookmarkAgeCategory(item) === 'new',
+                       'age-recent': getBookmarkAgeCategory(item) === 'recent',
+                       'age-older': getBookmarkAgeCategory(item) === 'older',
+                       'age-ancient': getBookmarkAgeCategory(item) === 'ancient'
+                     }"
+                    :style="`opacity: ${getBookmarkFadeOpacity(item)}`"
+                    @click="playItem(item); markAccessed(item.key)">
+
                     <!-- Card Image -->
                     <div class="card-cover">
-                        <img :src="item.artwork || '/static/img/default-cover.jpg'" 
-                             :alt="item.title" 
-                             class="cover-image image-placeholder"
-                             loading="lazy">
-                        
+                        <img
+                            :src="item.artwork || '/static/img/default-cover.jpg'"
+                            :alt="item.title"
+                            class="cover-image image-placeholder"
+                            loading="lazy">
+
+                        <!-- Age Indicator -->
+                        <div class="age-indicator"
+                            :class="getBookmarkAgeCategory(item)">
+                            <i :class="getAgeIcon(item)"></i>
+                            <span x-text="getAgeLabel(item)"></span>
+                        </div>
+
+                        <!-- Nest Indicator -->
+                        <div class="nest-indicator"
+                            x-show="item.nest_id"
+                            :style="`background-color: ${getNestColor(item.nest_id)}`">
+                            <i class="fas fa-folder"></i>
+                            <span x-text="getNestName(item.nest_id)"></span>
+                        </div>
+
                         <!-- Card Overlay -->
                         <div class="card-overlay">
-                            <button @click.stop="playItem(item)" class="play-btn" x-show="item.type === 'track' || item.type === 'show'">
+                            <button
+                                @click.stop="playItem(item); markAccessed(item.key)"
+                                class="play-btn"
+                                x-show="item.type === 'track' || item.type === 'show'">
                                 <i class="fas fa-play"></i>
                             </button>
-                            <button @click.stop="viewItem(item)" class="view-btn" x-show="item.type === 'artist'">
+                            <button
+                                @click.stop="viewItem(item); markAccessed(item.key)"
+                                class="view-btn"
+                                x-show="item.type === 'artist'">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            
+
                             <!-- Bookmark Actions -->
                             <div class="card-actions">
+                                <!-- Nest Management -->
+                                <div class="nest-dropdown"
+                                    x-show="Object.keys(nests).length > 0">
+                                    <button class="action-btn nest-btn"
+                                        @click.stop="$refs[`nestMenu_${item.key}`].classList.toggle('show')"
+                                        title="Add to nest">
+                                        <i class="fas fa-folder-plus"></i>
+                                    </button>
+                                    <div class="nest-menu"
+                                        :ref="`nestMenu_${item.key}`"
+                                        @click.away="$refs[`nestMenu_${item.key}`].classList.remove('show')">
+                                        <div class="nest-menu-item"
+                                            @click="removeFromNest(item.key)"
+                                            x-show="item.nest_id">
+                                            <i class="fas fa-folder-minus"></i>
+                                            <span>Remove from nest</span>
+                                        </div>
+                                        <template
+                                            x-for="nest in Object.values(nests)"
+                                            :key="nest.id">
+                                            <div class="nest-menu-item"
+                                                @click="addToNest(item.key, nest.id); $refs[`nestMenu_${item.key}`].classList.remove('show')"
+                                                :class="{ active: item.nest_id === nest.id }">
+                                                <div class="nest-color-dot"
+                                                    :style="`background-color: ${nest.color}`"></div>
+                                                <span x-text="nest.name"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
                                 <button class="action-btn bm-btn remove-btn"
-                                        @click.stop="toggleBookmark(item); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
-                                        title="Remove bookmark">
+                                    @click.stop="toggleBookmark(item); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
+                                    title="Remove bookmark">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Card Info -->
                     <div class="card-info">
                         <div class="card-type-badge">
-                            <i :class="item.type === 'track' ? 'fas fa-music' : item.type === 'show' ? 'fas fa-tv' : 'fas fa-user-music'"></i>
+                            <i
+                                :class="item.type === 'track' ? 'fas fa-music' : item.type === 'show' ? 'fas fa-tv' : 'fas fa-user-music'"></i>
                             <span x-text="item.type"></span>
                         </div>
                         <h3 class="card-title" x-text="item.title"></h3>
-                        <p class="card-date" x-text="'Saved ' + formatDate(item.added_at)"></p>
+                        <div class="card-meta">
+                            <p class="card-date"
+                                x-text="'Saved ' + formatDate(item.added_at)"></p>
+                            <div class="access-count"
+                                x-show="item.access_count > 0">
+                                <i class="fas fa-eye"></i>
+                                <span x-text="item.access_count"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </template>
         </div>
     </section>
-    
+
     <!-- Empty State -->
     <section class="empty-state" x-show="list().length === 0">
         <div class="empty-content">
@@ -121,8 +290,9 @@
                 <i class="fas fa-heart"></i>
             </div>
             <h2>No bookmarks yet!</h2>
-            <p>Start building your collection by bookmarking your favorite content.</p>
-            
+            <p>Start building your collection by bookmarking your favorite
+                content.</p>
+
             <div class="empty-actions">
                 <a href="/music" class="btn btn-primary">
                     <i class="fas fa-music"></i>
@@ -141,13 +311,15 @@
     </section>
 
     <!-- Filtered Empty State -->
-    <section class="empty-state" x-show="list().length > 0 && filteredList().length === 0">
+    <section class="empty-state"
+        x-show="list().length > 0 && filteredList().length === 0">
         <div class="empty-content">
             <div class="empty-icon">
                 <i class="fas fa-filter"></i>
             </div>
             <h2>No <span x-text="filterType"></span> bookmarks</h2>
-            <p>You haven't bookmarked any <span x-text="filterType"></span>s yet.</p>
+            <p>You haven't bookmarked any <span x-text="filterType"></span>s
+                yet.</p>
             <button @click="filterType = null" class="btn btn-primary">
                 Show All Bookmarks
             </button>
@@ -159,13 +331,20 @@
 function bookmarksPageHandler() {
     return {
         filterType: null,
+        filterNest: null,
         bookmarks: {},
+        nests: {},
+        showNestManager: false,
+        newNestName: '',
+        newNestDescription: '',
+        newNestColor: '#00d4ff',
         
         init() {
             
             // Wait a bit for all scripts to load, then load bookmarks
             setTimeout(() => {
                 this.loadBookmarks();
+                this.loadNests();
             }, 500);
             
             // Also retry after a longer delay in case of slow loading
@@ -183,8 +362,9 @@ function bookmarksPageHandler() {
             
             // Also listen for storage changes (for guest bookmarks)
             window.addEventListener('storage', (e) => {
-                if (e.key === 'ahoy.bookmarks.v1') {
+                if (e.key === 'ahoy.bookmarks.v1' || e.key === 'ahoy.nests.v1') {
                     this.loadBookmarks();
+                    this.loadNests();
                 }
             });
         },
@@ -216,14 +396,34 @@ function bookmarksPageHandler() {
             }
         },
         
+        loadNests() {
+            this.nests = {};
+            if (window.AhoyBookmarks) {
+                const nests = window.AhoyBookmarks.getNests();
+                nests.forEach(nest => {
+                    this.nests[nest.id] = nest;
+                });
+            }
+        },
+        
         list() {
             return Object.values(this.bookmarks || {});
         },
         
         filteredList() {
-            const items = this.list();
-            if (!this.filterType) return items;
-            return items.filter(item => item.type === this.filterType);
+            let items = this.list();
+            
+            // Filter by type
+            if (this.filterType) {
+                items = items.filter(item => item.type === this.filterType);
+            }
+            
+            // Filter by nest
+            if (this.filterNest) {
+                items = items.filter(item => item.nest_id === this.filterNest);
+            }
+            
+            return items;
         },
         
         toggleBookmark(item) {
@@ -266,6 +466,103 @@ function bookmarksPageHandler() {
             if (diffDays <= 7) return `${diffDays} days ago`;
             if (diffDays <= 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
             return date.toLocaleDateString();
+        },
+        
+        // Nest management functions
+        createNest() {
+            if (!this.newNestName.trim()) return;
+            
+            if (window.AhoyBookmarks) {
+                const nestId = window.AhoyBookmarks.createNest(
+                    this.newNestName.trim(),
+                    this.newNestDescription.trim(),
+                    this.newNestColor
+                );
+                
+                this.loadNests();
+                this.newNestName = '';
+                this.newNestDescription = '';
+                this.newNestColor = '#00d4ff';
+                this.showNestManager = false;
+            }
+        },
+        
+        deleteNest(nestId) {
+            if (confirm('Are you sure you want to delete this nest? All bookmarks will be moved to "Unorganized".')) {
+                if (window.AhoyBookmarks) {
+                    window.AhoyBookmarks.deleteNest(nestId);
+                    this.loadNests();
+                }
+            }
+        },
+        
+        addToNest(itemKey, nestId) {
+            if (window.AhoyBookmarks) {
+                window.AhoyBookmarks.addToNest(itemKey, nestId);
+                this.loadNests();
+            }
+        },
+        
+        removeFromNest(itemKey) {
+            if (window.AhoyBookmarks) {
+                window.AhoyBookmarks.removeFromNest(itemKey);
+                this.loadNests();
+            }
+        },
+        
+        getNestName(nestId) {
+            return this.nests[nestId]?.name || 'Unorganized';
+        },
+        
+        getNestColor(nestId) {
+            return this.nests[nestId]?.color || '#666';
+        },
+        
+        // Aging functions
+        getBookmarkAge(item) {
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.getBookmarkAge(item);
+            }
+            return 0;
+        },
+        
+        getBookmarkAgeCategory(item) {
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.getBookmarkAgeCategory(item);
+            }
+            return 'new';
+        },
+        
+        getBookmarkFadeOpacity(item) {
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.getBookmarkFadeOpacity(item);
+            }
+            return 1;
+        },
+        
+        markAccessed(itemKey) {
+            if (window.AhoyBookmarks) {
+                window.AhoyBookmarks.markAccessed(itemKey);
+            }
+        },
+        
+        getAgeLabel(item) {
+            const age = this.getBookmarkAge(item);
+            if (age <= 1) return 'New';
+            if (age <= 7) return 'Recent';
+            if (age <= 30) return 'Older';
+            return 'Ancient';
+        },
+        
+        getAgeIcon(item) {
+            const category = this.getBookmarkAgeCategory(item);
+            switch (category) {
+                case 'new': return 'fas fa-sparkles';
+                case 'recent': return 'fas fa-clock';
+                case 'older': return 'fas fa-calendar';
+                case 'ancient': return 'fas fa-hourglass-half';
+                default: return 'fas fa-bookmark';
+            }
         }
     };
 }
@@ -550,6 +847,371 @@ function bookmarksPageHandler() {
 .btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Nest Management Styles */
+.nest-tab {
+    border-left: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.nest-tab:hover {
+    border-left-color: var(--accent-color);
+}
+
+.nest-manager-btn {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+}
+
+.nest-manager-btn:hover {
+    background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+}
+
+.nest-manager-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 2rem;
+}
+
+.nest-manager-content {
+    background: var(--background-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.nest-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nest-manager-header h3 {
+    color: white;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: var(--background-light);
+    color: white;
+}
+
+.create-nest-section {
+    margin-bottom: 2rem;
+}
+
+.create-nest-section h4 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.nest-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.nest-input {
+    background: var(--background-medium);
+    border: 1px solid var(--border-color);
+    color: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.nest-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+}
+
+.color-picker {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.color-picker label {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.color-input {
+    width: 50px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.existing-nests-section h4 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.nests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.nest-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--background-medium);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.nest-item:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.nest-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nest-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.nest-details h5 {
+    color: white;
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+}
+
+.nest-details p {
+    color: var(--text-muted);
+    margin: 0 0 0.25rem 0;
+    font-size: 0.85rem;
+}
+
+.nest-count {
+    color: var(--accent-color);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.delete-nest-btn {
+    background: rgba(255, 0, 96, 0.2);
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.delete-nest-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Age Indicator Styles */
+.age-indicator {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.age-indicator.new {
+    background: linear-gradient(45deg, #00d4ff, #00a8cc);
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+.age-indicator.recent {
+    background: linear-gradient(45deg, #28a745, #20c997);
+}
+
+.age-indicator.older {
+    background: linear-gradient(45deg, #ffc107, #fd7e14);
+}
+
+.age-indicator.ancient {
+    background: linear-gradient(45deg, #6c757d, #495057);
+    opacity: 0.7;
+}
+
+@keyframes sparkle {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Nest Indicator Styles */
+.nest-indicator {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+/* Card Age Classes */
+.bookmark-card.age-new {
+    border-color: #00d4ff;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
+.bookmark-card.age-recent {
+    border-color: #28a745;
+}
+
+.bookmark-card.age-older {
+    border-color: #ffc107;
+}
+
+.bookmark-card.age-ancient {
+    border-color: #6c757d;
+    opacity: 0.8;
+}
+
+/* Nest Dropdown Styles */
+.nest-dropdown {
+    position: relative;
+}
+
+.nest-btn {
+    background: rgba(0, 212, 255, 0.2);
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+}
+
+.nest-btn:hover {
+    background: var(--accent-color);
+    color: var(--background-dark);
+}
+
+.nest-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--background-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    padding: 0.5rem;
+    min-width: 200px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.nest-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.nest-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.nest-menu-item:hover {
+    background: var(--background-light);
+    color: white;
+}
+
+.nest-menu-item.active {
+    background: rgba(0, 212, 255, 0.2);
+    color: var(--accent-color);
+}
+
+.nest-color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Card Meta Styles */
+.card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.access-count {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.access-count i {
+    font-size: 0.7rem;
 }
 </style>
 {% endblock %}

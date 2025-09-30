@@ -64,27 +64,12 @@
         <!-- Debug Alpine.js loading -->
         <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Send debug info to server
-            fetch('/debug/mobile-nav', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    event: 'page_loaded',
-                    alpine_loaded: typeof Alpine !== 'undefined',
-                    alpine_version: typeof Alpine !== 'undefined' ? Alpine.version : null,
-                    window_width: window.innerWidth,
-                    should_show_mobile: window.innerWidth <= 768
-                })
-            }).catch(e => console.log('Debug endpoint not available'));
-            
             // Hide loading indicator
             const loadingIndicator = document.getElementById('loading-indicator');
             if (loadingIndicator) {
                 loadingIndicator.style.display = 'none';
                 loadingIndicator.remove();
             }
-            
-            // Mobile menus are now controlled by Alpine.js x-show
         });
         </script>
 
@@ -113,19 +98,8 @@
                 <!-- Mobile Left Menu (Features) -->
                 <div class="mobile-left-menu mobile-only">
                     <button @click="
-                        const beforeState = leftMenuOpen;
                         rightMenuOpen = false; // Close right menu
                         leftMenuOpen = !leftMenuOpen;
-                        fetch('/debug/mobile-nav', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({
-                                event: 'left_menu_clicked',
-                                state_before: beforeState,
-                                state_after: leftMenuOpen,
-                                timestamp: new Date().toISOString()
-                            })
-                        }).catch(e => console.log('Debug endpoint not available'));
                     " 
                             class="mobile-menu-button"
                             :class="{'active': leftMenuOpen}"
@@ -276,19 +250,8 @@
                 <!-- Mobile Right Menu (User & Bookmarks) -->
                 <div class="mobile-right-menu mobile-only">
                     <button @click="
-                        const beforeState = rightMenuOpen;
                         leftMenuOpen = false; // Close left menu
                         rightMenuOpen = !rightMenuOpen;
-                        fetch('/debug/mobile-nav', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({
-                                event: 'right_menu_clicked',
-                                state_before: beforeState,
-                                state_after: rightMenuOpen,
-                                timestamp: new Date().toISOString()
-                            })
-                        }).catch(e => console.log('Debug endpoint not available'));
                     " 
                             class="mobile-menu-button"
                             :class="{'active': rightMenuOpen}"
@@ -672,99 +635,6 @@
                 
                 // Initialize
                 init() {
-                    console.log('🚀 Navbar component initialized');
-                    console.log('📱 Mobile menu state:', { leftMenuOpen: this.leftMenuOpen, rightMenuOpen: this.rightMenuOpen });
-                    
-                    // Watch for state changes and send to server
-                    this.$watch('leftMenuOpen', (value) => {
-                        fetch('/debug/mobile-nav', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({
-                                event: 'left_menu_state_changed',
-                                new_state: value,
-                                timestamp: new Date().toISOString()
-                            })
-                        }).catch(e => console.log('Debug endpoint not available'));
-                        
-                        // Debug dropdown visibility
-                        setTimeout(() => {
-                            const dropdown = document.querySelector('.mobile-left-dropdown');
-                            const allDropdowns = document.querySelectorAll('.mobile-dropdown-menu');
-                            fetch('/debug/mobile-nav', {
-                                method: 'POST',
-                                headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify({
-                                    event: 'left_dropdown_debug',
-                                    dropdown_found: !!dropdown,
-                                    total_dropdowns: allDropdowns.length,
-                                    state_value: value,
-                                    dropdown_classes: dropdown ? dropdown.className : 'not found'
-                                })
-                            }).catch(e => console.log('Debug endpoint not available'));
-                            
-                            if (dropdown) {
-                                const styles = window.getComputedStyle(dropdown);
-                                fetch('/debug/mobile-nav', {
-                                    method: 'POST',
-                                    headers: {'Content-Type': 'application/json'},
-                                    body: JSON.stringify({
-                                        event: 'left_dropdown_styles',
-                                        display: styles.display,
-                                        visibility: styles.visibility,
-                                        position: styles.position,
-                                        zIndex: styles.zIndex,
-                                        opacity: styles.opacity
-                                    })
-                                }).catch(e => console.log('Debug endpoint not available'));
-                            }
-                        }, 100);
-                    });
-                    
-                    this.$watch('rightMenuOpen', (value) => {
-                        fetch('/debug/mobile-nav', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({
-                                event: 'right_menu_state_changed',
-                                new_state: value,
-                                timestamp: new Date().toISOString()
-                            })
-                        }).catch(e => console.log('Debug endpoint not available'));
-                        
-                        // Debug dropdown visibility
-                        setTimeout(() => {
-                            const dropdown = document.querySelector('.mobile-right-dropdown');
-                            const allDropdowns = document.querySelectorAll('.mobile-dropdown-menu');
-                            fetch('/debug/mobile-nav', {
-                                method: 'POST',
-                                headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify({
-                                    event: 'right_dropdown_debug',
-                                    dropdown_found: !!dropdown,
-                                    total_dropdowns: allDropdowns.length,
-                                    state_value: value,
-                                    dropdown_classes: dropdown ? dropdown.className : 'not found'
-                                })
-                            }).catch(e => console.log('Debug endpoint not available'));
-                            
-                            if (dropdown) {
-                                const styles = window.getComputedStyle(dropdown);
-                                fetch('/debug/mobile-nav', {
-                                    method: 'POST',
-                                    headers: {'Content-Type': 'application/json'},
-                                    body: JSON.stringify({
-                                        event: 'right_dropdown_styles',
-                                        display: styles.display,
-                                        visibility: styles.visibility,
-                                        position: styles.position,
-                                        zIndex: styles.zIndex,
-                                        opacity: styles.opacity
-                                    })
-                                }).catch(e => console.log('Debug endpoint not available'));
-                            }
-                        }, 100);
-                    });
                     
                     // Listen for bookmark notifications
                     document.addEventListener('bookmark:notified', (e) => {

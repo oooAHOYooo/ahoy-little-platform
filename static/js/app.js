@@ -14,10 +14,14 @@ async function api(url, method="GET", payload=null) {
   try { return await res.json(); } catch { return {}; }
 }
 
-// Bookmark-only delegation
+// Bookmark-only delegation (legacy support for non-Alpine.js buttons)
 document.addEventListener("click", async (e) => {
   const bmBtn = e.target.closest("[data-bookmark]") || e.target.closest("[data-like]"); // compat
   if (!bmBtn) return;
+  
+  // Skip if this is an Alpine.js handled button (has x-data)
+  if (bmBtn.closest('[x-data]')) return;
+  
   e.preventDefault();
   const id = bmBtn.dataset.id;
   const kind = bmBtn.dataset.kind || "track";

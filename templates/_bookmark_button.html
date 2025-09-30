@@ -1,13 +1,61 @@
 {# templates/_bookmark_button.html #}
 {% macro bookmark_button(type, id, title="", artwork="") -%}
-<button class="bm-btn"
-        data-bookmark
-        data-type="{{ type }}"
-        data-id="{{ id }}"
-        data-title="{{ title }}"
-        data-artwork="{{ artwork }}"
-        aria-pressed="false">
-  <span data-bm-icon aria-hidden="true"><i class="far fa-bookmark"></i></span>
-  <span data-bm-label class="sr-only">Bookmark</span>
-</button>
+<div class="bookmark-container" x-data="globalBookmarkHandler()"
+  x-init="init()">
+  <button class="bm-btn"
+    data-bookmark
+    data-type="{{ type }}"
+    data-id="{{ id }}"
+    data-title="{{ title }}"
+    data-artwork="{{ artwork }}"
+    @click="toggleBookmark('{{ type }}', '{{ id }}', '{{ title }}', '{{ artwork }}')"
+    :class="{ 'bookmarked': isBookmarked('{{ type }}', '{{ id }}') }"
+    aria-pressed="false">
+    <span data-bm-icon aria-hidden="true">
+      <i
+        :class="isBookmarked('{{ type }}', '{{ id }}') ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+    </span>
+    <span data-bm-label class="sr-only">Bookmark</span>
+  </button>
+
+  <!-- Nest Dropdown (only show if bookmarked and nests exist) -->
+  <div class="global-nest-dropdown"
+    x-show="isBookmarked('{{ type }}', '{{ id }}') && Object.keys(nests).length > 0"
+    x-transition>
+    <button class="nest-assign-btn"
+      @click="showNestMenu = !showNestMenu"
+      title="Add to nest">
+      <i class="fas fa-folder-plus"></i>
+    </button>
+
+    <div class="global-nest-menu"
+      x-show="showNestMenu"
+      @click.away="showNestMenu = false"
+      x-transition>
+      <div class="nest-menu-header">
+        <span>Add to nest:</span>
+        <button @click="showNestMenu = false" class="close-nest-menu">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="nest-menu-item"
+        @click="removeFromNest('{{ type }}', '{{ id }}'); showNestMenu = false"
+        x-show="getCurrentNest('{{ type }}', '{{ id }}')">
+        <i class="fas fa-folder-minus"></i>
+        <span>Remove from nest</span>
+      </div>
+
+      <template x-for="nest in Object.values(nests)" :key="nest.id">
+        <div class="nest-menu-item"
+          @click="addToNest('{{ type }}', '{{ id }}', nest.id); showNestMenu = false"
+          :class="{ active: getCurrentNest('{{ type }}', '{{ id }}') === nest.id }">
+          <div class="nest-color-dot"
+            :style="`background-color: ${nest.color}`"></div>
+          <span x-text="nest.name"></span>
+        </div>
+      </template>
+    </div>
+  </div>
+</div>
 {%- endmacro %}
