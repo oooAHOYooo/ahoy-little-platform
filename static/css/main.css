@@ -2130,10 +2130,10 @@ a:hover {
     }
 }
 
-/* Tablet breakpoint - show desktop nav on tablets */
-@media (max-width: 768px) and (min-width: 481px) {
+/* Desktop breakpoint - show desktop nav on larger screens */
+@media (min-width: 769px) {
 
-    /* Keep desktop navigation on tablets */
+    /* Keep desktop navigation on larger screens */
     .mobile-only {
         display: none;
     }
@@ -2142,7 +2142,7 @@ a:hover {
         display: block;
     }
 
-    /* Ensure nav-features shows on tablets */
+    /* Ensure nav-features shows on desktop */
     .nav-features {
         display: flex !important;
         align-items: center;
@@ -2153,10 +2153,11 @@ a:hover {
     .mobile-right-menu {
         display: none;
     }
+
 }
 
-/* Mobile breakpoint - show mobile nav only on phones */
-@media (max-width: 480px) {
+/* Mobile breakpoint - show mobile nav on mobile and small screens */
+@media (max-width: 768px) {
     .main-content {
         padding-top: 64px;
     }
@@ -2222,29 +2223,45 @@ a:hover {
         display: none;
     }
 
+    /* Hide desktop search and menu on mobile */
+    .nav-search,
+    .nav-menu {
+        display: none;
+    }
+
     /* Mobile menu buttons styling */
     .mobile-menu-button {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: none;
+        background: var(--background-medium);
         border: 1px solid var(--border-color);
         color: var(--text-secondary);
         cursor: pointer;
-        padding: var(--spacing-sm);
-        border-radius: var(--border-radius-md);
-        transition: all 0.2s ease;
-        font-size: var(--font-size-lg);
+        padding: 0.75rem;
+        border-radius: 10px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 1.1rem;
         width: 48px;
         height: 48px;
+        position: relative;
+        backdrop-filter: blur(10px);
     }
 
-    .mobile-menu-button:hover,
-    .mobile-menu-button.active {
+    .mobile-menu-button:hover {
         color: var(--text-primary);
         background: var(--background-light);
         border-color: var(--primary-color);
-        transform: scale(1.05);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .mobile-menu-button.active {
+        color: var(--primary-color);
+        background: var(--background-light);
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
     }
 
     .mobile-user-avatar {
@@ -2314,20 +2331,23 @@ a:hover {
 
     /* New Mobile Dropdown Styles */
     .mobile-dropdown-menu {
-        position: absolute;
-        top: 100%;
+        position: fixed;
+        top: 80px;
+        left: 20px;
         background: var(--background-dark);
-        border: 1px solid var(--border-color);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-xl);
-        padding: var(--spacing-lg);
+        border: 2px solid var(--primary-color);
+        border-radius: 16px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        padding: 1.5rem;
         min-width: 300px;
         max-width: 350px;
-        z-index: 1001;
+        z-index: 10000;
         backdrop-filter: blur(20px);
         max-height: 80vh;
         overflow-y: auto;
-        margin-top: var(--spacing-sm);
+        margin-top: 0.75rem;
+        transform-origin: top;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .mobile-left-dropdown {
@@ -2335,11 +2355,12 @@ a:hover {
     }
 
     .mobile-right-dropdown {
-        right: 0;
+        left: auto;
+        right: 20px;
     }
 
     .menu-section {
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: 2rem;
     }
 
     .menu-section:last-child {
@@ -2348,41 +2369,47 @@ a:hover {
 
     .menu-section h4 {
         color: var(--text-primary);
-        font-size: var(--font-size-sm);
-        font-weight: 600;
+        font-size: 0.8rem;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin: 0 0 var(--spacing-sm) 0;
-        padding: 0 var(--spacing-sm);
-        opacity: 0.8;
+        letter-spacing: 1px;
+        margin: 0 0 1rem 0;
+        padding: 0.5rem 1rem;
+        opacity: 0.9;
+        background: var(--background-medium);
+        border-radius: 8px;
+        border-left: 3px solid var(--primary-color);
     }
 
     .mobile-menu-item {
         display: flex;
         align-items: center;
-        gap: var(--spacing-md);
-        padding: var(--spacing-md);
+        gap: 1rem;
+        padding: 1rem;
         color: var(--text-secondary);
         text-decoration: none;
-        border-radius: var(--border-radius-md);
-        transition: all 0.2s ease;
-        margin-bottom: var(--spacing-xs);
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 0.5rem;
         border: none;
         background: none;
         width: 100%;
         cursor: pointer;
-        font-size: var(--font-size-base);
+        font-size: 0.95rem;
+        font-weight: 500;
     }
 
     .mobile-menu-item:hover {
         background: var(--background-light);
         color: var(--text-primary);
-        transform: translateX(4px);
+        transform: translateX(6px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .mobile-menu-item.active {
-        background: rgba(255, 0, 96, 0.1);
+        background: var(--background-light);
         color: var(--primary-color);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .mobile-menu-item i {
@@ -2600,7 +2627,7 @@ a:hover {
     display: block;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .mobile-only {
         display: block;
     }

@@ -60,6 +60,33 @@
         <!-- Alpine.js for reactive components -->
         <script defer
             src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        
+        <!-- Debug Alpine.js loading -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Send debug info to server
+            fetch('/debug/mobile-nav', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    event: 'page_loaded',
+                    alpine_loaded: typeof Alpine !== 'undefined',
+                    alpine_version: typeof Alpine !== 'undefined' ? Alpine.version : null,
+                    window_width: window.innerWidth,
+                    should_show_mobile: window.innerWidth <= 768
+                })
+            }).catch(e => console.log('Debug endpoint not available'));
+            
+            // Hide loading indicator
+            const loadingIndicator = document.getElementById('loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+                loadingIndicator.remove();
+            }
+            
+            // Mobile menus are now controlled by Alpine.js x-show
+        });
+        </script>
 
         {% block extra_head %}{% endblock %}
     </head>
@@ -83,12 +110,26 @@
                     </a>
                 </div>
 
-                <!-- Mobile Left Menu (Features & Navigation) -->
-                <div class="mobile-left-menu mobile-only" x-data="{ leftMenuOpen: false }">
-                    <button @click="leftMenuOpen = !leftMenuOpen" 
+                <!-- Mobile Left Menu (Features) -->
+                <div class="mobile-left-menu mobile-only">
+                    <button @click="
+                        const beforeState = leftMenuOpen;
+                        rightMenuOpen = false; // Close right menu
+                        leftMenuOpen = !leftMenuOpen;
+                        fetch('/debug/mobile-nav', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                event: 'left_menu_clicked',
+                                state_before: beforeState,
+                                state_after: leftMenuOpen,
+                                timestamp: new Date().toISOString()
+                            })
+                        }).catch(e => console.log('Debug endpoint not available'));
+                    " 
                             class="mobile-menu-button"
                             :class="{'active': leftMenuOpen}"
-                            title="Main Menu">
+                            title="Features Menu">
                         <i class="fas fa-bars"></i>
                     </button>
                     
@@ -113,9 +154,9 @@
                             </div>
                         </div>
                         
-                        <!-- Main Navigation -->
+                        <!-- Features Navigation -->
                         <div class="menu-section">
-                            <h4>Explore</h4>
+                            <h4>Features</h4>
                             <a href="{{ url_for('home') }}" 
                                class="mobile-menu-item {% if request.endpoint == 'home' %}active{% endif %}"
                                @click="leftMenuOpen = false">
@@ -145,13 +186,6 @@
                                @click="leftMenuOpen = false">
                                 <i class="fas fa-calendar-alt"></i>
                                 <span>Performances</span>
-                            </a>
-                            <a href="/bookmarks" 
-                               class="mobile-menu-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
-                               @click="leftMenuOpen = false">
-                                <i class="fas fa-bookmark"></i>
-                                <span>My Bookmarks</span>
-                                <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
                             </a>
                         </div>
                     </div>
@@ -239,12 +273,26 @@
                     </div>
                 </div>
 
-                <!-- Mobile Right Menu (User & Settings) -->
-                <div class="mobile-right-menu mobile-only" x-data="{ rightMenuOpen: false }">
-                    <button @click="rightMenuOpen = !rightMenuOpen" 
+                <!-- Mobile Right Menu (User & Bookmarks) -->
+                <div class="mobile-right-menu mobile-only">
+                    <button @click="
+                        const beforeState = rightMenuOpen;
+                        leftMenuOpen = false; // Close left menu
+                        rightMenuOpen = !rightMenuOpen;
+                        fetch('/debug/mobile-nav', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                event: 'right_menu_clicked',
+                                state_before: beforeState,
+                                state_after: rightMenuOpen,
+                                timestamp: new Date().toISOString()
+                            })
+                        }).catch(e => console.log('Debug endpoint not available'));
+                    " 
                             class="mobile-menu-button"
                             :class="{'active': rightMenuOpen}"
-                            title="User & Settings Menu">
+                            title="User & Bookmarks Menu">
                         <i class="fas fa-user" x-show="!isLoggedIn"></i>
                         <img x-show="isLoggedIn"
                              :src="userProfile.avatar || '/static/img/default-avatar.png'"
@@ -268,6 +316,24 @@
                                     <p x-text="userProfile.email || ''"></p>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Bookmarks Section -->
+                        <div class="menu-section">
+                            <h4>My Content</h4>
+                            <a href="/bookmarks" 
+                               class="mobile-menu-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
+                               @click="rightMenuOpen = false">
+                                <i class="fas fa-bookmark"></i>
+                                <span>My Bookmarks</span>
+                                <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
+                            </a>
+                            <a href="/my-saves" 
+                               class="mobile-menu-item {% if request.endpoint == 'my_saves' %}active{% endif %}"
+                               @click="rightMenuOpen = false">
+                                <i class="fas fa-save"></i>
+                                <span>My Saves</span>
+                            </a>
                         </div>
 
                         <!-- Account Section -->
@@ -347,8 +413,8 @@
                 </div>
 
 
-                    <!-- Fullscreen Toggle -->
-                    <button @click="toggleFullscreen()" class="nav-item"
+                    <!-- Fullscreen Toggle (Desktop Only) -->
+                    <button @click="toggleFullscreen()" class="nav-item hidden-mobile"
                         title="Fullscreen">
                         <i class="fas fa-expand"></i>
                     </button>
@@ -600,8 +666,106 @@
                 // Search state
                 searchQuery: '',
                 
+                // Mobile menu state
+                leftMenuOpen: false,
+                rightMenuOpen: false,
+                
                 // Initialize
                 init() {
+                    console.log('🚀 Navbar component initialized');
+                    console.log('📱 Mobile menu state:', { leftMenuOpen: this.leftMenuOpen, rightMenuOpen: this.rightMenuOpen });
+                    
+                    // Watch for state changes and send to server
+                    this.$watch('leftMenuOpen', (value) => {
+                        fetch('/debug/mobile-nav', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                event: 'left_menu_state_changed',
+                                new_state: value,
+                                timestamp: new Date().toISOString()
+                            })
+                        }).catch(e => console.log('Debug endpoint not available'));
+                        
+                        // Debug dropdown visibility
+                        setTimeout(() => {
+                            const dropdown = document.querySelector('.mobile-left-dropdown');
+                            const allDropdowns = document.querySelectorAll('.mobile-dropdown-menu');
+                            fetch('/debug/mobile-nav', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({
+                                    event: 'left_dropdown_debug',
+                                    dropdown_found: !!dropdown,
+                                    total_dropdowns: allDropdowns.length,
+                                    state_value: value,
+                                    dropdown_classes: dropdown ? dropdown.className : 'not found'
+                                })
+                            }).catch(e => console.log('Debug endpoint not available'));
+                            
+                            if (dropdown) {
+                                const styles = window.getComputedStyle(dropdown);
+                                fetch('/debug/mobile-nav', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({
+                                        event: 'left_dropdown_styles',
+                                        display: styles.display,
+                                        visibility: styles.visibility,
+                                        position: styles.position,
+                                        zIndex: styles.zIndex,
+                                        opacity: styles.opacity
+                                    })
+                                }).catch(e => console.log('Debug endpoint not available'));
+                            }
+                        }, 100);
+                    });
+                    
+                    this.$watch('rightMenuOpen', (value) => {
+                        fetch('/debug/mobile-nav', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                event: 'right_menu_state_changed',
+                                new_state: value,
+                                timestamp: new Date().toISOString()
+                            })
+                        }).catch(e => console.log('Debug endpoint not available'));
+                        
+                        // Debug dropdown visibility
+                        setTimeout(() => {
+                            const dropdown = document.querySelector('.mobile-right-dropdown');
+                            const allDropdowns = document.querySelectorAll('.mobile-dropdown-menu');
+                            fetch('/debug/mobile-nav', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({
+                                    event: 'right_dropdown_debug',
+                                    dropdown_found: !!dropdown,
+                                    total_dropdowns: allDropdowns.length,
+                                    state_value: value,
+                                    dropdown_classes: dropdown ? dropdown.className : 'not found'
+                                })
+                            }).catch(e => console.log('Debug endpoint not available'));
+                            
+                            if (dropdown) {
+                                const styles = window.getComputedStyle(dropdown);
+                                fetch('/debug/mobile-nav', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({
+                                        event: 'right_dropdown_styles',
+                                        display: styles.display,
+                                        visibility: styles.visibility,
+                                        position: styles.position,
+                                        zIndex: styles.zIndex,
+                                        opacity: styles.opacity
+                                    })
+                                }).catch(e => console.log('Debug endpoint not available'));
+                            }
+                        }, 100);
+                    });
+                    
                     // Listen for bookmark notifications
                     document.addEventListener('bookmark:notified', (e) => {
                         this.newBookmarkCount = e.detail.count;
@@ -630,6 +794,26 @@
                 
                 clearSearch() {
                     this.searchQuery = '';
+                },
+                
+                // Fullscreen functionality
+                toggleFullscreen() {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen().catch(err => {
+                            console.log('Error attempting to enable fullscreen:', err);
+                        });
+                    } else {
+                        document.exitFullscreen().catch(err => {
+                            console.log('Error attempting to exit fullscreen:', err);
+                        });
+                    }
+                },
+                
+                // Logout functionality
+                logout() {
+                    if (confirm('Are you sure you want to sign out?')) {
+                        window.location.href = '/logout';
+                    }
                 }
             };
         }
@@ -746,6 +930,12 @@
                 isMuted: false,
                 audioElement: null,
                 
+                // Player state
+                isLiked: false,
+                isSaved: false,
+                isShuffled: false,
+                isRepeated: false,
+                
                 init() {
                     // Create audio element
                     this.audioElement = document.createElement('audio');
@@ -843,6 +1033,39 @@
                     const mins = Math.floor(seconds / 60);
                     const secs = Math.floor(seconds % 60);
                     return `${mins}:${secs.toString().padStart(2, '0')}`;
+                },
+                
+                // Player action methods
+                toggleLike() {
+                    this.isLiked = !this.isLiked;
+                    console.log('🎵 Toggle like:', this.isLiked);
+                    // TODO: Implement actual like functionality
+                },
+                
+                toggleSave() {
+                    this.isSaved = !this.isSaved;
+                    console.log('🎵 Toggle save:', this.isSaved);
+                    // TODO: Implement actual save functionality
+                },
+                
+                addToPlaylist() {
+                    console.log('🎵 Add to playlist');
+                    // TODO: Implement playlist functionality
+                },
+                
+                toggleShuffle() {
+                    this.isShuffled = !this.isShuffled;
+                    console.log('🎵 Toggle shuffle:', this.isShuffled);
+                },
+                
+                toggleRepeat() {
+                    this.isRepeated = !this.isRepeated;
+                    console.log('🎵 Toggle repeat:', this.isRepeated);
+                },
+                
+                openFullPlayer() {
+                    console.log('🎵 Open full player');
+                    // TODO: Implement full player functionality
                 }
             };
         }
