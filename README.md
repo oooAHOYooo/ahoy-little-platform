@@ -2,26 +2,22 @@
 
 A comprehensive Flask-based media platform for discovering and organizing independent music, shows, and content. Built as a modern replacement for the original Cordova webapp with enhanced user features and playlist management.
 
-## Features
+## 📋 Table of Contents
 
-### 🎵 Media Discovery
-- **Now Playing Feed**: TikTok-style horizontal discovery with 30-second previews
-- **Music Library**: Full music streaming with advanced filtering and search
-- **Shows & Videos**: Video content and live shows with categories
-- **Artist Profiles**: Detailed artist pages with content and social links
+1. [Quick Start](#quick-start)
+2. [Data Structure](#data-structure)
+3. [API Reference](#api-reference)
+4. [Features](#features)
+5. [Project Structure](#project-structure)
+6. [Sitemap & Documentation](#sitemap--documentation)
+7. [User Management](#user-management)
+8. [Customization](#customization)
+9. [Deployment](#deployment)
+10. [Development](#development)
+11. [Security & Performance](#security--performance)
+12. [Development Log](#development-log)
 
-### 🎧 User Experience
-- **Playlist Management**: Create, edit, reorder, and share unlimited playlists
-- **Collections**: Organize content into themed folders
-- **Likes & History**: Track everything users interact with
-- **Personalized Recommendations**: AI-driven content suggestions
-- **Universal Search**: Search across all content types
-
-### 🎨 Modern Interface
-- **Responsive Design**: Mobile-first approach with desktop optimization
-- **Dark Theme**: Eye-friendly dark interface
-- **Smooth Animations**: Polished user interactions
-- **Keyboard Shortcuts**: Power user features
+---
 
 ## Quick Start
 
@@ -33,7 +29,7 @@ A comprehensive Flask-based media platform for discovering and organizing indepe
 
 1. **Clone and navigate to the project:**
    ```bash
-   cd ahoy-super-platform
+   cd ahoy-little-platform
    ```
 
 2. **Create a virtual environment:**
@@ -74,98 +70,268 @@ The application automatically checks for available ports in the range 5001-5010 
 python scripts/check_ports.py
 ```
 
-## Project Structure
+---
 
+## Data Structure
+
+### 📊 Content Data Files
+| File | Location | Description | Schema |
+|------|----------|-------------|--------|
+| `music.json` | `static/data/` | Music tracks | `{id, title, artist, album, duration, url, cover_art}` |
+| `shows.json` | `static/data/` | Video shows | `{id, title, host, description, duration, thumbnail, url}` |
+| `artists.json` | `static/data/` | Artist profiles | `{id, name, bio, image, social_links, genre}` |
+
+### 👤 User Data Files
+| File | Location | Description | Schema |
+|------|----------|-------------|--------|
+| `users.json` | `data/` | User accounts | `{username, password_hash, email, created_at, profile}` |
+| `user_activity.json` | `data/` | User activity | `{username: {likes, bookmarks, history, playlists}}` |
+| `playlists.json` | `data/` | User playlists | `{id, name, description, items, created_by, created_at}` |
+| `feedback.json` | `data/` | User feedback | `{id, message, type, status, created_at, user}` |
+
+### 🔄 Data Flow
+1. **Content Loading**: JSON files loaded into memory on startup
+2. **User Activity**: Stored in `data/` directory with thread-safe operations
+3. **Real-time Updates**: Changes persisted immediately to disk
+4. **Guest Mode**: LocalStorage for temporary data, migrates on account creation
+
+---
+
+## API Reference
+
+### 🎵 Content APIs
+| Method | Endpoint | Description | Parameters | Response |
+|--------|----------|-------------|------------|----------|
+| `GET` | `/api/now-playing` | Discovery feed | None | Array of content items |
+| `GET` | `/api/music` | Music library | `?page=1&limit=20` | Paginated music tracks |
+| `GET` | `/api/shows` | Shows library | `?category=live` | Array of shows |
+| `GET` | `/api/artists` | Artist directory | `?genre=indie` | Array of artists |
+| `GET` | `/api/artist/<name>` | Specific artist | `name` (path) | Artist profile + content |
+| `GET` | `/api/search` | Universal search | `?q=query&type=all` | Search results |
+| `GET` | `/api/daily-playlist` | Daily playlist | None | Curated playlist |
+
+### 👤 User Management APIs
+| Method | Endpoint | Description | Parameters | Response |
+|--------|----------|-------------|------------|----------|
+| `POST` | `/api/auth/login` | User login | `username`, `password` | Auth token |
+| `POST` | `/api/auth/register` | User registration | `username`, `password`, `email` | User profile |
+| `POST` | `/api/auth/logout` | User logout | None | Success status |
+| `GET` | `/api/user/profile` | Get user profile | None | User data |
+| `PUT` | `/api/user/profile` | Update profile | `display_name`, `avatar` | Updated profile |
+
+### 💾 Content Management APIs
+| Method | Endpoint | Description | Parameters | Response |
+|--------|----------|-------------|------------|----------|
+| `GET` | `/api/user/playlists` | Get playlists | None | User playlists |
+| `POST` | `/api/user/playlists` | Create playlist | `name`, `description` | New playlist |
+| `PUT` | `/api/user/playlists/<id>` | Update playlist | `name`, `description` | Updated playlist |
+| `DELETE` | `/api/user/playlists/<id>` | Delete playlist | None | Success status |
+| `POST` | `/api/user/playlists/<id>/items` | Add to playlist | `content_id`, `content_type` | Success status |
+| `DELETE` | `/api/user/playlists/<id>/items` | Remove from playlist | `content_id` | Success status |
+
+### ❤️ Activity APIs
+| Method | Endpoint | Description | Parameters | Response |
+|--------|----------|-------------|------------|----------|
+| `GET` | `/api/user/likes` | Get liked content | None | Liked items |
+| `POST` | `/api/user/likes` | Like content | `content_id`, `content_type` | Success status |
+| `DELETE` | `/api/user/likes` | Unlike content | `content_id` | Success status |
+| `GET` | `/api/user/history` | Get play history | None | Play history |
+| `POST` | `/api/user/history` | Add to history | `content_id`, `content_type` | Success status |
+| `GET` | `/api/user/recommendations` | Get recommendations | None | Recommended content |
+
+### 💾 Save/Load APIs (Guest & User)
+| Method | Endpoint | Description | Parameters | Response |
+|--------|----------|-------------|------------|----------|
+| `POST` | `/api/saves/save` | Save content | `content_id`, `content_type` | Success status |
+| `POST` | `/api/saves/unsave` | Unsave content | `content_id` | Success status |
+| `POST` | `/api/saves/check` | Check if saved | `content_id` | Boolean status |
+| `GET` | `/api/saves/<type>` | Get saved content | `type` (tracks/shows/artists) | Saved items |
+
+---
+
+## Features
+
+### 🎵 Media Discovery
+- **Now Playing Feed**: TikTok-style horizontal discovery with 30-second previews
+- **Music Library**: Full music streaming with advanced filtering and search
+- **Shows & Videos**: Video content and live shows with categories
+- **Artist Profiles**: Detailed artist pages with content and social links
+
+### 🎧 User Experience
+- **Playlist Management**: Create, edit, reorder, and share unlimited playlists
+- **Collections**: Organize content into themed folders
+- **Likes & History**: Track everything users interact with
+- **Personalized Recommendations**: AI-driven content suggestions
+- **Universal Search**: Search across all content types
+
+### 🎨 Modern Interface
+- **Responsive Design**: Mobile-first approach with desktop optimization
+- **Dark Theme**: Eye-friendly dark interface
+- **Smooth Animations**: Polished user interactions
+- **Keyboard Shortcuts**: Power user features
+
+## Quick Start
+
+### Prerequisites
+- Python 3.8+
+- pip (Python package installer)
+
+### Installation
+
+1. **Clone and navigate to the project:**
+   ```bash
+   cd ahoy-little-platform
+   ```
+
+2. **Create a virtual environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your settings
+   ```
+
+5. **Run the application:**
+   ```bash
+   python run.py
+   ```
+   Or directly:
+   ```bash
+   python app.py
+   ```
+
+6. **Visit the application:**
+   The application will automatically find an available port between 5001-5010 and display the URL (e.g., `http://localhost:5003`)
+
+### Port Management
+
+The application automatically checks for available ports in the range 5001-5010 to avoid conflicts with other services (like macOS AirPlay Receiver on port 5000).
+
+**Check available ports:**
+```bash
+python scripts/check_ports.py
 ```
-ahoy-super-platform/
-├── app.py                          # Main Flask application
-├── requirements.txt                # Python dependencies
-├── README.md                       # This file
-├── .env.example                    # Environment variables template
-├── .gitignore                      # Git ignore file
-│
-├── data/                           # User data storage
-│   ├── users.json                  # User accounts (created at runtime)
-│   └── user_activity.json          # User activity logs
-│
-├── static/                         # Static files
-│   ├── css/
-│   │   ├── main.css               # Main stylesheet
-│   │   └── components.css         # Component-specific styles
-│   ├── js/
-│   │   ├── app.js                 # Main JavaScript
-│   │   ├── player.js              # Media player logic
-│   │   ├── playlist-manager.js    # Playlist management
-│   │   └── unified-hero.js        # Hero carousel system
-│   ├── img/                       # Images and assets
-│   └── data/                      # JSON data files
-│       ├── music.json             # Music tracks
-│       ├── shows.json             # Video shows
-│       └── artists.json           # Artist profiles
-│
-└── templates/                      # Jinja2 templates
-    ├── base.html                  # Base template
-    ├── home.html                  # Discovery page
-    ├── music.html                 # Music library
-    ├── shows.html                 # Shows/video content
-    ├── artists.html               # Artist directory
-    ├── player.html                # Full-screen player
-    ├── sitemap.html               # App structure documentation
-    └── artist_profile.html        # Individual artist page
-```
 
-## 📋 App Structure & Documentation
+## Sitemap & Documentation
 
-For a comprehensive overview of the application's architecture, API endpoints, data structure, and functionality, visit the **[App Structure & Sitemap](/sitemap)** page. This documentation includes:
+### 🌐 Complete Site Map
 
-- **Complete page hierarchy** with features and functionality
-- **Detailed API endpoint reference** with parameters and data sources
-- **Data structure documentation** with JSON schemas
-- **Frontend architecture** including JavaScript modules and CSS organization
-- **Technology stack overview** and development information
-- **Feature breakdown** and user functionality guides
+#### Main Pages
+| Route | Page | Description | Key Features |
+|-------|------|-------------|--------------|
+| `/` | **Home** | Discovery page with Now Playing feed | • TikTok-style carousel<br>• Weather widget<br>• Daily playlist<br>• Quick actions<br>• Bookmarks widget |
+| `/music` | **Music Library** | Browse and play music tracks | • Grid/List view toggle<br>• Search & filtering<br>• Like & bookmark<br>• Add to playlist |
+| `/shows` | **Shows & Videos** | Video content and live shows | • Video player<br>• Show categories<br>• Host information<br>• Save & like |
+| `/artists` | **Artists Directory** | Browse independent artists | • Artist profiles<br>• Music & shows<br>• Social links<br>• Follow artists |
+| `/performances` | **Performances** | Live performance listings | • Event calendar<br>• Venue information<br>• Ticket links |
+| `/player` | **Full-Screen Player** | Dedicated media player | • Full-screen playback<br>• Queue management<br>• Playback controls |
 
-Access this documentation:
+#### User Pages
+| Route | Page | Description | Key Features |
+|-------|------|-------------|--------------|
+| `/auth` | **Authentication** | Login and registration | • User login<br>• Account creation<br>• Password reset<br>• Guest mode |
+| `/account` | **User Profile** | Account management | • Profile settings<br>• Avatar upload<br>• Statistics<br>• Data migration |
+| `/settings` | **App Settings** | Application preferences | • Dark mode toggle<br>• Auto-play settings<br>• Notification preferences |
+| `/my-saves` | **My Saves** | Saved content management | • Saved tracks<br>• Saved shows<br>• Playlists<br>• Export/Sync |
+| `/bookmarks` | **Bookmarks** | Bookmarked content | • All bookmarks<br>• Filter by type<br>• Quick access |
+
+#### Utility Pages
+| Route | Page | Description | Key Features |
+|-------|------|-------------|--------------|
+| `/sitemap` | **App Structure** | Complete documentation | • Page hierarchy<br>• API reference<br>• Data schemas<br>• Architecture overview |
+| `/feedback` | **Feedback** | User feedback system | • Bug reports<br>• Feature requests<br>• User suggestions |
+| `/debug` | **Debug Console** | Development tools | • System status<br>• User management<br>• Data viewer<br>• API testing |
+| `/admin` | **Admin Panel** | User management | • User list<br>• Account management<br>• System monitoring |
+
+### 📚 Documentation Access
 - **In-app**: Settings menu → "App Structure" 
 - **Direct URL**: `/sitemap`
 - **Mobile**: User menu → "App Structure"
+- **Complete Reference**: [SITEMAP.md](./SITEMAP.md)
 
-## API Endpoints
+---
 
-### Content
-- `GET /api/now-playing` - Discovery feed
-- `GET /api/music` - Music library
-- `GET /api/shows` - Shows library
-- `GET /api/artists` - Artist directory
-- `GET /api/artist/<name>` - Specific artist profile
-- `GET /api/search?q=query` - Universal search
-- `GET /api/daily-playlist` - Seeded daily playlist
+## Project Structure
 
-### User Management
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/logout` - User logout
-- `GET /api/user/profile` - Get user profile
-
-### Playlist Management
-- `GET /api/user/playlists` - Get user playlists
-- `POST /api/user/playlists` - Create new playlist
-- `GET /api/user/playlists/<id>` - Get specific playlist
-- `PUT /api/user/playlists/<id>` - Update playlist
-- `DELETE /api/user/playlists/<id>` - Delete playlist
-- `POST /api/user/playlists/<id>/items` - Add item to playlist
-- `DELETE /api/user/playlists/<id>/items` - Remove item from playlist
-- `POST /api/user/playlists/<id>/reorder` - Reorder playlist items
-
-### User Activity
-- `GET /api/user/likes` - Get user likes
-- `POST /api/user/likes` - Like an item
-- `DELETE /api/user/likes` - Unlike an item
-- `GET /api/user/history` - Get listening history
-- `POST /api/user/history` - Add to history
-- `GET /api/user/recommendations` - Get personalized recommendations
-- `GET /api/user/collections` - Get user collections
-- `POST /api/user/collections` - Create new collection
+```
+ahoy-little-platform/
+├── app.py                          # Main Flask application
+├── config.py                       # Configuration settings
+├── storage.py                      # Thread-safe JSON storage
+├── user_manager.py                 # User management utilities
+├── extensions.py                   # Flask extensions
+├── wsgi.py                        # WSGI entry point
+├── run.py                         # Development runner
+├── start.py                       # Production starter
+├── requirements.txt               # Python dependencies
+├── gunicorn.conf.py              # Gunicorn configuration
+├── Procfile                       # Heroku deployment
+├── render.yaml                    # Render deployment config
+├── README.md                      # This file
+├── SITEMAP.md                     # Complete sitemap reference
+├── .env.example                   # Environment variables template
+├── .gitignore                     # Git ignore file
+│
+├── data/                          # User data storage
+│   ├── users.json                 # User accounts (created at runtime)
+│   ├── user_activity.json         # User activity logs
+│   ├── playlists.json             # User playlists
+│   └── feedback.json              # User feedback
+│
+├── static/                        # Static files
+│   ├── css/
+│   │   ├── main.css              # Main stylesheet
+│   │   └── components.css        # Component-specific styles
+│   ├── js/
+│   │   ├── app.js                # Main JavaScript
+│   │   ├── player.js             # Media player logic
+│   │   ├── playlist-manager.js   # Playlist management
+│   │   ├── bookmarks.js          # Bookmark functionality
+│   │   ├── guest-bootstrap.js    # Guest user setup
+│   │   └── unified-hero.js       # Hero carousel system
+│   ├── img/                      # Images and assets
+│   └── data/                     # JSON data files
+│       ├── music.json            # Music tracks
+│       ├── shows.json            # Video shows
+│       └── artists.json          # Artist profiles
+│
+├── templates/                     # Jinja2 templates
+│   ├── base.html                 # Base template
+│   ├── home.html                 # Discovery page
+│   ├── music.html                # Music library
+│   ├── shows.html                # Shows/video content
+│   ├── artists.html              # Artist directory
+│   ├── player.html               # Full-screen player
+│   ├── sitemap.html              # App structure documentation
+│   ├── auth.html                 # Authentication
+│   ├── account.html              # User profile
+│   ├── settings.html             # App settings
+│   ├── my_saves.html             # User saves
+│   ├── bookmarks.html            # Bookmarks page
+│   ├── admin.html                # Admin panel
+│   ├── debug.html                # Debug console
+│   ├── feedback.html             # Feedback form
+│   ├── privacy.html              # Privacy policy
+│   ├── security.html             # Security policy
+│   ├── terms.html                # Terms of service
+│   └── 404.html                  # Error page
+│
+└── blueprints/                    # Modular route organization
+    ├── __init__.py
+    ├── activity.py               # User activity APIs
+    ├── auth.py                   # Authentication APIs
+    ├── bookmarks.py              # Bookmark management
+    └── playlists.py              # Playlist management
+```
 
 ## User Management
 
@@ -175,14 +341,7 @@ The platform uses a simple file-based user system with:
 - **Session Management**: Flask session-based authentication
 - **User Preferences**: Theme, autoplay, and other settings
 - **Activity Tracking**: Listening history and user statistics
-
-## Data Structure
-
-All content is stored in JSON files in `static/data/`:
-- **`music.json`**: Track metadata and streaming URLs
-- **`shows.json`**: Video content and show information
-- **`artists.json`**: Artist profiles and biographical data
-- **User data**: Stored in `data/users.json` (created at runtime)
+- **Guest Mode**: LocalStorage for temporary data, migrates on account creation
 
 ## Customization
 
@@ -252,21 +411,25 @@ For production, consider migrating from JSON files to a database:
 - **SQLite**: For simple deployments
 - **MongoDB**: For document-based storage
 
-## Security Considerations
+## Security & Performance
 
-- **Password Security**: Consider upgrading to bcrypt
-- **Input Validation**: Validate all API inputs
-- **Rate Limiting**: Implement for production
-- **CORS**: Configure for API access
+### 🔒 Security Considerations
+- **Password Security**: SHA-256 hashing (consider upgrading to bcrypt for production)
+- **Input Validation**: All API inputs validated and sanitized
+- **Rate Limiting**: 60/min for likes/bookmarks, 120/min for history
+- **Session Security**: Flask session-based authentication with secure cookies
+- **File Operations**: Thread-safe JSON storage with atomic operations
+- **CORS**: Configured for API access
 - **HTTPS**: Use SSL in production
 
-## Performance Optimizations
-
+### ⚡ Performance Optimizations
 - **Static File Caching**: Configure web server caching
-- **API Response Caching**: 5-minute default cache
-- **Lazy Loading**: For large libraries
-- **Pagination**: For large datasets
-- **CDN Integration**: For media files
+- **API Response Caching**: 5-minute default cache for content APIs
+- **Lazy Loading**: For large libraries and images
+- **Pagination**: For large datasets (20 items per page)
+- **CDN Integration**: For media files and static assets
+- **Thread-Safe Storage**: Prevents data corruption during concurrent writes
+- **Memory Management**: Efficient JSON loading and caching
 
 ## Browser Support
 
@@ -422,4 +585,30 @@ For questions or support:
 
 ---
 
+---
+
+## 🚀 Quick Navigation
+
+### For Users
+- **Start Here**: [Home](/)
+- **Browse Music**: [Music Library](/music)
+- **Watch Shows**: [Shows & Videos](/shows)
+- **Discover Artists**: [Artists](/artists)
+- **My Content**: [My Saves](/my-saves)
+
+### For Developers
+- **API Reference**: [API Endpoints](#api-reference)
+- **Data Structure**: [Data Structure](#data-structure)
+- **File Organization**: [Project Structure](#project-structure)
+- **Debug Tools**: [Debug Console](/debug)
+
+### For Administrators
+- **User Management**: [Admin Panel](/admin)
+- **System Status**: [Debug Console](/debug)
+- **User Feedback**: [Feedback Review](/feedback)
+
+---
+
 **Ahoy Indie Media** - Discover, organize, and enjoy independent music and content.
+
+*Last Updated: December 2024 | Version: 1.0.0*
