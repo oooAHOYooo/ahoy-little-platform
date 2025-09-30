@@ -202,6 +202,13 @@
                             <span x-text="getNestName(item.nest_id)"></span>
                         </div>
 
+                        <!-- Unorganized Indicator -->
+                        <div class="unorganized-indicator"
+                            x-show="!item.nest_id">
+                            <i class="fas fa-folder-open"></i>
+                            <span>Unorganized</span>
+                        </div>
+
                         <!-- Card Overlay -->
                         <div class="card-overlay">
                             <button
@@ -224,14 +231,17 @@
                                     x-show="Object.keys(nests).length > 0">
                                     <button class="action-btn nest-btn"
                                         @click.stop="$refs[`nestMenu_${item.key}`].classList.toggle('show')"
-                                        title="Add to nest">
+                                        title="Organize in nest">
                                         <i class="fas fa-folder-plus"></i>
                                     </button>
                                     <div class="nest-menu"
                                         :ref="`nestMenu_${item.key}`"
                                         @click.away="$refs[`nestMenu_${item.key}`].classList.remove('show')">
+                                        <div class="nest-menu-header">
+                                            <span>Organize in nest:</span>
+                                        </div>
                                         <div class="nest-menu-item"
-                                            @click="removeFromNest(item.key)"
+                                            @click="removeFromNest(item.key); $refs[`nestMenu_${item.key}`].classList.remove('show')"
                                             x-show="item.nest_id">
                                             <i class="fas fa-folder-minus"></i>
                                             <span>Remove from nest</span>
@@ -690,6 +700,13 @@ function bookmarksPageHandler() {
     opacity: 1;
 }
 
+/* Hide indicators on hover to prevent crowding */
+.bookmark-card:hover .nest-indicator,
+.bookmark-card:hover .unorganized-indicator {
+    opacity: 0.3;
+    transform: scale(0.9);
+}
+
 .play-btn, .view-btn {
     background: var(--accent-color);
     color: var(--background-dark);
@@ -714,6 +731,22 @@ function bookmarksPageHandler() {
     position: absolute;
     top: 1rem;
     right: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 10;
+    animation: slideInActions 0.3s ease-out;
+}
+
+@keyframes slideInActions {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .remove-btn {
@@ -728,11 +761,13 @@ function bookmarksPageHandler() {
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255, 0, 96, 0.3);
 }
 
 .remove-btn:hover {
     background: var(--primary-color);
     transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(255, 0, 96, 0.5);
 }
 
 .card-info {
@@ -1106,6 +1141,26 @@ function bookmarksPageHandler() {
     gap: 0.25rem;
     backdrop-filter: blur(10px);
     transition: all 0.3s ease;
+    z-index: 5;
+}
+
+/* Unorganized Indicator */
+.unorganized-indicator {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(102, 102, 102, 0.8);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    z-index: 5;
 }
 
 /* Card Age Classes */
@@ -1136,34 +1191,55 @@ function bookmarksPageHandler() {
     background: rgba(0, 212, 255, 0.2);
     color: var(--accent-color);
     border: 1px solid var(--accent-color);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
 }
 
 .nest-btn:hover {
     background: var(--accent-color);
     color: var(--background-dark);
+    transform: scale(1.1);
 }
 
 .nest-menu {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 0.5rem);
     right: 0;
     background: var(--background-dark);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    padding: 0.5rem;
-    min-width: 200px;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    padding: 0.75rem;
+    min-width: 220px;
     z-index: 1000;
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.3s ease;
+    backdrop-filter: blur(20px);
 }
 
 .nest-menu.show {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+}
+
+.nest-menu-header {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nest-menu-header span {
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
 }
 
 .nest-menu-item {
