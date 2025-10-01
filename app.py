@@ -20,6 +20,24 @@ from blueprints.playlists import bp as playlists_bp
 from blueprints.bookmarks import bp as bookmarks_bp
 from blueprints.collections import bp as collections_bp
 
+# Initialize search index on app startup
+def initialize_search_index():
+    """Initialize the search index with all content"""
+    try:
+        from search_indexer import search_index
+        
+        data_sources = {
+            'music': 'static/data/music.json',
+            'shows': 'static/data/shows.json',
+            'artists': 'static/data/artists.json'
+        }
+        
+        search_index.reindex(data_sources)
+        print(f"✅ Search index initialized with {search_index.total_docs} documents")
+        
+    except Exception as e:
+        print(f"❌ Error initializing search index: {e}")
+
 def create_app():
     app = Flask(__name__)
 
@@ -50,6 +68,10 @@ def create_app():
     app.register_blueprint(playlists_bp)
     app.register_blueprint(bookmarks_bp)
     app.register_blueprint(collections_bp)
+    
+    # Initialize search index
+    with app.app_context():
+        initialize_search_index()
 
     # Health check endpoint
     @app.get("/healthz")
@@ -561,43 +583,7 @@ def api_daily_playlist():
         'seed': seed
     })
 
-@app.route('/api/search')
-def api_search():
-    """Universal search"""
-    query = request.args.get('q', '').lower()
-    
-    music_data = load_json_data('music.json', {'tracks': []})
-    shows_data = load_json_data('shows.json', {'shows': []})
-    artists_data = load_json_data('artists.json', {'artists': []})
-    
-    results = {
-        'tracks': [],
-        'shows': [],
-        'artists': []
-    }
-    
-    # Search music
-    for track in music_data.get('tracks', []):
-        if (query in track.get('title', '').lower() or 
-            query in track.get('artist', '').lower() or
-            query in track.get('tags', '').lower()):
-            results['tracks'].append(track)
-    
-    # Search shows
-    for show in shows_data.get('shows', []):
-        if (query in show.get('title', '').lower() or
-            query in show.get('description', '').lower() or
-            query in show.get('host', '').lower()):
-            results['shows'].append(show)
-    
-    # Search artists
-    for artist in artists_data.get('artists', []):
-        if (query in artist.get('name', '').lower() or
-            query in artist.get('bio', '').lower() or
-            query in artist.get('genre', '').lower()):
-            results['artists'].append(artist)
-    
-    return jsonify(results)
+# Removed duplicate search route - using comprehensive_search instead
 
 # Legacy playlist endpoints - redirect to new enhanced system
 @app.route('/api/user/playlists', methods=['GET', 'POST'])
@@ -1761,66 +1747,75 @@ def update_feedback_status():
         print(f"Error updating feedback status: {e}")
         return jsonify({'error': 'Failed to update status'}), 500
 
-@app.route('/api/search')
-def search_api():
-    """Search API endpoint"""
-    query = request.args.get('q', '').strip().lower()
-    
-    if not query:
-        return jsonify({'results': []})
-    
-    results = []
-    
+# Removed duplicate search route - using comprehensive_search instead
+
+# ========================================
+# 🔍 COMPREHENSIVE SEARCH API
+# ========================================
+
+@app.route('/api/search', methods=['GET'])
+def comprehensive_search():
+    """Comprehensive search API with TF-IDF scoring and fuzzy matching"""
     try:
-        # Search music
-        music_data = load_json_data('music.json', {'tracks': []})
-        for track in music_data.get('tracks', []):
-            if (query in track.get('title', '').lower() or 
-                query in track.get('artist', '').lower() or 
-                query in track.get('album', '').lower() or 
-                query in track.get('genre', '').lower()):
-                results.append({
-                    **track,
-                    'type': 'music',
-                    'id': track.get('id', f"music_{len(results)}")
-                })
+        from search_indexer import search_index
         
-        # Search shows
-        shows_data = load_json_data('shows.json', {'shows': []})
-        for show in shows_data.get('shows', []):
-            if (query in show.get('title', '').lower() or 
-                query in show.get('host', '').lower() or 
-                query in show.get('description', '').lower()):
-                results.append({
-                    **show,
-                    'type': 'show',
-                    'id': show.get('id', f"show_{len(results)}")
-                })
+        # Get query parameters
+        query = request.args.get('q', '').strip()
+        limit = min(int(request.args.get('limit', 20)), 100)  # Cap at 100
+        offset = int(request.args.get('offset', 0))
+        kinds = request.args.get('kinds', '').split(',') if request.args.get('kinds') else None
+        sort = request.args.get('sort', 'relevance')
         
-        # Search artists
-        artists_data = load_json_data('artists.json', {'artists': []})
-        for artist in artists_data.get('artists', []):
-            if (query in artist.get('name', '').lower() or 
-                query in artist.get('description', '').lower() or 
-                query in ' '.join(artist.get('genres', [])).lower()):
-                results.append({
-                    **artist,
-                    'type': 'artist',
-                    'id': artist.get('id', f"artist_{len(results)}")
-                })
+        # Validate sort parameter
+        if sort not in ['relevance', 'recent']:
+            sort = 'relevance'
         
-        # Shuffle results for variety
-        import random
-        random.shuffle(results)
+        # Perform search
+        results = search_index.search(
+            query=query,
+            limit=limit,
+            offset=offset,
+            kinds=kinds,
+            sort=sort
+        )
+        
+        return jsonify(results)
         
     except Exception as e:
-        print(f"Error in search: {e}")
-        return jsonify({'error': 'Search failed'}), 500
-    
-    return jsonify({'results': results})
+        print(f"Error in comprehensive search: {e}")
+        return jsonify({'error': 'Search failed', 'results': [], 'total': 0}), 500
+
+@app.route('/api/search/reindex', methods=['POST'])
+def reindex_search():
+    """Reindex the search data (admin endpoint)"""
+    try:
+        from search_indexer import search_index
+        
+        data_sources = {
+            'music': 'static/data/music.json',
+            'shows': 'static/data/shows.json',
+            'artists': 'static/data/artists.json'
+        }
+        
+        search_index.reindex(data_sources)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Search index rebuilt with {search_index.total_docs} documents'
+        })
+        
+    except Exception as e:
+        print(f"Error reindexing search: {e}")
+        return jsonify({'error': 'Reindex failed'}), 500
 
 # Allow `python -m app` locally if needed
 if __name__ == "__main__":
     import os
     port = int(os.getenv("PORT", "5000"))
-    create_app().run(port=port, use_reloader=False)
+    app = create_app()
+    
+    # Initialize search index
+    with app.app_context():
+        initialize_search_index()
+    
+    app.run(port=port, use_reloader=False)
