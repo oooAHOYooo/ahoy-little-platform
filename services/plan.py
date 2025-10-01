@@ -5,10 +5,10 @@ PRODUCTS = "data/products.json"
 USERS = "data/users.json"
 
 def _products():
-    return read_json(PRODUCTS) or {}
+    return read_json(PRODUCTS, {})
 
 def _users():
-    data = read_json(USERS) or {"users": []}
+    data = read_json(USERS, {"users": []})
     if "users" not in data: data["users"] = []
     return data
 

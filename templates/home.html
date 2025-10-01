@@ -524,10 +524,17 @@ function homePage() {
             this.currentIndex = index;
             this.stopHeroRotation();
             
-            // Try to play directly if it's music and global player is available
-            if (item.type === 'music' || item.artist) {
-                if (window.globalPlayer) {
-                    window.globalPlayer.playTrack(item);
+            console.log('🎵 Playing item:', item);
+            
+            // Try to play directly if it's music and media player is available
+            if (item.type === 'track' || item.type === 'music' || item.artist) {
+                if (window.mediaPlayer && window.mediaPlayer.play) {
+                    window.mediaPlayer.play(item);
+                    // Restart rotation after a delay
+                    setTimeout(() => this.startHeroRotation(), 10000);
+                    return;
+                } else if (window.PlayerControls && window.PlayerControls.play) {
+                    window.PlayerControls.play(item);
                     // Restart rotation after a delay
                     setTimeout(() => this.startHeroRotation(), 10000);
                     return;

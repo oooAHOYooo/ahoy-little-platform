@@ -14,7 +14,7 @@ def _now():
     return datetime.utcnow().isoformat() + "Z"
 
 def _ensure_store():
-    data = read_json(COLLECTIONS_FILE) or {"collections": []}
+    data = read_json(COLLECTIONS_FILE, {"collections": []})
     if "collections" not in data:
         data["collections"] = []
     return data
@@ -30,10 +30,9 @@ def auth_required(f):
     return decorated_function
 
 @bp.route("/", methods=['GET', 'POST'])
-@auth_required
 def collections():
     """Get all collections or create new collection"""
-    username = session.get('username')
+    username = session.get('username', 'guest')
     
     if request.method == 'POST':
         data = request.get_json() or {}
@@ -76,10 +75,9 @@ def collections():
     return jsonify(user_collections)
 
 @bp.route("/<collection_id>/items", methods=['POST'])
-@auth_required
 def add_item_to_collection(collection_id):
     """Add item to collection"""
-    username = session.get('username')
+    username = session.get('username', 'guest')
     data = request.get_json() or {}
     
     all_data = _ensure_store()

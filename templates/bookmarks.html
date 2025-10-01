@@ -214,27 +214,19 @@
 
                         <!-- Hover actions (right-top) -->
                         <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition flex gap-1">
+                            <!-- Open chooser -->
                             <button
                                 class="w-8 h-8 rounded-full grid place-items-center bg-white/90 hover:bg-white text-black shadow"
                                 title="Organize in Collection"
-                                data-quick-assign
-                                :data-id="item.id"
-                                :data-type="item.type"
-                                data-owner="{{ session.username if session.username else 'guest' }}"
-                                @click.stop="">
+                                @click.stop="openCollectionChooser(item)">
                                 📁
                             </button>
-                            <!-- Quick Move to Last Collection (if exists) -->
+                            
+                            <!-- Add to collection -->
                             <button
                                 class="w-8 h-8 rounded-full grid place-items-center bg-blue-600 hover:bg-blue-700 text-white shadow"
-                                title="Quick move to last Collection"
-                                data-quick-assign
-                                data-quick-last="1"
-                                :data-id="item.id"
-                                :data-type="item.type"
-                                data-owner="{{ session.username if session.username else 'guest' }}"
-                                style="display: none;"
-                                @click.stop="">
+                                title="Add to Collection"
+                                @click.stop="openCollectionChooser(item)">
                                 ➕
                             </button>
                         </div>
@@ -506,6 +498,31 @@ function bookmarksPageHandler() {
             if (diffDays <= 7) return `${diffDays} days ago`;
             if (diffDays <= 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
             return date.toLocaleDateString();
+        },
+
+        // Collection management
+        async openCollectionChooser(item) {
+            const owner = '{{ session.username if session.username else "guest" }}';
+            const itemId = item.id || item.key.split(':')[1];
+            const itemType = item.type;
+            
+            // Create a temporary button element for our existing script
+            const tempBtn = document.createElement('button');
+            tempBtn.setAttribute('data-quick-assign', '');
+            tempBtn.setAttribute('data-id', itemId);
+            tempBtn.setAttribute('data-type', itemType);
+            tempBtn.setAttribute('data-owner', owner);
+            
+            // Call our existing function
+            if (window.openQuickAssign) {
+                window.openQuickAssign(tempBtn);
+            } else {
+                console.warn('📁 Collection chooser not available');
+                // Fallback: dispatch a custom event
+                document.dispatchEvent(new CustomEvent('collection:choose', {
+                    detail: { item, owner, itemId, itemType }
+                }));
+            }
         },
         
         // Nest management functions

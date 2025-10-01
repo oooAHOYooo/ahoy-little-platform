@@ -589,14 +589,11 @@
             <div class="footer-bottom">
                 <div class="footer-bottom-content">
                     <p>&copy; 2025 Ahoy Indie Media. All rights reserved.</p>
+                    <p class="text-xs text-gray-500 mt-1">Beta v1.1 - Debug Mode</p>
                 </div>
             </div>
         </footer>
 
-        <!-- Debug Message -->
-        <div class="debug-message">
-            <span>Beta v1.0 - Debug Mode</span>
-        </div>
 
         <!-- Bottom Sheet -->
         <div id="playlist-sheet" class="hidden fixed inset-0 z-50 grid place-items-end bg-black/30 transition opacity-0">
@@ -636,6 +633,13 @@
         <!-- Global Toast -->
         <div id="app-toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-black text-white px-4 py-2 rounded-full shadow"></div>
 
+        <!-- Celebration overlay -->
+        <div id="celebrate" class="hidden fixed inset-0 z-[70] grid place-items-center bg-black/20 backdrop-blur-sm transition opacity-0">
+            <div class="px-5 py-3 rounded-2xl bg-white text-black text-lg font-semibold shadow-2xl">
+                <span data-celebrate-text>You bookmarked!</span>
+            </div>
+        </div>
+
         <!-- Simple Paywall Modal -->
         <div id="paywall" class="hidden fixed inset-0 z-50 grid place-items-center bg-black/40">
             <div class="bg-white rounded-2xl p-6 w-[28rem] shadow-xl">
@@ -664,6 +668,8 @@
         <script src="{{ url_for('static', filename='js/collections-manager.js') }}"></script>
         <script type="module" src="{{ url_for('static', filename='js/playlist-ui.js') }}"></script>
         <script type="module" src="{{ url_for('static', filename='js/collections-quickassign.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/player-queue.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/reinforce.js') }}"></script>
 
         <script type="module">
           import { showToast } from "{{ url_for('static', filename='js/toast.js') }}";

@@ -191,7 +191,7 @@ def bookmarks_page():
 def playlists_index():
     """List user playlists"""
     from storage import read_json
-    data = read_json("data/playlists.json") or {"playlists": []}
+    data = read_json("data/playlists.json", {"playlists": []})
     # Optionally filter by current_user
     playlists = data["playlists"]
     if session.get("username"):

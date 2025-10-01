@@ -1,1 +1,15 @@
-{"activity": []}
+{
+  "activity": [
+    {
+      "username": "guest",
+      "last_day": "2025-10-01",
+      "streak": 1,
+      "log": [
+        {
+          "at": "2025-10-01T01:55:07.004374Z",
+          "action": "collection:create"
+        }
+      ]
+    }
+  ]
+}

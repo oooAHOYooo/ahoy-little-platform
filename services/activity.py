@@ -7,7 +7,7 @@ def _now(): return datetime.utcnow()
 def _today_key(dt): return dt.strftime("%Y-%m-%d")
 
 def _store():
-    data = read_json(ACT) or {"activity": []}
+    data = read_json(ACT, {"activity": []})
     if "activity" not in data: data["activity"] = []
     return data
 
