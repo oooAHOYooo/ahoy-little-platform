@@ -224,6 +224,7 @@
   window.AhoyBookmarks = {
     all: () => Object.values(state.items),
     isBookmarked: (type, id) => !!state.items[keyOf(type, id)],
+    count: () => Object.keys(state.items).length,
     toggle,
     // Nests
     getNests: () => Object.values(loadNests()),
@@ -247,6 +248,9 @@
     Alpine.data("globalBookmarkHandler", () => ({
       nests: {},
       showNestMenu: false,
+      showCountFade: false,
+      showExploreNotification: false,
+      bookmarkCount: 0,
 
       init() {
         this.loadNests();
@@ -281,8 +285,28 @@
           const wasBookmarked = window.AhoyBookmarks.isBookmarked(type, id);
           window.AhoyBookmarks.toggle(item);
           
+          // Dispatch bookmark change event for navbar updates
+          document.dispatchEvent(new CustomEvent('bookmarks:changed', {
+            detail: { 
+              action: wasBookmarked ? 'removed' : 'added',
+              item: item,
+              totalCount: window.AhoyBookmarks.count()
+            }
+          }));
+          
           // Show notification for new bookmarks
           if (!wasBookmarked) {
+            // Get current bookmark count
+            this.bookmarkCount = window.AhoyBookmarks.count();
+            
+            // Show count fade animation
+            this.showCountFade = true;
+            
+            // Show explore notification after count fade
+            setTimeout(() => {
+              this.showExploreNotification = true;
+            }, 2500); // Show after count fade starts to disappear
+            
             window.__ahoyToast && window.__ahoyToast("Bookmarked!");
             // Trigger notification system
             window.__ahoyNotifyNewBookmark && window.__ahoyNotifyNewBookmark();

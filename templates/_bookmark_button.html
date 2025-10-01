@@ -16,6 +16,19 @@
         :class="isBookmarked('{{ type }}', '{{ id }}') ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
     </span>
     <span data-bm-label class="sr-only">Bookmark</span>
+
+    <!-- Count fade animation -->
+    <div class="bookmark-count-fade"
+      x-show="showCountFade"
+      x-transition:enter="transition ease-out duration-300"
+      x-transition:enter-start="opacity-0 scale-75"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="transition ease-in duration-500"
+      x-transition:leave-start="opacity-100 scale-100"
+      x-transition:leave-end="opacity-0 scale-50"
+      x-text="bookmarkCount"
+      x-init="setTimeout(() => showCountFade = false, 2000)">
+    </div>
   </button>
 
   <!-- Nest Dropdown (only show if bookmarked and nests exist) -->
@@ -55,6 +68,26 @@
           <span x-text="nest.name"></span>
         </div>
       </template>
+    </div>
+  </div>
+
+  <!-- Explore notification that appears after count fade -->
+  <div class="bookmark-explore-notification"
+    x-show="showExploreNotification"
+    x-transition:enter="transition ease-out duration-500"
+    x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+    x-transition:leave="transition ease-in duration-300"
+    x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+    x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+    x-init="setTimeout(() => showExploreNotification = false, 4000)">
+    <div class="explore-notification-content">
+      <i class="fas fa-compass"></i>
+      <span>Explore your bookmarks!</span>
+      <button @click="showExploreNotification = false"
+        class="close-explore-notification">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
   </div>
 </div>
