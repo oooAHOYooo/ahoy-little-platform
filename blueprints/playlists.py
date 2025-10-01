@@ -20,14 +20,67 @@ def _ensure(path, key):
         data[key] = []
     return data
 
-@bp.get("/")
-def list_playlists():
-    user = request.args.get("user")
-    data = _ensure(PLAYLISTS_FILE, "playlists")
-    pls = data["playlists"]
-    if user:
-        pls = [p for p in pls if p.get("owner") == user]
-    return jsonify(pls)
+@bp.route("/", methods=['GET', 'POST'])
+def manage_playlists():
+    """Get all playlists or create new playlist - works for both guests and users"""
+    if request.method == 'GET':
+        user = request.args.get("user")
+        data = _ensure(PLAYLISTS_FILE, "playlists")
+        pls = data["playlists"]
+        if user:
+            pls = [p for p in pls if p.get("owner") == user]
+        return jsonify(pls)
+    
+    # POST - Create new playlist
+    username = current_user.id if current_user.is_authenticated else None
+    
+    if username:
+        # For logged-in users, use the user_manager system
+        try:
+            from user_manager import user_manager
+            data = request.json
+            name = data.get('name')
+            description = data.get('description', '')
+            color = data.get('color', '#6366f1')
+            is_public = data.get('is_public', False)
+            
+            playlist_id = user_manager.create_playlist(username, name, description, color, is_public)
+            
+            if playlist_id:
+                playlist = user_manager.get_playlist(username, playlist_id)
+                return jsonify({'success': True, 'playlist': playlist, 'guest': False})
+            else:
+                return jsonify({'error': 'Failed to create playlist'}), 400
+        except ImportError:
+            # Fallback to file-based storage if user_manager not available
+            pass
+    
+    # For guests or fallback, use file-based storage
+    data = request.json
+    playlist_id = str(__import__('uuid').uuid4())
+    playlist = {
+        'id': playlist_id,
+        'name': data.get('name'),
+        'description': data.get('description', ''),
+        'color': data.get('color', '#6366f1'),
+        'is_public': False,  # Guests can't create public playlists
+        'created_at': _now(),
+        'updated_at': _now(),
+        'tracks': [],
+        'shows': [],
+        'artists': [],
+        'total_items': 0,
+        'cover_art': None,
+        'tags': [],
+        'is_guest': True,
+        'items': []
+    }
+    
+    file_data = _ensure(PLAYLISTS_FILE, "playlists")
+    file_data["playlists"].append(playlist)
+    write_json(PLAYLISTS_FILE, file_data)
+    
+    return jsonify({'success': True, 'playlist': playlist, 'guest': True})
 
 @bp.post("/from-collection/<collection_id>")
 def create_from_collection(collection_id):
@@ -93,7 +146,7 @@ def update_playlist(playlist_id):
 def add_item(playlist_id):
     payload = request.get_json(silent=True) or {}
     item_id = payload.get("id")
-    item_type = payload.get("type")  # 'track' | 'show' | 'episode' | 'clip' …
+    item_type = payload.get("type") or payload.get("kind")  # accept both
     if not item_id or not item_type:
         return jsonify({"error": "id and type required"}), 400
 
@@ -111,7 +164,7 @@ def add_item(playlist_id):
             success = user_manager.add_to_playlist(username, playlist_id, item_type, item_id, {})
             if success:
                 updated_playlist = user_manager.get_playlist(username, playlist_id)
-                return jsonify(updated_playlist)
+                return jsonify(updated_playlist), 200
             else:
                 return jsonify({"error": "failed to add item"}), 400
         except ImportError:
@@ -122,12 +175,16 @@ def add_item(playlist_id):
     data = _ensure(PLAYLISTS_FILE, "playlists")
     for p in data["playlists"]:
         if p["id"] == playlist_id:
-            new_item = {"id": item_id, "type": item_type, "added_at": _now()}
-            # no dupes; last write wins (moves to end)
-            p["items"] = [i for i in p["items"] if i["id"] != item_id] + [new_item]
+            p.setdefault("items", [])
+            # move-to-end if exists
+            p["items"] = [i for i in p["items"] if i.get("id") != item_id] + [{
+                "id": item_id, "type": item_type, "added_at": _now(), "data": {}
+            }]
             p["updated_at"] = _now()
+            # also keep totals in sync for tests that read them
+            p["total_items"] = len(p["items"])
             write_json(PLAYLISTS_FILE, data)
-            return jsonify(p)
+            return jsonify(p), 200
     return jsonify({"error": "not found"}), 404
 
 @bp.delete("/<playlist_id>/items/<item_id>")

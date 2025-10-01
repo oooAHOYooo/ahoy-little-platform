@@ -20,21 +20,55 @@ from blueprints.playlists import bp as playlists_bp
 from blueprints.bookmarks import bp as bookmarks_bp
 from blueprints.collections import bp as collections_bp
 
-app = Flask(__name__)
-app.config.from_object(get_config())
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(get_config())
 
-# Add secret key for session management (change in production)
-app.secret_key = os.getenv('SECRET_KEY', 'change-me-in-production')
-bcrypt.init_app(app)
-login_manager.init_app(app)
-limiter.init_app(app)
-init_cors(app)
-login_manager.login_view = "auth.login"
+    # minimal config safe for CI
+    app.config.setdefault("JSON_SORT_KEYS", False)
+    
+    # If you use Flask-Limiter, this avoids scary warnings in CI logs.
+    if os.getenv("CI"):
+        app.config.setdefault("RATELIMIT_STORAGE_URI", "memory://")
 
-# Health check endpoint
-@app.get("/api/healthz")
-def healthz():
-    return {"ok": True}
+    # Add secret key for session management (change in production)
+    app.secret_key = os.getenv('SECRET_KEY', 'change-me-in-production')
+    bcrypt.init_app(app)
+    login_manager.init_app(app)
+    limiter.init_app(app)
+    init_cors(app)
+    login_manager.login_view = "auth.login"
+
+    # Register blueprints
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(activity_bp)
+    app.register_blueprint(playlists_bp)
+    app.register_blueprint(bookmarks_bp)
+    app.register_blueprint(collections_bp)
+
+    # Health check endpoint
+    @app.get("/healthz")
+    def healthz():
+        return jsonify({"ok": True}), 200
+
+    # Context processor to inject login flag into templates
+    @app.context_processor
+    def inject_login_flag():
+        return {"LOGGED_IN": bool(session.get("username"))}
+
+    # Enable compression (optional)
+    try:
+        from flask_compress import Compress
+        Compress(app)
+        print("✅ Compression enabled")
+    except ImportError:
+        print("⚠️  Flask-Compress not available, compression disabled")
+
+    # Add all the route definitions here (we'll keep them outside for now but reference the app)
+    return app
+
+# Create the app instance for backward compatibility
+app = create_app()
 
 @app.route('/debug-report')
 def debug_report():
@@ -62,17 +96,10 @@ CACHE_TIMEOUT = 300  # 5 minutes
 USERS_FILE = 'data/users.json'
 ACTIVITY_FILE = 'data/user_activity.json'
 
-# Register blueprints
-app.register_blueprint(auth_bp)
-app.register_blueprint(activity_bp)
-app.register_blueprint(playlists_bp)
-app.register_blueprint(bookmarks_bp)
-app.register_blueprint(collections_bp)
-
-# Context processor to inject login flag into templates
-@app.context_processor
-def inject_login_flag():
-    return {"LOGGED_IN": bool(session.get("username"))}
+# Context processor to inject login flag into templates (duplicate, already in create_app)
+# @app.context_processor
+# def inject_login_flag():
+#     return {"LOGGED_IN": bool(session.get("username"))}
 
 def load_json_data(filename, default=None):
     """Load JSON data from file with fallback"""
@@ -1787,19 +1814,8 @@ def search_api():
     
     return jsonify({'results': results})
 
-if __name__ == '__main__':
-    # Create data directories
-    os.makedirs('data', exist_ok=True)
-    os.makedirs('static/data', exist_ok=True)
-    
-    # Find available port
-    port = find_available_port()
-    if port is None:
-        print("❌ No available ports found between 5001-5010")
-        print("💡 Try closing other applications or use a different port range")
-        exit(1)
-    
-    print(f"🎵 Starting Ahoy Indie Media on port {port}...")
-    print(f"📍 Server will be available at: http://localhost:{port}")
-    
-    app.run(debug=True, host='127.0.0.1', port=port)
+# Allow `python -m app` locally if needed
+if __name__ == "__main__":
+    import os
+    port = int(os.getenv("PORT", "5000"))
+    create_app().run(port=port, use_reloader=False)

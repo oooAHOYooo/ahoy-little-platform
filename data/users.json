@@ -83,5 +83,130 @@
         "basic_playlists"
       ]
     }
+  },
+  "testci": {
+    "user_id": "035f7a40-b814-4eb0-927d-2d8bfa90f59c",
+    "username": "testci",
+    "password": "7e90003fa8109debe48cbee800a44a665bac781128ead4733d3dae6362588401",
+    "email": "secret",
+    "display_name": "testci",
+    "created_at": "2025-09-30T22:21:27.693494",
+    "last_login": "2025-09-30T22:21:27.693494",
+    "profile": {
+      "username": "testci",
+      "display_name": "testci",
+      "email": "secret",
+      "avatar_url": "/static/img/default-avatar.png",
+      "bio": "",
+      "location": "",
+      "website": "",
+      "created_at": "2025-09-30T22:21:27.693494",
+      "preferences": {
+        "theme": "default",
+        "autoplay": true,
+        "notifications": true,
+        "privacy": "public"
+      }
+    },
+    "saves": {
+      "saved_tracks": [],
+      "saved_shows": [],
+      "saved_artists": [],
+      "liked_content": [],
+      "recently_played": [],
+      "playlists": [],
+      "collections": [],
+      "boards": []
+    },
+    "activity": {
+      "total_plays": 0,
+      "total_saves": 0,
+      "total_playlists": 0,
+      "last_active": "2025-09-30T22:21:27.693494"
+    },
+    "subscription": {
+      "type": "free",
+      "expires_at": null,
+      "features": [
+        "basic_saves",
+        "basic_playlists"
+      ]
+    }
+  },
+  "testci2": {
+    "user_id": "78524a48-421d-42a2-b8b9-a27fd3b8bc60",
+    "username": "testci2",
+    "password": "34d5e6ea816b60c3aa5bd996ff4a5bee0cb268a995467a8f269f3c7b1855ecb9",
+    "email": "secret",
+    "display_name": "testci2",
+    "created_at": "2025-09-30T22:22:19.296759",
+    "last_login": "2025-09-30T22:22:19.296759",
+    "profile": {
+      "username": "testci2",
+      "display_name": "testci2",
+      "email": "secret",
+      "avatar_url": "/static/img/default-avatar.png",
+      "bio": "",
+      "location": "",
+      "website": "",
+      "created_at": "2025-09-30T22:22:19.296759",
+      "preferences": {
+        "theme": "default",
+        "autoplay": true,
+        "notifications": true,
+        "privacy": "public"
+      }
+    },
+    "saves": {
+      "saved_tracks": [],
+      "saved_shows": [],
+      "saved_artists": [],
+      "liked_content": [],
+      "recently_played": [],
+      "playlists": [
+        {
+          "id": "a07fe7ff-6b9f-4318-8791-2cae7a3c0b50",
+          "name": "CI Test",
+          "description": "",
+          "color": "#6366f1",
+          "is_public": false,
+          "created_at": "2025-09-30T22:22:19.530966",
+          "updated_at": "2025-09-30T22:22:19.532745",
+          "tracks": [
+            {
+              "id": "demo1",
+              "added_at": "2025-09-30T22:22:19.531955",
+              "data": {}
+            },
+            {
+              "id": "demo2",
+              "added_at": "2025-09-30T22:22:19.532741",
+              "data": {}
+            }
+          ],
+          "shows": [],
+          "artists": [],
+          "total_items": 2,
+          "cover_art": null,
+          "tags": []
+        }
+      ],
+      "collections": [],
+      "boards": []
+    },
+    "activity": {
+      "total_plays": 0,
+      "total_saves": 0,
+      "total_playlists": 1,
+      "last_active": "2025-09-30T22:22:19.296759"
+    },
+    "subscription": {
+      "type": "free",
+      "expires_at": null,
+      "features": [
+        "basic_saves",
+        "basic_playlists"
+      ]
+    }
   }
 }
