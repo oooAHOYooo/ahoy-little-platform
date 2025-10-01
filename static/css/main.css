@@ -4274,23 +4274,23 @@ a:hover {
         align-items: stretch;
         gap: 1rem;
     }
-    
+
     .view-controls {
         margin-left: 0;
         justify-content: center;
     }
-    
+
     .search-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         gap: 1rem;
     }
-    
+
     .list-header,
     .list-item {
         grid-template-columns: 50px 1fr 150px 80px 60px;
         gap: 0.5rem;
     }
-    
+
     .col-cover {
         width: 40px;
         height: 40px;
