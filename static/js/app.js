@@ -171,3 +171,103 @@ document.addEventListener('DOMContentLoaded', function() {
     window.__ahoyClearBookmarkNotifications();
   }
 });
+
+// ========================================
+// 🧭 NAVBAR FUNCTION
+// ========================================
+
+// Define the navbar function for Alpine.js
+window.navbar = function() {
+  return {
+    // State
+    newBookmarkCount: 0,
+    hasNewBookmarks: false,
+    totalBookmarkCount: 0,
+    isLoggedIn: !!window.LOGGED_IN,
+    userProfile: window.userProfile || {},
+    searchQuery: '',
+    leftMenuOpen: false,
+    rightMenuOpen: false,
+    
+    // Initialize
+    init() {
+      this.setupEventListeners();
+      // Load bookmark count with a small delay to ensure AhoyBookmarks is available
+      setTimeout(() => {
+        this.loadBookmarkCount();
+      }, 100);
+    },
+    
+    // Load current bookmark count
+    loadBookmarkCount() {
+      // Try multiple ways to get bookmark count
+      if (window.AhoyBookmarks) {
+        this.totalBookmarkCount = window.AhoyBookmarks.count();
+      } else {
+        // Fallback: try to read from localStorage directly
+        try {
+          const rawData = localStorage.getItem('ahoy.bookmarks.v1');
+          if (rawData) {
+            const data = JSON.parse(rawData);
+            if (data.items) {
+              this.totalBookmarkCount = Object.keys(data.items).length;
+            }
+          }
+        } catch (e) {
+          console.error('Error reading bookmark count:', e);
+        }
+      }
+    },
+    
+    // Setup event listeners
+    setupEventListeners() {
+      // Listen for bookmark changes
+      document.addEventListener('bookmarks:changed', () => {
+        this.loadBookmarkCount();
+      });
+      
+      // Listen for bookmark notifications
+      document.addEventListener('bookmark:notified', (e) => {
+        this.newBookmarkCount = e.detail.count;
+        this.hasNewBookmarks = true;
+      });
+      
+      // Listen for notification clearing
+      document.addEventListener('bookmark:notifications-cleared', () => {
+        this.newBookmarkCount = 0;
+        this.hasNewBookmarks = false;
+      });
+      
+      // Periodic refresh to ensure count stays updated
+      setInterval(() => {
+        this.loadBookmarkCount();
+      }, 2000);
+    },
+    
+    // Search functionality
+    performSearch() {
+      if (this.searchQuery.trim()) {
+        window.location.href = `/search?q=${encodeURIComponent(this.searchQuery.trim())}`;
+      }
+    },
+    
+    clearSearch() {
+      this.searchQuery = '';
+    },
+    
+    // Fullscreen toggle
+    toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    },
+    
+    // Logout functionality
+    logout() {
+      // Add logout logic here
+      window.location.href = '/logout';
+    }
+  };
+};

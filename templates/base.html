@@ -187,10 +187,18 @@
                     </a>
                     <a href="/bookmarks"
                         class="feature-btn {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
-                        title="My Bookmarks">
-                        <i class="fas fa-bookmark"></i>
+                        title="My Bookmarks"
+                        :class="{ 'has-bookmarks': totalBookmarkCount > 0 }">
+                        <div class="bookmark-icon-container">
+                            <i class="fas fa-bookmark bookmark-icon" 
+                               :class="{ 'fas fa-bookmark': totalBookmarkCount > 0, 'far fa-bookmark': totalBookmarkCount === 0 }"></i>
+                            <span class="bookmark-count-badge" 
+                                  x-show="totalBookmarkCount > 0" 
+                                  x-text="totalBookmarkCount"
+                                  :class="{ 'pulse': hasNewBookmarks }"></span>
+                            <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
+                        </div>
                         <span>Bookmarks</span>
-                        <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
                     </a>
                 </div>
 
@@ -222,9 +230,17 @@
                     <!-- My Bookmarks -->
                     <a href="/bookmarks"
                         class="nav-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
-                        title="My Bookmarks">
-                        <i class="fas fa-bookmark"></i>
-                        <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
+                        title="My Bookmarks"
+                        :class="{ 'has-bookmarks': totalBookmarkCount > 0 }">
+                        <div class="bookmark-icon-container">
+                            <i class="fas fa-bookmark bookmark-icon" 
+                               :class="{ 'fas fa-bookmark': totalBookmarkCount > 0, 'far fa-bookmark': totalBookmarkCount === 0 }"></i>
+                            <span class="bookmark-count-badge" 
+                                  x-show="totalBookmarkCount > 0" 
+                                  x-text="totalBookmarkCount"
+                                  :class="{ 'pulse': hasNewBookmarks }"></span>
+                            <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
+                        </div>
                     </a>
 
                     <!-- User Section -->
