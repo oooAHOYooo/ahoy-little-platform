@@ -291,12 +291,6 @@
                                 <span>My Bookmarks</span>
                                 <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
                             </a>
-                            <a href="/my-saves" 
-                               class="mobile-menu-item {% if request.endpoint == 'my_saves' %}active{% endif %}"
-                               @click="rightMenuOpen = false">
-                                <i class="fas fa-save"></i>
-                                <span>My Saves</span>
-                            </a>
                         </div>
 
                         <!-- Account Section -->
@@ -669,6 +663,7 @@
             src="{{ url_for('static', filename='js/playlist-manager.js') }}"></script>
         <script src="{{ url_for('static', filename='js/collections-manager.js') }}"></script>
         <script type="module" src="{{ url_for('static', filename='js/playlist-ui.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/collections-quickassign.js') }}"></script>
 
         <script type="module">
           import { showToast } from "{{ url_for('static', filename='js/toast.js') }}";
@@ -805,6 +800,15 @@
         img[src*="default-cover.jpg"] {
             max-width: 100%;
             height: auto;
+        }
+        
+        /* Collection badge styling */
+        [data-collection-badge] { 
+            background: rgba(255,255,255,0.08); 
+            backdrop-filter: blur(4px); 
+            border-radius: 9999px; 
+            padding: 3px 8px; 
+            font-weight: 600; 
         }
         </style>
 

@@ -68,91 +68,91 @@
                     x-text="list().filter(item => item.type === 'artist').length"></span>
             </button>
 
-            <!-- Nests Filter -->
-            <template x-for="nest in Object.values(nests)" :key="nest.id">
+            <!-- Collections Filter -->
+            <template x-for="collection in Object.values(collections)" :key="collection.id">
                 <button
-                    class="filter-tab nest-tab"
-                    :class="{ active: filterNest === nest.id }"
-                    :style="`border-left-color: ${nest.color}`"
-                    @click="filterType = null; filterNest = nest.id">
+                    class="filter-tab collection-tab"
+                    :class="{ active: filterCollection === collection.id }"
+                    :style="`border-left-color: ${collection.color}`"
+                    @click="filterType = null; filterCollection = collection.id">
                     <i class="fas fa-folder"></i>
-                    <span x-text="nest.name"></span>
+                    <span x-text="collection.name"></span>
                     <span class="tab-count"
-                        x-text="list().filter(item => item.nest_id === nest.id).length"></span>
+                        x-text="list().filter(item => item.collection_id === collection.id).length"></span>
                 </button>
             </template>
 
-            <!-- Nest Management -->
+            <!-- Collection Management -->
             <button
-                class="filter-tab nest-manager-btn"
-                @click="showNestManager = !showNestManager">
+                class="filter-tab collection-manager-btn"
+                @click="showCollectionManager = !showCollectionManager">
                 <i class="fas fa-plus"></i>
-                <span>Manage Nests</span>
+                <span>Manage Collections</span>
             </button>
         </div>
     </section>
 
-    <!-- Nest Manager Modal -->
-    <div x-show="showNestManager"
+    <!-- Collection Manager Modal -->
+    <div x-show="showCollectionManager"
         x-transition
-        class="nest-manager-modal"
-        @click.away="showNestManager = false">
-        <div class="nest-manager-content">
-            <div class="nest-manager-header">
-                <h3><i class="fas fa-folder-plus"></i> Manage Nests</h3>
-                <button @click="showNestManager = false" class="close-btn">
+        class="collection-manager-modal"
+        @click.away="showCollectionManager = false">
+        <div class="collection-manager-content">
+            <div class="collection-manager-header">
+                <h3><i class="fas fa-folder-plus"></i> Manage Collections</h3>
+                <button @click="showCollectionManager = false" class="close-btn">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            <!-- Create New Nest -->
-            <div class="create-nest-section">
-                <h4>Create New Nest</h4>
-                <div class="nest-form">
+            <!-- Create New Collection -->
+            <div class="create-collection-section">
+                <h4>Create New Collection</h4>
+                <div class="collection-form">
                     <input type="text"
-                        x-model="newNestName"
-                        placeholder="Nest name (e.g., 'Work Music', 'Chill Vibes')"
-                        class="nest-input">
+                        x-model="newCollectionName"
+                        placeholder="Collection name (e.g., 'Work Music', 'Chill Vibes')"
+                        class="collection-input">
                     <input type="text"
-                        x-model="newNestDescription"
+                        x-model="newCollectionDescription"
                         placeholder="Description (optional)"
-                        class="nest-input">
+                        class="collection-input">
                     <div class="color-picker">
                         <label>Color:</label>
-                        <input type="color" x-model="newNestColor"
+                        <input type="color" x-model="newCollectionColor"
                             class="color-input">
                     </div>
-                    <button @click="createNest()"
-                        :disabled="!newNestName.trim()"
+                    <button @click="createCollection()"
+                        :disabled="!newCollectionName.trim()"
                         class="btn btn-primary">
                         <i class="fas fa-plus"></i>
-                        Create Nest
+                        Create Collection
                     </button>
                 </div>
             </div>
 
-            <!-- Existing Nests -->
-            <div class="existing-nests-section"
-                x-show="Object.keys(nests).length > 0">
-                <h4>Your Nests</h4>
-                <div class="nests-list">
-                    <template x-for="nest in Object.values(nests)"
-                        :key="nest.id">
-                        <div class="nest-item">
-                            <div class="nest-info">
-                                <div class="nest-color"
-                                    :style="`background-color: ${nest.color}`"></div>
-                                <div class="nest-details">
-                                    <h5 x-text="nest.name"></h5>
+            <!-- Existing Collections -->
+            <div class="existing-collections-section"
+                x-show="Object.keys(collections).length > 0">
+                <h4>Your Collections</h4>
+                <div class="collections-list">
+                    <template x-for="collection in Object.values(collections)"
+                        :key="collection.id">
+                        <div class="collection-item">
+                            <div class="collection-info">
+                                <div class="collection-color"
+                                    :style="`background-color: ${collection.color}`"></div>
+                                <div class="collection-details">
+                                    <h5 x-text="collection.name"></h5>
                                     <p
-                                        x-text="nest.description || 'No description'"></p>
-                                    <span class="nest-count"
-                                        x-text="`${list().filter(item => item.nest_id === nest.id).length} items`"></span>
+                                        x-text="collection.description || 'No description'"></p>
+                                    <span class="collection-count"
+                                        x-text="`${list().filter(item => item.collection_id === collection.id).length} items`"></span>
                                 </div>
                             </div>
-                            <button @click="deleteNest(nest.id)"
-                                class="delete-nest-btn"
-                                title="Delete nest">
+                            <button @click="deleteCollection(collection.id)"
+                                class="delete-collection-btn"
+                                title="Delete collection">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -162,11 +162,17 @@
         </div>
     </div>
 
+    <!-- First-time Helper Tooltip -->
+    <div x-show="Object.keys(collections).length === 0 && filteredList().length > 0" 
+         class="mb-3 text-sm text-white/80 bg-white/5 border border-white/10 rounded-xl p-3">
+        Tip: Click the <span class="px-1 rounded bg-white text-black text-xs">📁</span> icon on any card to create your first <strong>Collection</strong> and keep things organized.
+    </div>
+
     <!-- Bookmarks Grid -->
     <section class="bookmarks-grid-section" x-show="filteredList().length > 0">
         <div class="bookmarks-grid">
             <template x-for="item in filteredList()" :key="item.key">
-                <div class="bookmark-card"
+                <div class="bookmark-card group"
                     :class="{ 
                        'track-card': item.type === 'track', 
                        'show-card': item.type === 'show', 
@@ -177,7 +183,8 @@
                        'age-ancient': getBookmarkAgeCategory(item) === 'ancient'
                      }"
                     :style="`opacity: ${getBookmarkFadeOpacity(item)}`"
-                    @click="playItem(item); markAccessed(item.key)">
+                    @click="playItem(item); markAccessed(item.key)"
+                    data-card>
 
                     <!-- Card Image -->
                     <div class="card-cover">
@@ -187,26 +194,49 @@
                             class="cover-image image-placeholder"
                             loading="lazy">
 
-                        <!-- Age Indicator -->
-                        <div class="age-indicator"
-                            :class="getBookmarkAgeCategory(item)">
-                            <i :class="getAgeIcon(item)"></i>
-                            <span x-text="getAgeLabel(item)"></span>
+                        <!-- Top-left label group -->
+                        <div class="absolute top-2 left-2 flex items-center gap-2">
+                            <!-- Age Indicator -->
+                            <span class="text-[11px] px-2 py-0.5 rounded-full text-white"
+                                  :class="getBookmarkAgeCategory(item) === 'new' ? 'bg-teal-600' : 
+                                          getBookmarkAgeCategory(item) === 'recent' ? 'bg-green-600' : 
+                                          getBookmarkAgeCategory(item) === 'older' ? 'bg-yellow-600' : 'bg-gray-600'"
+                                  x-text="getAgeLabel(item)">
+                            </span>
+                            
+                            <!-- Collection Badge -->
+                            <span class="text-[11px] px-2 py-0.5 rounded-full text-white"
+                                  data-collection-badge
+                                  :class="item.collection_id ? 'bg-blue-600' : 'bg-white/10'"
+                                  x-text="item.collection_id ? getCollectionName(item.collection_id) : 'Unorganized'">
+                            </span>
                         </div>
 
-                        <!-- Nest Indicator -->
-                        <div class="nest-indicator"
-                            x-show="item.nest_id"
-                            :style="`background-color: ${getNestColor(item.nest_id)}`">
-                            <i class="fas fa-folder"></i>
-                            <span x-text="getNestName(item.nest_id)"></span>
-                        </div>
-
-                        <!-- Unorganized Indicator -->
-                        <div class="unorganized-indicator"
-                            x-show="!item.nest_id">
-                            <i class="fas fa-folder-open"></i>
-                            <span>Unorganized</span>
+                        <!-- Hover actions (right-top) -->
+                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition flex gap-1">
+                            <button
+                                class="w-8 h-8 rounded-full grid place-items-center bg-white/90 hover:bg-white text-black shadow"
+                                title="Organize in Collection"
+                                data-quick-assign
+                                :data-id="item.id"
+                                :data-type="item.type"
+                                data-owner="{{ session.username if session.username else 'guest' }}"
+                                @click.stop="">
+                                📁
+                            </button>
+                            <!-- Quick Move to Last Collection (if exists) -->
+                            <button
+                                class="w-8 h-8 rounded-full grid place-items-center bg-blue-600 hover:bg-blue-700 text-white shadow"
+                                title="Quick move to last Collection"
+                                data-quick-assign
+                                data-quick-last="1"
+                                :data-id="item.id"
+                                :data-type="item.type"
+                                data-owner="{{ session.username if session.username else 'guest' }}"
+                                style="display: none;"
+                                @click.stop="">
+                                ➕
+                            </button>
                         </div>
 
                         <!-- Card Overlay -->
