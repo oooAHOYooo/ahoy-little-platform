@@ -1808,6 +1808,214 @@ def reindex_search():
         print(f"Error reindexing search: {e}")
         return jsonify({'error': 'Reindex failed'}), 500
 
+@app.route('/api/suggest', methods=['GET'])
+def search_suggestions():
+    """Typeahead suggestions for search header"""
+    try:
+        from search_indexer import search_index
+        
+        query = request.args.get('q', '').strip()
+        limit = min(int(request.args.get('limit', 8)), 20)  # Cap at 20
+        
+        if not query or len(query) < 2:
+            return jsonify({
+                'query': query,
+                'items': []
+            })
+        
+        suggestions = []
+        query_lower = query.lower()
+        
+        # Get all documents for suggestion building
+        all_docs = list(search_index.documents.values())
+        
+        # 1. Matching titles (prefix-boosted)
+        title_matches = []
+        for doc in all_docs:
+            title = doc.get('title', '')
+            if title.lower().startswith(query_lower):
+                title_matches.append({
+                    'label': f"{title} — {doc.get('fields', {}).get('artist', doc.get('fields', {}).get('host', ''))}",
+                    'kind': doc.get('kind', ''),
+                    'url': doc.get('url', '#'),
+                    'score': 10.0  # High score for prefix matches
+                })
+            elif query_lower in title.lower():
+                title_matches.append({
+                    'label': f"{title} — {doc.get('fields', {}).get('artist', doc.get('fields', {}).get('host', ''))}",
+                    'kind': doc.get('kind', ''),
+                    'url': doc.get('url', '#'),
+                    'score': 5.0  # Lower score for contains matches
+                })
+        
+        # Sort by score and add to suggestions
+        title_matches.sort(key=lambda x: x['score'], reverse=True)
+        suggestions.extend(title_matches[:limit//2])
+        
+        # 2. Top tags/genres starting with query
+        tag_matches = []
+        seen_tags = set()
+        
+        for doc in all_docs:
+            # Get tags
+            tags = doc.get('tags', [])
+            for tag in tags:
+                if tag.lower().startswith(query_lower) and tag not in seen_tags:
+                    tag_matches.append({
+                        'label': f"#{tag}",
+                        'kind': 'tag',
+                        'url': f"/search?q=tag:{tag}",
+                        'score': 8.0
+                    })
+                    seen_tags.add(tag)
+            
+            # Get genres
+            genres = doc.get('genres', [])
+            for genre in genres:
+                if genre.lower().startswith(query_lower) and genre not in seen_tags:
+                    tag_matches.append({
+                        'label': f"#{genre}",
+                        'kind': 'genre',
+                        'url': f"/search?q=genre:{genre}",
+                        'score': 7.0
+                    })
+                    seen_tags.add(genre)
+        
+        # Sort and add tag matches
+        tag_matches.sort(key=lambda x: x['score'], reverse=True)
+        suggestions.extend(tag_matches[:limit//4])
+        
+        # 3. Popular artists/shows where name starts with query
+        artist_matches = []
+        seen_artists = set()
+        
+        for doc in all_docs:
+            artist_name = doc.get('fields', {}).get('artist', '') or doc.get('fields', {}).get('host', '')
+            if artist_name and artist_name.lower().startswith(query_lower) and artist_name not in seen_artists:
+                artist_matches.append({
+                    'label': f"🎤 {artist_name}",
+                    'kind': 'artist',
+                    'url': doc.get('url', '#'),
+                    'score': 6.0
+                })
+                seen_artists.add(artist_name)
+        
+        # Sort and add artist matches
+        artist_matches.sort(key=lambda x: x['score'], reverse=True)
+        suggestions.extend(artist_matches[:limit//4])
+        
+        # Sort all suggestions by score and limit
+        suggestions.sort(key=lambda x: x['score'], reverse=True)
+        suggestions = suggestions[:limit]
+        
+        # Add some fun suggestions for empty or short queries
+        if len(query) < 3:
+            fun_suggestions = [
+                {'label': '🔥 Trending Now', 'kind': 'trending', 'url': '/search?q=trending', 'score': 9.0},
+                {'label': '🎵 New Releases', 'kind': 'new', 'url': '/search?q=recent', 'score': 8.0},
+                {'label': '⭐ Staff Picks', 'kind': 'featured', 'url': '/search?q=featured', 'score': 7.0},
+                {'label': '🎧 Discover', 'kind': 'discover', 'url': '/search?q=discover', 'score': 6.0}
+            ]
+            suggestions = fun_suggestions[:limit]
+        
+        return jsonify({
+            'query': query,
+            'items': suggestions
+        })
+        
+    except Exception as e:
+        print(f"Error in search suggestions: {e}")
+        return jsonify({
+            'query': query if 'query' in locals() else '',
+            'items': []
+        }), 500
+
+@app.route('/api/search/analytics', methods=['GET'])
+def search_analytics():
+    """Get search analytics and popular queries"""
+    try:
+        from search_indexer import search_index
+        
+        # Get basic stats
+        total_docs = search_index.total_docs
+        
+        # Get popular tags (simplified)
+        all_tags = []
+        for doc in search_index.documents.values():
+            all_tags.extend(doc.get('tags', []))
+            all_tags.extend(doc.get('genres', []))
+        
+        from collections import Counter
+        popular_tags = Counter(all_tags).most_common(10)
+        
+        # Get content type distribution
+        content_types = {}
+        for doc in search_index.documents.values():
+            kind = doc.get('kind', 'unknown')
+            content_types[kind] = content_types.get(kind, 0) + 1
+        
+        return jsonify({
+            'total_documents': total_docs,
+            'content_types': content_types,
+            'popular_tags': [{'tag': tag, 'count': count} for tag, count in popular_tags],
+            'search_ready': True
+        })
+        
+    except Exception as e:
+        print(f"Error in search analytics: {e}")
+        return jsonify({'error': 'Analytics failed'}), 500
+
+@app.route('/api/search/trending', methods=['GET'])
+def trending_content():
+    """Get trending content for discovery"""
+    try:
+        from search_indexer import search_index
+        
+        # Get recent content (simplified - using added_date if available)
+        recent_docs = []
+        for doc in search_index.documents.values():
+            if doc.get('added_date'):
+                recent_docs.append(doc)
+        
+        # Sort by date (most recent first)
+        recent_docs.sort(key=lambda x: x.get('added_date', ''), reverse=True)
+        
+        # Take top 8
+        trending = recent_docs[:8]
+        
+        # Format for frontend
+        results = []
+        for doc in trending:
+            result = {
+                'id': doc['id'],
+                'kind': doc['kind'],
+                'title': doc['title'],
+                'url': doc['url'],
+                'summary': doc['summary'],
+                'tags': doc['tags'],
+                'genres': doc['genres']
+            }
+            
+            # Add type-specific fields
+            if doc['kind'] == 'music':
+                result['artist'] = doc['fields'].get('artist', '')
+                result['album'] = doc['fields'].get('album', '')
+            elif doc['kind'] == 'show':
+                result['host'] = doc['fields'].get('host', '')
+            elif doc['kind'] == 'artist':
+                result['name'] = doc['fields'].get('name', '')
+            
+            results.append(result)
+        
+        return jsonify({
+            'trending': results,
+            'count': len(results)
+        })
+        
+    except Exception as e:
+        print(f"Error in trending content: {e}")
+        return jsonify({'error': 'Trending failed'}), 500
+
 # Allow `python -m app` locally if needed
 if __name__ == "__main__":
     import os
