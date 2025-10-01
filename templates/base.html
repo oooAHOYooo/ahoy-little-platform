@@ -314,6 +314,10 @@
                                 <i class="fas fa-cog"></i>
                                 <span>Settings</span>
                             </a>
+                            <button class="mobile-menu-item" onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())" @click="rightMenuOpen = false">
+                                <i class="fas fa-palette"></i>
+                                <span>🎨 Themes</span>
+                            </button>
                             <a x-show="!isLoggedIn" href="/auth"
                                 class="mobile-menu-item"
                                 @click="rightMenuOpen = false">
@@ -600,6 +604,61 @@
             <span>Beta v1.0 - Debug Mode</span>
         </div>
 
+        <!-- Bottom Sheet -->
+        <div id="playlist-sheet" class="hidden fixed inset-0 z-50 grid place-items-end bg-black/30 transition opacity-0">
+            <div class="w-full max-w-xl m-4 rounded-2xl bg-white shadow-lg p-5">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">Create Playlist from <span data-col-name class="italic"></span></h3>
+                    <button class="text-gray-500 hover:text-black" onclick="document.getElementById('playlist-sheet').classList.remove('opacity-100'); setTimeout(()=>document.getElementById('playlist-sheet').classList.add('hidden'), 150)">✕</button>
+                </div>
+
+                <form class="mt-4 space-y-3">
+                    <input type="hidden" name="owner" value="{% if session.username %}{{ session.username }}{% endif %}">
+                    <label class="block">
+                        <span class="text-sm text-gray-600">Playlist name</span>
+                        <input name="playlist_name" class="mt-1 w-full rounded-xl border p-2" placeholder="Road Trip Mix" required>
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="is_public" class="rounded">
+                        <span class="text-sm text-gray-700">Make it public (shareable)</span>
+                    </label>
+
+                    <div class="flex items-center gap-2 pt-2">
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition">Create Playlist</button>
+                        <button type="button" class="px-3 py-2 rounded-xl border" onclick="document.getElementById('playlist-sheet').classList.remove('opacity-100'); setTimeout(()=>document.getElementById('playlist-sheet').classList.add('hidden'), 150)">Cancel</button>
+                    </div>
+
+                    <p class="text-xs text-gray-500 pt-2">Pro tip: you can reorder items later for the perfect flow.</p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div id="playlist-toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-black text-white px-4 py-2 rounded-full shadow">
+            Playlist created!
+        </div>
+
+        <!-- Global Toast -->
+        <div id="app-toast" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-black text-white px-4 py-2 rounded-full shadow"></div>
+
+        <!-- Simple Paywall Modal -->
+        <div id="paywall" class="hidden fixed inset-0 z-50 grid place-items-center bg-black/40">
+            <div class="bg-white rounded-2xl p-6 w-[28rem] shadow-xl">
+                <h3 class="text-xl font-semibold">Go Plus to unlock more</h3>
+                <p class="text-sm text-gray-600 mt-2">Free plan allows up to 3 Collections & 3 Playlists.</p>
+                <ul class="text-sm text-gray-700 mt-3 list-disc ml-5">
+                    <li>Unlimited Collections & Playlists</li>
+                    <li>Reorder with drag & drop</li>
+                    <li>Public share links</li>
+                </ul>
+                <div class="flex gap-2 mt-4">
+                    <button id="paywall-upgrade" class="px-4 py-2 rounded-xl bg-blue-600 text-white">Upgrade – $3/mo</button>
+                    <button class="px-3 py-2 rounded-xl border" onclick="document.getElementById('paywall').classList.add('hidden')">Not now</button>
+                </div>
+            </div>
+        </div>
+
         <!-- JavaScript -->
         <script>window.LOGGED_IN = {{ LOGGED_IN | tojson }};</script>
         <script src="{{ url_for('static', filename='js/guest-bootstrap.js') }}"></script>
@@ -608,6 +667,31 @@
         <script src="{{ url_for('static', filename='js/player.js') }}"></script>
         <script
             src="{{ url_for('static', filename='js/playlist-manager.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/collections-manager.js') }}"></script>
+        <script type="module" src="{{ url_for('static', filename='js/playlist-ui.js') }}"></script>
+
+        <script type="module">
+          import { showToast } from "{{ url_for('static', filename='js/toast.js') }}";
+
+          // Listen for 402 responses globally and open paywall
+          async function fetchWithPaywall(input, init) {
+            const r = await fetch(input, init);
+            if (r.status === 402) {
+              document.getElementById('paywall').classList.remove('hidden');
+              const data = await r.json().catch(()=>({}));
+              if (data && data.message) showToast(data.message, 3000);
+            }
+            return r;
+          }
+          // Optional: attach to window to use in your API clients
+          window.fetchWithPaywall = fetchWithPaywall;
+
+          // Fake upgrade action (tonight stub)
+          document.getElementById('paywall-upgrade')?.addEventListener('click', () => {
+            showToast("Pretend checkout → set plan=plus", 2500);
+            document.getElementById('paywall').classList.add('hidden');
+          });
+        </script>
         
         <!-- Navbar JavaScript -->
         <script>

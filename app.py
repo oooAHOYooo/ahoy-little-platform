@@ -17,6 +17,7 @@ from blueprints.auth import bp as auth_bp
 from blueprints.activity import bp as activity_bp
 from blueprints.playlists import bp as playlists_bp
 from blueprints.bookmarks import bp as bookmarks_bp
+from blueprints.collections import bp as collections_bp
 
 app = Flask(__name__)
 app.config.from_object(get_config())
@@ -65,6 +66,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(activity_bp)
 app.register_blueprint(playlists_bp)
 app.register_blueprint(bookmarks_bp)
+app.register_blueprint(collections_bp)
 
 # Context processor to inject login flag into templates
 @app.context_processor
@@ -184,6 +186,17 @@ def bookmarks_page():
             data = json.loads(data_path.read_text(encoding="utf-8"))
             items = list(data.get("users", {}).get(uid, {}).get("items", {}).values())
     return render_template("bookmarks.html", items=items)
+
+@app.route('/playlists')
+def playlists_index():
+    """List user playlists"""
+    from storage import read_json
+    data = read_json("data/playlists.json") or {"playlists": []}
+    # Optionally filter by current_user
+    playlists = data["playlists"]
+    if session.get("username"):
+        playlists = [p for p in playlists if p.get("owner") == session["username"]]
+    return render_template("playlists.html", playlists=playlists)
 
 
 # API Endpoints
@@ -581,33 +594,6 @@ def reorder_playlist(playlist_id):
     """Legacy reorder - not supported in new system"""
     return jsonify({'error': 'Reordering not supported in new system'}), 400
 
-@app.route('/api/user/collections', methods=['GET', 'POST'])
-@auth_required
-def user_collections():
-    """User collections - organized folders of content"""
-    username = session.get('username')
-    users = load_users()
-    
-    if 'collections' not in users[username]:
-        users[username]['collections'] = []
-    
-    if request.method == 'POST':
-        data = request.json
-        collection = {
-            'id': hashlib.md5(f"{username}-collection-{datetime.now().isoformat()}".encode()).hexdigest()[:8],
-            'name': data.get('name'),
-            'description': data.get('description', ''),
-            'type': data.get('type', 'mixed'),  # mixed, music, shows, artists
-            'created_at': datetime.now().isoformat(),
-            'items': [],
-            'tags': data.get('tags', [])
-        }
-        
-        users[username]['collections'].append(collection)
-        save_users(users)
-        return jsonify({'success': True, 'collection': collection})
-    
-    return jsonify(users[username]['collections'])
 
 @app.route('/api/user/likes', methods=['GET', 'POST', 'DELETE'])
 @auth_required
