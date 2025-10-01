@@ -14,6 +14,74 @@
     }
   ],
   "alex": {
-    "pw_hash": "$2b$12$LbHGKyLgKsPXsyEfqxssz.fk3H8NFxAw1oZ095kSh124MN5rKSfWu"
+    "user_id": "237d66db-9ea5-408d-9190-9fc7b64387ee",
+    "username": "alex",
+    "password": "0854685a492a153ded25db90532f3ffb7fa775571c1e8d899db747914d3bc098",
+    "email": "secret",
+    "display_name": "alex",
+    "created_at": "2025-09-30T22:13:23.996885",
+    "last_login": "2025-09-30T22:13:23.996885",
+    "profile": {
+      "username": "alex",
+      "display_name": "alex",
+      "email": "secret",
+      "avatar_url": "/static/img/default-avatar.png",
+      "bio": "",
+      "location": "",
+      "website": "",
+      "created_at": "2025-09-30T22:13:23.996885",
+      "preferences": {
+        "theme": "default",
+        "autoplay": true,
+        "notifications": true,
+        "privacy": "public"
+      }
+    },
+    "saves": {
+      "saved_tracks": [],
+      "saved_shows": [],
+      "saved_artists": [],
+      "liked_content": [],
+      "recently_played": [],
+      "playlists": [
+        {
+          "id": "4f6a6162-2143-4142-a23a-ca2a5d5ce67f",
+          "name": "X",
+          "description": "",
+          "color": "#6366f1",
+          "is_public": false,
+          "created_at": "2025-09-30T22:13:24.238393",
+          "updated_at": "2025-09-30T22:13:24.239272",
+          "tracks": [
+            {
+              "id": "demo",
+              "added_at": "2025-09-30T22:13:24.239269",
+              "data": {}
+            }
+          ],
+          "shows": [],
+          "artists": [],
+          "total_items": 1,
+          "cover_art": null,
+          "tags": []
+        }
+      ],
+      "collections": [],
+      "boards": []
+    },
+    "activity": {
+      "total_plays": 0,
+      "total_saves": 0,
+      "total_playlists": 1,
+      "last_active": "2025-09-30T22:13:23.996885"
+    },
+    "subscription": {
+      "type": "free",
+      "expires_at": null,
+      "features": [
+        "basic_saves",
+        "basic_playlists"
+      ]
+    }
   }
 }

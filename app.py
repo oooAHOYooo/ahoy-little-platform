@@ -1,4 +1,5 @@
 from flask import Flask, render_template, jsonify, request, session, send_from_directory, make_response
+from flask_login import current_user
 import os
 import json
 import uuid
@@ -1019,7 +1020,7 @@ def get_recently_played():
 @app.route('/api/playlists', methods=['GET', 'POST'])
 def manage_playlists():
     """Get all playlists or create new playlist - works for both guests and users"""
-    username = session.get('username')
+    username = current_user.id if current_user.is_authenticated else None
     
     if not username:
         # For guest users, use session-based storage

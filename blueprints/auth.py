@@ -5,7 +5,7 @@ import json, os
 from extensions import bcrypt, login_manager
 
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
-USERS_PATH = os.path.join("data", "users.json")
+USERS_PATH = os.path.join("data", "users_auth.json")
 
 class User(UserMixin):
     def __init__(self, username, pw_hash):
@@ -45,6 +45,18 @@ def register():
     pw_hash = bcrypt.generate_password_hash(password).decode("utf-8")
     users[username] = {"pw_hash": pw_hash}
     _save_users(users)
+    
+    # Also create user in user_manager for playlist functionality
+    try:
+        from user_manager import user_manager
+        # Check if user already exists in user_manager
+        existing_user = user_manager.get_user(username)
+        if not existing_user:
+            user_manager.create_user(username, f"{username}@example.com", password)
+    except Exception as e:
+        # Don't fail registration if user_manager fails
+        print(f"Warning: Failed to create user in user_manager: {e}")
+    
     return jsonify({"ok": True})
 
 @bp.get("/login")

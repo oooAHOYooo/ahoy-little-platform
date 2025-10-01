@@ -11,5 +11,11 @@
         }
       ]
     }
-  ]
+  ],
+  "bob": {
+    "bookmarks": [
+      "track:demo-track-1"
+    ],
+    "history": []
+  }
 }

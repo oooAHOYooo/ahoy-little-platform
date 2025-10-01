@@ -11,5 +11,5 @@ def test_register_login_and_playlist(tmp_path, monkeypatch):
     assert r.status_code == 200
     pid = r.get_json()["playlist"]["id"]
 
-    assert c.post(f"/api/playlists/{pid}/items", json={"id":"demo","kind":"track"}).status_code == 200
+    assert c.post(f"/api/playlists/{pid}/items", json={"id":"demo","type":"track"}).status_code == 200
     assert c.get("/api/playlists").status_code == 200

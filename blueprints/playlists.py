@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
+from flask_login import current_user
 from uuid import uuid4
 from datetime import datetime
 from storage import read_json, write_json
@@ -14,7 +15,7 @@ def _now():
     return datetime.utcnow().isoformat() + "Z"
 
 def _ensure(path, key):
-    data = read_json(path) or {key: []}
+    data = read_json(path, {key: []})
     if key not in data:
         data[key] = []
     return data
@@ -96,6 +97,28 @@ def add_item(playlist_id):
     if not item_id or not item_type:
         return jsonify({"error": "id and type required"}), 400
 
+    username = current_user.id if current_user.is_authenticated else None
+    
+    if username:
+        # For logged-in users, use the user_manager system (same as main app)
+        try:
+            from user_manager import user_manager
+            playlist = user_manager.get_playlist(username, playlist_id)
+            if not playlist:
+                return jsonify({"error": "not found"}), 404
+            
+            # Add item to playlist
+            success = user_manager.add_to_playlist(username, playlist_id, item_type, item_id, {})
+            if success:
+                updated_playlist = user_manager.get_playlist(username, playlist_id)
+                return jsonify(updated_playlist)
+            else:
+                return jsonify({"error": "failed to add item"}), 400
+        except ImportError:
+            # Fallback to file-based storage if user_manager not available
+            pass
+    
+    # For guests or fallback, use file-based storage
     data = _ensure(PLAYLISTS_FILE, "playlists")
     for p in data["playlists"]:
         if p["id"] == playlist_id:

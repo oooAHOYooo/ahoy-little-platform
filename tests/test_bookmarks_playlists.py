@@ -18,7 +18,7 @@ def test_bookmarks_and_playlists(tmp_path, monkeypatch):
     assert r.status_code == 200
     pid = r.get_json()["playlist"]["id"]
 
-    r = c.post(f"/api/playlists/{pid}/items", json={"id":"demo-track-1","kind":"track"})
+    r = c.post(f"/api/playlists/{pid}/items", json={"id":"demo-track-1","type":"track"})
     assert r.status_code == 200
 
     # Confirm activity payload shape (no likes)
