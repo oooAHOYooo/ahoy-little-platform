@@ -23,15 +23,15 @@
         </div>
     </div>
 
-    <!-- Filters -->
+    <!-- Filters and Controls -->
     <div class="search-filters" x-show="searchResults.length > 0">
         <div class="filter-group">
             <label>Filter by:</label>
             <select x-model="selectedFilter" @change="filterResults()">
                 <option value="all">All Results</option>
                 <option value="music">Music</option>
-                <option value="shows">Shows</option>
-                <option value="artists">Artists</option>
+                <option value="show">Shows</option>
+                <option value="artist">Artists</option>
             </select>
         </div>
         <div class="filter-group">
@@ -43,49 +43,107 @@
                 <option value="date">Date</option>
             </select>
         </div>
+        <div class="view-controls">
+            <button @click="viewMode = 'grid'"
+                :class="{'active': viewMode === 'grid'}"
+                class="view-btn">
+                <i class="fas fa-th"></i>
+            </button>
+            <button @click="viewMode = 'list'"
+                :class="{'active': viewMode === 'list'}"
+                class="view-btn">
+                <i class="fas fa-list"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Search Results -->
     <div class="search-results" x-show="searchResults.length > 0">
-        <div class="results-list">
-            <template x-for="item in filteredResults" :key="item.id + '-' + item.type">
-                <div class="result-item" @click="playContent(item)">
-                    <div class="result-cover">
-                        <img :src="item.cover_art || item.thumbnail || item.image || '/static/img/default-cover.jpg'" 
-                             :alt="item.title || item.name">
-                        <div class="result-overlay">
+        <!-- Grid View -->
+        <div x-show="viewMode === 'grid'" class="search-grid">
+            <template x-for="item in filteredResults" :key="item.id + '-' + item.kind">
+                <div class="search-card" 
+                     :class="{'music-card': item.kind === 'music', 'show-card': item.kind === 'show', 'artist-card': item.kind === 'artist'}"
+                     @click="playContent(item)">
+                    
+                    <div class="card-cover">
+                        <img :src="getItemImage(item)" 
+                             :alt="item.title"
+                             class="image-placeholder"
+                             loading="lazy">
+                        <div class="card-overlay">
                             <button @click.stop="playContent(item)" class="play-btn">
                                 <i class="fas fa-play"></i>
                             </button>
-                        </div>
-                    </div>
-                    <div class="result-info">
-                        <div class="result-header">
-                            <h3 x-text="item.title || item.name"></h3>
-                            <div class="result-actions">
-                                <button @click.stop="saveContent(item)" 
-                                    class="action-btn"
-                                    :class="{'saved': isSaved(item)}"
-                                    :title="isSaved(item) ? 'Remove from saves' : 'Save'">
-                                    <i class="fas fa-bookmark"></i>
-                                </button>
-                                <button @click.stop="likeContent(item)" 
-                                    class="action-btn"
-                                    :class="{'liked': isLiked(item)}"
-                                    :title="isLiked(item) ? 'Unlike' : 'Like'">
-                                    <i class="fas fa-heart"></i>
+                            <div class="card-actions">
+                                <button class="action-btn bm-btn"
+                                    @click.stop="toggleBookmark(item)"
+                                    :aria-pressed="isBookmarked(item)"
+                                    :class="{'just-bookmarked': isBookmarked(item)}">
+                                    <span aria-hidden="true">
+                                        <i x-show="isBookmarked(item)" class="fas fa-bookmark" style="color: var(--accent-color);"></i>
+                                        <i x-show="!isBookmarked(item)" class="far fa-bookmark"></i>
+                                    </span>
+                                    <span class="sr-only" x-text="isBookmarked(item) ? 'Remove bookmark' : 'Add bookmark'"></span>
                                 </button>
                             </div>
                         </div>
-                        <p class="result-artist" x-text="item.artist || item.host"></p>
-                        <p class="result-description" x-text="item.description || item.album"></p>
-                        <div class="result-meta">
-                            <span class="result-type" x-text="item.type?.toUpperCase() || 'CONTENT'"></span>
-                            <span class="result-date" x-text="formatDate(item.created_at || item.release_date)"></span>
+                    </div>
+
+                    <div class="card-info">
+                        <h4 x-text="item.title"></h4>
+                        <p x-text="getItemSubtitle(item)"></p>
+                        <div class="card-meta">
+                            <span class="card-type" x-text="getItemTypeLabel(item.kind)"></span>
                         </div>
                     </div>
                 </div>
             </template>
+        </div>
+
+        <!-- List View -->
+        <div x-show="viewMode === 'list'" class="search-list">
+            <div class="list-header">
+                <span class="col-cover"></span>
+                <span class="col-title">Title</span>
+                <span class="col-subtitle">Artist/Host</span>
+                <span class="col-type">Type</span>
+                <span class="col-actions">Actions</span>
+            </div>
+            <div class="list-items">
+                <template x-for="item in filteredResults" :key="item.id + '-' + item.kind">
+                    <div class="list-item" @click="playContent(item)">
+                        <div class="col-cover">
+                            <img :src="getItemImage(item)" 
+                                 :alt="item.title" 
+                                 class="image-placeholder">
+                            <div class="play-overlay">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                        <div class="col-title">
+                            <h4 x-text="item.title"></h4>
+                        </div>
+                        <div class="col-subtitle">
+                            <p x-text="getItemSubtitle(item)"></p>
+                        </div>
+                        <div class="col-type">
+                            <span class="type-badge" x-text="getItemTypeLabel(item.kind)"></span>
+                        </div>
+                        <div class="col-actions">
+                            <button class="action-btn bm-btn"
+                                @click.stop="toggleBookmark(item)"
+                                :aria-pressed="isBookmarked(item)">
+                                <span aria-hidden="true">
+                                    <i x-show="isBookmarked(item)" class="fas fa-bookmark"></i>
+                                    <i x-show="!isBookmarked(item)" class="far fa-bookmark"></i>
+                                </span>
+                                <span class="sr-only" x-text="isBookmarked(item) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
         </div>
     </div>
 
@@ -123,6 +181,7 @@ function searchResults() {
         filteredResults: [],
         selectedFilter: 'all',
         sortBy: 'relevance',
+        viewMode: 'grid',
         isLoading: false,
         hasSearched: false,
 
@@ -164,7 +223,7 @@ function searchResults() {
                 this.filteredResults = [...this.searchResults];
             } else {
                 this.filteredResults = this.searchResults.filter(item => 
-                    item.type === this.selectedFilter
+                    item.kind === this.selectedFilter
                 );
             }
             this.sortResults();
@@ -247,6 +306,72 @@ function searchResults() {
         searchSuggestion(suggestion) {
             this.searchQuery = suggestion;
             this.performSearch();
+        },
+
+        // Helper functions for card layout
+        getItemImage(item) {
+            if (item.kind === 'music') {
+                return item.cover_art || '/static/img/default-cover.jpg';
+            } else if (item.kind === 'show') {
+                return item.thumbnail || '/static/img/default-cover.jpg';
+            } else if (item.kind === 'artist') {
+                return item.image || '/static/img/default-avatar.png';
+            }
+            return '/static/img/default-cover.jpg';
+        },
+
+        getItemSubtitle(item) {
+            if (item.kind === 'music') {
+                return item.artist || item.fields?.artist || '';
+            } else if (item.kind === 'show') {
+                return item.host || item.fields?.host || '';
+            } else if (item.kind === 'artist') {
+                return item.fields?.name || item.name || '';
+            }
+            return '';
+        },
+
+        getItemTypeLabel(kind) {
+            const labels = {
+                'music': 'MUSIC',
+                'show': 'SHOW', 
+                'artist': 'ARTIST'
+            };
+            return labels[kind] || 'CONTENT';
+        },
+
+        async toggleBookmark(item) {
+            try {
+                const isBookmarked = this.isBookmarked(item);
+                const url = isBookmarked ? `/api/bookmarks/${item.id}` : '/api/bookmarks';
+                const method = isBookmarked ? 'DELETE' : 'POST';
+                const body = isBookmarked ? null : JSON.stringify({
+                    item_id: item.id,
+                    item_type: item.kind
+                });
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {'Content-Type': 'application/json'},
+                    body: body
+                });
+
+                if (response.ok) {
+                    // Update local state
+                    item.bookmarked = !isBookmarked;
+                    
+                    // Trigger bookmark count update
+                    if (window.navbar && window.navbar.loadBookmarkCount) {
+                        window.navbar.loadBookmarkCount();
+                    }
+                }
+            } catch (error) {
+                console.error('Error toggling bookmark:', error);
+            }
+        },
+
+        isBookmarked(item) {
+            return item.bookmarked || false;
         },
 
         // Utility functions
