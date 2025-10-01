@@ -1,7 +1,8 @@
-from app import app
+from app import create_app
 
 def test_bookmarks_and_playlists(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
+    app = create_app()
     c = app.test_client()
 
     # Register & login
@@ -14,7 +15,7 @@ def test_bookmarks_and_playlists(tmp_path, monkeypatch):
     assert r.get_json()["status"] in ("bookmarked", "removed")
 
     # Create playlist & add item
-    r = c.post("/api/playlists", json={"name":"My List","description":""})
+    r = c.post("/api/playlists/", json={"name":"My List","description":""})
     assert r.status_code == 200
     pid = r.get_json()["playlist"]["id"]
 
