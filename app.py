@@ -22,6 +22,11 @@ from blueprints.collections import bp as collections_bp
 
 def create_app():
     app = Flask(__name__)
+
+    # Fast & flexible: accept both "/route" and "/route/" everywhere.
+    # This prevents redirect surprises and keeps dev UX smooth.
+    app.url_map.strict_slashes = False
+
     app.config.from_object(get_config())
 
     # minimal config safe for CI
