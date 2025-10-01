@@ -326,7 +326,7 @@ function searchResults() {
             } else if (item.kind === 'show') {
                 return item.host || item.fields?.host || '';
             } else if (item.kind === 'artist') {
-                return item.fields?.name || item.name || '';
+                return item.name || item.fields?.name || '';
             }
             return '';
         },

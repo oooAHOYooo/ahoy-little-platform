@@ -3917,6 +3917,20 @@ a:hover {
     animation: bookmarkCountPulse 0.6s ease-out;
 }
 
+/* Bookmark glow effect for new bookmarks */
+.bookmark-glow {
+    animation: bookmarkGlow 2s ease-in-out infinite;
+}
+
+@keyframes bookmarkGlow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(0, 123, 255, 0.8), 0 0 30px rgba(0, 123, 255, 0.4);
+    }
+}
+
 @keyframes bookmarkCountPulse {
     0% {
         transform: scale(1);

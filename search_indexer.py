@@ -145,7 +145,14 @@ class SearchIndexer:
             'duration': doc.get('duration_seconds', 0),
             'added_date': doc.get('added_date', doc.get('published_date', '')),
             'fields': fields,
-            'terms': all_terms
+            'terms': all_terms,
+            # Add image fields for different content types
+            'cover_art': doc.get('cover_art', '') if doc_type == 'music' else '',
+            'thumbnail': doc.get('thumbnail', '') if doc_type == 'show' else '',
+            'image': doc.get('image', '') if doc_type == 'artist' else '',
+            'artist': doc.get('artist', '') if doc_type == 'music' else '',
+            'host': doc.get('host', '') if doc_type == 'show' else '',
+            'name': doc.get('name', '') if doc_type == 'artist' else ''
         }
         
         return search_doc
@@ -300,11 +307,14 @@ class SearchIndexer:
                 result['artist'] = doc['fields'].get('artist', '')
                 result['album'] = doc['fields'].get('album', '')
                 result['duration'] = doc.get('duration', 0)
+                result['cover_art'] = doc.get('cover_art', '')
             elif doc['kind'] == 'show':
                 result['host'] = doc['fields'].get('host', '')
                 result['duration'] = doc.get('duration', 0)
+                result['thumbnail'] = doc.get('thumbnail', '')
             elif doc['kind'] == 'artist':
                 result['name'] = doc['fields'].get('name', '')
+                result['image'] = doc.get('image', '')
             
             results.append(result)
         

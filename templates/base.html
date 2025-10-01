@@ -188,7 +188,7 @@
                     <a href="/bookmarks"
                         class="feature-btn {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
                         title="My Bookmarks"
-                        :class="{ 'has-bookmarks': totalBookmarkCount > 0 }">
+                        :class="{ 'has-bookmarks': totalBookmarkCount > 0, 'bookmark-glow': hasNewBookmarks }">
                         <div class="bookmark-icon-container">
                             <i class="fas fa-bookmark bookmark-icon" 
                                :class="{ 'fas fa-bookmark': totalBookmarkCount > 0, 'far fa-bookmark': totalBookmarkCount === 0 }"></i>
@@ -196,9 +196,8 @@
                                   x-show="totalBookmarkCount > 0" 
                                   x-text="totalBookmarkCount"
                                   :class="{ 'pulse': hasNewBookmarks }"></span>
-                            <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
+                            <span class="notification-badge" x-show="hasNewBookmarks">*</span>
                         </div>
-                        <span>Bookmarks</span>
                     </a>
                 </div>
 
@@ -231,7 +230,7 @@
                     <a href="/bookmarks"
                         class="nav-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
                         title="My Bookmarks"
-                        :class="{ 'has-bookmarks': totalBookmarkCount > 0 }">
+                        :class="{ 'has-bookmarks': totalBookmarkCount > 0, 'bookmark-glow': hasNewBookmarks }">
                         <div class="bookmark-icon-container">
                             <i class="fas fa-bookmark bookmark-icon" 
                                :class="{ 'fas fa-bookmark': totalBookmarkCount > 0, 'far fa-bookmark': totalBookmarkCount === 0 }"></i>
@@ -239,7 +238,7 @@
                                   x-show="totalBookmarkCount > 0" 
                                   x-text="totalBookmarkCount"
                                   :class="{ 'pulse': hasNewBookmarks }"></span>
-                            <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
+                            <span class="notification-badge" x-show="hasNewBookmarks">*</span>
                         </div>
                     </a>
 

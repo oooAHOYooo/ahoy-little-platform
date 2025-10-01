@@ -307,6 +307,11 @@
               this.showExploreNotification = true;
             }, 2500); // Show after count fade starts to disappear
             
+            // Trigger bookmark notification for navbar glow
+            document.dispatchEvent(new CustomEvent('bookmark:notified', {
+              detail: { count: this.bookmarkCount }
+            }));
+            
             window.__ahoyToast && window.__ahoyToast("Bookmarked!");
             // Trigger notification system
             window.__ahoyNotifyNewBookmark && window.__ahoyNotifyNewBookmark();
