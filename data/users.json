@@ -12,5 +12,8 @@
       "themes": [],
       "created_at": "2025-10-01T01:55:07.002558Z"
     }
-  ]
+  ],
+  "alex": {
+    "pw_hash": "$2b$12$LbHGKyLgKsPXsyEfqxssz.fk3H8NFxAw1oZ095kSh124MN5rKSfWu"
+  }
 }

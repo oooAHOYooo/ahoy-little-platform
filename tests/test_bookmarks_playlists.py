@@ -16,7 +16,7 @@ def test_bookmarks_and_playlists(tmp_path, monkeypatch):
     # Create playlist & add item
     r = c.post("/api/playlists", json={"name":"My List","description":""})
     assert r.status_code == 200
-    pid = r.get_json()["id"]
+    pid = r.get_json()["playlist"]["id"]
 
     r = c.post(f"/api/playlists/{pid}/items", json={"id":"demo-track-1","kind":"track"})
     assert r.status_code == 200

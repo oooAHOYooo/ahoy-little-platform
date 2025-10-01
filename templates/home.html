@@ -525,26 +525,39 @@ function homePage() {
             this.stopHeroRotation();
             
             console.log('🎵 Playing item:', item);
+            console.log('🎵 Available players:', {
+                mediaPlayer: !!window.mediaPlayer,
+                PlayerControls: !!window.PlayerControls,
+                globalPlayer: !!window.globalPlayer
+            });
             
             // Try to play directly if it's music and media player is available
             if (item.type === 'track' || item.type === 'music' || item.artist) {
-                if (window.mediaPlayer && window.mediaPlayer.play) {
+                if (window.mediaPlayer && typeof window.mediaPlayer.play === 'function') {
+                    console.log('🎵 Using window.mediaPlayer');
                     window.mediaPlayer.play(item);
-                    // Restart rotation after a delay
                     setTimeout(() => this.startHeroRotation(), 10000);
                     return;
-                } else if (window.PlayerControls && window.PlayerControls.play) {
+                } else if (window.PlayerControls && typeof window.PlayerControls.play === 'function') {
+                    console.log('🎵 Using window.PlayerControls');
                     window.PlayerControls.play(item);
-                    // Restart rotation after a delay
+                    setTimeout(() => this.startHeroRotation(), 10000);
+                    return;
+                } else if (window.globalPlayer && typeof window.globalPlayer.play === 'function') {
+                    console.log('🎵 Using window.globalPlayer');
+                    window.globalPlayer.play(item);
                     setTimeout(() => this.startHeroRotation(), 10000);
                     return;
                 }
+                console.log('🎵 No player available, using navigation fallback');
                 // Fallback to navigation
                 window.location.href = `/music?highlight=${item.id}`;
             } else if (item.type === 'show') {
+                console.log('🎵 Playing show, navigating to player');
                 // For shows, navigate to player
                 window.location.href = `/player?id=${item.id}&type=show`;
             } else {
+                console.log('🎵 Unknown type, defaulting to shows');
                 // Default to shows if no type specified
                 window.location.href = `/shows?highlight=${item.id}`;
             }
@@ -757,15 +770,39 @@ function homeBookmarksWidget() {
         },
         
         playBookmark(bookmark) {
+            console.log('🎵 Playing bookmark:', bookmark);
+            console.log('🎵 Available players:', {
+                mediaPlayer: !!window.mediaPlayer,
+                PlayerControls: !!window.PlayerControls,
+                globalPlayer: !!window.globalPlayer
+            });
+            
             if (bookmark.type === 'track') {
-                // Play music track
+                // Try to play directly with media player first
+                if (window.mediaPlayer && typeof window.mediaPlayer.play === 'function') {
+                    console.log('🎵 Using window.mediaPlayer for bookmark');
+                    window.mediaPlayer.play(bookmark);
+                    return;
+                } else if (window.PlayerControls && typeof window.PlayerControls.play === 'function') {
+                    console.log('🎵 Using window.PlayerControls for bookmark');
+                    window.PlayerControls.play(bookmark);
+                    return;
+                } else if (window.globalPlayer && typeof window.globalPlayer.play === 'function') {
+                    console.log('🎵 Using window.globalPlayer for bookmark');
+                    window.globalPlayer.play(bookmark);
+                    return;
+                }
+                console.log('🎵 No player available for bookmark, using custom event');
+                // Fallback to custom event
                 document.dispatchEvent(new CustomEvent('play-track', {
                     detail: { track: bookmark }
                 }));
             } else if (bookmark.type === 'show') {
+                console.log('🎵 Playing bookmark show, navigating to player');
                 // Navigate to show player
                 window.location.href = `/player?id=${bookmark.id}&type=show`;
             } else if (bookmark.type === 'artist') {
+                console.log('🎵 Playing bookmark artist, navigating to artists page');
                 // Navigate to artist page
                 window.location.href = `/artists/${bookmark.id}`;
             }
