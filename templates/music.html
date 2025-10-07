@@ -5,7 +5,7 @@
 {% block content %}
 <div class="music-container" x-data="musicLibrary()" x-init="loadMusic()">
     <!-- Unified Rotating Hero -->
-    <section class="unified-hero tv-hero" x-data="createUnifiedHero({ pageType: 'music', rotationSpeed: 9000 })" x-init="init()"
+    <section class="unified-hero tv-hero" x-data="createUnifiedHero({ pageType: 'music', rotationSpeed: 14000 })" x-init="init()"
         @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd">
         <div class="unified-hero-feed hero-feed" :style="`transform: translateX(${heroOffset}px)`">
             <template x-for="(item, index) in heroItems" :key="item.id">
