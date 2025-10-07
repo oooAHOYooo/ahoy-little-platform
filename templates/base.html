@@ -897,7 +897,7 @@
             });
         })();
         
-        // Global Player Alpine.js Function
+        // Global Player Alpine.js Function (proxy to window.mediaPlayer)
         function globalPlayer() {
             return {
                 currentTrack: null,
@@ -907,7 +907,6 @@
                 progressPercent: 0,
                 volume: 50,
                 isMuted: false,
-                audioElement: null,
                 
                 // Player state
                 isLiked: false,
@@ -916,147 +915,134 @@
                 isRepeated: false,
                 
                 init() {
-                    // Create audio element
-                    this.audioElement = document.createElement('audio');
-                    this.audioElement.style.display = 'none';
-                    document.body.appendChild(this.audioElement);
+                    // Ensure mediaPlayer exists; if not, create a minimal one
+                    if (!window.mediaPlayer || typeof window.mediaPlayer.play !== 'function') {
+                        try { import('/static/js/player.js'); } catch (e) { /* noop */ }
+                    }
                     
-                    // Listen for play events from other components
+                    // Hydrate initial state from mediaPlayer if available
+                    const mp = window.mediaPlayer;
+                    if (mp) {
+                        this.currentTrack = mp.currentTrack || null;
+                        this.isPlaying = !!mp.isPlaying;
+                        this.currentTime = mp.currentTime || 0;
+                        this.duration = mp.duration || 0;
+                        this.isMuted = !!mp.isMuted;
+                        this.volume = (typeof mp.volume === 'number') ? Math.round(mp.volume * 100) : 50;
+                        this.isShuffled = !!mp.isShuffled;
+                        this.isRepeated = !!mp.isRepeated;
+                        
+                        // Bind mediaPlayer events to update Alpine state
+                        mp.on && mp.on('play', () => { this.isPlaying = true; this.currentTrack = mp.currentTrack; });
+                        mp.on && mp.on('pause', () => { this.isPlaying = false; });
+                        mp.on && mp.on('timeupdate', (t) => { this.currentTime = t; this.progressPercent = this.duration ? (t / this.duration) * 100 : 0; });
+                        mp.on && mp.on('durationchange', (d) => { this.duration = d; });
+                        mp.on && mp.on('volumechange', ({ volume, muted }) => { this.volume = Math.round(volume * 100); this.isMuted = !!muted; });
+                        mp.on && mp.on('playlistchange', () => { this.currentTrack = mp.currentTrack; });
+                    }
+                    
+                    // Listen for custom play events from anywhere
                     document.addEventListener('play-track', (e) => {
-                        this.playTrack(e.detail.track);
-                    });
-                    
-                    // Audio event listeners
-                    this.audioElement.addEventListener('loadedmetadata', () => {
-                        this.duration = this.audioElement.duration;
-                    });
-                    
-                    this.audioElement.addEventListener('timeupdate', () => {
-                        this.currentTime = this.audioElement.currentTime;
-                        this.progressPercent = (this.currentTime / this.duration) * 100 || 0;
-                    });
-                    
-                    this.audioElement.addEventListener('ended', () => {
-                        this.isPlaying = false;
-                        this.nextTrack();
-                    });
-                    
-                    this.audioElement.addEventListener('play', () => {
-                        this.isPlaying = true;
-                    });
-                    
-                    this.audioElement.addEventListener('pause', () => {
-                        this.isPlaying = false;
+                        const track = e.detail && (e.detail.track || e.detail);
+                        if (track) this.playTrack(track);
                     });
                 },
                 
                 playTrack(track) {
-                    console.log('🎵 Global player: Playing track:', track.title);
                     this.currentTrack = track;
-                    
-                    if (track.audio_url) {
-                        this.audioElement.src = track.audio_url;
-                        this.audioElement.load();
-                        this.audioElement.play().catch(e => {
-                            console.error('Error playing track:', e);
-                        });
+                    if (window.mediaPlayer && typeof window.mediaPlayer.play === 'function') {
+                        window.mediaPlayer.play(track);
+                        return;
+                    }
+                    // Fallback: navigate to appropriate player page
+                    if (track && (track.type === 'show' || track.video_url || track.mp4_link)) {
+                        window.location.href = `/player?id=${track.id}&type=show`;
+                    } else if (track && track.id) {
+                        window.location.href = `/music?highlight=${track.id}`;
                     }
                 },
                 
                 togglePlay() {
-                    if (this.isPlaying) {
-                        this.audioElement.pause();
-                    } else {
-                        this.audioElement.play().catch(e => {
-                            console.error('Error playing:', e);
-                        });
+                    if (window.mediaPlayer) {
+                        if (this.isPlaying) {
+                            window.mediaPlayer.pause();
+                        } else {
+                            if (this.currentTrack) {
+                                window.mediaPlayer.play(this.currentTrack);
+                            } else {
+                                window.mediaPlayer.resume && window.mediaPlayer.resume();
+                            }
+                        }
+                        return;
                     }
                 },
                 
-                previousTrack() {
-                    console.log('🎵 Previous track');
-                },
-                
-                nextTrack() {
-                    console.log('🎵 Next track');
-                },
+                previousTrack() { window.mediaPlayer && window.mediaPlayer.previousTrack && window.mediaPlayer.previousTrack(); },
+                nextTrack() { window.mediaPlayer && window.mediaPlayer.nextTrack && window.mediaPlayer.nextTrack(); },
                 
                 seekBackward() {
-                    this.audioElement.currentTime = Math.max(0, this.audioElement.currentTime - 15);
+                    if (!window.mediaPlayer) return;
+                    const t = Math.max(0, (window.mediaPlayer.currentTime || 0) - 15);
+                    window.mediaPlayer.seekTo && window.mediaPlayer.seekTo(t);
                 },
                 
                 seekForward() {
-                    this.audioElement.currentTime = Math.min(this.duration, this.audioElement.currentTime + 15);
+                    if (!window.mediaPlayer) return;
+                    const t = Math.min(this.duration || (window.mediaPlayer.duration || 0), (window.mediaPlayer.currentTime || 0) + 15);
+                    window.mediaPlayer.seekTo && window.mediaPlayer.seekTo(t);
                 },
                 
                 seekTo(event) {
+                    if (!window.mediaPlayer) return;
                     const progressBar = event.currentTarget;
                     const rect = progressBar.getBoundingClientRect();
                     const clickX = event.clientX - rect.left;
                     const percentage = clickX / rect.width;
-                    this.audioElement.currentTime = percentage * this.duration;
+                    const newTime = percentage * (this.duration || 0);
+                    window.mediaPlayer.seekTo && window.mediaPlayer.seekTo(newTime);
                 },
                 
                 setVolume(volume) {
                     this.volume = volume;
-                    this.audioElement.volume = volume / 100;
+                    const v = Math.max(0, Math.min(1, volume / 100));
+                    window.mediaPlayer && window.mediaPlayer.setVolume && window.mediaPlayer.setVolume(v);
                 },
                 
                 toggleMute() {
                     this.isMuted = !this.isMuted;
-                    this.audioElement.muted = this.isMuted;
+                    window.mediaPlayer && window.mediaPlayer.setMuted && window.mediaPlayer.setMuted(this.isMuted);
                 },
                 
                 formatTime(seconds) {
-                    if (!seconds) return '0:00';
+                    if (!seconds || isNaN(seconds)) return '0:00';
                     const mins = Math.floor(seconds / 60);
                     const secs = Math.floor(seconds % 60);
                     return `${mins}:${secs.toString().padStart(2, '0')}`;
                 },
                 
-                // Player action methods
-                toggleLike() {
-                    this.isLiked = !this.isLiked;
-                    console.log('🎵 Toggle like:', this.isLiked);
-                    // TODO: Implement actual like functionality
-                },
-                
-                toggleSave() {
-                    this.isSaved = !this.isSaved;
-                    console.log('🎵 Toggle save:', this.isSaved);
-                    // TODO: Implement actual save functionality
-                },
-                
-                addToPlaylist() {
-                    console.log('🎵 Add to playlist');
-                    // TODO: Implement playlist functionality
-                },
-                
+                // UI actions (stubs)
+                toggleLike() { this.isLiked = !this.isLiked; },
+                toggleSave() { this.isSaved = !this.isSaved; },
+                addToPlaylist() {},
                 toggleShuffle() {
                     this.isShuffled = !this.isShuffled;
-                    console.log('🎵 Toggle shuffle:', this.isShuffled);
+                    window.mediaPlayer && window.mediaPlayer.setShuffle && window.mediaPlayer.setShuffle(this.isShuffled);
                 },
-                
                 toggleRepeat() {
                     this.isRepeated = !this.isRepeated;
-                    console.log('🎵 Toggle repeat:', this.isRepeated);
+                    window.mediaPlayer && window.mediaPlayer.setRepeat && window.mediaPlayer.setRepeat(this.isRepeated);
                 },
-                
-                openFullPlayer() {
-                    console.log('🎵 Open full player');
-                    // TODO: Implement full player functionality
-                }
+                openFullPlayer() {}
             };
         }
         
-        // Also create a global reference for other scripts
-        window.globalPlayer = {
-            playTrack: (track) => {
-                document.dispatchEvent(new CustomEvent('play-track', {
-                    detail: { track: track }
-                }));
-            }
+        // Global reference with a simple play alias
+        window.globalPlayer = window.globalPlayer || {};
+        window.globalPlayer.playTrack = (track) => {
+            document.dispatchEvent(new CustomEvent('play-track', { detail: { track } }));
         };
+        // Backward-compat: allow window.globalPlayer.play(item)
+        window.globalPlayer.play = (item) => window.globalPlayer.playTrack(item);
         </script>
 
         {% block extra_scripts %}{% endblock %}

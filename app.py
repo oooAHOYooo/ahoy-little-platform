@@ -2020,10 +2020,5 @@ def trending_content():
 if __name__ == "__main__":
     import os
     port = int(os.getenv("PORT", "5000"))
-    app = create_app()
-    
-    # Initialize search index
-    with app.app_context():
-        initialize_search_index()
-    
+    # Reuse the already-created `app` with all routes registered above
     app.run(port=port, use_reloader=False)

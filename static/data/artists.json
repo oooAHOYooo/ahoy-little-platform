@@ -476,7 +476,28 @@
       "genres": [
         "Indie"
       ],
-      "albums": [],
+      "albums": [
+        {
+          "id": "album_jc_1",
+          "title": "I Think We're Lost",
+          "release_date": "2025-10-07",
+          "cover_art": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Think%20Were%20Lost_1000kb.jpg",
+          "tracks": [
+            { "id": "song_53", "title": "A Routine Affair" },
+            { "id": "song_54", "title": "Between Us Two" },
+            { "id": "song_55", "title": "ClockedIn, Checked Out" },
+            { "id": "song_56", "title": "Feel That Way Again" },
+            { "id": "song_57", "title": "Hide Away" },
+            { "id": "song_58", "title": "I Get To Love You" },
+            { "id": "song_59", "title": "Interstellar" },
+            { "id": "song_60", "title": "Let Go" },
+            { "id": "song_61", "title": "Wake UpSpread Some Love" },
+            { "id": "song_62", "title": "We'll Be Right Back" }
+          ],
+          "tags": ["indie", "album", "new"],
+          "new": true
+        }
+      ],
       "shows": [],
       "tracks": [
         {

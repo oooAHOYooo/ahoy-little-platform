@@ -260,31 +260,56 @@ function createUnifiedHero(config = {}) {
         playHeroItem(item) {
             this.stopHeroRotation();
             
+            const tryPlayMusic = (track) => {
+                if (!track) return false;
+                // Prefer direct playback if possible
+                if (window.mediaPlayer && typeof window.mediaPlayer.play === 'function') {
+                    window.mediaPlayer.play(track);
+                    return true;
+                }
+                if (window.PlayerControls && typeof window.PlayerControls.play === 'function') {
+                    window.PlayerControls.play(track);
+                    return true;
+                }
+                if (window.globalPlayer && typeof window.globalPlayer.playTrack === 'function') {
+                    window.globalPlayer.playTrack(track);
+                    return true;
+                }
+                return false;
+            };
+            
             switch (this.pageType) {
-                case 'music':
-                    if (window.globalPlayer) {
-                        window.globalPlayer.playTrack(item);
-                    } else {
+                case 'music': {
+                    const played = tryPlayMusic(item);
+                    if (!played) {
                         window.location.href = `/player?id=${item.id}&type=music`;
                     }
                     break;
-                case 'shows':
+                }
+                case 'shows': {
+                    // Prefer dedicated player page for shows (video UX)
                     window.location.href = `/player?id=${item.id}&type=show`;
                     break;
-                case 'artists':
+                }
+                case 'artists': {
                     const artistSlug = item.name.toLowerCase()
                         .replace(/\s+/g, '-')
                         .replace(/[^a-z0-9-]/g, '');
                     window.location.href = `/artist/${artistSlug}`;
                     break;
+                }
                 case 'saves':
-                case 'account':
-                    if (item.type === 'music' && window.globalPlayer) {
-                        window.globalPlayer.playTrack(item);
+                case 'account': {
+                    if (item.type === 'music') {
+                        const played = tryPlayMusic(item);
+                        if (!played) {
+                            window.location.href = `/player?id=${item.id}&type=music`;
+                        }
                     } else if (item.type === 'show') {
                         window.location.href = `/player?id=${item.id}&type=show`;
                     }
                     break;
+                }
             }
             
             setTimeout(() => this.startHeroRotation(), 10000);

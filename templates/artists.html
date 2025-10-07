@@ -5,6 +5,42 @@
 {% block content %}
 <div class="artists-page" x-data="artistsPage()" x-init="init()">
     <div class="artists-container">
+        <!-- Unified Rotating Hero -->
+        <section class="unified-hero tv-hero" x-data="createUnifiedHero({ pageType: 'artists', rotationSpeed: 3000 })" x-init="init()"
+            @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd">
+            <div class="unified-hero-feed hero-feed" :style="`transform: translateX(${heroOffset}px)`">
+                <template x-for="(item, index) in heroItems" :key="item.id || item.name">
+                    <div class="hero-item" x-show="getItemImage(item)"
+                        :class="{'active': currentHeroIndex === index}"
+                        :style="`background-image: url(${getItemImage(item)})`"
+                        @click="playHeroItem(item)">
+                        <div class="hero-overlay">
+                            <div class="hero-content">
+                                <div class="hero-badge" x-text="getPageBadge()"></div>
+                                <h1 x-text="getItemTitle(item)"></h1>
+                                <p x-text="getItemSubtitle(item)"></p>
+                                <button @click.stop="playHeroItem(item)" class="hero-play-btn">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <div class="hero-controls">
+                <button @click="prevHero()" class="hero-nav">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button @click="nextHero()" class="hero-nav">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="hero-indicators">
+                <template x-for="(item, index) in heroItems" :key="item.id || item.name">
+                    <button @click="setHeroIndex(index)" :class="{'active': currentHeroIndex === index}" class="hero-dot"></button>
+                </template>
+            </div>
+        </section>
         <!-- Unified Header Section -->
         <section class="unified-header">
             <div class="header-content">
@@ -366,4 +402,8 @@ function artistsPage() {
     }
 }
 </script>
+{% endblock %}
+
+{% block extra_head %}
+<script src="{{ url_for('static', filename='js/unified-hero.js') }}"></script>
 {% endblock %}

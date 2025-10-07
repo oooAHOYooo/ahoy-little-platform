@@ -926,6 +926,206 @@
       ],
       "artist_slug": "mintea",
       "date_added": "12-13-24"
+    },
+    {
+      "id": "song_53",
+      "title": "A Routine Affair",
+      "artist": "Jake Custer",
+      "album": "I Think We're Lost",
+      "genre": "Indie",
+      "duration_seconds": 180,
+      "audio_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/A%20Routine%20Affair.mp3",
+      "preview_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/A%20Routine%20Affair.mp3",
+      "cover_art": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Think%20Were%20Lost_1000kb.jpg",
+      "added_date": "2025-10-07",
+      "tags": [
+        "indie",
+        "jake-custer",
+        "album",
+        "new"
+      ],
+      "artist_slug": "jake-custer",
+      "new": true
+    },
+    {
+      "id": "song_54",
+      "title": "Between Us Two",
+      "artist": "Jake Custer",
+      "album": "I Think We're Lost",
+      "genre": "Indie",
+      "duration_seconds": 180,
+      "audio_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/Between%20Us%20Two.mp3",
+      "preview_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/Between%20Us%20Two.mp3",
+      "cover_art": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Think%20Were%20Lost_1000kb.jpg",
+      "added_date": "2025-10-07",
+      "tags": [
+        "indie",
+        "jake-custer",
+        "album",
+        "new"
+      ],
+      "artist_slug": "jake-custer",
+      "new": true
+    },
+    {
+      "id": "song_55",
+      "title": "ClockedIn, Checked Out",
+      "artist": "Jake Custer",
+      "album": "I Think We're Lost",
+      "genre": "Indie",
+      "duration_seconds": 180,
+      "audio_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/ClockedIn%2C%20Checked%20Out.mp3",
+      "preview_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/ClockedIn%2C%20Checked%20Out.mp3",
+      "cover_art": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Think%20Were%20Lost_1000kb.jpg",
+      "added_date": "2025-10-07",
+      "tags": [
+        "indie",
+        "jake-custer",
+        "album",
+        "new"
+      ],
+      "artist_slug": "jake-custer",
+      "new": true
+    },
+    {
+      "id": "song_56",
+      "title": "Feel That Way Again",
+      "artist": "Jake Custer",
+      "album": "I Think We're Lost",
+      "genre": "Indie",
+      "duration_seconds": 180,
+      "audio_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/Feel%20That%20Way%20Again.mp3",
+      "preview_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/Feel%20That%20Way%20Again.mp3",
+      "cover_art": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Think%20Were%20Lost_1000kb.jpg",
+      "added_date": "2025-10-07",
+      "tags": [
+        "indie",
+        "jake-custer",
+        "album",
+        "new"
+      ],
+      "artist_slug": "jake-custer",
+      "new": true
+    },
+    {
+      "id": "song_57",
+      "title": "Hide Away",
+      "artist": "Jake Custer",
+      "album": "I Think We're Lost",
+      "genre": "Indie",
+      "duration_seconds": 180,
+      "audio_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/Hide%20Away.mp3",
+      "preview_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/Hide%20Away.mp3",
+      "cover_art": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Think%20Were%20Lost_1000kb.jpg",
+      "added_date": "2025-10-07",
+      "tags": [
+        "indie",
+        "jake-custer",
+        "album",
+        "new"
+      ],
+      "artist_slug": "jake-custer",
+      "new": true
+    },
+    {
+      "id": "song_58",
+      "title": "I Get To Love You",
+      "artist": "Jake Custer",
+      "album": "I Think We're Lost",
+      "genre": "Indie",
+      "duration_seconds": 180,
+      "audio_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Get%20To%20Love%20You.mp3",
+      "preview_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Get%20To%20Love%20You.mp3",
+      "cover_art": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Think%20Were%20Lost_1000kb.jpg",
+      "added_date": "2025-10-07",
+      "tags": [
+        "indie",
+        "jake-custer",
+        "album",
+        "new"
+      ],
+      "artist_slug": "jake-custer",
+      "new": true
+    },
+    {
+      "id": "song_59",
+      "title": "Interstellar",
+      "artist": "Jake Custer",
+      "album": "I Think We're Lost",
+      "genre": "Indie",
+      "duration_seconds": 180,
+      "audio_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/Interstellar.mp3",
+      "preview_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/Interstellar.mp3",
+      "cover_art": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Think%20Were%20Lost_1000kb.jpg",
+      "added_date": "2025-10-07",
+      "tags": [
+        "indie",
+        "jake-custer",
+        "album",
+        "new"
+      ],
+      "artist_slug": "jake-custer",
+      "new": true
+    },
+    {
+      "id": "song_60",
+      "title": "Let Go",
+      "artist": "Jake Custer",
+      "album": "I Think We're Lost",
+      "genre": "Indie",
+      "duration_seconds": 180,
+      "audio_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/Let%20Go.mp3",
+      "preview_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/Let%20Go.mp3",
+      "cover_art": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Think%20Were%20Lost_1000kb.jpg",
+      "added_date": "2025-10-07",
+      "tags": [
+        "indie",
+        "jake-custer",
+        "album",
+        "new"
+      ],
+      "artist_slug": "jake-custer",
+      "new": true
+    },
+    {
+      "id": "song_61",
+      "title": "Wake UpSpread Some Love",
+      "artist": "Jake Custer",
+      "album": "I Think We're Lost",
+      "genre": "Indie",
+      "duration_seconds": 180,
+      "audio_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/Wake%20UpSpread%20Some%20Love.mp3",
+      "preview_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/Wake%20UpSpread%20Some%20Love.mp3",
+      "cover_art": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Think%20Were%20Lost_1000kb.jpg",
+      "added_date": "2025-10-07",
+      "tags": [
+        "indie",
+        "jake-custer",
+        "album",
+        "new"
+      ],
+      "artist_slug": "jake-custer",
+      "new": true
+    },
+    {
+      "id": "song_62",
+      "title": "We'll Be Right Back",
+      "artist": "Jake Custer",
+      "album": "I Think We're Lost",
+      "genre": "Indie",
+      "duration_seconds": 180,
+      "audio_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/We%27ll%20Be%20Right%20Back.mp3",
+      "preview_url": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/We%27ll%20Be%20Right%20Back.mp3",
+      "cover_art": "https://storage.googleapis.com/ahoy-song-collection/jake-custer/i-think-were-lost/I%20Think%20Were%20Lost_1000kb.jpg",
+      "added_date": "2025-10-07",
+      "tags": [
+        "indie",
+        "jake-custer",
+        "album",
+        "new"
+      ],
+      "artist_slug": "jake-custer",
+      "new": true
     }
   ]
 }
