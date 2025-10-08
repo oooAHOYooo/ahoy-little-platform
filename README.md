@@ -400,7 +400,21 @@ CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
 
 This project uses Postgres with SQLAlchemy and Alembic for user state only. Content remains JSON-based.
 
-Set `DATABASE_URL` in your environment (see `.env.example`). Then run:
+Set `DATABASE_URL` in your environment (see `.env.example`). The app now fails fast if `DATABASE_URL` is missing and will NEVER fall back to localhost. For remote hosts, `sslmode=require` is automatically appended if missing.
+
+On Render, wire the database automatically via `render.yaml`:
+
+```yaml
+envVars:
+  - key: DATABASE_URL
+    fromDatabase:
+      name: ahoy-postgres
+      property: connectionString
+```
+
+Locally, set it in your shell or `.env` file.
+
+Then run:
 
 ```bash
 alembic revision --autogenerate -m "change"
@@ -408,6 +422,11 @@ alembic upgrade head
 ```
 
 On Render, migrations are applied automatically at startup via `scripts/migrate_and_start.sh`.
+
+### Readiness and Debug
+
+- `GET /readyz`: returns 200 when a DB `SELECT 1` succeeds; 500 with details otherwise.
+- `/debug`: shows masked DSN summary and a clear warning if `DATABASE_URL` is missing. Keeps live DB counts and error details on failures.
 
 ### JWT Auth (API)
 

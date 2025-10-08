@@ -80,6 +80,18 @@ def create_app():
     def healthz():
         return jsonify({"ok": True}), 200
 
+    # Readiness check that actually verifies DB connectivity
+    @app.get("/readyz")
+    def readyz():
+        try:
+            from db import get_session
+            from sqlalchemy import text
+            with get_session() as session:
+                session.execute(text("SELECT 1"))
+            return jsonify({"status": "ready"}), 200
+        except Exception as e:
+            return jsonify({"status": "error", "detail": str(e)}), 500
+
     # Context processor to inject login flag into templates
     @app.context_processor
     def inject_login_flag():
@@ -1308,6 +1320,8 @@ def debug_page():
     # Default values
     db_ok = False
     db_error = None
+    db_dsn_summary = None
+    db_env_missing = False
     db_counts = {
         'users': 0,
         'playlists': 0,
@@ -1318,13 +1332,14 @@ def debug_page():
 
     try:
         # Lazy imports to avoid hard dependency for non-DB flows
-        from db import get_session
+        from db import get_session, current_db_dsn_summary
         from sqlalchemy import text
 
         with get_session() as session:
             # Basic liveness
             session.execute(text('SELECT 1'))
             db_ok = True
+            db_dsn_summary = current_db_dsn_summary()
 
             # Counts per table
             for table, query in [
@@ -1342,8 +1357,11 @@ def debug_page():
                     db_counts[table] = 0
     except Exception as e:
         db_error = str(e)
+        # Identify missing env var to show Render mapping help
+        if "DATABASE_URL is not set" in db_error:
+            db_env_missing = True
 
-    return render_template('debug.html', db_ok=db_ok, db_error=db_error, db_counts=db_counts)
+    return render_template('debug.html', db_ok=db_ok, db_error=db_error, db_counts=db_counts, db_dsn_summary=db_dsn_summary, db_env_missing=db_env_missing)
 
 @app.route('/debug_hero')
 def debug_hero():

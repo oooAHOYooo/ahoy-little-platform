@@ -21,7 +21,12 @@ target_metadata = Base.metadata
 
 
 def get_url() -> str:
-    return os.getenv("DATABASE_URL", "postgresql+psycopg://postgres:postgres@localhost:5432/ahoy")
+    url = os.getenv("DATABASE_URL")
+    if not url:
+        raise RuntimeError(
+            "DATABASE_URL is required for Alembic. Set it in your environment or .env file."
+        )
+    return url
 
 
 def run_migrations_offline() -> None:
@@ -43,6 +48,7 @@ def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
 
     configuration = config.get_section(config.config_ini_section) or {}
+    # Force the URL from env; do not rely on alembic.ini defaults
     configuration["sqlalchemy.url"] = get_url()
 
     connectable = engine_from_config(
