@@ -25,6 +25,11 @@
                     x-text="'@' + (userProfile.username || 'username')"></p>
                 <p class="account-email"
                     x-text="userProfile.email || 'No email'"></p>
+                <div class="account-actions">
+                    <button type="button" class="btn btn-secondary" onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">
+                        <i class="fas fa-palette"></i> Theme Picker
+                    </button>
+                </div>
                 <div class="account-stats">
                     <div class="stat-item">
                         <span class="stat-number"
@@ -87,27 +92,26 @@
             <!-- Overview Tab -->
             <div x-show="activeTab === 'overview'" class="tab-panel">
                 <div class="overview-grid">
-                    <div class="overview-card">
-                        <h3>Recent Activity</h3>
-                        <div class="activity-list">
-                            <template x-for="item in recentActivity"
-                                :key="item.id">
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        <i
-                                            :class="getActivityIcon(item.type)"></i>
+                    <template x-if="!isGuest && recentActivity.length">
+                        <div class="overview-card">
+                            <h3>Recent Activity</h3>
+                            <div class="activity-list">
+                                <template x-for="item in recentActivity" :key="item.id">
+                                    <div class="activity-item">
+                                        <div class="activity-icon">
+                                            <i :class="getActivityIcon(item.type)"></i>
+                                        </div>
+                                        <div class="activity-details">
+                                            <p x-text="item.description"></p>
+                                            <span class="activity-time" x-text="formatTimeAgo(item.timestamp)"></span>
+                                        </div>
                                     </div>
-                                    <div class="activity-details">
-                                        <p x-text="item.description"></p>
-                                        <span class="activity-time"
-                                            x-text="formatTimeAgo(item.timestamp)"></span>
-                                    </div>
-                                </div>
-                            </template>
+                                </template>
+                            </div>
                         </div>
-                    </div>
+                    </template>
 
-                    <div class="overview-card">
+                    <div class="overview-card" x-show="topContent.length">
                         <h3>Top Content</h3>
                         <div class="top-content">
                             <template x-for="item in topContent" :key="item.id">
@@ -125,7 +129,7 @@
                         </div>
                     </div>
 
-                    <div class="overview-card">
+                    <div class="overview-card" x-show="!isGuest">
                         <h3>Account Details</h3>
                         <div class="account-details">
                             <div class="detail-row">
@@ -150,25 +154,25 @@
 
             <!-- Activity Tab -->
             <div x-show="activeTab === 'activity'" class="tab-panel">
-                <div class="activity-timeline">
-                    <h3>Activity Timeline</h3>
-                    <div class="timeline">
-                        <template x-for="item in activityTimeline"
-                            :key="item.id">
-                            <div class="timeline-item">
-                                <div class="timeline-marker">
-                                    <i :class="getActivityIcon(item.type)"></i>
+                <template x-if="!isGuest && activityTimeline.length">
+                    <div class="activity-timeline">
+                        <h3>Activity Timeline</h3>
+                        <div class="timeline">
+                            <template x-for="item in activityTimeline" :key="item.id">
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">
+                                        <i :class="getActivityIcon(item.type)"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h4 x-text="item.title"></h4>
+                                        <p x-text="item.description"></p>
+                                        <span class="timeline-time" x-text="formatDateTime(item.timestamp)"></span>
+                                    </div>
                                 </div>
-                                <div class="timeline-content">
-                                    <h4 x-text="item.title"></h4>
-                                    <p x-text="item.description"></p>
-                                    <span class="timeline-time"
-                                        x-text="formatDateTime(item.timestamp)"></span>
-                                </div>
-                            </div>
-                        </template>
+                            </template>
+                        </div>
                     </div>
-                </div>
+                </template>
             </div>
 
             <!-- Saves Tab -->
@@ -316,6 +320,12 @@
                             </button>
                         </div>
                     </form>
+                    <div class="form-section">
+                        <h4>Appearance</h4>
+                        <button type="button" class="btn btn-secondary" onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">
+                            <i class="fas fa-palette"></i> Theme Picker
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -469,6 +479,7 @@ function accountPage() {
         userProfile: {},
         userStats: {},
         userBoards: [],
+        isGuest: false,
         showAvatarCustomizer: false,
         selectedAvatar: 'red',
         recentActivity: [],
@@ -502,14 +513,34 @@ function accountPage() {
                     this.userProfile = await response.json();
                     this.selectedAvatar = this.userProfile.avatar_url || 'red';
                     this.populateForm();
-                } else {
-                    // Redirect to login if not authenticated
-                    window.location.href = '/auth';
+                    this.isGuest = false;
+                    return;
                 }
+                if (response.status === 401) {
+                    this.setGuestMode();
+                    return;
+                }
+                // Unknown error: fall back to guest mode
+                this.setGuestMode();
             } catch (error) {
                 console.error('Failed to load user data:', error);
-                window.location.href = '/auth';
+                this.setGuestMode();
             }
+        },
+
+        setGuestMode() {
+            this.isGuest = true;
+            this.userProfile = {
+                display_name: 'Guest',
+                username: 'guest',
+                email: '',
+                avatar_url: '/static/img/default-avatar.png',
+                created_at: new Date().toISOString(),
+                last_login: null,
+                subscription: { type: 'Free' }
+            };
+            this.selectedAvatar = 'red';
+            this.populateForm();
         },
         
         async loadUserStats() {
@@ -517,45 +548,82 @@ function accountPage() {
                 const response = await fetch('/api/user/stats');
                 if (response.ok) {
                     this.userStats = await response.json();
+                    return;
+                }
+                if (response.status === 401) {
+                    await this.loadGuestStats();
+                    return;
                 }
             } catch (error) {
                 console.error('Failed to load user stats:', error);
             }
         },
+
+        async loadGuestStats() {
+            try {
+                const [tracksRes, showsRes, artistsRes] = await Promise.all([
+                    fetch('/api/saves/track'),
+                    fetch('/api/saves/show'),
+                    fetch('/api/saves/artist')
+                ]);
+                const [tracks, shows, artists] = await Promise.all([
+                    tracksRes.ok ? tracksRes.json() : { content: [] },
+                    showsRes.ok ? showsRes.json() : { content: [] },
+                    artistsRes.ok ? artistsRes.json() : { content: [] }
+                ]);
+                const savedTracks = (tracks.content || []).length;
+                const savedShows = (shows.content || []).length;
+                const savedArtists = (artists.content || []).length;
+                this.userStats = {
+                    saved_tracks: savedTracks,
+                    saved_shows: savedShows,
+                    saved_artists: savedArtists,
+                    total_saves: savedTracks + savedShows + savedArtists,
+                    total_plays: 0,
+                    playlists: 0
+                };
+            } catch (e) {
+                this.userStats = { saved_tracks: 0, saved_shows: 0, saved_artists: 0, total_saves: 0, total_plays: 0, playlists: 0 };
+            }
+        },
         
         async loadUserPlaylists() {
             try {
-                const response = await fetch('/api/user/playlists');
+                // Unified API supports both guests and logged-in users
+                const response = await fetch('/api/playlists');
                 if (response.ok) {
-                    this.userPlaylists = await response.json();
+                    const data = await response.json();
+                    this.userPlaylists = data.playlists || [];
+                    // backfill playlists count in stats if missing
+                    if (!this.userStats.playlists && Array.isArray(this.userPlaylists)) {
+                        this.userStats.playlists = this.userPlaylists.length;
+                    }
                 }
             } catch (error) {
                 console.error('Failed to load playlists:', error);
             }
         },
         
-        loadRecentActivity() {
-            // Mock recent activity data
-            this.recentActivity = [
-                {
-                    id: 1,
-                    type: 'play',
-                    description: 'Played "Indie Vibes" playlist',
-                    timestamp: new Date(Date.now() - 1000 * 60 * 30) // 30 minutes ago
-                },
-                {
-                    id: 2,
-                    type: 'save',
-                    description: 'Saved "Summer Nights" track',
-                    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2) // 2 hours ago
-                },
-                {
-                    id: 3,
-                    type: 'create',
-                    description: 'Created "My Favorites" playlist',
-                    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24) // 1 day ago
+        async loadRecentActivity() {
+            try {
+                const r = await fetch('/api/user/history');
+                if (r.ok) {
+                    const items = await r.json();
+                    this.recentActivity = (items || []).map((it, idx) => ({
+                        id: it.id || idx,
+                        type: it.type || 'play',
+                        description: it.title || it.description || 'Recent activity',
+                        timestamp: it.played_at ? new Date(it.played_at) : new Date()
+                    }));
+                    this.activityTimeline = this.recentActivity;
+                } else if (r.status === 401) {
+                    this.recentActivity = [];
+                    this.activityTimeline = [];
                 }
-            ];
+            } catch (e) {
+                this.recentActivity = [];
+                this.activityTimeline = [];
+            }
         },
         
         loadTopContent() {

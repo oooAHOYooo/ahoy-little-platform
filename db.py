@@ -9,17 +9,28 @@ from sqlalchemy.engine.url import make_url
 
 
 def _require_database_url() -> str:
+    """Get DB URL, falling back to local SQLite for dev if not set.
+
+    Order of precedence:
+    - DATABASE_URL (production/Render)
+    - LOCAL_DATABASE_URL (optional override for local dev)
+    - sqlite:///local.db (default local file)
+    """
     value = os.getenv("DATABASE_URL")
-    if not value:
-        raise RuntimeError(
-            "DATABASE_URL is not set. On Render, map it via render.yaml envVars → fromDatabase, "
-            "or set it locally in a .env file."
-        )
-    return value
+    if value:
+        return value
+    value = os.getenv("LOCAL_DATABASE_URL")
+    if value:
+        return value
+    # Default local fallback
+    return "sqlite:///local.db"
 
 
 def _ensure_ssl_for_remote(url: str) -> str:
     parsed = urlsplit(url)
+    # Skip SSL tweaks for SQLite/local file URLs
+    if (parsed.scheme or "").startswith("sqlite"):
+        return url
     host = (parsed.hostname or "").lower()
     is_local = host in {"localhost", "127.0.0.1", "::1"}
     if is_local:

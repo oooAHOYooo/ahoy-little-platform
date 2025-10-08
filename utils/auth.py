@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 import datetime as dt
 from functools import wraps
 
@@ -122,7 +123,7 @@ def _sign_value(value: str) -> str:
     return f"{value}.{sig}"
 
 
-def _verify_signed_value(signed: str) -> str | None:
+def _verify_signed_value(signed: str) -> Optional[str]:
     parts = signed.split(".")
     if len(parts) < 2:
         return None
