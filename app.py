@@ -8,13 +8,13 @@ import random
 import hashlib
 from functools import wraps
 from user_manager import user_manager
-
 from dotenv import load_dotenv
 load_dotenv()
 
 from config import get_config
 from extensions import bcrypt, login_manager, limiter, init_cors
 from blueprints.auth import bp as auth_bp
+from blueprints.api.auth import bp as api_auth_bp
 from blueprints.activity import bp as activity_bp
 from blueprints.playlists import bp as playlists_bp
 from blueprints.bookmarks import bp as bookmarks_bp
@@ -64,6 +64,7 @@ def create_app():
 
     # Register blueprints
     app.register_blueprint(auth_bp)
+    app.register_blueprint(api_auth_bp)
     app.register_blueprint(activity_bp)
     app.register_blueprint(playlists_bp)
     app.register_blueprint(bookmarks_bp)

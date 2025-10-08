@@ -1,6 +1,7 @@
 (() => {
   const STORAGE_KEY = "ahoy.bookmarks.v1";
   const API = "/api/bookmarks";
+  const ACCESS_KEY = "access_token";
   const state = {
     items: {},
     loggedIn: !!(window.LOGGED_IN),
@@ -43,24 +44,30 @@
     saveLocal();
   }
 
+  function getAccessToken() {
+    try { return localStorage.getItem(ACCESS_KEY) || null; } catch { return null; }
+  }
+  function authHeaders() {
+    const t = getAccessToken();
+    const h = { "Content-Type": "application/json" };
+    if (t) h["Authorization"] = `Bearer ${t}`;
+    return h;
+  }
+
   async function fetchServer() {
-    if (!state.loggedIn) return;
-    const r = await fetch(API);
+    const token = getAccessToken();
+    if (!token) return; // guest mode
+    const r = await fetch(`${API}?page=1&per_page=100`, { headers: authHeaders() });
     if (!r.ok) return;
     const data = await r.json();
-    const serverItems = toObj(data.items || [], (x) => x.key);
+    const serverItems = toObj((data.items || []).map((x) => ({
+      id: x.media_id,
+      type: x.media_type,
+      key: `${x.media_type}:${x.media_id}`,
+      added_at: x.created_at,
+    })), (x) => x.key);
 
-    // Merge local → server if needed
-    const localOnly = Object.values(state.items).filter(it => !serverItems[it.key]);
-    if (localOnly.length) {
-      await fetch(`${API}/merge`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: localOnly })
-      }).catch(() => {});
-    }
-
-    state.items = { ...loadLocal(), ...serverItems };
+    state.items = { ...serverItems };
     saveLocal();
     state.serverLoaded = true;
   }
@@ -76,21 +83,25 @@
     }));
 
     try {
-      const r = await fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: exists ? "remove" : "add", item: { ...it, key } })
-      });
-      if (r.ok) {
-        const data = await r.json();
-        if (Array.isArray(data.items) && data.persisted) {
-          // Only update from server if persisted (logged in user)
-          state.items = toObj(data.items, (x) => x.key);
-          saveLocal();
+      const token = getAccessToken();
+      if (!token) return; // guest mode handled via local above
+      if (exists) {
+        // Need bookmark id; find it by listing current
+        const rList = await fetch(`${API}?page=1&per_page=100`, { headers: authHeaders() });
+        const data = await rList.json();
+        const found = (data.items || []).find((x) => x.media_id == it.id && x.media_type === (it.type === 'track' ? 'music' : it.type));
+        if (found) {
+          await fetch(`${API}/${found.id}`, { method: "DELETE", headers: authHeaders() });
         }
-        // For guests (persisted: false), keep the local state as-is
+      } else {
+        const media_type = it.type === 'track' ? 'music' : it.type;
+        await fetch(API, { method: "POST", headers: authHeaders(), body: JSON.stringify({ media_id: String(it.id), media_type }) });
       }
-    } catch {}
+    } catch (e) {
+      if (String(e?.message || '').includes('401')) {
+        if (confirm('Please log in to sync bookmarks. Go to login now?')) window.location.href = '/auth';
+      }
+    }
   }
 
   // Nests system

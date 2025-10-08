@@ -409,6 +409,40 @@ alembic upgrade head
 
 On Render, migrations are applied automatically at startup via `scripts/migrate_and_start.sh`.
 
+### JWT Auth (API)
+
+Endpoints:
+- POST /api/auth/register {"email","password"}
+- POST /api/auth/login {"email","password"}
+- GET  /api/auth/me (Authorization: Bearer <access>)
+- POST /api/auth/refresh {"refresh_token"}
+
+Tokens:
+- Access: HS256, expires in 15 minutes
+- Refresh: HS256, expires in 30 days
+
+Example:
+```bash
+# Register
+curl -s -X POST http://localhost:5000/api/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"user@example.com","password":"secret"}'
+
+# Login
+curl -s -X POST http://localhost:5000/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"user@example.com","password":"secret"}'
+
+# Me (replace ACCESS)
+curl -s http://localhost:5000/api/auth/me \
+  -H "Authorization: Bearer ACCESS"
+
+# Refresh (replace REFRESH)
+curl -s -X POST http://localhost:5000/api/auth/refresh \
+  -H 'Content-Type: application/json' \
+  -d '{"refresh_token":"REFRESH"}'
+```
+
 
 ### Adding New Features
 
