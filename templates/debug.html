@@ -65,6 +65,45 @@
         </div>
     </section>
 
+    <!-- Database Health Section -->
+    <section class="debug-section">
+        <div class="section-header">
+            <h2><i class="fas fa-database"></i> Database</h2>
+            {% if db_ok %}
+            <span
+                style="background:#10b981;color:white;padding:4px 8px;border-radius:9999px;font-weight:600;">DB
+                OK</span>
+            {% else %}
+            <span
+                style="background:#ef4444;color:white;padding:4px 8px;border-radius:9999px;font-weight:600;">DB
+                ERROR</span>
+            {% endif %}
+        </div>
+        {% if not db_ok and db_error %}
+        <p style="color:#b91c1c;">{{ db_error }}</p>
+        {% endif %}
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Table</th>
+                        <th>Row Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Users</td><td>{{ db_counts.users }}</td></tr>
+                    <tr><td>Playlists</td><td>{{ db_counts.playlists
+                            }}</td></tr>
+                    <tr><td>Bookmarks</td><td>{{ db_counts.bookmarks
+                            }}</td></tr>
+                    <tr><td>Play History</td><td>{{ db_counts.play_history
+                            }}</td></tr>
+                    <tr><td>Feedback</td><td>{{ db_counts.feedback }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
     <!-- Development Tools Section -->
     <section class="debug-section">
         <div class="section-header">

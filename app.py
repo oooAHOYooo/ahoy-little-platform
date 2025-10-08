@@ -1302,8 +1302,46 @@ def terms_of_service():
 # Debug Routes
 @app.route('/debug')
 def debug_page():
-    """Debug console page"""
-    return render_template('debug.html')
+    """Debug console page with DB health info"""
+    # Default values
+    db_ok = False
+    db_error = None
+    db_counts = {
+        'users': 0,
+        'playlists': 0,
+        'bookmarks': 0,
+        'play_history': 0,
+        'feedback': 0,
+    }
+
+    try:
+        # Lazy imports to avoid hard dependency for non-DB flows
+        from db import get_session
+        from sqlalchemy import text
+
+        with get_session() as session:
+            # Basic liveness
+            session.execute(text('SELECT 1'))
+            db_ok = True
+
+            # Counts per table
+            for table, query in [
+                ('users', 'SELECT COUNT(*) FROM users'),
+                ('playlists', 'SELECT COUNT(*) FROM playlists'),
+                ('bookmarks', 'SELECT COUNT(*) FROM bookmarks'),
+                ('play_history', 'SELECT COUNT(*) FROM play_history'),
+                ('feedback', 'SELECT COUNT(*) FROM feedback'),
+            ]:
+                try:
+                    result = session.execute(text(query)).scalar() or 0
+                    db_counts[table] = int(result)
+                except Exception:
+                    # Table might not exist yet
+                    db_counts[table] = 0
+    except Exception as e:
+        db_error = str(e)
+
+    return render_template('debug.html', db_ok=db_ok, db_error=db_error, db_counts=db_counts)
 
 @app.route('/debug_hero')
 def debug_hero():

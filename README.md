@@ -396,6 +396,19 @@ CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
 ```
 
 ## Development
+### Database and Migrations (User State)
+
+This project uses Postgres with SQLAlchemy and Alembic for user state only. Content remains JSON-based.
+
+Set `DATABASE_URL` in your environment (see `.env.example`). Then run:
+
+```bash
+alembic revision --autogenerate -m "change"
+alembic upgrade head
+```
+
+On Render, migrations are applied automatically at startup via `scripts/migrate_and_start.sh`.
+
 
 ### Adding New Features
 
