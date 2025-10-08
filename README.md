@@ -428,6 +428,15 @@ On Render, migrations are applied automatically at startup via `scripts/migrate_
 - `GET /readyz`: returns 200 when a DB `SELECT 1` succeeds; 500 with details otherwise.
 - `/debug`: shows masked DSN summary and a clear warning if `DATABASE_URL` is missing. Keeps live DB counts and error details on failures.
 
+### Operational Self-Test
+
+- `GET /ops/selftest` runs:
+  - `SELECT 1`
+  - ORM query to count users
+  - Reads Alembic current DB revision
+  - Returns `{ "ready": true, "alembic": "<rev>", "counts": { "users": N } }` on success; 500 with `{ "ready": false, "detail": "..." }` on failure
+  - Recommended Render `healthCheckPath`: `/ops/selftest`
+
 ### JWT Auth (API)
 
 Endpoints:

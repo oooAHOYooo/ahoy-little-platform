@@ -18,7 +18,7 @@ services:
         value: 1
       - key: SECRET_KEY
         generateValue: true
-    healthCheckPath: /readyz
+    healthCheckPath: /ops/selftest
     autoDeploy: true
     branch: main
     rootDir: .

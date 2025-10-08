@@ -92,6 +92,38 @@ def create_app():
         except Exception as e:
             return jsonify({"status": "error", "detail": str(e)}), 500
 
+    # Operational self-test endpoint
+    @app.get("/ops/selftest")
+    def ops_selftest():
+        try:
+            from db import get_session
+            from sqlalchemy import text
+            from models import User
+            from alembic.runtime.migration import MigrationContext
+
+            with get_session() as session:
+                # 1) Basic connectivity
+                session.execute(text("SELECT 1"))
+
+                # 2) ORM query
+                users_count = session.query(User).count()
+
+                # 3) Alembic current revision in DB
+                connection = session.connection()
+                context = MigrationContext.configure(connection)
+                current_rev = context.get_current_revision()
+
+            return jsonify({
+                "ready": True,
+                "alembic": current_rev or "unknown",
+                "counts": {"users": int(users_count)}
+            }), 200
+        except Exception as e:
+            return jsonify({
+                "ready": False,
+                "detail": str(e)
+            }), 500
+
     # Context processor to inject login flag into templates
     @app.context_processor
     def inject_login_flag():
