@@ -1764,6 +1764,27 @@ img.loading {
 
 @media (max-width: 768px) {
 
+    /* Slightly reduce hero section height for more above-the-fold content */
+    .unified-hero,
+    .tv-hero {
+        height: 42vh;
+        min-height: 280px;
+    }
+
+    .unified-hero .hero-controls {
+        top: 48%;
+    }
+
+    .unified-hero .hero-indicators {
+        bottom: var(--spacing-sm);
+        gap: 4px;
+    }
+
+    .unified-hero .hero-dot {
+        width: 7px;
+        height: 7px;
+    }
+
     .tv-hero,
     .hero-section {
         height: 50vh;
@@ -1899,6 +1920,16 @@ img.loading {
 }
 
 @media (max-width: 480px) {
+
+    .unified-hero,
+    .tv-hero {
+        height: 40vh;
+        min-height: 260px;
+    }
+
+    .unified-hero .hero-controls {
+        top: 46%;
+    }
 
     .tv-hero,
     .hero-section {
@@ -10271,7 +10302,6 @@ img.loading {
 /* ========================================
    Mobile Hero Compaction + Universal Sizing
    ======================================== */
-
 /* Apply consistent hero sizing across pages and shrink controls on mobile */
 .tv-hero,
 .unified-hero,
@@ -11868,11 +11898,6 @@ img.loading {
 .avatar-anchor.pink,
 .avatar-anchor-preview.pink {
     background: linear-gradient(135deg, #ec4899, #db2777);
-}
-
-.avatar-anchor.lime,
-.avatar-anchor-preview.lime {
-    background: linear-gradient(135deg, #84cc16, #65a30d);
 }
 
 .avatar-anchor.rose,
