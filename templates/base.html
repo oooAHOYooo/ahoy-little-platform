@@ -365,7 +365,7 @@
                             <a href="/admin"
                                 class="mobile-menu-item"
                                 @click="rightMenuOpen = false"
-                                x-show="userProfile.username === 'admin'">
+                                {% if session.get('is_admin') or (g.get('real_user') and g.real_user.is_admin) %}style="display:block"{% else %}style="display:none"{% endif %}>
                                 <i class="fas fa-user-shield"></i>
                                 <span>Admin</span>
                             </a>

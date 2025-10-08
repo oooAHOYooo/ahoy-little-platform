@@ -79,6 +79,19 @@
                 ERROR</span>
             {% endif %}
         </div>
+        <div style="margin-top:8px;">
+            <strong>Alembic Revision:</strong>
+            <code>{{ alembic_rev or 'unknown' }}</code>
+        </div>
+        {% if impersonation and impersonation.email %}
+        <div style="margin-top:8px;">
+            <strong>Impersonating:</strong> {{ impersonation.email }}
+            <form method="post" action="/admin/stop-impersonate" style="display:inline;margin-left:8px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button class="btn btn-outline btn-small">Stop</button>
+            </form>
+        </div>
+        {% endif %}
         {% if not db_ok and db_error %}
         <p style="color:#b91c1c;">{{ db_error }}</p>
         {% endif %}

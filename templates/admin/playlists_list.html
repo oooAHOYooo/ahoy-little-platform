@@ -1,0 +1,47 @@
+{% extends "admin/layout.html" %}
+{% from "partials/pagination.html" import pager %}
+{% from "partials/sort_link.html" import sort_link %}
+{% block admin_content %}
+<h1>Playlists</h1>
+
+<form method="get" class="filters">
+    <input type="text" name="q" value="{{ q or '' }}"
+        placeholder="Search name…">
+    <button>Search</button>
+    <a href="{{ url_for('admin.playlists_export', q=q, sort=sort) }}"
+        class="btn">Export CSV</a>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>{{ sort_link('ID','id') }}</th>
+            <th>{{ sort_link('User','user_id') }}</th>
+            <th>{{ sort_link('Name','name') }}</th>
+            <th>{{ sort_link('Created','created_at') }}</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in items %}
+        <tr>
+            <td>{{ p.id }}</td>
+            <td>{{ p.user_id }}</td>
+            <td>{{ p.name }}</td>
+            <td>{{ p.created_at }}</td>
+            <td>
+                <form method="post"
+                    action="{{ url_for('admin.playlists_delete', playlist_id=p.id) }}"
+                    style="display:inline;">
+                    <input type="hidden" name="csrf_token"
+                        value="{{ csrf_token }}">
+                    <button class="btn btn-small">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{{ pager(page, per_page, total) }}
+{% endblock %}

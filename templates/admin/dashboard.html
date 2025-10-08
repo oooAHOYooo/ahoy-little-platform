@@ -1,0 +1,68 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<h1>Admin Dashboard</h1>
+<div class="cards">
+    <div class="card"><div class="card-title">Users</div><div
+            class="card-value">{{ counts.users }}</div></div>
+    <div class="card"><div class="card-title">Playlists</div><div
+            class="card-value">{{ counts.playlists }}</div></div>
+    <div class="card"><div class="card-title">Bookmarks</div><div
+            class="card-value">{{ counts.bookmarks }}</div></div>
+    <div class="card"><div class="card-title">Feedback</div><div
+            class="card-value">{{ counts.feedback }}</div></div>
+</div>
+
+<div class="grid">
+    <section>
+        <h2>Recent Users</h2>
+        <table class="table">
+            <thead><tr><th>ID</th><th>Email</th><th>Created</th></tr></thead>
+            <tbody>
+                {% for u in recent.users %}
+                <tr><td>{{ u.id }}</td><td><a
+                            href="{{ url_for('admin.users_detail', user_id=u.id) }}">{{
+                            u.email }}</a></td><td>{{ u.created_at }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    <section>
+        <h2>Recent Playlists</h2>
+        <table class="table">
+            <thead><tr><th>ID</th><th>User</th><th>Name</th><th>Created</th></tr></thead>
+            <tbody>
+                {% for p in recent.playlists %}
+                <tr><td>{{ p.id }}</td><td>{{ p.user_id }}</td><td>{{ p.name
+                        }}</td><td>{{ p.created_at }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    <section>
+        <h2>Recent Bookmarks</h2>
+        <table class="table">
+            <thead><tr><th>ID</th><th>User</th><th>Media</th><th>Type</th><th>Created</th></tr></thead>
+            <tbody>
+                {% for b in recent.bookmarks %}
+                <tr><td>{{ b.id }}</td><td>{{ b.user_id }}</td><td>{{ b.media_id
+                        }}</td><td>{{ b.media_type }}</td><td>{{ b.created_at
+                        }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    <section>
+        <h2>Recent Feedback</h2>
+        <table class="table">
+            <thead><tr><th>ID</th><th>User</th><th>Message</th><th>Created</th></tr></thead>
+            <tbody>
+                {% for f in recent.feedback %}
+                <tr><td>{{ f.id }}</td><td>{{ f.user_id }}</td><td>{{
+                        f.message|truncate(80) }}</td><td>{{ f.created_at
+                        }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+{% endblock %}

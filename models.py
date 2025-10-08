@@ -8,6 +8,7 @@ from sqlalchemy import (
     ForeignKey,
     UniqueConstraint,
     Index,
+    Boolean,
 )
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -22,13 +23,14 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    is_admin = Column(Boolean, nullable=False, default=False, server_default='false', index=True)
 
     playlists = relationship('Playlist', back_populates='user', cascade='all, delete-orphan')
     bookmarks = relationship('Bookmark', back_populates='user', cascade='all, delete-orphan')
     play_history = relationship('PlayHistory', back_populates='user', cascade='all, delete-orphan')
 
     def __repr__(self) -> str:
-        return f"<User id={self.id} email={self.email}>"
+        return f"<User id={self.id} email={self.email} admin={self.is_admin}>"
 
 
 class Playlist(Base):

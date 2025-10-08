@@ -1,0 +1,49 @@
+{% extends "admin/layout.html" %}
+{% from "partials/pagination.html" import pager %}
+{% from "partials/sort_link.html" import sort_link %}
+{% block admin_content %}
+<h1>Bookmarks</h1>
+
+<form method="get" class="filters">
+    <input type="text" name="q" value="{{ q or '' }}"
+        placeholder="Search media id…">
+    <button>Search</button>
+    <a href="{{ url_for('admin.bookmarks_export', q=q, sort=sort) }}"
+        class="btn">Export CSV</a>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>{{ sort_link('ID','id') }}</th>
+            <th>{{ sort_link('User','user_id') }}</th>
+            <th>{{ sort_link('Media','media_id') }}</th>
+            <th>{{ sort_link('Type','media_type') }}</th>
+            <th>{{ sort_link('Created','created_at') }}</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for b in items %}
+        <tr>
+            <td>{{ b.id }}</td>
+            <td>{{ b.user_id }}</td>
+            <td>{{ b.media_id }}</td>
+            <td>{{ b.media_type }}</td>
+            <td>{{ b.created_at }}</td>
+            <td>
+                <form method="post"
+                    action="{{ url_for('admin.bookmarks_delete', bookmark_id=b.id) }}"
+                    style="display:inline;">
+                    <input type="hidden" name="csrf_token"
+                        value="{{ csrf_token }}">
+                    <button class="btn btn-small">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{{ pager(page, per_page, total) }}
+{% endblock %}

@@ -13,6 +13,7 @@ load_dotenv()
 
 from config import get_config
 from extensions import bcrypt, login_manager, limiter, init_cors
+from utils.auth import admin_required, get_effective_user
 from blueprints.auth import bp as auth_bp
 from blueprints.api.auth import bp as api_auth_bp
 from blueprints.activity import bp as activity_bp

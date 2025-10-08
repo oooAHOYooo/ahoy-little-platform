@@ -1,0 +1,60 @@
+{% extends "admin/layout.html" %}
+{% from "partials/pagination.html" import pager %}
+{% from "partials/sort_link.html" import sort_link %}
+{% block admin_content %}
+<h1>Users</h1>
+
+<form method="get" class="filters">
+    <input type="text" name="q" value="{{ q or '' }}"
+        placeholder="Search email…">
+    <button>Search</button>
+    <a href="{{ url_for('admin.users_export', q=q, sort=sort) }}"
+        class="btn">Export CSV</a>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>{{ sort_link('ID','id') }}</th>
+            <th>{{ sort_link('Email','email') }}</th>
+            <th>{{ sort_link('Admin','is_admin') }}</th>
+            <th>{{ sort_link('Disabled','disabled') }}</th>
+            <th>{{ sort_link('Created','created_at') }}</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in items %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td><a href="{{ url_for('admin.users_detail', user_id=u.id) }}">{{
+                    u.email }}</a></td>
+            <td>{% if u.is_admin %}<span
+                    class="badge badge-green">admin</span>{% endif %}</td>
+            <td>{% if getattr(u,'disabled',False) %}<span
+                    class="badge badge-red">disabled</span>{% endif %}</td>
+            <td>{{ u.created_at }}</td>
+            <td>
+                <form method="post"
+                    action="{{ url_for('admin.users_disable', user_id=u.id) }}"
+                    style="display:inline;">
+                    <input type="hidden" name="csrf_token"
+                        value="{{ csrf_token }}">
+                    <button class="btn btn-small">{{ 'Enable' if
+                        getattr(u,'disabled',False) else 'Disable' }}</button>
+                </form>
+                <form method="post"
+                    action="{{ url_for('admin.users_impersonate', user_id=u.id) }}"
+                    style="display:inline;">
+                    <input type="hidden" name="csrf_token"
+                        value="{{ csrf_token }}">
+                    <button class="btn btn-small">Impersonate</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{{ pager(page, per_page, total) }}
+{% endblock %}

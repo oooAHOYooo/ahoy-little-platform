@@ -1,0 +1,30 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<h1>User {{ user.id }}</h1>
+<p><strong>Email:</strong> {{ user.email }}</p>
+<p><strong>Admin:</strong> {{ 'Yes' if user.is_admin else 'No' }}</p>
+<p><strong>Disabled:</strong> {{ 'Yes' if getattr(user,'disabled',False) else
+    'No' }}</p>
+
+<h2>Recent Playlists</h2>
+<table class="table">
+    <thead><tr><th>ID</th><th>Name</th><th>Created</th></tr></thead>
+    <tbody>
+        {% for p in playlists %}
+        <tr><td>{{ p.id }}</td><td>{{ p.name }}</td><td>{{ p.created_at
+                }}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Recent Bookmarks</h2>
+<table class="table">
+    <thead><tr><th>ID</th><th>Media</th><th>Type</th><th>Created</th></tr></thead>
+    <tbody>
+        {% for b in bookmarks %}
+        <tr><td>{{ b.id }}</td><td>{{ b.media_id }}</td><td>{{ b.media_type
+                }}</td><td>{{ b.created_at }}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

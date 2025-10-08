@@ -1,0 +1,11 @@
+{% macro sort_link(label, field) -%}
+{# Toggle asc/desc preserving other query params #}
+{% set current = request.args.get('sort', '') %}
+{% set dir = 'asc' %}
+{% if current.startswith(field) and 'asc' in current %}
+{% set dir = 'desc' %}
+{% endif %}
+<a
+    href="{{ request.path }}?{{ request.query_string|tojson|safe }}&sort={{ field }} {{ dir }}">{{
+    label }}</a>
+{%- endmacro %}

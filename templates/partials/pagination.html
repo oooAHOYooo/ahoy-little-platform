@@ -1,0 +1,16 @@
+{% macro pager(page, per_page, total) -%}
+{% set pages = (total // per_page) + (1 if total % per_page else 0) %}
+<div class="pagination">
+    {% if page > 1 %}
+    <a
+        href="{{ request.path }}?{{ request.query_string|tojson|safe }}&page={{ page-1 }}"
+        class="page">Prev</a>
+    {% endif %}
+    <span class="page">Page {{ page }} of {{ pages or 1 }}</span>
+    {% if page < pages %}
+    <a
+        href="{{ request.path }}?{{ request.query_string|tojson|safe }}&page={{ page+1 }}"
+        class="page">Next</a>
+    {% endif %}
+</div>
+{%- endmacro %}
