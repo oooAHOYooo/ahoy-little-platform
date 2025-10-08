@@ -3923,9 +3923,12 @@ a:hover {
 }
 
 @keyframes bookmarkGlow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
     }
+
     50% {
         box-shadow: 0 0 20px rgba(0, 123, 255, 0.8), 0 0 30px rgba(0, 123, 255, 0.4);
     }
@@ -4308,5 +4311,244 @@ a:hover {
     .col-cover {
         width: 40px;
         height: 40px;
+    }
+}
+
+/* ========================================
+   Mobile Discovery Grid Flow Improvements
+   ======================================== */
+@media (max-width: 768px) {
+    .discovery-grid .grid-container {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding: 0 var(--spacing-md);
+    }
+
+    .grid-item {
+        height: auto;
+        min-height: 260px;
+    }
+
+    .item-header h3 {
+        font-size: 0.95rem;
+    }
+
+    .playing-list,
+    .bookmarks-preview,
+    .action-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    .playing-item {
+        min-height: 72px;
+    }
+}
+
+@media (max-width: 480px) {
+    .discovery-grid .grid-container {
+        grid-template-columns: 1fr;
+        gap: 0.6rem;
+        padding: 0 var(--spacing-sm);
+    }
+
+    .playing-list,
+    .bookmarks-preview,
+    .action-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 0.6rem;
+    }
+
+    .grid-item {
+        min-height: 220px;
+    }
+}
+
+/* ========================================
+   Mobile Footer Aspect Ratio Fixes
+   ======================================== */
+@media (max-width: 768px) {
+    .footer-logo img {
+        width: auto;
+        height: 48px;
+        max-width: 100%;
+        aspect-ratio: auto 24 / 24;
+        /* allow intrinsic ratio */
+        object-fit: contain;
+    }
+
+    .footer-brand {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* ========================================
+   Music Page - Mobile Enhancements
+   ======================================== */
+@media (max-width: 768px) {
+
+    /* Compact hero and header spacing on music page */
+    .music-container .unified-hero {
+        height: 42vh;
+        min-height: 280px;
+        padding: var(--spacing-md) var(--spacing-md);
+    }
+
+    .music-container .unified-header {
+        padding: var(--spacing-md) 0;
+    }
+
+    .music-container .header-content {
+        padding: 0 var(--spacing-md);
+        gap: var(--spacing-sm);
+    }
+
+    .music-container .header-title h1 {
+        font-size: var(--font-size-2xl);
+        line-height: 1.15;
+        margin: 0;
+    }
+
+    .music-container .header-title p {
+        font-size: var(--font-size-sm);
+        margin: 0;
+    }
+
+    /* Search - full width and compact */
+    .music-container .header-search .search-bar {
+        width: 100%;
+        min-width: 0;
+        border-radius: 12px;
+    }
+
+    .music-container .header-search .search-input {
+        height: 42px;
+        padding: 0 var(--spacing-lg);
+        font-size: var(--font-size-sm);
+    }
+
+    /* Filters - 2-up row on mobile, stack on very small */
+    .music-container .header-filters {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    .music-container .header-filters .filter-group {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .music-container .header-filters label {
+        font-size: var(--font-size-xs);
+        white-space: nowrap;
+    }
+
+    .music-container .header-filters select {
+        width: 100%;
+        padding: 0.5rem;
+        font-size: var(--font-size-sm);
+        border-radius: 10px;
+    }
+
+    /* Actions - inline with compact sizes */
+    .music-container .header-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-sm);
+    }
+
+    .music-container .header-actions .view-options {
+        gap: var(--spacing-xs);
+    }
+
+    .music-container .header-actions .view-btn {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 10px;
+        font-size: var(--font-size-sm);
+    }
+
+    .music-container .header-actions .btn.btn-primary.btn-large {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
+        border-radius: 10px;
+    }
+
+    /* Grid density - 2 per row, tighter gaps */
+    .music-container .music-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+        padding: 0 var(--spacing-md);
+    }
+
+    .music-container .track-cover {
+        height: 140px;
+    }
+
+    .music-container .track-info {
+        padding: 0.5rem 0.6rem 0.7rem;
+    }
+
+    .music-container .track-info h4 {
+        font-size: 0.95rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .music-container .track-info p {
+        font-size: 0.8rem;
+        opacity: 0.9;
+    }
+
+    /* List view - compact rows */
+    .music-container .music-list {
+        margin: 0 var(--spacing-md);
+    }
+
+    .music-container .music-list .list-header,
+    .music-container .music-list .list-item {
+        grid-template-columns: 40px 1fr 60px;
+        gap: var(--spacing-sm);
+        padding: 0.6rem var(--spacing-sm);
+    }
+
+    .music-container .music-list .col-cover {
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+    }
+
+    .music-container .music-list h4 {
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .music-container .music-list p,
+    .music-container .music-list .col-artist {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 360px) {
+
+    /* Stack filters on very small screens */
+    .music-container .header-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .music-container .music-grid {
+        grid-template-columns: 1fr;
     }
 }

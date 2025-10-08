@@ -963,13 +963,15 @@ img.loading {
     pointer-events: none;
     z-index: 2;
 }
+
 .unified-hero::before {
     left: 0;
-    background: linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0));
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
 }
+
 .unified-hero::after {
     right: 0;
-    background: linear-gradient(to left, rgba(0,0,0,0.6), rgba(0,0,0,0));
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
 }
 
 .hero-feed {
@@ -5468,11 +5470,13 @@ img.loading {
 }
 
 /* Enhanced Action Buttons */
-.save-btn, .bm-btn {
+.save-btn,
+.bm-btn {
     background: rgba(0, 0, 0, 0.7);
 }
 
-.save-btn.saved, .bm-btn.is-bookmarked {
+.save-btn.saved,
+.bm-btn.is-bookmarked {
     background: var(--primary-color);
     color: white;
 }
@@ -10261,6 +10265,117 @@ img.loading {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--spacing-xs);
+    }
+}
+
+/* ========================================
+   Mobile Hero Compaction + Universal Sizing
+   ======================================== */
+
+/* Apply consistent hero sizing across pages and shrink controls on mobile */
+.tv-hero,
+.unified-hero,
+.hero-section {
+    height: 56vh;
+    min-height: 360px;
+    padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+@media (max-width: 1024px) {
+
+    .tv-hero,
+    .unified-hero,
+    .hero-section {
+        height: 52vh;
+        min-height: 340px;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .tv-hero,
+    .unified-hero,
+    .hero-section {
+        height: 44vh;
+        min-height: 300px;
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .hero-content h1 {
+        font-size: var(--font-size-2xl);
+        line-height: 1.2;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .hero-content p {
+        font-size: var(--font-size-base);
+        line-height: 1.4;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .hero-badge {
+        padding: 0.2rem var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+        font-size: var(--font-size-xs);
+    }
+
+    .hero-play-btn {
+        width: 56px;
+        height: 56px;
+        font-size: var(--font-size-lg);
+        box-shadow: 0 6px 18px rgba(99, 102, 241, 0.45);
+    }
+
+    .hero-nav {
+        width: 40px;
+        height: 40px;
+        font-size: var(--font-size-base);
+    }
+
+    .hero-dot {
+        width: 8px;
+        height: 8px;
+    }
+
+    /* Avoid subtle zoom on mobile for better fit */
+    .hero-item.active {
+        transform: none;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .tv-hero,
+    .unified-hero,
+    .hero-section {
+        height: 40vh;
+        min-height: 260px;
+        padding: var(--spacing-md) var(--spacing-md);
+    }
+
+    .hero-content h1 {
+        font-size: var(--font-size-xl);
+    }
+
+    .hero-content p {
+        font-size: var(--font-size-sm);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .hero-play-btn {
+        width: 48px;
+        height: 48px;
+        font-size: var(--font-size-base);
+    }
+
+    .hero-nav {
+        width: 36px;
+        height: 36px;
+    }
+
+    .hero-dot {
+        width: 6px;
+        height: 6px;
     }
 }
 
