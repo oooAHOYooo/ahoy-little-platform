@@ -439,6 +439,10 @@
                         <i
                             :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
                     </button>
+                    <button @click="toggleBookmarkCurrent()" class="control-btn"
+                        :aria-pressed="isSaved" title="Bookmark">
+                        <i :class="isSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+                    </button>
                     <button @click="seekForward()" class="control-btn"
                         title="15 seconds forward">
                         <i class="fas fa-forward"></i>
@@ -455,6 +459,7 @@
                         :class="{'active': isRepeated}" title="Repeat">
                         <i class="fas fa-redo"></i>
                     </button>
+                    <canvas x-ref="clock" class="analog-clock" width="40" height="40" aria-hidden="true"></canvas>
                 </div>
 
                 <div class="player-progress">
@@ -942,6 +947,10 @@
                         const track = e.detail && (e.detail.track || e.detail);
                         if (track) this.playTrack(track);
                     });
+
+                    // Initialize bookmark state and start clock animation
+                    this.updateSavedState();
+                    this.startClock();
                 },
                 
                 playTrack(track) {
@@ -971,6 +980,30 @@
                         }
                         return;
                     }
+                },
+
+                toggleBookmarkCurrent() {
+                    if (!this.currentTrack || !window.AhoyBookmarks) return;
+                    const type = (this.currentTrack.type === 'show' ? 'show' : (this.currentTrack.type || 'track'));
+                    const item = {
+                        type,
+                        id: this.currentTrack.id,
+                        title: this.currentTrack.title,
+                        artwork: this.currentTrack.cover_art || this.currentTrack.thumbnail
+                    };
+                    window.AhoyBookmarks.toggle(item);
+                    this.updateSavedState();
+                    // Notify others
+                    document.dispatchEvent(new CustomEvent('bookmarks:changed', { detail: { item, totalCount: window.AhoyBookmarks.count?.() } }));
+                },
+
+                updateSavedState() {
+                    if (!this.currentTrack || !window.AhoyBookmarks) {
+                        this.isSaved = false;
+                        return;
+                    }
+                    const type = (this.currentTrack.type === 'show' ? 'show' : (this.currentTrack.type || 'track'));
+                    this.isSaved = !!window.AhoyBookmarks.isBookmarked?.(type, this.currentTrack.id);
                 },
                 
                 previousTrack() { window.mediaPlayer && window.mediaPlayer.previousTrack && window.mediaPlayer.previousTrack(); },
@@ -1029,6 +1062,44 @@
                     window.mediaPlayer && window.mediaPlayer.setRepeat && window.mediaPlayer.setRepeat(this.isRepeated);
                 },
                 openFullPlayer() {}
+                ,
+                // Analog clock drawing for current time and progress ring
+                startClock() {
+                    const draw = () => {
+                        const c = this.$refs.clock;
+                        if (!c) return;
+                        const ctx = c.getContext('2d');
+                        const w = c.width, h = c.height, r = Math.min(w, h) / 2 - 2;
+                        ctx.clearRect(0,0,w,h);
+                        ctx.translate(w/2, h/2);
+                        // Clock face
+                        ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
+                        // Ticks
+                        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+                        for (let i=0;i<12;i++){ ctx.save(); ctx.rotate(i*Math.PI/6); ctx.beginPath(); ctx.moveTo(0,-r); ctx.lineTo(0,-r+4); ctx.stroke(); ctx.restore(); }
+                        // Hands (current time)
+                        const now = new Date();
+                        const sec = now.getSeconds();
+                        const min = now.getMinutes() + sec/60;
+                        const hr = (now.getHours()%12) + min/60;
+                        ctx.strokeStyle = 'white';
+                        ctx.lineWidth = 2; ctx.beginPath(); ctx.rotate(hr*Math.PI/6); ctx.moveTo(0,5); ctx.lineTo(0,-r*0.5); ctx.stroke(); ctx.rotate(-hr*Math.PI/6);
+                        ctx.lineWidth = 1.5; ctx.beginPath(); ctx.rotate(min*Math.PI/30); ctx.moveTo(0,7); ctx.lineTo(0,-r*0.75); ctx.stroke(); ctx.rotate(-min*Math.PI/30);
+                        ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 1; ctx.beginPath(); ctx.rotate(sec*Math.PI/30); ctx.moveTo(0,10); ctx.lineTo(0,-r*0.85); ctx.stroke(); ctx.rotate(-sec*Math.PI/30);
+                        // Progress ring for media
+                        if (this.duration > 0) {
+                            const frac = (this.currentTime || 0) / this.duration;
+                            ctx.beginPath();
+                            ctx.strokeStyle = 'var(--accent-color, #00d4ff)';
+                            ctx.lineWidth = 3;
+                            ctx.arc(0,0,r, -Math.PI/2, -Math.PI/2 + frac*2*Math.PI);
+                            ctx.stroke();
+                        }
+                        ctx.setTransform(1,0,0,1,0,0);
+                        requestAnimationFrame(draw);
+                    };
+                    requestAnimationFrame(draw);
+                }
             };
         }
         

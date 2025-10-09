@@ -7683,6 +7683,12 @@ img.loading {
     flex-shrink: 0;
 }
 
+/* Analog clock in bottom player */
+.global-player .analog-clock {
+    margin-left: var(--spacing-sm);
+    background: transparent;
+}
+
 .global-player .action-btn {
     background: none;
     border: none;
