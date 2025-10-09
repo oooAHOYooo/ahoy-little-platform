@@ -1,5 +1,21 @@
 {% extends "base.html" %}
-
+<div class="track-actions">
+    <button class="action-btn save-btn bm-btn"
+        @click.stop="window.AhoyBookmarks && window.AhoyBookmarks.toggle({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art }); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
+        :aria-pressed="window.AhoyBookmarks ? window.AhoyBookmarks.isBookmarked('track', track.id) : false"
+        :class="{ 'just-bookmarked': window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked('track', track.id) }">
+        <span aria-hidden="true">
+            <i
+                x-show="window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked('track', track.id)"
+                class="fas fa-bookmark"
+                style="color: var(--accent-color);"></i>
+            <i
+                x-show="!(window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked('track', track.id))"
+                class="far fa-bookmark"></i>
+        </span>
+        <span class="sr-only">Bookmark</span>
+    </button>
+</div>
 {% block title %}{{ artist.name }} - Artist Profile - Ahoy Indie Media{%
 endblock %}
 
@@ -117,6 +133,7 @@ endblock %}
                             <div class="play-overlay">
                                 <i class="fas fa-play"></i>
                             </div>
+
                         </div>
                         <div class="music-info">
                             <h4 x-text="track.title"></h4>

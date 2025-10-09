@@ -8305,6 +8305,20 @@ img.loading {
     opacity: 1;
 }
 
+.artist-actions {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    display: flex;
+    gap: var(--spacing-xs);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.artist-card:hover .artist-actions {
+    opacity: 1;
+}
+
 .track-info {
     padding: var(--spacing-md);
 }

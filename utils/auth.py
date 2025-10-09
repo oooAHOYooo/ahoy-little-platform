@@ -3,7 +3,14 @@ from typing import Optional
 import datetime as dt
 from functools import wraps
 
-import jwt
+# Optional PyJWT import with fallback
+try:
+    import jwt as _pyjwt  # type: ignore
+    _HAS_PYJWT = True
+except Exception:  # ImportError or runtime issues
+    _pyjwt = None
+    _HAS_PYJWT = False
+
 from flask import request, jsonify, g, redirect, url_for, flash, current_app, make_response
 
 
@@ -11,6 +18,47 @@ JWT_SECRET = os.getenv("JWT_SECRET", "change-me")
 JWT_ALG = "HS256"
 ACCESS_TTL_MIN = 15
 REFRESH_TTL_DAYS = 30
+
+
+# Lightweight JWT-compatible fallback (HS256 only)
+def _b64url_encode(raw: bytes) -> str:
+    import base64
+    return base64.urlsafe_b64encode(raw).rstrip(b"=").decode("utf-8")
+
+
+def _b64url_decode(data: str) -> bytes:
+    import base64
+    padding = "=" * (-len(data) % 4)
+    return base64.urlsafe_b64decode((data + padding).encode("utf-8"))
+
+
+def _jwt_fallback_encode(payload: dict, secret: str, algorithm: str = "HS256") -> str:
+    import json, hmac, hashlib
+    header = {"alg": algorithm, "typ": "JWT"}
+    header_b64 = _b64url_encode(json.dumps(header, separators=(",", ":")).encode("utf-8"))
+    payload_b64 = _b64url_encode(json.dumps(payload, separators=(",", ":")).encode("utf-8"))
+    signing_input = f"{header_b64}.{payload_b64}".encode("utf-8")
+    signature = hmac.new(secret.encode("utf-8"), signing_input, hashlib.sha256).digest()
+    sig_b64 = _b64url_encode(signature)
+    return f"{header_b64}.{payload_b64}.{sig_b64}"
+
+
+def _jwt_fallback_decode(token: str, secret: str, algorithms: list[str] | tuple[str, ...] = ("HS256",)) -> dict:
+    import json, hmac, hashlib, time
+    try:
+        header_b64, payload_b64, sig_b64 = token.split(".")
+    except ValueError:
+        raise ValueError("Invalid token format")
+    signing_input = f"{header_b64}.{payload_b64}".encode("utf-8")
+    expected_sig = hmac.new(secret.encode("utf-8"), signing_input, hashlib.sha256).digest()
+    if not hmac.compare_digest(expected_sig, _b64url_decode(sig_b64)):
+        raise ValueError("Invalid signature")
+    payload = json.loads(_b64url_decode(payload_b64))
+    # Basic exp check (seconds since epoch)
+    exp = payload.get("exp")
+    if isinstance(exp, (int, float)) and time.time() > float(exp):
+        raise ValueError("Token expired")
+    return payload
 
 
 def create_access_token(user_id: int, email: str) -> str:
@@ -22,7 +70,9 @@ def create_access_token(user_id: int, email: str) -> str:
         "iat": int(now.timestamp()),
         "exp": int((now + dt.timedelta(minutes=ACCESS_TTL_MIN)).timestamp()),
     }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
+    if _HAS_PYJWT:
+        return _pyjwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)  # type: ignore
+    return _jwt_fallback_encode(payload, JWT_SECRET, algorithm=JWT_ALG)
 
 
 def create_refresh_token(user_id: int, email: str) -> str:
@@ -34,11 +84,15 @@ def create_refresh_token(user_id: int, email: str) -> str:
         "iat": int(now.timestamp()),
         "exp": int((now + dt.timedelta(days=REFRESH_TTL_DAYS)).timestamp()),
     }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
+    if _HAS_PYJWT:
+        return _pyjwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)  # type: ignore
+    return _jwt_fallback_encode(payload, JWT_SECRET, algorithm=JWT_ALG)
 
 
 def decode_token(token: str) -> dict:
-    return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
+    if _HAS_PYJWT:
+        return _pyjwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])  # type: ignore
+    return _jwt_fallback_decode(token, JWT_SECRET, algorithms=[JWT_ALG])
 
 
 def jwt_required(fn):

@@ -6,20 +6,27 @@
 <div class="artists-page" x-data="artistsPage()" x-init="init()">
     <div class="artists-container">
         <!-- Unified Rotating Hero -->
-        <section class="unified-hero tv-hero" x-data="createUnifiedHero({ pageType: 'artists', rotationSpeed: 14000 })" x-init="init()"
-            @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd">
-            <div class="unified-hero-feed hero-feed" :style="`transform: translateX(${heroOffset}px)`">
-                <template x-for="(item, index) in heroItems" :key="item.id || item.name">
+        <section class="unified-hero tv-hero"
+            x-data="createUnifiedHero({ pageType: 'artists', rotationSpeed: 14000 })"
+            x-init="init()"
+            @touchstart="handleTouchStart" @touchmove="handleTouchMove"
+            @touchend="handleTouchEnd">
+            <div class="unified-hero-feed hero-feed"
+                :style="`transform: translateX(${heroOffset}px)`">
+                <template x-for="(item, index) in heroItems"
+                    :key="item.id || item.name">
                     <div class="hero-item" x-show="getItemImage(item)"
                         :class="{'active': currentHeroIndex === index}"
                         :style="`background-image: url(${getItemImage(item)})`"
                         @click="playHeroItem(item)">
                         <div class="hero-overlay">
                             <div class="hero-content">
-                                <div class="hero-badge" x-text="getPageBadge()"></div>
+                                <div class="hero-badge"
+                                    x-text="getPageBadge()"></div>
                                 <h1 x-text="getItemTitle(item)"></h1>
                                 <p x-text="getItemSubtitle(item)"></p>
-                                <button @click.stop="playHeroItem(item)" class="hero-play-btn">
+                                <button @click.stop="playHeroItem(item)"
+                                    class="hero-play-btn">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
@@ -36,8 +43,11 @@
                 </button>
             </div>
             <div class="hero-indicators">
-                <template x-for="(item, index) in heroItems" :key="item.id || item.name">
-                    <button @click="setHeroIndex(index)" :class="{'active': currentHeroIndex === index}" class="hero-dot"></button>
+                <template x-for="(item, index) in heroItems"
+                    :key="item.id || item.name">
+                    <button @click="setHeroIndex(index)"
+                        :class="{'active': currentHeroIndex === index}"
+                        class="hero-dot"></button>
                 </template>
             </div>
         </section>
@@ -145,15 +155,24 @@
                                     class="view-btn">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <button class="action-btn bm-btn"
-                                    @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image })"
-                                    :aria-pressed="isBookmarked('artist', artist.id || artist.slug)">
-                                    <span aria-hidden="true">
-                                        <i x-show="isBookmarked('artist', artist.id || artist.slug)" class="fas fa-bookmark"></i>
-                                        <i x-show="!isBookmarked('artist', artist.id || artist.slug)" class="far fa-bookmark"></i>
-                                    </span>
-                                    <span class="sr-only" x-text="isBookmarked('artist', artist.id || artist.slug) ? 'Remove bookmark' : 'Add bookmark'"></span>
-                                </button>
+                                <div class="artist-actions">
+                                    <button class="action-btn bm-btn"
+                                        @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image })"
+                                        :aria-pressed="isBookmarked('artist', artist.id || artist.slug)"
+                                        :class="{ 'just-bookmarked': isBookmarked('artist', artist.id || artist.slug) }">
+                                        <span aria-hidden="true">
+                                            <i
+                                                x-show="isBookmarked('artist', artist.id || artist.slug)"
+                                                class="fas fa-bookmark"
+                                                style="color: var(--accent-color);"></i>
+                                            <i
+                                                x-show="!isBookmarked('artist', artist.id || artist.slug)"
+                                                class="far fa-bookmark"></i>
+                                        </span>
+                                        <span class="sr-only"
+                                            x-text="isBookmarked('artist', artist.id || artist.slug) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="artist-type-badge"
                                 x-text="artist.type?.toUpperCase()"></div>
@@ -198,13 +217,20 @@
                                 x-text="artist.genres?.join(', ') || 'Various'"></span>
                             <div class="col-actions">
                                 <button class="action-btn bm-btn"
-                                    @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image })"
-                                    :aria-pressed="isBookmarked('artist', artist.id || artist.slug)">
+                                    @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image }); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
+                                    :aria-pressed="isBookmarked('artist', artist.id || artist.slug)"
+                                    :class="{ 'just-bookmarked': isBookmarked('artist', artist.id || artist.slug) }">
                                     <span aria-hidden="true">
-                                        <i x-show="isBookmarked('artist', artist.id || artist.slug)" class="fas fa-bookmark"></i>
-                                        <i x-show="!isBookmarked('artist', artist.id || artist.slug)" class="far fa-bookmark"></i>
+                                        <i
+                                            x-show="isBookmarked('artist', artist.id || artist.slug)"
+                                            class="fas fa-bookmark"
+                                            style="color: var(--accent-color);"></i>
+                                        <i
+                                            x-show="!isBookmarked('artist', artist.id || artist.slug)"
+                                            class="far fa-bookmark"></i>
                                     </span>
-                                    <span class="sr-only" x-text="isBookmarked('artist', artist.id || artist.slug) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                                    <span class="sr-only"
+                                        x-text="isBookmarked('artist', artist.id || artist.slug) ? 'Remove bookmark' : 'Add bookmark'"></span>
                                 </button>
                             </div>
                         </div>

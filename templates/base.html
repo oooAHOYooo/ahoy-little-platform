@@ -475,9 +475,24 @@
                         :class="{'liked': isLiked}" title="Like">
                         <i class="fas fa-heart"></i>
                     </button>
-                    <button @click="toggleSave()" class="action-btn"
-                        :class="{'saved': isSaved}" title="Save">
-                        <i class="fas fa-bookmark"></i>
+                    <button @click="
+                        currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.toggle({ 
+                            type: (currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), 
+                            id: currentTrack.id, 
+                            title: currentTrack.title, 
+                            artwork: currentTrack.cover_art || currentTrack.thumbnail 
+                        });
+                        isSaved = currentTrack ? !!(window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), currentTrack.id)) : false;
+                        $nextTick(()=>{ document.dispatchEvent(new CustomEvent('bookmarks:changed', { detail: { items: window.AhoyBookmarks?.all?.() || {}, action: isSaved ? 'add' : 'remove', item: currentTrack } })); });
+                    " class="action-btn bm-btn"
+                        :class="{'saved': currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)}" 
+                        :aria-pressed="currentTrack && window.AhoyBookmarks ? window.AhoyBookmarks.isBookmarked((currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), currentTrack.id) : false"
+                        title="Bookmark">
+                        <span aria-hidden="true">
+                            <i x-show="currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)" class="fas fa-bookmark" style="color: var(--accent-color);"></i>
+                            <i x-show="!(currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id))" class="far fa-bookmark"></i>
+                        </span>
+                        <span class="sr-only">Bookmark</span>
                     </button>
                     <button @click="addToPlaylist()" class="action-btn"
                         title="Add to Playlist">
