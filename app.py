@@ -61,11 +61,11 @@ def create_app():
     login_manager.init_app(app)
     limiter.init_app(app)
     init_cors(app)
-    login_manager.login_view = "auth.login"
+    login_manager.login_view = "auth_page"
 
     # Register blueprints
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(api_auth_bp)
+    # app.register_blueprint(auth_bp)  # Disabled: using JWT-based auth under /api/auth
+    # app.register_blueprint(api_auth_bp)  # Disabled for simple session-based auth today
     app.register_blueprint(activity_bp)
     app.register_blueprint(playlists_bp)
     app.register_blueprint(bookmarks_bp)
@@ -142,6 +142,37 @@ def create_app():
 
 # Create the app instance for backward compatibility
 app = create_app()
+# ==== JSON Sitemap: GET /api/_sitemap =======================================
+from urllib.parse import unquote
+from flask import jsonify
+
+def _generate_sitemap(flask_app):
+    def is_method(m): return m in ("GET","POST","PUT","PATCH","DELETE")
+    routes, seen = [], {}
+    for rule in flask_app.url_map.iter_rules():
+        if rule.endpoint == "static":  # skip static
+            continue
+        methods = tuple(sorted([m for m in rule.methods if is_method(m)]))
+        info = {
+            "rule": unquote(str(rule)),
+            "endpoint": rule.endpoint,
+            "methods": list(methods),
+            "blueprint": rule.endpoint.split(".", 1)[0] if "." in rule.endpoint else None,
+        }
+        routes.append(info)
+        seen.setdefault((info["rule"], methods), []).append(info["endpoint"])
+
+    duplicates = [
+        {"rule": r, "methods": list(m), "endpoints": eps}
+        for (r, m), eps in seen.items() if len(eps) > 1
+    ]
+    routes.sort(key=lambda r: (r["rule"], r["methods"]))
+    return {"routes": routes, "duplicates": duplicates}
+
+@app.get("/api/_sitemap")
+def api_sitemap():
+    return jsonify(_generate_sitemap(app))
+# ============================================================================
 
 @app.route('/debug-report')
 def debug_report():
@@ -247,21 +278,19 @@ def player():
     media_type = request.args.get('type', 'music')  # music, show, video
     return render_template('player.html', media_id=media_id, media_type=media_type)
 
-@app.route('/artist/<artist_name>')
-def artist_profile(artist_name):
-    """Individual artist profile page"""
-    # Load artist data
+@app.route('/artist/<artist_slug>')
+def artist_profile(artist_slug):
+    """Individual artist profile page (slug or case-insensitive name)"""
     artists_data = load_json_data('artists.json', {'artists': []})
     artist = None
     
-    # Find artist by name (case-insensitive)
     for a in artists_data.get('artists', []):
-        if a.get('name', '').lower() == artist_name.lower():
+        slug = (a.get('slug') or a.get('name', '').lower().replace(' ', '-'))
+        if slug == artist_slug or a.get('name', '').lower() == artist_slug.replace('-', ' ').lower():
             artist = a
             break
     
     if not artist:
-        # Return 404 if artist not found
         return render_template('404.html'), 404
     
     return render_template('artist_detail.html', artist=artist)

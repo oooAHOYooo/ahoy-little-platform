@@ -1,3 +1,26 @@
+// ==== Auth helpers (session/cookie-based) ==================================
+window.AHOY_AUTH = {
+  async login(username, password) {
+    const r = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      credentials: 'include',
+      body: JSON.stringify({ username, password })
+    });
+    if (!r.ok) throw new Error((await r.json()).message || 'Login failed');
+    return r.json();
+  },
+  async logout() {
+    const r = await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    if (!r.ok) throw new Error('Logout failed');
+    return true;
+  },
+  async me() {
+    const r = await fetch('/api/user/profile', { credentials: 'include' });
+    if (!r.ok) return null;
+    return r.json();
+  }
+};
 // Ahoy Indie Media - Main JavaScript (Global Version)
 
 // unified API helper
