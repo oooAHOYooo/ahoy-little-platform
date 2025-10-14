@@ -22,6 +22,39 @@ window.AHOY_AUTH = {
   }
 };
 // Ahoy Indie Media - Main JavaScript (Global Version)
+// ==== Slug + link helpers ===================================================
+window.slugify = function(s){
+  return String(s || '').toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-+|-+$/g,'');
+};
+window.artistHref = function(artist){
+  return `/artist/${window.slugify(artist.slug || artist.name)}`;
+};
+
+// ==== Artist detail bootstrap ==============================================
+document.addEventListener('DOMContentLoaded', async () => {
+  const m = location.pathname.match(/\/artist\/([^\/?#]+)/);
+  if (!m) return;
+  const id = decodeURIComponent(m[1]);
+  try {
+    const r = await fetch(`/api/artist/${id}`);
+    if (!r.ok) { 
+      const target = document.querySelector('[data-artist-name]') || document.body;
+      target.innerHTML = '<h2>Artist not found</h2>';
+      return; 
+    }
+    const artist = await r.json();
+    const nameEl = document.querySelector('[data-artist-name]');
+    if (nameEl) nameEl.textContent = artist.name || '';
+    // Optionally expose for other widgets
+    window.__ARTIST__ = artist;
+    document.dispatchEvent(new CustomEvent('artist:loaded', { detail: artist }));
+  } catch (e) {
+    console.error('Failed to load artist', e);
+  }
+});
+// ============================================================================
 
 // unified API helper
 async function api(url, method="GET", payload=null) {

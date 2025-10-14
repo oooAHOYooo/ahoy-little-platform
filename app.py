@@ -10,6 +10,7 @@ from functools import wraps
 from user_manager import user_manager
 from dotenv import load_dotenv
 load_dotenv()
+import re, pathlib
 
 from config import get_config
 from extensions import bcrypt, login_manager, limiter, init_cors
@@ -142,6 +143,33 @@ def create_app():
 
 # Create the app instance for backward compatibility
 app = create_app()
+# ==== Forgiving Artist API (slug or case-insensitive name) ==================
+ARTISTS_PATH = pathlib.Path("static/data/artists.json")
+
+def _slugify(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", (s or "").strip().lower()).strip("-")
+
+def _load_artists_flat():
+    try:
+        data = load_json_data('artists.json', {'artists': []})
+        return data.get('artists', [])
+    except Exception:
+        return []
+
+@app.get("/api/artist/<slug_or_name>")
+def api_artist(slug_or_name):
+    key = (slug_or_name or "").strip().lower()
+    artists = _load_artists_flat()
+    # slug match
+    for a in artists:
+        if _slugify(a.get("slug") or a.get("name", "")) == key:
+            return jsonify(a)
+    # case-insensitive name match
+    for a in artists:
+        if (a.get("name", "").strip().lower()) == key:
+            return jsonify(a)
+    return jsonify({"error": "not_found"}), 404
+# ===========================================================================
 # ==== JSON Sitemap: GET /api/_sitemap =======================================
 from urllib.parse import unquote
 from flask import jsonify
