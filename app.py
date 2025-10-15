@@ -1728,6 +1728,11 @@ def sitemap_page():
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
+    @app.route('/cast')
+    def cast_page():
+        """Casting instructions and sender setup page"""
+        return render_template('cast.html')
+
 @app.route('/admin')
 def admin_page():
     """Admin page for user management"""
