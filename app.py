@@ -11,6 +11,7 @@ from user_manager import user_manager
 from dotenv import load_dotenv
 load_dotenv()
 import re, pathlib
+from pathlib import Path
 
 from config import get_config
 from extensions import bcrypt, login_manager, limiter, init_cors
@@ -201,6 +202,43 @@ def _generate_sitemap(flask_app):
 def api_sitemap():
     return jsonify(_generate_sitemap(app))
 # ============================================================================
+
+DOWNLOADS_DIR = Path("downloads")
+
+@app.route('/downloads')
+def downloads_page():
+    """Landing page to download latest desktop builds."""
+    def _format_size(n: int) -> str:
+        units = ["B", "KB", "MB", "GB", "TB"]
+        size = float(n)
+        idx = 0
+        while size >= 1024 and idx < len(units) - 1:
+            size /= 1024.0
+            idx += 1
+        return f"{size:.1f} {units[idx]}"
+    # Discover files by platform naming convention
+    files = []
+    if DOWNLOADS_DIR.exists():
+        for p in sorted(DOWNLOADS_DIR.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True):
+            if p.is_file():
+                files.append({
+                    'name': p.name,
+                    'size_bytes': p.stat().st_size,
+                    'size_label': _format_size(p.stat().st_size),
+                    'modified': datetime.fromtimestamp(p.stat().st_mtime).isoformat(),
+                    'url': f"/downloads/{p.name}",
+                })
+    return render_template('downloads.html', files=files)
+
+@app.route('/downloads/<path:filename>')
+def download_artifact(filename):
+    """Serve built desktop artifacts."""
+    if not DOWNLOADS_DIR.exists():
+        return jsonify({'error': 'No downloads available'}), 404
+    try:
+        return send_from_directory(str(DOWNLOADS_DIR), filename, as_attachment=True)
+    except Exception:
+        return jsonify({'error': 'File not found'}), 404
 
 @app.route('/debug-report')
 def debug_report():
@@ -1728,10 +1766,10 @@ def sitemap_page():
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
-    @app.route('/cast')
-    def cast_page():
-        """Casting instructions and sender setup page"""
-        return render_template('cast.html')
+@app.route('/cast')
+def cast_page():
+    """Casting instructions and sender setup page"""
+    return render_template('cast.html')
 
 @app.route('/admin')
 def admin_page():

@@ -374,6 +374,12 @@
                                 <i class="fas fa-chart-line"></i>
                                 <span>Debug Report</span>
                             </a>
+                            <a href="/downloads"
+                                class="mobile-menu-item"
+                                @click="rightMenuOpen = false">
+                                <i class="fas fa-download"></i>
+                                <span>Downloads</span>
+                            </a>
                             <a href="/admin"
                                 class="mobile-menu-item"
                                 @click="rightMenuOpen = false"
@@ -610,6 +616,7 @@
                             <li><a href="{{ url_for('shows') }}">Shows</a></li>
                             <li><a href="{{ url_for('artists') }}">Artists</a></li>
                             <li><a href="{{ url_for('cast_page') }}">Cast</a></li>
+                            <li><a href="/downloads">Downloads</a></li>
                             <li><a href="/bookmarks">My Bookmarks</a></li>
                             <li><a href="/settings">Settings</a></li>
                             <li><a href="/feedback">Feedback</a></li>

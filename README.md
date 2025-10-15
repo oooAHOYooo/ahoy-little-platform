@@ -412,6 +412,38 @@ envVars:
       property: connectionString
 ```
 
+## Desktop wrapper (macOS/Windows/Linux)
+
+Package Ahoy as a desktop app using PyWebview (with a local Flask server).
+
+1) Install build tools:
+
+```bash
+pip install -r requirements.txt pyinstaller
+```
+
+2) Run in desktop mode (dev):
+
+```bash
+python desktop_main.py
+```
+
+3) Build binaries:
+
+```bash
+pyinstaller --noconfirm --onefile --name "Ahoy Indie Media" desktop_main.py
+```
+
+4) Publish downloads:
+
+- Create a `downloads/` folder at repo root and copy `dist/Ahoy Indie Media` builds into it
+- Visit `/downloads` to serve artifacts
+
+Environment:
+- `PORT` (default 17600)
+- `SECRET_KEY` (set for production)
+- `LOCAL_DATABASE_URL` optional (e.g., `sqlite:////<user-data-dir>/ahoy.db`)
+
 Locally, set it in your shell or `.env` file.
 
 Then run:
