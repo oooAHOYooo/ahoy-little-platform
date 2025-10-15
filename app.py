@@ -589,26 +589,46 @@ def api_artist_profile(artist_name):
     artists_data = load_json_data('artists.json', {'artists': []})
     music_data = load_json_data('music.json', {'tracks': []})
     shows_data = load_json_data('shows.json', {'shows': []})
-    
-    # Find artist
+
+    # Normalize
+    try:
+        slug_from_param = _slugify(artist_name)
+    except Exception:
+        slug_from_param = (artist_name or '').strip().lower()
+
+    # Find artist by slug or name (case-insensitive)
     artist = None
     for a in artists_data.get('artists', []):
-        if a.get('slug') == artist_name or a.get('name').lower().replace(' ', '-') == artist_name:
+        a_slug = _slugify(a.get('slug') or a.get('name', ''))
+        if a_slug == slug_from_param or (a.get('name', '').strip().lower() == artist_name.strip().lower()):
             artist = a
             break
-    
+
     if not artist:
         return jsonify({'error': 'Artist not found'}), 404
-    
-    # Get artist's content
-    artist_tracks = [t for t in music_data.get('tracks', []) if t.get('artist_slug') == artist_name]
-    artist_shows = [s for s in shows_data.get('shows', []) if s.get('host_slug') == artist_name]
-    
-    return jsonify({
-        'artist': artist,
-        'tracks': artist_tracks,
-        'shows': artist_shows
-    })
+
+    artist_slug = _slugify(artist.get('slug') or artist.get('name', ''))
+    artist_name_lc = (artist.get('name', '') or '').strip().lower()
+
+    # Collect tracks: by slug, by name, or by tag match
+    artist_tracks = []
+    for t in music_data.get('tracks', []):
+        t_slug = (t.get('artist_slug') or '').strip().lower()
+        t_name = (t.get('artist') or '').strip().lower()
+        tags = [str(x).strip().lower() for x in (t.get('tags') or [])]
+        if t_slug == artist_slug or t_name == artist_name_lc or artist_slug in tags:
+            artist_tracks.append(t)
+
+    # Collect shows: by host_slug, by host name, or tag
+    artist_shows = []
+    for s in shows_data.get('shows', []):
+        h_slug = (s.get('host_slug') or '').strip().lower()
+        h_name = (s.get('host') or '').strip().lower()
+        tags = [str(x).strip().lower() for x in (s.get('tags') or [])]
+        if h_slug == artist_slug or h_name == artist_name_lc or artist_slug in tags:
+            artist_shows.append(s)
+
+    return jsonify({'artist': artist, 'tracks': artist_tracks, 'shows': artist_shows})
 
 @app.route('/api/artists/<int:artist_id>/music')
 def api_artist_music(artist_id):

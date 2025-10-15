@@ -44,10 +44,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       target.innerHTML = '<h2>Artist not found</h2>';
       return; 
     }
-    const artist = await r.json();
+    const data = await r.json();
+    const artist = data.artist || data;
+    // attach tracks/shows if provided separately
+    if ((data.tracks && Array.isArray(data.tracks)) || (data.shows && Array.isArray(data.shows))) {
+      if (!artist.tracks && data.tracks) artist.tracks = data.tracks;
+      if (!artist.shows && data.shows) artist.shows = data.shows;
+    }
     const nameEl = document.querySelector('[data-artist-name]');
     if (nameEl) nameEl.textContent = artist.name || '';
-    // Optionally expose for other widgets
+    // expose for page component
     window.__ARTIST__ = artist;
     document.dispatchEvent(new CustomEvent('artist:loaded', { detail: artist }));
   } catch (e) {

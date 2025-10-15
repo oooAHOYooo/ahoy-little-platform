@@ -39,8 +39,8 @@ endblock %}
 {% endblock %}
 
 {% block content %}
-<div class="artist-detail-page" x-data="artistDetailPage()" x-init="init()">
-    <!-- Artist Hero Section -->
+<div class="artist-detail-page" x-data="artistGallery()" x-init="init()">
+    <!-- Hero: image + big name only -->
     <section class="artist-hero">
         <div class="artist-hero-bg"
             :style="`background-image: url(${artist.image || '/static/img/default-avatar.png'})`"></div>
@@ -50,286 +50,177 @@ endblock %}
                     :alt="artist.name">
             </div>
             <div class="artist-info">
-                <h1 x-text="artist.name"></h1>
-                <p class="artist-type" x-text="artist.type || 'Artist'"></p>
-                <p class="artist-location"
-                    x-text="artist.location || 'Location not specified'"></p>
-                <p class="artist-bio"
-                    x-text="artist.bio || 'No bio available'"></p>
-                <div class="artist-stats">
-                    <div class="stat-item">
-                        <span class="stat-number"
-                            x-text="artist.music_count || 0"></span>
-                        <span class="stat-label">Tracks</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number"
-                            x-text="artist.show_count || 0"></span>
-                        <span class="stat-label">Shows</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number"
-                            x-text="artist.followers || 0"></span>
-                        <span class="stat-label">Followers</span>
-                    </div>
-                </div>
-                <div class="artist-actions">
-                    <button @click="followArtist()" class="btn btn-primary"
-                        :class="{'following': isFollowing}">
-                        <i class="fas fa-heart" x-show="!isFollowing"></i>
-                        <i class="fas fa-check" x-show="isFollowing"></i>
-                        <span
-                            x-text="isFollowing ? 'Following' : 'Follow'"></span>
-                    </button>
-                    <button @click="shareArtist()" class="btn btn-outline">
-                        <i class="fas fa-share"></i> Share
-                    </button>
-                </div>
+                <h1 data-artist-name x-text="artist.name"></h1>
             </div>
         </div>
     </section>
 
-    <!-- Artist Content Tabs -->
+    <!-- Mixed media gallery (tracks + shows) -->
     <section class="artist-content">
-        <div class="content-tabs">
-            <button @click="activeTab = 'music'"
-                :class="{'active': activeTab === 'music'}" class="tab-btn">
-                <i class="fas fa-music"></i> Music
-            </button>
-            <button @click="activeTab = 'shows'"
-                :class="{'active': activeTab === 'shows'}" class="tab-btn">
-                <i class="fas fa-play-circle"></i> Shows
-            </button>
-            <button @click="activeTab = 'about'"
-                :class="{'active': activeTab === 'about'}" class="tab-btn">
-                <i class="fas fa-info-circle"></i> About
-            </button>
+        <div class="content-header">
+            <h2>Media by <span x-text="artist.name"></span></h2>
         </div>
 
-        <!-- Music Tab -->
-        <div x-show="activeTab === 'music'" class="tab-content">
-            <div class="content-header">
-                <h2>Music by <span x-text="artist.name"></span></h2>
-                <div class="view-controls">
-                    <button @click="musicViewMode = 'grid'"
-                        :class="{'active': musicViewMode === 'grid'}"
-                        class="view-btn">
-                        <i class="fas fa-th"></i>
-                    </button>
-                    <button @click="musicViewMode = 'list'"
-                        :class="{'active': musicViewMode === 'list'}"
-                        class="view-btn">
-                        <i class="fas fa-list"></i>
-                    </button>
-                </div>
-            </div>
-            <div x-show="musicViewMode === 'grid'" class="music-grid">
-                <template x-for="track in artistMusic" :key="track.id">
-                    <div class="music-card" @click="playTrack(track)">
-                        <div class="music-cover">
-                            <img
-                                :src="track.cover_art || '/static/img/default-cover.jpg'"
-                                :alt="track.title">
-                            <div class="play-overlay">
-                                <i class="fas fa-play"></i>
-                            </div>
-
-                        </div>
-                        <div class="music-info">
-                            <h4 x-text="track.title"></h4>
-                            <p x-text="track.genre || 'Music'"></p>
-                        </div>
-                    </div>
-                </template>
-            </div>
-            <div x-show="musicViewMode === 'list'" class="music-list">
-                <template x-for="track in artistMusic" :key="track.id">
-                    <div class="music-list-item" @click="playTrack(track)">
+        <div class="music-grid">
+            <template x-for="item in mediaItems" :key="item.key">
+                <div class="track-card" @click="playItem(item)">
+                    <div class="track-cover">
                         <img
-                            :src="track.cover_art || '/static/img/default-cover.jpg'"
-                            :alt="track.title">
-                        <div class="music-details">
-                            <h4 x-text="track.title"></h4>
-                            <p x-text="track.genre || 'Music'"></p>
-                        </div>
-                        <div class="music-actions">
-                            <button @click.stop="playTrack(track)"
+                            :src="item.image || '/static/img/default-cover.jpg'"
+                            :alt="item.title" class="image-placeholder"
+                            loading="lazy">
+                        <div class="track-overlay">
+                            <button @click.stop="playItem(item)"
                                 class="play-btn">
                                 <i class="fas fa-play"></i>
                             </button>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </div>
-
-        <!-- Shows Tab -->
-        <div x-show="activeTab === 'shows'" class="tab-content">
-            <div class="content-header">
-                <h2>Shows by <span x-text="artist.name"></span></h2>
-                <div class="view-controls">
-                    <button @click="showsViewMode = 'grid'"
-                        :class="{'active': showsViewMode === 'grid'}"
-                        class="view-btn">
-                        <i class="fas fa-th"></i>
-                    </button>
-                    <button @click="showsViewMode = 'list'"
-                        :class="{'active': showsViewMode === 'list'}"
-                        class="view-btn">
-                        <i class="fas fa-list"></i>
-                    </button>
-                </div>
-            </div>
-            <div x-show="showsViewMode === 'grid'" class="shows-grid">
-                <template x-for="show in artistShows" :key="show.id">
-                    <div class="show-card" @click="playShow(show)">
-                        <div class="show-thumbnail">
-                            <img
-                                :src="show.thumbnail || '/static/img/default-cover.jpg'"
-                                :alt="show.title">
-                            <div class="play-overlay">
-                                <i class="fas fa-play"></i>
+                            <div class="track-actions">
+                                <button class="action-btn save-btn bm-btn"
+                                    @click.stop="toggleBookmark(item)"
+                                    :aria-pressed="isBookmarked(item.kind, item.id)"
+                                    :class="{ 'just-bookmarked': isBookmarked(item.kind, item.id) }">
+                                    <span aria-hidden="true">
+                                        <i
+                                            x-show="isBookmarked(item.kind, item.id)"
+                                            class="fas fa-bookmark"
+                                            style="color: var(--accent-color);"></i>
+                                        <i
+                                            x-show="!isBookmarked(item.kind, item.id)"
+                                            class="far fa-bookmark"></i>
+                                    </span>
+                                    <span class="sr-only"
+                                        x-text="isBookmarked(item.kind, item.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                                </button>
                             </div>
                         </div>
-                        <div class="show-info">
-                            <h4 x-text="show.title"></h4>
-                            <p x-text="show.host || 'Show'"></p>
-                        </div>
                     </div>
-                </template>
-            </div>
-            <div x-show="showsViewMode === 'list'" class="shows-list">
-                <template x-for="show in artistShows" :key="show.id">
-                    <div class="show-list-item" @click="playShow(show)">
-                        <img
-                            :src="show.thumbnail || '/static/img/default-cover.jpg'"
-                            :alt="show.title">
-                        <div class="show-details">
-                            <h4 x-text="show.title"></h4>
-                            <p x-text="show.host || 'Show'"></p>
-                        </div>
-                        <div class="show-actions">
-                            <button @click.stop="playShow(show)"
-                                class="play-btn">
-                                <i class="fas fa-play"></i>
-                            </button>
-                        </div>
+                    <div class="track-info">
+                        <h4 x-text="item.title"></h4>
+                        <p x-text="item.subtitle"></p>
                     </div>
-                </template>
-            </div>
+                </div>
+            </template>
         </div>
 
-        <!-- About Tab -->
-        <div x-show="activeTab === 'about'" class="tab-content">
-            <div class="about-content">
-                <div class="about-section">
-                    <h3>About <span x-text="artist.name"></span></h3>
-                    <p
-                        x-text="artist.bio || 'No biography available for this artist.'"></p>
-                </div>
-                <div class="about-section" x-show="artist.location">
-                    <h3>Location</h3>
-                    <p x-text="artist.location"></p>
-                </div>
-                <div class="about-section" x-show="artist.website">
-                    <h3>Website</h3>
-                    <a :href="artist.website" target="_blank"
-                        class="website-link">
-                        <i class="fas fa-external-link-alt"></i>
-                        <span x-text="artist.website"></span>
-                    </a>
-                </div>
-                <div class="about-section">
-                    <h3>Stats</h3>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <i class="fas fa-music"></i>
-                            <span class="stat-number"
-                                x-text="artist.music_count || 0"></span>
-                            <span class="stat-label">Tracks</span>
-                        </div>
-                        <div class="stat-card">
-                            <i class="fas fa-play-circle"></i>
-                            <span class="stat-number"
-                                x-text="artist.show_count || 0"></span>
-                            <span class="stat-label">Shows</span>
-                        </div>
-                        <div class="stat-card">
-                            <i class="fas fa-heart"></i>
-                            <span class="stat-number"
-                                x-text="artist.followers || 0"></span>
-                            <span class="stat-label">Followers</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div x-show="!isLoading && mediaItems.length === 0" class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <h3>No media found</h3>
         </div>
     </section>
 </div>
 
 <script>
-function artistDetailPage() {
+function artistGallery() {
     return {
         artist: {{ artist|tojson }},
-        activeTab: 'music',
-        musicViewMode: 'grid',
-        showsViewMode: 'grid',
-        artistMusic: [],
-        artistShows: [],
-        isFollowing: false,
+        mediaItems: [],
+        isLoading: true,
 
         init() {
-            this.loadArtistContent();
+            // Prefer client bootstrap artist if provided
+            if (window.__ARTIST__) this.artist = window.__ARTIST__;
+            this.composeMedia();
         },
 
-        async loadArtistContent() {
-            try {
-                // Load artist's music
-                const musicResponse = await fetch(`/api/artists/${this.artist.id}/music`);
-                if (musicResponse.ok) {
-                    this.artistMusic = await musicResponse.json();
-                }
+        async composeMedia() {
+            this.isLoading = true;
+            const items = [];
+            const tracks = Array.isArray(this.artist.tracks) ? this.artist.tracks : [];
+            const shows  = Array.isArray(this.artist.shows)  ? this.artist.shows  : [];
 
-                // Load artist's shows
-                const showsResponse = await fetch(`/api/artists/${this.artist.id}/shows`);
-                if (showsResponse.ok) {
-                    this.artistShows = await showsResponse.json();
-                }
-            } catch (error) {
-                console.error('Error loading artist content:', error);
-            }
-        },
-
-        playTrack(track) {
-            if (window.ahoyApp && window.ahoyApp.playMedia) {
-                window.ahoyApp.playMedia(track);
-            }
-        },
-
-        playShow(show) {
-            if (window.ahoyApp && window.ahoyApp.playMedia) {
-                window.ahoyApp.playMedia(show);
-            }
-        },
-
-        followArtist() {
-            this.isFollowing = !this.isFollowing;
-            // TODO: Implement follow/unfollow API call
-        },
-
-        shareArtist() {
-            if (navigator.share) {
-                navigator.share({
-                    title: `${this.artist.name} - Artist Profile`,
-                    text: `Check out ${this.artist.name} on Ahoy Indie Media`,
-                    url: window.location.href
+            for (const t of tracks) {
+                items.push({
+                    key: `track:${t.id}`,
+                    kind: 'track',
+                    id: t.id,
+                    title: t.title || 'Untitled',
+                    subtitle: t.genre || 'Music',
+                    image: t.cover_art || this.artist.image,
+                    data: t
                 });
-            } else {
-                // Fallback to copying URL
-                navigator.clipplaylist.writeText(window.location.href);
-                alert('Link copied to clipplaylist!');
             }
-        }
+            for (const s of shows) {
+                items.push({
+                    key: `show:${s.id}`,
+                    kind: 'show',
+                    id: s.id,
+                    title: s.title || 'Untitled',
+                    subtitle: s.host || s.category || 'Show',
+                    image: s.thumbnail || this.artist.image,
+                    data: s
+                });
+            }
+
+            // If the artist object didn't include media, build from global JSONs
+            if (items.length === 0) {
+                const slug = (window.slugify ? window.slugify(this.artist.slug || this.artist.name) : (this.artist.slug || (this.artist.name || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')));
+                try {
+                    const [musicRes, showsRes] = await Promise.all([
+                        fetch('/api/music'),
+                        fetch('/api/shows')
+                    ]);
+                    const musicJson = musicRes.ok ? await musicRes.json() : { tracks: [] };
+                    const showsJson = showsRes.ok ? await showsRes.json() : { shows: [] };
+
+                    const mTracks = Array.isArray(musicJson.tracks) ? musicJson.tracks.filter(t => (t.artist_slug || '').toLowerCase() === slug) : [];
+                    for (const t of mTracks) {
+                        items.push({
+                            key: `track:${t.id}`,
+                            kind: 'track',
+                            id: t.id,
+                            title: t.title || 'Untitled',
+                            subtitle: t.artist || 'Music',
+                            image: t.cover_art || this.artist.image,
+                            data: t
+                        });
+                    }
+
+                    const mShows = Array.isArray(showsJson.shows) ? showsJson.shows.filter(s => (s.host_slug || '').toLowerCase() === slug) : [];
+                    for (const s of mShows) {
+                        items.push({
+                            key: `show:${s.id}`,
+                            kind: 'show',
+                            id: s.id,
+                            title: s.title || 'Untitled',
+                            subtitle: s.host || s.category || 'Show',
+                            image: s.thumbnail || this.artist.image,
+                            data: s
+                        });
+                    }
+                } catch (e) {
+                    console.error('Failed to build media from global JSONs', e);
+                }
+            }
+
+            // Deduplicate by key in case of repeats
+            const seen = new Set();
+            const unique = [];
+            for (const it of items) { if (!seen.has(it.key)) { seen.add(it.key); unique.push(it); } }
+
+            unique.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+            this.mediaItems = unique;
+            this.isLoading = false;
+        },
+
+        playItem(item) {
+            const type = item.kind === 'show' ? 'show' : 'music';
+            window.location.href = `/player?id=${encodeURIComponent(item.id)}&type=${type}`;
+        },
+
+        toggleBookmark(item) {
+            if (window.AhoyBookmarks) {
+                window.AhoyBookmarks.toggle({ type: item.kind === 'show' ? 'show' : 'track', id: item.id, title: item.title, artwork: item.image });
+                this.lastBookmarkAction = Date.now();
+            }
+        },
+
+        isBookmarked(type, id) {
+            this.lastBookmarkAction;
+            if (window.AhoyBookmarks) return window.AhoyBookmarks.isBookmarked(type === 'show' ? 'show' : 'track', id);
+            return false;
+        },
+
+        lastBookmarkAction: 0
     };
 }
 </script>
