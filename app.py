@@ -2190,7 +2190,25 @@ def trending_content():
 
 # Allow `python -m app` locally if needed
 if __name__ == "__main__":
-    import os
-    port = int(os.getenv("PORT", "5000"))
+    import os, socket
+
+    def _is_port_free(p: int) -> bool:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(("127.0.0.1", p))
+            return True
+        except OSError:
+            return False
+
+    requested = int(os.getenv("PORT", "5000"))
+    chosen = requested
+    if not _is_port_free(requested):
+        alt = find_available_port(5001, 5010)
+        if alt:
+            print(f"⚠️  Port {requested} busy — starting on {alt}")
+            chosen = alt
+        else:
+            print(f"⚠️  Port {requested} busy and no alternates free in 5001-5010. Trying {requested} anyway…")
+
     # Reuse the already-created `app` with all routes registered above
-    app.run(port=port, use_reloader=False)
+    app.run(port=chosen, use_reloader=False)
