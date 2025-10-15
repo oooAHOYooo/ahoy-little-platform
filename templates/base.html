@@ -72,6 +72,25 @@
             }
         });
         </script>
+        <script>
+        // Global cast receiver: accept ahoy:play messages from /cast sender
+        window.addEventListener('message', (e) => {
+            try {
+                const data = e && e.data || {};
+                if (data && data.type === 'ahoy:play' && data.payload) {
+                    // If global player helper exists, trigger playback
+                    if (window.globalPlayer && typeof window.globalPlayer.play === 'function') {
+                        window.globalPlayer.play(data.payload);
+                    } else {
+                        // Fallback: navigate to the player page
+                        const item = data.payload;
+                        const type = (item.type === 'show' || item.video_url) ? 'show' : 'music';
+                        window.location.href = `/player?id=${encodeURIComponent(item.id)}&type=${type}`;
+                    }
+                }
+            } catch (err) { console.error('Cast receive failed', err); }
+        });
+        </script>
 
         {% block extra_head %}{% endblock %}
     </head>
