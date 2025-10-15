@@ -4,76 +4,95 @@
 
 {% block content %}
 <div class="page-container cast-page" x-data="castPage()" x-init="init()">
-    <section class="header-simple">
-        <h1><i class="fas fa-tv"></i> Cast Ahoy to your TV</h1>
-        <p>Fast, no-fuss casting. Start playing, then tap a button below. No new accounts required for the recommended options.</p>
-    </section>
+  <section class="header-simple">
+    <h1><i class="fas fa-tv"></i> Cast Ahoy to your TV</h1>
+    <p>Fast, no-fuss casting. Start playing, then tap a button below. No new
+      accounts required for the recommended options.</p>
+  </section>
 
-    <section class="cast-quickstart">
-        <div class="quick-grid">
-            <div class="quick-card">
-                <h3><i class="fas fa-bolt"></i> Quick Start</h3>
-                <ol>
-                    <li>Open this Cast page on your TV or a laptop hooked to your TV.</li>
-                    <li>Click <strong>Open Receiver (TV)</strong>.</li>
-                    <li>On your phone/laptop, pick a track/show and click <strong>Send to Receiver</strong>.</li>
-                </ol>
-                <div class="badges">
-                    <span class="badge">No account needed</span>
-                    <span class="badge">Works anywhere</span>
-                </div>
-                <div class="cast-actions">
-                    <button class="btn btn-primary" @click="openReceiver()"><i class="fas fa-tv"></i> Open Receiver (TV)</button>
-                    <button class="btn btn-outline" :disabled="!nowPlaying" @click="sendToReceiver()"><i class="fas fa-paper-plane"></i> Send to Receiver</button>
-                </div>
-                <p class="hint" x-show="!nowPlaying">Tip: press Play on something first, then hit Send.</p>
-                <p class="hint" x-show="nowPlaying"><i class="fas fa-music"></i> Now Playing: <strong x-text="nowPlaying?.title"></strong></p>
-            </div>
-            <div class="quick-card">
-                <h3><i class="fab fa-apple"></i> AirPlay (Safari / iOS / macOS)</h3>
-                <ul>
-                    <li>No account needed.</li>
-                    <li>Open Ahoy in Safari. Start playing a video or audio.</li>
-                    <li>Tap the <strong>AirPlay</strong> icon in the media controls and choose your Apple TV or AirPlay device.</li>
-                </ul>
-                <div class="badges"><span class="badge">No account needed</span></div>
-            </div>
-            <div class="quick-card">
-                <h3><i class="fab fa-chrome"></i> Chrome Tab Casting (Chromecast / Android TV)</h3>
-                <ul>
-                    <li>No Ahoy account needed. A Google account is typically only required to <em>set up</em> a new Chromecast via the Google Home app.</li>
-                    <li>In Chrome, click the <strong>Cast</strong> button → choose your Chromecast or Android TV.</li>
-                    <li>Select <strong>Cast tab</strong> for quick casting, or <strong>Cast desktop</strong> for full mirroring.</li>
-                </ul>
-                <div class="badges"><span class="badge">No account for tab casting</span></div>
-            </div>
-            <div class="quick-card">
-                <h3><i class="fas fa-wifi"></i> Mirroring (DLNA / Miracast)</h3>
-                <ul>
-                    <li>Windows: Settings → System → Display → Connect to a wireless display.</li>
-                    <li>Android: Quick Settings → Cast / Smart View (name varies).</li>
-                    <li>Mirrors your screen; works with Ahoy’s player. No accounts required.</li>
-                </ul>
-                <div class="badges"><span class="badge">No account needed</span></div>
-            </div>
+  <section class="cast-quickstart">
+    <div class="quick-grid">
+      <div class="quick-card">
+        <h3><i class="fas fa-bolt"></i> Quick Start</h3>
+        <ol>
+          <li>Open this Cast page on your TV or a laptop hooked to your TV.</li>
+          <li>Click <strong>Open Receiver (TV)</strong>.</li>
+          <li>On your phone/laptop, pick a track/show and click <strong>Send to
+              Receiver</strong>.</li>
+        </ol>
+        <div class="badges">
+          <span class="badge">No account needed</span>
+          <span class="badge">Works anywhere</span>
         </div>
-    </section>
-
-    <section class="cast-section">
-        <h2><i class="fas fa-signal"></i> Network tips</h2>
+        <div class="cast-actions">
+          <button class="btn btn-primary" @click="openReceiver()"><i
+              class="fas fa-tv"></i> Open Receiver (TV)</button>
+          <button class="btn btn-outline" :disabled="!nowPlaying"
+            @click="sendToReceiver()"><i class="fas fa-paper-plane"></i> Send to
+            Receiver</button>
+        </div>
+        <p class="hint" x-show="!nowPlaying">Tip: press Play on something first,
+          then hit Send.</p>
+        <p class="hint" x-show="nowPlaying"><i class="fas fa-music"></i> Now
+          Playing: <strong x-text="nowPlaying?.title"></strong></p>
+      </div>
+      <div class="quick-card">
+        <h3><i class="fab fa-apple"></i> AirPlay (Safari / iOS / macOS)</h3>
         <ul>
-            <li>Put the sender and TV on the <strong>same Wi‑Fi</strong>.</li>
-            <li>Disable corporate VPNs that block local discovery.</li>
-            <li>Pop‑up blockers can prevent opening the receiver window; allow pop‑ups for this site.</li>
+          <li>No account needed.</li>
+          <li>Open Ahoy in Safari. Start playing a video or audio.</li>
+          <li>Tap the <strong>AirPlay</strong> icon in the media controls and
+            choose your Apple TV or AirPlay device.</li>
         </ul>
-    </section>
+        <div class="badges"><span class="badge">No account needed</span></div>
+      </div>
+      <div class="quick-card">
+        <h3><i class="fab fa-chrome"></i> Chrome Tab Casting (Chromecast /
+          Android TV)</h3>
+        <ul>
+          <li>No Ahoy account needed. A Google account is typically only
+            required to <em>set up</em> a new Chromecast via the Google Home
+            app.</li>
+          <li>In Chrome, click the <strong>Cast</strong> button → choose your
+            Chromecast or Android TV.</li>
+          <li>Select <strong>Cast tab</strong> for quick casting, or
+            <strong>Cast desktop</strong> for full mirroring.</li>
+        </ul>
+        <div class="badges"><span class="badge">No account for tab
+            casting</span></div>
+      </div>
+      <div class="quick-card">
+        <h3><i class="fas fa-wifi"></i> Mirroring (DLNA / Miracast)</h3>
+        <ul>
+          <li>Windows: Settings → System → Display → Connect to a wireless
+            display.</li>
+          <li>Android: Quick Settings → Cast / Smart View (name varies).</li>
+          <li>Mirrors your screen; works with Ahoy’s player. No accounts
+            required.</li>
+        </ul>
+        <div class="badges"><span class="badge">No account needed</span></div>
+      </div>
+    </div>
+  </section>
 
-    <section class="cast-section">
-        <h2><i class="fas fa-plug"></i> Optional dev integration</h2>
-        <p>Want a native Cast button? We can add Google Cast / Web Receiver and Apple TV receiver apps later. That requires platform registration; not needed for the options above.</p>
-    </section>
+  <section class="cast-section">
+    <h2><i class="fas fa-signal"></i> Network tips</h2>
+    <ul>
+      <li>Put the sender and TV on the <strong>same Wi‑Fi</strong>.</li>
+      <li>Disable corporate VPNs that block local discovery.</li>
+      <li>Pop‑up blockers can prevent opening the receiver window; allow pop‑ups
+        for this site.</li>
+    </ul>
+  </section>
 
-    <style>
+  <section class="cast-section">
+    <h2><i class="fas fa-plug"></i> Optional dev integration</h2>
+    <p>Want a native Cast button? We can add Google Cast / Web Receiver and
+      Apple TV receiver apps later. That requires platform registration; not
+      needed for the options above.</p>
+  </section>
+
+  <style>
       .cast-page .quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
       .cast-page .quick-card{background:var(--surface,rgba(255,255,255,0.04));border-radius:14px;padding:16px}
       .cast-page .quick-card h3{margin:0 0 8px}
@@ -82,22 +101,26 @@
       .cast-page .hint{font-size:.9em;color:#a0a0a0;margin-top:6px}
     </style>
 
-    <section class="cast-section">
-        <h2>4) DLNA / Miracast (device mirroring)</h2>
-        <ul>
-            <li>Windows: Settings → System → Display → Connect to a wireless display.</li>
-            <li>Android: Quick Settings → Cast / Smart View (varies by device).</li>
-            <li>Many Smart TVs expose a "DLNA receiver"; mirroring your device works with Ahoy’s player.</li>
-        </ul>
-    </section>
+  <section class="cast-section">
+    <h2>4) DLNA / Miracast (device mirroring)</h2>
+    <ul>
+      <li>Windows: Settings → System → Display → Connect to a wireless
+        display.</li>
+      <li>Android: Quick Settings → Cast / Smart View (varies by device).</li>
+      <li>Many Smart TVs expose a "DLNA receiver"; mirroring your device works
+        with Ahoy’s player.</li>
+    </ul>
+  </section>
 
-    <section class="cast-section">
-        <h2>Receiver Window</h2>
-        <p>This opens a minimal fullscreen page that plays a provided media URL. Use with the WebRTC sender above or paste a link manually.</p>
-        <div class="cast-actions">
-            <button class="btn" @click="openReceiver('/player')"><i class="fas fa-external-link-alt"></i> Open Minimal Player</button>
-        </div>
-    </section>
+  <section class="cast-section">
+    <h2>Receiver Window</h2>
+    <p>This opens a minimal fullscreen page that plays a provided media URL. Use
+      with the WebRTC sender above or paste a link manually.</p>
+    <div class="cast-actions">
+      <button class="btn" @click="openReceiver('/player')"><i
+          class="fas fa-external-link-alt"></i> Open Minimal Player</button>
+    </div>
+  </section>
 </div>
 
 <script>
@@ -148,5 +171,3 @@ document.addEventListener('play-track', (e)=>{
 });
 </script>
 {% endblock %}
-
-
