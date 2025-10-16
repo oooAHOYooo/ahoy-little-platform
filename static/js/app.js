@@ -112,47 +112,6 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-// Watchlist delegation
-document.addEventListener("click", async (e) => {
-  const wlBtn = e.target.closest("[data-watchlist]");
-  if (!wlBtn) return;
-  // Skip if Alpine handles it
-  if (wlBtn.closest('[x-data]')) return;
-  e.preventDefault();
-  const id = wlBtn.dataset.id;
-  const kind = wlBtn.dataset.kind || 'show';
-  const action = wlBtn.classList.contains('is-watchlisted') ? 'remove' : 'add';
-  if (!id) return;
-  try {
-    wlBtn.classList.add("is-loading");
-    const headers = { 'Content-Type': 'application/json' };
-    // attach CSRF token if available in template context
-    if (window.CSRF_TOKEN || window.csrf_token) {
-      headers['X-CSRF-Token'] = window.CSRF_TOKEN || window.csrf_token;
-    }
-    const res = await fetch('/api/activity/watchlist', {
-      method: action === 'add' ? 'POST' : 'DELETE',
-      headers,
-      credentials: 'include',
-      body: JSON.stringify({ id, kind })
-    });
-    if (res.status === 401) {
-      window.__ahoyToast && window.__ahoyToast('Please sign in to use watchlist');
-      return;
-    }
-    if (!res.ok) throw new Error(`watchlist ${action} failed: ${res.status}`);
-    const data = await res.json();
-    const nowListed = action === 'add' || data.status === 'added' || data.status === 'exists';
-    wlBtn.classList.toggle('is-watchlisted', nowListed);
-    window.__ahoyToast && window.__ahoyToast(nowListed ? 'Added to Watchlist' : 'Removed from Watchlist');
-  } catch (err) {
-    console.error(err);
-    window.__ahoyToast && window.__ahoyToast('Watchlist action failed');
-  } finally {
-    wlBtn.classList.remove("is-loading");
-  }
-});
-
 // Safe API helper for 401-tolerant calls
 async function safeGet(url) {
   try {

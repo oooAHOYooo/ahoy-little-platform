@@ -6,13 +6,9 @@
 <div class="shows-page" x-data="showsPage()" x-init="init()">
     <div class="shows-container">
         <!-- Unified Rotating Hero -->
-        <section class="unified-hero tv-hero"
-            x-data="createUnifiedHero({ pageType: 'shows', rotationSpeed: 14000 })"
-            x-init="init()"
-            @touchstart="handleTouchStart" @touchmove="handleTouchMove"
-            @touchend="handleTouchEnd">
-            <div class="unified-hero-feed hero-feed"
-                :style="`transform: translateX(${heroOffset}px)`">
+        <section class="unified-hero tv-hero" x-data="createUnifiedHero({ pageType: 'shows', rotationSpeed: 14000 })" x-init="init()"
+            @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd">
+            <div class="unified-hero-feed hero-feed" :style="`transform: translateX(${heroOffset}px)`">
                 <template x-for="(item, index) in heroItems" :key="item.id">
                     <div class="hero-item" x-show="getItemImage(item)"
                         :class="{'active': currentHeroIndex === index}"
@@ -20,12 +16,10 @@
                         @click="playHeroItem(item)">
                         <div class="hero-overlay">
                             <div class="hero-content">
-                                <div class="hero-badge"
-                                    x-text="getPageBadge()"></div>
+                                <div class="hero-badge" x-text="getPageBadge()"></div>
                                 <h1 x-text="getItemTitle(item)"></h1>
                                 <p x-text="getItemSubtitle(item)"></p>
-                                <button @click.stop="playHeroItem(item)"
-                                    class="hero-play-btn">
+                                <button @click.stop="playHeroItem(item)" class="hero-play-btn">
                                     <i class="fas fa-play"></i>
                                 </button>
                             </div>
@@ -43,9 +37,7 @@
             </div>
             <div class="hero-indicators">
                 <template x-for="(item, index) in heroItems" :key="item.id">
-                    <button @click="setHeroIndex(index)"
-                        :class="{'active': currentHeroIndex === index}"
-                        class="hero-dot"></button>
+                    <button @click="setHeroIndex(index)" :class="{'active': currentHeroIndex === index}" class="hero-dot"></button>
                 </template>
             </div>
         </section>
@@ -177,23 +169,10 @@
                                         @click.stop="toggleBookmark({ type: 'show', id: show.id, title: show.title, artwork: show.thumbnail })"
                                         :aria-pressed="isBookmarked('show', show.id)">
                                         <span aria-hidden="true">
-                                            <i
-                                                x-show="isBookmarked('show', show.id)"
-                                                class="fas fa-bookmark"></i>
-                                            <i
-                                                x-show="!isBookmarked('show', show.id)"
-                                                class="far fa-bookmark"></i>
+                                            <i x-show="isBookmarked('show', show.id)" class="fas fa-bookmark"></i>
+                                            <i x-show="!isBookmarked('show', show.id)" class="far fa-bookmark"></i>
                                         </span>
-                                        <span class="sr-only"
-                                            x-text="isBookmarked('show', show.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
-                                    </button>
-                                    <button class="action-btn"
-                                        data-watchlist
-                                        :data-id="show.id"
-                                        data-kind="show"
-                                        :class="{ 'is-watchlisted': false }"
-                                        title="Add to Watchlist">
-                                        <i class="far fa-eye"></i>
+                                        <span class="sr-only" x-text="isBookmarked('show', show.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
                                     </button>
                                 </div>
                             </div>
@@ -236,23 +215,10 @@
                                     @click.stop="toggleBookmark({ type: 'show', id: show.id, title: show.title, artwork: show.thumbnail })"
                                     :aria-pressed="isBookmarked('show', show.id)">
                                     <span aria-hidden="true">
-                                        <i
-                                            x-show="isBookmarked('show', show.id)"
-                                            class="fas fa-bookmark"></i>
-                                        <i
-                                            x-show="!isBookmarked('show', show.id)"
-                                            class="far fa-bookmark"></i>
+                                        <i x-show="isBookmarked('show', show.id)" class="fas fa-bookmark"></i>
+                                        <i x-show="!isBookmarked('show', show.id)" class="far fa-bookmark"></i>
                                     </span>
-                                    <span class="sr-only"
-                                        x-text="isBookmarked('show', show.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
-                                </button>
-                                <button class="action-btn"
-                                    data-watchlist
-                                    :data-id="show.id"
-                                    data-kind="show"
-                                    :class="{ 'is-watchlisted': false }"
-                                    title="Add to Watchlist">
-                                    <i class="far fa-eye"></i>
+                                    <span class="sr-only" x-text="isBookmarked('show', show.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
                                 </button>
                             </div>
                         </div>

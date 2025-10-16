@@ -195,48 +195,6 @@ python scripts/check_ports.py
 | `POST` | `/api/user/history` | Add to history | `content_id`, `content_type` | Success status |
 | `GET` | `/api/user/recommendations` | Get recommendations | None | Recommended content |
 
-### 👁️ Watchlist APIs
-| Method | Endpoint | Description | Body |
-|--------|----------|-------------|------|
-| `GET` | `/api/activity/watchlist` | List watchlist items (auth) | — |
-| `POST` | `/api/activity/watchlist` | Add item to watchlist (auth + CSRF) | `{ id, kind: 'show'|'track' }` |
-| `DELETE` | `/api/activity/watchlist` | Remove item from watchlist (auth + CSRF) | `{ id, kind }` |
-
----
-
-## Watchlist & Queue
-
-### What is Watchlist?
-Use Watchlist to mark shows or tracks you want to watch/listen soon. It’s separate from Bookmarks (long-term saves).
-
-### Add/Remove from Watchlist
-- Any card or player button with `data-watchlist` toggles Watchlist.
-- On Shows and Player pages, click the eye icon to add/remove.
-
-### Bulk from Bookmarks
-On the Bookmarks page:
-- Play Queue: queues all filtered bookmarks and starts playback.
-- Add to Queue: appends all filtered bookmarks to the current queue.
-- Add All to Watchlist: adds all filtered bookmarks (tracks/shows) to Watchlist.
-
-### Programmatic usage
-- Browser JS automatically sends `X-CSRF-Token` from `window.CSRF_TOKEN`.
-- cURL examples:
-```bash
-# List
-curl -b cookie.jar -c cookie.jar http://localhost:5000/api/activity/watchlist
-# Add (show)
-curl -b cookie.jar -c cookie.jar -X POST -H 'Content-Type: application/json' -H "X-CSRF-Token: $TOKEN" \
-  -d '{"id":"show-123","kind":"show"}' http://localhost:5000/api/activity/watchlist
-# Remove
-curl -b cookie.jar -c cookie.jar -X DELETE -H 'Content-Type: application/json' -H "X-CSRF-Token: $TOKEN" \
-  -d '{"id":"show-123","kind":"show"}' http://localhost:5000/api/activity/watchlist
-```
-
-### Queue behavior
-- Queue stubs are provided in `static/js/player-queue.js` with `replace`, `append`, and `playNext`.
-- Bookmarks page emits a `playlist:created` event that the queue listens to. Integrate with your real player later by mapping these events.
-
 ### 💾 Save/Load APIs (Guest & User)
 | Method | Endpoint | Description | Parameters | Response |
 |--------|----------|-------------|------------|----------|

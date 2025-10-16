@@ -40,28 +40,13 @@
                         <i class="fas fa-share"></i>
                         <span>Share</span>
                     </button>
-                    <button @click="toggleBookmark()"
+                    <button @click="toggleBookmark()" 
                         class="action-btn bm-btn save-btn"
                         :class="{ 'just-bookmarked': isBookmarked() }"
                         :aria-pressed="isBookmarked()">
-                        <i
-                            :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'"
-                            :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
-                        <span
-                            x-text="isBookmarked() ? 'Bookmarked' : 'Bookmark'"></span>
-                    </button>
-                    <button
-                        class="action-btn"
-                        data-watchlist
-                        :data-id="currentMedia?.id"
-                        :data-kind="(mediaType === 'show' ? 'show' : 'track')"
-                        :class="{ 'is-watchlisted': isWatchlisted() }"
-                        :aria-pressed="isWatchlisted()"
-                        title="Toggle Watchlist">
-                        <i
-                            :class="isWatchlisted() ? 'fas fa-eye' : 'far fa-eye'"></i>
-                        <span
-                            x-text="isWatchlisted() ? 'Watchlisted' : 'Watchlist'"></span>
+                        <i :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'" 
+                           :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
+                        <span x-text="isBookmarked() ? 'Bookmarked' : 'Bookmark'"></span>
                     </button>
                 </div>
             </div>
@@ -101,27 +86,14 @@
                     </div>
                 </div>
                 <div class="media-actions">
-                    <button @click="toggleBookmark()"
+                    <button @click="toggleBookmark()" 
                         class="action-btn bm-btn save-btn floating-bookmark"
                         :class="{ 'just-bookmarked': isBookmarked() }"
                         :aria-pressed="isBookmarked()"
                         title="Bookmark this media">
-                        <i
-                            :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'"
-                            :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
-                        <span
-                            x-text="isBookmarked() ? 'Bookmarked' : 'Bookmark'"></span>
-                    </button>
-                    <button
-                        class="action-btn"
-                        data-watchlist
-                        :data-id="currentMedia?.id"
-                        :data-kind="(mediaType === 'show' ? 'show' : 'track')"
-                        :class="{ 'is-watchlisted': isWatchlisted() }"
-                        :aria-pressed="isWatchlisted()"
-                        title="Toggle Watchlist">
-                        <i
-                            :class="isWatchlisted() ? 'fas fa-eye' : 'far fa-eye'"></i>
+                        <i :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'" 
+                           :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
+                        <span x-text="isBookmarked() ? 'Bookmarked' : 'Bookmark'"></span>
                     </button>
                 </div>
             </div>
@@ -414,11 +386,6 @@ function fullPlayer() {
                 };
                 window.AhoyBookmarks.toggle(bookmarkItem);
             }
-        },
-        isWatchlisted() {
-            if (!this.currentMedia) return false;
-            const btn = document.querySelector('[data-watchlist][data-id="' + this.currentMedia.id + '"]');
-            return !!(btn && btn.classList.contains('is-watchlisted'));
         },
         
         isBookmarked() {
