@@ -169,7 +169,7 @@ python scripts/check_ports.py
 ### 👤 User Management APIs
 | Method | Endpoint | Description | Parameters | Response |
 |--------|----------|-------------|------------|----------|
-| `POST` | `/api/auth/login` | User login | `username`, `password` | Auth token |
+| `POST` | `/api/auth/login` | User login | `username`, `password` | Success + session cookie |
 | `POST` | `/api/auth/register` | User registration | `username`, `password`, `email` | User profile |
 | `POST` | `/api/auth/logout` | User logout | None | Success status |
 | `GET` | `/api/user/profile` | Get user profile | None | User data |
@@ -307,6 +307,7 @@ python scripts/check_ports.py
 | `/feedback` | **Feedback** | User feedback system | • Bug reports<br>• Feature requests<br>• User suggestions |
 | `/debug` | **Debug Console** | Development tools | • System status<br>• User management<br>• Data viewer<br>• API testing |
 | `/admin` | **Admin Panel** | User management | • User list<br>• Account management<br>• System monitoring |
+| `/downloads` | **Downloads** | Desktop build downloads | • Simple links to artifacts |
 
 ### 📚 Documentation Access
 - **In-app**: Settings menu → "App Structure" 
@@ -326,6 +327,7 @@ ahoy-little-platform/
 ├── user_manager.py                 # User management utilities
 ├── extensions.py                   # Flask extensions
 ├── wsgi.py                        # WSGI entry point
+├── desktop_main.py                # Desktop (PyWebview) entrypoint
 ├── run.py                         # Development runner
 ├── start.py                       # Production starter
 ├── requirements.txt               # Python dependencies
@@ -375,12 +377,14 @@ ahoy-little-platform/
 │   ├── bookmarks.html            # Bookmarks page
 │   ├── admin.html                # Admin panel
 │   ├── debug.html                # Debug console
+│   ├── downloads.html            # Downloads page
 │   ├── feedback.html             # Feedback form
 │   ├── privacy.html              # Privacy policy
 │   ├── security.html             # Security policy
 │   ├── terms.html                # Terms of service
 │   └── 404.html                  # Error page
 │
+├── downloads/                     # Published desktop builds (served at /downloads)
 └── blueprints/                    # Modular route organization
     ├── __init__.py
     ├── activity.py               # User activity APIs
@@ -454,9 +458,7 @@ CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
 ## Development
 ### Database and Migrations (User State)
 
-This project uses Postgres with SQLAlchemy and Alembic for user state only. Content remains JSON-based.
-
-Set `DATABASE_URL` in your environment (see `.env.example`). The app now fails fast if `DATABASE_URL` is missing and will NEVER fall back to localhost. For remote hosts, `sslmode=require` is automatically appended if missing.
+This project uses SQLAlchemy and Alembic for user state. In production, set `DATABASE_URL` (Postgres recommended). Locally, the app defaults to SQLite file `sqlite:///local.db` if no database URL is provided.
 
 On Render, wire the database automatically via `render.yaml`:
 
@@ -525,39 +527,7 @@ On Render, migrations are applied automatically at startup via `scripts/migrate_
   - Returns `{ "ready": true, "alembic": "<rev>", "counts": { "users": N } }` on success; 500 with `{ "ready": false, "detail": "..." }` on failure
   - Recommended Render `healthCheckPath`: `/ops/selftest`
 
-### JWT Auth (API)
-
-Endpoints:
-- POST /api/auth/register {"email","password"}
-- POST /api/auth/login {"email","password"}
-- GET  /api/auth/me (Authorization: Bearer <access>)
-- POST /api/auth/refresh {"refresh_token"}
-
-Tokens:
-- Access: HS256, expires in 15 minutes
-- Refresh: HS256, expires in 30 days
-
-Example:
-```bash
-# Register
-curl -s -X POST http://localhost:5000/api/auth/register \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"user@example.com","password":"secret"}'
-
-# Login
-curl -s -X POST http://localhost:5000/api/auth/login \
-  -H 'Content-Type: application/json' \
-  -d '{"email":"user@example.com","password":"secret"}'
-
-# Me (replace ACCESS)
-curl -s http://localhost:5000/api/auth/me \
-  -H "Authorization: Bearer ACCESS"
-
-# Refresh (replace REFRESH)
-curl -s -X POST http://localhost:5000/api/auth/refresh \
-  -H 'Content-Type: application/json' \
-  -d '{"refresh_token":"REFRESH"}'
-```
+<!-- Removed outdated JWT Auth section; current app uses session-based auth under /api/auth -->
 
 
 ### Adding New Features
@@ -757,7 +727,7 @@ For questions or support:
 - **Browse Music**: [Music Library](/music)
 - **Watch Shows**: [Shows & Videos](/shows)
 - **Discover Artists**: [Artists](/artists)
-- **My Content**: [My Saves](/my-saves)
+- **Bookmarks**: [Bookmarks](/bookmarks)
 
 ### For Developers
 - **API Reference**: [API Endpoints](#api-reference)

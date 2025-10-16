@@ -363,8 +363,9 @@ def artist_profile(artist_slug):
 
 @app.route('/my-saves')
 def my_saves():
-    """My Saves page - user's saved content and playlists"""
-    return render_template('my_saves.html')
+    """Legacy route: redirect to Bookmarks"""
+    from flask import redirect
+    return redirect('/bookmarks', code=302)
 
 @app.route("/bookmarks")
 def bookmarks_page():
