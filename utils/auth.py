@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, Sequence
 import datetime as dt
 from functools import wraps
 
@@ -43,7 +43,7 @@ def _jwt_fallback_encode(payload: dict, secret: str, algorithm: str = "HS256") -
     return f"{header_b64}.{payload_b64}.{sig_b64}"
 
 
-def _jwt_fallback_decode(token: str, secret: str, algorithms: list[str] | tuple[str, ...] = ("HS256",)) -> dict:
+def _jwt_fallback_decode(token: str, secret: str, algorithms: Sequence[str] = ("HS256",)) -> dict:
     import json, hmac, hashlib, time
     try:
         header_b64, payload_b64, sig_b64 = token.split(".")
