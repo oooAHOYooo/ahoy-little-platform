@@ -89,6 +89,12 @@
                 <i class="fas fa-plus"></i>
                 <span>Manage Collections</span>
             </button>
+            <button
+                class="filter-tab"
+                @click="openWizard()">
+                <i class="fas fa-magic"></i>
+                <span>Collections Wizard</span>
+            </button>
         </div>
     </section>
 
@@ -157,6 +163,90 @@
                             </button>
                         </div>
                     </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collections Wizard Overlay -->
+    <div x-show="showWizard" x-transition class="fixed inset-0 z-[10010] grid place-items-center bg-black/70">
+        <div class="w-full max-w-3xl bg-[var(--background-dark)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
+                <h3 class="text-white text-lg font-semibold flex items-center gap-2"><i class="fas fa-magic"></i> Collections Wizard</h3>
+                <button class="text-white/70 hover:text-white" @click="closeWizard()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-4">
+                <!-- Step indicators -->
+                <div class="flex items-center gap-2 mb-4 text-sm">
+                    <span :class="{'text-white': wizardStep===1, 'text-white/50': wizardStep!==1}">1. Choose focus</span>
+                    <span class="text-white/30">→</span>
+                    <span :class="{'text-white': wizardStep===2, 'text-white/50': wizardStep!==2}">2. Select items</span>
+                    <span class="text-white/30">→</span>
+                    <span :class="{'text-white': wizardStep===3, 'text-white/50': wizardStep!==3}">3. Create or pick collection</span>
+                    <span class="text-white/30">→</span>
+                    <span :class="{'text-white': wizardStep===4, 'text-white/50': wizardStep!==4}">4. Review</span>
+                </div>
+
+                <!-- Step 1: focus -->
+                <div x-show="wizardStep===1" class="space-y-3">
+                    <p class="text-white/80">What do you want to organize?</p>
+                    <div class="flex gap-2">
+                        <button class="btn" @click="wizardFilter='track'; wizardNext()"><i class="fas fa-music"></i> Tracks</button>
+                        <button class="btn" @click="wizardFilter='show'; wizardNext()"><i class="fas fa-tv"></i> Shows</button>
+                        <button class="btn" @click="wizardFilter=null; wizardNext()"><i class="fas fa-th"></i> All</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: select items -->
+                <div x-show="wizardStep===2" class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <p class="text-white/80">Select items to add to a collection</p>
+                        <button class="btn" @click="wizardSelectAll()">Select All</button>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-[320px] overflow-auto">
+                        <template x-for="it in (wizardFilter ? list().filter(i=>i.type===wizardFilter) : list())" :key="it.key">
+                            <label class="flex items-center gap-2 p-2 rounded-lg bg-white/5 cursor-pointer">
+                                <input type="checkbox" :value="it.key" x-model="wizardSelected">
+                                <span class="truncate" x-text="it.title"></span>
+                                <span class="text-xs px-2 py-0.5 rounded bg-white/10" x-text="it.type"></span>
+                            </label>
+                        </template>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button class="btn" @click="wizardBack()">Back</button>
+                        <button class="btn btn-primary" :disabled="wizardSelected.length===0" @click="wizardNext()">Next</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: create or pick collection -->
+                <div x-show="wizardStep===3" class="space-y-3">
+                    <p class="text-white/80">Pick an existing collection or create a new one</p>
+                    <div class="grid grid-cols-2 gap-2 max-h-[220px] overflow-auto p-1 border border-[var(--border-color)] rounded">
+                        <template x-for="c in Object.values(collections)" :key="c.id">
+                            <button class="text-left p-2 rounded hover:bg-white/10" :class="{'ring-1 ring-white/40': wizardCollection && wizardCollection.id===c.id}" @click="wizardCollection=c">
+                                <div class="text-white">{{ '{{' }} c.name {{ '}}' }}</div>
+                                <div class="text-white/50 text-xs">{{ '{{' }} c.description || '—' {{ '}}' }}</div>
+                            </button>
+                        </template>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input class="flex-1 collection-input" placeholder="New collection name (suggested: 'Focus Mix', 'Watch Soon')" x-model="wizardNewName">
+                        <button class="btn" @click="wizardSuggest()">Suggest</button>
+                        <button class="btn btn-primary" :disabled="!wizardNewName.trim()" @click="wizardCreate()">Create</button>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button class="btn" @click="wizardBack()">Back</button>
+                        <button class="btn btn-primary" :disabled="!wizardCollection" @click="wizardNext()">Next</button>
+                    </div>
+                </div>
+
+                <!-- Step 4: review and apply -->
+                <div x-show="wizardStep===4" class="space-y-3">
+                    <p class="text-white/80">Add <span x-text="wizardSelected.length"></span> items to <strong x-text="wizardCollection?.name"></strong>?</p>
+                    <div class="flex justify-end gap-2">
+                        <button class="btn" @click="wizardBack()">Back</button>
+                        <button class="btn btn-primary" @click="wizardApply()">Apply</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -366,6 +456,13 @@ function bookmarksPageHandler() {
         filterNest: null,
         bookmarks: {},
         nests: {},
+        // Wizard state
+        showWizard: false,
+        wizardStep: 1,
+        wizardFilter: null,
+        wizardSelected: [],
+        wizardCollection: null,
+        wizardNewName: '',
         showNestManager: false,
         newNestName: '',
         newNestDescription: '',
@@ -399,6 +496,40 @@ function bookmarksPageHandler() {
                     this.loadNests();
                 }
             });
+        },
+        openWizard() { this.showWizard = true; this.wizardStep = 1; this.wizardFilter = null; this.wizardSelected = []; this.wizardCollection = null; this.wizardNewName = ''; },
+        closeWizard() { this.showWizard = false; },
+        wizardNext() { this.wizardStep = Math.min(4, this.wizardStep + 1); },
+        wizardBack() { this.wizardStep = Math.max(1, this.wizardStep - 1); },
+        wizardSelectAll() {
+            const items = this.wizardFilter ? this.list().filter(i => i.type === this.wizardFilter) : this.list();
+            this.wizardSelected = items.map(i => i.key);
+        },
+        wizardSuggest() {
+            const suggestions = ['Focus Mix', 'Morning Fuel', 'Deep Work', 'Gym Boost', 'Watch Soon', 'Chill Stack'];
+            this.wizardNewName = suggestions[Math.floor(Math.random() * suggestions.length)];
+        },
+        async wizardCreate() {
+            try {
+                const owner = '{{ session.username if session.username else "guest" }}';
+                const created = await (window.CollectionsAPI?.create?.({ name: this.wizardNewName, owner }) || Promise.resolve(null));
+                if (created && created.id) {
+                    this.wizardCollection = created;
+                    this.wizardNewName = '';
+                }
+            } catch (e) { console.warn(e); }
+        },
+        async wizardApply() {
+            if (!this.wizardCollection) return;
+            const owner = '{{ session.username if session.username else "guest" }}';
+            try {
+                for (const key of this.wizardSelected) {
+                    const [type, id] = key.split(':');
+                    await window.CollectionsAPI?.addItem?.(this.wizardCollection.id, { id, type });
+                }
+                document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: `Added ${this.wizardSelected.length} to "${this.wizardCollection.name}"` }));
+            } catch (e) { console.warn(e); }
+            this.closeWizard();
         },
         
         loadBookmarks() {
