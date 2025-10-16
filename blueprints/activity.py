@@ -3,13 +3,17 @@ from flask_login import login_required, current_user
 import os, time
 from storage import read_json, write_json
 from extensions import limiter
+from utils.csrf import csrf_protect
 
 bp = Blueprint("activity", __name__, url_prefix="/api/activity")
 DATA_PATH = os.path.join("data", "user_activity.json")
 
 def _user_bucket(store, username):
     # Migrate legacy shape that had "likes"
-    bucket = store.setdefault(username, {"bookmarks": [], "history": []})
+    bucket = store.setdefault(username, {"bookmarks": [], "history": [], "watchlist": []})
+    # Ensure required keys exist for new features
+    if "watchlist" not in bucket:
+        bucket["watchlist"] = []
     if "likes" in bucket:
         # fold all likes into bookmarks (idempotent)
         for key in bucket.get("likes", []):
@@ -85,3 +89,68 @@ def mark_played():
 
     write_json(DATA_PATH, store)
     return jsonify({"ok": True})
+
+
+# =========================
+# Watchlist Endpoints
+# =========================
+
+@bp.get("/watchlist")
+@limiter.limit("120/minute")
+@login_required
+def get_watchlist():
+    store = read_json(DATA_PATH, {})
+    bucket = _user_bucket(store, current_user.id)
+    # persist any migrations immediately
+    write_json(DATA_PATH, store)
+    return jsonify({"items": list(bucket.get("watchlist", []))})
+
+
+@bp.post("/watchlist")
+@csrf_protect
+@limiter.limit("60/minute")
+@login_required
+def add_watchlist():
+    body = request.get_json(silent=True) or {}
+    item_id = (body.get("id") or "").strip()
+    kind = (body.get("kind") or "show").strip()
+    if not item_id:
+        return jsonify({"error": "missing id"}), 400
+
+    store = read_json(DATA_PATH, {})
+    bucket = _user_bucket(store, current_user.id)
+    key = f"{kind}:{item_id}"
+
+    if key not in bucket["watchlist"]:
+        bucket["watchlist"].append(key)
+        status = "added"
+    else:
+        status = "exists"
+
+    write_json(DATA_PATH, store)
+    return jsonify({"ok": True, "status": status, "key": key})
+
+
+@bp.delete("/watchlist")
+@csrf_protect
+@limiter.limit("60/minute")
+@login_required
+def remove_watchlist():
+    body = request.get_json(silent=True) or {}
+    item_id = (body.get("id") or "").strip()
+    kind = (body.get("kind") or "show").strip()
+    if not item_id:
+        return jsonify({"error": "missing id"}), 400
+
+    store = read_json(DATA_PATH, {})
+    bucket = _user_bucket(store, current_user.id)
+    key = f"{kind}:{item_id}"
+
+    if key in bucket["watchlist"]:
+        bucket["watchlist"].remove(key)
+        status = "removed"
+    else:
+        status = "absent"
+
+    write_json(DATA_PATH, store)
+    return jsonify({"ok": True, "status": status, "key": key})

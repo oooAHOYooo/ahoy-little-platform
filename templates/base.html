@@ -708,6 +708,7 @@
 
         <!-- JavaScript -->
         <script>window.LOGGED_IN = {{ LOGGED_IN | tojson }};</script>
+        <script>window.CSRF_TOKEN = {{ csrf_token | tojson }};</script>
         <script src="{{ url_for('static', filename='js/guest-bootstrap.js') }}"></script>
         <script src="{{ url_for('static', filename='js/bookmarks.js') }}"></script>
         <script src="{{ url_for('static', filename='js/app.js') }}"></script>

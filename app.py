@@ -131,6 +131,15 @@ def create_app():
     def inject_login_flag():
         return {"LOGGED_IN": bool(session.get("username"))}
 
+    # CSRF token injection for templates (meta/header usage in JS)
+    @app.context_processor
+    def inject_csrf_token():
+        try:
+            from utils.csrf import generate_csrf_token
+            return {"csrf_token": generate_csrf_token()}
+        except Exception:
+            return {"csrf_token": ""}
+
     # Enable compression (optional)
     try:
         from flask_compress import Compress

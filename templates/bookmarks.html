@@ -68,8 +68,19 @@
                     x-text="list().filter(item => item.type === 'artist').length"></span>
             </button>
 
+            <!-- Watchlist Tab (from activity) -->
+            <button
+                class="filter-tab"
+                @click="toggleWatchlistTab()"
+                :class="{ active: showingWatchlist }">
+                <i class="fas fa-eye"></i>
+                Watchlist
+                <span class="tab-count" x-text="watchlist.length"></span>
+            </button>
+
             <!-- Collections Filter -->
-            <template x-for="collection in Object.values(collections)" :key="collection.id">
+            <template x-for="collection in Object.values(collections)"
+                :key="collection.id">
                 <button
                     class="filter-tab collection-tab"
                     :class="{ active: filterCollection === collection.id }"
@@ -90,6 +101,18 @@
                 <span>Manage Collections</span>
             </button>
         </div>
+        <!-- Bulk actions -->
+        <div class="mt-3 px-8 flex gap-2" x-show="!showingWatchlist && filteredList().length > 0">
+            <button class="btn btn-primary" @click="queueAll('replace')">
+                <i class="fas fa-play"></i> Play Queue
+            </button>
+            <button class="btn" @click="queueAll('append')">
+                <i class="fas fa-plus"></i> Add to Queue
+            </button>
+            <button class="btn" @click="addAllToWatchlist()">
+                <i class="fas fa-eye"></i> Add All to Watchlist
+            </button>
+        </div>
     </section>
 
     <!-- Collection Manager Modal -->
@@ -100,7 +123,8 @@
         <div class="collection-manager-content">
             <div class="collection-manager-header">
                 <h3><i class="fas fa-folder-plus"></i> Manage Collections</h3>
-                <button @click="showCollectionManager = false" class="close-btn">
+                <button @click="showCollectionManager = false"
+                    class="close-btn">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -163,13 +187,39 @@
     </div>
 
     <!-- First-time Helper Tooltip -->
-    <div x-show="Object.keys(collections).length === 0 && filteredList().length > 0" 
-         class="mb-3 text-sm text-white/80 bg-white/5 border border-white/10 rounded-xl p-3">
-        Tip: Click the <span class="px-1 rounded bg-white text-black text-xs">📁</span> icon on any card to create your first <strong>Collection</strong> and keep things organized.
+    <div
+        x-show="Object.keys(collections).length === 0 && filteredList().length > 0"
+        class="mb-3 text-sm text-white/80 bg-white/5 border border-white/10 rounded-xl p-3">
+        Tip: Click the <span
+            class="px-1 rounded bg-white text-black text-xs">📁</span> icon on
+        any card to create your first <strong>Collection</strong> and keep
+        things organized.
     </div>
 
+    <!-- Watchlist (simple) -->
+    <section class="bookmarks-grid-section" x-show="showingWatchlist">
+        <div class="bookmarks-grid">
+            <template x-for="key in watchlist" :key="key">
+                <div class="bookmark-card"
+                    @click="const [type,id]=key.split(':'); if(type==='show'){ window.location.href = '/player?id='+id+'&type=show'; } else { window.location.href='/music?highlight='+id; }">
+                    <div class="card-info" style="padding:1rem;">
+                        <div class="card-type-badge">
+                            <i
+                                :class="key.startsWith('show:') ? 'fas fa-tv' : 'fas fa-music'"></i>
+                            <span x-text="key.split(':')[0]"></span>
+                        </div>
+                        <h3 class="card-title" x-text="key"></h3>
+                        <div class="card-meta"><span class="card-date">Watchlist
+                                item</span></div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </section>
+
     <!-- Bookmarks Grid -->
-    <section class="bookmarks-grid-section" x-show="filteredList().length > 0">
+    <section class="bookmarks-grid-section"
+        x-show="!showingWatchlist && filteredList().length > 0">
         <div class="bookmarks-grid">
             <template x-for="item in filteredList()" :key="item.key">
                 <div class="bookmark-card group"
@@ -195,25 +245,29 @@
                             loading="lazy">
 
                         <!-- Top-left label group -->
-                        <div class="absolute top-2 left-2 flex items-center gap-2">
+                        <div
+                            class="absolute top-2 left-2 flex items-center gap-2">
                             <!-- Age Indicator -->
-                            <span class="text-[11px] px-2 py-0.5 rounded-full text-white"
-                                  :class="getBookmarkAgeCategory(item) === 'new' ? 'bg-teal-600' : 
+                            <span
+                                class="text-[11px] px-2 py-0.5 rounded-full text-white"
+                                :class="getBookmarkAgeCategory(item) === 'new' ? 'bg-teal-600' : 
                                           getBookmarkAgeCategory(item) === 'recent' ? 'bg-green-600' : 
                                           getBookmarkAgeCategory(item) === 'older' ? 'bg-yellow-600' : 'bg-gray-600'"
-                                  x-text="getAgeLabel(item)">
+                                x-text="getAgeLabel(item)">
                             </span>
-                            
+
                             <!-- Collection Badge -->
-                            <span class="text-[11px] px-2 py-0.5 rounded-full text-white"
-                                  data-collection-badge
-                                  :class="item.collection_id ? 'bg-blue-600' : 'bg-white/10'"
-                                  x-text="item.collection_id ? getCollectionName(item.collection_id) : 'Unorganized'">
+                            <span
+                                class="text-[11px] px-2 py-0.5 rounded-full text-white"
+                                data-collection-badge
+                                :class="item.collection_id ? 'bg-blue-600' : 'bg-white/10'"
+                                x-text="item.collection_id ? getCollectionName(item.collection_id) : 'Unorganized'">
                             </span>
                         </div>
 
                         <!-- Hover actions (right-top) -->
-                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition flex gap-1">
+                        <div
+                            class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition flex gap-1">
                             <!-- Open chooser -->
                             <button
                                 class="w-8 h-8 rounded-full grid place-items-center bg-white/90 hover:bg-white text-black shadow"
@@ -221,7 +275,7 @@
                                 @click.stop="openCollectionChooser(item)">
                                 📁
                             </button>
-                            
+
                             <!-- Add to collection -->
                             <button
                                 class="w-8 h-8 rounded-full grid place-items-center bg-blue-600 hover:bg-blue-700 text-white shadow"
@@ -287,6 +341,14 @@
                                     title="Remove bookmark">
                                     <i class="fas fa-times"></i>
                                 </button>
+                        <button class="action-btn"
+                                :data-id="item.id"
+                                :data-kind="item.type"
+                                data-watchlist
+                                :class="{ 'is-watchlisted': false }"
+                                title="Add to Watchlist">
+                            <i class="far fa-eye"></i>
+                        </button>
                             </div>
                         </div>
                     </div>
@@ -377,6 +439,7 @@ function bookmarksPageHandler() {
             setTimeout(() => {
                 this.loadBookmarks();
                 this.loadNests();
+                this.loadWatchlist();
             }, 500);
             
             // Also retry after a longer delay in case of slow loading
@@ -457,6 +520,50 @@ function bookmarksPageHandler() {
             
             return items;
         },
+
+        // Watchlist state and methods
+        showingWatchlist: false,
+        watchlist: [],
+        async loadWatchlist() {
+            try {
+                const r = await fetch('/api/activity/watchlist', { credentials: 'include' });
+                if (!r.ok) return;
+                const data = await r.json();
+                this.watchlist = Array.isArray(data.items) ? data.items : [];
+            } catch {}
+        },
+        toggleWatchlistTab() {
+            this.showingWatchlist = !this.showingWatchlist;
+            if (this.showingWatchlist) {
+                // No-op: grid below replaced by watchlist renderer
+            }
+        },
+
+        // Queue helpers for bookmarks
+        queueAll(mode) {
+            const items = this.filteredList().map(i => ({ id: i.id, type: i.type, title: i.title, artwork: i.artwork }));
+            try {
+                if (mode === 'replace') {
+                    window.Queue && window.Queue.replace ? window.Queue.replace(items) : document.dispatchEvent(new CustomEvent('playlist:created', { detail: { items, _queueMode: 'replace' } }));
+                } else if (mode === 'append') {
+                    window.Queue && window.Queue.append ? window.Queue.append(items) : document.dispatchEvent(new CustomEvent('playlist:created', { detail: { items, _queueMode: 'append' } }));
+                }
+                window.__ahoyToast && window.__ahoyToast(mode === 'replace' ? 'Playing queue' : 'Added to queue');
+            } catch (e) { console.warn(e); }
+        },
+        async addAllToWatchlist() {
+            const headers = { 'Content-Type': 'application/json' };
+            if (window.CSRF_TOKEN || window.csrf_token) headers['X-CSRF-Token'] = window.CSRF_TOKEN || window.csrf_token;
+            const list = this.filteredList();
+            for (const item of list) {
+                if (item.type !== 'track' && item.type !== 'show') continue;
+                try {
+                    await fetch('/api/activity/watchlist', { method: 'POST', headers, credentials: 'include', body: JSON.stringify({ id: item.id, kind: item.type }) });
+                } catch (e) { /* ignore one-off failures */ }
+            }
+            this.loadWatchlist();
+            window.__ahoyToast && window.__ahoyToast('Added to Watchlist');
+        }
         
         toggleBookmark(item) {
             if (window.AhoyBookmarks) {
