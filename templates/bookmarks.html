@@ -92,7 +92,6 @@
             </button>
             <button
                 class="filter-tab"
-                x-show="Object.keys(collections).length === 0"
                 @click="openWizard()">
                 <i class="fas fa-folder-plus"></i>
                 <span>Create New Collection</span>
@@ -103,20 +102,30 @@
     <!-- Collections Row with Play-All -->
     <section class="px-8 mt-4" x-show="Object.keys(collections).length > 0">
         <div class="flex items-center justify-between mb-2">
-            <h3 class="text-white text-base font-semibold flex items-center gap-2"><i class="fas fa-folder"></i> Your Collections</h3>
-            <div class="text-xs text-white/60" x-text="Object.keys(collections).length + ' total'"></div>
+            <h3
+                class="text-white text-base font-semibold flex items-center gap-2"><i
+                    class="fas fa-folder"></i> Your Collections</h3>
+            <div class="text-xs text-white/60"
+                x-text="Object.keys(collections).length + ' total'"></div>
         </div>
         <div class="flex gap-2 overflow-auto pb-2">
             <template x-for="c in Object.values(collections)" :key="c.id">
-                <div class="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 flex items-center gap-3">
-                    <div class="w-2 h-2 rounded-full" :style="`background:${c.color || '#00d4ff'}`"></div>
+                <div
+                    class="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full"
+                        :style="`background:${c.color || '#00d4ff'}`"></div>
                     <div>
                         <div class="text-white text-sm" x-text="c.name"></div>
-                        <div class="text-white/60 text-xs" x-text="(list().filter(i=>i.collection_id===c.id).length || 0) + ' items'"></div>
+                        <div class="text-white/60 text-xs"
+                            x-text="(list().filter(i=>i.collection_id===c.id).length || 0) + ' items'"></div>
                     </div>
                     <div class="flex items-center gap-1 ml-2">
-                        <button class="btn" @click="queueCollection(c.id, 'replace')"><i class="fas fa-play"></i> Play All</button>
-                        <button class="btn" @click="queueCollection(c.id, 'append')"><i class="fas fa-plus"></i> Queue</button>
+                        <button class="btn"
+                            @click="queueCollection(c.id, 'replace')"><i
+                                class="fas fa-play"></i> Play All</button>
+                        <button class="btn"
+                            @click="queueCollection(c.id, 'append')"><i
+                                class="fas fa-plus"></i> Queue</button>
                     </div>
                 </div>
             </template>
