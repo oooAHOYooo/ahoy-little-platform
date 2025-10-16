@@ -19,6 +19,62 @@ A comprehensive Flask-based media platform for discovering and organizing indepe
 
 ---
 
+## 🤖 GPT Assistant: Next Steps
+
+Follow these exact steps when asked to run/build/package or publish downloads.
+
+1) Run the web app (productionish local)
+
+```bash
+export FLASK_ENV=production
+export SECRET_KEY=$(python - <<'PY'\nimport secrets;print(secrets.token_urlsafe(32))\nPY)
+python app.py
+```
+
+Then open the printed localhost URL (or http://127.0.0.1:5000 or chosen port). Health checks: `/healthz`, `/readyz`.
+
+2) Run the desktop wrapper (PyWebview)
+
+```bash
+export FLASK_ENV=production
+export SECRET_KEY=$(python - <<'PY'\nimport secrets;print(secrets.token_urlsafe(32))\nPY)
+export PORT=17600
+python desktop_main.py
+```
+
+3) Build desktop binaries
+
+```bash
+python -m pip install -r requirements.txt pyinstaller
+pyinstaller --noconfirm --onefile --name "Ahoy Indie Media" desktop_main.py
+```
+
+Artifacts appear in `dist/`.
+
+4) Publish downloads on the site
+
+```bash
+mkdir -p downloads
+cp dist/* downloads/
+```
+
+Visit `/downloads` to see and download the files.
+
+5) Commit and push
+
+```bash
+git add -A
+git commit -m "chore: update builds and docs"
+git push origin main
+```
+
+If push is blocked on macOS: run `sudo xcodebuild -license` once, then push again.
+
+Troubleshooting
+- Internal Server Error: check terminal logs; verify `SECRET_KEY` is set; ensure dependencies `pip install -r requirements.txt`.
+- Desktop window not opening: `pip install pywebview`; ensure port 17600 is free.
+- Downloads page empty: ensure files exist in `downloads/`.
+
 ## Quick Start
 
 ### Prerequisites
