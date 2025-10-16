@@ -613,6 +613,8 @@ function bookmarksPageHandler() {
                 if (created && created.id) {
                     this.wizardCollection = created;
                     this.wizardNewName = '';
+                    // ensure collections list reflects the new one immediately
+                    this.collections = { ...(this.collections || {}), [created.id]: created };
                 }
             } catch (e) { console.warn(e); }
         },
