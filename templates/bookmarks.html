@@ -69,7 +69,8 @@
             </button>
 
             <!-- Collections Filter -->
-            <template x-for="collection in Object.values(collections)" :key="collection.id">
+            <template x-for="collection in Object.values(collections)"
+                :key="collection.id">
                 <button
                     class="filter-tab collection-tab"
                     :class="{ active: filterCollection === collection.id }"
@@ -91,9 +92,10 @@
             </button>
             <button
                 class="filter-tab"
+                x-show="Object.keys(collections).length === 0"
                 @click="openWizard()">
-                <i class="fas fa-magic"></i>
-                <span>Collections Wizard</span>
+                <i class="fas fa-folder-plus"></i>
+                <span>Create New Collection</span>
             </button>
         </div>
     </section>
@@ -106,7 +108,8 @@
         <div class="collection-manager-content">
             <div class="collection-manager-header">
                 <h3><i class="fas fa-folder-plus"></i> Manage Collections</h3>
-                <button @click="showCollectionManager = false" class="close-btn">
+                <button @click="showCollectionManager = false"
+                    class="close-btn">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -169,83 +172,133 @@
     </div>
 
     <!-- Collections Wizard Overlay -->
-    <div x-show="showWizard" x-transition class="fixed inset-0 z-[10010] grid place-items-center bg-black/70">
-        <div class="w-full max-w-3xl bg-[var(--background-dark)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden">
-            <div class="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
-                <h3 class="text-white text-lg font-semibold flex items-center gap-2"><i class="fas fa-magic"></i> Collections Wizard</h3>
-                <button class="text-white/70 hover:text-white" @click="closeWizard()"><i class="fas fa-times"></i></button>
+    <div x-show="showWizard" x-transition
+        class="fixed inset-0 z-[10010] grid place-items-center bg-black/60 backdrop-blur-sm">
+        <div
+            class="w-full max-w-3xl bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+            <div
+                class="flex items-center justify-between p-4 border-b border-white/10">
+                <h3
+                    class="text-white text-lg font-semibold flex items-center gap-2"><i
+                        class="fas fa-folder-plus"></i> Create New Collection</h3>
+                <button class="text-white/70 hover:text-white"
+                    @click="closeWizard()"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-4">
                 <!-- Step indicators -->
                 <div class="flex items-center gap-2 mb-4 text-sm">
-                    <span :class="{'text-white': wizardStep===1, 'text-white/50': wizardStep!==1}">1. Choose focus</span>
+                    <span
+                        :class="{'text-white': wizardStep===1, 'text-white/50': wizardStep!==1}">1.
+                        Choose focus</span>
                     <span class="text-white/30">→</span>
-                    <span :class="{'text-white': wizardStep===2, 'text-white/50': wizardStep!==2}">2. Select items</span>
+                    <span
+                        :class="{'text-white': wizardStep===2, 'text-white/50': wizardStep!==2}">2.
+                        Select items</span>
                     <span class="text-white/30">→</span>
-                    <span :class="{'text-white': wizardStep===3, 'text-white/50': wizardStep!==3}">3. Create or pick collection</span>
+                    <span
+                        :class="{'text-white': wizardStep===3, 'text-white/50': wizardStep!==3}">3.
+                        Create or pick collection</span>
                     <span class="text-white/30">→</span>
-                    <span :class="{'text-white': wizardStep===4, 'text-white/50': wizardStep!==4}">4. Review</span>
+                    <span
+                        :class="{'text-white': wizardStep===4, 'text-white/50': wizardStep!==4}">4.
+                        Review</span>
                 </div>
 
                 <!-- Step 1: focus -->
                 <div x-show="wizardStep===1" class="space-y-3">
                     <p class="text-white/80">What do you want to organize?</p>
                     <div class="flex gap-2">
-                        <button class="btn" @click="wizardFilter='track'; wizardNext()"><i class="fas fa-music"></i> Tracks</button>
-                        <button class="btn" @click="wizardFilter='show'; wizardNext()"><i class="fas fa-tv"></i> Shows</button>
-                        <button class="btn" @click="wizardFilter=null; wizardNext()"><i class="fas fa-th"></i> All</button>
+                        <button class="btn"
+                            @click="wizardFilter='track'; wizardNext()"><i
+                                class="fas fa-music"></i> Tracks</button>
+                        <button class="btn"
+                            @click="wizardFilter='show'; wizardNext()"><i
+                                class="fas fa-tv"></i> Shows</button>
+                        <button class="btn"
+                            @click="wizardFilter=null; wizardNext()"><i
+                                class="fas fa-th"></i> All</button>
                     </div>
                 </div>
 
                 <!-- Step 2: select items -->
                 <div x-show="wizardStep===2" class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <p class="text-white/80">Select items to add to a collection</p>
-                        <button class="btn" @click="wizardSelectAll()">Select All</button>
+                    <div class="flex items-center justify-between gap-3">
+                        <p class="text-white/80">Select items to add to a
+                            collection</p>
+                        <input class="glass-input flex-1 max-w-sm" placeholder="Search your bookmarks…" x-model="wizardQuery">
+                        <button class="btn" @click="wizardSelectAll()">Select
+                            All</button>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-[320px] overflow-auto">
-                        <template x-for="it in (wizardFilter ? list().filter(i=>i.type===wizardFilter) : list())" :key="it.key">
-                            <label class="flex items-center gap-2 p-2 rounded-lg bg-white/5 cursor-pointer">
-                                <input type="checkbox" :value="it.key" x-model="wizardSelected">
+                    <div
+                        class="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-[320px] overflow-auto">
+                        <template
+                            x-for="it in (wizardFilter ? list().filter(i=>i.type===wizardFilter) : list()).filter(i => (wizardQuery||'').trim() === '' ? true : (i.title||'').toLowerCase().includes((wizardQuery||'').toLowerCase()))"
+                            :key="it.key">
+                            <label
+                                class="flex items-center gap-2 p-2 rounded-lg bg-white/5 cursor-pointer">
+                                <input type="checkbox" :value="it.key"
+                                    x-model="wizardSelected">
                                 <span class="truncate" x-text="it.title"></span>
-                                <span class="text-xs px-2 py-0.5 rounded bg-white/10" x-text="it.type"></span>
+                                <span
+                                    class="text-xs px-2 py-0.5 rounded bg-white/10"
+                                    x-text="it.type"></span>
                             </label>
                         </template>
                     </div>
                     <div class="flex justify-end gap-2">
                         <button class="btn" @click="wizardBack()">Back</button>
-                        <button class="btn btn-primary" :disabled="wizardSelected.length===0" @click="wizardNext()">Next</button>
+                        <button class="btn btn-primary"
+                            :disabled="wizardSelected.length===0"
+                            @click="wizardNext()">Next</button>
                     </div>
                 </div>
 
                 <!-- Step 3: create or pick collection -->
                 <div x-show="wizardStep===3" class="space-y-3">
-                    <p class="text-white/80">Pick an existing collection or create a new one</p>
-                    <div class="grid grid-cols-2 gap-2 max-h-[220px] overflow-auto p-1 border border-[var(--border-color)] rounded">
-                        <template x-for="c in Object.values(collections)" :key="c.id">
-                            <button class="text-left p-2 rounded hover:bg-white/10" :class="{'ring-1 ring-white/40': wizardCollection && wizardCollection.id===c.id}" @click="wizardCollection=c">
-                                <div class="text-white">{{ '{{' }} c.name {{ '}}' }}</div>
-                                <div class="text-white/50 text-xs">{{ '{{' }} c.description || '—' {{ '}}' }}</div>
+                    <p class="text-white/80">Pick an existing collection or
+                        create a new one</p>
+                    <div
+                        class="grid grid-cols-2 gap-2 max-h-[220px] overflow-auto p-1 border border-[var(--border-color)] rounded">
+                        <template x-for="c in Object.values(collections)"
+                            :key="c.id">
+                            <button
+                                class="text-left p-2 rounded hover:bg-white/10"
+                                :class="{'ring-1 ring-white/40': wizardCollection && wizardCollection.id===c.id}"
+                                @click="wizardCollection=c">
+                                <div class="text-white">{{ '{{' }} c.name {{
+                                    '}}' }}</div>
+                                <div class="text-white/50 text-xs">{{ '{{' }}
+                                    c.description || '—' {{ '}}' }}</div>
                             </button>
                         </template>
                     </div>
                     <div class="flex items-center gap-2">
-                        <input class="flex-1 collection-input" placeholder="New collection name (suggested: 'Focus Mix', 'Watch Soon')" x-model="wizardNewName">
-                        <button class="btn" @click="wizardSuggest()">Suggest</button>
-                        <button class="btn btn-primary" :disabled="!wizardNewName.trim()" @click="wizardCreate()">Create</button>
+                        <input class="flex-1 collection-input"
+                            placeholder="New collection name (suggested: 'Focus Mix', 'Watch Soon')"
+                            x-model="wizardNewName">
+                        <button class="btn"
+                            @click="wizardSuggest()">Suggest</button>
+                        <button class="btn btn-primary"
+                            :disabled="!wizardNewName.trim()"
+                            @click="wizardCreate()">Create</button>
                     </div>
                     <div class="flex justify-end gap-2">
                         <button class="btn" @click="wizardBack()">Back</button>
-                        <button class="btn btn-primary" :disabled="!wizardCollection" @click="wizardNext()">Next</button>
+                        <button class="btn btn-primary"
+                            :disabled="!wizardCollection"
+                            @click="wizardNext()">Next</button>
                     </div>
                 </div>
 
                 <!-- Step 4: review and apply -->
                 <div x-show="wizardStep===4" class="space-y-3">
-                    <p class="text-white/80">Add <span x-text="wizardSelected.length"></span> items to <strong x-text="wizardCollection?.name"></strong>?</p>
+                    <p class="text-white/80">Add <span
+                            x-text="wizardSelected.length"></span> items to
+                        <strong x-text="wizardCollection?.name"></strong>?</p>
                     <div class="flex justify-end gap-2">
                         <button class="btn" @click="wizardBack()">Back</button>
-                        <button class="btn btn-primary" @click="wizardApply()">Apply</button>
+                        <button class="btn btn-primary"
+                            @click="wizardApply()">Apply</button>
                     </div>
                 </div>
             </div>
@@ -253,9 +306,13 @@
     </div>
 
     <!-- First-time Helper Tooltip -->
-    <div x-show="Object.keys(collections).length === 0 && filteredList().length > 0" 
-         class="mb-3 text-sm text-white/80 bg-white/5 border border-white/10 rounded-xl p-3">
-        Tip: Click the <span class="px-1 rounded bg-white text-black text-xs">📁</span> icon on any card to create your first <strong>Collection</strong> and keep things organized.
+    <div
+        x-show="Object.keys(collections).length === 0 && filteredList().length > 0"
+        class="mb-3 text-sm text-white/80 bg-white/5 border border-white/10 rounded-xl p-3">
+        Tip: Click the <span
+            class="px-1 rounded bg-white text-black text-xs">📁</span> icon on
+        any card to create your first <strong>Collection</strong> and keep
+        things organized.
     </div>
 
     <!-- Bookmarks Grid -->
@@ -285,25 +342,29 @@
                             loading="lazy">
 
                         <!-- Top-left label group -->
-                        <div class="absolute top-2 left-2 flex items-center gap-2">
+                        <div
+                            class="absolute top-2 left-2 flex items-center gap-2">
                             <!-- Age Indicator -->
-                            <span class="text-[11px] px-2 py-0.5 rounded-full text-white"
-                                  :class="getBookmarkAgeCategory(item) === 'new' ? 'bg-teal-600' : 
+                            <span
+                                class="text-[11px] px-2 py-0.5 rounded-full text-white"
+                                :class="getBookmarkAgeCategory(item) === 'new' ? 'bg-teal-600' : 
                                           getBookmarkAgeCategory(item) === 'recent' ? 'bg-green-600' : 
                                           getBookmarkAgeCategory(item) === 'older' ? 'bg-yellow-600' : 'bg-gray-600'"
-                                  x-text="getAgeLabel(item)">
+                                x-text="getAgeLabel(item)">
                             </span>
-                            
+
                             <!-- Collection Badge -->
-                            <span class="text-[11px] px-2 py-0.5 rounded-full text-white"
-                                  data-collection-badge
-                                  :class="item.collection_id ? 'bg-blue-600' : 'bg-white/10'"
-                                  x-text="item.collection_id ? getCollectionName(item.collection_id) : 'Unorganized'">
+                            <span
+                                class="text-[11px] px-2 py-0.5 rounded-full text-white"
+                                data-collection-badge
+                                :class="item.collection_id ? 'bg-blue-600' : 'bg-white/10'"
+                                x-text="item.collection_id ? getCollectionName(item.collection_id) : 'Unorganized'">
                             </span>
                         </div>
 
                         <!-- Hover actions (right-top) -->
-                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition flex gap-1">
+                        <div
+                            class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition flex gap-1">
                             <!-- Open chooser -->
                             <button
                                 class="w-8 h-8 rounded-full grid place-items-center bg-white/90 hover:bg-white text-black shadow"
@@ -311,7 +372,7 @@
                                 @click.stop="openCollectionChooser(item)">
                                 📁
                             </button>
-                            
+
                             <!-- Add to collection -->
                             <button
                                 class="w-8 h-8 rounded-full grid place-items-center bg-blue-600 hover:bg-blue-700 text-white shadow"
@@ -463,6 +524,7 @@ function bookmarksPageHandler() {
         wizardSelected: [],
         wizardCollection: null,
         wizardNewName: '',
+        wizardQuery: '',
         showNestManager: false,
         newNestName: '',
         newNestDescription: '',
@@ -757,6 +819,20 @@ function bookmarksPageHandler() {
 </script>
 
 <style>
+.glass-input {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: white;
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-input::placeholder { color: rgba(255,255,255,0.55); }
+.glass-input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+}
 .bookmarks-container {
     min-height: 100vh;
 }
