@@ -1,5 +1,8 @@
 from flask import Flask, render_template, jsonify, request, session, send_from_directory, make_response
-from flask_session import Session
+try:
+    from flask_session import Session as FlaskSession
+except Exception:  # ImportError or env issues
+    FlaskSession = None
 from flask_login import current_user
 import os
 import json
@@ -64,7 +67,10 @@ def create_app():
     # Add secret key for session management (change in production)
     app.secret_key = os.getenv('SECRET_KEY', 'change-me-in-production')
     # Initialize server-side sessions (filesystem by default per config)
-    Session(app)
+    if FlaskSession is not None:
+        FlaskSession(app)
+    else:
+        print("⚠️  Flask-Session not available; using client-side cookies only. Activate venv or install Flask-Session.")
     bcrypt.init_app(app)
     login_manager.init_app(app)
     limiter.init_app(app)
@@ -2277,7 +2283,7 @@ def trending_content():
 
 # Allow `python -m app` locally if needed
 if __name__ == "__main__":
-    import os, socket
+    import os, socket, subprocess, shutil, sys
 
     def _is_port_free(p: int) -> bool:
         try:
@@ -2287,6 +2293,24 @@ if __name__ == "__main__":
         except OSError:
             return False
 
+    # 1) Ensure DB migrations are applied (best-effort for local dev)
+    try:
+        alembic_bin = shutil.which("alembic")
+        if alembic_bin:
+            print("⚙️  Applying migrations (alembic upgrade head)…")
+            env = os.environ.copy()
+            # Ensure PYTHONPATH includes project root so alembic/env.py can import models
+            project_root = os.path.dirname(os.path.abspath(__file__))
+            env["PYTHONPATH"] = f"{project_root}:{env.get('PYTHONPATH','')}" if env.get('PYTHONPATH') else project_root
+            # Provide a sane default DATABASE_URL for local runs
+            env.setdefault("DATABASE_URL", "sqlite:///local.db")
+            subprocess.run([alembic_bin, "upgrade", "head"], check=True, env=env)
+        else:
+            print("⚠️  Alembic not found in PATH; skipping automatic migrations.")
+    except Exception as e:
+        print(f"⚠️  Migrations step skipped: {e}")
+
+    # 2) Pick a free port automatically if requested is busy
     requested = int(os.getenv("PORT", "5000"))
     chosen = requested
     if not _is_port_free(requested):
@@ -2297,5 +2321,12 @@ if __name__ == "__main__":
         else:
             print(f"⚠️  Port {requested} busy and no alternates free in 5001-5010. Trying {requested} anyway…")
 
-    # Reuse the already-created `app` with all routes registered above
-    app.run(port=chosen, use_reloader=False)
+    # 3) Run with gunicorn if available for parity; else Flask dev server
+    gunicorn_bin = shutil.which("gunicorn")
+    if gunicorn_bin:
+        print(f"🚀 Starting gunicorn on port {chosen}…")
+        # Use the same interface as Render's script but single worker for local
+        os.execv(gunicorn_bin, ["gunicorn", "app:app", "--workers", "2", "--threads", "4", "--timeout", "120", "-b", f"0.0.0.0:{chosen}"])
+    else:
+        print(f"🚀 Starting Flask dev server on http://127.0.0.1:{chosen}")
+        app.run(port=chosen, use_reloader=False)
