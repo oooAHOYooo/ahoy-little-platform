@@ -16,6 +16,12 @@ class MediaPlayer {
         this.audioElement = null;
         this.videoElement = null;
         this.eventListeners = new Map();
+        // Passive listening-time tracker (persisted)
+        this.listening = {
+            totalSec: parseInt(localStorage.getItem('ahoy.listening.totalSec') || '0', 10) || 0,
+            lastTick: null,
+            lastPersist: 0
+        };
         
         this.initializePlayer();
     }
@@ -46,22 +52,26 @@ class MediaPlayer {
         this.audioElement.addEventListener('timeupdate', () => {
             this.currentTime = this.audioElement.currentTime;
             this.emit('timeupdate', this.currentTime);
+            this._onTimeProgress();
         });
         
         this.audioElement.addEventListener('play', () => {
             this.isPlaying = true;
             this.emit('play');
+            this._onStarted();
         });
         
         this.audioElement.addEventListener('pause', () => {
             this.isPlaying = false;
             this.emit('pause');
+            this._onPaused();
         });
         
         this.audioElement.addEventListener('ended', () => {
             this.isPlaying = false;
             this.emit('ended');
             this.handleTrackEnd();
+            this._onPaused();
         });
         
         this.audioElement.addEventListener('volumechange', () => {
@@ -79,22 +89,26 @@ class MediaPlayer {
         this.videoElement.addEventListener('timeupdate', () => {
             this.currentTime = this.videoElement.currentTime;
             this.emit('timeupdate', this.currentTime);
+            this._onTimeProgress();
         });
         
         this.videoElement.addEventListener('play', () => {
             this.isPlaying = true;
             this.emit('play');
+            this._onStarted();
         });
         
         this.videoElement.addEventListener('pause', () => {
             this.isPlaying = false;
             this.emit('pause');
+            this._onPaused();
         });
         
         this.videoElement.addEventListener('ended', () => {
             this.isPlaying = false;
             this.emit('ended');
             this.handleTrackEnd();
+            this._onPaused();
         });
         
         this.videoElement.addEventListener('volumechange', () => {
@@ -305,6 +319,45 @@ class MediaPlayer {
         } else {
             this.stop();
         }
+    }
+    
+    // Passive listening-time helpers
+    _onStarted() {
+        this.listening.lastTick = Date.now();
+    }
+    _onPaused() {
+        if (this.listening.lastTick) {
+            const now = Date.now();
+            const delta = Math.max(0, Math.floor((now - this.listening.lastTick) / 1000));
+            if (delta > 0) {
+                this.listening.totalSec += delta;
+                this._persistListening();
+            }
+        }
+        this.listening.lastTick = null;
+    }
+    _onTimeProgress() {
+        if (!this.isPlaying) return;
+        const now = Date.now();
+        if (!this.listening.lastTick) { this.listening.lastTick = now; return; }
+        const delta = Math.max(0, Math.floor((now - this.listening.lastTick) / 1000));
+        if (delta > 0) {
+            this.listening.totalSec += delta;
+            this.listening.lastTick = now;
+            if (now - this.listening.lastPersist > 5000) {
+                this._persistListening();
+            }
+        }
+    }
+    _persistListening() {
+        this.listening.lastPersist = Date.now();
+        try {
+            localStorage.setItem('ahoy.listening.totalSec', String(this.listening.totalSec));
+        } catch (_) {}
+        // Notify listeners each time we persist
+        try {
+            window.dispatchEvent(new CustomEvent('listening:update', { detail: { totalSeconds: this.listening.totalSec } }));
+        } catch (_) {}
     }
     
     // Cleanup

@@ -718,6 +718,50 @@ For questions or support:
 
 ---
 
+### 2025-10-17 — Gamification, Listening, DB Migrations, APIs, UI
+
+- Database & Migrations
+  - Added SQLAlchemy models: `ListeningSession`, `ListeningTotal`, `Achievement`, `UserAchievement`, `QuestDef`, `UserQuest`, `RadioPrefs`.
+  - Alembic migrations:
+    - `0004_add_user_profile_fields.py` (display_name, avatar_url, preferences JSON/JSONB, last_active_at, disabled).
+    - `0005_create_listening_tables.py` (sessions + totals, indexes, Postgres UUID default).
+    - `0006_create_achievements.py` (achievements + user_achievements, unique + indexes).
+    - `0007_create_quests.py` (quest_defs + user_quests, unique + indexes, JSONB rules on Postgres).
+    - `0008_create_radio_prefs.py` (per-user radio prefs; JSONB on Postgres).
+
+- Services
+  - `services/listening.py`: start/end listening sessions; idempotent end with safe tz math; updates totals.
+  - `services/gamify.py`: `on_event`, `check_achievements`, `apply_quest_progress`, `ensure_user_daily_quests`.
+
+- CLI
+  - `flask gamify seed-defs` (upsert default achievements and daily quests).
+  - `flask gamify backfill-totals` (estimate listen totals from play_history).
+  - `flask gamify ensure-today` (create today/weekly user quests; idempotent).
+
+- APIs
+  - New blueprint `blueprints/api/gamify.py` under `/api`:
+    - `GET /api/me/gamification` (badges, listen totals, today’s quests, recent unlocks).
+    - `POST /api/debug/gamify` (dev-only; guarded by `AHOY_DEV_GAMIFY_DEBUG`).
+  - Minimal listening hooks:
+    - `POST /api/listening/start` and `/api/listening/end`.
+
+- Hooks
+  - Wired `blueprints/activity.py` to call gamify on `play` and `save`.
+
+- UI
+  - Header badge chips partial `templates/_badge_chips.html` (shows up to 3 recent badges); included in `base.html` next to username.
+  - Account page mission list describing how to earn badges/merit badges.
+
+- Config & App bootstrap
+  - Sessions: `SESSION_TYPE=filesystem`, secure cookie flags; Flask-Session integration (optional if not installed).
+  - `app.py` local UX: auto-apply migrations (with PYTHONPATH/DATABASE_URL defaults), pick a free port, prefer gunicorn if available.
+
+- Render/Prod readiness
+  - `scripts/migrate_and_start.sh` runs `alembic upgrade head` before gunicorn.
+  - Added deploy/seed/test steps to this README.
+
+Notes: Local dev defaults to SQLite if `DATABASE_URL` is unset; Postgres JSONB/UUID features are enabled automatically in migrations when available.
+
 ---
 
 ## 🚀 Quick Navigation

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Ahoy Radio (Experimental){% endblock %}
+
+{% block content %}
+<div class="radio-page" x-data="radioPage()" x-init="init()">
+    <section class="radio-hero">
+        <h1><i class="fas fa-broadcast-tower"></i> Ahoy Radio <span
+                class="badge">Experimental</span></h1>
+        <p>Tune in for a continuous mix from your indie library.</p>
+        <div class="radio-controls">
+            <button class="btn btn-primary" @click="toggle()">
+                <span x-show="!isPlaying"><i class="fas fa-play"></i>
+                    Play</span>
+                <span x-show="isPlaying"><i class="fas fa-pause"></i>
+                    Pause</span>
+            </button>
+            <button class="btn" @click="skip()"><i class="fas fa-forward"></i>
+                Skip</button>
+            <label class="checkbox-label" style="margin-left:12px">
+                <input type="checkbox" x-model="shuffle">
+                <span class="checkmark"></span>
+                Shuffle
+            </label>
+        </div>
+    </section>
+
+    <section class="radio-now">
+        <div class="now-card" x-show="current">
+            <img :src="current.cover_art || '/static/img/default-cover.jpg'"
+                alt="cover" class="now-cover">
+            <div class="now-info">
+                <h3 x-text="current.title"></h3>
+                <p x-text="current.artist"></p>
+            </div>
+        </div>
+    </section>
+
+    <section class="radio-upnext">
+        <h3>Up Next</h3>
+        <div class="playing-list">
+            <template x-for="item in upNext.slice(0, 8)" :key="item.id">
+                <div class="playing-item"
+                    :style="`background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${item.cover_art || '/static/img/default-cover.jpg'}); background-size: cover; background-position: center;`"
+                    @click="playNow(item)">
+                    <div class="item-details">
+                        <h4 x-text="item.title"></h4>
+                        <p x-text="item.artist"></p>
+                    </div>
+                    <div class="play-indicator"><i
+                            class="fas fa-play"></i></div>
+                </div>
+            </template>
+        </div>
+    </section>
+</div>
+
+<script>
+function radioPage(){
+    return {
+        isPlaying: false,
+        shuffle: true,
+        tracks: [],
+        queue: [],
+        current: null,
+        upNext: [],
+        async init(){
+            try{
+                const r = await fetch('/api/music');
+                const data = await r.json();
+                const tracks = (data.tracks||[]).filter(t=>t.audio_url||t.preview_url);
+                // Deduplicate by id
+                const seen = new Set();
+                this.tracks = tracks.filter(t=>{ if(seen.has(t.id)) return false; seen.add(t.id); return true; });
+                this._buildQueue();
+            }catch(e){ console.error('radio load failed', e); }
+        },
+        _buildQueue(){
+            const list = [...this.tracks];
+            if(this.shuffle) list.sort(()=>0.5-Math.random());
+            this.queue = list.map(t=>({ ...t, type: 'track' }));
+            this.upNext = this.queue.slice(0, 20);
+        },
+        toggle(){
+            if(this.isPlaying){ window.mediaPlayer.pause(); this.isPlaying=false; return; }
+            if(!this.current){ this._playNext(); return; }
+            window.mediaPlayer.resume(); this.isPlaying=true;
+        },
+        skip(){ this._playNext(); },
+        playNow(item){ this.current = item; window.mediaPlayer.play(item); this.isPlaying = true; },
+        _playNext(){
+            if(this.queue.length === 0) this._buildQueue();
+            const next = this.queue.shift();
+            if(next){ this.current = next; window.mediaPlayer.play(next); this.isPlaying = true; }
+            this.upNext = this.queue.slice(0, 20);
+        }
+    }
+}
+</script>
+{% endblock %}

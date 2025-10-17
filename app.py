@@ -1,4 +1,8 @@
 from flask import Flask, render_template, jsonify, request, session, send_from_directory, make_response
+try:
+    from flask_session import Session as FlaskSession
+except Exception:  # ImportError or env issues
+    FlaskSession = None
 from flask_login import current_user
 import os
 import json
@@ -22,6 +26,9 @@ from blueprints.activity import bp as activity_bp
 from blueprints.playlists import bp as playlists_bp
 from blueprints.bookmarks import bp as bookmarks_bp
 from blueprints.collections import bp as collections_bp
+from blueprints.api.gamify import bp as gamify_api_bp
+from services.listening import start_session as listening_start_session, end_session as listening_end_session
+from services.user_resolver import resolve_db_user_id
 
 # Initialize search index on app startup
 def initialize_search_index():
@@ -59,6 +66,11 @@ def create_app():
 
     # Add secret key for session management (change in production)
     app.secret_key = os.getenv('SECRET_KEY', 'change-me-in-production')
+    # Initialize server-side sessions (filesystem by default per config)
+    if FlaskSession is not None:
+        FlaskSession(app)
+    else:
+        print("⚠️  Flask-Session not available; using client-side cookies only. Activate venv or install Flask-Session.")
     bcrypt.init_app(app)
     login_manager.init_app(app)
     limiter.init_app(app)
@@ -72,10 +84,19 @@ def create_app():
     app.register_blueprint(playlists_bp)
     app.register_blueprint(bookmarks_bp)
     app.register_blueprint(collections_bp)
+    app.register_blueprint(gamify_api_bp)
     
     # Initialize search index
     with app.app_context():
         initialize_search_index()
+
+    # Register Click CLI commands
+    try:
+        from commands.gamify import gamify_cli
+        app.cli.add_command(gamify_cli, name="gamify")
+    except Exception as e:
+        # CLI should not break app startup
+        print(f"⚠️  CLI registration skipped: {e}")
 
     # Health check endpoint
     @app.get("/healthz")
@@ -456,6 +477,34 @@ def api_now_playing():
     
     return jsonify({'feed': feed_items})
 
+    # Minimal listening hooks (optional endpoints for client player)
+    @app.post('/api/listening/start')
+    def api_listening_start():
+        try:
+            data = request.get_json(silent=True) or {}
+            media_type = (data.get('media_type') or '').strip() or 'track'
+            media_id = (data.get('media_id') or '').strip()
+            source = (data.get('source') or 'manual').strip()
+            uid = resolve_db_user_id()
+            if not uid:
+                return jsonify({'error': 'not_authenticated'}), 401
+            sid = listening_start_session(uid, media_type, media_id, source)
+            return jsonify({'session_id': sid})
+        except Exception as e:
+            return jsonify({'error': 'failed', 'detail': str(e)}), 400
+
+    @app.post('/api/listening/end')
+    def api_listening_end():
+        try:
+            data = request.get_json(silent=True) or {}
+            sid = (data.get('session_id') or '').strip()
+            if not sid:
+                return jsonify({'error': 'missing_session_id'}), 400
+            seconds = listening_end_session(sid)
+            return jsonify({'seconds': int(seconds or 0)})
+        except Exception as e:
+            return jsonify({'error': 'failed', 'detail': str(e)}), 400
+
 @app.route('/api/weather')
 def api_weather():
     """Get weather information for user's location"""
@@ -572,6 +621,11 @@ def api_music():
     """Get all music data"""
     music_data = load_json_data('music.json', {'tracks': []})
     return jsonify(music_data)
+
+@app.route('/radio')
+def radio_page():
+    """Experimental: Ahoy Radio - continuous play from all music."""
+    return render_template('radio.html')
 
 @app.route('/api/shows')
 def api_shows():
@@ -2229,7 +2283,7 @@ def trending_content():
 
 # Allow `python -m app` locally if needed
 if __name__ == "__main__":
-    import os, socket
+    import os, socket, subprocess, shutil, sys
 
     def _is_port_free(p: int) -> bool:
         try:
@@ -2239,6 +2293,24 @@ if __name__ == "__main__":
         except OSError:
             return False
 
+    # 1) Ensure DB migrations are applied (best-effort for local dev)
+    try:
+        alembic_bin = shutil.which("alembic")
+        if alembic_bin:
+            print("⚙️  Applying migrations (alembic upgrade head)…")
+            env = os.environ.copy()
+            # Ensure PYTHONPATH includes project root so alembic/env.py can import models
+            project_root = os.path.dirname(os.path.abspath(__file__))
+            env["PYTHONPATH"] = f"{project_root}:{env.get('PYTHONPATH','')}" if env.get('PYTHONPATH') else project_root
+            # Provide a sane default DATABASE_URL for local runs
+            env.setdefault("DATABASE_URL", "sqlite:///local.db")
+            subprocess.run([alembic_bin, "upgrade", "head"], check=True, env=env)
+        else:
+            print("⚠️  Alembic not found in PATH; skipping automatic migrations.")
+    except Exception as e:
+        print(f"⚠️  Migrations step skipped: {e}")
+
+    # 2) Pick a free port automatically if requested is busy
     requested = int(os.getenv("PORT", "5000"))
     chosen = requested
     if not _is_port_free(requested):
@@ -2249,5 +2321,12 @@ if __name__ == "__main__":
         else:
             print(f"⚠️  Port {requested} busy and no alternates free in 5001-5010. Trying {requested} anyway…")
 
-    # Reuse the already-created `app` with all routes registered above
-    app.run(port=chosen, use_reloader=False)
+    # 3) Run with gunicorn if available for parity; else Flask dev server
+    gunicorn_bin = shutil.which("gunicorn")
+    if gunicorn_bin:
+        print(f"🚀 Starting gunicorn on port {chosen}…")
+        # Use the same interface as Render's script but single worker for local
+        os.execv(gunicorn_bin, ["gunicorn", "app:app", "--workers", "2", "--threads", "4", "--timeout", "120", "-b", f"0.0.0.0:{chosen}"])
+    else:
+        print(f"🚀 Starting Flask dev server on http://127.0.0.1:{chosen}")
+        app.run(port=chosen, use_reloader=False)

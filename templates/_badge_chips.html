@@ -1,0 +1,39 @@
+<div class="badge-chips" x-data="badgeChips()" x-init="init()">
+    <template x-if="badges.length === 0">
+        <div class="badge-chip placeholder"
+            title="Earn badges by playing and saving">
+            <i class="fas fa-award"></i>
+            <span>Badges</span>
+        </div>
+    </template>
+    <template x-for="b in badges.slice(0, maxToShow)" :key="b.key">
+        <div class="badge-chip" :title="b.title">
+            <i :class="b.icon || 'fas fa-award'"></i>
+            <span x-text="b.title"></span>
+        </div>
+    </template>
+</div>
+
+<script>
+function badgeChips() {
+    return {
+        badges: [],
+        maxToShow: 3,
+        async init() {
+            try {
+                const r = await fetch('/api/me/gamification');
+                if (!r.ok) return;
+                const data = await r.json();
+                this.badges = Array.isArray(data.badges) ? data.badges : [];
+            } catch (_) {}
+        }
+    };
+}
+</script>
+
+<style>
+.badge-chips { display: inline-flex; gap: 6px; margin-left: 8px; vertical-align: middle; }
+.badge-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 9999px; background: rgba(255,255,255,0.08); font-size: 12px; line-height: 1; }
+.badge-chip i { color: var(--accent-color, #34d399); }
+.badge-chip.placeholder { opacity: .7; }
+</style>
