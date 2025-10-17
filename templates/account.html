@@ -26,7 +26,8 @@
                 <p class="account-email"
                     x-text="userProfile.email || 'No email'"></p>
                 <div class="account-actions">
-                    <button type="button" class="btn btn-secondary" onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">
                         <i class="fas fa-palette"></i> Theme Picker
                     </button>
                 </div>
@@ -45,6 +46,10 @@
                         <span class="stat-number"
                             x-text="userStats.playlists || 0"></span>
                         <span class="stat-label">Boards</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" x-text="streakDays"></span>
+                        <span class="stat-label">Day Streak</span>
                     </div>
                 </div>
             </div>
@@ -96,14 +101,17 @@
                         <div class="overview-card">
                             <h3>Recent Activity</h3>
                             <div class="activity-list">
-                                <template x-for="item in recentActivity" :key="item.id">
+                                <template x-for="item in recentActivity"
+                                    :key="item.id">
                                     <div class="activity-item">
                                         <div class="activity-icon">
-                                            <i :class="getActivityIcon(item.type)"></i>
+                                            <i
+                                                :class="getActivityIcon(item.type)"></i>
                                         </div>
                                         <div class="activity-details">
                                             <p x-text="item.description"></p>
-                                            <span class="activity-time" x-text="formatTimeAgo(item.timestamp)"></span>
+                                            <span class="activity-time"
+                                                x-text="formatTimeAgo(item.timestamp)"></span>
                                         </div>
                                     </div>
                                 </template>
@@ -149,6 +157,93 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="overview-card">
+                        <h3>Today’s Quests</h3>
+                        <div class="quest-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill"
+                                    :style="`width: ${dailyProgressPct}%`"></div>
+                            </div>
+                            <span class="progress-text"
+                                x-text="`${completedQuests}/${dailyQuests.length} completed`"></span>
+                        </div>
+                        <div class="quests-list">
+                            <template x-for="q in dailyQuests" :key="q.id">
+                                <div class="quest-item" :class="{done: q.done}">
+                                    <div class="quest-info">
+                                        <h4 x-text="q.title"></h4>
+                                        <p x-text="q.description"></p>
+                                    </div>
+                                    <div class="quest-actions">
+                                        <button class="btn btn-primary"
+                                            @click="toggleQuest(q)"
+                                            :disabled="q.done">
+                                            <span
+                                                x-show="!q.done">Complete</span>
+                                            <span x-show="q.done"><i
+                                                    class="fas fa-check"></i></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="overview-card">
+                        <h3>Level & XP</h3>
+                        <div class="xp-header">
+                            <div class="xp-level">Level <span
+                                    x-text="level"></span></div>
+                            <div class="xp-points"
+                                x-text="`${xp}/${nextLevelXp} XP`"></div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill"
+                                :style="`width: ${xpPct}%`"></div>
+                        </div>
+                        <p class="text-xs"
+                            style="margin-top:8px;opacity:.8">Play, save, and
+                            complete quests to earn XP.</p>
+                    </div>
+
+                    <div class="overview-card">
+                        <h3>Achievements</h3>
+                        <div class="achievements-grid">
+                            <template x-for="a in achievements" :key="a.id">
+                                <div class="achievement"
+                                    :class="{ unlocked: a.unlocked }"
+                                    :title="a.description">
+                                    <div class="badge">
+                                        <i :class="a.icon"></i>
+                                    </div>
+                                    <div class="label" x-text="a.title"></div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="overview-card">
+                        <h3>How to earn badges</h3>
+                        <ul class="mission-list">
+                            <li><strong>First Play</strong> – press play on your
+                                first track.</li>
+                            <li><strong>First Save</strong> – bookmark anything
+                                you love.</li>
+                            <li><strong>Queue Starter</strong> – add your first
+                                item to the queue.</li>
+                            <li><strong>Playlist Creator</strong> – create your
+                                first playlist/board.</li>
+                            <li><strong>One Hour Listened</strong> – reach 60
+                                minutes of listening time.</li>
+                            <li><strong>Daily Listener</strong> – complete
+                                today’s “Listen 15m” quest.</li>
+                        </ul>
+                        <p class="text-xs"
+                            style="opacity:.8;margin-top:6px;">More merit badges
+                            are coming soon. Daily and weekly quests refresh
+                            automatically.</p>
+                    </div>
                 </div>
             </div>
 
@@ -158,15 +253,18 @@
                     <div class="activity-timeline">
                         <h3>Activity Timeline</h3>
                         <div class="timeline">
-                            <template x-for="item in activityTimeline" :key="item.id">
+                            <template x-for="item in activityTimeline"
+                                :key="item.id">
                                 <div class="timeline-item">
                                     <div class="timeline-marker">
-                                        <i :class="getActivityIcon(item.type)"></i>
+                                        <i
+                                            :class="getActivityIcon(item.type)"></i>
                                     </div>
                                     <div class="timeline-content">
                                         <h4 x-text="item.title"></h4>
                                         <p x-text="item.description"></p>
-                                        <span class="timeline-time" x-text="formatDateTime(item.timestamp)"></span>
+                                        <span class="timeline-time"
+                                            x-text="formatDateTime(item.timestamp)"></span>
                                     </div>
                                 </div>
                             </template>
@@ -322,7 +420,8 @@
                     </form>
                     <div class="form-section">
                         <h4>Appearance</h4>
-                        <button type="button" class="btn btn-secondary" onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">
                             <i class="fas fa-palette"></i> Theme Picker
                         </button>
                     </div>
@@ -487,6 +586,14 @@ function accountPage() {
         activityTimeline: [],
         activeTab: 'overview',
         isUpdating: false,
+        // Habit systems
+        streakDays: 0,
+        lastActiveDate: null,
+        xp: 0,
+        level: 1,
+        nextLevelXp: 100,
+        dailyQuests: [],
+        achievements: [],
         profileForm: {
             display_name: '',
             bio: '',
@@ -504,6 +611,10 @@ function accountPage() {
             this.loadRecentActivity();
             this.loadTopContent();
             this.loadActivityTimeline();
+            this.loadHabitState();
+            this.seedQuests();
+            this.seedAchievements();
+            this._wireGlobalEvents();
         },
         
         async loadUserData() {
@@ -636,6 +747,124 @@ function accountPage() {
             this.activityTimeline = [];
         },
         
+        // Habit state
+        loadHabitState() {
+            try {
+                const data = JSON.parse(localStorage.getItem('ahoy.account.habits') || '{}');
+                this.streakDays = data.streakDays || 0;
+                this.lastActiveDate = data.lastActiveDate || null;
+                this.xp = data.xp || 0;
+                this.level = data.level || 1;
+                this.nextLevelXp = data.nextLevelXp || 100;
+                this.touchDailyActivity();
+            } catch (_) {
+                this.streakDays = 1; this.lastActiveDate = new Date().toISOString().slice(0,10);
+            }
+        },
+        saveHabitState() {
+            localStorage.setItem('ahoy.account.habits', JSON.stringify({
+                streakDays: this.streakDays,
+                lastActiveDate: this.lastActiveDate,
+                xp: this.xp,
+                level: this.level,
+                nextLevelXp: this.nextLevelXp
+            }));
+        },
+        touchDailyActivity() {
+            const today = new Date();
+            const todayKey = today.toISOString().slice(0,10);
+            if (!this.lastActiveDate) {
+                this.lastActiveDate = todayKey; this.streakDays = 1; this.saveHabitState(); return;
+            }
+            if (this.lastActiveDate === todayKey) return; // already counted today
+            const last = new Date(this.lastActiveDate);
+            const diffDays = Math.round((today - last) / (1000*60*60*24));
+            if (diffDays === 1) this.streakDays += 1; else if (diffDays > 1) this.streakDays = 1;
+            this.lastActiveDate = todayKey;
+            this.grantXp(5); // daily login bonus
+            this.unlockAchievement('streak_1');
+            if (this.streakDays >= 3) this.unlockAchievement('streak_3');
+            if (this.streakDays >= 7) this.unlockAchievement('streak_7');
+            this.saveHabitState();
+        },
+        grantXp(amount) {
+            this.xp += amount;
+            while (this.xp >= this.nextLevelXp) {
+                this.xp -= this.nextLevelXp;
+                this.level += 1;
+                this.nextLevelXp = Math.round(this.nextLevelXp * 1.25);
+                this.showNotification(`Level up! You are now level ${this.level}.`, 'success');
+            }
+            this.saveHabitState();
+        },
+        get xpPct() {
+            return Math.max(0, Math.min(100, Math.round((this.xp / this.nextLevelXp) * 100)));
+        },
+
+        // Quests
+        seedQuests() {
+            const todayKey = new Date().toISOString().slice(0,10);
+            const stored = JSON.parse(localStorage.getItem('ahoy.account.quests') || '{}');
+            if (stored.date === todayKey && Array.isArray(stored.items)) {
+                this.dailyQuests = stored.items;
+                return;
+            }
+            this.dailyQuests = [
+                { id: 'play_1', title: 'Spin It', description: 'Play 1 track', done: false, xp: 10 },
+                { id: 'save_1', title: 'Mark It', description: 'Bookmark 1 item', done: false, xp: 10 },
+                { id: 'queue_1', title: 'Queue It', description: 'Add something to your queue', done: false, xp: 10 }
+            ];
+            localStorage.setItem('ahoy.account.quests', JSON.stringify({ date: todayKey, items: this.dailyQuests }));
+        },
+        get completedQuests() {
+            return (this.dailyQuests || []).filter(q => q.done).length;
+        },
+        get dailyProgressPct() {
+            const total = (this.dailyQuests || []).length || 1;
+            return Math.round((this.completedQuests / total) * 100);
+        },
+        toggleQuest(q) {
+            if (q.done) return;
+            q.done = true;
+            this.grantXp(q.xp || 10);
+            localStorage.setItem('ahoy.account.quests', JSON.stringify({
+                date: new Date().toISOString().slice(0,10),
+                items: this.dailyQuests
+            }));
+            this.showNotification(`+${q.xp || 10} XP`, 'success');
+        },
+
+        // Achievements
+        seedAchievements() {
+            const stored = JSON.parse(localStorage.getItem('ahoy.account.achievements') || '[]');
+            this.achievements = stored.length ? stored : [
+                // Level 1 basics
+                { id: 'play_first', title: 'First Spin', description: 'Play your first track', icon: 'fas fa-play', unlocked: false },
+                { id: 'save_first', title: 'First Save', description: 'Bookmark your first item', icon: 'fas fa-bookmark', unlocked: false },
+                { id: 'queue_first', title: 'In The Queue', description: 'Add your first item to the queue', icon: 'fas fa-list', unlocked: false },
+                { id: 'playlist_first', title: 'Boarded', description: 'Create your first playlist/board', icon: 'fas fa-layer-group', unlocked: false },
+                // Listening time tiers
+                { id: 'listen_10', title: '10 Minutes', description: 'Listen for 10 minutes total', icon: 'fas fa-headphones', unlocked: false },
+                { id: 'listen_20', title: '20 Minutes', description: 'Listen for 20 minutes total', icon: 'fas fa-headphones', unlocked: false },
+                { id: 'listen_60', title: 'Hour In', description: 'Listen for 60 minutes total', icon: 'fas fa-headphones', unlocked: false },
+                // Streaks
+                { id: 'streak_1', title: 'Day One', description: 'Log activity for 1 day in a row', icon: 'fas fa-fire', unlocked: this.streakDays >= 1 },
+                { id: 'streak_3', title: 'Getting Warm', description: '3-day streak', icon: 'fas fa-fire-alt', unlocked: this.streakDays >= 3 },
+                { id: 'streak_7', title: 'On A Roll', description: '7-day streak', icon: 'fas fa-burn', unlocked: this.streakDays >= 7 },
+                // Collection
+                { id: 'saver_10', title: 'Collector', description: 'Save 10 items', icon: 'fas fa-bookmark', unlocked: (this.userStats.total_saves || 0) >= 10 }
+            ];
+            localStorage.setItem('ahoy.account.achievements', JSON.stringify(this.achievements));
+        },
+        unlockAchievement(id) {
+            const a = (this.achievements || []).find(x => x.id === id);
+            if (a && !a.unlocked) {
+                a.unlocked = true;
+                localStorage.setItem('ahoy.account.achievements', JSON.stringify(this.achievements));
+                this.showNotification(`Achievement unlocked: ${a.title}`, 'success');
+            }
+        },
+
         populateForm() {
             this.profileForm = {
                 display_name: this.userProfile.display_name || '',
@@ -792,6 +1021,31 @@ function accountPage() {
                     }
                 }, 300);
             }, 3000);
+        }
+        ,
+        // Wire achievements to global app events
+        _wireGlobalEventsOnce: false,
+        _wireGlobalEvents() {
+            if (this._wireGlobalEventsOnce) return; this._wireGlobalEventsOnce = true;
+            // Bookmark actions
+            document.addEventListener('bookmarks:changed', (e) => {
+                try { this.unlockAchievement('save_first'); } catch(_) {}
+                try {
+                    const total = (window.AhoyBookmarks && window.AhoyBookmarks.count && window.AhoyBookmarks.count()) || (this.userStats.total_saves || 0);
+                    if (total >= 10) this.unlockAchievement('saver_10');
+                } catch(_) {}
+            });
+            // Queue/playlist actions
+            document.addEventListener('playlist:created', () => { this.unlockAchievement('playlist_first'); });
+            // Player play
+            document.addEventListener('play-track', () => { this.unlockAchievement('play_first'); });
+            // Listening time updates
+            window.addEventListener('listening:update', (e) => {
+                const sec = (e && e.detail && e.detail.totalSeconds) || 0;
+                if (sec >= 10*60) this.unlockAchievement('listen_10');
+                if (sec >= 20*60) this.unlockAchievement('listen_20');
+                if (sec >= 60*60) this.unlockAchievement('listen_60');
+            });
         }
     };
 }

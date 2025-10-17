@@ -9,8 +9,11 @@ from sqlalchemy import (
     UniqueConstraint,
     Index,
     Boolean,
+    JSON,
+    BigInteger,
 )
 from sqlalchemy.orm import declarative_base, relationship
+import uuid
 
 
 Base = declarative_base()
@@ -24,6 +27,11 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     is_admin = Column(Boolean, nullable=False, default=False, server_default='false', index=True)
+    display_name = Column(String(255), nullable=True)
+    avatar_url = Column(String(1024), nullable=True)
+    preferences = Column(JSON, nullable=False, default=dict)
+    last_active_at = Column(DateTime(timezone=True), nullable=True, index=True)
+    disabled = Column(Boolean, nullable=False, default=False, server_default='false', index=True)
 
     playlists = relationship('Playlist', back_populates='user', cascade='all, delete-orphan')
     bookmarks = relationship('Bookmark', back_populates='user', cascade='all, delete-orphan')
@@ -120,6 +128,33 @@ class PlayHistory(Base):
         )
 
 
+class ListeningSession(Base):
+    __tablename__ = 'listening_sessions'
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    media_type = Column(String(20), nullable=False)  # track|episode|clip|short|album|playlist
+    media_id = Column(String(36), nullable=False)
+    started_at = Column(DateTime(timezone=True), nullable=False)
+    ended_at = Column(DateTime(timezone=True), nullable=True)
+    seconds = Column(Integer, nullable=False, default=0)
+    source = Column(String(20), nullable=False, default='manual')  # radio|manual
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        Index('ix_listening_sessions_user_id_started_at', 'user_id', 'started_at'),
+        Index('ix_listening_sessions_media', 'media_type', 'media_id'),
+    )
+
+
+class ListeningTotal(Base):
+    __tablename__ = 'listening_totals'
+
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
+    total_seconds = Column(BigInteger, nullable=False, default=0)
+    updated_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+
+
 class Feedback(Base):
     __tablename__ = 'feedback'
 
@@ -135,4 +170,75 @@ class Feedback(Base):
     def __repr__(self) -> str:
         return f"<Feedback id={self.id} user_id={self.user_id} created_at={self.created_at}>"
 
+
+class RadioPrefs(Base):
+    __tablename__ = 'radio_prefs'
+
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
+    shuffle = Column(Boolean, nullable=False, default=True, server_default='true')
+    include_shows = Column(Boolean, nullable=False, default=True, server_default='true')
+    seed_tags = Column(JSON, nullable=False, default=list)  # JSONB on Postgres via migration
+    last_station_key = Column(String(255), nullable=True)
+
+
+class Achievement(Base):
+    __tablename__ = 'achievements'
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    key = Column(String(100), nullable=False, unique=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(String(2000), nullable=True)
+    icon = Column(String(255), nullable=True)
+    tier = Column(String(20), nullable=False)  # bronze|silver|gold|platinum
+    kind = Column(String(20), nullable=False)  # play|save|queue|playlist|streak|listen_time
+    threshold_int = Column(Integer, nullable=True)
+    active = Column(Boolean, nullable=False, default=True, server_default='true', index=True)
+    sort = Column(Integer, nullable=False, default=0, server_default='0')
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class UserAchievement(Base):
+    __tablename__ = 'user_achievements'
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    achievement_id = Column(String(36), ForeignKey('achievements.id', ondelete='CASCADE'), nullable=False, index=True)
+    unlocked_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'achievement_id', name='uq_user_achievement_once'),
+        Index('ix_user_achievements_user_id_unlocked_at', 'user_id', 'unlocked_at'),
+    )
+
+
+class QuestDef(Base):
+    __tablename__ = 'quest_defs'
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    key = Column(String(100), nullable=False, unique=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(String(2000), nullable=True)
+    xp = Column(Integer, nullable=False, default=10, server_default='10')
+    cadence = Column(String(20), nullable=False)  # daily|weekly
+    kind = Column(String(20), nullable=False)  # play|save|queue|playlist|streak|listen_time
+    rule = Column(JSON, nullable=True)
+    active = Column(Boolean, nullable=False, default=True, server_default='true', index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class UserQuest(Base):
+    __tablename__ = 'user_quests'
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    quest_id = Column(String(36), ForeignKey('quest_defs.id', ondelete='CASCADE'), nullable=False, index=True)
+    day_key = Column(String(20), nullable=False)  # YYYY-MM-DD or ISO week key
+    progress_int = Column(Integer, nullable=False, default=0, server_default='0')
+    done = Column(Boolean, nullable=False, default=False, server_default='false', index=True)
+    completed_at = Column(DateTime, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'quest_id', 'day_key', name='uq_user_quest_per_day'),
+        Index('ix_user_quests_user_id_day_key', 'user_id', 'day_key'),
+    )
 

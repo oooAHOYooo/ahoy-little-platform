@@ -134,20 +134,24 @@
             </div>
 
             <!-- My Bookmarks Widget -->
-            <div class="grid-item bookmarks-widget" x-data="homeBookmarksWidget()" x-init="loadBookmarks()">
+            <div class="grid-item bookmarks-widget"
+                x-data="homeBookmarksWidget()" x-init="loadBookmarks()">
                 <div class="item-header">
                     <h3><i class="fas fa-bookmark"></i> My Bookmarks</h3>
-                    <a href="/bookmarks" class="view-all-btn" x-show="bookmarksList().length > 0">
+                    <a href="/bookmarks" class="view-all-btn"
+                        x-show="bookmarksList().length > 0">
                         <span x-text="bookmarksList().length"></span>
                     </a>
                 </div>
                 <div class="bookmarks-content">
                     <!-- Empty State -->
-                    <div class="bookmarks-empty" x-show="bookmarksList().length === 0">
+                    <div class="bookmarks-empty"
+                        x-show="bookmarksList().length === 0">
                         <div class="empty-state">
                             <i class="fas fa-bookmark"></i>
                             <h4>No Bookmarks Yet</h4>
-                            <p>Start bookmarking your favorite tracks, shows, and artists!</p>
+                            <p>Start bookmarking your favorite tracks, shows,
+                                and artists!</p>
                             <div class="bookmark-tips">
                                 <a href="/music" class="tip-link">
                                     <i class="fas fa-music"></i> Browse Music
@@ -160,19 +164,19 @@
                     </div>
 
                     <!-- Bookmarks Preview -->
-                    <div class="bookmarks-preview" x-show="bookmarksList().length > 0">
-                        <template x-for="bookmark in bookmarksList().slice(0, 4)" :key="bookmark.key">
-                            <div class="bookmark-item"
+                    <div class="bookmarks-preview playing-list"
+                        x-show="bookmarksList().length > 0">
+                        <template
+                            x-for="bookmark in bookmarksList().slice(0, 4)"
+                            :key="bookmark.key">
+                            <div class="playing-item"
                                 :style="`background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url(${bookmark.artwork || '/static/img/default-cover.jpg'}); background-size: cover; background-position: center;`"
                                 @click="playBookmark(bookmark)">
-                                <div class="bookmark-type-badge">
-                                    <i :class="bookmark.type === 'track' ? 'fas fa-music' : bookmark.type === 'show' ? 'fas fa-tv' : 'fas fa-user-music'"></i>
-                                </div>
-                                <div class="bookmark-info">
+                                <div class="item-details">
                                     <h4 x-text="bookmark.title"></h4>
                                     <p x-text="bookmark.type"></p>
                                 </div>
-                                <div class="bookmark-play-overlay">
+                                <div class="play-indicator">
                                     <i class="fas fa-play"></i>
                                 </div>
                             </div>
@@ -180,9 +184,42 @@
                     </div>
 
                     <!-- View All Link -->
-                    <a href="/bookmarks" class="view-all-btn bookmark-view-all" x-show="bookmarksList().length > 4">
+                    <a href="/bookmarks" class="view-all-btn bookmark-view-all"
+                        x-show="bookmarksList().length > 4">
                         <i class="fas fa-arrow-right"></i> View All Bookmarks
                     </a>
+                </div>
+            </div>
+            <!-- Recently Added (Latest Updates) -->
+            <div class="grid-item recently-added" x-data="recentlyAdded()"
+                x-init="init()">
+                <div class="item-header">
+                    <h3><i class="fas fa-bolt"></i> Recently Added</h3>
+                    <span class="view-all-btn" x-show="latestDateText"
+                        x-text="latestDateText"></span>
+                </div>
+                <div x-show="isLoading" class="playing-list">
+                    <div class="playing-item"
+                        style="opacity:.6;display:flex;align-items:center;justify-content:center;">
+                        <span>Loading latest…</span>
+                    </div>
+                </div>
+                <div class="playing-list">
+                    <template x-for="item in latestItems" :key="item.id">
+                        <div class="playing-item"
+                            x-show="item.cover_art || item.thumbnail"
+                            :style="`background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${item.cover_art || item.thumbnail}); background-size: cover; background-position: center;`"
+                            @click="play(item)">
+                            <div class="item-details">
+                                <h4 x-text="item.title"></h4>
+                                <p
+                                    x-text="item.artist || (item.host || '')"></p>
+                            </div>
+                            <div class="play-indicator">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>
@@ -806,6 +843,100 @@ function homeBookmarksWidget() {
                 // Navigate to artist page
                 window.location.href = `/artists/${bookmark.id}`;
             }
+        }
+    };
+}
+
+// Recently Added widget logic
+function recentlyAdded() {
+    return {
+        isLoading: true,
+        latestItems: [],
+        latestDateText: '',
+        async init() {
+            try {
+                const [musicRes, showsRes] = await Promise.all([
+                    fetch('/api/music'),
+                    fetch('/api/shows')
+                ]);
+                const musicData = await musicRes.json();
+                const showsData = await showsRes.json();
+
+                const tracks = (musicData.tracks || []).map(t => ({
+                    ...t,
+                    type: t.type || 'track',
+                    dateComparable: this.parseAnyDate(t.added_date || t.date_added)
+                }));
+                const shows = (showsData.shows || []).map(s => ({
+                    ...s,
+                    type: 'show',
+                    title: s.title,
+                    artist: s.host,
+                    cover_art: s.thumbnail,
+                    dateComparable: this.parseAnyDate(s.published_date || s.added_date)
+                }));
+
+                // Combine and find latest date
+                const combined = [...tracks, ...shows].filter(i => i.dateComparable);
+                combined.sort((a, b) => b.dateComparable - a.dateComparable);
+
+                const latestDate = combined.length ? combined[0].dateComparable : null;
+                if (latestDate) {
+                    // Show up to 6 items with that same latest date
+                    const sameDay = combined.filter(i => this.isSameDay(i.dateComparable, latestDate)).slice(0, 6);
+                    this.latestItems = sameDay;
+                    this.latestDateText = `Updated ${this.humanDate(latestDate)}`;
+                } else {
+                    this.latestItems = combined.slice(0, 6);
+                }
+            } catch (e) {
+                console.error('Error loading Recently Added:', e);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        play(item) {
+            if (item.type === 'show') {
+                window.location.href = `/player?id=${item.id}&type=show`;
+                return;
+            }
+            if (window.mediaPlayer && typeof window.mediaPlayer.play === 'function') {
+                window.mediaPlayer.play(item);
+                return;
+            }
+            if (window.globalPlayer && typeof window.globalPlayer.play === 'function') {
+                window.globalPlayer.play(item);
+                return;
+            }
+            window.location.href = `/music?highlight=${item.id}`;
+        },
+        parseAnyDate(d) {
+            if (!d) return null;
+            // Try ISO (YYYY-MM-DD)
+            const iso = Date.parse(d);
+            if (!isNaN(iso)) return new Date(iso);
+            // Try MM-DD-YY or MM-DD-YYYY
+            const parts = String(d).replace(/\//g, '-').split('-').map(x => x.trim());
+            if (parts.length >= 2) {
+                let [mm, dd, yy] = parts;
+                mm = parseInt(mm, 10); dd = parseInt(dd, 10);
+                if (!isNaN(mm) && !isNaN(dd)) {
+                    let yyyy = parseInt(yy, 10);
+                    if (!isNaN(yyyy)) {
+                        if (yyyy < 100) yyyy = 2000 + yyyy; // assume 20xx
+                        return new Date(yyyy, mm - 1, dd);
+                    }
+                }
+            }
+            return null;
+        },
+        isSameDay(a, b) {
+            return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+        },
+        humanDate(d) {
+            try {
+                return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+            } catch (_) { return ''; }
         }
     };
 }
