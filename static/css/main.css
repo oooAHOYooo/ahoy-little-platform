@@ -1021,6 +1021,97 @@ a:hover {
     }
 }
 
+/* ========================================
+   Account: Achievements Grid + Hover Glow
+   ======================================== */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.achievement {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.9rem;
+    background: var(--background-medium);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease, background 0.2s ease;
+    text-align: center;
+    min-height: 120px;
+    cursor: pointer;
+}
+
+.achievement .badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 212, 255, 0.08);
+    border: 1px solid rgba(0, 212, 255, 0.25);
+    color: var(--accent-color);
+}
+
+.achievement .label {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.achievement .desc {
+    margin-top: 0.25rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-color);
+}
+
+.achievement .desc p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.achievement:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-color);
+    background: rgba(0, 212, 255, 0.06);
+    box-shadow: 0 8px 24px rgba(0, 212, 255, 0.25), 0 0 20px rgba(0, 212, 255, 0.25);
+}
+
+.achievement.unlocked {
+    border-color: rgba(0, 212, 255, 0.5);
+    background: rgba(0, 212, 255, 0.08);
+}
+
+.achievement.unlocked .badge {
+    background: rgba(0, 212, 255, 0.15);
+    border-color: rgba(0, 212, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+    .achievements-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.75rem;
+    }
+    .achievement {
+        min-height: 104px;
+        padding: 0.75rem;
+    }
+    .achievement .badge {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+    }
+    .achievement .label {
+        font-size: 0.8rem;
+    }
+}
+
 /* Loading States */
 .loading-state {
     display: flex;
@@ -1312,6 +1403,113 @@ a:hover {
 }
 
 /* ========================================
+   Account: Today’s Quests Grid + Hover Glow
+   ======================================== */
+.quests-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.quest-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.9rem;
+    background: var(--background-medium);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.quest-item:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-color);
+    background: rgba(0, 212, 255, 0.06);
+    box-shadow: 0 8px 24px rgba(0, 212, 255, 0.25), 0 0 20px rgba(0, 212, 255, 0.25);
+}
+
+.quest-item.done {
+    opacity: 0.75;
+    border-color: rgba(16, 185, 129, 0.5);
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.quest-item .quest-info h4 {
+    margin: 0 0 4px 0;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.quest-item .quest-info p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.quest-item .quest-actions .btn {
+    padding: 0.5rem 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .quests-list {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.75rem;
+    }
+}
+
+/* Subtle progress bar styling inside quests card */
+.quests-card .progress-bar {
+    height: 6px;
+    background: var(--background-light);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.quests-card .progress-fill {
+    background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
+}
+
+/* ========================================
+   Account: Level & XP Card Hover Glow
+   ======================================== */
+.xp-card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--background-medium);
+    transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.xp-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-color);
+    background: rgba(0, 212, 255, 0.06);
+    box-shadow: 0 8px 24px rgba(0, 212, 255, 0.25), 0 0 20px rgba(0, 212, 255, 0.25);
+}
+
+.xp-card .xp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.xp-card .xp-level span {
+    color: var(--accent-color);
+    font-weight: 700;
+}
+
+.xp-card .progress-bar {
+    height: 8px;
+    background: var(--background-light);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.xp-card .progress-fill {
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+}
    📱 BEAUTIFUL MOBILE FOOTER
    ======================================== */
 @media (max-width: 768px) {

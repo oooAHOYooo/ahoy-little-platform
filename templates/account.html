@@ -3,7 +3,7 @@
 {% block title %}My Account - Ahoy Indie Media{% endblock %}
 
 {% block content %}
-<div class="account-page" x-data="accountPage()" x-init="init()">
+<div class="account-page" x-data="accountPage()" x-init="init()" @keydown.escape.window="openAchievementId = null">
     <!-- Account Header -->
     <div class="account-header">
         <div class="account-hero">
@@ -158,7 +158,7 @@
                         </div>
                     </div>
 
-                    <div class="overview-card">
+                    <div class="overview-card quests-card">
                         <h3>Today’s Quests</h3>
                         <div class="quest-progress">
                             <div class="progress-bar">
@@ -190,7 +190,7 @@
                         </div>
                     </div>
 
-                    <div class="overview-card">
+                    <div class="overview-card xp-card">
                         <h3>Level & XP</h3>
                         <div class="xp-header">
                             <div class="xp-level">Level <span
@@ -207,42 +207,53 @@
                             complete quests to earn XP.</p>
                     </div>
 
-                    <div class="overview-card">
+                    <div class="overview-card" @click.away="openAchievementId = null">
                         <h3>Achievements</h3>
                         <div class="achievements-grid">
                             <template x-for="a in achievements" :key="a.id">
                                 <div class="achievement"
                                     :class="{ unlocked: a.unlocked }"
-                                    :title="a.description">
+                                    :title="a.description"
+                                    @click="openAchievementId = (openAchievementId === a.id ? null : a.id)">
                                     <div class="badge">
                                         <i :class="a.icon"></i>
                                     </div>
                                     <div class="label" x-text="a.title"></div>
+                                    <div class="desc" x-show="openAchievementId === a.id" x-transition>
+                                        <p x-text="a.description"></p>
+                                    </div>
                                 </div>
                             </template>
                         </div>
                     </div>
 
-                    <div class="overview-card">
-                        <h3>How to earn badges</h3>
-                        <ul class="mission-list">
-                            <li><strong>First Play</strong> – press play on your
-                                first track.</li>
-                            <li><strong>First Save</strong> – bookmark anything
-                                you love.</li>
-                            <li><strong>Queue Starter</strong> – add your first
-                                item to the queue.</li>
-                            <li><strong>Playlist Creator</strong> – create your
-                                first playlist/board.</li>
-                            <li><strong>One Hour Listened</strong> – reach 60
-                                minutes of listening time.</li>
-                            <li><strong>Daily Listener</strong> – complete
-                                today’s “Listen 15m” quest.</li>
-                        </ul>
-                        <p class="text-xs"
-                            style="opacity:.8;margin-top:6px;">More merit badges
-                            are coming soon. Daily and weekly quests refresh
-                            automatically.</p>
+                    <div class="overview-card" x-data="{}">
+                        <h3>My Bookmarks</h3>
+                        <div class="bookmarks-content">
+                            <div class="bookmarks-empty" x-show="bookmarksList().length === 0">
+                                <div class="empty-state">
+                                    <i class="fas fa-bookmark"></i>
+                                    <h4>No Bookmarks Yet</h4>
+                                    <p class="muted">Save tracks or shows to see them here.</p>
+                                    <a href="/bookmarks" class="btn btn-primary">Go to Bookmarks</a>
+                                </div>
+                            </div>
+                            <div class="bookmarks-preview playing-list" x-show="bookmarksList().length > 0">
+                                <template x-for="bookmark in bookmarksList().slice(0, 4)" :key="bookmark.key">
+                                    <div class="playing-item" @click="$dispatch('play-track', bookmark)">
+                                        <div class="item-details">
+                                            <h4 x-text="bookmark.title"></h4>
+                                            <p x-text="(bookmark.type || 'track')"></p>
+                                        </div>
+                                        <div class="play-indicator"><i class="fas fa-play"></i></div>
+                                        <img class="thumb-bg" :src="bookmark.artwork || '/static/img/default-cover.jpg'" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:brightness(0.7);">
+                                    </div>
+                                </template>
+                            </div>
+                            <a href="/bookmarks" class="bookmark-view-all" x-show="bookmarksList().length > 4">
+                                View All Bookmarks
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -594,6 +605,8 @@ function accountPage() {
         nextLevelXp: 100,
         dailyQuests: [],
         achievements: [],
+        bookmarks: {},
+        openAchievementId: null,
         profileForm: {
             display_name: '',
             bio: '',
@@ -615,6 +628,7 @@ function accountPage() {
             this.seedQuests();
             this.seedAchievements();
             this._wireGlobalEvents();
+            this.loadBookmarks();
         },
         
         async loadUserData() {
@@ -863,6 +877,42 @@ function accountPage() {
                 localStorage.setItem('ahoy.account.achievements', JSON.stringify(this.achievements));
                 this.showNotification(`Achievement unlocked: ${a.title}`, 'success');
             }
+        },
+
+        // Bookmarks (overview widget)
+        loadBookmarks() {
+            try { this.refreshBookmarks(); } catch(_) {}
+            document.addEventListener('bookmarks:changed', () => {
+                try { this.refreshBookmarks(); } catch(_) {}
+            });
+        },
+        refreshBookmarks() {
+            this.bookmarks = {};
+            try {
+                if (window.AhoyBookmarks && typeof window.AhoyBookmarks.all === 'function') {
+                    const items = window.AhoyBookmarks.all();
+                    (items || []).forEach((item) => {
+                        const key = item.key || `${item.type}:${item.id}`;
+                        this.bookmarks[key] = item;
+                    });
+                    return;
+                }
+                // Fallback to localStorage (guest or offline)
+                const raw = localStorage.getItem('ahoy.bookmarks.v1');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    const list = Array.isArray(parsed?.items) ? parsed.items : [];
+                    list.forEach((item) => {
+                        const key = item.key || `${item.type}:${item.id}`;
+                        this.bookmarks[key] = item;
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to refresh bookmarks', e);
+            }
+        },
+        bookmarksList() {
+            return Object.values(this.bookmarks || {});
         },
 
         populateForm() {
