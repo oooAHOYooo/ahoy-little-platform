@@ -2,6 +2,10 @@
 
 {% block title %}Player - Ahoy Indie Media{% endblock %}
 
+{% block head %}
+<script src="/static/js/media-session.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="player-container" x-data="fullPlayer()" x-init="loadMedia()">
 
@@ -40,13 +44,15 @@
                         <i class="fas fa-share"></i>
                         <span>Share</span>
                     </button>
-                    <button @click="toggleBookmark()" 
+                    <button @click="toggleBookmark()"
                         class="action-btn bm-btn save-btn"
                         :class="{ 'just-bookmarked': isBookmarked() }"
                         :aria-pressed="isBookmarked()">
-                        <i :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'" 
-                           :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
-                        <span x-text="isBookmarked() ? 'Bookmarked' : 'Bookmark'"></span>
+                        <i
+                            :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'"
+                            :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
+                        <span
+                            x-text="isBookmarked() ? 'Bookmarked' : 'Bookmark'"></span>
                     </button>
                 </div>
             </div>
@@ -86,14 +92,16 @@
                     </div>
                 </div>
                 <div class="media-actions">
-                    <button @click="toggleBookmark()" 
+                    <button @click="toggleBookmark()"
                         class="action-btn bm-btn save-btn floating-bookmark"
                         :class="{ 'just-bookmarked': isBookmarked() }"
                         :aria-pressed="isBookmarked()"
                         title="Bookmark this media">
-                        <i :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'" 
-                           :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
-                        <span x-text="isBookmarked() ? 'Bookmarked' : 'Bookmark'"></span>
+                        <i
+                            :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'"
+                            :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
+                        <span
+                            x-text="isBookmarked() ? 'Bookmarked' : 'Bookmark'"></span>
                     </button>
                 </div>
             </div>
@@ -227,6 +235,7 @@ function fullPlayer() {
                 
                 this.currentMedia = data;
                 this.setupMediaPlayer();
+                this.setupMediaSession();
             } catch (error) {
                 console.error('Error loading media:', error);
             } finally {
@@ -255,6 +264,22 @@ function fullPlayer() {
             }
         },
         
+        setupMediaSession() {
+            // Initialize media session for background audio controls
+            if (window.mediaSessionManager && this.currentMedia) {
+                const player = {
+                    play: () => this.togglePlay(),
+                    pause: () => this.togglePlay(),
+                    prev: () => this.previousTrack(),
+                    next: () => this.nextTrack(),
+                    seek: (time) => this.seekTo(time)
+                };
+                
+                window.mediaSessionManager.init(player);
+                window.mediaSessionManager.updateMetadata(this.currentMedia);
+            }
+        },
+        
         // Player controls
         togglePlay() {
             if (this.mediaType === 'show' && this.$refs.videoPlayer) {
@@ -271,6 +296,11 @@ function fullPlayer() {
                 }
             }
             this.isPlaying = !this.isPlaying;
+            
+            // Update media session state
+            if (window.mediaSessionManager) {
+                window.mediaSessionManager.updatePlaybackState(this.isPlaying ? 'playing' : 'paused');
+            }
         },
         
         previousTrack() {

@@ -11,6 +11,14 @@
         <meta name="author" content="Ahoy Indie Media">
         <meta name="robots" content="index, follow">
 
+        <!-- PWA Meta Tags -->
+        <meta name="theme-color" content="#111111">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="Ahoy">
+        <link rel="manifest" href="/static/manifest.webmanifest">
+        <link rel="apple-touch-icon" href="/static/images/icon-192.png">
+
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
         <meta property="og:url" content="{{ request.url }}">
@@ -1154,5 +1162,20 @@
         </script>
 
         {% block extra_scripts %}{% endblock %}
+        
+        <!-- Service Worker Registration -->
+        <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/service-worker.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+        </script>
     </body>
 </html>

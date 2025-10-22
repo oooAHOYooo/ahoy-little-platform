@@ -596,6 +596,80 @@ For production releases, consider code signing to avoid OS security warnings:
 
 **⚠️ Warning:** Unsigned binaries will trigger OS security prompts and may be blocked by antivirus software. Code signing is recommended for distribution.
 
+### Android Signing
+
+For production Android releases, sign the APK with your keystore:
+
+```bash
+# Set environment variables
+export ANDROID_KEYSTORE_BASE64="base64_encoded_keystore_content"
+export ANDROID_KEY_ALIAS="your_key_alias"
+export ANDROID_KEYSTORE_PASSWORD="keystore_password"
+export ANDROID_KEY_PASSWORD="key_password"
+
+# Sign the APK
+./scripts/sign_apk.sh android/app/build/outputs/apk/release/app-release-unsigned.apk
+```
+
+**Environment Variables:**
+- `ANDROID_KEYSTORE_BASE64`: Base64-encoded .jks keystore file
+- `ANDROID_KEY_ALIAS`: Key alias in the keystore
+- `ANDROID_KEYSTORE_PASSWORD`: Keystore password
+- `ANDROID_KEY_PASSWORD`: Key password
+
+### Android Device Smoke Test
+
+After building the APK, verify it works correctly on a physical device:
+
+**Pre-installation:**
+1. Enable "Install unknown apps" in Android Settings → Apps → Special access → Install unknown apps
+2. For Android 13+: Settings → Apps → Special app access → Install unknown apps → [Your browser/ADB]
+
+**Installation:**
+```bash
+# Install via ADB
+adb install AhoyIndieMedia-Android-release.apk
+
+# Or download APK to device and install manually
+```
+
+**First Launch Tests:**
+1. **Audio Playback:** Tap play on a track, confirm audio continues with screen off
+2. **Media Controls:** Use notification controls (Android OS shows controls via Media Session API)
+3. **Headset Controls:** Confirm headset buttons play/pause work correctly
+4. **Background Audio:** Switch to another app, verify audio continues playing
+5. **Lock Screen:** Lock device, verify media controls appear on lock screen
+
+**Expected Behavior:**
+- App loads production URL (https://ahoy-indie-media.onrender.com)
+- Audio plays without user gesture requirement
+- Media session controls work in notifications and lock screen
+- Headset buttons control playback
+- App continues playing when backgrounded
+
+### iOS Build (Optional)
+
+For iOS builds, additional setup is required:
+
+```bash
+# Install iOS platform
+npm install @capacitor/ios@5.7.0
+npx cap add ios
+
+# Open in Xcode
+open ios/App/App.xcworkspace
+```
+
+**Xcode Configuration:**
+1. Set bundle identifier: `com.ahoy.app`
+2. Select development team
+3. Enable "Background Modes" capability:
+   - Audio, AirPlay, and Picture in Picture
+4. Build to device or simulator
+
+**Background Modes Enabled:**
+- Audio, AirPlay, and Picture in Picture
+
 ### Database and Migrations (User State)
 
 This project uses SQLAlchemy and Alembic for user state. In production, set `DATABASE_URL` (Postgres recommended). Locally, the app defaults to SQLite file `sqlite:///local.db` if no database URL is provided.
