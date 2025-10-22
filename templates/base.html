@@ -27,17 +27,24 @@
         <meta property="og:description"
             content="{% block og_description %}Discover and save indie music, shows, and media. Create playlists, save favorites, and explore new artists.{% endblock %}">
         <meta property="og:image"
-            content="{{ url_for('static', filename='img/ahoy_logo.png') }}">
+            content="{{ url_for('static', filename='img/ahoy_logo.png', _external=True) }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:site_name" content="Ahoy Indie Media">
 
         <!-- Twitter -->
-        <meta property="twitter:card" content="summary_large_image">
-        <meta property="twitter:url" content="{{ request.url }}">
-        <meta property="twitter:title"
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:url" content="{{ request.url }}">
+        <meta name="twitter:title"
             content="{% block twitter_title %}Ahoy Indie Media - Discover Indie Music & Shows{% endblock %}">
-        <meta property="twitter:description"
+        <meta name="twitter:description"
             content="{% block twitter_description %}Discover and save indie music, shows, and media. Create playlists, save favorites, and explore new artists.{% endblock %}">
-        <meta property="twitter:image"
-            content="{{ url_for('static', filename='img/ahoy_logo.png') }}">
+        <meta name="twitter:image"
+            content="{{ url_for('static', filename='img/ahoy_logo.png', _external=True) }}">
+        <meta name="twitter:image:alt" content="Ahoy Indie Media Logo">
+
+        <!-- Canonical URL -->
+        <link rel="canonical" href="{{ request.url }}">
 
         <!-- Favicon -->
         <link rel="icon" type="image/png"
@@ -635,10 +642,19 @@
                     <div class="footer-section">
                         <h4>Legal</h4>
                         <ul>
-                            <li><a href="/privacy">Privacy Policy</a></li>
-                            <li><a href="/terms">Terms of Service</a></li>
+                            <li><a href="/privacy" rel="nofollow">Privacy Policy</a></li>
+                            <li><a href="/terms" rel="nofollow">Terms of Service</a></li>
+                            <li><a href="/security">Security</a></li>
                             <li><a href="{{ url_for('sitemap_page') }}">Sitemap</a></li>
                             <li><a href="/debug-report">Debug Report</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-section">
+                        <h4>Support</h4>
+                        <ul>
+                            <li><a href="mailto:support@ahoy.example">Contact Support</a></li>
+                            <li><a href="/downloads">Downloads</a></li>
                         </ul>
                     </div>
 

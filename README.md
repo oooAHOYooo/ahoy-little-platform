@@ -676,6 +676,74 @@ This project uses SQLAlchemy and Alembic for user state. In production, set `DAT
 
 On Render, wire the database automatically via `render.yaml`:
 
+### Database Backups
+
+Automated nightly backups are configured via GitHub Actions:
+
+```bash
+# Manual backup
+./scripts/backup_db.sh
+
+# Environment variables required:
+# DATABASE_URL - PostgreSQL connection string
+# AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET (for S3)
+# GOOGLE_APPLICATION_CREDENTIALS, GCS_BUCKET (for GCS)
+```
+
+**Manual Restore Steps:**
+1. Download backup from S3/GCS: `aws s3 cp s3://bucket/backups/ahoy_backup_YYYYMMDD_HHMMSS.sql.gz .`
+2. Decompress: `gunzip ahoy_backup_YYYYMMDD_HHMMSS.sql.gz`
+3. Restore: `psql $DATABASE_URL < ahoy_backup_YYYYMMDD_HHMMSS.sql`
+4. Verify: `psql $DATABASE_URL -c "SELECT COUNT(*) FROM users;"`
+
+**Backup Retention:** 30 days (configurable in script)
+
+### Production Readiness Gate
+
+Before launching publicly, run the production readiness check:
+
+```bash
+# Run comprehensive health check
+python scripts/prod_gate.py
+
+# Set custom base URL
+BASE_URL=https://your-domain.com python scripts/prod_gate.py
+```
+
+**What it checks:**
+- `/healthz` endpoint responds with correct version
+- `/readyz` endpoint confirms database connectivity
+- Version matches `ahoy/version.py`
+- Downloads page shows 3 assets (macOS/Windows/Linux)
+- Email service configuration (Resend/SMTP)
+- Test email sending capability
+
+**Sample Output:**
+```json
+{
+  "timestamp": "2025-01-22T17:30:00Z",
+  "base_url": "https://ahoy-indie-media.onrender.com",
+  "overall_status": "PASS",
+  "checks": {
+    "health_endpoint": {"status": "pass", "version": "0.1.1"},
+    "readiness_endpoint": {"status": "pass", "ready": true},
+    "version_match": {"status": "pass", "local_version": "0.1.1"},
+    "downloads_page": {"status": "pass", "asset_count": 3},
+    "email_configuration": {"status": "pass", "can_send_emails": true}
+  },
+  "summary": {
+    "total_checks": 6,
+    "passed": 6,
+    "warnings": 0,
+    "failed": 0
+  }
+}
+```
+
+**Exit Codes:**
+- `0`: All checks passed (ready for production)
+- `1`: One or more checks failed (not ready)
+
 ```yaml
 envVars:
   - key: DATABASE_URL

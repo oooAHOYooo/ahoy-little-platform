@@ -26,3 +26,5 @@ limits
 python-json-logger
 sentry-sdk[flask]
 structlog
+itsdangerous
+requests

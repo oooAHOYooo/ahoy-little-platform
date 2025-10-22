@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Block admin and debug pages
+Disallow: /admin
+Disallow: /debug
+Disallow: /_boom
+Disallow: /debug-report
+
+# Block API endpoints that don't need indexing
+Disallow: /api/auth/
+Disallow: /api/playlists/
+Disallow: /api/bookmarks/
+
+# Allow important pages
+Allow: /music
+Allow: /shows
+Allow: /artists
+Allow: /cast
+Allow: /downloads
+
+# Sitemap location
+Sitemap: https://ahoy-indie-media.onrender.com/sitemap.xml

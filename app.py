@@ -1908,6 +1908,16 @@ def sitemap_page():
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
+@app.route('/sitemap.xml')
+def sitemap_xml():
+    """XML sitemap for search engines"""
+    return send_from_directory('static', 'sitemap.xml', mimetype='application/xml')
+
+@app.route('/robots.txt')
+def robots_txt():
+    """Robots.txt for search engines"""
+    return send_from_directory('static', 'robots.txt', mimetype='text/plain')
+
 @app.route('/cast')
 def cast_page():
     """Casting instructions and sender setup page"""

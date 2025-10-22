@@ -1,0 +1,56 @@
+name: Nightly Database Backup
+
+on:
+  schedule:
+    # Run at 6 AM UTC every day
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup-database:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    
+    - name: Install PostgreSQL client
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+    
+    - name: Install AWS CLI
+      run: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+    
+    - name: Install Google Cloud SDK
+      run: |
+        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+        sudo apt-get update && sudo apt-get install -y google-cloud-cli
+    
+    - name: Run database backup
+      run: |
+        chmod +x scripts/backup_db.sh
+        ./scripts/backup_db.sh
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        S3_BUCKET: ${{ secrets.S3_BUCKET }}
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        GCS_BUCKET: ${{ secrets.GCS_BUCKET }}
+    
+    - name: Upload backup summary
+      uses: actions/upload-artifact@v3
+      with:
+        name: backup-summary-${{ github.run_number }}
+        path: backup-summary.json
+      if: always()
