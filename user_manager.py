@@ -5,11 +5,11 @@ Handles user registration, authentication, and data management
 """
 
 import json
-import hashlib
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 import uuid
+from utils.security import hash_password, verify_password, rehash_legacy_password, is_legacy_hash
 
 class UserManager:
     def __init__(self, users_file: str = 'data/users.json'):
@@ -35,9 +35,8 @@ class UserManager:
             json.dump(self.users, f, indent=2)
     
     def hash_password(self, password: str) -> str:
-        """Hash password with salt"""
-        salt = "ahoy_indie_media_2025"
-        return hashlib.sha256((password + salt).encode()).hexdigest()
+        """Hash password using bcrypt"""
+        return hash_password(password)
     
     def create_user(self, username: str, password: str, email: str, display_name: str = None) -> Dict[str, Any]:
         """Create a new user"""
@@ -99,13 +98,26 @@ class UserManager:
         return user_data
     
     def authenticate_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
-        """Authenticate user login"""
+        """Authenticate user login with legacy password rehashing"""
         if username not in self.users:
             return None
         
         user = self.users[username]
-        if user['password'] != self.hash_password(password):
+        stored_hash = user['password']
+        
+        # Verify password (supports both bcrypt and legacy SHA-256)
+        if not verify_password(password, stored_hash):
             return None
+        
+        # If it's a legacy hash, rehash it transparently
+        if is_legacy_hash(stored_hash):
+            try:
+                new_hash = rehash_legacy_password(password, stored_hash, username)
+                user['password'] = new_hash
+                self.save_users()
+            except ValueError:
+                # Password verification failed, don't rehash
+                return None
         
         # Update last login
         user['last_login'] = datetime.now().isoformat()

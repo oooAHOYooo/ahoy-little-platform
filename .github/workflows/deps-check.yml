@@ -1,0 +1,33 @@
+name: Dependency Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check-dependencies:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Check dependencies
+      run: python scripts/check_deps.py > deps-check-output.txt
+    
+    - name: Upload dependency check results
+      uses: actions/upload-artifact@v3
+      with:
+        name: deps-check-output.txt
+        path: deps-check-output.txt

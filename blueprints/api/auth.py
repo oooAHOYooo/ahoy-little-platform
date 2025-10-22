@@ -1,18 +1,18 @@
 from flask import Blueprint, request, jsonify, g
-from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError
 
 from db import get_session
 from models import User
 from utils.auth import create_access_token, create_refresh_token, jwt_required, decode_token
-from extensions import limiter
+from utils.security import hash_password, verify_password
+from extensions import limiter, rate_limit_auth
 
 
 bp = Blueprint("api_auth", __name__, url_prefix="/api/auth")
 
 
 @bp.post("/register")
-@limiter.limit("5 per minute")
+@limiter.limit(rate_limit_auth)
 def register():
     data = request.get_json(silent=True) or {}
     email = (data.get("email") or "").strip().lower()
@@ -20,7 +20,7 @@ def register():
     if not email or not password:
         return jsonify({"error": "email_and_password_required"}), 400
 
-    pw_hash = generate_password_hash(password)
+    pw_hash = hash_password(password)
 
     try:
         with get_session() as session:
@@ -39,7 +39,7 @@ def register():
 
 
 @bp.post("/login")
-@limiter.limit("5 per minute")
+@limiter.limit(rate_limit_auth)
 def login():
     data = request.get_json(silent=True) or {}
     email = (data.get("email") or "").strip().lower()
@@ -49,7 +49,7 @@ def login():
 
     with get_session() as session:
         user = session.query(User).filter(User.email == email).first()
-        if not user or not check_password_hash(user.password_hash, password):
+        if not user or not verify_password(password, user.password_hash):
             return jsonify({"error": "invalid_credentials"}), 401
 
         access = create_access_token(user.id, user.email)

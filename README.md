@@ -422,6 +422,41 @@ The platform uses a simple file-based user system with:
 
 ## Deployment
 
+### Environment Variables
+
+| Variable | Description | Example Value | Required |
+|----------|-------------|---------------|----------|
+| `FLASK_ENV` | Application environment | `production` | Yes |
+| `SECRET_KEY` | Flask secret key for sessions | `your-secret-key-here` | Yes |
+| `DATABASE_URL` | Database connection string | `postgresql+psycopg://user:pass@host:5432/dbname` | Yes |
+| `SENTRY_DSN` | Sentry error tracking URL | `https://key@sentry.io/project` | No |
+| `RATE_LIMIT_DEFAULT` | Default rate limit | `60 per minute` | No |
+| `RATE_LIMIT_AUTH` | Auth endpoint rate limit | `10 per minute` | No |
+| `SESSION_COOKIE_SECURE` | Secure session cookies | `True` | No |
+| `SESSION_COOKIE_SAMESITE` | SameSite cookie policy | `Lax` | No |
+| `PREFERRED_URL_SCHEME` | URL scheme for redirects | `https` | No |
+| `LOG_LEVEL` | Logging level | `INFO` | No |
+| `REQUEST_ID_HEADER` | Request ID header name | `X-Request-ID` | No |
+
+**⚠️ Security Note:** `SECRET_KEY` and `SENTRY_DSN` contain sensitive information and must not be committed to version control.
+
+### Render.com Deployment
+
+1. **Create a new Web Service** in your Render dashboard
+2. **Connect your GitHub repository**
+3. **Configure environment variables:**
+   - Go to Settings → Environment
+   - Add each variable from the table above
+   - Set `FLASK_ENV=production`
+   - Set `LOG_LEVEL=INFO`
+   - Set `DATABASE_URL` to your Render Postgres connection string
+   - Add `SENTRY_DSN` if using error tracking
+
+4. **Deploy settings:**
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `./scripts/migrate_and_start.sh`
+   - Health Check Path: `/ops/selftest`
+
 ### Production Setup
 
 1. **Set environment variables:**
@@ -456,6 +491,111 @@ CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
 ```
 
 ## Development
+
+### Dependency check
+
+Check that all production dependencies are properly installed:
+
+```bash
+python scripts/check_deps.py
+```
+
+### Render Validation
+
+Validate deployment health and functionality:
+
+```bash
+# Local validation
+python scripts/render_validate.py
+
+# Remote validation (set BASE_URL)
+BASE_URL=https://your-app.onrender.com python scripts/render_validate.py
+```
+
+The script checks:
+- `/healthz` endpoint returns 200
+- `/readyz` endpoint returns 200  
+- `/_boom` endpoint (if `SENTRY_TEST_ROUTE=true`) returns 500
+
+### Downloads Auto-refresh
+
+The downloads page automatically updates with the latest release assets:
+
+```bash
+# Update downloads page manually
+python scripts/update_downloads_page.py
+
+# Set GitHub token for API access
+export GITHUB_TOKEN=your_token_here
+```
+
+**Workflow Requirements:**
+- `GITHUB_TOKEN` with `contents:write` permission
+- Runs automatically after each release
+- Updates `templates/downloads.html` with latest 3 assets
+
+### Desktop Smoke Test
+
+After building desktop apps, verify they work correctly:
+
+**macOS:**
+```bash
+# Remove quarantine attributes (if needed)
+xattr -dr com.apple.quarantine AhoyIndieMedia.app
+
+# Open the app
+open AhoyIndieMedia.app
+
+# Or test with production URL
+open AhoyIndieMedia.app --args --url=https://your-app.onrender.com
+```
+
+**Windows:**
+```cmd
+# Run with production URL
+AhoyIndieMedia.exe --url=https://your-app.onrender.com
+
+# Or run locally (starts Flask server)
+AhoyIndieMedia.exe
+```
+
+**Linux:**
+```bash
+# Make executable and run with production URL
+chmod +x AhoyIndieMedia
+./AhoyIndieMedia --url=https://your-app.onrender.com
+
+# Or run locally
+./AhoyIndieMedia
+```
+
+**Expected Behavior:**
+- Window opens with "Ahoy Indie Media" title
+- App loads the specified URL or starts local server
+- Media playback works correctly
+- Window is resizable with minimum size 1200×800
+- App exits cleanly on window close
+
+### Code Signing (Optional)
+
+For production releases, consider code signing to avoid OS security warnings:
+
+**macOS Developer ID:**
+- Obtain Developer ID Application certificate (.p12 file)
+- Set environment variables in GitHub Actions:
+  - `MACOS_CERT_P12`: Base64-encoded .p12 certificate
+  - `MACOS_CERT_PWD`: Certificate password
+- PyInstaller will automatically sign the .app bundle
+
+**Windows Authenticode:**
+- Obtain code signing certificate (.pfx file)
+- Set environment variables:
+  - `WINDOWS_SIGNING_CERT`: Base64-encoded .pfx certificate
+  - `WINDOWS_SIGNING_PWD`: Certificate password
+- Use SignTool in the build process
+
+**⚠️ Warning:** Unsigned binaries will trigger OS security prompts and may be blocked by antivirus software. Code signing is recommended for distribution.
+
 ### Database and Migrations (User State)
 
 This project uses SQLAlchemy and Alembic for user state. In production, set `DATABASE_URL` (Postgres recommended). Locally, the app defaults to SQLite file `sqlite:///local.db` if no database URL is provided.

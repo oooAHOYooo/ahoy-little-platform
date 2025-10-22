@@ -1,0 +1,127 @@
+name: Release Desktop Apps
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        python-version: ["3.12"]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build desktop app
+      run: |
+        chmod +x scripts/build_desktop.sh
+        ./scripts/build_desktop.sh
+    
+    - name: Prepare macOS artifacts
+      if: matrix.os == 'macos-latest'
+      run: |
+        cd dist
+        zip -r AhoyIndieMedia-macOS.zip AhoyIndieMedia.app/
+        ls -la *.zip
+    
+    - name: Prepare Windows artifacts
+      if: matrix.os == 'windows-latest'
+      run: |
+        cd dist
+        ls -la *.exe
+    
+    - name: Prepare Linux artifacts
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cd dist
+        tar -czf AhoyIndieMedia-Linux.tar.gz AhoyIndieMedia
+        ls -la AhoyIndieMedia*
+    
+    - name: Generate checksums
+      run: |
+        cd dist
+        if [ "${{ matrix.os }}" = "macos-latest" ]; then
+          sha256sum AhoyIndieMedia-macOS.zip > SHA256SUMS.txt
+        elif [ "${{ matrix.os }}" = "windows-latest" ]; then
+          sha256sum *.exe >> SHA256SUMS.txt
+        elif [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+          sha256sum AhoyIndieMedia* >> SHA256SUMS.txt
+        fi
+        cat SHA256SUMS.txt
+    
+    - name: Upload macOS artifacts
+      if: matrix.os == 'macos-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: AhoyIndieMedia-macOS
+        path: dist/AhoyIndieMedia-macOS.zip
+    
+    - name: Upload Windows artifacts
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: AhoyIndieMedia-Windows
+        path: dist/*.exe
+    
+    - name: Upload Linux artifacts
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: AhoyIndieMedia-Linux
+        path: dist/AhoyIndieMedia*
+    
+    - name: Upload checksums
+      uses: actions/upload-artifact@v3
+      with:
+        name: SHA256SUMS-${{ matrix.os }}
+        path: dist/SHA256SUMS.txt
+
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts
+    
+    - name: Combine checksums
+      run: |
+        cat artifacts/SHA256SUMS-macOS/SHA256SUMS.txt > combined-SHA256SUMS.txt
+        cat artifacts/SHA256SUMS-windows/SHA256SUMS.txt >> combined-SHA256SUMS.txt
+        cat artifacts/SHA256SUMS-ubuntu/SHA256SUMS.txt >> combined-SHA256SUMS.txt
+        cat combined-SHA256SUMS.txt
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          artifacts/AhoyIndieMedia-macOS/AhoyIndieMedia-macOS.zip
+          artifacts/AhoyIndieMedia-Windows/*
+          artifacts/AhoyIndieMedia-Linux/*
+          combined-SHA256SUMS.txt
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -14,9 +14,15 @@ Flask-Login==0.6.3
 Flask-Limiter==3.7.0
 Flask-CORS==5.0.0
 Flask-Session==0.8.0
+Flask-WTF
 marshmallow==3.22.0
 SQLAlchemy>=2.0
 alembic>=1.13
 psycopg[binary]>=3.2
 PyJWT>=2.8
 pywebview>=4.4
+email-validator
+limits
+python-json-logger
+sentry-sdk[flask]
+structlog

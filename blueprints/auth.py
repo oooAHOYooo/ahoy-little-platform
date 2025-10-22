@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, login_required, UserMixin
 from werkzeug.exceptions import BadRequest
 import json, os
 from extensions import bcrypt, login_manager
+from utils.security import hash_password, verify_password
 
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 USERS_PATH = os.path.join("data", "users_auth.json")
@@ -42,7 +43,7 @@ def register():
     users = _load_users()
     if username in users:
         return jsonify({"error": "username_taken"}), 409
-    pw_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+    pw_hash = hash_password(password)
     users[username] = {"pw_hash": pw_hash}
     _save_users(users)
     
@@ -71,7 +72,7 @@ def login():
     password = data.get("password") or ""
     users = _load_users()
     rec = users.get(username)
-    if not rec or not bcrypt.check_password_hash(rec["pw_hash"], password):
+    if not rec or not verify_password(password, rec["pw_hash"]):
         return jsonify({"error": "invalid_credentials"}), 401
     login_user(User(username, rec["pw_hash"]), remember=True)
     return jsonify({"ok": True, "user": {"username": username}})

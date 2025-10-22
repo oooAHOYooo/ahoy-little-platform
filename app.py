@@ -20,6 +20,10 @@ from pathlib import Path
 from config import get_config
 from extensions import bcrypt, login_manager, limiter, init_cors
 from utils.auth import admin_required, get_effective_user
+from utils.observability import init_sentry
+from utils.logging_init import init_logging, init_request_logging
+from utils.security_headers import attach_security_headers, create_csp_report_blueprint
+from utils.csrf_init import init_csrf
 from blueprints.auth import bp as auth_bp
 from blueprints.api.auth import bp as api_auth_bp
 from blueprints.activity import bp as activity_bp
@@ -48,6 +52,54 @@ def initialize_search_index():
     except Exception as e:
         print(f"❌ Error initializing search index: {e}")
 
+def startup_logging(app):
+    """Log startup configuration for operational visibility"""
+    import structlog
+    import os
+    from utils.observability import get_release
+    
+    logger = structlog.get_logger()
+    
+    # Logging configuration
+    flask_env = os.getenv("FLASK_ENV", "development")
+    log_level = os.getenv("LOG_LEVEL", "INFO")
+    logging_mode = "json" if flask_env == "production" else "console"
+    
+    # Sentry configuration
+    sentry_dsn = os.getenv("SENTRY_DSN")
+    sentry_enabled = bool(sentry_dsn)
+    release = get_release()
+    
+    # Rate limiting configuration
+    rate_limit_default = os.getenv("RATE_LIMIT_DEFAULT", "60 per minute")
+    rate_limit_auth = os.getenv("RATE_LIMIT_AUTH", "10 per minute")
+    
+    # Security configuration
+    csrf_enabled = True
+    security_headers_enabled = flask_env == "production"
+    
+    # Emit startup logs
+    logger.info("Application startup",
+               logging_mode=logging_mode,
+               level=log_level,
+               request_id=None)
+    
+    logger.info("Sentry configuration",
+               sentry_enabled=sentry_enabled,
+               environment=flask_env,
+               release=release,
+               request_id=None)
+    
+    logger.info("Rate limiting configuration",
+               default_limit=rate_limit_default,
+               auth_limit=rate_limit_auth,
+               request_id=None)
+    
+    logger.info("Security configuration",
+               csrf_enabled=csrf_enabled,
+               security_headers_enabled=security_headers_enabled,
+               request_id=None)
+
 def create_app():
     app = Flask(__name__)
 
@@ -56,6 +108,9 @@ def create_app():
     app.url_map.strict_slashes = False
 
     app.config.from_object(get_config())
+    
+    # Initialize structured logging
+    init_logging()
 
     # minimal config safe for CI
     app.config.setdefault("JSON_SORT_KEYS", False)
@@ -76,7 +131,25 @@ def create_app():
     limiter.init_app(app)
     init_cors(app)
     login_manager.login_view = "auth_page"
-
+    
+    # Initialize observability
+    init_sentry(app)
+    
+    # Initialize request logging
+    init_request_logging(app)
+    
+    # Initialize security headers
+    attach_security_headers(app)
+    
+    # Register CSP report blueprint
+    app.register_blueprint(create_csp_report_blueprint())
+    
+    # Initialize CSRF protection
+    init_csrf(app)
+    
+    # Log startup configuration
+    startup_logging(app)
+    
     # Register blueprints
     # app.register_blueprint(auth_bp)  # Disabled: using JWT-based auth under /api/auth
     # app.register_blueprint(api_auth_bp)  # Disabled for simple session-based auth today
@@ -101,7 +174,8 @@ def create_app():
     # Health check endpoint
     @app.get("/healthz")
     def healthz():
-        return jsonify({"ok": True}), 200
+        from ahoy.version import __version__
+        return jsonify({"ok": True, "version": __version__}), 200
 
     # Readiness check that actually verifies DB connectivity
     @app.get("/readyz")
@@ -146,6 +220,15 @@ def create_app():
                 "ready": False,
                 "detail": str(e)
             }), 500
+
+    # Sentry test route (production only)
+    @app.get("/_boom")
+    def sentry_test():
+        """Test route for Sentry error tracking - only works in production"""
+        import os
+        if os.getenv("FLASK_ENV") == "production" or os.getenv("SENTRY_TEST_ROUTE") == "true":
+            raise Exception("Sentry test exception - this is intentional")
+        return jsonify({"error": "Not found"}), 404
 
     # Context processor to inject login flag into templates
     @app.context_processor
@@ -417,65 +500,66 @@ def playlists_index():
     return render_template("playlists.html", playlists=playlists)
 
 
-# API Endpoints
-@app.route('/api/now-playing')
-def api_now_playing():
-    """Get curated now playing feed with 30s previews - randomized on each request"""
-    music_data = load_json_data('music.json', {'tracks': []})
-    shows_data = load_json_data('shows.json', {'shows': []})
-    
-    # Combine and curate content for discovery feed
-    feed_items = []
-    
-    # Get all available tracks and shows
-    all_tracks = music_data.get('tracks', [])
-    all_shows = shows_data.get('shows', [])
-    
-    # Filter for content with preview URLs
-    tracks_with_preview = [t for t in all_tracks if t.get('preview_url')]
-    shows_with_preview = [s for s in all_shows if s.get('trailer_url')]
-    
-    # Randomly select tracks (up to 8)
-    selected_tracks = random.sample(tracks_with_preview, min(len(tracks_with_preview), 8))
-    for track in selected_tracks:
-        feed_items.append({
-            'id': track['id'],
-            'type': 'music',
-            'title': track['title'],
-            'artist': track['artist'],
-            'preview_url': track['preview_url'],
-            'cover_art': track['cover_art'],
-            'duration': 30,  # Preview length
-            'full_url': track['audio_url'],
-            'duration_seconds': track.get('duration_seconds', 180),
-            'description': track.get('description', ''),
-            'genre': track.get('genre', '')
-        })
-    
-    # Randomly select shows (up to 5)
-    selected_shows = random.sample(shows_with_preview, min(len(shows_with_preview), 5))
-    for show in selected_shows:
-        feed_items.append({
-            'id': show['id'],
-            'type': 'show',
-            'title': show['title'],
-            'artist': show.get('host', 'Ahoy Indie Media'),
-            'preview_url': show['trailer_url'],
-            'cover_art': show['thumbnail'],
-            'duration': 30,
-            'full_url': show['video_url'],
-            'duration_seconds': show.get('duration_seconds', 300),
-            'description': show.get('description', ''),
-            'genre': show.get('genre', '')
-        })
-    
-    # Shuffle for discovery - this will be different on each request
-    random.shuffle(feed_items)
-    
-    # Limit to 12 items for better performance
-    feed_items = feed_items[:12]
-    
-    return jsonify({'feed': feed_items})
+    # API Endpoints
+    @app.route('/api/now-playing')
+    @limiter.exempt
+    def api_now_playing():
+        """Get curated now playing feed with 30s previews - randomized on each request"""
+        music_data = load_json_data('music.json', {'tracks': []})
+        shows_data = load_json_data('shows.json', {'shows': []})
+        
+        # Combine and curate content for discovery feed
+        feed_items = []
+        
+        # Get all available tracks and shows
+        all_tracks = music_data.get('tracks', [])
+        all_shows = shows_data.get('shows', [])
+        
+        # Filter for content with preview URLs
+        tracks_with_preview = [t for t in all_tracks if t.get('preview_url')]
+        shows_with_preview = [s for s in all_shows if s.get('trailer_url')]
+        
+        # Randomly select tracks (up to 8)
+        selected_tracks = random.sample(tracks_with_preview, min(len(tracks_with_preview), 8))
+        for track in selected_tracks:
+            feed_items.append({
+                'id': track['id'],
+                'type': 'music',
+                'title': track['title'],
+                'artist': track['artist'],
+                'preview_url': track['preview_url'],
+                'cover_art': track['cover_art'],
+                'duration': 30,  # Preview length
+                'full_url': track['audio_url'],
+                'duration_seconds': track.get('duration_seconds', 180),
+                'description': track.get('description', ''),
+                'genre': track.get('genre', '')
+            })
+        
+        # Randomly select shows (up to 5)
+        selected_shows = random.sample(shows_with_preview, min(len(shows_with_preview), 5))
+        for show in selected_shows:
+            feed_items.append({
+                'id': show['id'],
+                'type': 'show',
+                'title': show['title'],
+                'artist': show.get('host', 'Ahoy Indie Media'),
+                'preview_url': show['trailer_url'],
+                'cover_art': show['thumbnail'],
+                'duration': 30,
+                'full_url': show['video_url'],
+                'duration_seconds': show.get('duration_seconds', 300),
+                'description': show.get('description', ''),
+                'genre': show.get('genre', '')
+            })
+        
+        # Shuffle for discovery - this will be different on each request
+        random.shuffle(feed_items)
+        
+        # Limit to 12 items for better performance
+        feed_items = feed_items[:12]
+        
+        return jsonify({'feed': feed_items})
 
     # Minimal listening hooks (optional endpoints for client player)
     @app.post('/api/listening/start')
@@ -617,6 +701,7 @@ def api_homepage_layout():
         return jsonify({'success': True, 'message': 'Layout saved successfully'})
 
 @app.route('/api/music')
+@limiter.exempt
 def api_music():
     """Get all music data"""
     music_data = load_json_data('music.json', {'tracks': []})
@@ -628,6 +713,7 @@ def radio_page():
     return render_template('radio.html')
 
 @app.route('/api/shows')
+@limiter.exempt
 def api_shows():
     """Get all shows/video content"""
     shows_data = load_json_data('shows.json', {'shows': []})
@@ -645,6 +731,7 @@ def api_show(show_id):
     return jsonify(show)
 
 @app.route('/api/artists')
+@limiter.exempt
 def api_artists():
     """Get artists directory"""
     artists_data = load_json_data('artists.json', {'artists': []})
