@@ -9,19 +9,27 @@
     <p class="text-gray">Get the latest desktop builds for macOS, Windows, and
         Linux.</p>
 
-    {% if files %}
-    <ul style="margin-top:1rem;line-height:1.9;">
-        {% for f in files %}
-        <li>
-            <a href="{{ f.url }}">{{ f.name }}</a>
-            <span style="color:#6b7280;font-size:12px;">— {{ f.size_label
-                }}</span>
-        </li>
-        {% endfor %}
-    </ul>
+    {% if release_assets %}
+    <div class="downloads-section" style="margin-top:2rem;">
+        <h2>Latest Release: {{ release_tag }}</h2>
+        <div class="download-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin-top:1rem;">
+            {% for asset in release_assets %}
+            <div class="download-item" style="border:1px solid #e5e7eb;border-radius:8px;padding:1rem;text-align:center;">
+                <div class="platform-icon" style="font-size:2rem;margin-bottom:0.5rem;">
+                    {% if 'macOS' in asset.name %}🍎{% elif 'Windows' in asset.name %}🪟{% elif 'Linux' in asset.name %}🐧{% elif 'Android' in asset.name %}🤖{% endif %}
+                </div>
+                <div class="platform-name" style="font-weight:600;margin-bottom:0.5rem;">
+                    {% if 'macOS' in asset.name %}macOS{% elif 'Windows' in asset.name %}Windows{% elif 'Linux' in asset.name %}Linux{% elif 'Android' in asset.name %}Android{% endif %}
+                </div>
+                <div class="file-name" style="font-size:0.9rem;color:#6b7280;margin-bottom:0.5rem;">{{ asset.name }}</div>
+                <div class="file-size" style="font-size:0.8rem;color:#9ca3af;margin-bottom:1rem;">{{ asset.size_mb }} MB</div>
+                <a href="{{ asset.download_url }}" class="download-btn" style="display:inline-block;background:#007bff;color:white;padding:0.5rem 1rem;border-radius:4px;text-decoration:none;font-size:0.9rem;">Download</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
     {% else %}
-    <p style="margin-top:1rem;color:#6b7280;">No builds are available yet. Add
-        files to the <code>downloads/</code> folder.</p>
+    <p style="margin-top:1rem;color:#6b7280;">No builds are available yet. Check back after the next release.</p>
     {% endif %}
 
     <h2 style="margin-top:2rem;">Build locally</h2>

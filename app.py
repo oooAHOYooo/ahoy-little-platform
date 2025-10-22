@@ -312,27 +312,80 @@ DOWNLOADS_DIR = Path("downloads")
 @app.route('/downloads')
 def downloads_page():
     """Landing page to download latest desktop builds."""
-    def _format_size(n: int) -> str:
-        units = ["B", "KB", "MB", "GB", "TB"]
-        size = float(n)
-        idx = 0
-        while size >= 1024 and idx < len(units) - 1:
-            size /= 1024.0
-            idx += 1
-        return f"{size:.1f} {units[idx]}"
-    # Discover files by platform naming convention
-    files = []
-    if DOWNLOADS_DIR.exists():
-        for p in sorted(DOWNLOADS_DIR.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True):
-            if p.is_file():
-                files.append({
-                    'name': p.name,
-                    'size_bytes': p.stat().st_size,
-                    'size_label': _format_size(p.stat().st_size),
-                    'modified': datetime.fromtimestamp(p.stat().st_mtime).isoformat(),
-                    'url': f"/downloads/{p.name}",
-                })
-    return render_template('downloads.html', files=files)
+    import requests
+    import os
+    
+    # Try to fetch latest release from GitHub
+    release_assets = []
+    release_tag = "No releases yet"
+    
+    try:
+        # Use GitHub API to get latest release
+        github_token = os.getenv('GITHUB_TOKEN')
+        headers = {}
+        if github_token:
+            headers['Authorization'] = f'token {github_token}'
+        
+        # Get repository info from git remote or use default
+        repo_owner = "oooAHOYooo"  # Update this to match your GitHub username
+        repo_name = "ahoy-little-platform"
+        
+        url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            release_data = response.json()
+            release_tag = release_data.get('tag_name', 'Unknown')
+            
+            # Filter and format assets
+            for asset in release_data.get('assets', []):
+                asset_name = asset['name']
+                asset_size = asset['size']
+                size_mb = asset_size / (1024 * 1024)
+                
+                # Only include desktop/Android assets
+                if any(platform in asset_name for platform in ['macOS', 'Windows', 'Linux', 'Android']):
+                    release_assets.append({
+                        'name': asset_name,
+                        'size_bytes': asset_size,
+                        'size_mb': f"{size_mb:.1f}",
+                        'download_url': asset['browser_download_url']
+                    })
+            
+            # Sort by platform preference
+            platform_order = {'macOS': 0, 'Windows': 1, 'Linux': 2, 'Android': 3}
+            release_assets.sort(key=lambda x: platform_order.get(next((p for p in platform_order.keys() if p in x['name']), 'Other'), 99))
+            
+    except Exception as e:
+        print(f"Error fetching GitHub release: {e}")
+        # Fallback to local files if GitHub fails
+        pass
+    
+    # Fallback to local files if no GitHub assets
+    if not release_assets:
+        def _format_size(n: int) -> str:
+            units = ["B", "KB", "MB", "GB", "TB"]
+            size = float(n)
+            idx = 0
+            while size >= 1024 and idx < len(units) - 1:
+                size /= 1024.0
+                idx += 1
+            return f"{size:.1f} {units[idx]}"
+        
+        files = []
+        if DOWNLOADS_DIR.exists():
+            for p in sorted(DOWNLOADS_DIR.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True):
+                if p.is_file():
+                    files.append({
+                        'name': p.name,
+                        'size_bytes': p.stat().st_size,
+                        'size_label': _format_size(p.stat().st_size),
+                        'modified': datetime.fromtimestamp(p.stat().st_mtime).isoformat(),
+                        'url': f"/downloads/{p.name}",
+                    })
+        return render_template('downloads.html', files=files, release_assets=None, release_tag="Local builds")
+    
+    return render_template('downloads.html', files=None, release_assets=release_assets, release_tag=release_tag)
 
 @app.route('/downloads/<path:filename>')
 def download_artifact(filename):
