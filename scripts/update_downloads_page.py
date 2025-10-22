@@ -59,12 +59,12 @@ def format_file_size(size_bytes: int) -> str:
     return f"{size_bytes:.1f} TB"
 
 
-def render_download_rows(assets: List[Dict[str, Any]], checksums: Dict[str, str]) -> str:
+def render_download_rows(assets: List[Dict[str, Any]], checksums: Dict[str, str], include_apk: bool = False) -> str:
     """Render HTML table rows for download assets"""
     rows = []
     
     # Sort assets by platform preference
-    platform_order = {"macOS": 0, "Windows": 1, "Linux": 2}
+    platform_order = {"macOS": 0, "Windows": 1, "Linux": 2, "Android": 3}
     
     def sort_key(asset):
         name = asset["name"].lower()
@@ -73,9 +73,20 @@ def render_download_rows(assets: List[Dict[str, Any]], checksums: Dict[str, str]
                 return (order, name)
         return (999, name)
     
-    sorted_assets = sorted(assets, key=sort_key)
+    # Filter assets based on include_apk flag
+    filtered_assets = []
+    for asset in assets:
+        name = asset["name"].lower()
+        if any(platform in name for platform in ["macos", "windows", "linux"]):
+            filtered_assets.append(asset)
+        elif "android" in name and include_apk:
+            filtered_assets.append(asset)
     
-    for asset in sorted_assets[:3]:  # Limit to latest 3 assets
+    sorted_assets = sorted(filtered_assets, key=sort_key)
+    
+    # Limit to 3 desktop assets + 1 Android if enabled
+    max_assets = 4 if include_apk else 3
+    for asset in sorted_assets[:max_assets]:
         filename = asset["name"]
         size_mb = asset["size"] / (1024 * 1024)
         checksum = checksums.get(filename, "N/A")
@@ -92,6 +103,9 @@ def render_download_rows(assets: List[Dict[str, Any]], checksums: Dict[str, str]
         elif "linux" in filename.lower():
             platform = "Linux"
             icon = "🐧"
+        elif "android" in filename.lower():
+            platform = "Android (APK)"
+            icon = "🤖"
         
         # Create download link
         download_url = asset["browser_download_url"]
@@ -168,8 +182,11 @@ def main():
     """Main function"""
     repo = os.getenv("GITHUB_REPOSITORY", "agworkywork/ahoy-little-platform")
     token = os.getenv("GITHUB_TOKEN")
+    include_apk = os.getenv("INCLUDE_APK", "false").lower() == "true"
     
     print(f"Fetching latest release for {repo}")
+    if include_apk:
+        print("Android APK inclusion enabled")
     
     # Fetch release data
     release_data = fetch_latest_release(repo, token)
@@ -198,7 +215,7 @@ def main():
         sys.exit(1)
     
     # Render HTML rows
-    html_rows = render_download_rows(download_assets, checksums)
+    html_rows = render_download_rows(download_assets, checksums, include_apk)
     
     # Update template
     try:

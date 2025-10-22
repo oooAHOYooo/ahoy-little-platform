@@ -3,14 +3,14 @@
 block_cipher = None
 
 a = Analysis(
-    ['desktop_main.py'],
+    ['../desktop_main.py'],
     pathex=[],
     binaries=[],
     datas=[
-        ('templates', 'templates'),
-        ('static', 'static'),
-        ('data', 'data'),
-        ('ahoy', 'ahoy'),
+        ('../templates', 'templates'),
+        ('../static', 'static'),
+        ('../data', 'data'),
+        ('../ahoy', 'ahoy'),
     ],
     hiddenimports=[
         'flask',

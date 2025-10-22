@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-"""
-Desktop build script for Ahoy Indie Media
-Builds platform-specific executables using PyInstaller
-"""
+# Desktop build script for Ahoy Indie Media
+# Builds platform-specific executables using PyInstaller
 
 set -euo pipefail
 
