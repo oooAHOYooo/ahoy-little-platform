@@ -1,1 +1,26 @@
-/Users/ag/ahoy-little-platform/data/products.json
+{
+  "subscriptions": [
+    {
+      "id": "sub_plus",
+      "name": "Ahoy Plus",
+      "price_usd": 3.0,
+      "billing": "monthly",
+      "features": [
+        "Unlimited collections",
+        "Unlimited playlists",
+        "Reorder with drag & drop",
+        "Public sharing links",
+        "Early access themes"
+      ]
+    }
+  ],
+  "themes": [
+    { "id": "theme_darkwave", "name": "Darkwave Pack", "description": "Neon purples + black gradients", "price_usd": 1.99 },
+    { "id": "theme_sunset",   "name": "Sunset Glow",   "description": "Warm oranges + pink skies",     "price_usd": 1.99 },
+    { "id": "theme_retro",    "name": "Retro Pixel",   "description": "8-bit colors + patterns",       "price_usd": 0.99 }
+  ],
+  "limits": {
+    "free": { "max_collections": 3, "max_playlists": 3 },
+    "plus": { "max_collections": "unlimited", "max_playlists": "unlimited" }
+  }
+}

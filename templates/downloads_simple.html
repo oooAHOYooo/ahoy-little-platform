@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Downloads - Ahoy Indie Media</title>
+        <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .download-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            background: #f9f9f9;
+        }
+        .download-item h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .download-item .size {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .download-btn:hover {
+            background: #0056b3;
+        }
+        .version {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🎵 Ahoy Indie Media</h1>
+            <p>Download the latest version for your platform</p>
+            <p class="version">Version: {{ release_tag }}</p>
+        </div>
+
+        {% if release_assets %}
+        <h2>Desktop Applications</h2>
+        {% for asset in release_assets %}
+        <div class="download-item">
+            <h3>{{ asset.name }}</h3>
+            <p class="size">Size: {{ asset.size_mb }} MB</p>
+            <a href="{{ asset.download_url }}" class="download-btn">Download</a>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="download-item">
+            <h3>No releases available yet</h3>
+            <p>Check back soon for downloadable desktop applications!</p>
+        </div>
+        {% endif %}
+
+        <div style="margin-top: 40px; text-align: center; color: #666;">
+            <p>🎶 Discover indie music and shows</p>
+            <p>📱 Mobile-friendly web interface</p>
+            <p>💾 Save favorites and create playlists</p>
+        </div>
+    </body>
+</html>
