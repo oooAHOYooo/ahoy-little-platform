@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timezone
 import os
 from typing import Any, Dict, List
 
@@ -16,6 +16,10 @@ from models import (
     UserQuest,
 )
 from services.gamify import on_event
+
+
+def _utcnow():
+    return datetime.now(timezone.utc)
 
 
 bp = Blueprint("gamify_api", __name__, url_prefix="/api")
@@ -85,9 +89,13 @@ def me_gamification():
             {
                 "key": qd.key,
                 "title": qd.title,
+                "description": qd.description,
+                "kind": qd.kind,
                 "progress_int": int(uq.progress_int or 0),
                 "done": bool(uq.done),
                 "xp": int(qd.xp or 0),
+                "rule": qd.rule or {},
+                "threshold": (qd.rule or {}).get("threshold", 1) if qd.rule else 1,
             }
             for (uq, qd) in uq_rows
         ]
@@ -132,5 +140,111 @@ def debug_gamify():
 
     summary = on_event(user_id, event_kind, meta)
     return jsonify(summary)
+
+
+@bp.post("/gamify/redeem-code")
+@login_required
+def redeem_show_code():
+    """Redeem a code from a live show to earn a merit badge"""
+    user_id = _require_int_user_id()
+    if user_id <= 0:
+        return jsonify({"error": "unsupported_user_identity"}), 400
+
+    try:
+        body = request.get_json(silent=True) or {}
+        code = (body.get("code") or "").strip().upper()
+        
+        if not code:
+            return jsonify({"error": "code_required"}), 400
+
+        # Simple mapping of codes to badge keys
+        # In production, these would be stored in the database with show events
+        code_to_badge = {
+            "NEWHAVEN2024": {
+                "key": "show_attended_newhaven",
+                "title": "New Haven Attender",
+                "description": "Attended a show in New Haven",
+                "icon": "fas fa-map-marker-alt",
+                "tier": "bronze"
+            },
+            "POETRY2024": {
+                "key": "poetry_event",
+                "title": "Poetry Enthusiast",
+                "description": "Attended a poetry event",
+                "icon": "fas fa-book",
+                "tier": "bronze"
+            },
+            "INDIE2024": {
+                "key": "indie_music_show",
+                "title": "Indie Music Fan",
+                "description": "Attended an indie music show",
+                "icon": "fas fa-music",
+                "tier": "silver"
+            }
+        }
+
+        badge_def = code_to_badge.get(code)
+        if not badge_def:
+            return jsonify({"error": "invalid_code", "message": "This code is not recognized"}), 400
+
+        with get_session() as session:
+            # Check if achievement already exists
+            ach = session.execute(
+                select(Achievement).where(Achievement.key == badge_def["key"])
+            ).scalar_one_or_none()
+
+            # Create achievement if it doesn't exist
+            if not ach:
+                ach = Achievement(
+                    key=badge_def["key"],
+                    title=badge_def["title"],
+                    description=badge_def["description"],
+                    icon=badge_def["icon"],
+                    tier=badge_def["tier"],
+                    kind="show_code",
+                    threshold_int=1,
+                    active=True
+                )
+                session.add(ach)
+                session.flush()
+
+            # Check if user already has this achievement
+            existing_ua = session.execute(
+                select(UserAchievement).where(
+                    (UserAchievement.user_id == user_id) &
+                    (UserAchievement.achievement_id == ach.id)
+                )
+            ).scalar_one_or_none()
+
+            if existing_ua:
+                return jsonify({
+                    "error": "already_redeemed",
+                    "message": "You already redeemed this code!"
+                }), 400
+
+            # Grant the achievement
+            ua = UserAchievement(
+                user_id=user_id,
+                achievement_id=ach.id,
+                unlocked_at=_utcnow()
+            )
+            session.add(ua)
+
+            # Trigger XP reward
+            on_event(user_id, "show_code", {"code": code})
+
+            return jsonify({
+                "success": True,
+                "message": "Code redeemed! You earned a badge!",
+                "badge": {
+                    "key": ach.key,
+                    "title": ach.title,
+                    "icon": ach.icon,
+                    "tier": ach.tier
+                }
+            })
+
+    except Exception as e:
+        return jsonify({"error": "redemption_failed", "detail": str(e)}), 500
 
 

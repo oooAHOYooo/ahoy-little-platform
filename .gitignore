@@ -11,3 +11,10 @@ data/user_activity.json
 data/playlists.json
 dist/
 build/
+flask_session/
+start.py
+start.bat
+start_browser.sh
+templates/dashboard.html
+static/css/dashboard.css
+*.spec

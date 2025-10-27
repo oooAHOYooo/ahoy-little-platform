@@ -67,6 +67,9 @@
             href="{{ url_for('static', filename='css/main.css') }}">
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/components.css') }}">
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/sidebar.css') }}">
+        {% block extra_css %}{% endblock %}
 
         <!-- Font Awesome -->
         <link rel="stylesheet"
@@ -244,6 +247,13 @@
                         class="nav-item {% if request.endpoint == 'home' %}active{% endif %}"
                         title="Home">
                         <i class="fas fa-home"></i>
+                    </a>
+
+                    <!-- Dashboard -->
+                    <a href="/dashboard"
+                        class="nav-item {% if request.endpoint == 'dashboard_page' %}active{% endif %}"
+                        title="Dashboard">
+                        <i class="fas fa-trophy"></i>
                     </a>
 
                     <!-- My Bookmarks -->
@@ -428,7 +438,105 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            {% block content %}{% endblock %}
+            <div class="dashboard-sidebars">
+                <!-- Left Dashboard: Collection -->
+                <aside class="dashboard-sidebar dashboard-left" x-data="dashboardCollection()" x-init="init()">
+                    <div class="sidebar-header">
+                        <h3>Collection</h3>
+                    </div>
+                    <div class="sidebar-content">
+                        <!-- Playlists -->
+                        <div class="section-title">Playlists</div>
+                        <div class="playlists-mini">
+                            <template x-for="playlist in playlists.slice(0, 3)" :key="playlist.id">
+                                <div class="item-mini" @click="goToPlaylist(playlist)">
+                                    <span x-text="playlist.name"></span>
+                                    <span class="count" x-text="playlist.total_items || 0"></span>
+                                </div>
+                            </template>
+                            <div x-show="playlists.length === 0" class="empty-mini">
+                                <span>Create Playlist</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Badges -->
+                        <div class="section-title">Merit Badges</div>
+                        <div class="badges-mini">
+                            <template x-for="badge in badges.slice(0, 4)" :key="badge.key">
+                                <div class="badge-mini" :class="'badge-' + (badge.tier || 'bronze')" :title="badge.title">
+                                    <i :class="badge.icon || 'fas fa-medal'"></i>
+                                </div>
+                            </template>
+                            <button @click="showCodeEntry = !showCodeEntry" class="btn-code-mini" title="Enter code">
+                                Code
+                            </button>
+                        </div>
+                        
+                        <!-- Code Entry Modal -->
+                        <div x-show="showCodeEntry" class="modal-overlay" @click="showCodeEntry = false">
+                                <div class="modal-mini" @click.stop>
+                                <h4>Enter Show Code</h4>
+                                <p class="text-small">Got a code from a show?</p>
+                                <input type="text" x-model="codeEntry" placeholder="Enter code..." class="input-field" maxlength="20">
+                                <button @click="redeemCode()" class="btn-mini">Redeem</button>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Center Content -->
+                <div class="content-area">
+                    {% block content %}{% endblock %}
+                </div>
+
+                <!-- Right Dashboard: Up Next -->
+                <aside class="dashboard-sidebar dashboard-right" x-data="dashboardUpNext()" x-init="init()">
+                    <div class="sidebar-header">
+                        <h3>Up Next</h3>
+                    </div>
+                    <div class="sidebar-content">
+                        <!-- Now Playing -->
+                        <div class="section-title">Playing Now</div>
+                        <div class="now-playing-mini" x-show="nowPlaying">
+                            <div class="item-mini" @click="playItem(nowPlaying)">
+                                <img :src="nowPlaying.cover_art" class="mini-cover">
+                                <div>
+                                    <div class="mini-title" x-text="nowPlaying.title"></div>
+                                    <div class="mini-artist" x-text="nowPlaying.artist"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="empty-mini" x-show="!nowPlaying">
+                            <span>Nothing playing</span>
+                        </div>
+                        
+                        <!-- Recently Added -->
+                        <div class="section-title">Recently Added</div>
+                        <div class="recent-mini">
+                            <template x-for="item in recent.slice(0, 3)" :key="item.id">
+                                <div class="item-mini" @click="playItem(item)">
+                                    <img :src="item.cover_art" class="mini-thumb">
+                                    <div class="mini-info">
+                                        <span class="mini-title" x-text="item.title"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="section-title">Quick</div>
+                        <div class="actions-mini">
+                            <div class="action-mini" @click="goTo('/music')">Music</div>
+                            <div class="action-mini" @click="goTo('/shows')">Shows</div>
+                            <div class="action-mini" @click="goTo('/artists')">Artists</div>
+                        </div>
+                        
+                        <div class="demo-badge">
+                            <span class="demo-label">DEMO</span>
+                        </div>
+                    </div>
+                </aside>
+            </div>
         </main>
 
         <!-- Global Player -->
@@ -1177,6 +1285,81 @@
         window.globalPlayer.play = (item) => window.globalPlayer.playTrack(item);
         </script>
 
+        <!-- Global Dashboard Sidebars Script -->
+        <script>
+        function dashboardCollection() {
+            return {
+                playlists: [],
+                badges: [],
+                showCodeEntry: false,
+                codeEntry: '',
+                async init() {
+                    try {
+                        const response = await fetch('/api/playlists');
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.playlists = data.playlists || [];
+                        }
+                    } catch (e) { console.log('Playlists not available'); }
+                    
+                    try {
+                        const response = await fetch('/api/me/gamification');
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.badges = data.badges || [];
+                        }
+                    } catch (e) { console.log('Badges not available'); }
+                },
+                goToPlaylist(playlist) {
+                    window.location.href = '/my-saves';
+                },
+                async redeemCode() {
+                    if (!this.codeEntry) return;
+                    try {
+                        const response = await fetch('/api/gamify/redeem-code', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ code: this.codeEntry.toUpperCase() })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            this.codeEntry = '';
+                            this.showCodeEntry = false;
+                            if (window.ahoyApp?.showNotification) {
+                                window.ahoyApp.showNotification('Badge earned!', 'success');
+                            }
+                            await this.init();
+                        }
+                    } catch (e) { console.error('Code redemption failed'); }
+                }
+            };
+        }
+        
+        function dashboardUpNext() {
+            return {
+                nowPlaying: null,
+                recent: [],
+                async init() {
+                    try {
+                        const response = await fetch('/api/music');
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.recent = (data.tracks || []).slice(0, 3);
+                        }
+                    } catch (e) { console.log('Music data not available'); }
+                },
+                playItem(item) {
+                    if (window.globalPlayer?.play) {
+                        window.globalPlayer.play(item);
+                    }
+                },
+                goTo(url) {
+                    window.location.href = url;
+                }
+            };
+        }
+        </script>
+        
         {% block extra_scripts %}{% endblock %}
         
         <!-- Service Worker Registration -->

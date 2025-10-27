@@ -1951,6 +1951,11 @@ def account_page():
     """User account/profile page"""
     return render_template('account.html')
 
+@app.route('/dashboard')
+def dashboard_page():
+    """Dashboard page with user collection and quests"""
+    return render_template('dashboard.html')
+
 @app.route('/settings')
 def settings_page():
     """Settings page"""

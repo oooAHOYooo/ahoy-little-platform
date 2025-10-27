@@ -133,63 +133,6 @@
                 </div>
             </div>
 
-            <!-- My Bookmarks Widget -->
-            <div class="grid-item bookmarks-widget"
-                x-data="homeBookmarksWidget()" x-init="loadBookmarks()">
-                <div class="item-header">
-                    <h3><i class="fas fa-bookmark"></i> My Bookmarks</h3>
-                    <a href="/bookmarks" class="view-all-btn"
-                        x-show="bookmarksList().length > 0">
-                        <span x-text="bookmarksList().length"></span>
-                    </a>
-                </div>
-                <div class="bookmarks-content">
-                    <!-- Empty State -->
-                    <div class="bookmarks-empty"
-                        x-show="bookmarksList().length === 0">
-                        <div class="empty-state">
-                            <i class="fas fa-bookmark"></i>
-                            <h4>No Bookmarks Yet</h4>
-                            <p>Start bookmarking your favorite tracks, shows,
-                                and artists!</p>
-                            <div class="bookmark-tips">
-                                <a href="/music" class="tip-link">
-                                    <i class="fas fa-music"></i> Browse Music
-                                </a>
-                                <a href="/shows" class="tip-link">
-                                    <i class="fas fa-tv"></i> Watch Shows
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bookmarks Preview -->
-                    <div class="bookmarks-preview playing-list"
-                        x-show="bookmarksList().length > 0">
-                        <template
-                            x-for="bookmark in bookmarksList().slice(0, 4)"
-                            :key="bookmark.key">
-                            <div class="playing-item"
-                                :style="`background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url(${bookmark.artwork || '/static/img/default-cover.jpg'}); background-size: cover; background-position: center;`"
-                                @click="playBookmark(bookmark)">
-                                <div class="item-details">
-                                    <h4 x-text="bookmark.title"></h4>
-                                    <p x-text="bookmark.type"></p>
-                                </div>
-                                <div class="play-indicator">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- View All Link -->
-                    <a href="/bookmarks" class="view-all-btn bookmark-view-all"
-                        x-show="bookmarksList().length > 4">
-                        <i class="fas fa-arrow-right"></i> View All Bookmarks
-                    </a>
-                </div>
-            </div>
             <!-- Recently Added (Latest Updates) -->
             <div class="grid-item recently-added" x-data="recentlyAdded()"
                 x-init="init()">
@@ -242,29 +185,44 @@
                 </div>
 
                 <div class="promo-events">
-                    <div class="event-card featured" onclick="window.open('https://newhaven.ahoy.ooo','_blank')">
+                    <div class="event-card featured"
+                        onclick="window.open('https://newhaven.ahoy.ooo','_blank')">
                         <div class="event-date-badge">
                             <span class="event-day">30</span>
                             <span class="event-month">Oct</span>
                         </div>
                         <div class="event-info">
                             <h3>Poets &amp; Friends #4: Spooky Edition</h3>
-                            <p class="event-venue">Koffee? • 104 Audubon Street, New Haven, CT 06511</p>
-                            <p class="event-time">6:30 PM • Doors 6:00 PM; Readings 6:30–8:00 PM</p>
-                            <p class="event-description">Poets &amp; Friends #4 (Spooky Edition). Thursday, Oct 30, 2025. Doors 6:00 PM. Readings 6:30–8:00 PM. Koffee? — 104 Audubon St, New Haven, CT. Costumes encouraged. Food available at Koffee?. Bring friends.</p>
+                            <p class="event-venue">Koffee? • 104 Audubon Street,
+                                New Haven, CT 06511</p>
+                            <p class="event-time">6:30 PM • Doors 6:00 PM;
+                                Readings 6:30–8:00 PM</p>
+                            <p class="event-description">Poets &amp; Friends #4
+                                (Spooky Edition). Thursday, Oct 30, 2025. Doors
+                                6:00 PM. Readings 6:30–8:00 PM. Koffee? — 104
+                                Audubon St, New Haven, CT. Costumes encouraged.
+                                Food available at Koffee?. Bring friends.</p>
                         </div>
                     </div>
 
-                    <div class="event-card" onclick="window.open('https://newhaven.ahoy.ooo','_blank')">
+                    <div class="event-card"
+                        onclick="window.open('https://newhaven.ahoy.ooo','_blank')">
                         <div class="event-date-badge">
                             <span class="event-day">7</span>
                             <span class="event-month">Nov</span>
                         </div>
                         <div class="event-info">
                             <h3>Jake Custer - Live</h3>
-                            <p class="event-venue">Spruce Coffeeshop • 952 State St, New Haven, CT</p>
+                            <p class="event-venue">Spruce Coffeeshop • 952 State
+                                St, New Haven, CT</p>
                             <p class="event-time">7:45 PM</p>
-                            <p class="event-description">Join us for a night of indie rock as Jake Custer debuts new songs from 'I Think We\'re Lost' live for the first time. Album debut event featuring Jake Custer performing tracks from his new album 'I Think We\'re Lost'. Doors open at 7:15 PM, showtime at 7:45 PM.</p>
+                            <p class="event-description">Join us for a night of
+                                indie rock as Jake Custer debuts new songs from
+                                'I Think We\'re Lost' live for the first time.
+                                Album debut event featuring Jake Custer
+                                performing tracks from his new album
+                                'I Think We\'re Lost'. Doors open at 7:15 PM,
+                                showtime at 7:45 PM.</p>
                         </div>
                     </div>
                 </div>
