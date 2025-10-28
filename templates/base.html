@@ -445,18 +445,13 @@
                         <h3>Collection</h3>
                     </div>
                     <div class="sidebar-content">
-                        <!-- Playlists -->
-                        <div class="section-title">Playlists</div>
-                        <div class="playlists-mini">
-                            <template x-for="playlist in playlists.slice(0, 3)" :key="playlist.id">
-                                <div class="item-mini" @click="goToPlaylist(playlist)">
-                                    <span x-text="playlist.name"></span>
-                                    <span class="count" x-text="playlist.total_items || 0"></span>
-                                </div>
-                            </template>
-                            <div x-show="playlists.length === 0" class="empty-mini">
-                                <span>Create Playlist</span>
-                            </div>
+                        <!-- Collections -->
+                        <div class="section-title">Collections</div>
+                        <div class="collections-mini">
+                            <button @click="goToCollections()" class="item-mini collection-add-btn">
+                                <i class="fas fa-plus"></i>
+                                <span>Add Collection</span>
+                            </button>
                         </div>
                         
                         <!-- Badges -->
@@ -1289,19 +1284,10 @@
         <script>
         function dashboardCollection() {
             return {
-                playlists: [],
                 badges: [],
                 showCodeEntry: false,
                 codeEntry: '',
                 async init() {
-                    try {
-                        const response = await fetch('/api/playlists');
-                        if (response.ok) {
-                            const data = await response.json();
-                            this.playlists = data.playlists || [];
-                        }
-                    } catch (e) { console.log('Playlists not available'); }
-                    
                     try {
                         const response = await fetch('/api/me/gamification');
                         if (response.ok) {
@@ -1310,8 +1296,8 @@
                         }
                     } catch (e) { console.log('Badges not available'); }
                 },
-                goToPlaylist(playlist) {
-                    window.location.href = '/my-saves';
+                goToCollections() {
+                    window.location.href = '/bookmarks';
                 },
                 async redeemCode() {
                     if (!this.codeEntry) return;
@@ -1340,13 +1326,56 @@
                 nowPlaying: null,
                 recent: [],
                 async init() {
-                    try {
-                        const response = await fetch('/api/music');
-                        if (response.ok) {
-                            const data = await response.json();
-                            this.recent = (data.tracks || []).slice(0, 3);
-                        }
-                    } catch (e) { console.log('Music data not available'); }
+                    // Check if media player has a current track (radio or player)
+                    if (window.mediaPlayer && window.mediaPlayer.currentTrack) {
+                        this.nowPlaying = window.mediaPlayer.currentTrack;
+                    } else {
+                        // Load random media for "Now Playing"
+                        try {
+                            const [musicRes, showsRes] = await Promise.all([
+                                fetch('/api/music'),
+                                fetch('/api/shows')
+                            ]);
+                            
+                            const musicData = await musicRes.json();
+                            const showsData = await showsRes.json();
+                            
+                            const allItems = [
+                                ...(musicData.tracks || []).map(t => ({
+                                    ...t,
+                                    type: 'track',
+                                    artist: t.artist
+                                })),
+                                ...(showsData.shows || []).map(s => ({
+                                    ...s,
+                                    type: 'show',
+                                    title: s.title,
+                                    artist: s.host,
+                                    cover_art: s.thumbnail
+                                }))
+                            ];
+                            
+                            // Pick a random item for "Now Playing" if nothing is playing
+                            if (allItems.length > 0) {
+                                const randomIndex = Math.floor(Math.random() * allItems.length);
+                                this.nowPlaying = allItems[randomIndex];
+                            }
+                            
+                            // Pick 3 random items for "Recently Added"
+                            const shuffled = [...allItems].sort(() => 0.5 - Math.random());
+                            this.recent = shuffled.slice(0, 3);
+                        } catch (e) { console.log('Media data not available', e); }
+                    }
+                    
+                    // Set up listener for media player changes
+                    if (window.mediaPlayer && window.mediaPlayer.on) {
+                        window.mediaPlayer.on('play', () => {
+                            this.nowPlaying = window.mediaPlayer.currentTrack;
+                        });
+                        window.mediaPlayer.on('playlistchange', () => {
+                            this.nowPlaying = window.mediaPlayer.currentTrack;
+                        });
+                    }
                 },
                 playItem(item) {
                     if (window.globalPlayer?.play) {
