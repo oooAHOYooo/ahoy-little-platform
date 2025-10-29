@@ -368,6 +368,20 @@
     width: 100%;
 }
 
+.actions-mini-vertical {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: none;
+    margin-top: auto;
+    padding-top: 1rem;
+    gap: 0.5rem;
+}
+
+.actions-mini-vertical .action-mini {
+    width: 100%;
+    padding: 0.75rem 0.5rem;
+}
+
 .action-mini {
     background: rgba(255, 255, 255, 0.02);
     padding: 0.5rem 0.35rem;
@@ -403,6 +417,60 @@
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* Queue Items */
+.queue-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0.5rem;
+}
+
+.queue-item {
+    position: relative;
+}
+
+.queue-add-btn,
+.queue-remove-btn {
+    position: absolute;
+    top: 50%;
+    right: 0.25rem;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0;
+}
+
+.queue-item:hover .queue-remove-btn,
+.item-mini:hover .queue-add-btn {
+    opacity: 1;
+}
+
+.queue-add-btn:hover,
+.queue-remove-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.queue-add-btn {
+    background: rgba(99, 102, 241, 0.3);
+    color: #6366f1;
+}
+
+.queue-add-btn:hover {
+    background: rgba(99, 102, 241, 0.5);
 }
 
 /* Demo Badge */

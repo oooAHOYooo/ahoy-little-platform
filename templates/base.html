@@ -441,12 +441,9 @@
             <div class="dashboard-sidebars">
                 <!-- Left Dashboard: Collection -->
                 <aside class="dashboard-sidebar dashboard-left" x-data="dashboardCollection()" x-init="init()">
-                    <div class="sidebar-header">
-                        <h3>Collection</h3>
-                    </div>
                     <div class="sidebar-content">
-                        <!-- Collections -->
-                        <div class="section-title">Collections</div>
+                        <!-- Bookmarks -->
+                        <div class="section-title">Bookmarks</div>
                         <div class="collections-mini">
                             <button @click="goToCollections()" class="item-mini collection-add-btn">
                                 <i class="fas fa-plus"></i>
@@ -493,7 +490,7 @@
                         <!-- Now Playing -->
                         <div class="section-title">Playing Now</div>
                         <div class="now-playing-mini" x-show="nowPlaying">
-                            <div class="item-mini" @click="playItem(nowPlaying)">
+                            <div class="item-mini" @click="goToMediaItem(nowPlaying)">
                                 <img :src="nowPlaying.cover_art" class="mini-cover">
                                 <div>
                                     <div class="mini-title" x-text="nowPlaying.title"></div>
@@ -505,29 +502,47 @@
                             <span>Nothing playing</span>
                         </div>
                         
+                        <!-- Up Next Queue -->
+                        <div class="section-title">Up Next</div>
+                        <div class="queue-mini" x-show="queueItems.length > 0">
+                            <template x-for="(item, index) in queueItems" :key="item.id || index">
+                                <div class="item-mini queue-item" @click="goToMediaItem(item)">
+                                    <img :src="item.cover_art || item.thumbnail" class="mini-thumb">
+                                    <div class="mini-info">
+                                        <span class="mini-title" x-text="item.title"></span>
+                                    </div>
+                                    <button @click.stop="removeFromQueue(index)" class="queue-remove-btn" title="Remove from queue">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="empty-mini" x-show="queueItems.length === 0">
+                            <span>Queue is empty</span>
+                        </div>
+                        
                         <!-- Recently Added -->
                         <div class="section-title">Recently Added</div>
                         <div class="recent-mini">
                             <template x-for="item in recent.slice(0, 3)" :key="item.id">
-                                <div class="item-mini" @click="playItem(item)">
+                                <div class="item-mini" @click="goToMediaItem(item)">
                                     <img :src="item.cover_art" class="mini-thumb">
                                     <div class="mini-info">
                                         <span class="mini-title" x-text="item.title"></span>
                                     </div>
+                                    <button @click.stop="addToQueue(item)" class="queue-add-btn" title="Add to queue">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
                                 </div>
                             </template>
                         </div>
                         
                         <!-- Quick Actions -->
                         <div class="section-title">Quick</div>
-                        <div class="actions-mini">
+                        <div class="actions-mini actions-mini-vertical">
                             <div class="action-mini" @click="goTo('/music')">Music</div>
                             <div class="action-mini" @click="goTo('/shows')">Shows</div>
                             <div class="action-mini" @click="goTo('/artists')">Artists</div>
-                        </div>
-                        
-                        <div class="demo-badge">
-                            <span class="demo-label">DEMO</span>
                         </div>
                     </div>
                 </aside>
@@ -1325,9 +1340,13 @@
             return {
                 nowPlaying: null,
                 recent: [],
+                queueItems: [],
                 async init() {
                     // Check if media player has a current track (radio or player)
-                    if (window.mediaPlayer && window.mediaPlayer.currentTrack) {
+                    // Prioritize actively playing radio/player content
+                    if (window.mediaPlayer && window.mediaPlayer.currentTrack && window.mediaPlayer.isPlaying) {
+                        this.nowPlaying = window.mediaPlayer.currentTrack;
+                    } else if (window.mediaPlayer && window.mediaPlayer.currentTrack) {
                         this.nowPlaying = window.mediaPlayer.currentTrack;
                     } else {
                         // Load random media for "Now Playing"
@@ -1367,7 +1386,7 @@
                         } catch (e) { console.log('Media data not available', e); }
                     }
                     
-                    // Set up listener for media player changes
+                    // Set up listener for media player changes (radio/player updates)
                     if (window.mediaPlayer && window.mediaPlayer.on) {
                         window.mediaPlayer.on('play', () => {
                             this.nowPlaying = window.mediaPlayer.currentTrack;
@@ -1375,6 +1394,57 @@
                         window.mediaPlayer.on('playlistchange', () => {
                             this.nowPlaying = window.mediaPlayer.currentTrack;
                         });
+                        window.mediaPlayer.on('trackchange', () => {
+                            this.nowPlaying = window.mediaPlayer.currentTrack;
+                        });
+                    }
+                    
+                    // Poll for radio updates if radio page is active
+                    setInterval(() => {
+                        if (window.mediaPlayer && window.mediaPlayer.currentTrack && window.mediaPlayer.isPlaying) {
+                            this.nowPlaying = window.mediaPlayer.currentTrack;
+                        }
+                    }, 2000);
+                    
+                    // Load queue from media player if available
+                    if (window.mediaPlayer && window.mediaPlayer.playlist) {
+                        const currentIdx = window.mediaPlayer.currentIndex || 0;
+                        this.queueItems = window.mediaPlayer.playlist.slice(currentIdx + 1);
+                    }
+                    
+                    // Listen for playlist changes to update queue
+                    if (window.mediaPlayer && window.mediaPlayer.on) {
+                        window.mediaPlayer.on('playlistchange', () => {
+                            if (window.mediaPlayer && window.mediaPlayer.playlist) {
+                                this.queueItems = window.mediaPlayer.playlist.slice((window.mediaPlayer.currentIndex || 0) + 1);
+                            }
+                        });
+                    }
+                },
+                goToMediaItem(item) {
+                    // Navigate to the media item's detail page
+                    const type = item.type === 'show' ? 'show' : 'track';
+                    window.location.href = `/player?id=${encodeURIComponent(item.id)}&type=${type}`;
+                },
+                addToQueue(item) {
+                    // Add item to media player queue
+                    if (window.mediaPlayer) {
+                        window.mediaPlayer.addToPlaylist(item);
+                        // Update local queue display
+                        this.queueItems = window.mediaPlayer.playlist.slice((window.mediaPlayer.currentIndex || 0) + 1);
+                    }
+                    // Show notification
+                    if (window.ahoyApp?.showNotification) {
+                        window.ahoyApp.showNotification('Added to queue', 'success');
+                    }
+                },
+                removeFromQueue(index) {
+                    // Remove item from queue (adjust index based on current track position)
+                    if (window.mediaPlayer && window.mediaPlayer.playlist) {
+                        const actualIndex = (window.mediaPlayer.currentIndex || 0) + 1 + index;
+                        window.mediaPlayer.removeFromPlaylist(actualIndex);
+                        // Update local queue display
+                        this.queueItems = window.mediaPlayer.playlist.slice((window.mediaPlayer.currentIndex || 0) + 1);
                     }
                 },
                 playItem(item) {

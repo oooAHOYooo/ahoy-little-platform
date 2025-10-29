@@ -324,6 +324,9 @@ function homePage() {
             this.isLoading = false;
             this.startHeroRotation();
             
+            // Sync playing state with media player if available
+            this.syncPlayingState();
+            
             // Load user playlists if logged in
             if (window.ahoyApp && window.ahoyApp.isLoggedIn) {
                 await this.loadUserPlaylists();
@@ -339,6 +342,22 @@ function homePage() {
             
             // Expose functions globally for keyplaylist navigation
             window.homePage = this;
+        },
+        
+        syncPlayingState() {
+            // Check if media player has a current track and sync the index
+            if (window.mediaPlayer && window.mediaPlayer.currentTrack && this.feedItems.length > 0) {
+                const currentTrack = window.mediaPlayer.currentTrack;
+                const displayedItems = this.feedItems.slice(0, 4);
+                const foundIndex = displayedItems.findIndex(i => {
+                    const itemId = i.id || i.track_id || i.show_id;
+                    const currentId = currentTrack.id || currentTrack.track_id;
+                    return itemId && currentId && String(itemId) === String(currentId);
+                });
+                if (foundIndex !== -1) {
+                    this.currentIndex = foundIndex;
+                }
+            }
         },
         
         // Data loading
@@ -359,7 +378,14 @@ function homePage() {
             try {
                 const response = await fetch('/api/now-playing');
                 const data = await response.json();
-                this.feedItems = data.feed || [];
+                // Normalize feed items - API returns type: 'music' but we need type: 'track' for mediaPlayer
+                this.feedItems = (data.feed || []).map(item => ({
+                    ...item,
+                    type: item.type === 'music' ? 'track' : item.type,
+                    audio_url: item.audio_url || item.preview_url || item.full_url
+                }));
+                // Re-sync playing state after loading feed items
+                this.syncPlayingState();
             } catch (error) {
                 console.error('Error loading now playing:', error);
             }
@@ -500,54 +526,97 @@ function homePage() {
         // Actions
         playRandom() {
             if (this.feedItems.length > 0) {
-                const randomIndex = Math.floor(Math.random() * this.feedItems.length);
-                this.playItem(this.feedItems[randomIndex], randomIndex);
+                // Get the displayed items (first 4)
+                const displayedItems = this.feedItems.slice(0, 4);
+                const randomIndex = Math.floor(Math.random() * displayedItems.length);
+                this.playItem(displayedItems[randomIndex], randomIndex);
             }
         },
         
         playItem(item, index) {
+            // Update current index for visual feedback
             this.currentIndex = index;
             this.stopHeroRotation();
             
-            console.log('🎵 Playing item:', item);
-            console.log('🎵 Available players:', {
-                mediaPlayer: !!window.mediaPlayer,
-                PlayerControls: !!window.PlayerControls,
-                globalPlayer: !!window.globalPlayer
-            });
+            // Ensure item has required properties
+            const normalizedItem = {
+                ...item,
+                type: item.type || (item.host || item.show_id ? 'show' : 'track'),
+                id: item.id || item.track_id || item.show_id
+            };
             
-            // Try to play directly if it's music and media player is available
-            if (item.type === 'track' || item.type === 'music' || item.artist) {
-                if (window.mediaPlayer && typeof window.mediaPlayer.play === 'function') {
-                    console.log('🎵 Using window.mediaPlayer');
-                    window.mediaPlayer.play(item);
-                    setTimeout(() => this.startHeroRotation(), 10000);
-                    return;
-                } else if (window.PlayerControls && typeof window.PlayerControls.play === 'function') {
-                    console.log('🎵 Using window.PlayerControls');
-                    window.PlayerControls.play(item);
-                    setTimeout(() => this.startHeroRotation(), 10000);
-                    return;
-                } else if (window.globalPlayer && typeof window.globalPlayer.play === 'function') {
-                    console.log('🎵 Using window.globalPlayer');
-                    window.globalPlayer.play(item);
-                    setTimeout(() => this.startHeroRotation(), 10000);
+            console.log('🎵 Playing item:', normalizedItem);
+            
+            // Determine if it's a show or track
+            const isShow = normalizedItem.type === 'show' || normalizedItem.host || normalizedItem.show_id || normalizedItem.video_url || normalizedItem.mp4_link;
+            
+            if (isShow) {
+                // For shows, navigate to player page
+                console.log('🎵 Playing show, navigating to player');
+                window.location.href = `/player?id=${normalizedItem.id}&type=show`;
+                return;
+            }
+            
+            // For music tracks, try to play with media player
+            if (window.mediaPlayer && typeof window.mediaPlayer.play === 'function') {
+                // Ensure the item has proper structure for mediaPlayer
+                const playItem = {
+                    ...normalizedItem,
+                    type: 'track',
+                    audio_url: normalizedItem.audio_url || normalizedItem.preview_url || normalizedItem.full_url,
+                    cover_art: normalizedItem.cover_art || normalizedItem.thumbnail,
+                    title: normalizedItem.title,
+                    artist: normalizedItem.artist
+                };
+                
+                // Check if we have audio URL
+                if (!playItem.audio_url && !playItem.preview_url) {
+                    console.log('🎵 No audio URL available, using navigation fallback');
+                    if (normalizedItem.id) {
+                        window.location.href = `/player?id=${normalizedItem.id}&type=track`;
+                    } else {
+                        window.location.href = `/music`;
+                    }
                     return;
                 }
-                console.log('🎵 No player available, using navigation fallback');
-                // Fallback to navigation
-                window.location.href = `/music?highlight=${item.id}`;
-            } else if (item.type === 'show') {
-                console.log('🎵 Playing show, navigating to player');
-                // For shows, navigate to player
-                window.location.href = `/player?id=${item.id}&type=show`;
-            } else {
-                console.log('🎵 Unknown type, defaulting to shows');
-                // Default to shows if no type specified
-                window.location.href = `/shows?highlight=${item.id}`;
+                
+                console.log('🎵 Using window.mediaPlayer', playItem);
+                window.mediaPlayer.play(playItem);
+                
+                // Update the index to show as playing
+                // The index is already set above, but we ensure it stays in sync
+                
+                // Listen for track changes from media player
+                if (window.mediaPlayer && window.mediaPlayer.on) {
+                    const checkCurrentTrack = () => {
+                        if (window.mediaPlayer.currentTrack) {
+                            const displayedItems = this.feedItems.slice(0, 4);
+                            const foundIndex = displayedItems.findIndex(i => {
+                                const itemId = i.id || i.track_id || i.show_id;
+                                const currentId = window.mediaPlayer.currentTrack.id || 
+                                                window.mediaPlayer.currentTrack.track_id;
+                                return itemId && currentId && itemId === currentId;
+                            });
+                            if (foundIndex !== -1) {
+                                this.currentIndex = foundIndex;
+                            }
+                        }
+                    };
+                    window.mediaPlayer.on('play', checkCurrentTrack);
+                    window.mediaPlayer.on('trackchange', checkCurrentTrack);
+                }
+                
+                setTimeout(() => this.startHeroRotation(), 10000);
+                return;
             }
-            // Restart rotation after a delay
-            setTimeout(() => this.startHeroRotation(), 10000);
+            
+            // Fallback: navigate to music page
+            console.log('🎵 No player available, using navigation fallback');
+            if (normalizedItem.id) {
+                window.location.href = `/player?id=${normalizedItem.id}&type=track`;
+            } else {
+                window.location.href = `/music`;
+            }
         },
         
         playShow(show, index = null) {
