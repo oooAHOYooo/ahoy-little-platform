@@ -409,9 +409,7 @@ def api_sitemap():
 def debug_report():
     return render_template('debug_report.html')
 
-@app.route('/bookmark-test')
-def bookmark_test():
-    return render_template('bookmark_test.html')
+# Removed bookmark-test route - template moved to .archive
 
 
 
@@ -643,6 +641,14 @@ def playlists_index():
             return jsonify({'seconds': int(seconds or 0)})
         except Exception as e:
             return jsonify({'error': 'failed', 'detail': str(e)}), 400
+
+@app.route('/api/products')
+@limiter.exempt
+def api_products():
+    """Get products data (subscriptions, themes, limits)"""
+    from storage import read_json
+    products = read_json('data/products.json', {})
+    return jsonify(products)
 
 @app.route('/api/weather')
 def api_weather():

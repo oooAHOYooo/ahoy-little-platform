@@ -1,5 +1,5 @@
 async function getThemes() {
-  const r = await fetch("/static/data/products.json"); // or serve via /api/products
+  const r = await fetch("/api/products");
   try { return (await r.json()).themes || []; } catch { return []; }
 }
 

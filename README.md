@@ -1071,3 +1071,38 @@ Notes: Local dev defaults to SQLite if `DATABASE_URL` is unset; Postgres JSONB/U
 **Ahoy Indie Media** - Discover, organize, and enjoy independent music and content.
 
 *Last Updated: December 2024 | Version: 1.0.0*
+
+---
+
+## 📦 Repository Cleanup & Archive
+
+As part of repository maintenance, the following files have been moved to `.archive/` folder for reference but are no longer actively used in the codebase:
+
+### Redundant Entry Point Scripts
+- **`start.py`** - Redundant production startup script. Production deployments use `gunicorn` with `gunicorn.conf.py` and `scripts/migrate_and_start.sh`. For local development, use `run.py` or `cli.py`.
+- **`start.bat`** - Windows-specific startup script. Functionality covered by `cli.py` which works cross-platform.
+- **`start_browser.sh`** - Shell script that only starts the app and opens browser. Redundant with `run.py` which handles port detection and startup.
+
+### Redundant Deployment Documentation
+- **`DEPLOYMENT.md`** - Basic deployment guide. All deployment information is now consolidated in the main README.md under the "Deployment" section.
+- **`PRODUCTION_DEPLOYMENT.md`** - Production-specific deployment guide. Information integrated into README.md.
+- **`RENDER_DEPLOYMENT_CHECKLIST.md`** - Deployment checklist. Checked items and process now documented in main README.
+- **`RENDER_FIX_GUIDE.md`** - Historical fix guide for Render deployment issues. No longer needed as deployment is stable.
+
+### Redundant Build Configuration
+- **`AhoyIndieMedia.spec`** - Duplicate PyInstaller spec file. The canonical spec file is `packaging/ahoy.spec` which is properly maintained.
+
+### Debug/Development Files
+- **`cookies.txt`** - Session cookie file from browser testing. Should not be in version control as it contains session data.
+- **`debug_config.json`** - Debug configuration snapshot. Outdated and no longer reflects current architecture.
+- **`debug_hero.html`** - Standalone HTML file for debugging hero carousel. Debugged issue resolved; no longer needed.
+
+### Unused Templates
+- **`templates/bookmark_test.html`** - Test template for bookmark functionality. Bookmark system is fully implemented; test template no longer needed. Route `/bookmark-test` has been removed.
+- **`templates/downloads_simple.html`** - Simple version of downloads page. Replaced by `templates/downloads.html` which is actively used.
+
+### Documentation
+- **`GPT_COLLABORATION_SUMMARY.md`** - Historical collaboration notes with GPT assistant. Information integrated into main README development log section.
+- **`static/data/products.json`** - Duplicate products file. The canonical file is `data/products.json` which is used by `services/plan.py`. Frontend code should reference via API endpoint instead.
+
+**Note:** All archived files are preserved for historical reference. If you need any of these files, they can be found in the `.archive/` directory. However, they are not part of the active codebase and may reference outdated patterns or configurations.
