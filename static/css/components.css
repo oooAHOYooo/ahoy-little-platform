@@ -1227,6 +1227,18 @@ img.loading {
 
 .playing-list {
     padding: var(--spacing-sm);
+    /* Default vertical layout for mobile */
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+/* Grid layout for Live Now section - 4 items in a row on desktop */
+.shows-compact .playing-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    padding: var(--spacing-sm);
 }
 
 .playing-item {
@@ -1238,6 +1250,9 @@ img.loading {
     cursor: pointer;
     transition: all 0.2s ease;
     margin-bottom: var(--spacing-xs);
+    /* Min width for Live Now items to prevent collapsing */
+    min-width: 0;
+    min-height: 100px;
 }
 
 .playing-item:hover {
@@ -1287,6 +1302,56 @@ img.loading {
 /* Shows Compact */
 .shows-compact {
     min-height: 200px;
+}
+
+/* Live Now specific styles - ensure items are clickable cards */
+.shows-compact .playing-item {
+    margin-bottom: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    min-height: 120px;
+    aspect-ratio: 16/9;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+}
+
+.shows-compact .playing-item .item-details {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.75rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
+}
+
+.shows-compact .playing-item .item-details h4,
+.shows-compact .playing-item .item-details p {
+    color: white;
+    margin: 0;
+}
+
+.shows-compact .playing-item .play-indicator {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(99, 102, 241, 0.9);
+    color: white;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.shows-compact .playing-item:hover .play-indicator,
+.shows-compact .playing-item.playing .play-indicator {
+    opacity: 1;
 }
 
 .shows-list {
@@ -1751,6 +1816,62 @@ img.loading {
     font-weight: 600;
 }
 
+/* Recently Added - Grid Layout */
+.recently-added .playing-list.recently-added-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    padding: var(--spacing-sm);
+}
+
+.recently-added .playing-list.recently-added-grid .playing-item {
+    margin-bottom: 0;
+    min-height: 100px;
+    aspect-ratio: 1;
+    position: relative;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.recently-added .playing-list.recently-added-grid .playing-item .item-details {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.75rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+}
+
+.recently-added .playing-list.recently-added-grid .playing-item .item-details h4,
+.recently-added .playing-list.recently-added-grid .playing-item .item-details p {
+    color: white;
+}
+
+.recently-added .playing-list.recently-added-grid .playing-item .play-indicator {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(99, 102, 241, 0.9);
+    color: white;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.recently-added .playing-list.recently-added-grid .playing-item:hover .play-indicator {
+    opacity: 1;
+}
+
+/* Radio Feed - Fill Container */
+.radio-feed-single {
+    margin: 0 !important;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .grid-container {
@@ -1760,6 +1881,40 @@ img.loading {
 
     .now-playing-compact {
         grid-column: 1 / -1;
+    }
+    
+    /* Live Now: 2 columns on tablet */
+    .shows-compact .playing-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Recently Added: 2 columns on tablet */
+    .recently-added .playing-list.recently-added-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    /* Live Now: 1 column on mobile, back to vertical layout */
+    .shows-compact .playing-list {
+        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .shows-compact .playing-item {
+        aspect-ratio: 16/9;
+        min-height: 150px;
+    }
+    
+    /* Radio feed: reduce padding on mobile */
+    .radio-feed-single {
+        padding: 1rem !important;
+    }
+    
+    /* Recently Added: 2 columns on mobile */
+    .recently-added .playing-list.recently-added-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 

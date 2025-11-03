@@ -490,8 +490,9 @@
                         <!-- Now Playing -->
                         <div class="section-title">Playing Now</div>
                         <div class="now-playing-mini" x-show="nowPlaying">
-                            <div class="item-mini" @click="goToMediaItem(nowPlaying)">
-                                <img :src="nowPlaying.cover_art" class="mini-cover">
+                            <div class="item-mini" @click="goToMediaItem(nowPlaying)" 
+                                :class="{'radio-track': isRadioTrack(nowPlaying)}">
+                                <img :src="nowPlaying.cover_art || '/static/img/default-cover.jpg'" class="mini-cover">
                                 <div>
                                     <div class="mini-title" x-text="nowPlaying.title"></div>
                                     <div class="mini-artist" x-text="nowPlaying.artist"></div>
@@ -1421,7 +1422,30 @@
                         });
                     }
                 },
+                isRadioTrack(item) {
+                    // Check if this track is from radio (has radio-specific properties or is in radio queue)
+                    if (!item || !window.homePage) return false;
+                    // Check if it matches the radio current track
+                    if (window.homePage.radioCurrent && 
+                        (window.homePage.radioCurrent.id === item.id || 
+                         window.homePage.radioCurrent.track_id === item.track_id)) {
+                        return true;
+                    }
+                    // Check if it's in radio tracks
+                    if (window.homePage.radioTracks) {
+                        return window.homePage.radioTracks.some(t => 
+                            (t.id && item.id && String(t.id) === String(item.id)) ||
+                            (t.track_id && item.track_id && String(t.track_id) === String(item.track_id))
+                        );
+                    }
+                    return false;
+                },
                 goToMediaItem(item) {
+                    // If it's a radio track, go to radio page, otherwise go to player
+                    if (this.isRadioTrack(item)) {
+                        window.location.href = '/radio';
+                        return;
+                    }
                     // Navigate to the media item's detail page
                     const type = item.type === 'show' ? 'show' : 'track';
                     window.location.href = `/player?id=${encodeURIComponent(item.id)}&type=${type}`;

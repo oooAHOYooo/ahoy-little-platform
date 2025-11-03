@@ -53,41 +53,31 @@
         <div class="grid-container">
 
             <!-- Now Playing Compact (Radio Feed) -->
-            <div class="grid-item now-playing-compact" style="display:flex;flex-direction:column;height:100%;">
+            <div class="grid-item now-playing-compact" style="display:flex;flex-direction:column;height:100%;padding:0;overflow:hidden;">
                 <div class="item-header" style="padding:0.75rem 1rem;flex-shrink:0;">
                     <h3 style="font-size:0.875rem;">Radio Feed</h3>
                     <a href="/radio" class="view-all-btn" style="font-size:0.75rem;">
                         Full Radio (Beta)
                     </a>
                 </div>
-                <div class="radio-feed-single" style="padding:0.5rem;flex:1;min-height:0;display:flex;align-items:stretch;">
-                    <!-- Current Track with Big Play Button -->
-                    <div class="radio-track-current" 
-                        :style="`background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url(${(radioCurrent || radioUpNext[0])?.cover_art || '/static/img/default-cover.jpg'}); background-size: cover; background-position: center;`"
-                        style="border-radius:0.6rem;padding:1rem;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative;cursor:pointer;transition:all 0.2s;border:2px solid rgba(99,102,241,0.3);width:100%;height:100%;"
-                        @click="radioCurrent ? toggleRadio() : playRadioTrack(radioUpNext[0])">
-                        <!-- Big Play Button -->
-                        <button @click.stop="radioCurrent ? toggleRadio() : playRadioTrack(radioUpNext[0])"
-                            style="width:3.5rem;height:3.5rem;border-radius:50%;background:rgba(99,102,241,0.9);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px rgba(99,102,241,0.5);margin-bottom:0.5rem;flex-shrink:0;"
-                            @mouseenter="$el.style.transform='scale(1.1)';$el.style.background='rgba(99,102,241,1)'"
-                            @mouseleave="$el.style.transform='scale(1)';$el.style.background='rgba(99,102,241,0.9)'">
-                            <i class="fas" :class="radioIsPlaying ? 'fa-pause' : 'fa-play'" style="color:white;font-size:1.25rem;margin-left:2px;"></i>
-                        </button>
-                        <!-- Track Info -->
-                        <div style="text-align:center;width:100%;flex-shrink:0;">
-                            <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0.2rem;" 
-                                x-text="(radioCurrent || radioUpNext[0])?.title || 'No track playing'"></div>
-                            <div style="font-size:0.7rem;opacity:0.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" 
-                                x-text="(radioCurrent || radioUpNext[0])?.artist || ''"></div>
-                        </div>
+                <!-- Radio Feed fills entire container -->
+                <a href="/radio" class="radio-feed-single" 
+                    :style="`background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url(${(radioCurrent || radioUpNext[0])?.cover_art || '/static/img/default-cover.jpg'}); background-size: cover; background-position: center;`"
+                    style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative;cursor:pointer;transition:all 0.2s;text-decoration:none;color:inherit;padding:1.5rem;margin:0;width:100%;height:100%;">
+                    <!-- Track Info -->
+                    <div style="text-align:center;width:100%;z-index:1;">
+                        <div style="font-size:1rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0.5rem;color:white;" 
+                            x-text="(radioCurrent || radioUpNext[0])?.title || 'No track playing'"></div>
+                        <div style="font-size:0.85rem;opacity:0.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:white;" 
+                            x-text="(radioCurrent || radioUpNext[0])?.artist || ''"></div>
                     </div>
                     
                     <!-- Placeholder if no tracks -->
                     <div x-show="!radioCurrent && radioUpNext.length === 0" 
-                        style="border-radius:0.6rem;padding:2rem;display:flex;align-items:center;justify-content:center;opacity:0.4;background:rgba(255,255,255,0.02);width:100%;height:100%;">
+                        style="text-align:center;opacity:0.6;color:white;z-index:1;">
                         <span>Loading radio feed...</span>
                     </div>
-                </div>
+                </a>
             </div>
 
             <!-- Live Shows Compact -->
@@ -156,7 +146,7 @@
                         <span>Loading latest…</span>
                     </div>
                 </div>
-                <div class="playing-list">
+                <div class="playing-list recently-added-grid">
                     <template x-for="item in latestItems" :key="item.id">
                         <div class="playing-item"
                             x-show="item.cover_art || item.thumbnail"
