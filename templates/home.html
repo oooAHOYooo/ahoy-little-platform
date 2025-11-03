@@ -167,79 +167,6 @@
         </div>
     </section>
 
-    <!-- New Haven Events Promotional Banner -->
-    <section class="newhaven-promo-section">
-        <div class="promo-container">
-            <div class="promo-content">
-                <div class="promo-header">
-
-                    <div class="promo-title">
-                        <h2>Ahoy New Haven</h2>
-                        <p>Discover live shows, poetry readings, and indie
-                            performances in New Haven</p>
-                        <p class="beta-notice">Custom built web app beta - help
-                            us improve!</p>
-                        <h3>Upcoming Events</h3>
-                    </div>
-                </div>
-
-                <div class="promo-events">
-                    <div class="event-card featured"
-                        onclick="window.open('https://newhaven.ahoy.ooo','_blank')">
-                        <div class="event-date-badge">
-                            <span class="event-day">30</span>
-                            <span class="event-month">Oct</span>
-                        </div>
-                        <div class="event-info">
-                            <h3>Poets &amp; Friends #4: Spooky Edition</h3>
-                            <p class="event-venue">Koffee? • 104 Audubon Street,
-                                New Haven, CT 06511</p>
-                            <p class="event-time">6:30 PM • Doors 6:00 PM;
-                                Readings 6:30–8:00 PM</p>
-                            <p class="event-description">Poets &amp; Friends #4
-                                (Spooky Edition). Thursday, Oct 30, 2025. Doors
-                                6:00 PM. Readings 6:30–8:00 PM. Koffee? — 104
-                                Audubon St, New Haven, CT. Costumes encouraged.
-                                Food available at Koffee?. Bring friends.</p>
-                        </div>
-                    </div>
-
-                    <div class="event-card"
-                        onclick="window.open('https://newhaven.ahoy.ooo','_blank')">
-                        <div class="event-date-badge">
-                            <span class="event-day">7</span>
-                            <span class="event-month">Nov</span>
-                        </div>
-                        <div class="event-info">
-                            <h3>Jake Custer - Live</h3>
-                            <p class="event-venue">Spruce Coffeeshop • 952 State
-                                St, New Haven, CT</p>
-                            <p class="event-time">7:45 PM</p>
-                            <p class="event-description">Join us for a night of
-                                indie rock as Jake Custer debuts new songs from
-                                'I Think We\'re Lost' live for the first time.
-                                Album debut event featuring Jake Custer
-                                performing tracks from his new album
-                                'I Think We\'re Lost'. Doors open at 7:15 PM,
-                                showtime at 7:45 PM.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="promo-actions">
-                    <a href="https://newhaven.ahoy.ooo" target="_blank"
-                        class="promo-btn primary">
-                        Visit New Haven Events
-                    </a>
-                    <a href="https://newhaven.ahoy.ooo" target="_blank"
-                        class="promo-btn secondary">
-                        RSVP
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Loading State -->
     <section x-show="isLoading" class="loading-section">
         <div class="spinner"></div>
@@ -289,6 +216,31 @@
                     <i class="fas fa-user-plus"></i> Create Free Account
                 </button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Left Dashboard and Media Player relocation -->
+<div class="left-dashboard" style="display: flex; flex-direction: column;">
+    <!-- Existing merit badges -->
+    <div class="merit-badges" style="margin-bottom: 1rem;">
+        <!-- Merit badges code here -->
+    </div>
+
+    <!-- Media Player -->
+    <div class="media-player" style="background-color: #303030; padding: 1rem; border-radius: 5px; color: white;">
+        <div class="media-title" style="font-size: 1.2rem;">Media Player</div>
+        <div x-show="radioCurrent || radioUpNext.length > 0">
+            <div class="current-track">
+                <div x-text="radioCurrent?.title || 'No track playing'" style="font-weight: bold;"></div>
+                <div x-text="radioCurrent?.artist || ''"></div>
+            </div>
+            <button @click="toggleRadio()" style="margin-top: 1rem;">
+                <i :class="{'fas fa-pause': radioIsPlaying, 'fas fa-play': !radioIsPlaying}"></i>
+            </button>
+        </div>
+        <div x-show="!radioCurrent && radioUpNext.length === 0" style="color: grey;">
+            <div>No media playing at the moment.</div>
         </div>
     </div>
 </div>

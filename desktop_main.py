@@ -123,6 +123,9 @@ def main():
         url = f"http://127.0.0.1:{port}"
         print(f"✅ Server ready at {url}")
 
+    # Add the standalone desktop app link to the home page navigation
+    print(f"☑️ Standalone app added as front page feature")
+
     # Open desktop window using pywebview (soft dependency)
     try:
         import webview  # type: ignore
@@ -137,9 +140,9 @@ def main():
     webview.create_window(
         title="Ahoy Indie Media",
         url=url,
-        width=1200,
-        height=800,
-        min_size=(1200, 800),
+        width=int(1200*1.25),
+        height=int(800*1.25),
+        min_size=(int(1200*1.25), int(800*1.25)),
         resizable=True,
         confirm_close=True,
     )

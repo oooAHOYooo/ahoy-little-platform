@@ -58,10 +58,25 @@ html {
 
 body {
     font-family: var(--font-family);
-    background-color: var(--background-dark);
+    background-image: url('https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaHR4emR2d3ZkamprdXlrMTZsZWExN3VhdXh1dXNoZXJ3b3Zvem4xcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/w6WE0AKTT6XE3kKmv8/giphy.gif');
+    background-size: cover;
+    background-position: center center;
+    animation: rotateBackground 10s infinite;
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
+}
+
+@keyframes rotateBackground {
+    0%, 100% {
+        background-image: url('https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaHR4emR2d3ZkamprdXlrMTZsZWExN3VhdXh1dXNoZXJ3b3Zvem4xcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/w6WE0AKTT6XE3kKmv8/giphy.gif');
+    }
+    33% {
+        background-image: url('https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGhubDcwbmNpMGdvMmlmM3B5Z3J6NnZ3a3NkdmRreWNjYTVkeDgwbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Byour3OgR0nWnRR6Tc/giphy.gif');
+    }
+    66% {
+        background-image: url('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdmQ1bWJqd2FnOXJzN2VwOHkybDRsMWx0M3pkam8zaGc2OGNtMXg3NyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Wy3Q0fuNIJmYn62Lcv/giphy.gif');
+    }
 }
 
 /* Typography */
@@ -790,7 +805,6 @@ a:hover {
 .nav-dropdown-arrow.rotated {
     transform: rotate(180deg);
 }
-
 .nav-dropdown-menu {
     position: absolute;
     top: 100%;
@@ -1403,7 +1417,7 @@ a:hover {
 }
 
 /* ========================================
-   Account: Today’s Quests Grid + Hover Glow
+   Account: Today's Quests Grid + Hover Glow
    ======================================== */
 .quests-list {
     display: grid;
@@ -2192,7 +2206,8 @@ a:hover {
 .player-actions {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-md);
+    flex: 1;
 }
 
 .player-info {
@@ -2296,7 +2311,6 @@ a:hover {
     align-items: center;
     gap: var(--spacing-sm);
 }
-
 /* Responsive Design */
 @media (max-width: 768px) {
     .nav-container {
@@ -3097,7 +3111,6 @@ a:hover {
         opacity: 1;
     }
 }
-
 .animate-fadeIn {
     animation: fadeIn 0.3s ease;
 }
@@ -3893,7 +3906,6 @@ a:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
 }
-
 .bookmark-type-badge {
     position: absolute;
     top: 0.5rem;
@@ -4648,7 +4660,6 @@ a:hover {
         gap: 0.5rem;
     }
 }
-
 /* ========================================
    Music Page - Mobile Enhancements
    ======================================== */
@@ -5445,7 +5456,6 @@ a:hover {
 .hero-media:hover .hero-media-overlay {
     opacity: 1;
 }
-
 .hero-play-btn {
     background: var(--primary-color);
     border: none;
@@ -6242,7 +6252,6 @@ img.loading {
     color: var(--text-primary);
     font-weight: 700;
 }
-
 .featured-info h4 {
     font-size: var(--font-size-lg);
     margin: 0 0 var(--spacing-sm) 0;
@@ -7042,7 +7051,6 @@ img.loading {
     gap: var(--spacing-sm);
     padding: var(--spacing-lg);
 }
-
 .show-card-compact {
     display: flex;
     align-items: center;
@@ -7839,7 +7847,6 @@ img.loading {
     gap: var(--spacing-2xl);
     align-items: center;
 }
-
 .artist-image {
     position: relative;
     border-radius: var(--border-radius-xl);
@@ -8632,7 +8639,6 @@ img.loading {
     font-size: var(--font-size-xs);
     font-weight: 600;
 }
-
 .show-type-badge {
     position: absolute;
     top: var(--spacing-sm);
@@ -9431,7 +9437,6 @@ img.loading {
     text-decoration: none;
     color: var(--text-primary);
 }
-
 .quick-action:hover {
     background: var(--primary-color);
     color: white;
@@ -10231,7 +10236,6 @@ img.loading {
     align-items: center;
     margin-bottom: var(--spacing-xl);
 }
-
 /* About Tab */
 .about-content {
     max-width: 800px;
@@ -11029,12 +11033,10 @@ img.loading {
 .like-btn {
     background: rgba(0, 0, 0, 0.7);
 }
-
 .like-btn.liked {
     background: #ef4444;
     color: white;
 }
-
 .menu-btn {
     background: rgba(0, 0, 0, 0.7);
 }
@@ -11825,13 +11827,11 @@ img.loading {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-
 .featured-actions-compact {
     display: flex;
     gap: var(--spacing-sm);
     flex-wrap: wrap;
 }
-
 .btn-sm {
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: var(--font-size-xs);
@@ -12619,7 +12619,6 @@ img.loading {
     padding: var(--spacing-md);
     border: 1px solid var(--border-color);
 }
-
 .test-result {
     padding: var(--spacing-md);
     border-radius: var(--border-radius);
@@ -12628,7 +12627,6 @@ img.loading {
     align-items: center;
     gap: var(--spacing-sm);
 }
-
 .test-result.success {
     background: rgba(16, 185, 129, 0.1);
     border-left: 4px solid #10b981;
@@ -13420,7 +13418,6 @@ img.loading {
         height: 28px;
     }
 }
-
 /* Mobile Responsive for My Saves */
 @media (max-width: 768px) {
     .page-header {
@@ -14220,7 +14217,6 @@ img.loading {
     position: relative;
     transition: all 0.2s ease;
 }
-
 .checkbox-label input[type="checkbox"]:checked+.checkmark {
     background: var(--primary-color);
     border-color: var(--primary-color);
@@ -15018,7 +15014,6 @@ img.loading {
     flex-direction: column;
     gap: var(--spacing-md);
 }
-
 .content-item {
     display: flex;
     align-items: center;
@@ -15797,7 +15792,6 @@ img.loading {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
-
 /* Video Theater Responsive */
 @media (max-width: 768px) {
     .video-theater-info {
@@ -16598,7 +16592,6 @@ img.loading {
     flex: 1;
     text-align: left;
 }
-
 .event-info h3 {
     margin: 0 0 var(--spacing-sm) 0;
     font-size: var(--font-size-lg);
@@ -17395,22 +17388,10 @@ img.loading {
 .avatar-anchor-preview.green {
     background: linear-gradient(135deg, #22c55e, #16a34a);
 }
-
-.avatar-anchor.teal,
-.avatar-anchor-preview.teal {
-    background: linear-gradient(135deg, #14b8a6, #0d9488);
-}
-
 .avatar-anchor.cyan,
 .avatar-anchor-preview.cyan {
     background: linear-gradient(135deg, #06b6d4, #0891b2);
 }
-
-.avatar-anchor.blue,
-.avatar-anchor-preview.blue {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-}
-
 .avatar-anchor.indigo,
 .avatar-anchor-preview.indigo {
     background: linear-gradient(135deg, #6366f1, #4f46e5);
@@ -18188,7 +18169,6 @@ img.loading {
     background: rgba(16, 185, 129, 0.1);
     border-color: rgba(16, 185, 129, 0.3);
 }
-
 .quest-icon {
     width: 40px;
     height: 40px;
@@ -18205,7 +18185,6 @@ img.loading {
 .quest-details {
     flex: 1;
 }
-
 .quest-details h4 {
     margin: 0 0 0.5rem;
     font-size: 1rem;
