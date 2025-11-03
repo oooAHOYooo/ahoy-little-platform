@@ -235,9 +235,14 @@
                 <div x-text="radioCurrent?.title || 'No track playing'" style="font-weight: bold;"></div>
                 <div x-text="radioCurrent?.artist || ''"></div>
             </div>
-            <button @click="toggleRadio()" style="margin-top: 1rem;">
-                <i :class="{'fas fa-pause': radioIsPlaying, 'fas fa-play': !radioIsPlaying}"></i>
-            </button>
+            <div class="media-player-controls" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 1.5rem; color: white;">
+                <button @click="toggleRadio()" style="background: none; border: none; color: inherit;">
+                    <i :class="{'fas fa-pause': radioIsPlaying, 'fas fa-play': !radioIsPlaying}" style="font-size: 2rem;"></i>
+                </button>
+                <button @click="skipRadio()" style="background: none; border: none; color: inherit;">
+                    <i class="fas fa-forward" style="font-size: 2rem;"></i>
+                </button>
+            </div>
         </div>
         <div x-show="!radioCurrent && radioUpNext.length === 0" style="color: grey;">
             <div>No media playing at the moment.</div>
