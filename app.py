@@ -245,13 +245,40 @@ def create_app():
 
     # Downloads routes
     DOWNLOADS_DIR = Path("downloads")
+    DIST_DIR = Path("dist")
     
     @app.route('/downloads')
     def downloads_page():
         """Landing page to download latest desktop builds."""
         import requests
-        import os
         from datetime import datetime
+        
+        def _format_size(n: int) -> str:
+            """Format file size in human-readable format"""
+            units = ["B", "KB", "MB", "GB", "TB"]
+            size = float(n)
+            idx = 0
+            while size >= 1024 and idx < len(units) - 1:
+                size /= 1024.0
+                idx += 1
+            return f"{size:.1f} {units[idx]}"
+        
+        def _get_file_type(filename: str) -> dict:
+            """Determine file type and platform from filename"""
+            filename_lower = filename.lower()
+            if filename_lower.endswith('.dmg'):
+                return {'type': 'installer', 'platform': 'macOS', 'icon': '🍎', 'description': 'DMG Installer (Recommended)'}
+            elif filename_lower.endswith('.app'):
+                return {'type': 'standalone', 'platform': 'macOS', 'icon': '🍎', 'description': 'App Bundle (Standalone)'}
+            elif 'setup.exe' in filename_lower or filename_lower.endswith('-setup.exe'):
+                return {'type': 'installer', 'platform': 'Windows', 'icon': '🪟', 'description': 'Setup Installer (Recommended)'}
+            elif filename_lower.endswith('.exe'):
+                return {'type': 'standalone', 'platform': 'Windows', 'icon': '🪟', 'description': 'Executable (Standalone)'}
+            elif filename_lower.endswith('.tar.gz') or filename_lower.endswith('.tgz'):
+                return {'type': 'archive', 'platform': 'Linux', 'icon': '🐧', 'description': 'Linux Archive'}
+            elif filename_lower.endswith('.apk'):
+                return {'type': 'installer', 'platform': 'Android', 'icon': '🤖', 'description': 'Android APK'}
+            return {'type': 'other', 'platform': 'Unknown', 'icon': '📦', 'description': 'Download'}
         
         # Try to fetch latest release from GitHub
         release_assets = []
@@ -282,56 +309,143 @@ def create_app():
                     size_mb = asset_size / (1024 * 1024)
                     
                     # Only include desktop/Android assets
-                    if any(platform in asset_name for platform in ['macOS', 'Windows', 'Linux', 'Android']):
+                    if any(platform in asset_name for platform in ['macOS', 'Windows', 'Linux', 'Android', 'dmg', 'exe', 'Setup', '.app']):
+                        file_info = _get_file_type(asset_name)
                         release_assets.append({
                             'name': asset_name,
                             'size_bytes': asset_size,
                             'size_mb': f"{size_mb:.1f}",
-                            'download_url': asset['browser_download_url']
+                            'size_label': _format_size(asset_size),
+                            'download_url': asset['browser_download_url'],
+                            **file_info
                         })
                 
-                # Sort by platform preference
+                # Sort by platform preference, then by type (installer first)
                 platform_order = {'macOS': 0, 'Windows': 1, 'Linux': 2, 'Android': 3}
-                release_assets.sort(key=lambda x: platform_order.get(next((p for p in platform_order.keys() if p in x['name']), 'Other'), 99))
-                
+                type_order = {'installer': 0, 'standalone': 1, 'archive': 2, 'other': 3}
+                release_assets.sort(key=lambda x: (
+                    platform_order.get(x.get('platform', 'Other'), 99),
+                    type_order.get(x.get('type', 'other'), 99)
+                ))
+        
         except Exception as e:
             print(f"Error fetching GitHub release: {e}")
             # Fallback to local files if GitHub fails
             pass
         
-        # Fallback to local files if no GitHub assets
-        if not release_assets:
-            def _format_size(n: int) -> str:
-                units = ["B", "KB", "MB", "GB", "TB"]
-                size = float(n)
-                idx = 0
-                while size >= 1024 and idx < len(units) - 1:
-                    size /= 1024.0
-                    idx += 1
-                return f"{size:.1f} {units[idx]}"
-            
-            files = []
-            if DOWNLOADS_DIR.exists():
-                for p in sorted(DOWNLOADS_DIR.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True):
-                    if p.is_file():
-                        files.append({
-                            'name': p.name,
-                            'size_bytes': p.stat().st_size,
-                            'size_label': _format_size(p.stat().st_size),
-                            'modified': datetime.fromtimestamp(p.stat().st_mtime).isoformat(),
-                            'url': f"/downloads/{p.name}",
-                        })
-            return render_template('downloads_simple.html', files=files, release_assets=None, release_tag="Local builds")
+        # Collect local files from both dist/ and downloads/ directories
+        local_files = []
         
-        return render_template('downloads_simple.html', files=None, release_assets=release_assets, release_tag=release_tag)
+        # Check dist/ directory (where build scripts put files)
+        if DIST_DIR.exists():
+            try:
+                # Collect files first, then sort safely
+                dist_files = []
+                for p in DIST_DIR.iterdir():
+                    try:
+                        if p.is_file() and not p.name.startswith('.'):
+                            dist_files.append(p)
+                    except (OSError, PermissionError):
+                        # Skip files that can't be accessed
+                        continue
+                
+                # Sort by modification time with error handling
+                try:
+                    dist_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
+                except (OSError, PermissionError):
+                    # If sorting fails, use unsorted list
+                    pass
+                
+                for p in dist_files:
+                    try:
+                        file_stat = p.stat()
+                        file_info = _get_file_type(p.name)
+                        local_files.append({
+                            'name': p.name,
+                            'size_bytes': file_stat.st_size,
+                            'size_label': _format_size(file_stat.st_size),
+                            'size_mb': f"{file_stat.st_size / (1024 * 1024):.1f}",
+                            'modified': datetime.fromtimestamp(file_stat.st_mtime).isoformat(),
+                            'url': f"/downloads/dist/{p.name}",
+                            **file_info
+                        })
+                    except (OSError, PermissionError):
+                        # Skip files that can't be accessed
+                        continue
+            except Exception as e:
+                print(f"Error processing dist/ directory: {e}")
+        
+        # Check downloads/ directory (for manually placed files)
+        if DOWNLOADS_DIR.exists():
+            try:
+                # Collect files first, then sort safely
+                download_files = []
+                for p in DOWNLOADS_DIR.iterdir():
+                    try:
+                        if p.is_file() and not p.name.startswith('.'):
+                            download_files.append(p)
+                    except (OSError, PermissionError):
+                        # Skip files that can't be accessed
+                        continue
+                
+                # Sort by modification time with error handling
+                try:
+                    download_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
+                except (OSError, PermissionError):
+                    # If sorting fails, use unsorted list
+                    pass
+                
+                for p in download_files:
+                    try:
+                        file_stat = p.stat()
+                        file_info = _get_file_type(p.name)
+                        local_files.append({
+                            'name': p.name,
+                            'size_bytes': file_stat.st_size,
+                            'size_label': _format_size(file_stat.st_size),
+                            'size_mb': f"{file_stat.st_size / (1024 * 1024):.1f}",
+                            'modified': datetime.fromtimestamp(file_stat.st_mtime).isoformat(),
+                            'url': f"/downloads/{p.name}",
+                            **file_info
+                        })
+                    except (OSError, PermissionError):
+                        # Skip files that can't be accessed
+                        continue
+            except Exception as e:
+                print(f"Error processing downloads/ directory: {e}")
+        
+        # Sort local files by platform and type
+        if local_files:
+            platform_order = {'macOS': 0, 'Windows': 1, 'Linux': 2, 'Android': 3}
+            type_order = {'installer': 0, 'standalone': 1, 'archive': 2, 'other': 3}
+            local_files.sort(key=lambda x: (
+                platform_order.get(x.get('platform', 'Other'), 99),
+                type_order.get(x.get('type', 'other'), 99)
+            ))
+        
+        # Use GitHub assets if available, otherwise use local files
+        if release_assets:
+            return render_template('downloads.html', files=None, release_assets=release_assets, release_tag=release_tag)
+        else:
+            return render_template('downloads.html', files=local_files, release_assets=None, release_tag="Local Builds")
 
     @app.route('/downloads/<path:filename>')
     def download_artifact(filename):
-        """Serve built desktop artifacts."""
+        """Serve built desktop artifacts from downloads/ directory."""
         if not DOWNLOADS_DIR.exists():
             return jsonify({'error': 'No downloads available'}), 404
         try:
             return send_from_directory(str(DOWNLOADS_DIR), filename, as_attachment=True)
+        except Exception:
+            return jsonify({'error': 'File not found'}), 404
+    
+    @app.route('/downloads/dist/<path:filename>')
+    def download_dist_artifact(filename):
+        """Serve built desktop artifacts from dist/ directory."""
+        if not DIST_DIR.exists():
+            return jsonify({'error': 'No builds available'}), 404
+        try:
+            return send_from_directory(str(DIST_DIR), filename, as_attachment=True)
         except Exception:
             return jsonify({'error': 'File not found'}), 404
 

@@ -752,39 +752,71 @@ envVars:
       property: connectionString
 ```
 
-## Desktop wrapper (macOS/Windows/Linux)
+## 🖥️ Desktop Application (Primary Distribution Method)
 
-Package Ahoy as a desktop app using PyWebview (with a local Flask server).
+Ahoy Indie Media is primarily distributed as **standalone desktop applications** for macOS and Windows with proper installers.
 
-1) Install build tools:
+### Quick Start - Build Desktop Apps
 
+#### macOS
 ```bash
-pip install -r requirements.txt pyinstaller
+cd packaging
+./build-all.sh
 ```
+Creates: `dist/AhoyIndieMedia.app` and `dist/AhoyIndieMedia.dmg`
 
-2) Run in desktop mode (dev):
+#### Windows
+```bash
+cd packaging
+./windows-build.sh
+```
+Creates: `dist/AhoyIndieMedia.exe` and `dist/Ahoy Indie Media-Setup.exe` (installer)
 
+### Development Mode
+
+Run the desktop app in development mode:
 ```bash
 python desktop_main.py
 ```
 
-3) Build binaries:
-
+Or with production URL:
 ```bash
-pyinstaller --noconfirm --onefile --name "Ahoy Indie Media" desktop_main.py
+python desktop_main.py --url https://your-app.onrender.com
 ```
 
-4) Publish downloads:
+### Build System
 
-- Create a `downloads/` folder at repo root and copy `dist/Ahoy Indie Media` builds into it
-- Visit `/downloads` to serve artifacts
+The desktop app uses:
+- **PyInstaller**: Packages Python into standalone executables
+- **PyWebview**: Native desktop window wrapper
+- **NSIS** (Windows): Creates Windows installer EXE
+- **DMG** (macOS): Creates macOS disk image installer
 
-Environment:
-- `PORT` (default 17600)
-- `SECRET_KEY` (set for production)
-- `LOCAL_DATABASE_URL` optional (e.g., `sqlite:////<user-data-dir>/ahoy.db`)
+### Detailed Build Guide
 
-Locally, set it in your shell or `.env` file.
+See **[`packaging/DESKTOP_BUILD_GUIDE.md`](packaging/DESKTOP_BUILD_GUIDE.md)** for:
+- Complete build instructions
+- Prerequisites and dependencies
+- Troubleshooting
+- Code signing and distribution
+- Customization options
+
+### App Features
+
+- **Standalone**: No Python installation required
+- **Local Database**: Uses SQLite stored in `~/.ahoy-indie-media/`
+- **Auto Port Selection**: Finds free port automatically (default 17600)
+- **Production Ready**: Configured for production use
+- **Native UI**: Native desktop window with proper window controls
+
+### Distribution
+
+Desktop apps are the **primary distribution method**. Web app is secondary.
+
+For publishing:
+1. Build installers: `./packaging/build-all.sh`
+2. Upload to distribution platform (GitHub Releases, your website, etc.)
+3. Serve via `/downloads` page (optional)
 
 Then run:
 
