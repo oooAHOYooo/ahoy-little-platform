@@ -69,6 +69,8 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    min-height: 0; /* Allows flex child to shrink */
+    flex: 1; /* Takes available space */
 }
 
 .section-title {
@@ -271,6 +273,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 0.7rem;
+    word-break: break-word; /* Allow breaking long words if needed */
 }
 
 .item-mini .count {
@@ -295,6 +298,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    word-break: break-word; /* Allow breaking long words if needed */
 }
 
 .mini-artist {
@@ -303,6 +307,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    word-break: break-word; /* Allow breaking long words if needed */
 }
 
 .mini-info {

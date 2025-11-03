@@ -1129,6 +1129,7 @@ img.loading {
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 var(--spacing-lg);
+    align-items: stretch; /* Ensure all grid items stretch to same height */
 }
 
 .grid-item {

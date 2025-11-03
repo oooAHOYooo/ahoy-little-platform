@@ -52,32 +52,41 @@
     <section class="discovery-grid">
         <div class="grid-container">
 
-            <!-- Now Playing Compact -->
-            <div class="grid-item now-playing-compact">
-                <div class="item-header">
-                    <h3><i class="fas fa-music"></i> Now Playing</h3>
-                    <button @click="playRandom()" class="shuffle-btn">
-                        <i class="fas fa-random"></i>
-                    </button>
+            <!-- Now Playing Compact (Radio Feed) -->
+            <div class="grid-item now-playing-compact" style="display:flex;flex-direction:column;height:100%;">
+                <div class="item-header" style="padding:0.75rem 1rem;flex-shrink:0;">
+                    <h3 style="font-size:0.875rem;">Radio Feed</h3>
+                    <a href="/radio" class="view-all-btn" style="font-size:0.75rem;">
+                        Full Radio (Beta)
+                    </a>
                 </div>
-                <div class="playing-list">
-                    <template x-for="(item, index) in feedItems.slice(0, 4)"
-                        :key="item.id">
-                        <div class="playing-item"
-                            x-show="item.cover_art || item.thumbnail"
-                            :class="{'playing': currentIndex === index}"
-                            :style="`background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${item.cover_art || item.thumbnail}); background-size: cover; background-position: center;`"
-                            @click="playItem(item, index)">
-                            <div class="item-details">
-                                <h4 x-text="item.title"></h4>
-                                <p x-text="item.artist"></p>
-                            </div>
-                            <div class="play-indicator"
-                                x-show="currentIndex === index">
-                                <i class="fas fa-play"></i>
-                            </div>
+                <div class="radio-feed-single" style="padding:0.5rem;flex:1;min-height:0;display:flex;align-items:stretch;">
+                    <!-- Current Track with Big Play Button -->
+                    <div class="radio-track-current" 
+                        :style="`background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url(${(radioCurrent || radioUpNext[0])?.cover_art || '/static/img/default-cover.jpg'}); background-size: cover; background-position: center;`"
+                        style="border-radius:0.6rem;padding:1rem;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative;cursor:pointer;transition:all 0.2s;border:2px solid rgba(99,102,241,0.3);width:100%;height:100%;"
+                        @click="radioCurrent ? toggleRadio() : playRadioTrack(radioUpNext[0])">
+                        <!-- Big Play Button -->
+                        <button @click.stop="radioCurrent ? toggleRadio() : playRadioTrack(radioUpNext[0])"
+                            style="width:3.5rem;height:3.5rem;border-radius:50%;background:rgba(99,102,241,0.9);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px rgba(99,102,241,0.5);margin-bottom:0.5rem;flex-shrink:0;"
+                            @mouseenter="$el.style.transform='scale(1.1)';$el.style.background='rgba(99,102,241,1)'"
+                            @mouseleave="$el.style.transform='scale(1)';$el.style.background='rgba(99,102,241,0.9)'">
+                            <i class="fas" :class="radioIsPlaying ? 'fa-pause' : 'fa-play'" style="color:white;font-size:1.25rem;margin-left:2px;"></i>
+                        </button>
+                        <!-- Track Info -->
+                        <div style="text-align:center;width:100%;flex-shrink:0;">
+                            <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0.2rem;" 
+                                x-text="(radioCurrent || radioUpNext[0])?.title || 'No track playing'"></div>
+                            <div style="font-size:0.7rem;opacity:0.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" 
+                                x-text="(radioCurrent || radioUpNext[0])?.artist || ''"></div>
                         </div>
-                    </template>
+                    </div>
+                    
+                    <!-- Placeholder if no tracks -->
+                    <div x-show="!radioCurrent && radioUpNext.length === 0" 
+                        style="border-radius:0.6rem;padding:2rem;display:flex;align-items:center;justify-content:center;opacity:0.4;background:rgba(255,255,255,0.02);width:100%;height:100%;">
+                        <span>Loading radio feed...</span>
+                    </div>
                 </div>
             </div>
 
@@ -318,6 +327,15 @@ function homePage() {
         newPlaylistDescription: '',
         showPlaylistForm: false,
         
+        // Radio state
+        radioTracks: [],
+        radioQueue: [],
+        radioPrevious: null,
+        radioCurrent: null,
+        radioUpNext: [],
+        radioIsPlaying: false,
+        radioShuffle: true,
+        
         // Initialize
         async init() {
             await this.loadAllData();
@@ -326,6 +344,12 @@ function homePage() {
             
             // Sync playing state with media player if available
             this.syncPlayingState();
+            
+            // Load radio feed
+            await this.loadRadioFeed();
+            
+            // Set up radio sync with media player
+            this.setupRadioSync();
             
             // Load user playlists if logged in
             if (window.ahoyApp && window.ahoyApp.isLoggedIn) {
@@ -772,6 +796,192 @@ function homePage() {
             this.showPlaylistForm = !this.showPlaylistForm;
             if (!this.showPlaylistForm) {
                 this.clearPlaylistForm();
+            }
+        },
+        
+        // Radio functions
+        async loadRadioFeed() {
+            try {
+                const response = await fetch('/api/music');
+                const data = await response.json();
+                const tracks = (data.tracks || []).filter(t => t.audio_url || t.preview_url);
+                // Deduplicate by id
+                const seen = new Set();
+                this.radioTracks = tracks.filter(t => {
+                    if (seen.has(t.id)) return false;
+                    seen.add(t.id);
+                    return true;
+                });
+                this._buildRadioQueue();
+            } catch (error) {
+                console.error('Error loading radio feed:', error);
+            }
+        },
+        
+        _buildRadioQueue() {
+            const list = [...this.radioTracks];
+            if (this.radioShuffle) {
+                list.sort(() => 0.5 - Math.random());
+            }
+            this.radioQueue = list.map(t => ({ ...t, type: 'track' }));
+            this.radioUpNext = this.radioQueue.slice(0, 20);
+        },
+        
+        setupRadioSync() {
+            // Check if media player is already playing a track
+            if (window.mediaPlayer && window.mediaPlayer.currentTrack) {
+                const current = window.mediaPlayer.currentTrack;
+                // Check if it's from our radio feed
+                const isRadioTrack = this.radioTracks.some(t => 
+                    (t.id && current.id && String(t.id) === String(current.id)) ||
+                    (t.track_id && current.track_id && String(t.track_id) === String(current.track_id))
+                );
+                if (isRadioTrack) {
+                    this.radioCurrent = current;
+                    this.radioIsPlaying = window.mediaPlayer.isPlaying || false;
+                }
+            }
+            
+            // Listen for media player events
+            if (window.mediaPlayer && window.mediaPlayer.on) {
+                window.mediaPlayer.on('play', () => {
+                    if (window.mediaPlayer.currentTrack) {
+                        const current = window.mediaPlayer.currentTrack;
+                        const isRadioTrack = this.radioTracks.some(t => 
+                            (t.id && current.id && String(t.id) === String(current.id)) ||
+                            (t.track_id && current.track_id && String(t.track_id) === String(current.track_id))
+                        );
+                        if (isRadioTrack) {
+                            // Store previous track before updating
+                            if (this.radioCurrent && (!this.radioPrevious || this.radioPrevious.id !== current.id)) {
+                                this.radioPrevious = this.radioCurrent;
+                            }
+                            this.radioCurrent = current;
+                            this.radioIsPlaying = true;
+                            // Update queue if track was played
+                            this._updateRadioQueueAfterPlay(current);
+                        }
+                    }
+                });
+                
+                window.mediaPlayer.on('pause', () => {
+                    this.radioIsPlaying = false;
+                });
+                
+                window.mediaPlayer.on('trackchange', () => {
+                    if (window.mediaPlayer.currentTrack) {
+                        const current = window.mediaPlayer.currentTrack;
+                        const isRadioTrack = this.radioTracks.some(t => 
+                            (t.id && current.id && String(t.id) === String(current.id)) ||
+                            (t.track_id && current.track_id && String(t.track_id) === String(current.track_id))
+                        );
+                        if (isRadioTrack) {
+                            // Store previous track before updating
+                            if (this.radioCurrent && (!this.radioPrevious || this.radioPrevious.id !== current.id)) {
+                                this.radioPrevious = this.radioCurrent;
+                            }
+                            this.radioCurrent = current;
+                            this._updateRadioQueueAfterPlay(current);
+                        }
+                    }
+                });
+                
+                window.mediaPlayer.on('ended', () => {
+                    // Auto-play next track when current ends
+                    setTimeout(() => {
+                        if (this.radioQueue.length === 0) {
+                            this._buildRadioQueue();
+                        }
+                        this._playNextRadio();
+                    }, 500);
+                });
+            }
+        },
+        
+        _updateRadioQueueAfterPlay(track) {
+            // Remove played track from queue if it exists
+            const trackId = track.id || track.track_id;
+            this.radioQueue = this.radioQueue.filter(t => {
+                const tId = t.id || t.track_id;
+                return tId && trackId && String(tId) !== String(trackId);
+            });
+            this.radioUpNext = this.radioQueue.slice(0, 20);
+        },
+        
+        toggleRadio() {
+            if (!window.mediaPlayer) {
+                console.error('Media player not available');
+                return;
+            }
+            
+            if (this.radioIsPlaying) {
+                window.mediaPlayer.pause();
+                this.radioIsPlaying = false;
+            } else {
+                if (!this.radioCurrent) {
+                    this._playNextRadio();
+                } else {
+                    window.mediaPlayer.resume();
+                    this.radioIsPlaying = true;
+                }
+            }
+        },
+        
+        skipRadio() {
+            if (!window.mediaPlayer) {
+                console.error('Media player not available');
+                return;
+            }
+            this._playNextRadio();
+        },
+        
+        playRadioTrack(track) {
+            if (!window.mediaPlayer) {
+                console.error('Media player not available');
+                return;
+            }
+            
+            const playItem = {
+                ...track,
+                type: 'track',
+                audio_url: track.audio_url || track.preview_url || track.full_url
+            };
+            
+            // Store current as previous before updating
+            if (this.radioCurrent) {
+                this.radioPrevious = this.radioCurrent;
+            }
+            
+            this.radioCurrent = playItem;
+            window.mediaPlayer.play(playItem);
+            this.radioIsPlaying = true;
+            this._updateRadioQueueAfterPlay(playItem);
+        },
+        
+        _playNextRadio() {
+            if (!window.mediaPlayer) {
+                return;
+            }
+            
+            if (this.radioQueue.length === 0) {
+                this._buildRadioQueue();
+            }
+            
+            const next = this.radioQueue.shift();
+            if (next) {
+                const playItem = {
+                    ...next,
+                    type: 'track',
+                    audio_url: next.audio_url || next.preview_url || next.full_url
+                };
+                // Store current as previous before updating
+                if (this.radioCurrent) {
+                    this.radioPrevious = this.radioCurrent;
+                }
+                this.radioCurrent = playItem;
+                window.mediaPlayer.play(playItem);
+                this.radioIsPlaying = true;
+                this.radioUpNext = this.radioQueue.slice(0, 20);
             }
         }
     }
