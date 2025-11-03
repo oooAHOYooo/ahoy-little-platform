@@ -10,8 +10,10 @@ data/users.json
 data/user_activity.json
 data/playlists.json
 dist/
+dist-electron/
 build/
 flask_session/
+node_modules/
 start.py
 start.bat
 start_browser.sh

@@ -1,15 +1,19 @@
 {
-  "name": "ahoy-little-platform",
-  "version": "1.0.0",
-  "description": "A comprehensive Flask-based media platform for discovering and organizing independent music, shows, and content. Built as a modern replacement for the original Cordova webapp with enhanced user features and playlist management.",
-  "main": "index.js",
+  "name": "ahoy-indie-media",
+  "version": "0.2.0",
+  "description": "A comprehensive Flask-based media platform for discovering and organizing independent music, shows, and content.",
+  "main": "electron/main.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
+    "electron:dev": "electron .",
+    "electron:build:mac": "electron-builder --mac",
+    "electron:build:mac:dmg": "electron-builder --mac --publish never",
+    "electron:build:all": "electron-builder --mac --win --linux",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["music", "media", "indie", "desktop"],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -18,6 +22,97 @@
     "@capacitor/core": "^5.7.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.ahoyindiemedia.desktop",
+    "productName": "Ahoy Indie Media",
+    "directories": {
+      "output": "dist-electron",
+      "buildResources": "packaging"
+    },
+    "mac": {
+      "category": "public.app-category.music",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "packaging/icons/ahoy.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "packaging/entitlements.mac.plist",
+      "entitlementsInherit": "packaging/entitlements.mac.plist"
+    },
+    "dmg": {
+      "title": "${productName} ${version}",
+      "icon": "packaging/icons/ahoy.icns",
+      "background": null,
+      "contents": [
+        {
+          "x": 410,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 150,
+          "type": "file"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
+    },
+    "files": [
+      "electron/**/*",
+      "desktop_main.py",
+      "app.py",
+      "models.py",
+      "db.py",
+      "config.py",
+      "storage.py",
+      "extensions.py",
+      "user_manager.py",
+      "search_indexer.py",
+      "templates/**/*",
+      "static/**/*",
+      "data/**/*",
+      "ahoy/**/*",
+      "blueprints/**/*",
+      "services/**/*",
+      "utils/**/*",
+      "commands/**/*",
+      "alembic/**/*",
+      "alembic.ini",
+      "requirements.txt",
+      "!electron/preload.js.map"
+    ],
+    "extraResources": [
+      {
+        "from": ".",
+        "filter": [
+          "*.py",
+          "templates/**",
+          "static/**",
+          "data/**",
+          "ahoy/**",
+          "blueprints/**",
+          "services/**",
+          "utils/**",
+          "commands/**",
+          "alembic/**"
+        ]
+      }
+    ]
   }
 }

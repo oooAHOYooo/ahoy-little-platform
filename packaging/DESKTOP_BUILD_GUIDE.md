@@ -4,13 +4,35 @@ This guide explains how to build standalone desktop applications for macOS and W
 
 ## 🎯 Overview
 
-The desktop app is built using:
+This project supports **two build approaches**:
+
+### Option 1: Electron (Recommended for macOS)
+- **Electron**: Modern cross-platform desktop framework
+- **electron-builder**: Creates macOS DMG installers
+- Better macOS integration and native feel
+- See [ELECTRON_BUILD.md](../ELECTRON_BUILD.md) for detailed Electron guide
+
+### Option 2: PyInstaller (Original)
 - **PyInstaller**: Packages Python app into standalone executables
 - **PyWebview**: Creates native desktop windows
 - **NSIS** (Windows): Creates Windows installer EXE
 - **DMG** (macOS): Creates macOS disk image installer
 
-The app runs a local Flask server and displays it in a native desktop window.
+Both approaches run a local Flask server and display it in a native desktop window.
+
+## 🚀 Quick Start
+
+### macOS with Electron (Recommended)
+```bash
+cd packaging
+./electron-build-mac.sh
+```
+
+### macOS with PyInstaller
+```bash
+cd packaging
+./build-all.sh
+```
 
 ## 📋 Prerequisites
 
