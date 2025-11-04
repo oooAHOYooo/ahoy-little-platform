@@ -460,6 +460,30 @@
                             </button>
                         </div>
                         
+                        <!-- Tiny Media Player -->
+                        <div class="tiny-media-player" x-show="currentTrack" style="margin-top: 0.75rem; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 6px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;">
+                            <!-- Thumbnail -->
+                            <img :src="currentTrack?.cover_art || currentTrack?.thumbnail || '/static/img/default-cover.jpg'" 
+                                 alt="Track cover" 
+                                 style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover; flex-shrink: 0;">
+                            <!-- Play/Pause Button -->
+                            <button @click="toggleTinyPlayer()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 0.875rem; padding: 0.25rem; flex-shrink: 0;">
+                                <i :class="isTinyPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+                            </button>
+                            <!-- Track Info -->
+                            <div style="flex: 1; min-width: 0; overflow: hidden;">
+                                <div style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" x-text="currentTrack?.title || 'No track'"></div>
+                                <div style="font-size: 0.7rem; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" x-text="currentTrack?.artist || ''"></div>
+                            </div>
+                            <!-- Bookmark Button -->
+                            <button @click="toggleTinyBookmark()" 
+                                    style="background: none; border: none; color: #fff; cursor: pointer; font-size: 0.875rem; padding: 0.25rem; flex-shrink: 0; opacity: 0.8;"
+                                    :style="isTinyBookmarked ? 'color: #00d4ff; opacity: 1;' : ''"
+                                    :title="isTinyBookmarked ? 'Remove bookmark' : 'Bookmark track'">
+                                <i :class="isTinyBookmarked ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+                            </button>
+                        </div>
+                        
                         <!-- Code Entry Modal -->
                         <div x-show="showCodeEntry" class="modal-overlay" @click="showCodeEntry = false">
                                 <div class="modal-mini" @click.stop>
@@ -1299,6 +1323,8 @@
                 badges: [],
                 showCodeEntry: false,
                 codeEntry: '',
+                currentTrack: null,
+                isTinyPlaying: false,
                 async init() {
                     try {
                         const response = await fetch('/api/me/gamification');
@@ -1307,6 +1333,36 @@
                             this.badges = data.badges || [];
                         }
                     } catch (e) { console.log('Badges not available'); }
+                    
+                    // Sync with media player
+                    this.syncMediaPlayer();
+                    // Listen for media player updates
+                    if (window.mediaPlayer && window.mediaPlayer.on) {
+                        window.mediaPlayer.on('play', () => this.syncMediaPlayer());
+                        window.mediaPlayer.on('pause', () => this.syncMediaPlayer());
+                    }
+                    // Poll for updates (catches track changes and other state changes)
+                    setInterval(() => this.syncMediaPlayer(), 1000);
+                },
+                syncMediaPlayer() {
+                    if (window.mediaPlayer) {
+                        this.currentTrack = window.mediaPlayer.currentTrack;
+                        this.isTinyPlaying = window.mediaPlayer.isPlaying || false;
+                    }
+                },
+                toggleTinyPlayer() {
+                    if (!window.mediaPlayer) return;
+                    if (this.isTinyPlaying) {
+                        window.mediaPlayer.pause();
+                    } else {
+                        if (this.currentTrack) {
+                            window.mediaPlayer.resume();
+                        } else {
+                            // Try to play something if nothing is playing
+                            console.log('No track to play');
+                        }
+                    }
+                    this.syncMediaPlayer();
                 },
                 goToCollections() {
                     window.location.href = '/bookmarks';

@@ -555,6 +555,20 @@ window.playerData = function() {
         
         formatDuration(seconds) {
             return this.formatTime(seconds);
+        },
+
+        toggleBookmark(mediaId) {
+            const item = { id: mediaId, type: 'track' };
+            // Assuming toggle and keyOf are defined elsewhere or will be added.
+            // For now, just a placeholder.
+            // window.mediaPlayer.toggleBookmark(item);
+        },
+
+        isBookmarked(mediaId) {
+            // Assuming keyOf and state are defined elsewhere or will be added.
+            // For now, just a placeholder.
+            // return window.mediaPlayer.isBookmarked(mediaId);
+            return false; // Placeholder
         }
     };
 };

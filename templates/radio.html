@@ -5,23 +5,19 @@
 {% block content %}
 <div class="radio-page" x-data="radioPage()" x-init="init()">
     <section class="radio-hero">
-        <h1><i class="fas fa-broadcast-tower"></i> Ahoy Radio <span
-                class="badge">Experimental</span></h1>
-        <p>Tune in for a continuous mix from your indie library.</p>
-        <div class="radio-controls">
-            <button class="btn btn-primary" @click="toggle()">
-                <span x-show="!isPlaying"><i class="fas fa-play"></i>
-                    Play</span>
-                <span x-show="isPlaying"><i class="fas fa-pause"></i>
-                    Pause</span>
-            </button>
-            <button class="btn" @click="skip()"><i class="fas fa-forward"></i>
-                Skip</button>
-            <label class="checkbox-label" style="margin-left:12px">
-                <input type="checkbox" x-model="shuffle">
-                <span class="checkmark"></span>
-                Shuffle
-            </label>
+        <div class="hero-content" style="text-align: center; margin: 2rem 0;">
+            <h1 style="font-size: 4rem; color: #ff0066;"><i class="fas fa-broadcast-tower" style="font-size: 3.5rem; margin-right: 8px;"></i> Ahoy Radio</h1>
+            <p style="color: #ccc; font-size: 1.5rem;">Tune in for a continuous mix from your indie library.</p>
+            <div class="radio-controls" style="display: flex; justify-content: space-around; align-items: center; margin-top: 2rem;">
+                <button class="btn btn-primary" @click="toggle()" style="background-color: #00b894; border: none; padding: 1rem 2rem; color: white; font-size: 1.5rem; flex-grow: 1; margin: 0 10px; border-radius: 12px;">
+                    <span x-show="!isPlaying"><i class="fas fa-play"></i> Play</span>
+                    <span x-show="isPlaying"><i class="fas fa-pause"></i> Pause</span>
+                </button>
+                <button class="btn" @click="skip()" style="background-color: #0984e3; border: none; padding: 1rem 2rem; color: white; font-size: 1.5rem; flex-grow: 1; margin: 0 10px; border-radius: 12px;">
+                    <i class="fas fa-forward"></i> Skip
+                </button>
+                <!-- Removed shuffle and experimental badge -->
+            </div>
         </div>
     </section>
 
@@ -32,6 +28,8 @@
             <div class="now-info">
                 <h3 x-text="current.title"></h3>
                 <p x-text="current.artist"></p>
+                <p class="artist-description" style="font-size: 0.85rem; color: #999; margin-top: 8px;" x-text="current.artist_description || 'An amazing indie artist creating outstanding music.'"></p>
+                <button @click="tipArtist(current)" style="background-color: #e17055; border: none; padding: 0.5rem 1rem; color: white; font-size: 1rem; border-radius: 5px; margin-top: 10px;">Tip the Artist</button>
             </div>
         </div>
     </section>
@@ -67,13 +65,27 @@ function radioPage(){
         async init(){
             try{
                 const r = await fetch('/api/music');
+                if (!r.ok) {
+                    console.error('Radio API error:', r.status, r.statusText);
+                    return;
+                }
                 const data = await r.json();
+                if (!data || !Array.isArray(data.tracks)) {
+                    console.error('Invalid radio data format');
+                    return;
+                }
                 const tracks = (data.tracks||[]).filter(t=>t.audio_url||t.preview_url);
                 // Deduplicate by id
                 const seen = new Set();
                 this.tracks = tracks.filter(t=>{ if(seen.has(t.id)) return false; seen.add(t.id); return true; });
                 this._buildQueue();
-            }catch(e){ console.error('radio load failed', e); }
+            }catch(e){ 
+                console.error('radio load failed', e); 
+                // Show user-friendly error message
+                if (window.ahoyApp?.showNotification) {
+                    window.ahoyApp.showNotification('Failed to load radio. Please try again.', 'error');
+                }
+            }
         },
         _buildQueue(){
             const list = [...this.tracks];
@@ -82,17 +94,29 @@ function radioPage(){
             this.upNext = this.queue.slice(0, 20);
         },
         toggle(){
+            if(!window.mediaPlayer){ console.error('Media player not available'); return; }
             if(this.isPlaying){ window.mediaPlayer.pause(); this.isPlaying=false; return; }
             if(!this.current){ this._playNext(); return; }
             window.mediaPlayer.resume(); this.isPlaying=true;
         },
         skip(){ this._playNext(); },
-        playNow(item){ this.current = item; window.mediaPlayer.play(item); this.isPlaying = true; },
+        playNow(item){ 
+            if(!window.mediaPlayer){ console.error('Media player not available'); return; }
+            this.current = item; 
+            window.mediaPlayer.play(item); 
+            this.isPlaying = true; 
+        },
         _playNext(){
+            if(!window.mediaPlayer){ console.error('Media player not available'); return; }
             if(this.queue.length === 0) this._buildQueue();
             const next = this.queue.shift();
             if(next){ this.current = next; window.mediaPlayer.play(next); this.isPlaying = true; }
             this.upNext = this.queue.slice(0, 20);
+        },
+        tipArtist(item) {
+            console.log(`Tipping artist: ${item.artist}`);
+            // Implement tipping functionality here
+            // Example: launch a modal or redirect to a payment page
         }
     }
 }

@@ -220,11 +220,26 @@
     </div>
 </div>
 
-<!-- Left Dashboard and Media Player relocation -->
+<!-- Left Dashboard and adjustments -->
 <div class="left-dashboard" style="display: flex; flex-direction: column;">
-    <!-- Existing merit badges -->
-    <div class="merit-badges" style="margin-bottom: 1rem;">
-        <!-- Merit badges code here -->
+    <!-- Merit Badges with subtle border and tiny icons -->
+    <div class="merit-badges" style="border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 1rem; max-height: 100px; overflow-y: auto; display: flex;">
+        <div class="badge" style="flex: 1; margin: 0 5px; display: flex; align-items: center; justify-content: center;">
+            <!-- Small icon for badge -->
+            <i class="fas fa-medal" style="font-size: 0.75rem;"></i>
+        </div>
+        <!-- Repeat for more badges -->
+    </div>
+
+    <!-- Mini Media Player directly below merit badges -->
+    <div class="mini-media-player" style="background-color: #202020; padding: 1rem; border-radius: 5px; color: white; margin-top: 1rem; display: flex; align-items: center; justify-content: space-between;">
+        <div class="mini-player-info">
+            <div style="font-size: 1rem; font-weight: bold;" x-text="radioCurrent?.title || 'No track playing'"></div>
+            <div style="font-size: 0.85rem; opacity: 0.8;" x-text="radioCurrent?.artist || ''"></div>
+        </div>
+        <button @click="toggleRadio()" style="background: none; border: none; color: inherit; font-size: 1.5rem;">
+            <i :class="{'fas fa-pause': radioIsPlaying, 'fas fa-play': !radioIsPlaying}"></i>
+        </button>
     </div>
 
     <!-- Media Player -->

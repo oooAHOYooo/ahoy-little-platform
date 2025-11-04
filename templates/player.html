@@ -79,6 +79,19 @@
                 x-ref="audioPlayer">
                 Your browser does not support the audio tag.
             </audio>
+
+            <!-- Timeline -->
+            <div class="timeline">
+                <input type="range" min="0" :max="Math.floor(currentMedia.duration_seconds)" x-model.number="currentTime" @input="seekAudio">
+            </div>
+            <div class="time-info">
+                <span x-text="formatTime(currentTime)"></span> / <span x-text="formatTime(currentMedia.duration_seconds)"></span>
+            </div>
+
+            <!-- Bookmark Button -->
+            <button type="button" @click="toggleBookmark(currentMedia.id)" class="bookmark-button">
+                <span :class="{'bookmarked': isBookmarked(currentMedia.id)}">Bookmark</span>
+            </button>
         </div>
 
         <!-- Media Info -->
@@ -406,11 +419,11 @@ function fullPlayer() {
             // Implement like functionality
         },
         
-        toggleBookmark() {
+        toggleBookmark(id) {
             if (this.currentMedia && window.AhoyBookmarks) {
                 const bookmarkItem = {
                     type: this.mediaType === 'music' ? 'track' : 'show',
-                    id: this.currentMedia.id,
+                    id: id,
                     title: this.currentMedia.title,
                     artwork: this.currentMedia.cover_art || this.currentMedia.thumbnail
                 };
@@ -418,10 +431,10 @@ function fullPlayer() {
             }
         },
         
-        isBookmarked() {
+        isBookmarked(id) {
             if (this.currentMedia && window.AhoyBookmarks) {
                 const type = this.mediaType === 'music' ? 'track' : 'show';
-                return window.AhoyBookmarks.isBookmarked(type, this.currentMedia.id);
+                return window.AhoyBookmarks.isBookmarked(type, id);
             }
             return false;
         },

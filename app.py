@@ -555,6 +555,16 @@ def load_json_data(filename, default=None):
             return json.load(f)
     except FileNotFoundError:
         return default or {}
+    except json.JSONDecodeError as e:
+        # Log the error and return default
+        import logging
+        logging.error(f'JSON decode error in {filename}: {e}')
+        return default or {}
+    except Exception as e:
+        # Catch any other errors
+        import logging
+        logging.error(f'Error loading {filename}: {e}')
+        return default or {}
 
 def load_users():
     """Load user data"""
