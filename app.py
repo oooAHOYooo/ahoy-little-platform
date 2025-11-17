@@ -32,6 +32,7 @@ from blueprints.bookmarks import bp as bookmarks_bp
 from blueprints.collections import bp as collections_bp
 from blueprints.api.gamify import bp as gamify_api_bp
 from blueprints.payments import bp as payments_bp
+from blueprints.portfolio import bp as portfolio_bp
 from services.listening import start_session as listening_start_session, end_session as listening_end_session
 from services.user_resolver import resolve_db_user_id
 from db import get_session
@@ -162,6 +163,7 @@ def create_app():
     app.register_blueprint(collections_bp)
     app.register_blueprint(gamify_api_bp)
     app.register_blueprint(payments_bp)
+    app.register_blueprint(portfolio_bp)
     
     # Initialize search index
     with app.app_context():
@@ -2039,14 +2041,14 @@ def test_save():
 def static_files(filename):
     return send_from_directory('static', filename)
 
-def find_available_port(start_port=5001, end_port=5010):
+def find_available_port(start_port=5001, end_port=5020):
     """Find an available port between start_port and end_port"""
     import socket
     for port in range(start_port, end_port + 1):
         try:
-            # Try to bind to the port
+            # Try to bind to the port on all interfaces (0.0.0.0) to match gunicorn behavior
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.bind(('localhost', port))
+                s.bind(('0.0.0.0', port))
                 return port
         except OSError:
             # Port is in use, try next one
@@ -2660,9 +2662,10 @@ if __name__ == "__main__":
     import os, socket, subprocess, shutil, sys
 
     def _is_port_free(p: int) -> bool:
+        """Check if port is free on all interfaces (0.0.0.0) to match gunicorn binding"""
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.bind(("127.0.0.1", p))
+                s.bind(("0.0.0.0", p))
             return True
         except OSError:
             return False
@@ -2688,12 +2691,14 @@ if __name__ == "__main__":
     requested = int(os.getenv("PORT", "5000"))
     chosen = requested
     if not _is_port_free(requested):
-        alt = find_available_port(5001, 5010)
+        alt = find_available_port(5001, 5020)
         if alt:
             print(f"⚠️  Port {requested} busy — starting on {alt}")
             chosen = alt
         else:
-            print(f"⚠️  Port {requested} busy and no alternates free in 5001-5010. Trying {requested} anyway…")
+            print(f"❌ Port {requested} busy and no alternates free in 5001-5020.")
+            print(f"💡 Please free up port {requested} or set PORT environment variable to a different port.")
+            sys.exit(1)
 
     # 3) Run with gunicorn if available for parity; else Flask dev server
     gunicorn_bin = shutil.which("gunicorn")

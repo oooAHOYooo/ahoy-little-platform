@@ -106,6 +106,182 @@
         });
         </script>
 
+        <!-- Portfolio Widget Styles -->
+        <style>
+        .portfolio-widget-container {
+            position: relative;
+        }
+
+        .portfolio-widget-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .portfolio-widget-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .portfolio-widget-btn.has-investment {
+            background: rgba(236, 72, 153, 0.2);
+        }
+
+        .portfolio-icon {
+            font-size: 1.2rem;
+        }
+
+        .portfolio-amount {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .portfolio-label {
+            font-size: 0.875rem;
+        }
+
+        .portfolio-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            min-width: 300px;
+            max-width: 400px;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .portfolio-dropdown-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .portfolio-dropdown-header h4 {
+            margin: 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .portfolio-view-all {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .portfolio-view-all:hover {
+            text-decoration: underline;
+        }
+
+        .portfolio-empty {
+            padding: 2rem;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        .portfolio-empty p {
+            margin: 0.5rem 0;
+        }
+
+        .portfolio-empty .text-muted {
+            font-size: 0.875rem;
+            opacity: 0.7;
+        }
+
+        .portfolio-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .portfolio-total-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .portfolio-total-amount {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #059669;
+        }
+
+        .portfolio-artists-list {
+            padding: 0.5rem;
+        }
+
+        .portfolio-artist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .portfolio-artist-item:hover {
+            background: #f9fafb;
+        }
+
+        .portfolio-artist-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            flex: 1;
+        }
+
+        .portfolio-artist-name {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.875rem;
+        }
+
+        .portfolio-artist-amount {
+            font-size: 0.75rem;
+            color: #059669;
+            font-weight: 500;
+        }
+
+        .portfolio-tip-btn {
+            padding: 0.375rem 0.75rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .portfolio-tip-btn:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-dropdown {
+                right: auto;
+                left: 0;
+                min-width: 280px;
+            }
+        }
+        </style>
+
         {% block extra_head %}{% endblock %}
     </head>
     <body>
@@ -117,7 +293,7 @@
 
         <!-- Navigation -->
         <nav class="navbar" x-data="navbar()" x-init="init()">
-            <div class="nav-container">
+            <div class="nav-container max-w-7xl mx-auto px-4">
 
                 <!-- Logo -->
                 <div class="nav-logo">
@@ -236,58 +412,178 @@
                     </div>
                 </div>
 
-                <!-- App Menu -->
-                <div class="nav-menu">
-                    <!-- Home -->
+                <!-- App Menu - Compact Right Side -->
+                <div class="nav-menu flex items-center gap-1">
+                    <!-- Home (Desktop Only) -->
                     <a href="{{ url_for('home') }}"
-                        class="nav-item {% if request.endpoint == 'home' %}active{% endif %}"
+                        class="nav-item hidden md:flex {% if request.endpoint == 'home' %}active{% endif %}"
                         title="Home">
                         <i class="fas fa-home"></i>
                     </a>
 
-                    <!-- Dashboard -->
-                    <a href="/dashboard"
-                        class="nav-item {% if request.endpoint == 'dashboard_page' %}active{% endif %}"
-                        title="Dashboard">
-                        <i class="fas fa-trophy"></i>
-                    </a>
-
-                    <!-- My Bookmarks -->
-                    <a href="/bookmarks"
-                        class="nav-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
-                        title="My Bookmarks"
-                        :class="{ 'has-bookmarks': totalBookmarkCount > 0, 'bookmark-glow': hasNewBookmarks }">
-                        <div class="bookmark-icon-container">
-                            <i class="fas fa-bookmark bookmark-icon" 
-                               :class="{ 'fas fa-bookmark': totalBookmarkCount > 0, 'far fa-bookmark': totalBookmarkCount === 0 }"></i>
-                            <span class="bookmark-count-badge" 
-                                  x-show="totalBookmarkCount > 0" 
-                                  x-text="totalBookmarkCount"
-                                  :class="{ 'pulse': hasNewBookmarks }"></span>
-                            <span class="notification-badge" x-show="hasNewBookmarks">*</span>
+                    <!-- Account Features Dropdown (Desktop Only - Logged In) -->
+                    <div class="hidden-mobile relative" 
+                         x-show="isLoggedIn"
+                         x-data="{ accountMenuOpen: false, menuPosition: { top: 0, right: 0 } }"
+                         @click.away="accountMenuOpen = false">
+                        <button @click="
+                                accountMenuOpen = !accountMenuOpen;
+                                if (accountMenuOpen) {
+                                    const rect = $el.getBoundingClientRect();
+                                    menuPosition = { top: rect.bottom + 8, right: window.innerWidth - rect.right };
+                                }
+                            "
+                                class="nav-item account-menu-btn"
+                                title="Account Features">
+                            <img
+                                :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                                :alt="userProfile.display_name || 'User'"
+                                class="account-avatar">
+                            <i class="fas fa-chevron-down account-chevron"></i>
+                        </button>
+                        
+                        <!-- Unified Account Features Dropdown -->
+                        <div x-show="accountMenuOpen"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95 translate-y-1"
+                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 scale-95 translate-y-1"
+                             :style="`position: fixed; top: ${menuPosition.top}px; right: ${menuPosition.right}px;`"
+                             class="w-72 rounded-xl bg-neutral-900/95 backdrop-blur-xl border border-neutral-700/50 shadow-2xl z-[9999] overflow-hidden">
+                            
+                            <!-- User Header with Stats -->
+                            <div class="px-4 py-4 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 border-b border-neutral-700/50">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <img
+                                        :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                                        :alt="userProfile.display_name || 'User'"
+                                        class="w-12 h-12 rounded-full border-2 border-white/20">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-semibold text-white truncate" x-text="userProfile.display_name || 'User'"></p>
+                                        <p class="text-xs text-neutral-300 truncate" x-text="userProfile.email || ''"></p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Quick Stats -->
+                                <div class="grid grid-cols-3 gap-2 pt-3 border-t border-neutral-700/50"
+                                     x-data="portfolioNavWidget()" 
+                                     x-init="init()">
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-pink-400" x-text="totalBookmarkCount || 0"></div>
+                                        <div class="text-xs text-neutral-400">Bookmarks</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-purple-400" x-text="'$' + (totalInvested || 0).toFixed(0)"></div>
+                                        <div class="text-xs text-neutral-400">Invested</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-yellow-400" x-text="badges?.length || 0"></div>
+                                        <div class="text-xs text-neutral-400">Badges</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Main Menu Items -->
+                            <div class="py-2">
+                                <a href="/portfolio"
+                                   class="flex items-center px-4 py-3 text-sm text-neutral-200 hover:bg-neutral-800/50 transition-colors group border-l-2 border-transparent hover:border-purple-500"
+                                   @click="accountMenuOpen = false">
+                                    <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mr-3 group-hover:bg-purple-500/30 transition-colors">
+                                        <i class="fas fa-chart-line text-purple-400"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="font-medium">Portfolio</div>
+                                        <div class="text-xs text-neutral-500">Creative positions</div>
+                                    </div>
+                                </a>
+                                
+                                <a href="/dashboard"
+                                   class="flex items-center px-4 py-3 text-sm text-neutral-200 hover:bg-neutral-800/50 transition-colors group border-l-2 border-transparent hover:border-yellow-500"
+                                   @click="accountMenuOpen = false">
+                                    <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center mr-3 group-hover:bg-yellow-500/30 transition-colors">
+                                        <i class="fas fa-trophy text-yellow-400"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="font-medium">Dashboard</div>
+                                        <div class="text-xs text-neutral-500">Achievements & progress</div>
+                                    </div>
+                                </a>
+                                
+                                <a href="/bookmarks"
+                                   class="flex items-center px-4 py-3 text-sm text-neutral-200 hover:bg-neutral-800/50 transition-colors group border-l-2 border-transparent hover:border-blue-500 relative"
+                                   @click="accountMenuOpen = false">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mr-3 group-hover:bg-blue-500/30 transition-colors">
+                                        <i class="fas fa-bookmark text-blue-400"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="font-medium">Bookmarks</div>
+                                        <div class="text-xs text-neutral-500">Saved content</div>
+                                    </div>
+                                    <span x-show="totalBookmarkCount > 0" 
+                                          class="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full"
+                                          x-text="totalBookmarkCount"></span>
+                                </a>
+                                
+                                <a href="/settings"
+                                   class="flex items-center px-4 py-3 text-sm text-neutral-200 hover:bg-neutral-800/50 transition-colors group border-l-2 border-transparent hover:border-neutral-500"
+                                   @click="accountMenuOpen = false">
+                                    <div class="w-10 h-10 rounded-lg bg-neutral-500/20 flex items-center justify-center mr-3 group-hover:bg-neutral-500/30 transition-colors">
+                                        <i class="fas fa-cog text-neutral-400"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="font-medium">Settings</div>
+                                        <div class="text-xs text-neutral-500">Preferences</div>
+                                    </div>
+                                </a>
+                                
+                                <a href="/account"
+                                   class="flex items-center px-4 py-3 text-sm text-neutral-200 hover:bg-neutral-800/50 transition-colors group border-l-2 border-transparent hover:border-green-500"
+                                   @click="accountMenuOpen = false">
+                                    <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center mr-3 group-hover:bg-green-500/30 transition-colors">
+                                        <i class="fas fa-user-circle text-green-400"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="font-medium">Account</div>
+                                        <div class="text-xs text-neutral-500">Profile & security</div>
+                                    </div>
+                                </a>
+                            </div>
+                            
+                            <!-- Divider -->
+                            <div class="border-t border-neutral-700/50"></div>
+                            
+                            <!-- Sign Out -->
+                            <div class="py-2">
+                                <button @click="logout(); accountMenuOpen = false"
+                                        class="w-full flex items-center px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors group border-l-2 border-transparent hover:border-red-500">
+                                    <div class="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center mr-3 group-hover:bg-red-500/30 transition-colors">
+                                        <i class="fas fa-sign-out-alt text-red-400"></i>
+                                    </div>
+                                    <div class="flex-1 text-left">
+                                        <div class="font-medium">Sign Out</div>
+                                    </div>
+                                </button>
+                            </div>
                         </div>
-                    </a>
+                    </div>
 
-
-                    <!-- User Section -->
-                    <div class="nav-user" x-show="!isLoggedIn">
-                        <a href="/account" class="nav-item" title="Account">
+                    <!-- Login Button (Not Logged In) -->
+                    <div class="hidden-mobile" x-show="!isLoggedIn">
+                        <a href="/account" 
+                           class="nav-item px-3 py-2 rounded-lg hover:bg-neutral-800/50 transition-colors"
+                           title="Account">
                             <i class="fas fa-user"></i>
                         </a>
                     </div>
 
-                    <div class="nav-user" x-show="isLoggedIn">
-                        <a href="/account" class="nav-item nav-username"
-                            title="My Account">
-                            <img
-                                :src="userProfile.avatar || '/static/img/default-avatar.png'"
-                                :alt="userProfile.display_name || 'User'"
-                                class="user-avatar">
-                            <span
-                                x-text="userProfile.display_name || 'User'"></span>
-                            {% include '_badge_chips.html' %}
-                        </a>
-                    </div>
+                    <!-- Fullscreen Toggle (Desktop Only) -->
+                    <button @click="toggleFullscreen()" 
+                            class="nav-item hidden-mobile"
+                            title="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                    </button>
                 </div>
 
                 <!-- Mobile Right Menu (User & Bookmarks) -->
@@ -421,14 +717,6 @@
                         </div>
                     </div>
                 </div>
-
-
-                    <!-- Fullscreen Toggle (Desktop Only) -->
-                    <button @click="toggleFullscreen()" class="nav-item hidden-mobile"
-                        title="Fullscreen">
-                        <i class="fas fa-expand"></i>
-                    </button>
-                </div>
             </div>
         </nav>
 
@@ -440,25 +728,87 @@
                     <div class="sidebar-content">
                         <!-- Tip Jar -->
                         <div class="section-title">💝 Tip Jar</div>
-                        <div class="tip-jar-container">
-                            <select x-model="selectedArtistId" class="tip-artist-select">
-                                <option value="">Select an artist...</option>
-                                <template x-for="artist in artists" :key="artist.id || artist.name">
-                                    <option :value="artist.id || artist.name" x-text="artist.name"></option>
-                                </template>
-                            </select>
-                            <div class="tip-amount-input-group">
-                                <span class="tip-currency">$</span>
-                                <input type="number" x-model="tipAmount" placeholder="0.00" min="0.50" step="0.50" class="tip-amount-input">
+                        <div class="rounded-xl border border-neutral-700 bg-neutral-900/50 backdrop-blur-sm shadow-lg p-5 space-y-4">
+                            <!-- Header with heart icon and message -->
+                            <div class="flex items-center gap-2 text-neutral-300">
+                                <i class="fas fa-heart text-pink-500 text-sm"></i>
+                                <p class="text-sm">Support independent artists directly.</p>
                             </div>
-                            <button @click="sendTip()" 
-                                    :disabled="!selectedArtistId || !tipAmount || parseFloat(tipAmount) < 0.50 || isTipping"
-                                    class="tip-button">
+                            
+                            <!-- Form: 2-column on desktop, stacked on mobile -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Artist Dropdown -->
+                                <div class="space-y-1.5">
+                                    <label class="text-xs text-neutral-400 font-medium">Artist</label>
+                                    <select 
+                                        x-model="selectedArtistId" 
+                                        class="w-full px-4 py-2.5 bg-neutral-800/50 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all">
+                                        <option value="" class="bg-neutral-800">Select an artist...</option>
+                                        <template x-for="artist in artists" :key="artist.id || artist.name">
+                                            <option :value="artist.id || artist.name" x-text="artist.name" class="bg-neutral-800"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                
+                                <!-- Amount Input -->
+                                <div class="space-y-1.5">
+                                    <label class="text-xs text-neutral-400 font-medium">Amount</label>
+                                    <div class="relative">
+                                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">$</span>
+                                        <input 
+                                            type="number" 
+                                            x-model="tipAmount" 
+                                            placeholder="0.00" 
+                                            min="0.50" 
+                                            step="0.01" 
+                                            class="w-full pl-8 pr-4 py-2.5 bg-neutral-800/50 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                                            @input="tipAmount = $event.target.value">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Platform Fee Display -->
+                            <div x-show="isValid" 
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
+                                 class="text-xs text-neutral-500 border-t border-neutral-700 pt-3">
+                                <div class="flex justify-between items-center">
+                                    <span>Platform fee (7.5%):</span>
+                                    <span class="font-medium" x-text="'$' + (parseFloat(tipAmount || 0) * 0.075).toFixed(2)"></span>
+                                </div>
+                                <div class="flex justify-between items-center mt-1 text-neutral-300">
+                                    <span class="font-medium">Artist receives:</span>
+                                    <span class="font-semibold" x-text="'$' + (parseFloat(tipAmount || 0) * 0.925).toFixed(2)"></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Send Tip Button -->
+                            <button 
+                                @click="sendTip()" 
+                                :disabled="!isValid || isTipping"
+                                class="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:from-neutral-700 disabled:to-neutral-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
                                 <i class="fas fa-heart" x-show="!isTipping"></i>
                                 <i class="fas fa-spinner fa-spin" x-show="isTipping"></i>
                                 <span x-text="isTipping ? 'Processing...' : 'Send Tip'"></span>
                             </button>
-                            <p class="tip-note">Support artists directly • 7.5% platform fee</p>
+                        </div>
+                        
+                        <!-- Success Toast -->
+                        <div x-show="showTipSuccess"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-200"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Thanks for supporting independent artists!</p>
+                            </div>
                         </div>
                         
                         <!-- Bookmarks -->
@@ -1353,6 +1703,23 @@
                 selectedArtistId: '',
                 tipAmount: '',
                 isTipping: false,
+                showTipSuccess: false,
+                
+                get isValid() {
+                    return this.selectedArtistId && 
+                           this.tipAmount && 
+                           parseFloat(this.tipAmount) >= 0.50;
+                },
+                
+                initToast() {
+                    this.$watch('showTipSuccess', (value) => {
+                        if (value) {
+                            setTimeout(() => {
+                                this.showTipSuccess = false;
+                            }, 3000);
+                        }
+                    });
+                },
                 async init() {
                     try {
                         const response = await fetch('/api/me/gamification');
@@ -1361,6 +1728,9 @@
                             this.badges = data.badges || [];
                         }
                     } catch (e) { console.log('Badges not available'); }
+                    
+                    // Initialize toast watcher
+                    this.initToast();
                     
                     // Load artists for tip jar
                     await this.loadArtists();
@@ -1423,9 +1793,9 @@
                             const checkClosed = setInterval(() => {
                                 if (checkoutWindow.closed) {
                                     clearInterval(checkClosed);
-                                    if (window.ahoyApp?.showNotification) {
-                                        window.ahoyApp.showNotification('Thank you for supporting artists!', 'success');
-                                    }
+                                    // Show success toast
+                                    this.showTipSuccess = true;
+                                    // Auto-hide after 3 seconds (handled by x-init)
                                 }
                             }, 500);
                         } else {
@@ -1634,6 +2004,41 @@
         }
         </script>
         
+        <!-- Portfolio Nav Widget -->
+        <script>
+        function portfolioNavWidget() {
+            return {
+                portfolioDropdownOpen: false,
+                totalInvested: 0,
+                topArtists: [],
+                
+                async init() {
+                    await this.loadPortfolioData();
+                    // Refresh every 30 seconds
+                    setInterval(() => this.loadPortfolioData(), 30000);
+                },
+                
+                async loadPortfolioData() {
+                    try {
+                        const response = await fetch('/portfolio/widget-data');
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.totalInvested = data.total_invested || 0;
+                            this.topArtists = data.top_artists || [];
+                        }
+                    } catch (e) {
+                        console.log('Portfolio data not available');
+                    }
+                },
+                
+                tipAgain(artistId) {
+                    // Find artist page or open tip modal
+                    window.location.href = `/artists?tip=${encodeURIComponent(artistId)}`;
+                }
+            };
+        }
+        </script>
+
         {% block extra_scripts %}{% endblock %}
         
         <!-- Service Worker Registration -->

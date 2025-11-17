@@ -12,6 +12,7 @@ from sqlalchemy import (
     JSON,
     BigInteger,
     Numeric,
+    Float,
 )
 from sqlalchemy.orm import declarative_base, relationship
 import uuid
@@ -251,7 +252,8 @@ class Tip(Base):
     user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True, index=True)
     artist_id = Column(String(255), nullable=False, index=True)  # Artist slug or ID from JSON
     amount = Column(Numeric(10, 2), nullable=False)  # Tip amount in USD
-    fee = Column(Numeric(10, 2), nullable=False)  # Platform fee (7.5%)
+    fee = Column(Numeric(10, 2), nullable=False)  # Platform fee (7.5%) - legacy name
+    platform_fee = Column(Numeric(10, 2), nullable=True)  # Platform fee (7.5%) - new name
     net_amount = Column(Numeric(10, 2), nullable=False)  # Amount after fee
     stripe_payment_intent_id = Column(String(255), nullable=True, unique=True, index=True)
     stripe_checkout_session_id = Column(String(255), nullable=True, unique=True, index=True)
@@ -282,4 +284,29 @@ class UserArtistFollow(Base):
 
     def __repr__(self) -> str:
         return f"<UserArtistFollow id={self.id} user_id={self.user_id} artist_id={self.artist_id}>"
+
+
+class UserArtistPosition(Base):
+    __tablename__ = 'user_artist_positions'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    artist_id = Column(String(255), nullable=False, index=True)  # Artist slug or ID from JSON
+    total_contributed = Column(Numeric(10, 2), nullable=False, default=0)  # Total amount contributed
+    last_tip = Column(DateTime, nullable=True)  # Last tip datetime
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'artist_id', name='uq_user_artist_position_once'),
+        Index('ix_user_artist_positions_user_id', 'user_id'),
+        Index('ix_user_artist_positions_artist_id', 'artist_id'),
+        Index('ix_user_artist_positions_user_id_updated_at', 'user_id', 'updated_at'),
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<UserArtistPosition id={self.id} user_id={self.user_id} artist_id={self.artist_id} "
+            f"total_contributed={self.total_contributed}>"
+        )
 

@@ -6,7 +6,7 @@ import stripe
 from decimal import Decimal
 from datetime import datetime
 from db import get_session
-from models import Tip, User
+from models import Tip, User, UserArtistPosition
 from services.user_resolver import resolve_db_user_id
 
 bp = Blueprint("payments", __name__, url_prefix="/payments")
@@ -24,6 +24,46 @@ def calculate_fee_and_net(amount: Decimal):
     fee = amount * PLATFORM_FEE_PERCENT
     net = amount - fee
     return fee, net
+
+
+def update_user_artist_position(user_id: int, artist_id: str, tip_amount: Decimal, tip_datetime: datetime, db_session):
+    """
+    Update or create a user's position for an artist after a tip.
+    
+    Args:
+        user_id: The user ID who made the tip
+        artist_id: The artist ID/slug
+        tip_amount: The tip amount
+        tip_datetime: When the tip was made
+        db_session: Database session
+    """
+    if not user_id:
+        return  # Skip for guest tips
+    
+    # Get or create position
+    position = db_session.query(UserArtistPosition).filter(
+        UserArtistPosition.user_id == user_id,
+        UserArtistPosition.artist_id == str(artist_id)
+    ).first()
+    
+    if position:
+        # Update existing position
+        position.total_contributed += tip_amount
+        position.last_tip = tip_datetime
+        position.updated_at = datetime.utcnow()
+    else:
+        # Create new position
+        position = UserArtistPosition(
+            user_id=user_id,
+            artist_id=str(artist_id),
+            total_contributed=tip_amount,
+            last_tip=tip_datetime,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
+        )
+        db_session.add(position)
+    
+    db_session.flush()  # Flush to ensure position is saved
 
 
 @bp.route("/tip-session", methods=["POST"])
@@ -139,20 +179,33 @@ def stripe_webhook():
         # Parse user_id (may be empty for guest tips)
         user_id = int(user_id_str) if user_id_str and user_id_str.isdigit() else None
 
-        # Create Tip record
+        # Create Tip record and update position
         try:
             with get_session() as db_session:
+                tip_datetime = datetime.utcnow()
                 tip = Tip(
                     user_id=user_id,
                     artist_id=str(artist_id),
                     amount=Decimal(amount_str),
                     fee=Decimal(fee_str),
+                    platform_fee=Decimal(fee_str),  # Set platform_fee
                     net_amount=Decimal(net_amount_str),
                     stripe_checkout_session_id=session_data.get("id"),
                     stripe_payment_intent_id=session_data.get("payment_intent"),
-                    created_at=datetime.utcnow(),
+                    created_at=tip_datetime,
                 )
                 db_session.add(tip)
+                
+                # Update or create user artist position
+                if user_id:
+                    update_user_artist_position(
+                        user_id=user_id,
+                        artist_id=str(artist_id),
+                        tip_amount=Decimal(amount_str),
+                        tip_datetime=tip_datetime,
+                        db_session=db_session
+                    )
+                
                 db_session.commit()
 
                 print(f"✅ Tip recorded: ${amount_str} to artist {artist_id} (net: ${net_amount_str})")

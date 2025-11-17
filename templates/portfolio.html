@@ -1,0 +1,472 @@
+{% extends "base.html" %}
+
+{% block title %}Your Creative Portfolio - Ahoy Indie Media{% endblock %}
+
+{% block extra_css %}
+<style>
+    .portfolio-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem 1rem;
+    }
+
+    .portfolio-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .hero-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 3rem;
+    }
+
+    .hero-header h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .hero-header p {
+        font-size: 1.25rem;
+        opacity: 0.9;
+    }
+
+    .portfolio-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .stat-label {
+        color: #6b7280;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .charts-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .chart-card h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #1f2937;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+
+    .positions-table-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .positions-table-section h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #1f2937;
+    }
+
+    .positions-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .positions-table thead {
+        background: #f9fafb;
+    }
+
+    .positions-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #374151;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .positions-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .positions-table tbody tr:hover {
+        background: #f9fafb;
+    }
+
+    .artist-name {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .amount {
+        font-weight: 600;
+        color: #059669;
+    }
+
+    .weight {
+        color: #6b7280;
+    }
+
+    .last-tip {
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: white;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.7;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+        .hero-header h1 {
+            font-size: 2rem;
+        }
+
+        .charts-section {
+            grid-template-columns: 1fr;
+        }
+
+        .positions-table {
+            font-size: 0.875rem;
+        }
+
+        .positions-table th,
+        .positions-table td {
+            padding: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="portfolio-page" x-data="portfolioWidget()" x-init="init()">
+    <div class="portfolio-container">
+        <!-- Hero Header -->
+        <div class="hero-header">
+            <h1>Your Creative Portfolio</h1>
+            <p>Track your investments in independent artists</p>
+        </div>
+
+        <!-- Loading State -->
+        <div x-show="isLoading" class="empty-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <h3>Loading your portfolio...</h3>
+        </div>
+
+        <!-- Empty State -->
+        <div x-show="!isLoading && totalContributed === 0" class="empty-state">
+            <i class="fas fa-chart-line"></i>
+            <h3>No Positions Yet</h3>
+            <p>Start tipping artists to build your creative portfolio!</p>
+        </div>
+
+        <!-- Portfolio Content -->
+        <div x-show="!isLoading && totalContributed > 0">
+            <!-- Stats Cards -->
+            <div class="portfolio-stats">
+                <div class="stat-card">
+                    <div class="stat-value" x-text="'$' + totalContributed.toFixed(2)"></div>
+                    <div class="stat-label">Total Invested</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" x-text="positionCount"></div>
+                    <div class="stat-label">Artists Supported</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" x-text="averageContribution.toFixed(2)"></div>
+                    <div class="stat-label">Avg per Artist</div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <!-- Pie Chart -->
+                <div class="chart-card">
+                    <h3>Contributions by Artist</h3>
+                    <div class="chart-container">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Timeline Chart -->
+                <div class="chart-card">
+                    <h3>Contribution Timeline</h3>
+                    <div class="chart-container">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Positions Table -->
+            <div class="positions-table-section">
+                <h3>Your Positions</h3>
+                <table class="positions-table">
+                    <thead>
+                        <tr>
+                            <th>Artist</th>
+                            <th>Total Contributed</th>
+                            <th>Weight %</th>
+                            <th>Last Tip</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="position in positions" :key="position.artist_id">
+                            <tr>
+                                <td>
+                                    <span class="artist-name" x-text="position.artist_name"></span>
+                                </td>
+                                <td>
+                                    <span class="amount" x-text="'$' + position.total_contributed.toFixed(2)"></span>
+                                </td>
+                                <td>
+                                    <span class="weight" x-text="position.weight + '%'"></span>
+                                </td>
+                                <td>
+                                    <span class="last-tip" x-text="formatDate(position.last_tip)"></span>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+function portfolioWidget() {
+    return {
+        isLoading: true,
+        totalContributed: 0,
+        positionCount: 0,
+        positions: [],
+        timeline: [],
+        pieData: [],
+        pieChart: null,
+        timelineChart: null,
+
+        get averageContribution() {
+            return this.positionCount > 0 ? this.totalContributed / this.positionCount : 0;
+        },
+
+        async init() {
+            await this.loadPortfolioData();
+        },
+
+        async loadPortfolioData() {
+            try {
+                this.isLoading = true;
+                const response = await fetch('/portfolio/data');
+                if (!response.ok) {
+                    throw new Error('Failed to load portfolio data');
+                }
+                const data = await response.json();
+                
+                this.totalContributed = data.total_contributed || 0;
+                this.positionCount = data.position_count || 0;
+                this.positions = data.positions || [];
+                this.timeline = data.timeline || [];
+                this.pieData = data.pie_data || [];
+
+                // Render charts after data is loaded
+                this.$nextTick(() => {
+                    this.renderPieChart();
+                    this.renderTimelineChart();
+                });
+            } catch (error) {
+                console.error('Error loading portfolio data:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        renderPieChart() {
+            const ctx = document.getElementById('pieChart');
+            if (!ctx || this.pieData.length === 0) return;
+
+            // Destroy existing chart if it exists
+            if (this.pieChart) {
+                this.pieChart.destroy();
+            }
+
+            const colors = [
+                '#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe',
+                '#43e97b', '#fa709a', '#fee140', '#30cfd0', '#330867'
+            ];
+
+            this.pieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: this.pieData.map(d => d.artist_name),
+                    datasets: [{
+                        data: this.pieData.map(d => d.amount),
+                        backgroundColor: colors.slice(0, this.pieData.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: $${value.toFixed(2)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        },
+
+        renderTimelineChart() {
+            const ctx = document.getElementById('timelineChart');
+            if (!ctx || this.timeline.length === 0) return;
+
+            // Destroy existing chart if it exists
+            if (this.timelineChart) {
+                this.timelineChart.destroy();
+            }
+
+            // Calculate cumulative amounts
+            let cumulative = 0;
+            const cumulativeData = this.timeline.map(item => {
+                cumulative += item.amount;
+                return cumulative;
+            });
+
+            this.timelineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: this.timeline.map(d => this.formatDateShort(d.date)),
+                    datasets: [{
+                        label: 'Cumulative Contributions',
+                        data: cumulativeData,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Total: $${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toFixed(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        },
+
+        formatDate(dateString) {
+            if (!dateString) return 'Never';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        },
+
+        formatDateShort(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+    };
+}
+</script>
+{% endblock %}
+

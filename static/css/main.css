@@ -133,7 +133,7 @@ a:hover {
 /* Layout */
 .main-content {
     min-height: 100vh;
-    padding-top: 60px;
+    padding-top: 44px;
     /* Account for fixed navbar */
 }
 
@@ -143,20 +143,28 @@ a:hover {
     padding: 0 var(--spacing-lg);
 }
 
-/* Navigation - OS Native Style */
+/* Navigation - Compact Toolbar with Dark Glass Neomorphism */
 .navbar {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    background: rgba(10, 10, 10, 0.95);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-color);
+    /* Dark glass morphism background */
+    background: rgba(15, 15, 18, 0.75);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    /* Neomorphic border with subtle inset shadow */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 
+        0 1px 0 rgba(255, 255, 255, 0.03) inset,
+        0 2px 8px rgba(0, 0, 0, 0.4),
+        0 1px 2px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-    height: 60px;
+    height: 44px;
     -webkit-app-region: drag;
     /* For Electron apps */
     user-select: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-container {
@@ -166,8 +174,8 @@ a:hover {
     height: 100%;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 0 var(--spacing-lg);
-    gap: var(--spacing-lg);
+    padding: 0 12px;
+    gap: 8px;
     overflow: hidden;
 }
 
@@ -231,9 +239,9 @@ a:hover {
 }
 
 .nav-logo img {
-    height: 32px;
+    height: 24px;
     width: auto;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
     transition: all 0.2s ease;
 }
 
@@ -311,50 +319,59 @@ a:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    padding: var(--spacing-sm) var(--spacing-md);
-    color: var(--text-secondary);
+    gap: 2px;
+    padding: 4px 8px;
+    color: rgba(255, 255, 255, 0.6);
     text-decoration: none;
-    border-radius: var(--border-radius-lg);
-    transition: all 0.2s ease;
-    font-size: var(--font-size-xs);
+    border-radius: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 10px;
     font-weight: 500;
-    min-width: 60px;
+    min-width: 48px;
     text-align: center;
     background: transparent;
     border: 1px solid transparent;
+    height: 32px;
+    justify-content: center;
 }
 
 .feature-btn:hover {
-    color: var(--text-primary);
-    background: var(--background-light);
-    transform: translateY(-1px);
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.3) inset,
+        0 1px 1px rgba(255, 255, 255, 0.05);
+    transform: translateY(-0.5px);
 }
 
 .feature-btn.active {
-    color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.1);
-    border-color: rgba(99, 102, 241, 0.2);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+    color: rgba(139, 92, 246, 0.95);
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.3) inset,
+        0 1px 1px rgba(139, 92, 246, 0.2),
+        0 0 8px rgba(139, 92, 246, 0.15);
 }
 
 .feature-btn i {
-    font-size: var(--font-size-lg);
-    margin-bottom: 2px;
+    font-size: 14px;
+    margin-bottom: 1px;
 }
 
 .feature-btn span {
-    font-size: var(--font-size-xs);
+    font-size: 9px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
+    line-height: 1;
 }
 
 /* Search Bar */
 .nav-search {
     flex: 1;
     max-width: 400px;
-    margin: 0 var(--spacing-lg);
+    margin: 0 8px;
     -webkit-app-region: no-drag;
 }
 
@@ -362,63 +379,78 @@ a:hover {
     position: relative;
     display: flex;
     align-items: center;
-    background: var(--background-light);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-lg);
-    transition: all 0.2s ease;
+    background: rgba(20, 20, 24, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.3) inset,
+        0 1px 1px rgba(255, 255, 255, 0.03);
+    height: 28px;
 }
 
 .search-container:focus-within {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: rgba(139, 92, 246, 0.4);
+    background: rgba(25, 25, 30, 0.7);
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.3) inset,
+        0 1px 1px rgba(255, 255, 255, 0.05),
+        0 0 0 2px rgba(139, 92, 246, 0.15);
 }
 
 .search-icon {
     position: absolute;
-    left: var(--spacing-sm);
-    color: var(--text-tertiary);
-    font-size: var(--font-size-sm);
+    left: 8px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 11px;
     pointer-events: none;
 }
 
 .search-input {
     width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
-    padding-left: 32px;
-    padding-right: 32px;
+    padding: 4px 8px;
+    padding-left: 28px;
+    padding-right: 28px;
     background: transparent;
     border: none;
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 12px;
     outline: none;
+    height: 100%;
 }
 
 .search-input::placeholder {
-    color: var(--text-tertiary);
+    color: rgba(255, 255, 255, 0.35);
 }
 
 .search-clear {
     position: absolute;
-    right: var(--spacing-sm);
+    right: 6px;
     background: none;
     border: none;
-    color: var(--text-tertiary);
+    color: rgba(255, 255, 255, 0.4);
     cursor: pointer;
-    padding: var(--spacing-xs);
-    border-radius: var(--border-radius-sm);
-    transition: color 0.2s ease;
-    font-size: var(--font-size-xs);
+    padding: 2px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 10px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .search-clear:hover {
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* App Menu */
 .nav-menu {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: 4px;
     -webkit-app-region: no-drag;
 }
 
@@ -469,27 +501,64 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+    color: rgba(255, 255, 255, 0.6);
     text-decoration: none;
-    border-radius: var(--border-radius-md);
-    transition: all 0.2s ease;
-    font-size: var(--font-size-md);
+    border-radius: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 13px;
     background: transparent;
-    border: none;
+    border: 1px solid transparent;
     cursor: pointer;
 }
 
 .nav-item:hover {
-    color: var(--text-primary);
-    background: var(--background-light);
-    transform: translateY(-1px);
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.3) inset,
+        0 1px 1px rgba(255, 255, 255, 0.05);
+    transform: translateY(-0.5px);
 }
 
 .nav-item.active {
-    color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.1);
+    color: rgba(139, 92, 246, 0.95);
+    background: rgba(139, 92, 246, 0.12);
+    border-color: rgba(139, 92, 246, 0.2);
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.3) inset,
+        0 1px 1px rgba(139, 92, 246, 0.2);
+}
+
+/* Account Menu Button */
+.account-menu-btn {
+    width: auto !important;
+    min-width: auto;
+    padding: 4px 6px !important;
+    gap: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.account-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid rgba(139, 92, 246, 0.4);
+    flex-shrink: 0;
+}
+
+.account-chevron {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.4);
+    transition: all 0.2s ease;
+}
+
+.account-menu-btn:hover .account-chevron {
+    color: rgba(255, 255, 255, 0.7);
 }
 
 /* Dropdown Styles */
