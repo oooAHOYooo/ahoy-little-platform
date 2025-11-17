@@ -2,184 +2,237 @@
 
 {% block title %}Sign In - Ahoy Indie Media{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Hide navbar on auth page */
+    .navbar {
+        display: none;
+    }
+    .main-content {
+        padding-top: 0;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="auth-page" x-data="authPage()" x-init="init()">
-    <div class="auth-container">
-        <!-- Auth Header -->
-        <div class="auth-header">
-            <div class="auth-logo">
-                <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
-                    alt="Ahoy Indie Media">
-                <h1>Welcome to Ahoy Indie Media</h1>
-                <p>Sign in to your account or create a new one</p>
-            </div>
+<div class="auth-page-modern" x-data="authPage()" x-init="init()">
+    <!-- Animated Gradient Hero Section -->
+    <div class="auth-hero">
+        <div class="auth-hero-gradient"></div>
+        <div class="auth-hero-content">
+            <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+                alt="Ahoy Indie Media"
+                class="auth-hero-logo">
+            <p class="auth-hero-subtitle">Your indie universe awaits.</p>
+        </div>
+    </div>
+
+    <!-- Centered Card Container -->
+    <div class="auth-card" :class="{'auth-card-success': loginSuccess}">
+        <!-- Tab Navigation -->
+        <div class="auth-tabs-modern">
+            <button @click="authMode = 'login'"
+                :class="{'active': authMode === 'login'}"
+                class="auth-tab-modern">
+                Sign In
+            </button>
+            <button @click="authMode = 'register'"
+                :class="{'active': authMode === 'register'}"
+                class="auth-tab-modern">
+                Create Account
+            </button>
         </div>
 
-        <!-- Auth Content -->
-        <div class="auth-content">
-            <!-- Tab Navigation -->
-            <div class="auth-tabs">
-                <button @click="authMode = 'login'"
-                    :class="{'active': authMode === 'login'}"
-                    class="auth-tab">
-                    <i class="fas fa-sign-in-alt"></i>
-                    Sign In
-                </button>
-                <button @click="authMode = 'register'"
-                    :class="{'active': authMode === 'register'}"
-                    class="auth-tab">
-                    <i class="fas fa-user-plus"></i>
-                    Create Account
-                </button>
-            </div>
-
-            <!-- Login Form -->
-            <div x-show="authMode === 'login'" class="auth-form-container">
-                <form @submit.prevent="login()" class="auth-form">
-                    <div class="form-group">
-                        <label for="login-username">Username</label>
-                        <input type="text" id="login-username"
-                            x-model="authForm.username"
-                            placeholder="Enter your username" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-lock input-icon"></i>
-                            <input :type="showPassword ? 'text' : 'password'"
-                                id="password"
-                                x-model="authForm.password"
-                                placeholder="Enter your password" required
-                                class="auth-input">
-                            <button type="button"
-                                @click="showPassword = !showPassword"
-                                class="password-toggle">
-                                <i
-                                    :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="form-options">
-                        <label class="checkbox-label">
-                            <input type="checkbox"
-                                x-model="authForm.rememberMe">
-                            <span class="checkmark"></span>
-                            Remember me
-                        </label>
-                        <a href="#" class="forgot-password">Forgot password?</a>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-full"
-                        :disabled="isLoading">
-                        <span x-show="!isLoading">Sign In</span>
-                        <span x-show="isLoading">Signing in...</span>
-                    </button>
-                </form>
-            </div>
-
-            <!-- Register Form -->
-            <div x-show="authMode === 'register'" class="auth-form-container">
-                <div class="fun-header">
-                    <h3>🎉 Join the Ahoy Community!</h3>
-                    <p>Let's create your musical journey together</p>
+        <!-- Login Form -->
+        <div x-show="authMode === 'login'" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 transform translate-y-4"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             class="auth-form-modern">
+            <form @submit.prevent="login()" class="auth-form-content">
+                <!-- Username Field -->
+                <div class="floating-input-group" style="animation-delay: 0.1s">
+                    <input type="text" 
+                        id="login-username"
+                        x-model="authForm.username"
+                        @input="updateEmailEmoji()"
+                        @focus="focusedField = 'username'"
+                        @blur="focusedField = null"
+                        class="floating-input"
+                        :class="{'floating-input-focused': focusedField === 'username' || authForm.username}"
+                        placeholder=" "
+                        required>
+                    <label for="login-username" class="floating-label">Username</label>
                 </div>
-                <form @submit.prevent="register()" class="auth-form">
-                    <div class="form-group">
-                        <label for="reg-email">Email</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-envelope input-icon"></i>
-                            <input type="email" id="reg-email"
-                                x-model="authForm.email"
-                                placeholder="your@email.com" required
-                                class="auth-input">
-                        </div>
-                        <div class="input-feedback" x-show="authForm.email">
-                            <span x-show="!isValidEmail(authForm.email)"
-                                class="feedback-error">Please enter a valid
-                                email</span>
-                            <span x-show="isValidEmail(authForm.email)"
-                                class="feedback-success">Perfect! 📧</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-password">Password</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-lock input-icon"></i>
-                            <input :type="showPassword ? 'text' : 'password'"
-                                id="reg-password"
-                                x-model="authForm.password"
-                                placeholder="Create a strong password" required
-                                class="auth-input">
-                            <button type="button"
-                                @click="showPassword = !showPassword"
-                                class="password-toggle">
-                                <i
-                                    :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                            </button>
-                        </div>
-                        <div class="password-strength"
-                            x-show="authForm.password">
-                            <div class="strength-bar">
-                                <div class="strength-fill"
-                                    :class="getPasswordStrength(authForm.password).class"
-                                    :style="`width: ${getPasswordStrength(authForm.password).width}%`"></div>
-                            </div>
-                            <span class="strength-text"
-                                x-text="getPasswordStrength(authForm.password).text"></span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-confirm-password">Confirm
-                            Password</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-lock input-icon"></i>
-                            <input :type="showPassword ? 'text' : 'password'"
-                                id="reg-confirm-password"
-                                x-model="authForm.confirmPassword"
-                                placeholder="Confirm your password" required
-                                class="auth-input">
-                        </div>
-                        <div class="input-feedback"
-                            x-show="authForm.confirmPassword">
-                            <span
-                                x-show="authForm.password !== authForm.confirmPassword"
-                                class="feedback-error">Passwords don't
-                                match</span>
-                            <span
-                                x-show="authForm.password === authForm.confirmPassword && authForm.password"
-                                class="feedback-success">Passwords match!
-                                🔒</span>
-                        </div>
-                    </div>
-                    <div class="form-options">
-                        <label class="checkbox-label">
-                            <input type="checkbox" x-model="authForm.agreeTerms"
-                                required>
-                            <span class="checkmark"></span>
-                            I agree to the <a href="/terms"
-                                target="_blank">Terms of Service</a> and <a
-                                href="/privacy" target="_blank">Privacy
-                                Policy</a>
-                        </label>
-                    </div>
-                    <button type="submit"
-                        class="btn btn-primary btn-full fun-button"
-                        :disabled="isLoading || !isFormValid()">
-                        <i class="fas fa-rocket" x-show="!isLoading"></i>
-                        <i class="fas fa-spinner fa-spin"
-                            x-show="isLoading"></i>
-                        <span x-show="!isLoading">Launch My Account! 🚀</span>
-                        <span x-show="isLoading">Creating your space...</span>
-                    </button>
-                </form>
-            </div>
 
-            <!-- Back to Home -->
-            <div class="auth-footer">
-                <a href="/" class="back-to-home">
-                    <i class="fas fa-arrow-left"></i>
-                    Back to Home
-                </a>
-            </div>
+                <!-- Password Field -->
+                <div class="floating-input-group" style="animation-delay: 0.2s">
+                    <input :type="showPassword ? 'text' : 'password'"
+                        id="password"
+                        x-model="authForm.password"
+                        @focus="focusedField = 'password'"
+                        @blur="focusedField = null"
+                        class="floating-input"
+                        :class="{'floating-input-focused': focusedField === 'password' || authForm.password}"
+                        placeholder=" "
+                        required>
+                    <label for="password" class="floating-label">Password</label>
+                    <button type="button"
+                        @click="showPassword = !showPassword"
+                        class="password-reveal-btn">
+                        <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                    </button>
+                </div>
+
+                <!-- Form Options -->
+                <div class="auth-form-options" style="animation-delay: 0.3s">
+                    <label class="checkbox-modern">
+                        <input type="checkbox" x-model="authForm.rememberMe">
+                        <span class="checkbox-custom"></span>
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="forgot-link">Forgot password?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" 
+                    class="auth-submit-btn"
+                    :class="{'auth-submit-loading': isLoading, 'auth-submit-success': loginSuccess}"
+                    :disabled="isLoading || loginSuccess"
+                    style="animation-delay: 0.4s">
+                    <span x-show="!isLoading && !loginSuccess">Sign In</span>
+                    <span x-show="isLoading" class="auth-submit-loading-text">
+                        <span class="loading-dot"></span>
+                        <span class="loading-dot"></span>
+                        <span class="loading-dot"></span>
+                        Signing you in…
+                    </span>
+                    <span x-show="loginSuccess" class="auth-submit-success-text">🎉 Welcome back!</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Register Form -->
+        <div x-show="authMode === 'register'" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 transform translate-y-4"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             class="auth-form-modern">
+            <form @submit.prevent="register()" class="auth-form-content">
+                <!-- Username Field -->
+                <div class="floating-input-group" style="animation-delay: 0.05s">
+                    <input type="text" 
+                        id="reg-username"
+                        x-model="authForm.username"
+                        @input="updateEmailEmoji()"
+                        @focus="focusedField = 'reg-username'"
+                        @blur="focusedField = null"
+                        class="floating-input"
+                        :class="{'floating-input-focused': focusedField === 'reg-username' || authForm.username}"
+                        placeholder=" "
+                        required>
+                    <label for="reg-username" class="floating-label">Username</label>
+                </div>
+
+                <!-- Email Field with Emoji -->
+                <div class="floating-input-group" style="animation-delay: 0.1s">
+                    <input type="email" 
+                        id="reg-email"
+                        x-model="authForm.email"
+                        @input="updateEmailEmoji()"
+                        @focus="focusedField = 'email'"
+                        @blur="focusedField = null"
+                        class="floating-input"
+                        :class="{'floating-input-focused': focusedField === 'email' || authForm.email}"
+                        placeholder=" "
+                        required>
+                    <label for="reg-email" class="floating-label">Email</label>
+                    <span class="input-emoji" 
+                          :class="{'input-emoji-active': authForm.email}"
+                          x-text="emailEmoji">📧</span>
+                </div>
+                <div class="input-feedback" x-show="authForm.email" style="animation-delay: 0.15s">
+                    <span x-show="!isValidEmail(authForm.email)" class="feedback-error">Please enter a valid email</span>
+                    <span x-show="isValidEmail(authForm.email)" class="feedback-success">Perfect! 📧</span>
+                </div>
+
+                <!-- Password Field -->
+                <div class="floating-input-group" style="animation-delay: 0.2s">
+                    <input :type="showPassword ? 'text' : 'password'"
+                        id="reg-password"
+                        x-model="authForm.password"
+                        @focus="focusedField = 'reg-password'"
+                        @blur="focusedField = null"
+                        class="floating-input"
+                        :class="{'floating-input-focused': focusedField === 'reg-password' || authForm.password}"
+                        placeholder=" "
+                        required>
+                    <label for="reg-password" class="floating-label">Password</label>
+                    <button type="button"
+                        @click="showPassword = !showPassword"
+                        class="password-reveal-btn">
+                        <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                    </button>
+                </div>
+                <div class="password-strength" x-show="authForm.password" style="animation-delay: 0.25s">
+                    <div class="strength-bar">
+                        <div class="strength-fill"
+                            :class="getPasswordStrength(authForm.password).class"
+                            :style="`width: ${getPasswordStrength(authForm.password).width}%`"></div>
+                    </div>
+                    <span class="strength-text" x-text="getPasswordStrength(authForm.password).text"></span>
+                </div>
+
+                <!-- Confirm Password Field -->
+                <div class="floating-input-group" style="animation-delay: 0.3s">
+                    <input :type="showPassword ? 'text' : 'password'"
+                        id="reg-confirm-password"
+                        x-model="authForm.confirmPassword"
+                        @focus="focusedField = 'confirm-password'"
+                        @blur="focusedField = null"
+                        class="floating-input"
+                        :class="{'floating-input-focused': focusedField === 'confirm-password' || authForm.confirmPassword}"
+                        placeholder=" "
+                        required>
+                    <label for="reg-confirm-password" class="floating-label">Confirm Password</label>
+                </div>
+                <div class="input-feedback" x-show="authForm.confirmPassword" style="animation-delay: 0.35s">
+                    <span x-show="authForm.password !== authForm.confirmPassword" class="feedback-error">Passwords don't match</span>
+                    <span x-show="authForm.password === authForm.confirmPassword && authForm.password" class="feedback-success">Passwords match! 🔒</span>
+                </div>
+
+                <!-- Terms Checkbox -->
+                <div class="auth-form-options" style="animation-delay: 0.4s">
+                    <label class="checkbox-modern">
+                        <input type="checkbox" x-model="authForm.agreeTerms" required>
+                        <span class="checkbox-custom"></span>
+                        <span>I agree to the <a href="/terms" target="_blank">Terms</a> and <a href="/privacy" target="_blank">Privacy Policy</a></span>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                    class="auth-submit-btn"
+                    :class="{'auth-submit-loading': isLoading}"
+                    :disabled="isLoading || !isFormValid()"
+                    style="animation-delay: 0.5s">
+                    <span x-show="!isLoading">Launch My Account! 🚀</span>
+                    <span x-show="isLoading" class="auth-submit-loading-text">
+                        <span class="loading-dot"></span>
+                        <span class="loading-dot"></span>
+                        <span class="loading-dot"></span>
+                        Creating your space…
+                    </span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="auth-footer-modern">
+            <a href="/" class="back-to-home-link">
+                <i class="fas fa-arrow-left"></i>
+                Back to Home
+            </a>
         </div>
     </div>
 </div>
@@ -190,6 +243,9 @@ function authPage() {
         authMode: 'login', // 'login' or 'register'
         isLoading: false,
         showPassword: false,
+        loginSuccess: false,
+        focusedField: null,
+        emailEmoji: '📧',
         authForm: {
             username: '',
             email: '',
@@ -202,6 +258,17 @@ function authPage() {
         init() {
             // Check if user is already logged in
             this.checkAuthStatus();
+        },
+        
+        updateEmailEmoji() {
+            const email = this.authForm.email || this.authForm.username;
+            if (!email) {
+                this.emailEmoji = '📧';
+                return;
+            }
+            const emojis = ['😊', '🎵', '🎸', '🎤', '🎧', '🎹', '🎺', '🎻', '🥁', '🎪'];
+            const index = email.length % emojis.length;
+            this.emailEmoji = emojis[index];
         },
         
         async checkAuthStatus() {
@@ -265,16 +332,27 @@ function authPage() {
                 
                 if (response.ok) {
                     const data = await response.json();
-                    this.showNotification('Welcome back!', 'success');
-                    // Redirect to home page
-                    window.location.href = '/';
+                    this.loginSuccess = true;
+                    // Animate success, then redirect
+                    setTimeout(() => {
+                        const card = document.querySelector('.auth-card');
+                        if (card) {
+                            card.style.transform = 'scale(0.95)';
+                            card.style.opacity = '0';
+                            setTimeout(() => {
+                                window.location.href = '/';
+                            }, 300);
+                        } else {
+                            window.location.href = '/';
+                        }
+                    }, 1500);
                 } else {
                     const error = await response.json();
                     this.showNotification(error.message || error.error || 'Login failed', 'error');
+                    this.isLoading = false;
                 }
             } catch (error) {
                 this.showNotification('Login failed. Please try again.', 'error');
-            } finally {
                 this.isLoading = false;
             }
         },
@@ -308,16 +386,27 @@ function authPage() {
                 
                 if (response.ok) {
                     const data = await response.json();
-                    this.showNotification('Account created successfully! Welcome to Ahoy!', 'success');
-                    // Redirect to home page
-                    window.location.href = '/';
+                    this.loginSuccess = true;
+                    // Animate success, then redirect
+                    setTimeout(() => {
+                        const card = document.querySelector('.auth-card');
+                        if (card) {
+                            card.style.transform = 'scale(0.95)';
+                            card.style.opacity = '0';
+                            setTimeout(() => {
+                                window.location.href = '/';
+                            }, 300);
+                        } else {
+                            window.location.href = '/';
+                        }
+                    }, 1500);
                 } else {
                     const error = await response.json();
                     this.showNotification(error.message || error.error || 'Registration failed', 'error');
+                    this.isLoading = false;
                 }
             } catch (error) {
                 this.showNotification('Registration failed. Please try again.', 'error');
-            } finally {
                 this.isLoading = false;
             }
         },

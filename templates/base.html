@@ -67,6 +67,11 @@
             href="{{ url_for('static', filename='css/main.css') }}">
         {% block extra_css %}{% endblock %}
 
+        <!-- Google Fonts - Inter -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        
         <!-- Font Awesome -->
         <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -726,72 +731,95 @@
                 <!-- Left Dashboard: Collection -->
                 <aside class="dashboard-sidebar dashboard-left" x-data="dashboardCollection()" x-init="init()">
                     <div class="sidebar-content">
-                        <!-- Tip Jar -->
-                        <div class="section-title">💝 Tip Jar</div>
-                        <div class="rounded-xl border border-neutral-700 bg-neutral-900/50 backdrop-blur-sm shadow-lg p-5 space-y-4">
-                            <!-- Header with heart icon and message -->
-                            <div class="flex items-center gap-2 text-neutral-300">
-                                <i class="fas fa-heart text-pink-500 text-sm"></i>
-                                <p class="text-sm">Support independent artists directly.</p>
+                        <!-- User Info Block -->
+                        <div class="sidebar-user-block">
+                            <div class="user-block-content">
+                                <img :src="(window.userProfile && window.userProfile.avatar) || '/static/img/default-avatar.png'"
+                                     :alt="(window.userProfile && window.userProfile.display_name) || 'Guest'"
+                                     class="user-block-avatar">
+                                <div class="user-block-info">
+                                    <div class="user-block-name" x-text="(window.userProfile && window.userProfile.display_name) || 'Guest'"></div>
+                                    <div class="user-block-stats">
+                                        <span>Bookmarks</span> • <span>Badges</span> • <span x-text="'$' + (window.totalInvested || 0).toFixed(0) + ' invested'"></span>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <!-- Form: 2-column on desktop, stacked on mobile -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Artist Dropdown -->
-                                <div class="space-y-1.5">
-                                    <label class="text-xs text-neutral-400 font-medium">Artist</label>
+                            <div class="user-block-divider"></div>
+                        </div>
+                        
+                        <!-- Global Search -->
+                        <div class="sidebar-panel sidebar-item">
+                            <div class="section-title">Search</div>
+                            <div class="sidebar-search-container">
+                                <i class="fas fa-search sidebar-search-icon"></i>
+                                <input type="text"
+                                    placeholder="Search music, shows, artists..."
+                                    x-model="searchQuery"
+                                    @keyup.enter="performSearch()"
+                                    class="sidebar-search-input">
+                                <button @click="clearSearch()" class="sidebar-search-clear"
+                                    x-show="searchQuery">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Tip Jar -->
+                        <div class="tip-jar-card sidebar-item">
+                            <div class="tip-jar-compact">
+                                <div class="tip-jar-row">
+                                    <label class="tip-jar-label-inline">Artist</label>
                                     <select 
                                         x-model="selectedArtistId" 
-                                        class="w-full px-4 py-2.5 bg-neutral-800/50 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all">
-                                        <option value="" class="bg-neutral-800">Select an artist...</option>
+                                        class="tip-jar-select">
+                                        <option value="">Select...</option>
                                         <template x-for="artist in artists" :key="artist.id || artist.name">
-                                            <option :value="artist.id || artist.name" x-text="artist.name" class="bg-neutral-800"></option>
+                                            <option :value="artist.id || artist.name" x-text="artist.name"></option>
                                         </template>
                                     </select>
                                 </div>
                                 
-                                <!-- Amount Input -->
-                                <div class="space-y-1.5">
-                                    <label class="text-xs text-neutral-400 font-medium">Amount</label>
-                                    <div class="relative">
-                                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">$</span>
+                                <div class="tip-jar-row">
+                                    <label class="tip-jar-label-inline">Amount</label>
+                                    <div class="tip-jar-amount-group">
+                                        <span class="tip-jar-currency-prefix">$</span>
                                         <input 
                                             type="number" 
                                             x-model="tipAmount" 
                                             placeholder="0.00" 
                                             min="0.50" 
                                             step="0.01" 
-                                            class="w-full pl-8 pr-4 py-2.5 bg-neutral-800/50 border border-neutral-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                                            class="tip-jar-amount-input"
                                             @input="tipAmount = $event.target.value">
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Platform Fee Display -->
-                            <div x-show="isValid" 
-                                 x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0"
-                                 x-transition:enter-end="opacity-100"
-                                 class="text-xs text-neutral-500 border-t border-neutral-700 pt-3">
-                                <div class="flex justify-between items-center">
-                                    <span>Platform fee (7.5%):</span>
-                                    <span class="font-medium" x-text="'$' + (parseFloat(tipAmount || 0) * 0.075).toFixed(2)"></span>
+                                
+                                <!-- Platform Fee Display -->
+                                <div x-show="isValid" 
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0"
+                                     x-transition:enter-end="opacity-100"
+                                     class="tip-jar-fees">
+                                    <div class="tip-jar-fee-line">
+                                        <span class="tip-jar-fee-label">Platform fee (7.5%):</span>
+                                        <span class="tip-jar-fee-value" x-text="'$' + (parseFloat(tipAmount || 0) * 0.075).toFixed(2)"></span>
+                                    </div>
+                                    <div class="tip-jar-fee-line tip-jar-fee-total">
+                                        <span class="tip-jar-fee-label">Artist receives:</span>
+                                        <span class="tip-jar-fee-value" x-text="'$' + (parseFloat(tipAmount || 0) * 0.925).toFixed(2)"></span>
+                                    </div>
                                 </div>
-                                <div class="flex justify-between items-center mt-1 text-neutral-300">
-                                    <span class="font-medium">Artist receives:</span>
-                                    <span class="font-semibold" x-text="'$' + (parseFloat(tipAmount || 0) * 0.925).toFixed(2)"></span>
-                                </div>
+                                
+                                <!-- Send Tip Button -->
+                                <button 
+                                    @click="sendTip()" 
+                                    :disabled="!isValid || isTipping"
+                                    class="tip-jar-submit">
+                                    <i class="fas fa-heart" x-show="!isTipping"></i>
+                                    <i class="fas fa-spinner fa-spin" x-show="isTipping"></i>
+                                    <span x-text="isTipping ? 'Processing...' : 'Send Tip'"></span>
+                                </button>
                             </div>
-                            
-                            <!-- Send Tip Button -->
-                            <button 
-                                @click="sendTip()" 
-                                :disabled="!isValid || isTipping"
-                                class="w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 disabled:from-neutral-700 disabled:to-neutral-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
-                                <i class="fas fa-heart" x-show="!isTipping"></i>
-                                <i class="fas fa-spinner fa-spin" x-show="isTipping"></i>
-                                <span x-text="isTipping ? 'Processing...' : 'Send Tip'"></span>
-                            </button>
                         </div>
                         
                         <!-- Success Toast -->
@@ -811,49 +839,43 @@
                             </div>
                         </div>
                         
+                        <!-- Merit Badges -->
+                        <div class="sidebar-panel sidebar-item">
+                            <div class="section-title">Merit Badges</div>
+                            <div class="badges-mini">
+                                <template x-for="badge in badges.slice(0, 4)" :key="badge.key">
+                                    <div class="badge-mini" :class="'badge-' + (badge.tier || 'bronze')" :title="badge.title">
+                                        <i :class="badge.icon || 'fas fa-medal'"></i>
+                                    </div>
+                                </template>
+                                <button @click="showCodeEntry = !showCodeEntry" class="btn-code-mini" title="Enter code">
+                                    Code
+                                </button>
+                            </div>
+                        </div>
+                        
                         <!-- Bookmarks -->
-                        <div class="section-title">Bookmarks</div>
-                        <div class="collections-mini">
-                            <button @click="goToCollections()" class="item-mini collection-add-btn">
-                                <i class="fas fa-plus"></i>
-                                <span>Add Collection</span>
-                            </button>
+                        <div class="sidebar-panel sidebar-item">
+                            <div class="section-title">Bookmarks</div>
+                            <div class="collections-mini">
+                                <button @click="goToCollections()" class="item-mini collection-add-btn">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add Collection</span>
+                                </button>
+                            </div>
                         </div>
                         
-                        <!-- Badges -->
-                        <div class="section-title">Merit Badges</div>
-                        <div class="badges-mini">
-                            <template x-for="badge in badges.slice(0, 4)" :key="badge.key">
-                                <div class="badge-mini" :class="'badge-' + (badge.tier || 'bronze')" :title="badge.title">
-                                    <i :class="badge.icon || 'fas fa-medal'"></i>
-                                </div>
-                            </template>
-                            <button @click="showCodeEntry = !showCodeEntry" class="btn-code-mini" title="Enter code">
-                                Code
-                            </button>
-                        </div>
-                        
-                        <!-- Tiny Media Player -->
-                        <div class="tiny-media-player" x-show="currentTrack" style="margin-top: 0.75rem; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 6px; display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;">
-                            <!-- Thumbnail -->
+                        <!-- Mini Player Footer -->
+                        <div class="sidebar-mini-player" x-show="currentTrack">
                             <img :src="currentTrack?.cover_art || currentTrack?.thumbnail || '/static/img/default-cover.jpg'" 
                                  alt="Track cover" 
-                                 style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover; flex-shrink: 0;">
-                            <!-- Play/Pause Button -->
-                            <button @click="toggleTinyPlayer()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 0.875rem; padding: 0.25rem; flex-shrink: 0;">
-                                <i :class="isTinyPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
-                            </button>
-                            <!-- Track Info -->
-                            <div style="flex: 1; min-width: 0; overflow: hidden;">
-                                <div style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" x-text="currentTrack?.title || 'No track'"></div>
-                                <div style="font-size: 0.7rem; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" x-text="currentTrack?.artist || ''"></div>
+                                 class="mini-player-cover">
+                            <div class="mini-player-info">
+                                <div class="mini-player-title" x-text="currentTrack?.title || 'No track'"></div>
+                                <div class="mini-player-artist" x-text="currentTrack?.artist || ''"></div>
                             </div>
-                            <!-- Bookmark Button -->
-                            <button @click="toggleTinyBookmark()" 
-                                    style="background: none; border: none; color: #fff; cursor: pointer; font-size: 0.875rem; padding: 0.25rem; flex-shrink: 0; opacity: 0.8;"
-                                    :style="isTinyBookmarked ? 'color: #00d4ff; opacity: 1;' : ''"
-                                    :title="isTinyBookmarked ? 'Remove bookmark' : 'Bookmark track'">
-                                <i :class="isTinyBookmarked ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+                            <button @click="toggleTinyPlayer()" class="mini-player-control">
+                                <i :class="isTinyPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
                             </button>
                         </div>
                         
@@ -1128,53 +1150,53 @@
 
         <!-- Footer -->
         <footer class="site-footer">
+            <!-- Neon Gradient Accent Bar -->
+            <div class="footer-accent-bar"></div>
+            
             <div class="footer-content">
-                <div class="footer-brand">
-                    <div class="footer-logo">
-                        <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}" alt="Ahoy Indie Media">
+                <!-- Left Column: Logo + Tagline -->
+                <div class="footer-column footer-brand-column">
+                    <div class="footer-brand">
+                        <div class="footer-logo">
+                            <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}" alt="Ahoy Indie Media">
+                        </div>
+                        <p class="footer-tagline">Your gateway to independent music discovery and organization</p>
                     </div>
-                    <p class="footer-tagline">Your gateway to independent music discovery and organization</p>
                 </div>
 
-                <div class="footer-sections">
-                    <div class="footer-section">
-                        <h4>App</h4>
-                        <ul>
-                            <li><a href="{{ url_for('music') }}">Music</a></li>
-                            <li><a href="{{ url_for('shows') }}">Shows</a></li>
-                            <li><a href="{{ url_for('artists') }}">Artists</a></li>
-                            <li><a href="{{ url_for('cast_page') }}">Cast</a></li>
-                            <li><a href="/downloads">Downloads</a></li>
-                            <li><a href="/bookmarks">My Bookmarks</a></li>
-                            <li><a href="/settings">Settings</a></li>
-                            <li><a href="/feedback">Feedback</a></li>
-                        </ul>
-                    </div>
+                <!-- Center Column: App Navigation -->
+                <div class="footer-column footer-nav-column">
+                    <h4 class="footer-column-title">App Navigation</h4>
+                    <ul class="footer-nav-list">
+                        <li><a href="{{ url_for('music') }}">Music</a></li>
+                        <li><a href="{{ url_for('shows') }}">Shows</a></li>
+                        <li><a href="{{ url_for('artists') }}">Artists</a></li>
+                        <li><a href="{{ url_for('cast_page') }}">Cast</a></li>
+                        <li><a href="/downloads">Downloads</a></li>
+                        <li><a href="/bookmarks">My Bookmarks</a></li>
+                        <li><a href="/settings">Settings</a></li>
+                        <li><a href="/feedback">Feedback</a></li>
+                    </ul>
+                </div>
 
-                    <div class="footer-section">
-                        <h4>Legal</h4>
-                        <ul>
-                            <li><a href="/privacy" rel="nofollow">Privacy Policy</a></li>
-                            <li><a href="/terms" rel="nofollow">Terms of Service</a></li>
-                            <li><a href="/security">Security</a></li>
-                            <li><a href="{{ url_for('sitemap_page') }}">Sitemap</a></li>
-                            <li><a href="/debug-report">Debug Report</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="footer-section">
-                        <h4>Support</h4>
-                        <ul>
-                            <li><a href="mailto:support@ahoy.example">Contact Support</a></li>
-                            <li><a href="/downloads">Downloads</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="footer-section">
-                        <h4>Beta Features</h4>
-                        <ul>
-                            <li><a href="/radio">Radio (Experimental)</a></li>
-                        </ul>
+                <!-- Right Column: Legal + Developer Tools + Version -->
+                <div class="footer-column footer-legal-column">
+                    <h4 class="footer-column-title">Legal</h4>
+                    <ul class="footer-nav-list">
+                        <li><a href="/privacy" rel="nofollow">Privacy Policy</a></li>
+                        <li><a href="/terms" rel="nofollow">Terms of Service</a></li>
+                        <li><a href="/security">Security</a></li>
+                        <li><a href="{{ url_for('sitemap_page') }}">Sitemap</a></li>
+                    </ul>
+                    
+                    <h4 class="footer-column-title footer-dev-title">Developer Tools</h4>
+                    <ul class="footer-nav-list">
+                        <li><a href="/debug-report">Debug Report</a></li>
+                        <li><a href="/radio">Radio (Experimental)</a></li>
+                    </ul>
+                    
+                    <div class="footer-version-badge">
+                        <span class="version-text">Ahoy Engine v1.1.0 — Indie Build</span>
                     </div>
                 </div>
             </div>
@@ -1182,7 +1204,6 @@
             <div class="footer-bottom">
                 <div class="footer-bottom-content">
                     <p>&copy; 2025 Ahoy Indie Media. All rights reserved.</p>
-                    <p class="text-xs text-gray-500 mt-1">Beta v1.1 - Debug Mode</p>
                 </div>
             </div>
         </footer>
@@ -1704,6 +1725,8 @@
                 tipAmount: '',
                 isTipping: false,
                 showTipSuccess: false,
+                // Search state
+                searchQuery: '',
                 
                 get isValid() {
                     return this.selectedArtistId && 
@@ -1835,6 +1858,15 @@
                 },
                 goToCollections() {
                     window.location.href = '/bookmarks';
+                },
+                // Search functionality
+                performSearch() {
+                    if (!this.searchQuery.trim()) return;
+                    const searchUrl = `/search?q=${encodeURIComponent(this.searchQuery)}`;
+                    window.location.href = searchUrl;
+                },
+                clearSearch() {
+                    this.searchQuery = '';
                 },
                 async redeemCode() {
                     if (!this.codeEntry) return;
