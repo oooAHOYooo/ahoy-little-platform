@@ -28,3 +28,4 @@ sentry-sdk[flask]
 structlog
 itsdangerous
 requests
+stripe>=7.0.0

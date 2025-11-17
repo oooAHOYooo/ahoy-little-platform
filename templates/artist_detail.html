@@ -39,18 +39,129 @@ endblock %}
 {% endblock %}
 
 {% block content %}
-<div class="artist-detail-page" x-data="artistGallery()" x-init="init()">
-    <!-- Hero: image + big name only -->
-    <section class="artist-hero">
-        <div class="artist-hero-bg"
-            :style="`background-image: url(${artist.image || '/static/img/default-avatar.png'})`"></div>
-        <div class="artist-hero-content">
-            <div class="artist-avatar-large">
+<div class="artist-detail-page" x-data="artistDetail()" x-init="init()">
+    <!-- Hero Banner with Tailwind-style design -->
+    <section class="artist-hero-banner">
+        <div class="hero-bg-overlay"></div>
+        <div class="hero-bg-image" 
+             :style="`background-image: url(${artist.hero_image_url || artist.cover_image || artist.image || '/static/img/default-avatar.png'})`">
+        </div>
+        <div class="hero-content-wrapper">
+            <div class="hero-content">
+                <div class="hero-avatar">
                 <img :src="artist.image || '/static/img/default-avatar.png'"
-                    :alt="artist.name">
+                         :alt="artist.name"
+                         class="avatar-image">
+                </div>
+                <div class="hero-info">
+                    <h1 class="hero-name" x-text="artist.name"></h1>
+                    <p class="hero-genre" x-text="artist.genre || artist.type || 'Artist'"></p>
+                    {% if artist.bio %}
+                    <p class="hero-bio" x-text="artist.bio"></p>
+                    {% endif %}
+                    <div class="hero-actions">
+                        <button 
+                            @click="toggleFollow()"
+                            :class="{ 'following': isFollowing }"
+                            class="follow-button">
+                            <i :class="isFollowing ? 'fas fa-check' : 'fas fa-plus'"></i>
+                            <span x-text="isFollowing ? 'Following' : 'Follow Artist'"></span>
+                        </button>
+                    </div>
             </div>
-            <div class="artist-info">
-                <h1 data-artist-name x-text="artist.name"></h1>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tip Jar Section (Component injected) -->
+    <section class="tip-jar-section" x-data="tipJar()" x-init="init()">
+        <div class="tip-jar-container">
+            <div class="tip-jar-header">
+                <h2>💝 Tip Jar</h2>
+                <p class="tip-jar-subtitle">Support <span x-text="artist.name"></span> directly</p>
+                <p class="tip-jar-fee-note">Ahoy takes 7.5% platform fee</p>
+            </div>
+            
+            <div class="tip-amount-buttons">
+                <button 
+                    @click="selectAmount(1)"
+                    :class="{ 'active': selectedAmount === 1 }"
+                    class="tip-btn">
+                    $1
+                </button>
+                <button 
+                    @click="selectAmount(3)"
+                    :class="{ 'active': selectedAmount === 3 }"
+                    class="tip-btn">
+                    $3
+                </button>
+                <button 
+                    @click="selectAmount(5)"
+                    :class="{ 'active': selectedAmount === 5 }"
+                    class="tip-btn">
+                    $5
+                </button>
+                <button 
+                    @click="selectAmount(10)"
+                    :class="{ 'active': selectedAmount === 10 }"
+                    class="tip-btn">
+                    $10
+                </button>
+                <button 
+                    @click="showCustomInput = true"
+                    :class="{ 'active': showCustomInput }"
+                    class="tip-btn custom">
+                    Custom
+                </button>
+            </div>
+
+            <div x-show="showCustomInput" x-transition class="custom-amount-input">
+                <label for="custom-amount">Enter amount ($)</label>
+                <input 
+                    type="number" 
+                    id="custom-amount"
+                    x-model="customAmount"
+                    min="0.50"
+                    step="0.01"
+                    placeholder="0.50"
+                    @input="selectedAmount = null; customAmount = $event.target.value">
+            </div>
+
+            <button 
+                @click="processTip()"
+                :disabled="isProcessing || !canTip"
+                class="tip-submit-btn">
+                <span x-show="!isProcessing">Send Tip</span>
+                <span x-show="isProcessing">Processing...</span>
+            </button>
+
+            <!-- Supporter Badge Display -->
+            <div x-show="isSupporter" class="supporter-badge" x-transition>
+                <div class="badge-icon">⭐</div>
+                <div class="badge-text">
+                    <strong>Supporter Badge</strong>
+                    <p>You've tipped over $10! Thank you for supporting artists.</p>
+                </div>
+            </div>
+
+            <!-- Success Animation -->
+            <div x-show="showSuccess" x-transition class="tip-success-animation">
+                <div class="success-icon">✨</div>
+                <p>Thank you for your support!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Merch Section -->
+    <section class="merch-section">
+        <div class="merch-container">
+            <h2 class="merch-title">Merchandise</h2>
+            <div class="merch-grid">
+                <!-- Merch items will be populated here when available -->
+                <div class="merch-empty">
+                    <i class="fas fa-tshirt"></i>
+                    <p>Merchandise coming soon!</p>
+                </div>
             </div>
         </div>
     </section>
@@ -110,9 +221,10 @@ endblock %}
 </div>
 
 <script>
-function artistGallery() {
+function artistDetail() {
     return {
         artist: {{ artist|tojson }},
+        isFollowing: {{ is_following|tojson }},
         mediaItems: [],
         isLoading: true,
 
@@ -120,6 +232,42 @@ function artistGallery() {
             // Prefer client bootstrap artist if provided
             if (window.__ARTIST__) this.artist = window.__ARTIST__;
             this.composeMedia();
+        },
+
+        getArtistId() {
+            return this.artist.slug || this.artist.id || this.artist.name;
+        },
+
+        async toggleFollow() {
+            const artistId = this.getArtistId();
+            
+            try {
+                const response = await fetch(`/artists/${encodeURIComponent(artistId)}/follow`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.isFollowing = data.following;
+                    
+                    if (window.ahoyApp?.showNotification) {
+                        window.ahoyApp.showNotification(data.message || 'Updated', 'success');
+                    }
+                } else {
+                    const error = await response.json();
+                    if (window.ahoyApp?.showNotification) {
+                        window.ahoyApp.showNotification(error.error || 'Failed to update follow status', 'error');
+                    }
+                }
+            } catch (e) {
+                console.error('Follow error:', e);
+                if (window.ahoyApp?.showNotification) {
+                    window.ahoyApp.showNotification('Error updating follow status', 'error');
+                }
+            }
         },
 
         async composeMedia() {
@@ -223,5 +371,317 @@ function artistGallery() {
         lastBookmarkAction: 0
     };
 }
+
+function tipJar() {
+    return {
+        artist: {{ artist|tojson }},
+        selectedAmount: null,
+        customAmount: '',
+        showCustomInput: false,
+        isProcessing: false,
+        isSupporter: false,
+        showSuccess: false,
+
+        get artistId() {
+            // Get artist ID from slug or generate from name
+            if (this.artist.slug) {
+                return this.artist.slug;
+            }
+            if (this.artist.name) {
+                return this.artist.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+            }
+            return this.artist.id || '';
+        },
+
+        async init() {
+            // Check if user is a supporter
+            await this.checkSupporterStatus();
+        },
+
+        async checkSupporterStatus() {
+            try {
+                const response = await fetch('/payments/user/total-tips');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.isSupporter = data.is_supporter || false;
+                }
+            } catch (e) {
+                console.error('Failed to check supporter status:', e);
+            }
+        },
+
+        selectAmount(amount) {
+            this.selectedAmount = amount;
+            this.showCustomInput = false;
+            this.customAmount = '';
+        },
+
+        get canTip() {
+            return this.selectedAmount !== null || (this.customAmount && parseFloat(this.customAmount) >= 0.50);
+        },
+
+        get tipAmount() {
+            if (this.selectedAmount !== null) {
+                return this.selectedAmount;
+            }
+            if (this.customAmount) {
+                const amount = parseFloat(this.customAmount);
+                return amount >= 0.50 ? amount : null;
+            }
+            return null;
+        },
+
+        async processTip() {
+            const amount = this.tipAmount;
+            if (!amount || this.isProcessing) return;
+
+            this.isProcessing = true;
+
+            try {
+                const response = await fetch('/payments/tip-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        artist_id: this.artistId,
+                        amount: amount
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.checkout_url) {
+                    // Open Stripe Checkout in new window
+                    const checkoutWindow = window.open(data.checkout_url, 'stripe-checkout', 'width=600,height=700');
+                    
+                    // Poll for window close (payment completion)
+                    const checkClosed = setInterval(() => {
+                        if (checkoutWindow.closed) {
+                            clearInterval(checkClosed);
+                            // Check if user is now a supporter
+                            this.checkSupporterStatus();
+                            // Show success animation
+                            this.showSuccess = true;
+                            setTimeout(() => {
+                                this.showSuccess = false;
+                            }, 3000);
+                            // Reset form
+                            this.selectedAmount = null;
+                            this.customAmount = '';
+                            this.showCustomInput = false;
+                        }
+                    }, 500);
+                } else {
+                    alert(data.error || 'Failed to create payment session');
+                }
+            } catch (e) {
+                console.error('Tip processing error:', e);
+                alert('An error occurred. Please try again.');
+            } finally {
+                this.isProcessing = false;
+            }
+        }
+    };
+}
+
 </script>
+
+<style>
+/* Hero Banner Styles - Tailwind-inspired */
+.artist-hero-banner {
+    position: relative;
+    width: 100%;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border-radius: 1rem;
+}
+
+.hero-bg-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 1;
+}
+
+.hero-bg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7));
+    z-index: 2;
+}
+
+.hero-content-wrapper {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    max-width: 1200px;
+    padding: 2rem;
+}
+
+.hero-content {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: white;
+}
+
+.hero-avatar {
+    flex-shrink: 0;
+}
+
+.avatar-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    object-fit: cover;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.hero-info {
+    flex: 1;
+}
+
+.hero-name {
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero-genre {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin: 0 0 1rem 0;
+}
+
+.hero-bio {
+    font-size: 1rem;
+    line-height: 1.6;
+    opacity: 0.85;
+    margin: 0 0 1.5rem 0;
+    max-width: 600px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.follow-button {
+    background: rgba(102, 126, 234, 0.9);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.follow-button:hover {
+    background: rgba(102, 126, 234, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.follow-button.following {
+    background: rgba(34, 197, 94, 0.9);
+}
+
+.follow-button.following:hover {
+    background: rgba(34, 197, 94, 1);
+}
+
+/* Merch Section */
+.merch-section {
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.merch-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.merch-title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem 0;
+    color: white;
+}
+
+.merch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.merch-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.merch-empty i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
+.merch-empty p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .hero-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .hero-name {
+        font-size: 2rem;
+    }
+    
+    .hero-genre {
+        font-size: 1rem;
+    }
+    
+    .hero-bio {
+        font-size: 0.9rem;
+    }
+    
+    .avatar-image {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .merch-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 {% endblock %}

@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block title %}Featured Artists - Ahoy Indie Media{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Discover featured independent artists on Ahoy Indie Media. Support emerging talent and explore their music and shows.">
+<meta property="og:title" content="Featured Artists - Ahoy Indie Media">
+<meta property="og:description" content="Discover featured independent artists on Ahoy Indie Media">
+{% endblock %}
+
+{% block content %}
+<div class="featured-artists-page" x-data="featuredArtists()" x-init="init()">
+    <!-- Hero Section -->
+    <section class="featured-hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Featured Artists</h1>
+            <p class="hero-subtitle">Discover and support independent talent</p>
+        </div>
+    </section>
+
+    <!-- Featured Artists Grid -->
+    <section class="featured-artists-grid">
+        <div class="artists-container">
+            <template x-for="artist in artists" :key="artist.id || artist.slug || artist.name">
+                <div class="artist-card-featured">
+                    <a :href="`/artist/${getArtistSlug(artist)}`" class="artist-card-link">
+                        <div class="artist-hero-image-container">
+                            <img 
+                                :src="artist.hero_image_url || artist.cover_image || artist.image || '/static/img/default-avatar.png'"
+                                :alt="artist.name"
+                                class="artist-hero-image"
+                                loading="lazy">
+                            <div class="artist-overlay">
+                                <div class="artist-info-overlay">
+                                    <h3 class="artist-name" x-text="artist.name"></h3>
+                                    <p class="artist-genre" x-text="artist.genre || artist.type || 'Artist'"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    <div class="artist-card-actions">
+                        <button 
+                            @click.stop="toggleFollow(artist)"
+                            :class="{ 'following': isFollowing(artist) }"
+                            class="follow-btn">
+                            <i :class="isFollowing(artist) ? 'fas fa-check' : 'fas fa-plus'"></i>
+                            <span x-text="isFollowing(artist) ? 'Following' : 'Follow'"></span>
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div x-show="artists.length === 0" class="empty-state">
+            <i class="fas fa-music"></i>
+            <h3>No featured artists yet</h3>
+            <p>Check back soon for featured independent artists!</p>
+        </div>
+    </section>
+</div>
+
+<script>
+function featuredArtists() {
+    return {
+        artists: {{ artists|tojson }},
+        following: new Set(),
+
+        init() {
+            this.loadFollowingStatus();
+        },
+
+        getArtistSlug(artist) {
+            return artist.slug || (artist.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        },
+
+        getArtistId(artist) {
+            return artist.slug || artist.id || artist.name;
+        },
+
+        async loadFollowingStatus() {
+            // Load user's followed artists if logged in
+            try {
+                // This would require an endpoint to get all followed artists
+                // For now, we'll check on toggle
+            } catch (e) {
+                console.error('Failed to load following status:', e);
+            }
+        },
+
+        isFollowing(artist) {
+            const artistId = this.getArtistId(artist);
+            return this.following.has(artistId);
+        },
+
+        async toggleFollow(artist) {
+            const artistId = this.getArtistId(artist);
+            const artistSlug = this.getArtistSlug(artist);
+            
+            try {
+                const response = await fetch(`/artists/${encodeURIComponent(artistSlug)}/follow`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.following) {
+                        this.following.add(artistId);
+                    } else {
+                        this.following.delete(artistId);
+                    }
+                    
+                    if (window.ahoyApp?.showNotification) {
+                        window.ahoyApp.showNotification(data.message || 'Updated', 'success');
+                    }
+                } else {
+                    const error = await response.json();
+                    if (window.ahoyApp?.showNotification) {
+                        window.ahoyApp.showNotification(error.error || 'Failed to update follow status', 'error');
+                    }
+                }
+            } catch (e) {
+                console.error('Follow error:', e);
+                if (window.ahoyApp?.showNotification) {
+                    window.ahoyApp.showNotification('Error updating follow status', 'error');
+                }
+            }
+        }
+    };
+}
+</script>
+
+<style>
+.featured-artists-page {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+/* Hero Section */
+.featured-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 1rem;
+    padding: 4rem 2rem;
+    margin-bottom: 3rem;
+    text-align: center;
+    color: white;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+/* Artists Grid */
+.featured-artists-grid {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.artists-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.artist-card-featured {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    backdrop-filter: blur(10px);
+}
+
+.artist-card-featured:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.artist-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.artist-hero-image-container {
+    position: relative;
+    width: 100%;
+    padding-top: 75%; /* 4:3 aspect ratio */
+    overflow: hidden;
+    background: #1a1a1a;
+}
+
+.artist-hero-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.artist-card-featured:hover .artist-hero-image {
+    transform: scale(1.05);
+}
+
+.artist-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    padding: 1.5rem;
+}
+
+.artist-info-overlay {
+    color: white;
+}
+
+.artist-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.artist-genre {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin: 0;
+}
+
+.artist-card-actions {
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.follow-btn {
+    background: rgba(102, 126, 234, 0.2);
+    border: 1px solid rgba(102, 126, 234, 0.4);
+    color: #667eea;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.follow-btn:hover {
+    background: rgba(102, 126, 234, 0.3);
+    border-color: rgba(102, 126, 234, 0.6);
+}
+
+.follow-btn.following {
+    background: rgba(102, 126, 234, 0.4);
+    border-color: #667eea;
+}
+
+.follow-btn i {
+    font-size: 0.8rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .artists-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+

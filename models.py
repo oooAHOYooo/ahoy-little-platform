@@ -11,6 +11,7 @@ from sqlalchemy import (
     Boolean,
     JSON,
     BigInteger,
+    Numeric,
 )
 from sqlalchemy.orm import declarative_base, relationship
 import uuid
@@ -241,4 +242,44 @@ class UserQuest(Base):
         UniqueConstraint('user_id', 'quest_id', 'day_key', name='uq_user_quest_per_day'),
         Index('ix_user_quests_user_id_day_key', 'user_id', 'day_key'),
     )
+
+
+class Tip(Base):
+    __tablename__ = 'tips'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True, index=True)
+    artist_id = Column(String(255), nullable=False, index=True)  # Artist slug or ID from JSON
+    amount = Column(Numeric(10, 2), nullable=False)  # Tip amount in USD
+    fee = Column(Numeric(10, 2), nullable=False)  # Platform fee (7.5%)
+    net_amount = Column(Numeric(10, 2), nullable=False)  # Amount after fee
+    stripe_payment_intent_id = Column(String(255), nullable=True, unique=True, index=True)
+    stripe_checkout_session_id = Column(String(255), nullable=True, unique=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    __table_args__ = (
+        Index('ix_tips_user_id_created_at', 'user_id', 'created_at'),
+        Index('ix_tips_artist_id_created_at', 'artist_id', 'created_at'),
+    )
+
+    def __repr__(self) -> str:
+        return f"<Tip id={self.id} user_id={self.user_id} artist_id={self.artist_id} amount={self.amount}>"
+
+
+class UserArtistFollow(Base):
+    __tablename__ = 'user_artist_follows'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    artist_id = Column(String(255), nullable=False, index=True)  # Artist slug or ID from JSON
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'artist_id', name='uq_user_artist_follow_once'),
+        Index('ix_user_artist_follows_user_id_created_at', 'user_id', 'created_at'),
+        Index('ix_user_artist_follows_artist_id', 'artist_id'),
+    )
+
+    def __repr__(self) -> str:
+        return f"<UserArtistFollow id={self.id} user_id={self.user_id} artist_id={self.artist_id}>"
 

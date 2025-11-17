@@ -438,6 +438,29 @@
                 <!-- Left Dashboard: Collection -->
                 <aside class="dashboard-sidebar dashboard-left" x-data="dashboardCollection()" x-init="init()">
                     <div class="sidebar-content">
+                        <!-- Tip Jar -->
+                        <div class="section-title">💝 Tip Jar</div>
+                        <div class="tip-jar-container">
+                            <select x-model="selectedArtistId" class="tip-artist-select">
+                                <option value="">Select an artist...</option>
+                                <template x-for="artist in artists" :key="artist.id || artist.name">
+                                    <option :value="artist.id || artist.name" x-text="artist.name"></option>
+                                </template>
+                            </select>
+                            <div class="tip-amount-input-group">
+                                <span class="tip-currency">$</span>
+                                <input type="number" x-model="tipAmount" placeholder="0.00" min="0.50" step="0.50" class="tip-amount-input">
+                            </div>
+                            <button @click="sendTip()" 
+                                    :disabled="!selectedArtistId || !tipAmount || parseFloat(tipAmount) < 0.50 || isTipping"
+                                    class="tip-button">
+                                <i class="fas fa-heart" x-show="!isTipping"></i>
+                                <i class="fas fa-spinner fa-spin" x-show="isTipping"></i>
+                                <span x-text="isTipping ? 'Processing...' : 'Send Tip'"></span>
+                            </button>
+                            <p class="tip-note">Support artists directly • 7.5% platform fee</p>
+                        </div>
+                        
                         <!-- Bookmarks -->
                         <div class="section-title">Bookmarks</div>
                         <div class="collections-mini">
@@ -1325,6 +1348,11 @@
                 codeEntry: '',
                 currentTrack: null,
                 isTinyPlaying: false,
+                // Tip jar state
+                artists: [],
+                selectedArtistId: '',
+                tipAmount: '',
+                isTipping: false,
                 async init() {
                     try {
                         const response = await fetch('/api/me/gamification');
@@ -1333,6 +1361,9 @@
                             this.badges = data.badges || [];
                         }
                     } catch (e) { console.log('Badges not available'); }
+                    
+                    // Load artists for tip jar
+                    await this.loadArtists();
                     
                     // Sync with media player
                     this.syncMediaPlayer();
@@ -1343,6 +1374,74 @@
                     }
                     // Poll for updates (catches track changes and other state changes)
                     setInterval(() => this.syncMediaPlayer(), 1000);
+                },
+                async loadArtists() {
+                    try {
+                        const response = await fetch('/api/artists');
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.artists = data.artists || [];
+                        }
+                    } catch (e) { 
+                        console.log('Artists not available for tip jar'); 
+                        this.artists = [];
+                    }
+                },
+                async sendTip() {
+                    if (!this.selectedArtistId || !this.tipAmount) return;
+                    
+                    const amount = parseFloat(this.tipAmount);
+                    if (amount < 0.50) {
+                        if (window.ahoyApp?.showNotification) {
+                            window.ahoyApp.showNotification('Minimum tip is $0.50', 'error');
+                        }
+                        return;
+                    }
+                    
+                    this.isTipping = true;
+                    try {
+                        const response = await fetch('/payments/tip-session', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                artist_id: this.selectedArtistId,
+                                amount: amount
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok && data.checkout_url) {
+                            // Open Stripe checkout in a new window
+                            const checkoutWindow = window.open(data.checkout_url, 'stripe-checkout', 'width=600,height=700');
+                            
+                            // Reset form after opening checkout
+                            this.selectedArtistId = '';
+                            this.tipAmount = '';
+                            
+                            // Monitor for window close (payment completion)
+                            const checkClosed = setInterval(() => {
+                                if (checkoutWindow.closed) {
+                                    clearInterval(checkClosed);
+                                    if (window.ahoyApp?.showNotification) {
+                                        window.ahoyApp.showNotification('Thank you for supporting artists!', 'success');
+                                    }
+                                }
+                            }, 500);
+                        } else {
+                            const errorMsg = data.error || 'Failed to create tip session';
+                            if (window.ahoyApp?.showNotification) {
+                                window.ahoyApp.showNotification(errorMsg, 'error');
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Tip error:', e);
+                        if (window.ahoyApp?.showNotification) {
+                            window.ahoyApp.showNotification('Error processing tip. Please try again.', 'error');
+                        }
+                    } finally {
+                        this.isTipping = false;
+                    }
                 },
                 syncMediaPlayer() {
                     if (window.mediaPlayer) {

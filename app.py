@@ -31,8 +31,11 @@ from blueprints.playlists import bp as playlists_bp
 from blueprints.bookmarks import bp as bookmarks_bp
 from blueprints.collections import bp as collections_bp
 from blueprints.api.gamify import bp as gamify_api_bp
+from blueprints.payments import bp as payments_bp
 from services.listening import start_session as listening_start_session, end_session as listening_end_session
 from services.user_resolver import resolve_db_user_id
+from db import get_session
+from models import UserArtistFollow
 
 # Initialize search index on app startup
 def initialize_search_index():
@@ -158,6 +161,7 @@ def create_app():
     app.register_blueprint(bookmarks_bp)
     app.register_blueprint(collections_bp)
     app.register_blueprint(gamify_api_bp)
+    app.register_blueprint(payments_bp)
     
     # Initialize search index
     with app.app_context():
@@ -625,6 +629,13 @@ def player():
     media_type = request.args.get('type', 'music')  # music, show, video
     return render_template('player.html', media_id=media_id, media_type=media_type)
 
+@app.route('/artists/featured')
+def featured_artists():
+    """Featured artists page"""
+    artists_data = load_json_data('artists.json', {'artists': []})
+    featured = [a for a in artists_data.get('artists', []) if a.get('featured', False)]
+    return render_template('artists/featured.html', artists=featured)
+
 @app.route('/artist/<artist_slug>')
 def artist_profile(artist_slug):
     """Individual artist profile page (slug or case-insensitive name)"""
@@ -640,7 +651,22 @@ def artist_profile(artist_slug):
     if not artist:
         return render_template('404.html'), 404
     
-    return render_template('artist_detail.html', artist=artist)
+    # Get user's follow status if logged in
+    is_following = False
+    user_id = resolve_db_user_id()
+    if user_id and artist:
+        artist_id = artist.get('slug') or artist.get('id') or artist.get('name')
+        try:
+            with get_session() as db_session:
+                follow = db_session.query(UserArtistFollow).filter(
+                    UserArtistFollow.user_id == user_id,
+                    UserArtistFollow.artist_id == str(artist_id)
+                ).first()
+                is_following = follow is not None
+        except Exception:
+            pass
+    
+    return render_template('artist_detail.html', artist=artist, is_following=is_following)
 
 @app.route('/my-saves')
 def my_saves():
@@ -921,6 +947,67 @@ def api_artists():
     """Get artists directory"""
     artists_data = load_json_data('artists.json', {'artists': []})
     return jsonify(artists_data)
+
+@app.route('/api/artists/featured')
+@limiter.exempt
+def api_featured_artists():
+    """Get featured artists"""
+    artists_data = load_json_data('artists.json', {'artists': []})
+    featured = [a for a in artists_data.get('artists', []) if a.get('featured', False)]
+    return jsonify({'artists': featured})
+
+@app.route('/artists/<artist_id>/follow', methods=['POST'])
+def follow_artist(artist_id):
+    """Follow or unfollow an artist"""
+    user_id = resolve_db_user_id()
+    if not user_id:
+        return jsonify({'error': 'Authentication required'}), 401
+    
+    # Normalize artist_id (could be slug, id, or name)
+    artists_data = load_json_data('artists.json', {'artists': []})
+    artist = None
+    for a in artists_data.get('artists', []):
+        a_slug = _slugify(a.get('slug') or a.get('name', ''))
+        a_id = str(a.get('id') or '')
+        a_name = (a.get('name') or '').strip().lower()
+        artist_id_normalized = _slugify(artist_id)
+        
+        if (a_slug == artist_id_normalized or 
+            a_id == artist_id or 
+            a_name == artist_id.strip().lower()):
+            artist = a
+            break
+    
+    if not artist:
+        return jsonify({'error': 'Artist not found'}), 404
+    
+    # Use slug, id, or name as the artist identifier
+    artist_identifier = artist.get('slug') or artist.get('id') or artist.get('name')
+    
+    try:
+        with get_session() as db_session:
+            # Check if already following
+            existing = db_session.query(UserArtistFollow).filter(
+                UserArtistFollow.user_id == user_id,
+                UserArtistFollow.artist_id == str(artist_identifier)
+            ).first()
+            
+            if existing:
+                # Unfollow
+                db_session.delete(existing)
+                db_session.commit()
+                return jsonify({'following': False, 'message': 'Unfollowed artist'}), 200
+            else:
+                # Follow
+                follow = UserArtistFollow(
+                    user_id=user_id,
+                    artist_id=str(artist_identifier)
+                )
+                db_session.add(follow)
+                db_session.commit()
+                return jsonify({'following': True, 'message': 'Following artist'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/performances')
 def api_performances():
