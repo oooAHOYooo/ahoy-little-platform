@@ -161,6 +161,12 @@ class MediaPlayer {
         
         // Set source
         const source = isVideo ? (track.video_url || track.mp4_link) : (track.audio_url || track.preview_url);
+        if (!source) {
+            console.error('No audio/video source available for track:', track);
+            this.emit('error', new Error('No source available'));
+            return;
+        }
+        
         mediaElement.src = source;
         
         // Set properties
@@ -171,6 +177,21 @@ class MediaPlayer {
         mediaElement.play().then(() => {
             this.isPlaying = true;
             this.emit('play');
+            
+            // Notify Now Playing controller after playback starts (for audio tracks)
+            // This ensures the audio element has a source before we try to connect analyser
+            if (!isVideo && window.nowPlayingController) {
+                // Update track info first
+                window.nowPlayingController.onTrackChange(track);
+                
+                // Then try to connect analyser (but don't break if it fails)
+                setTimeout(() => {
+                    if (window.nowPlayingController && window.mediaPlayer.audioElement) {
+                        window.nowPlayingController.audioElement = window.mediaPlayer.audioElement;
+                        window.nowPlayingController.connectAudio();
+                    }
+                }, 200);
+            }
         }).catch(error => {
             console.error('Error playing media:', error);
             this.emit('error', error);

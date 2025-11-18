@@ -53,28 +53,25 @@
         <div class="grid-container">
 
             <!-- Now Playing Compact (Radio Feed) -->
-            <div class="grid-item now-playing-compact" style="display:flex;flex-direction:column;height:100%;padding:0;overflow:hidden;">
-                <div class="item-header" style="padding:0.75rem 1rem;flex-shrink:0;">
-                    <h3 style="font-size:0.875rem;">Radio Feed</h3>
-                    <a href="/radio" class="view-all-btn" style="font-size:0.75rem;">
-                        Full Radio (Beta)
-                    </a>
+            <div class="grid-item now-playing-compact">
+                <div class="item-header">
+                    <h3>Radio Feed</h3>
+                    <a href="/radio" class="view-all-btn">Full Radio (Beta)</a>
                 </div>
                 <!-- Radio Feed fills entire container -->
-                <a href="/radio" class="radio-feed-single" 
-                    :style="`background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url(${(radioCurrent || radioUpNext[0])?.cover_art || '/static/img/default-cover.jpg'}); background-size: cover; background-position: center;`"
-                    style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center;position:relative;cursor:pointer;transition:all 0.2s;text-decoration:none;color:inherit;padding:1.5rem;margin:0;width:100%;height:100%;">
+                <a href="/radio" class="radio-feed-single"
+                    :style="`--radio-bg-image: url(${(radioCurrent || radioUpNext[0])?.cover_art || '/static/img/default-cover.jpg'});`">
                     <!-- Track Info -->
-                    <div style="text-align:center;width:100%;z-index:1;">
-                        <div style="font-size:1rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0.5rem;color:white;" 
+                    <div class="radio-feed-content">
+                        <div class="radio-feed-title"
                             x-text="(radioCurrent || radioUpNext[0])?.title || 'No track playing'"></div>
-                        <div style="font-size:0.85rem;opacity:0.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:white;" 
+                        <div class="radio-feed-artist"
                             x-text="(radioCurrent || radioUpNext[0])?.artist || ''"></div>
                     </div>
-                    
+
                     <!-- Placeholder if no tracks -->
-                    <div x-show="!radioCurrent && radioUpNext.length === 0" 
-                        style="text-align:center;opacity:0.6;color:white;z-index:1;">
+                    <div x-show="!radioCurrent && radioUpNext.length === 0"
+                        class="radio-feed-loading">
                         <span>Loading radio feed...</span>
                     </div>
                 </a>
@@ -223,8 +220,10 @@
 <!-- Left Dashboard and adjustments -->
 <div class="left-dashboard" style="display: flex; flex-direction: column;">
     <!-- Merit Badges with subtle border and tiny icons -->
-    <div class="merit-badges" style="border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 1rem; max-height: 100px; overflow-y: auto; display: flex;">
-        <div class="badge" style="flex: 1; margin: 0 5px; display: flex; align-items: center; justify-content: center;">
+    <div class="merit-badges"
+        style="border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 1rem; max-height: 100px; overflow-y: auto; display: flex;">
+        <div class="badge"
+            style="flex: 1; margin: 0 5px; display: flex; align-items: center; justify-content: center;">
             <!-- Small icon for badge -->
             <i class="fas fa-medal" style="font-size: 0.75rem;"></i>
         </div>
@@ -232,34 +231,47 @@
     </div>
 
     <!-- Mini Media Player directly below merit badges -->
-    <div class="mini-media-player" style="background-color: #202020; padding: 1rem; border-radius: 5px; color: white; margin-top: 1rem; display: flex; align-items: center; justify-content: space-between;">
+    <div class="mini-media-player"
+        style="background-color: #202020; padding: 1rem; border-radius: 5px; color: white; margin-top: 1rem; display: flex; align-items: center; justify-content: space-between;">
         <div class="mini-player-info">
-            <div style="font-size: 1rem; font-weight: bold;" x-text="radioCurrent?.title || 'No track playing'"></div>
-            <div style="font-size: 0.85rem; opacity: 0.8;" x-text="radioCurrent?.artist || ''"></div>
+            <div style="font-size: 1rem; font-weight: bold;"
+                x-text="radioCurrent?.title || 'No track playing'"></div>
+            <div style="font-size: 0.85rem; opacity: 0.8;"
+                x-text="radioCurrent?.artist || ''"></div>
         </div>
-        <button @click="toggleRadio()" style="background: none; border: none; color: inherit; font-size: 1.5rem;">
-            <i :class="{'fas fa-pause': radioIsPlaying, 'fas fa-play': !radioIsPlaying}"></i>
+        <button @click="toggleRadio()"
+            style="background: none; border: none; color: inherit; font-size: 1.5rem;">
+            <i
+                :class="{'fas fa-pause': radioIsPlaying, 'fas fa-play': !radioIsPlaying}"></i>
         </button>
     </div>
 
     <!-- Media Player -->
-    <div class="media-player" style="background-color: #303030; padding: 1rem; border-radius: 5px; color: white;">
+    <div class="media-player"
+        style="background-color: #303030; padding: 1rem; border-radius: 5px; color: white;">
         <div class="media-title" style="font-size: 1.2rem;">Media Player</div>
         <div x-show="radioCurrent || radioUpNext.length > 0">
             <div class="current-track">
-                <div x-text="radioCurrent?.title || 'No track playing'" style="font-weight: bold;"></div>
+                <div x-text="radioCurrent?.title || 'No track playing'"
+                    style="font-weight: bold;"></div>
                 <div x-text="radioCurrent?.artist || ''"></div>
             </div>
-            <div class="media-player-controls" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 1.5rem; color: white;">
-                <button @click="toggleRadio()" style="background: none; border: none; color: inherit;">
-                    <i :class="{'fas fa-pause': radioIsPlaying, 'fas fa-play': !radioIsPlaying}" style="font-size: 2rem;"></i>
+            <div class="media-player-controls"
+                style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 1.5rem; color: white;">
+                <button @click="toggleRadio()"
+                    style="background: none; border: none; color: inherit;">
+                    <i
+                        :class="{'fas fa-pause': radioIsPlaying, 'fas fa-play': !radioIsPlaying}"
+                        style="font-size: 2rem;"></i>
                 </button>
-                <button @click="skipRadio()" style="background: none; border: none; color: inherit;">
+                <button @click="skipRadio()"
+                    style="background: none; border: none; color: inherit;">
                     <i class="fas fa-forward" style="font-size: 2rem;"></i>
                 </button>
             </div>
         </div>
-        <div x-show="!radioCurrent && radioUpNext.length === 0" style="color: grey;">
+        <div x-show="!radioCurrent && radioUpNext.length === 0"
+            style="color: grey;">
             <div>No media playing at the moment.</div>
         </div>
     </div>

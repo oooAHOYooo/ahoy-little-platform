@@ -251,10 +251,22 @@ class Tip(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True, index=True)
     artist_id = Column(String(255), nullable=False, index=True)  # Artist slug or ID from JSON
+    
+    # Tip amount (artist receives 100% of this)
     amount = Column(Numeric(10, 2), nullable=False)  # Tip amount in USD
-    fee = Column(Numeric(10, 2), nullable=False)  # Platform fee (7.5%) - legacy name
-    platform_fee = Column(Numeric(10, 2), nullable=True)  # Platform fee (7.5%) - new name
-    net_amount = Column(Numeric(10, 2), nullable=False)  # Amount after fee
+    
+    # Legacy fields (for backward compatibility)
+    fee = Column(Numeric(10, 2), nullable=True)  # Platform fee - legacy name
+    platform_fee = Column(Numeric(10, 2), nullable=True)  # Platform fee (7.5%)
+    net_amount = Column(Numeric(10, 2), nullable=True)  # Amount after fee (legacy)
+    
+    # New fee structure fields
+    stripe_fee = Column(Numeric(10, 2), nullable=True)  # Stripe processing fee (2.9% + $0.30)
+    total_paid = Column(Numeric(10, 2), nullable=True)  # Total amount tipper paid (tipAmount + stripeFee + platformFee)
+    artist_payout = Column(Numeric(10, 2), nullable=True)  # Amount artist receives (100% of tipAmount)
+    platform_revenue = Column(Numeric(10, 2), nullable=True)  # Platform revenue (platformFee)
+    
+    # Stripe identifiers
     stripe_payment_intent_id = Column(String(255), nullable=True, unique=True, index=True)
     stripe_checkout_session_id = Column(String(255), nullable=True, unique=True, index=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
@@ -265,7 +277,7 @@ class Tip(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<Tip id={self.id} user_id={self.user_id} artist_id={self.artist_id} amount={self.amount}>"
+        return f"<Tip id={self.id} user_id={self.user_id} artist_id={self.artist_id} amount={self.amount} total_paid={self.total_paid}>"
 
 
 class UserArtistFollow(Base):
