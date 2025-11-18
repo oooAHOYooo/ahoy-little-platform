@@ -75,6 +75,15 @@ class Visualizer {
 
             // Handle resize
             window.addEventListener('resize', () => this.handleResize());
+            
+            // Handle fullscreen changes
+            const handleFullscreenChange = () => {
+                setTimeout(() => this.handleResize(), 100);
+            };
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+            document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 
             return true;
         } catch (error) {
@@ -313,8 +322,8 @@ class Visualizer {
     handleResize() {
         if (!this.camera || !this.renderer) return;
 
-        const width = this.container.clientWidth;
-        const height = this.container.clientHeight;
+        const width = this.container.clientWidth || window.innerWidth;
+        const height = this.container.clientHeight || window.innerHeight;
 
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();

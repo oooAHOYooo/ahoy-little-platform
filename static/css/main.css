@@ -20254,11 +20254,66 @@ img.loading {
     pointer-events: none;
     z-index: 0;
     overflow: hidden;
+    background: #000;
+    transition: all 0.3s ease;
 }
 
 .now-playing-visualizer canvas {
     width: 100% !important;
     height: 100% !important;
+}
+
+/* Fullscreen visualizer */
+.now-playing-visualizer:fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.now-playing-visualizer:-webkit-full-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.now-playing-visualizer:-moz-full-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.now-playing-visualizer:-ms-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Glassy Now Playing Bar */
@@ -20468,6 +20523,15 @@ img.loading {
     background: rgba(236, 72, 153, 0.3);
     color: #ec4899;
     box-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
+}
+
+.now-playing-fullscreen-btn {
+    margin-left: 8px;
+}
+
+.now-playing-fullscreen-btn.active {
+    background: var(--accent-color, rgba(236, 72, 153, 0.3));
+    color: var(--accent-color, #ec4899);
 }
 
 /* Progress Bar */

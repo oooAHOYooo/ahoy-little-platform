@@ -1167,6 +1167,13 @@
                             title="Bookmark">
                             <i class="fas fa-bookmark"></i>
                         </button>
+                        <button @click="toggleFullscreenVisualizer()" 
+                            class="now-playing-btn now-playing-fullscreen-btn" 
+                            :class="{'active': isFullscreenVisualizer}"
+                            :title="isFullscreenVisualizer ? 'Exit Fullscreen' : 'Fullscreen Visualizer'"
+                            x-show="currentTrack && currentTrack.type !== 'show'">
+                            <i :class="isFullscreenVisualizer ? 'fas fa-compress' : 'fas fa-expand'"></i>
+                        </button>
                     </div>
 
                     <!-- Progress Bar -->
@@ -1777,6 +1784,7 @@
                 isSaved: false,
                 isShuffled: false,
                 isRepeated: false,
+                isFullscreenVisualizer: false,
                 
                 init() {
                     // Ensure mediaPlayer exists; if not, create a minimal one
@@ -1827,6 +1835,20 @@
                     // Initialize bookmark state and start clock animation
                     this.updateSavedState();
                     this.startClock();
+                    
+                    // Listen for fullscreen changes
+                    document.addEventListener('fullscreenchange', () => {
+                        this.isFullscreenVisualizer = !!document.fullscreenElement;
+                    });
+                    document.addEventListener('webkitfullscreenchange', () => {
+                        this.isFullscreenVisualizer = !!document.webkitFullscreenElement;
+                    });
+                    document.addEventListener('mozfullscreenchange', () => {
+                        this.isFullscreenVisualizer = !!document.mozFullScreenElement;
+                    });
+                    document.addEventListener('MSFullscreenChange', () => {
+                        this.isFullscreenVisualizer = !!document.msFullscreenElement;
+                    });
                 },
                 
                 playTrack(track) {
@@ -1941,6 +1963,39 @@
                     if (this.currentTrack) {
                         const type = this.currentTrack.type === 'show' ? 'show' : 'track';
                         window.location.href = `/player?id=${this.currentTrack.id}&type=${type}`;
+                    }
+                },
+                
+                toggleFullscreenVisualizer() {
+                    if (!this.currentTrack || this.currentTrack.type === 'show') return;
+                    
+                    const visualizerContainer = document.getElementById('now-playing-visualizer');
+                    if (!visualizerContainer) return;
+                    
+                    if (!this.isFullscreenVisualizer) {
+                        // Enter fullscreen
+                        if (visualizerContainer.requestFullscreen) {
+                            visualizerContainer.requestFullscreen();
+                        } else if (visualizerContainer.webkitRequestFullscreen) {
+                            visualizerContainer.webkitRequestFullscreen();
+                        } else if (visualizerContainer.mozRequestFullScreen) {
+                            visualizerContainer.mozRequestFullScreen();
+                        } else if (visualizerContainer.msRequestFullscreen) {
+                            visualizerContainer.msRequestFullscreen();
+                        }
+                        this.isFullscreenVisualizer = true;
+                    } else {
+                        // Exit fullscreen
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                        } else if (document.mozCancelFullScreen) {
+                            document.mozCancelFullScreen();
+                        } else if (document.msExitFullscreen) {
+                            document.msExitFullscreen();
+                        }
+                        this.isFullscreenVisualizer = false;
                     }
                 }
                 ,

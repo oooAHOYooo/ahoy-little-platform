@@ -159,15 +159,28 @@ class MediaPlayer {
             this.videoElement.pause();
         }
         
-        // Set source
-        const source = isVideo ? (track.video_url || track.mp4_link) : (track.audio_url || track.preview_url);
+        // Set source - try multiple possible URL fields
+        let source = null;
+        if (isVideo) {
+            source = track.video_url || track.mp4_link || track.url;
+        } else {
+            source = track.audio_url || track.preview_url || track.full_url || track.url || track.src;
+        }
+        
         if (!source) {
             console.error('No audio/video source available for track:', track);
             this.emit('error', new Error('No source available'));
             return;
         }
         
-        mediaElement.src = source;
+        // Ensure source is a valid URL
+        if (typeof source === 'string' && source.trim()) {
+            mediaElement.src = source;
+        } else {
+            console.error('Invalid source URL:', source);
+            this.emit('error', new Error('Invalid source URL'));
+            return;
+        }
         
         // Set properties
         mediaElement.volume = this.volume;
