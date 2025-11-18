@@ -75,7 +75,6 @@
                 @loadedmetadata="onAudioLoaded()"
                 @timeupdate="onTimeUpdate()"
                 @ended="onMediaEnded()"
-                autoplay
                 x-ref="audioPlayer">
                 Your browser does not support the audio tag.
             </audio>
@@ -249,6 +248,7 @@ function fullPlayer() {
                 this.currentMedia = data;
                 this.setupMediaPlayer();
                 this.setupMediaSession();
+                this.setupGlobalPlayerSync();
             } catch (error) {
                 console.error('Error loading media:', error);
             } finally {
@@ -266,14 +266,16 @@ function fullPlayer() {
                 cover_art: '/static/img/default-cover.jpg'
             };
             this.setupMediaPlayer();
+            this.setupGlobalPlayerSync();
         },
         
         setupMediaPlayer() {
             // Setup media player based on type
             if (this.mediaType === 'show' && this.$refs.videoPlayer) {
                 this.$refs.videoPlayer.load();
-            } else if (this.mediaType === 'music' && this.$refs.audioPlayer) {
-                this.$refs.audioPlayer.load();
+            } else if (this.mediaType === 'music') {
+                // For music, route playback through global mediaPlayer for unified audio + visualizer
+                // Do not auto-play here; wait for user interaction via togglePlay()
             }
         },
         
@@ -293,6 +295,43 @@ function fullPlayer() {
             }
         },
         
+        // Keep this view in sync with the global player (used for music)
+        setupGlobalPlayerSync() {
+            if (!window.mediaPlayer) return;
+            
+            // Initial sync
+            this.isPlaying = window.mediaPlayer.isPlaying;
+            this.volume = window.mediaPlayer.volume;
+            this.isMuted = window.mediaPlayer.isMuted;
+            this.currentTime = window.mediaPlayer.currentTime || 0;
+            this.progressPercent = (this.currentTime / (this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 1)) * 100;
+            
+            // Event listeners
+            window.mediaPlayer.on('play', () => {
+                this.isPlaying = true;
+            });
+            window.mediaPlayer.on('pause', () => {
+                this.isPlaying = false;
+            });
+            window.mediaPlayer.on('timeupdate', (time) => {
+                if (this.mediaType === 'music') {
+                    this.currentTime = time;
+                    this.progressPercent = (this.currentTime / (this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 1)) * 100;
+                }
+            });
+            window.mediaPlayer.on('durationchange', (duration) => {
+                if (this.mediaType === 'music') {
+                    // Prefer media metadata if present; fallback to player-reported duration
+                    const total = this.currentMedia?.duration_seconds || duration || 0;
+                    this.progressPercent = (this.currentTime / (total || 1)) * 100;
+                }
+            });
+            window.mediaPlayer.on('volumechange', (data) => {
+                this.volume = data.volume;
+                this.isMuted = data.muted;
+            });
+        },
+        
         // Player controls
         togglePlay() {
             if (this.mediaType === 'show' && this.$refs.videoPlayer) {
@@ -302,10 +341,13 @@ function fullPlayer() {
                     this.$refs.videoPlayer.play();
                 }
             } else if (this.mediaType === 'music' && this.$refs.audioPlayer) {
+                // Delegate music control to global player for consistent playback + visualizer
                 if (this.isPlaying) {
-                    this.$refs.audioPlayer.pause();
+                    window.mediaPlayer?.pause();
                 } else {
-                    this.$refs.audioPlayer.play();
+                    if (this.currentMedia) {
+                        window.mediaPlayer?.play(this.currentMedia);
+                    }
                 }
             }
             this.isPlaying = !this.isPlaying;
@@ -371,10 +413,14 @@ function fullPlayer() {
         },
         
         onTimeUpdate() {
-            const player = this.mediaType === 'show' ? this.$refs.videoPlayer : this.$refs.audioPlayer;
+            const player = this.mediaType === 'show' ? this.$refs.videoPlayer : null;
             if (player) {
                 this.currentTime = player.currentTime;
                 this.progressPercent = (this.currentTime / (this.currentMedia?.duration_seconds || 1)) * 100;
+            } else if (this.mediaType === 'music' && window.mediaPlayer) {
+                this.currentTime = window.mediaPlayer.currentTime || 0;
+                const total = this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 0;
+                this.progressPercent = (this.currentTime / (total || 1)) * 100;
             }
         },
         
@@ -394,8 +440,8 @@ function fullPlayer() {
             if (this.$refs.videoPlayer) {
                 this.$refs.videoPlayer.currentTime = newTime;
             }
-            if (this.$refs.audioPlayer) {
-                this.$refs.audioPlayer.currentTime = newTime;
+            if (this.mediaType === 'music' && window.mediaPlayer) {
+                window.mediaPlayer.seekTo(newTime);
             }
         },
         
@@ -405,11 +451,11 @@ function fullPlayer() {
             const clickX = event.clientX - rect.left;
             this.volume = Math.max(0, Math.min(1, clickX / rect.width));
             
-            if (this.$refs.audioPlayer) {
-                this.$refs.audioPlayer.volume = this.volume;
-            }
             if (this.$refs.videoPlayer) {
                 this.$refs.videoPlayer.volume = this.volume;
+            }
+            if (this.mediaType === 'music' && window.mediaPlayer) {
+                window.mediaPlayer.setVolume(this.volume);
             }
         },
         
