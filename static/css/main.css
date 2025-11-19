@@ -799,7 +799,6 @@ a:hover {
 .setting-label input[type="checkbox"] {
     display: none;
 }
-
 .toggle-switch {
     position: relative;
     width: 44px;
@@ -1597,7 +1596,6 @@ a:hover {
     transform: translateX(4px);
     text-shadow: 0 0 8px rgba(106, 0, 255, 0.5);
 }
-
 .footer-version-badge {
     margin-top: var(--spacing-lg);
     padding: var(--spacing-sm) var(--spacing-md);
@@ -2396,7 +2394,6 @@ a:hover {
     flex: 1;
     min-width: 200px;
 }
-
 .time-current,
 .time-total {
     font-size: var(--font-size-xs);
@@ -3196,7 +3193,6 @@ a:hover {
 .justify-between {
     justify-content: space-between;
 }
-
 .rounded {
     border-radius: var(--border-radius-md);
 }
@@ -3997,7 +3993,6 @@ a:hover {
     cursor: pointer;
     user-select: none;
 }
-
 .playing-item:active {
     transform: scale(0.98);
 }
@@ -4798,6 +4793,40 @@ a:hover {
     }
 }
 
+/* Compact tip jar quick actions */
+.tip-quick-row {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0 10px;
+}
+.tip-quick-btn {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+.tip-quick-btn:hover { border-color: rgba(99,102,241,0.5); background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+.tip-quick-custom { color: #fffb; }
+
+/* Compact select */
+.tip-compact-select { width: 100%; }
+
+/* Screen-reader only utility */
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
 /* ========================================
    Mobile Footer Aspect Ratio Fixes
    ======================================== */
@@ -5592,7 +5621,6 @@ a:hover {
     gap: 0.35rem;
     width: 100%;
 }
-
 .badge-mini {
     width: 100%;
     aspect-ratio: 1;
@@ -6390,7 +6418,6 @@ img.loading {
     object-fit: cover;
     border-radius: var(--border-radius-lg);
 }
-
 .header-title .hero-media-overlay {
     border-radius: var(--border-radius-lg);
 }
@@ -7187,7 +7214,6 @@ img.loading {
     color: var(--primary-color);
     background: rgba(99, 102, 241, 0.1);
 }
-
 /* Artist Spotlight Compact */
 .artist-spotlight {
     min-height: 120px;
@@ -7972,7 +7998,6 @@ img.loading {
     z-index: 1;
     position: relative;
 }
-
 /* Responsive Design */
 @media (max-width: 1024px) {
     .grid-container {
@@ -8761,7 +8786,6 @@ img.loading {
 .show-card:hover .show-thumbnail img {
     transform: scale(1.05);
 }
-
 .show-overlay {
     position: absolute;
     top: 0;
@@ -9560,7 +9584,6 @@ img.loading {
     transition: all 0.3s ease;
     border: 1px solid var(--border-color);
 }
-
 .artist-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -10349,7 +10372,6 @@ img.loading {
     transform: translateY(-4px);
     background: var(--background-light);
 }
-
 .quick-access-icon {
     width: 60px;
     height: 60px;
@@ -11144,7 +11166,6 @@ img.loading {
     background: var(--background-medium);
     border-bottom: 1px solid var(--border-color);
 }
-
 .back-btn {
     display: flex;
     align-items: center;
@@ -11945,7 +11966,6 @@ img.loading {
     height: 60px;
     flex-shrink: 0;
 }
-
 .recent-item .item-info {
     flex: 1;
     padding: 0;
@@ -12671,7 +12691,6 @@ img.loading {
     font-size: var(--font-size-xs);
     min-height: 32px;
 }
-
 /* Mobile Responsiveness for Artists */
 @media (max-width: 768px) {
     .artists-container {
@@ -13468,7 +13487,6 @@ img.loading {
     border-left: 4px solid #10b981;
     color: #10b981;
 }
-
 .test-result.error {
     background: rgba(239, 68, 68, 0.1);
     border-left: 4px solid #ef4444;
@@ -14254,7 +14272,6 @@ img.loading {
         height: 28px;
     }
 }
-
 /* Mobile Responsive for My Saves */
 @media (max-width: 768px) {
     .page-header {
@@ -15054,7 +15071,6 @@ img.loading {
     position: relative;
     transition: all 0.2s ease;
 }
-
 .checkbox-label input[type="checkbox"]:checked+.checkmark {
     background: var(--primary-color);
     border-color: var(--primary-color);
@@ -15852,7 +15868,6 @@ img.loading {
     flex-direction: column;
     gap: var(--spacing-md);
 }
-
 .content-item {
     display: flex;
     align-items: center;
@@ -16650,7 +16665,6 @@ img.loading {
     padding-top: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 .back-to-home-link {
     display: inline-flex;
     align-items: center;
@@ -17448,7 +17462,6 @@ img.loading {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
-
 .featured-show {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -18233,7 +18246,6 @@ img.loading {
         padding: var(--spacing-sm) var(--spacing-lg);
     }
 }
-
 /* Mobile Responsive for Playlists Widget */
 @media (max-width: 768px) {
     .playlists-widget {
@@ -19033,7 +19045,6 @@ img.loading {
 .avatar-anchor-preview.rose {
     background: linear-gradient(135deg, #f43f5e, #e11d48);
 }
-
 /* Avatar Option Hover Effects */
 .avatar-option:hover .avatar-anchor {
     transform: scale(1.1);
@@ -19829,7 +19840,6 @@ img.loading {
     align-items: center;
     gap: 0.5rem;
 }
-
 .progress-bar-small {
     flex: 1;
     height: 6px;
@@ -20597,7 +20607,6 @@ img.loading {
     font-variant-numeric: tabular-nums;
     font-weight: 500;
 }
-
 /* Responsive Design */
 @media (max-width: 768px) {
     .now-playing-wrapper {
@@ -20714,8 +20723,8 @@ img.loading {
     backdrop-filter: blur(14px) saturate(160%);
     -webkit-backdrop-filter: blur(14px) saturate(160%);
     box-shadow:
-        0 2px 6px rgba(0,0,0,0.25),
-        inset 0 0 0 1px rgba(255,255,255,0.15);
+        0 2px 6px rgba(0, 0, 0, 0.25),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.15);
     transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -20723,5 +20732,5 @@ img.loading {
     background: rgba(255, 0, 96, 0.22);
     box-shadow:
         0 4px 12px rgba(255, 0, 96, 0.25),
-        inset 0 0 0 1px rgba(255,255,255,0.2);
+        inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }

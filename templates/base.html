@@ -802,39 +802,31 @@
                             </div>
                         </div>
 
-                        <!-- Tip Jar -->
+                        <!-- Tip Jar (Compact) -->
                         <div class="tip-jar-card sidebar-item">
                             <div class="tip-jar-compact">
-                                <div class="tip-jar-row">
-                                    <label
-                                        class="tip-jar-label-inline">Artist</label>
-                                    <select
-                                        x-model="selectedArtistId"
-                                        class="tip-jar-select">
-                                        <option value>Select...</option>
-                                        <template x-for="artist in artists"
-                                            :key="artist.id || artist.name">
-                                            <option
-                                                :value="artist.id || artist.name"
-                                                x-text="artist.name"></option>
+                                <!-- Compact select + quick amounts -->
+                                <div class="tip-jar-row tip-compact-row">
+                                    <select x-model="selectedArtistId" class="tip-jar-select tip-compact-select" aria-label="Select artist to tip">
+                                        <option value>Select artist…</option>
+                                        <template x-for="artist in artists" :key="artist.id || artist.name">
+                                            <option :value="artist.id || artist.name" x-text="artist.name"></option>
                                         </template>
                                     </select>
                                 </div>
-
-                                <div class="tip-jar-row">
-                                    <label
-                                        class="tip-jar-label-inline">Amount</label>
+                                <div class="tip-quick-row">
+                                    <button class="tip-quick-btn" @click="tipAmount='1'">$1</button>
+                                    <button class="tip-quick-btn" @click="tipAmount='3'">$3</button>
+                                    <button class="tip-quick-btn" @click="tipAmount='5'">$5</button>
+                                    <button class="tip-quick-btn" @click="tipAmount='10'">$10</button>
+                                    <button class="tip-quick-btn tip-quick-custom" @click="showCustomTip=true">Custom</button>
+                                </div>
+                                <!-- Visually hidden native input to preserve behavior (screen-reader friendly) -->
+                                <div class="tip-jar-row sr-only">
+                                    <label class="tip-jar-label-inline">Amount</label>
                                     <div class="tip-jar-amount-group">
-                                        <span
-                                            class="tip-jar-currency-prefix">$</span>
-                                        <input
-                                            type="number"
-                                            x-model="tipAmount"
-                                            placeholder="0.00"
-                                            min="0.50"
-                                            step="0.01"
-                                            class="tip-jar-amount-input"
-                                            @input="tipAmount = $event.target.value">
+                                        <span class="tip-jar-currency-prefix">$</span>
+                                        <input type="number" x-model="tipAmount" min="0.50" step="0.01" @input="tipAmount = $event.target.value" class="tip-jar-amount-input">
                                     </div>
                                 </div>
 
@@ -897,6 +889,22 @@
                                     <span
                                         x-text="isTipping ? 'Processing...' : 'Send Tip — $' + (isValid ? calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2) : '0.00')"></span>
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Custom Tip Modal -->
+                        <div x-show="showCustomTip" class="modal-overlay" @click="showCustomTip=false">
+                            <div class="modal-mini" @click.stop>
+                                <h4>Custom Tip</h4>
+                                <p class="text-small">Enter a custom tip amount</p>
+                                <div class="tip-jar-amount-group" style="margin: 8px 0 12px;">
+                                    <span class="tip-jar-currency-prefix">$</span>
+                                    <input type="number" x-model="tipAmount" min="0.50" step="0.01" placeholder="0.50" class="tip-jar-amount-input">
+                                </div>
+                                <div class="modal-actions" style="display:flex; gap:8px; justify-content:flex-end;">
+                                    <button class="btn-mini" @click="showCustomTip=false">Cancel</button>
+                                    <button class="btn-mini" @click="showCustomTip=false">Set</button>
+                                </div>
                             </div>
                         </div>
 
@@ -2054,6 +2062,7 @@
             return {
                 badges: [],
                 showCodeEntry: false,
+                showCustomTip: false,
                 codeEntry: '',
                 currentTrack: null,
                 isTinyPlaying: false,
