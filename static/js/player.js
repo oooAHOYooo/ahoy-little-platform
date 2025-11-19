@@ -52,6 +52,21 @@ class MediaPlayer {
             this.duration = this.audioElement.duration;
             this.emit('durationchange', this.duration);
         });
+        this.audioElement.addEventListener('canplay', () => {
+            // Auto-start if a track is queued but play promise was previously blocked
+            if (this.currentTrack && !this.isPlaying && this.audioElement.paused) {
+                this.audioElement.play().catch(() => {/* will be retried on gesture if needed */});
+            }
+        });
+        this.audioElement.addEventListener('error', () => {
+            try {
+                const code = (this.audioElement.error && this.audioElement.error.code) || 'unknown';
+                console.error('Audio element error, code:', code, this.audioElement.error);
+                document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Audio failed to load. Trying again…' }));
+            } catch (_) {}
+            // Soft retry by reloading once
+            try { this.audioElement.load(); } catch (_) {}
+        });
         
         this.audioElement.addEventListener('timeupdate', () => {
             this.currentTime = this.audioElement.currentTime;
@@ -88,6 +103,9 @@ class MediaPlayer {
         this.videoElement.addEventListener('loadedmetadata', () => {
             this.duration = this.videoElement.duration;
             this.emit('durationchange', this.duration);
+        });
+        this.videoElement.addEventListener('error', () => {
+            console.error('Video element error:', this.videoElement.error);
         });
         
         this.videoElement.addEventListener('timeupdate', () => {
@@ -180,6 +198,7 @@ class MediaPlayer {
         // Ensure source is a valid URL
         if (typeof source === 'string' && source.trim()) {
             mediaElement.src = source;
+            try { mediaElement.load(); } catch (_) {}
         } else {
             console.error('Invalid source URL:', source);
             this.emit('error', new Error('Invalid source URL'));
