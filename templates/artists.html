@@ -21,7 +21,7 @@
                         @click="playHeroItem(item)">
                         <div class="hero-overlay">
                             <div class="hero-content">
-                                <div class="hero-badge"
+                                <div class="hero-badge ahoy-subheader"
                                     x-text="getPageBadge()"></div>
                                 <h1 x-text="getItemTitle(item)"></h1>
                                 <p x-text="getItemSubtitle(item)"></p>
@@ -174,7 +174,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="artist-type-badge"
+                            <div class="artist-type-badge ahoy-subheader"
                                 x-text="artist.type?.toUpperCase()"></div>
                         </div>
                         <div class="artist-info">
@@ -204,7 +204,7 @@
                                     :src="artist.image || '/static/img/default-avatar.png'"
                                     :alt="artist.name"
                                     class="artist-thumbnail image-placeholder">
-                                <div class="artist-type-badge"
+                                <div class="artist-type-badge ahoy-subheader"
                                     x-text="artist.type?.toUpperCase()"></div>
                             </div>
                             <div class="col-name">
