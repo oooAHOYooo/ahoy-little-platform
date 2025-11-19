@@ -506,17 +506,22 @@
                                 </div>
 
                                 <!-- Wallet Summary -->
-                                <div class="flex items-center justify-between mt-3 p-2 rounded-md border border-neutral-700/40 bg-neutral-800/30">
-                                    <div class="text-xs text-neutral-300">Wallet</div>
-                                    <div class="text-sm font-semibold text-white"
-                                         x-text="'$' + ((walletBalanceCents || 0) / 100).toFixed(2)"></div>
+                                <div
+                                    class="flex items-center justify-between mt-3 p-2 rounded-md border border-neutral-700/40 bg-neutral-800/30">
+                                    <div
+                                        class="text-xs text-neutral-300">Wallet</div>
+                                    <div
+                                        class="text-sm font-semibold text-white"
+                                        x-text="'$' + ((walletBalanceCents || 0) / 100).toFixed(2)"></div>
                                 </div>
                                 <div class="mt-2 flex gap-2">
-                                    <button class="px-2 py-1 text-xs rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
+                                    <button
+                                        class="px-2 py-1 text-xs rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
                                         @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(2000) : null">
                                         Add $20
                                     </button>
-                                    <button class="px-2 py-1 text-xs rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
+                                    <button
+                                        class="px-2 py-1 text-xs rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
                                         @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(5000) : null">
                                         Add $50
                                     </button>
@@ -946,12 +951,20 @@
 
                         <!-- XP Reinforcement Modal -->
                         <template x-if="showXpReward">
-                            <div class="xp-overlay" @click.self="showXpReward=false">
+                            <div class="xp-overlay"
+                                @click.self="showXpReward=false">
                                 <div class="xp-card">
-                                    <div style="font-size:18px; font-weight:800; margin-bottom:6px;">Great job!</div>
-                                    <div>You earned <span class="xp-points" x-text="'+' + (xpGain || 0)"></span> XP</div>
-                                    <div style="opacity:.8; font-size:12px; margin-top:6px;">Total XP: <span x-text="xpTotal"></span></div>
-                                    <button class="xp-close tip-cancel" @click="showXpReward=false">Close</button>
+                                    <div
+                                        style="font-size:18px; font-weight:800; margin-bottom:6px;">Great
+                                        job!</div>
+                                    <div>You earned <span class="xp-points"
+                                            x-text="'+' + (xpGain || 0)"></span>
+                                        XP</div>
+                                    <div
+                                        style="opacity:.8; font-size:12px; margin-top:6px;">Total
+                                        XP: <span x-text="xpTotal"></span></div>
+                                    <button class="xp-close tip-cancel"
+                                        @click="showXpReward=false">Close</button>
                                 </div>
                             </div>
                         </template>
