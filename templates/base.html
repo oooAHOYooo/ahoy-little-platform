@@ -82,9 +82,10 @@
         <!-- Alpine.js for reactive components -->
         <script defer
             src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-        
+
         <!-- Three.js for visualizer -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
         <!-- Debug Alpine.js loading -->
         <script>
@@ -805,17 +806,29 @@
                         <!-- Tip Jar (Compact) -->
                         <div class="tip-jar-card sidebar-item">
                             <div class="tip-jar-compact">
-                                <!-- Compact select + amount input (side-by-side) -->
-                                <div class="tip-jar-row tip-compact-row" style="display:flex; gap:8px; align-items:center;">
-                                    <select x-model="selectedArtistId" class="tip-jar-select tip-compact-select" aria-label="Select artist to tip" style="flex:1 1 65%;">
+                                <!-- Compact select (top) -->
+                                <div class="tip-jar-row tip-compact-row">
+                                    <select x-model="selectedArtistId"
+                                        class="tip-jar-select tip-compact-select tip-mini-field"
+                                        aria-label="Select artist to tip">
                                         <option value>Select artist…</option>
-                                        <template x-for="artist in artists" :key="artist.id || artist.name">
-                                            <option :value="artist.id || artist.name" x-text="artist.name"></option>
+                                        <template x-for="artist in artists"
+                                            :key="artist.id || artist.name">
+                                            <option
+                                                :value="artist.id || artist.name"
+                                                x-text="artist.name"></option>
                                         </template>
                                     </select>
-                                    <div class="tip-jar-amount-group" style="flex:1 1 35%;">
+                                </div>
+                                <!-- Compact amount input (below) -->
+                                <div class="tip-jar-row tip-compact-row">
+                                    <div class="tip-jar-amount-group tip-mini-field">
                                         <span class="tip-jar-currency-prefix">$</span>
-                                        <input type="number" x-model="tipAmount" min="0.50" step="0.01" placeholder="0.50" class="tip-jar-amount-input" @input="tipAmount = $event.target.value">
+                                        <input type="number" x-model="tipAmount"
+                                            min="0.50" step="0.01"
+                                            placeholder="0.50"
+                                            class="tip-jar-amount-input"
+                                            @input="tipAmount = $event.target.value">
                                     </div>
                                 </div>
 
@@ -880,7 +893,6 @@
                                 </button>
                             </div>
                         </div>
-
 
                         <!-- Success Toast -->
                         <div x-show="showTipSuccess"
@@ -1073,39 +1085,45 @@
             x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="transform translate-y-0 opacity-100"
             x-transition:leave-end="transform translate-y-full opacity-0">
-            
+
             <!-- Three.js Visualizer Background -->
-            <div id="now-playing-visualizer" class="now-playing-visualizer"></div>
-            
+            <div id="now-playing-visualizer"
+                class="now-playing-visualizer"></div>
+
             <!-- Glassy Now Playing Bar -->
             <div class="now-playing-glass">
                 <div class="now-playing-container">
                     <!-- Left: Album Artwork -->
-                    <div class="now-playing-album-art" @click="openFullPlayer()">
+                    <div class="now-playing-album-art"
+                        @click="openFullPlayer()">
                         <img
                             :src="currentTrack?.cover_art || '/static/img/default-cover.jpg'"
                             :alt="currentTrack?.title"
                             class="now-playing-album-img"
                             :class="{'spinning': isPlaying}">
-                        <div class="now-playing-album-overlay" x-show="!isPlaying">
+                        <div class="now-playing-album-overlay"
+                            x-show="!isPlaying">
                             <i class="fas fa-play"></i>
                         </div>
                     </div>
 
                     <!-- Center: Track Info -->
                     <div class="now-playing-info">
-                        <div class="now-playing-title" x-text="currentTrack?.title || 'Unknown Title'"></div>
-                        <div class="now-playing-artist" 
+                        <div class="now-playing-title"
+                            x-text="currentTrack?.title || 'Unknown Title'"></div>
+                        <div class="now-playing-artist"
                             x-show="currentTrack?.type === 'show'"
                             x-text="currentTrack?.host || currentTrack?.creator || 'Unknown Host'"></div>
-                        <div class="now-playing-artist" 
+                        <div class="now-playing-artist"
                             x-show="currentTrack?.type !== 'show'"
                             x-text="currentTrack?.artist || 'Unknown Artist'"></div>
                         <div class="now-playing-category">
-                            <span x-show="currentTrack?.type === 'show'" class="category-pill">
+                            <span x-show="currentTrack?.type === 'show'"
+                                class="category-pill">
                                 <i class="fas fa-play-circle"></i> Video
                             </span>
-                            <span x-show="currentTrack?.type !== 'show'" class="category-pill">
+                            <span x-show="currentTrack?.type !== 'show'"
+                                class="category-pill">
                                 <i class="fas fa-music"></i> Music
                             </span>
                         </div>
@@ -1113,25 +1131,29 @@
 
                     <!-- Right: Controls -->
                     <div class="now-playing-controls">
-                        <button @click="previousTrack()" class="now-playing-btn" title="Previous">
+                        <button @click="previousTrack()" class="now-playing-btn"
+                            title="Previous">
                             <i class="fas fa-step-backward"></i>
                         </button>
-                        <button @click="togglePlay()" class="now-playing-btn now-playing-play-btn" 
+                        <button @click="togglePlay()"
+                            class="now-playing-btn now-playing-play-btn"
                             :title="isPlaying ? 'Pause' : 'Play'">
-                            <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+                            <i
+                                :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
                         </button>
-                        <button @click="nextTrack()" class="now-playing-btn" title="Next">
+                        <button @click="nextTrack()" class="now-playing-btn"
+                            title="Next">
                             <i class="fas fa-step-forward"></i>
                         </button>
-                        <button @click="toggleShuffle()" class="now-playing-btn" 
+                        <button @click="toggleShuffle()" class="now-playing-btn"
                             :class="{'active': isShuffled}" title="Shuffle">
                             <i class="fas fa-random"></i>
                         </button>
-                        <button @click="toggleRepeat()" class="now-playing-btn" 
+                        <button @click="toggleRepeat()" class="now-playing-btn"
                             :class="{'active': isRepeated}" title="Repeat">
                             <i class="fas fa-redo"></i>
                         </button>
-                        <button @click="toggleLike()" class="now-playing-btn" 
+                        <button @click="toggleLike()" class="now-playing-btn"
                             :class="{'active': isLiked}" title="Like">
                             <i class="fas fa-heart"></i>
                         </button>
@@ -1144,23 +1166,25 @@
                             });
                             isSaved = currentTrack ? !!(window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), currentTrack.id)) : false;
                             $nextTick(()=>{ document.dispatchEvent(new CustomEvent('bookmarks:changed', { detail: { items: window.AhoyBookmarks?.all?.() || {}, action: isSaved ? 'add' : 'remove', item: currentTrack } })); });
-                        " class="now-playing-btn" 
+                        " class="now-playing-btn"
                             :class="{'active': currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)}"
                             title="Bookmark">
                             <i class="fas fa-bookmark"></i>
                         </button>
-                        <button @click="toggleFullscreenVisualizer()" 
-                            class="now-playing-btn now-playing-fullscreen-btn" 
+                        <button @click="toggleFullscreenVisualizer()"
+                            class="now-playing-btn now-playing-fullscreen-btn"
                             :class="{'active': isFullscreenVisualizer}"
                             :title="isFullscreenVisualizer ? 'Exit Fullscreen' : 'Fullscreen Visualizer'"
                             x-show="currentTrack && currentTrack.type !== 'show'">
-                            <i :class="isFullscreenVisualizer ? 'fas fa-compress' : 'fas fa-expand'"></i>
+                            <i
+                                :class="isFullscreenVisualizer ? 'fas fa-compress' : 'fas fa-expand'"></i>
                         </button>
                     </div>
 
                     <!-- Progress Bar -->
                     <div class="now-playing-progress">
-                        <div class="now-playing-progress-bar" @click="seekTo($event)">
+                        <div class="now-playing-progress-bar"
+                            @click="seekTo($event)">
                             <div class="now-playing-progress-fill"
                                 :style="`width: ${progressPercent}%`"></div>
                             <div class="now-playing-progress-handle"
@@ -1168,7 +1192,8 @@
                         </div>
                         <div class="now-playing-time">
                             <span x-text="formatTime(currentTime)"></span>
-                            <span x-text="formatTime(currentTrack?.duration_seconds || 0)"></span>
+                            <span
+                                x-text="formatTime(currentTrack?.duration_seconds || 0)"></span>
                         </div>
                     </div>
                 </div>
@@ -1520,12 +1545,16 @@
             src="{{ url_for('static', filename='js/bookmarks.js') }}"></script>
         <script src="{{ url_for('static', filename='js/app.js') }}"></script>
         <script src="{{ url_for('static', filename='js/player.js') }}"></script>
-        
+
         <!-- Now Playing Component Modules -->
-        <script src="{{ url_for('static', filename='js/colorExtractor.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/audioAnalyser.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/visualizer.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/nowPlaying.js') }}"></script>
+        <script
+            src="{{ url_for('static', filename='js/colorExtractor.js') }}"></script>
+        <script
+            src="{{ url_for('static', filename='js/audioAnalyser.js') }}"></script>
+        <script
+            src="{{ url_for('static', filename='js/visualizer.js') }}"></script>
+        <script
+            src="{{ url_for('static', filename='js/nowPlaying.js') }}"></script>
         <script
             src="{{ url_for('static', filename='js/playlist-manager.js') }}"></script>
         <script
