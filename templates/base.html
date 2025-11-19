@@ -822,8 +822,10 @@
                                 </div>
                                 <!-- Compact amount input (below) -->
                                 <div class="tip-jar-row tip-compact-row">
-                                    <div class="tip-jar-amount-group tip-mini-field">
-                                        <span class="tip-jar-currency-prefix">$</span>
+                                    <div
+                                        class="tip-jar-amount-group tip-mini-field">
+                                        <span
+                                            class="tip-jar-currency-prefix">$</span>
                                         <input type="number" x-model="tipAmount"
                                             min="0.50" step="0.01"
                                             placeholder="0.50"
@@ -891,6 +893,11 @@
                                     <span
                                         x-text="isTipping ? 'Processing...' : 'Send Tip — $' + (isValid ? calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2) : '0.00')"></span>
                                 </button>
+                                <div class="text-right">
+                                    <button type="button" class="btn-mini" @click="tipAmount=''; document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Tip canceled.' }))" style="margin-top:6px; opacity:.8;">
+                                        Cancel
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -2152,9 +2159,7 @@
                     
                     const tipAmount = parseFloat(this.tipAmount);
                     if (tipAmount < 0.50) {
-                        if (window.ahoyApp?.showNotification) {
-                            window.ahoyApp.showNotification('Minimum tip is $0.50', 'error');
-                        }
+                        document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Enter a valid tip amount (min $0.50).' }));
                         return;
                     }
                     
@@ -2175,9 +2180,11 @@
                             // Open Stripe checkout in a new window
                             const checkoutWindow = window.open(data.checkout_url, 'stripe-checkout', 'width=600,height=700');
                             
-                            // Reset form after opening checkout
-                            this.selectedArtistId = '';
-                            this.tipAmount = '';
+                            // Friendly toast
+                            try {
+                                const artistName = (this.artists.find(a => (a.id || a.name) == this.selectedArtistId)?.name) || 'artist';
+                                document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: `Thank you! Your $${tipAmount.toFixed(2)} tip went to ${artistName} 🙌` }));
+                            } catch (_) {}
                             
                             // Monitor for window close (payment completion)
                             const checkClosed = setInterval(() => {
@@ -2185,20 +2192,26 @@
                                     clearInterval(checkClosed);
                                     // Show success toast
                                     this.showTipSuccess = true;
+                                    // Persist locally for positions
+                                    try {
+                                        const tips = JSON.parse(localStorage.getItem('ahoyTips') || '[]');
+                                        tips.push({ artistID: this.selectedArtistId, amount: tipAmount, timestamp: Date.now() });
+                                        localStorage.setItem('ahoyTips', JSON.stringify(tips));
+                                        window.dispatchEvent(new CustomEvent('tipping:update', { detail: { total: tips.reduce((s,t)=>s + (t.amount||0), 0) } }));
+                                    } catch (_) {}
+                                    // Clear form
+                                    this.selectedArtistId = '';
+                                    this.tipAmount = '';
                                     // Auto-hide after 3 seconds (handled by x-init)
                                 }
                             }, 500);
                         } else {
                             const errorMsg = data.error || 'Failed to create tip session';
-                            if (window.ahoyApp?.showNotification) {
-                                window.ahoyApp.showNotification(errorMsg, 'error');
-                            }
+                            document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: errorMsg }));
                         }
                     } catch (e) {
                         console.error('Tip error:', e);
-                        if (window.ahoyApp?.showNotification) {
-                            window.ahoyApp.showNotification('Error processing tip. Please try again.', 'error');
-                        }
+                        document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Error processing tip. Please try again.' }));
                     } finally {
                         this.isTipping = false;
                     }

@@ -4793,13 +4793,54 @@ a:hover {
     }
 }
 
+/* Ahoy ephemeral toast */
+.ahoy-toast {
+    position: fixed;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #fff;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+.ahoy-toast.visible {
+    bottom: 25px;
+    opacity: 1;
+}
 /* Tiny compact fields for dashboard tip jar */
-.tip-compact-row { margin: 6px 0; }
-.tip-mini-field { font-size: 12px; }
-.tip-mini-field .tip-jar-currency-prefix { font-size: 12px; }
-.tip-mini-field.tip-jar-amount-group { padding: 6px 8px; border-radius: 8px; }
-.tip-mini-field.tip-jar-amount-group .tip-jar-amount-input { font-size: 12px; }
-.tip-compact-select { font-size: 12px; padding: 6px 8px; }
+.tip-compact-row {
+    margin: 6px 0;
+}
+
+.tip-mini-field {
+    font-size: 12px;
+}
+
+.tip-mini-field .tip-jar-currency-prefix {
+    font-size: 12px;
+}
+
+.tip-mini-field.tip-jar-amount-group {
+    padding: 6px 8px;
+    border-radius: 8px;
+}
+
+.tip-mini-field.tip-jar-amount-group .tip-jar-amount-input {
+    font-size: 12px;
+}
+
+.tip-compact-select {
+    font-size: 12px;
+    padding: 6px 8px;
+}
+
 /* Compact tip jar quick actions */
 .tip-quick-row {
     display: flex;
@@ -5558,7 +5599,6 @@ a:hover {
     line-height: 1.4;
     font-style: italic;
 }
-
 .tip-jar-submit {
     width: 100%;
     height: 42px;
@@ -5593,6 +5633,7 @@ a:hover {
 .tip-jar-submit:active:not(:disabled) {
     transform: translateY(0);
 }
+
 @media (min-width: 400px) {
     .tip-jar-row {
         flex-direction: row;
@@ -6358,7 +6399,6 @@ img.loading {
     border-radius: 50%;
     transition: background-color 0.2s ease;
 }
-
 .header-search .search-clear:hover {
     background: rgba(0, 0, 0, 0.1);
 }
@@ -6391,6 +6431,7 @@ img.loading {
     color: #ff0060;
     border-color: white;
 }
+
 /* View Options in Header */
 .header-actions .view-options {
     display: flex;
@@ -7149,7 +7190,6 @@ img.loading {
     display: flex;
     gap: var(--spacing-sm);
 }
-
 .hero-dot {
     width: 12px;
     height: 12px;
@@ -7189,6 +7229,7 @@ img.loading {
     overflow: hidden;
     transition: all 0.3s ease;
 }
+
 .grid-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -7941,7 +7982,6 @@ img.loading {
 .recently-added .playing-list.recently-added-grid .playing-item:hover .play-indicator {
     opacity: 1;
 }
-
 /* ==========================================
    RADIO FEED - FIXED STRETCHING
    Max-height 150px, object-fit cover, balanced spacing
@@ -7988,6 +8028,7 @@ img.loading {
     position: relative;
     padding: var(--spacing-2);
 }
+
 .radio-feed-title {
     font-size: var(--font-size-base);
     font-weight: 600;
@@ -8742,7 +8783,6 @@ img.loading {
 .stat {
     text-align: center;
 }
-
 .stat-number {
     display: block;
     font-size: var(--font-size-2xl);
@@ -8788,6 +8828,7 @@ img.loading {
     transform: translateY(-4px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
+
 .show-thumbnail {
     position: relative;
     aspect-ratio: 16/9;
@@ -9534,7 +9575,6 @@ img.loading {
     height: 100%;
     object-fit: cover;
 }
-
 .col-thumbnail .play-overlay {
     position: absolute;
     top: 0;
@@ -9585,6 +9625,7 @@ img.loading {
     padding: var(--spacing-2xl) 0;
     background: var(--background-light);
 }
+
 .artists-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -10296,7 +10337,6 @@ img.loading {
     font-size: var(--font-size-xs);
     color: var(--text-tertiary);
 }
-
 /* Responsive Design */
 @media (max-width: 768px) {
     .agenda-header {
@@ -10374,6 +10414,7 @@ img.loading {
     gap: var(--spacing-lg);
     margin-top: var(--spacing-xl);
 }
+
 .quick-access-item {
     display: flex;
     flex-direction: column;
@@ -11095,7 +11136,6 @@ img.loading {
     color: var(--primary-color);
     border-bottom-color: var(--primary-color);
 }
-
 .tab-content {
     min-height: 400px;
 }
@@ -11168,6 +11208,7 @@ img.loading {
     color: var(--text-muted);
     font-size: var(--font-size-sm);
 }
+
 /* Player Components */
 .player-container {
     min-height: 100vh;
@@ -11895,7 +11936,6 @@ img.loading {
 .add-btn {
     background: rgba(0, 0, 0, 0.7);
 }
-
 .add-btn:hover {
     background: #10b981;
 }
@@ -11964,6 +12004,7 @@ img.loading {
     flex-direction: column;
     gap: var(--spacing-sm);
 }
+
 .recent-item {
     display: flex;
     align-items: center;
@@ -12687,7 +12728,6 @@ img.loading {
     color: var(--accent-color);
     font-size: var(--font-size-sm);
 }
-
 .featured-description-compact {
     font-size: var(--font-size-sm);
     color: var(--text-secondary);
@@ -12710,6 +12750,7 @@ img.loading {
     font-size: var(--font-size-xs);
     min-height: 32px;
 }
+
 /* Mobile Responsiveness for Artists */
 @media (max-width: 768px) {
     .artists-container {
@@ -13484,7 +13525,6 @@ img.loading {
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
 }
-
 .test-results {
     background: var(--background-dark);
     border-radius: var(--border-radius);
@@ -13506,6 +13546,7 @@ img.loading {
     border-left: 4px solid #10b981;
     color: #10b981;
 }
+
 .test-result.error {
     background: rgba(239, 68, 68, 0.1);
     border-left: 4px solid #ef4444;
@@ -14268,6 +14309,27 @@ img.loading {
     }
 }
 
+/* Ahoy ephemeral toast */
+.ahoy-toast {
+    position: fixed;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #fff;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+.ahoy-toast.visible {
+    bottom: 25px;
+    opacity: 1;
+}
 @media (max-width: 480px) {
     .artists-grid {
         grid-template-columns: 1fr;
@@ -14291,6 +14353,7 @@ img.loading {
         height: 28px;
     }
 }
+
 /* Mobile Responsive for My Saves */
 @media (max-width: 768px) {
     .page-header {
@@ -15067,7 +15130,6 @@ img.loading {
     border-color: var(--text-primary);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
-
 /* Checkbox Styling */
 .checkbox-label {
     display: flex;
@@ -15090,6 +15152,7 @@ img.loading {
     position: relative;
     transition: all 0.2s ease;
 }
+
 .checkbox-label input[type="checkbox"]:checked+.checkmark {
     background: var(--primary-color);
     border-color: var(--primary-color);
@@ -15858,7 +15921,6 @@ img.loading {
     background: var(--background-medium);
     border-radius: var(--border-radius-md);
 }
-
 .activity-icon {
     width: 40px;
     height: 40px;
@@ -15887,6 +15949,7 @@ img.loading {
     flex-direction: column;
     gap: var(--spacing-md);
 }
+
 .content-item {
     display: flex;
     align-items: center;
@@ -16655,7 +16718,6 @@ img.loading {
     margin-top: 6px;
     animation: slideUp 0.3s ease-out both;
 }
-
 .strength-bar {
     width: 100%;
     height: 3px;
@@ -16684,6 +16746,7 @@ img.loading {
     padding-top: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .back-to-home-link {
     display: inline-flex;
     align-items: center;
@@ -17447,7 +17510,6 @@ img.loading {
     padding-bottom: var(--spacing-md);
     border-bottom: 2px solid var(--border-color);
 }
-
 .featured-header h2 {
     font-size: var(--font-size-2xl);
     font-weight: 700;
@@ -17481,6 +17543,7 @@ img.loading {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
+
 .featured-show {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -18180,7 +18243,6 @@ img.loading {
     color: white;
     transform: translateX(4px);
 }
-
 /* Mobile Responsive for New Haven Promotional Banner */
 @media (max-width: 768px) {
     .newhaven-promo-section {
@@ -18265,6 +18327,7 @@ img.loading {
         padding: var(--spacing-sm) var(--spacing-lg);
     }
 }
+
 /* Mobile Responsive for Playlists Widget */
 @media (max-width: 768px) {
     .playlists-widget {
@@ -18945,7 +19008,6 @@ img.loading {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
-
 /* Mobile Responsive for Artist Detail */
 @media (max-width: 768px) {
     .artist-hero-content {
@@ -19064,6 +19126,7 @@ img.loading {
 .avatar-anchor-preview.rose {
     background: linear-gradient(135deg, #f43f5e, #e11d48);
 }
+
 /* Avatar Option Hover Effects */
 .avatar-option:hover .avatar-anchor {
     transform: scale(1.1);
@@ -19743,7 +19806,6 @@ img.loading {
     opacity: 0.7;
     color: rgba(255, 255, 255, 0.6);
 }
-
 .new-badge-label {
     position: absolute;
     top: -12px;
@@ -19859,6 +19921,7 @@ img.loading {
     align-items: center;
     gap: 0.5rem;
 }
+
 .progress-bar-small {
     flex: 1;
     height: 6px;
@@ -20541,7 +20604,6 @@ img.loading {
     font-size: 18px;
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
-
 .now-playing-play-btn:hover {
     background: var(--secondary-color, #8b5cf6);
     transform: scale(1.1);
@@ -20626,6 +20688,7 @@ img.loading {
     font-variant-numeric: tabular-nums;
     font-weight: 500;
 }
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .now-playing-wrapper {
