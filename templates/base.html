@@ -757,6 +757,12 @@
             </div>
         </nav>
 
+        <!-- Top tip status badge -->
+        <div id="tip-status-badge" aria-live="polite" class="hidden">
+            <i class="fas fa-check-circle"></i>
+            <span class="tip-status-text">Tip Sent</span>
+        </div>
+
         <!-- Main Content -->
         <main class="main-content">
             <div class="dashboard-sidebars">
@@ -894,7 +900,9 @@
                                         x-text="isTipping ? 'Processing...' : 'Send Tip — $' + (isValid ? calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2) : '0.00')"></span>
                                 </button>
                                 <div class="text-right">
-                                    <button type="button" class="btn-mini" @click="tipAmount=''; document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Tip canceled.' }))" style="margin-top:6px; opacity:.8;">
+                                    <button type="button" class="tip-cancel"
+                                        :disabled="!tipAmount || parseFloat(tipAmount || 0) <= 0"
+                                        @click="tipAmount=''; document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Tip canceled.' }))">
                                         Cancel
                                     </button>
                                 </div>
@@ -918,6 +926,18 @@
                                     independent artists!</p>
                             </div>
                         </div>
+
+                        <!-- XP Reinforcement Modal -->
+                        <template x-if="showXpReward">
+                            <div class="xp-overlay" @click.self="showXpReward=false">
+                                <div class="xp-card">
+                                    <div style="font-size:18px; font-weight:800; margin-bottom:6px;">Great job!</div>
+                                    <div>You earned <span class="xp-points" x-text="'+' + (xpGain || 0)"></span> XP</div>
+                                    <div style="opacity:.8; font-size:12px; margin-top:6px;">Total XP: <span x-text="xpTotal"></span></div>
+                                    <button class="xp-close tip-cancel" @click="showXpReward=false">Close</button>
+                                </div>
+                            </div>
+                        </template>
 
                         <!-- Merit Badges -->
                         <div class="sidebar-panel sidebar-item">
@@ -2073,6 +2093,10 @@
                 badges: [],
                 showCodeEntry: false,
                 codeEntry: '',
+                // XP / reinforcement
+                showXpReward: false,
+                xpGain: 0,
+                xpTotal: 0,
                 currentTrack: null,
                 isTinyPlaying: false,
                 // Tip jar state
@@ -2128,6 +2152,8 @@
                     
                     // Initialize toast watcher
                     this.initToast();
+                    // Load XP total (local positions helper)
+                    try { this.xpTotal = parseInt(localStorage.getItem('ahoyXp') || '0', 10) || 0; } catch (_) { this.xpTotal = 0; }
                     
                     // Load artists for tip jar
                     await this.loadArtists();
@@ -2198,6 +2224,20 @@
                                         tips.push({ artistID: this.selectedArtistId, amount: tipAmount, timestamp: Date.now() });
                                         localStorage.setItem('ahoyTips', JSON.stringify(tips));
                                         window.dispatchEvent(new CustomEvent('tipping:update', { detail: { total: tips.reduce((s,t)=>s + (t.amount||0), 0) } }));
+                                        // XP reinforce
+                                        this.xpGain = Math.max(5, Math.round(tipAmount));
+                                        this.xpTotal = (this.xpTotal || 0) + this.xpGain;
+                                        localStorage.setItem('ahoyXp', String(this.xpTotal));
+                                        this.showXpReward = true;
+                                        // Top status badge blip
+                                        try {
+                                            const badge = document.getElementById('tip-status-badge');
+                                            if (badge) {
+                                                badge.classList.add('visible');
+                                                badge.querySelector('.tip-status-text').textContent = `+${this.xpGain} XP`;
+                                                setTimeout(()=> badge.classList.remove('visible'), 2500);
+                                            }
+                                        } catch(_) {}
                                     } catch (_) {}
                                     // Clear form
                                     this.selectedArtistId = '';

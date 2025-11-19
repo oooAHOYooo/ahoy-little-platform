@@ -4793,6 +4793,68 @@ a:hover {
     }
 }
 
+/* Subtle compact cancel */
+.tip-cancel {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.45);
+    font-size: 11px;
+    padding: 4px 6px;
+    cursor: pointer;
+    transition: color 0.15s ease, opacity 0.15s ease;
+}
+.tip-cancel:hover { color: rgba(255,255,255,0.7); }
+.tip-cancel:disabled { color: rgba(255,255,255,0.25); cursor: default; }
+
+/* Top status badge */
+#tip-status-badge {
+    position: fixed;
+    top: 10px;
+    right: 14px;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: all 0.25s ease;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    pointer-events: none;
+}
+#tip-status-badge.visible { opacity: 1; transform: translateY(0); }
+#tip-status-badge i { color: #22c55e; }
+
+/* XP reinforcement modal */
+.xp-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+}
+.xp-card {
+    background: rgba(15, 18, 22, 0.7);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 18px 20px;
+    color: #fff;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+    min-width: 260px;
+    text-align: center;
+}
+.xp-card .xp-points { font-weight: 800; color: #4CC9F0; }
+.xp-card .xp-close { margin-top: 10px; font-size: 12px; opacity: .8; }
 /* Ahoy ephemeral toast */
 .ahoy-toast {
     position: fixed;
@@ -4802,7 +4864,7 @@ a:hover {
     padding: 10px 18px;
     font-size: 0.85rem;
     border-radius: 10px;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     color: #fff;
@@ -4810,10 +4872,12 @@ a:hover {
     transition: all 0.3s ease;
     z-index: 9999;
 }
+
 .ahoy-toast.visible {
     bottom: 25px;
     opacity: 1;
 }
+
 /* Tiny compact fields for dashboard tip jar */
 .tip-compact-row {
     margin: 6px 0;
@@ -5588,7 +5652,6 @@ a:hover {
     font-weight: 700;
     font-size: var(--font-size-md);
 }
-
 .tip-breakdown-caption {
     margin-top: 12px;
     padding-top: 12px;
@@ -5599,6 +5662,7 @@ a:hover {
     line-height: 1.4;
     font-style: italic;
 }
+
 .tip-jar-submit {
     width: 100%;
     height: 42px;
@@ -6385,7 +6449,6 @@ img.loading {
     color: var(--background-dark);
     z-index: 1;
 }
-
 .header-search .search-clear {
     position: absolute;
     right: var(--spacing-md);
@@ -6399,6 +6462,7 @@ img.loading {
     border-radius: 50%;
     transition: background-color 0.2s ease;
 }
+
 .header-search .search-clear:hover {
     background: rgba(0, 0, 0, 0.1);
 }
@@ -7181,7 +7245,6 @@ img.loading {
     background: rgba(0, 0, 0, 0.8);
     transform: scale(1.1);
 }
-
 .hero-indicators {
     position: absolute;
     bottom: var(--spacing-lg);
@@ -7190,6 +7253,7 @@ img.loading {
     display: flex;
     gap: var(--spacing-sm);
 }
+
 .hero-dot {
     width: 12px;
     height: 12px;
@@ -7978,10 +8042,10 @@ img.loading {
     opacity: 0;
     transition: opacity 0.2s ease;
 }
-
 .recently-added .playing-list.recently-added-grid .playing-item:hover .play-indicator {
     opacity: 1;
 }
+
 /* ==========================================
    RADIO FEED - FIXED STRETCHING
    Max-height 150px, object-fit cover, balanced spacing
@@ -8773,7 +8837,6 @@ img.loading {
     line-height: 1.6;
     margin: 0 0 var(--spacing-xl) 0;
 }
-
 .artist-stats {
     display: flex;
     gap: var(--spacing-xl);
@@ -8783,6 +8846,7 @@ img.loading {
 .stat {
     text-align: center;
 }
+
 .stat-number {
     display: block;
     font-size: var(--font-size-2xl);
@@ -9569,12 +9633,12 @@ img.loading {
     border-radius: var(--border-radius-sm);
     overflow: hidden;
 }
-
 .col-thumbnail img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
+
 .col-thumbnail .play-overlay {
     position: absolute;
     top: 0;
@@ -14308,7 +14372,6 @@ img.loading {
         font-size: 10px;
     }
 }
-
 /* Ahoy ephemeral toast */
 .ahoy-toast {
     position: fixed;
@@ -14318,7 +14381,7 @@ img.loading {
     padding: 10px 18px;
     font-size: 0.85rem;
     border-radius: 10px;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     color: #fff;
@@ -14326,10 +14389,12 @@ img.loading {
     transition: all 0.3s ease;
     z-index: 9999;
 }
+
 .ahoy-toast.visible {
     bottom: 25px;
     opacity: 1;
 }
+
 @media (max-width: 480px) {
     .artists-grid {
         grid-template-columns: 1fr;
@@ -15105,7 +15170,6 @@ img.loading {
     border-radius: 4px;
     font-weight: 500;
 }
-
 /* Color Picker */
 .color-picker {
     display: flex;
@@ -15130,6 +15194,7 @@ img.loading {
     border-color: var(--text-primary);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
+
 /* Checkbox Styling */
 .checkbox-label {
     display: flex;
@@ -15906,7 +15971,6 @@ img.loading {
     color: var(--text-primary);
     margin: 0 0 var(--spacing-lg) 0;
 }
-
 .activity-list {
     display: flex;
     flex-direction: column;
@@ -15921,6 +15985,7 @@ img.loading {
     background: var(--background-medium);
     border-radius: var(--border-radius-md);
 }
+
 .activity-icon {
     width: 40px;
     height: 40px;
@@ -16702,7 +16767,6 @@ img.loading {
     font-size: 0.75rem;
     animation: slideUp 0.3s ease-out both;
 }
-
 .feedback-success {
     color: #10b981;
     font-weight: 500;
@@ -16718,6 +16782,7 @@ img.loading {
     margin-top: 6px;
     animation: slideUp 0.3s ease-out both;
 }
+
 .strength-bar {
     width: 100%;
     height: 3px;
@@ -17501,7 +17566,6 @@ img.loading {
     margin: 0 auto;
     padding: 0 var(--spacing-lg);
 }
-
 .featured-header {
     display: flex;
     justify-content: space-between;
@@ -17510,6 +17574,7 @@ img.loading {
     padding-bottom: var(--spacing-md);
     border-bottom: 2px solid var(--border-color);
 }
+
 .featured-header h2 {
     font-size: var(--font-size-2xl);
     font-weight: 700;
