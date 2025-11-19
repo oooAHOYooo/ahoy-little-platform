@@ -1,12 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Checkout - Ahoy Indie Media{% endblock %}
 {% block content %}
-<div class="max-w-3xl mx-auto px-4 py-8">
-    <div class="bg-[#0a0a0a]/70 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-white space-y-6">
-        <h1 class="text-2xl font-bold">Checkout</h1>
+<div id="checkoutContainer"
+     class="checkout-overlay fixed inset-0 z-[9998] flex items-center justify-center p-6 backdrop-blur-xl bg-black/60">
+
+    <div class="checkout-card w-full max-w-xl bg-black/50 rounded-2xl border border-white/10 shadow-2xl p-8 text-white relative">
+
+        <div class="checkout-steps flex items-center justify-center gap-3 mb-6">
+            <div class="step active px-4 py-2 rounded-full bg-white/20 text-white text-sm">Review</div>
+            <div class="step px-4 py-2 rounded-full bg-white/10 text-white/60 text-sm">Pay</div>
+            <div class="step px-4 py-2 rounded-full bg-white/10 text-white/60 text-sm">Complete</div>
+        </div>
+
+        <h1 class="text-2xl font-bold mb-4">Checkout</h1>
 
         {% if error %}
-        <div class="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-3 rounded-lg">{{ error }}</div>
+        <div class="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-3 rounded-lg mb-4">{{ error }}</div>
         {% endif %}
 
         <div class="grid grid-cols-1 gap-4">
@@ -15,28 +24,28 @@
                 <p class="text-white/60 text-sm">Tip for Artist</p>
                 <p class="text-lg font-semibold">{{ artist_id or 'Unknown Artist' }}</p>
             </div>
-            <div class="bg-white/5 rounded-lg p-4 border border-white/10">
-                <p class="text-white/60 text-sm">Breakdown</p>
-                <div class="flex justify-between mt-2 text-sm">
-                    <span class="text-white/70">Tip Amount</span>
-                    <span class="text-white font-medium">${{ '%.2f'|format(amount|float) }}</span>
+
+            <div class="breakdown bg-black/30 border border-white/10 rounded-xl p-4 mt-2 mb-2">
+                <h3 class="font-semibold text-lg mb-3">Breakdown</h3>
+                <div class="flex justify-between py-1">
+                    <span class="text-white/80">Tip Amount</span>
+                    <span id="tipAmount">${{ '%.2f'|format(amount|float) }}</span>
                 </div>
                 {% if stripe_fee is not none %}
-                <div class="flex justify-between text-sm">
-                    <span class="text-white/70">Stripe Fee</span>
-                    <span class="text-white font-medium">${{ '%.2f'|format(stripe_fee) }}</span>
+                <div class="flex justify-between py-1">
+                    <span class="text-white/80">Stripe Fee</span>
+                    <span id="stripeFee">${{ '%.2f'|format(stripe_fee) }}</span>
                 </div>
                 {% endif %}
                 {% if platform_fee is not none %}
-                <div class="flex justify-between text-sm">
-                    <span class="text-white/70">Ahoy Fee</span>
-                    <span class="text-white font-medium">${{ '%.2f'|format(platform_fee) }}</span>
+                <div class="flex justify-between py-1">
+                    <span class="text-white/80">Ahoy Fee</span>
+                    <span id="ahoyFee">${{ '%.2f'|format(platform_fee) }}</span>
                 </div>
                 {% endif %}
-                <div class="border-t border-white/10 my-2"></div>
-                <div class="flex justify-between text-base">
-                    <span class="text-white">Total</span>
-                    <span class="text-white font-semibold">${{ '%.2f'|format(total|float) }}</span>
+                <div class="flex justify-between pt-3 mt-2 border-t border-white/10">
+                    <span class="font-semibold">Total</span>
+                    <span id="checkoutTotal" class="font-semibold">${{ '%.2f'|format(total|float) }}</span>
                 </div>
             </div>
             {% else %}
@@ -51,10 +60,9 @@
                     <span class="text-white/70">Amount</span>
                     <span class="text-white font-medium">${{ '%.2f'|format(amount|float) }}</span>
                 </div>
-                <div class="border-t border-white/10 my-2"></div>
-                <div class="flex justify-between text-base">
-                    <span class="text-white">Total</span>
-                    <span class="text-white font-semibold">${{ '%.2f'|format(total|float) }}</span>
+                <div class="flex justify-between pt-3 mt-2 border-t border-white/10">
+                    <span class="font-semibold">Total</span>
+                    <span class="font-semibold">${{ '%.2f'|format(total|float) }}</span>
                 </div>
             </div>
             {% endif %}
@@ -70,11 +78,38 @@
             <input type="hidden" name="computed_total" value="{{ total }}">
 
             <button type="submit"
-                class="w-full bg-indigo-500/80 hover:bg-indigo-500 text-white rounded-lg py-3 font-semibold">
+                class="complete-checkout w-full py-3 mt-4 rounded-xl bg-gradient-to-r from-rose-500 to-purple-500 text-white text-lg font-semibold shadow-lg hover:opacity-90 transition"
+                id="completeCheckoutBtn">
                 Complete Checkout — ${{ '%.2f'|format(total|float) }}
             </button>
         </form>
     </div>
 </div>
+
+<script>
+// Dim rest of page while checkout open
+document.addEventListener('DOMContentLoaded', () => {
+    try { document.body.classList.add('checkout-mode'); } catch (_) {}
+});
+window.addEventListener('beforeunload', () => {
+    try { document.body.classList.remove('checkout-mode'); } catch (_) {}
+});
+
+// Steps animation (Review → Pay → Complete)
+document.addEventListener('DOMContentLoaded', () => {
+    const steps = document.querySelectorAll('.checkout-steps .step');
+    const completeBtn = document.getElementById('completeCheckoutBtn');
+    if (completeBtn && steps && steps.length === 3) {
+        completeBtn.addEventListener('click', () => {
+            steps[0].classList.remove('active');
+            steps[1].classList.add('active'); // Pay
+            setTimeout(() => {
+                steps[1].classList.remove('active');
+                steps[2].classList.add('active'); // Complete
+            }, 800);
+        });
+    }
+});
+</script>
 {% endblock %}
 

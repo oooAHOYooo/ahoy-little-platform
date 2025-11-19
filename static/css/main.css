@@ -4794,14 +4794,31 @@ a:hover {
     }
 }
 
+/* Checkout overlay + glass card */
+.checkout-overlay { animation: fadeIn .3s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.checkout-card { animation: slideUp .35s ease forwards; transform: translateY(20px); }
+@keyframes slideUp { to { transform: translateY(0px); } }
+
+.checkout-steps .step.active { background: rgba(255,255,255,0.35); color: #fff; }
+.complete-checkout { letter-spacing: 0.3px; }
+
+/* Dim rest of app when checkout is active */
+.checkout-mode > *:not(#checkoutContainer) {
+    filter: blur(6px) brightness(0.7);
+    pointer-events: none;
+}
 /* Visualizer overlay */
 .viz-overlay {
     transition: opacity .35s ease-in-out;
 }
+
 .viz-overlay.hidden {
     opacity: 0;
     pointer-events: none;
 }
+
 .viz-overlay.flex {
     opacity: 1;
 }
@@ -4812,10 +4829,12 @@ a:hover {
     transform: translateY(-6px);
     opacity: 0;
 }
+
 .acc-menu:not(.hidden) {
     transform: translateY(0);
     opacity: 1;
 }
+
 /* Subtle compact cancel */
 .tip-cancel {
     background: transparent;
@@ -5583,7 +5602,6 @@ a:hover {
     background: rgba(25, 25, 30, 0.7);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
 }
-
 .tip-jar-amount-group {
     display: flex;
     align-items: center;
@@ -5615,6 +5633,7 @@ a:hover {
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
 }
+
 .tip-jar-amount-input {
     flex: 1;
     padding: 0 12px;
@@ -6382,7 +6401,6 @@ img.loading {
     align-items: center;
     justify-content: center;
 }
-
 .unified-header::before {
     content: '';
     position: absolute;
@@ -6414,6 +6432,7 @@ img.loading {
     align-items: center;
     gap: var(--spacing-lg);
 }
+
 /* Consistent alignment for title text when no hero-media is present */
 .header-title:not(:has(.hero-media)) {
     align-items: flex-start;
@@ -7182,7 +7201,6 @@ img.loading {
     transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
     will-change: transform;
 }
-
 .hero-item {
     flex: 0 0 100%;
     background-size: cover;
@@ -7214,6 +7232,7 @@ img.loading {
     max-width: 600px;
     padding: var(--spacing-xl);
 }
+
 .hero-badge {
     display: inline-block;
     background: var(--primary-color);
@@ -7978,7 +7997,6 @@ img.loading {
     font-size: 10px;
     font-weight: 600;
 }
-
 .show-info h4 {
     font-size: var(--font-size-sm);
     font-weight: 600;
@@ -8012,6 +8030,7 @@ img.loading {
     margin: 0 auto;
     padding: 0 var(--spacing-lg);
 }
+
 .access-item {
     display: flex;
     flex-direction: column;
@@ -8778,7 +8797,6 @@ img.loading {
     color: var(--primary-color);
     background: rgba(99, 102, 241, 0.1);
 }
-
 /* Featured Artists Section */
 .featured-artists-section {
     padding: var(--spacing-2xl) 0;
@@ -8808,6 +8826,7 @@ img.loading {
     height: 100%;
     object-fit: cover;
 }
+
 .artist-overlay {
     position: absolute;
     top: 0;
@@ -9575,7 +9594,6 @@ img.loading {
 .action-btn.saved {
     background: var(--warning-color);
 }
-
 .show-duration {
     position: absolute;
     bottom: var(--spacing-sm);
@@ -9605,6 +9623,7 @@ img.loading {
 .show-info {
     padding: var(--spacing-lg);
 }
+
 .show-info h4 {
     font-size: var(--font-size-lg);
     font-weight: 600;
@@ -10370,7 +10389,6 @@ img.loading {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-md);
 }
-
 .quick-action {
     display: flex;
     flex-direction: column;
@@ -10401,6 +10419,7 @@ img.loading {
     font-size: var(--font-size-sm);
     font-weight: 500;
 }
+
 /* Recent Activity Widget */
 .activity-list {
     display: flex;
@@ -11162,7 +11181,6 @@ img.loading {
     align-items: flex-end;
     padding: var(--spacing-2xl);
 }
-
 .artist-info {
     display: flex;
     gap: var(--spacing-xl);
@@ -11202,6 +11220,7 @@ img.loading {
     line-height: 1.6;
     margin: 0 0 var(--spacing-lg) 0;
 }
+
 .artist-stats {
     display: flex;
     gap: var(--spacing-xl);
@@ -11957,7 +11976,6 @@ img.loading {
     aspect-ratio: 1;
     overflow: hidden;
 }
-
 .item-cover img,
 .playlist-cover img {
     width: 100%;
@@ -11999,6 +12017,7 @@ img.loading {
     align-items: center;
     justify-content: center;
 }
+
 .play-btn:hover {
     background: var(--primary-hover);
     transform: scale(1.1);
@@ -12751,7 +12770,6 @@ img.loading {
     color: var(--primary-color);
     border-bottom-color: var(--primary-color);
 }
-
 /* Featured Artist */
 .featured-artist {
     background: var(--background-light);
@@ -12788,6 +12806,7 @@ img.loading {
     object-fit: cover;
     border: 2px solid var(--border-color);
 }
+
 .artist-badge-compact {
     position: absolute;
     bottom: -5px;
@@ -13539,7 +13558,6 @@ img.loading {
     align-items: center;
     gap: var(--spacing-sm);
 }
-
 .console-output {
     background: var(--background-dark);
     border-radius: var(--border-radius);
@@ -13582,6 +13600,7 @@ img.loading {
     gap: var(--spacing-sm);
     align-items: center;
 }
+
 .command-input {
     flex: 1;
     padding: var(--spacing-sm) var(--spacing-md);
@@ -14251,7 +14270,6 @@ img.loading {
     color: var(--warning-color);
     background: rgba(245, 158, 11, 0.1);
 }
-
 /* Global Player Responsive Design */
 @media (max-width: 480px) {
     .global-player {
@@ -14348,6 +14366,7 @@ img.loading {
         padding-bottom: 80px;
     }
 }
+
 @media (max-width: 768px) and (min-width: 481px) {
     .global-player .player-container {
         gap: var(--spacing-md);
@@ -15051,7 +15070,6 @@ img.loading {
 .artists-list .list-item:last-child {
     border-bottom: none;
 }
-
 .col-avatar {
     width: 50px;
     height: 50px;
@@ -15145,6 +15163,7 @@ img.loading {
     color: white;
     font-weight: 600;
 }
+
 .playlist-overlay {
     position: absolute;
     top: 0;
@@ -15851,7 +15870,6 @@ img.loading {
     text-align: center;
     margin-top: 2px;
 }
-
 /* Account Page Styles */
 .account-page {
     min-height: 100vh;
@@ -15943,6 +15961,7 @@ img.loading {
     font-weight: 700;
     color: white;
 }
+
 .stat-label {
     font-size: var(--font-size-sm);
     color: rgba(255, 255, 255, 0.8);
@@ -16643,7 +16662,6 @@ img.loading {
     opacity: 1;
     animation: emojiBounce 0.3s ease;
 }
-
 @keyframes emojiBounce {
 
     0%,
@@ -16723,6 +16741,7 @@ img.loading {
     color: #6366f1;
     text-decoration: underline;
 }
+
 /* Submit Button */
 .auth-submit-btn {
     width: 100%;
@@ -17423,7 +17442,6 @@ img.loading {
         min-height: 340px;
     }
 }
-
 @media (max-width: 768px) {
 
     .tv-hero,
@@ -17511,6 +17529,7 @@ img.loading {
         height: 6px;
     }
 }
+
 /* Debug Page Responsive */
 @media (max-width: 768px) {
     .accounts-grid {
@@ -18219,7 +18238,6 @@ img.loading {
 .event-card.featured .event-description {
     color: #fff;
 }
-
 .promo-actions {
     display: flex;
     gap: var(--spacing-lg);
@@ -18311,6 +18329,7 @@ img.loading {
     background: var(--background-light);
     transform: translateX(4px);
 }
+
 .playlist-cover {
     width: 40px;
     height: 40px;
@@ -19017,7 +19036,6 @@ img.loading {
     color: var(--text-primary);
     margin: 0 0 var(--spacing-xs) 0;
 }
-
 .music-details p,
 .show-details p {
     font-size: var(--font-size-sm);
@@ -19106,6 +19124,7 @@ img.loading {
     color: var(--primary-color);
     margin-bottom: var(--spacing-sm);
 }
+
 .stat-card .stat-number {
     display: block;
     font-size: var(--font-size-2xl);
@@ -19813,7 +19832,6 @@ img.loading {
 .stat-item {
     text-align: center;
 }
-
 .stat-number {
     font-size: 2.5rem;
     font-weight: bold;
@@ -19906,6 +19924,7 @@ img.loading {
     background: linear-gradient(135deg, #808080, #6b6b6b);
     opacity: 0.7;
 }
+
 .badge-info h4 {
     margin: 0.75rem 0 0.5rem;
     font-size: 1rem;
@@ -20598,7 +20617,6 @@ img.loading {
         box-shadow: 0 0 30px rgba(99, 102, 241, 0.8);
     }
 }
-
 .now-playing-album-overlay {
     position: absolute;
     top: 0;
@@ -20696,6 +20714,7 @@ img.loading {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
+
 .now-playing-btn:hover {
     background: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
