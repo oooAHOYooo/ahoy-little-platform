@@ -30,12 +30,16 @@ class MediaPlayer {
         // Create audio element for music
         this.audioElement = document.createElement('audio');
         this.audioElement.preload = 'metadata';
+        // Improve compatibility with iOS/Safari and WebAudio
+        try { this.audioElement.setAttribute('playsinline', ''); } catch (_) {}
+        try { this.audioElement.crossOrigin = 'anonymous'; } catch (_) {}
         this.audioElement.style.display = 'none';
         document.body.appendChild(this.audioElement);
         
         // Create video element for shows
         this.videoElement = document.createElement('video');
         this.videoElement.preload = 'metadata';
+        try { this.videoElement.setAttribute('playsinline', ''); } catch (_) {}
         this.videoElement.style.display = 'none';
         document.body.appendChild(this.videoElement);
         
@@ -207,7 +211,29 @@ class MediaPlayer {
             }
         }).catch(error => {
             console.error('Error playing media:', error);
-            this.emit('error', error);
+            // Common case: Autoplay policy NotAllowedError until user gesture
+            if (typeof error?.name === 'string' && error.name.toLowerCase().includes('notallowed')) {
+                const retryOnGesture = () => {
+                    // Attempt to unlock AudioContext too
+                    try { window.audioAnalyser?.resume?.(); } catch (_) {}
+                    mediaElement.play().then(() => {
+                        this.isPlaying = true;
+                        this.emit('play');
+                        document.removeEventListener('click', retryOnGesture, { capture: true });
+                        document.removeEventListener('touchstart', retryOnGesture, { capture: true });
+                    }).catch((err) => {
+                        console.error('Retry play failed:', err);
+                        this.emit('error', err);
+                    });
+                };
+                // One-shot listeners
+                document.addEventListener('click', retryOnGesture, { once: true, capture: true });
+                document.addEventListener('touchstart', retryOnGesture, { once: true, capture: true });
+                // Inform user subtly
+                try { document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Tap anywhere to start audio' })); } catch (_) {}
+            } else {
+                this.emit('error', error);
+            }
         });
     }
     
