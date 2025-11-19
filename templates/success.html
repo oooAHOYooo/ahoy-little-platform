@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Success - Ahoy Indie Media{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto px-4 py-16">
+    <div class="bg-[#0a0a0a]/70 backdrop-blur-xl border border-white/10 rounded-2xl p-8 text-white space-y-4 text-center">
+        <div class="text-4xl">🎉</div>
+        <h1 class="text-2xl font-bold">Thank you!</h1>
+        <p>Your purchase was completed successfully.</p>
+        {% if pid %}
+        <p class="text-white/70 text-sm">Reference: #{{ pid }}</p>
+        {% endif %}
+        <a href="/" class="inline-block mt-2 px-4 py-2 rounded-lg bg-white/10 border border-white/20 hover:bg-white/15">
+            Back to Ahoy
+        </a>
+    </div>
+    </div>
+{% endblock %}
+

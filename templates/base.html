@@ -911,7 +911,7 @@
 
                                 <!-- Send Tip Button -->
                                 <button
-                                    @click="sendTip()"
+                                    @click="window.location.href = `/checkout?type=tip&artist_id=${encodeURIComponent(selectedArtistId||'')}&amount=${encodeURIComponent(tipAmount||'')}`"
                                     :disabled="!isValid || isTipping"
                                     class="tip-jar-submit">
                                     <i class="fas fa-heart"

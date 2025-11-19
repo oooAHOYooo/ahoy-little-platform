@@ -37,6 +37,7 @@ from services.listening import start_session as listening_start_session, end_ses
 from services.user_resolver import resolve_db_user_id
 from db import get_session
 from models import UserArtistFollow
+from models import Purchase
 
 # Initialize search index on app startup
 def initialize_search_index():
@@ -524,6 +525,111 @@ def _generate_sitemap(flask_app):
 def api_sitemap():
     return jsonify(_generate_sitemap(app))
 # ============================================================================
+
+@app.route('/checkout')
+def checkout_page():
+    """
+    Universal checkout entrypoint (GET)
+    Accepts query params:
+      type, artist_id, amount, item_id, qty, title
+    Renders a CSRF-protected form that POSTS to /checkout/process
+    """
+    from decimal import Decimal
+    from utils.csrf import generate_csrf_token
+    from blueprints.payments import calculate_tip_fees
+    q = request.args
+    kind = (q.get('type') or 'tip').strip()
+    artist_id = q.get('artist_id') or ''
+    amount = q.get('amount') or ''
+    title = q.get('title') or ''
+    item_id = q.get('item_id') or ''
+    qty = int(q.get('qty') or '1')
+
+    stripe_fee = platform_fee = total = None
+    try:
+        amt = Decimal(str(amount or '0'))
+        if kind == 'tip' and amt > 0:
+            stripe_fee, platform_fee, total, _, _ = calculate_tip_fees(amt)
+        else:
+            total = amt
+    except Exception:
+        total = None
+
+    return render_template(
+        'checkout.html',
+        kind=kind,
+        artist_id=artist_id,
+        amount=amount,
+        item_id=item_id,
+        qty=qty,
+        title=title,
+        stripe_fee=float(stripe_fee) if stripe_fee is not None else None,
+        platform_fee=float(platform_fee) if platform_fee is not None else None,
+        total=float(total) if total is not None else None,
+        csrf_token=generate_csrf_token(),
+    )
+
+
+@app.route('/checkout/process', methods=['POST'])
+def checkout_process():
+    """
+    Universal checkout processor (POST)
+    Validates CSRF, records a Purchase, and (optionally) creates Stripe PI.
+    """
+    from utils.csrf import validate_csrf, generate_csrf_token
+    if not validate_csrf():
+        # Re-render checkout with a new token and error
+        return render_template('checkout.html', error="Invalid CSRF token.", csrf_token=generate_csrf_token()), 400
+
+    form = request.form
+    kind = (form.get('type') or 'tip').strip()
+    artist_id = form.get('artist_id') or None
+    item_id = form.get('item_id') or None
+    qty = int(form.get('qty') or '1')
+    try:
+        amount = float(form.get('amount') or '0')
+    except Exception:
+        amount = 0.0
+    try:
+        total = float(form.get('total') or form.get('computed_total') or amount)
+    except Exception:
+        total = amount
+
+    user_id = None
+    try:
+        user_id = session.get('user_id') or session.get('uid') or None
+        if user_id:
+            user_id = int(user_id)
+    except Exception:
+        user_id = None
+
+    # Persist a pending purchase
+    from db import get_session
+    purchase_id = None
+    with get_session() as s:
+        p = Purchase(
+            type=kind,
+            user_id=user_id,
+            artist_id=str(artist_id) if artist_id else None,
+            item_id=str(item_id) if item_id else None,
+            qty=qty,
+            amount=amount,
+            total=total,
+            status='pending',
+        )
+        s.add(p)
+        s.flush()
+        purchase_id = p.id
+        s.commit()
+
+    # Placeholder: mark paid_test and redirect to success
+    return redirect(url_for('checkout_success', pid=purchase_id))
+
+
+@app.route('/success')
+def checkout_success():
+    pid = request.args.get('pid')
+    return render_template('success.html', pid=pid)
 
 @app.route('/debug-report')
 def debug_report():

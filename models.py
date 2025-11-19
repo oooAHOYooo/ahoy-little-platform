@@ -322,3 +322,24 @@ class UserArtistPosition(Base):
             f"total_contributed={self.total_contributed}>"
         )
 
+
+class Purchase(Base):
+    __tablename__ = 'purchases'
+
+    id = Column(Integer, primary_key=True)
+    type = Column(String(50), nullable=False)  # tip|merch|ticket
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True, index=True)
+    artist_id = Column(String(50), nullable=True, index=True)
+    item_id = Column(String(50), nullable=True, index=True)
+    qty = Column(Integer, nullable=False, default=1)
+    amount = Column(Float, nullable=False)         # amount before fees
+    total = Column(Float, nullable=False)          # final charge
+    stripe_id = Column(String(255), nullable=True, index=True)
+    status = Column(String(50), nullable=False, default="pending", index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    __table_args__ = (
+        Index('ix_purchases_user_id_created_at', 'user_id', 'created_at'),
+        Index('ix_purchases_type_created_at', 'type', 'created_at'),
+    )
+
