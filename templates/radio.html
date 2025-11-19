@@ -121,5 +121,71 @@ function radioPage(){
     }
 }
 </script>
+<!-- Visualizer Overlay Container -->
+<div id="visualizerOverlay"
+     class="viz-overlay hidden fixed inset-0 bg-black/85 backdrop-blur-2xl flex items-center justify-center z-[9999]">
+    <div id="visualizerCanvasContainer"
+         class="w-[92%] h-[70%] bg-black/40 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
+         <!-- visualizer canvas gets appended here -->
+    </div>
+    <button id="closeVisualizer"
+            class="absolute top-6 right-6 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 backdrop-blur-md">
+        ✕ Close
+    </button>
+    </div>
+
+<script>
+// Fullscreen Visualizer → Overlay
+document.addEventListener('DOMContentLoaded', () => {
+    const vizOverlay = document.getElementById('visualizerOverlay');
+    const vizBtn = document.querySelector('button[title="Fullscreen Visualizer"]');
+    const closeViz = document.getElementById('closeVisualizer');
+    const canvasContainer = document.getElementById('visualizerCanvasContainer');
+    const originalContainer = document.getElementById('now-playing-visualizer');
+    let moved = false;
+
+    function openViz() {
+        if (vizOverlay && canvasContainer && originalContainer) {
+            // Move any existing visualizer children into overlay
+            while (originalContainer.firstChild) {
+                canvasContainer.appendChild(originalContainer.firstChild);
+                moved = true;
+            }
+            vizOverlay.classList.remove('hidden');
+            vizOverlay.classList.add('flex');
+        }
+    }
+    function closeVizOverlay() {
+        if (vizOverlay) {
+            vizOverlay.classList.add('hidden');
+            vizOverlay.classList.remove('flex');
+        }
+        // Move back canvas
+        if (moved && canvasContainer && originalContainer) {
+            while (canvasContainer.firstChild) {
+                originalContainer.appendChild(canvasContainer.firstChild);
+            }
+            moved = false;
+        }
+    }
+
+    if (vizBtn) vizBtn.addEventListener('click', openViz);
+    if (closeViz) closeViz.addEventListener('click', closeVizOverlay);
+});
+
+// Account Dropdown (Mobile) safeguard wrapper
+document.addEventListener('DOMContentLoaded', () => {
+    const accountBtn = document.querySelector('button[title="User & Bookmarks Menu"]');
+    const accountMenu = document.querySelector('.mobile-right-dropdown');
+    if (accountBtn && accountMenu) {
+        accountMenu.classList.add('hidden');
+        accountBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            accountMenu.classList.toggle('hidden');
+        });
+        document.addEventListener('click', () => accountMenu.classList.add('hidden'));
+    }
+});
+</script>
 {% endblock %}
 

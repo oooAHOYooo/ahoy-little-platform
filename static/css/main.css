@@ -799,7 +799,6 @@ a:hover {
 .setting-label input[type="checkbox"] {
     display: none;
 }
-
 .toggle-switch {
     position: relative;
     width: 44px;
@@ -1598,7 +1597,6 @@ a:hover {
     transform: translateX(4px);
     text-shadow: 0 0 8px rgba(106, 0, 255, 0.5);
 }
-
 .footer-version-badge {
     margin-top: var(--spacing-lg);
     padding: var(--spacing-sm) var(--spacing-md);
@@ -2397,7 +2395,6 @@ a:hover {
     flex: 1;
     min-width: 200px;
 }
-
 .time-current,
 .time-total {
     font-size: var(--font-size-xs);
@@ -3197,7 +3194,6 @@ a:hover {
 .justify-between {
     justify-content: space-between;
 }
-
 .rounded {
     border-radius: var(--border-radius-md);
 }
@@ -3998,7 +3994,6 @@ a:hover {
     cursor: pointer;
     user-select: none;
 }
-
 .playing-item:active {
     transform: scale(0.98);
 }
@@ -4799,6 +4794,28 @@ a:hover {
     }
 }
 
+/* Visualizer overlay */
+.viz-overlay {
+    transition: opacity .35s ease-in-out;
+}
+.viz-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+.viz-overlay.flex {
+    opacity: 1;
+}
+
+/* Account menu smooth animation */
+.acc-menu {
+    transition: opacity .25s ease, transform .25s ease;
+    transform: translateY(-6px);
+    opacity: 0;
+}
+.acc-menu:not(.hidden) {
+    transform: translateY(0);
+    opacity: 1;
+}
 /* Subtle compact cancel */
 .tip-cancel {
     background: transparent;
@@ -5598,7 +5615,6 @@ a:hover {
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
 }
-
 .tip-jar-amount-input {
     flex: 1;
     padding: 0 12px;
@@ -6398,7 +6414,6 @@ img.loading {
     align-items: center;
     gap: var(--spacing-lg);
 }
-
 /* Consistent alignment for title text when no hero-media is present */
 .header-title:not(:has(.hero-media)) {
     align-items: flex-start;
@@ -7199,7 +7214,6 @@ img.loading {
     max-width: 600px;
     padding: var(--spacing-xl);
 }
-
 .hero-badge {
     display: inline-block;
     background: var(--primary-color);
@@ -7998,7 +8012,6 @@ img.loading {
     margin: 0 auto;
     padding: 0 var(--spacing-lg);
 }
-
 .access-item {
     display: flex;
     flex-direction: column;
@@ -8795,7 +8808,6 @@ img.loading {
     height: 100%;
     object-fit: cover;
 }
-
 .artist-overlay {
     position: absolute;
     top: 0;
@@ -9593,7 +9605,6 @@ img.loading {
 .show-info {
     padding: var(--spacing-lg);
 }
-
 .show-info h4 {
     font-size: var(--font-size-lg);
     font-weight: 600;
@@ -10390,7 +10401,6 @@ img.loading {
     font-size: var(--font-size-sm);
     font-weight: 500;
 }
-
 /* Recent Activity Widget */
 .activity-list {
     display: flex;
@@ -11192,7 +11202,6 @@ img.loading {
     line-height: 1.6;
     margin: 0 0 var(--spacing-lg) 0;
 }
-
 .artist-stats {
     display: flex;
     gap: var(--spacing-xl);
@@ -11990,7 +11999,6 @@ img.loading {
     align-items: center;
     justify-content: center;
 }
-
 .play-btn:hover {
     background: var(--primary-hover);
     transform: scale(1.1);
@@ -12780,7 +12788,6 @@ img.loading {
     object-fit: cover;
     border: 2px solid var(--border-color);
 }
-
 .artist-badge-compact {
     position: absolute;
     bottom: -5px;
@@ -13575,7 +13582,6 @@ img.loading {
     gap: var(--spacing-sm);
     align-items: center;
 }
-
 .command-input {
     flex: 1;
     padding: var(--spacing-sm) var(--spacing-md);
@@ -14342,7 +14348,6 @@ img.loading {
         padding-bottom: 80px;
     }
 }
-
 @media (max-width: 768px) and (min-width: 481px) {
     .global-player .player-container {
         gap: var(--spacing-md);
@@ -15140,7 +15145,6 @@ img.loading {
     color: white;
     font-weight: 600;
 }
-
 .playlist-overlay {
     position: absolute;
     top: 0;
@@ -15939,7 +15943,6 @@ img.loading {
     font-weight: 700;
     color: white;
 }
-
 .stat-label {
     font-size: var(--font-size-sm);
     color: rgba(255, 255, 255, 0.8);
@@ -16720,7 +16723,6 @@ img.loading {
     color: #6366f1;
     text-decoration: underline;
 }
-
 /* Submit Button */
 .auth-submit-btn {
     width: 100%;
@@ -17509,7 +17511,6 @@ img.loading {
         height: 6px;
     }
 }
-
 /* Debug Page Responsive */
 @media (max-width: 768px) {
     .accounts-grid {
@@ -18310,7 +18311,6 @@ img.loading {
     background: var(--background-light);
     transform: translateX(4px);
 }
-
 .playlist-cover {
     width: 40px;
     height: 40px;
@@ -19106,7 +19106,6 @@ img.loading {
     color: var(--primary-color);
     margin-bottom: var(--spacing-sm);
 }
-
 .stat-card .stat-number {
     display: block;
     font-size: var(--font-size-2xl);
@@ -19907,12 +19906,6 @@ img.loading {
     background: linear-gradient(135deg, #808080, #6b6b6b);
     opacity: 0.7;
 }
-
-.badge-gold {
-    background: linear-gradient(135deg, #b8860b, #99750a);
-    opacity: 0.7;
-}
-
 .badge-info h4 {
     margin: 0.75rem 0 0.5rem;
     font-size: 1rem;
@@ -20703,7 +20696,6 @@ img.loading {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
-
 .now-playing-btn:hover {
     background: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
