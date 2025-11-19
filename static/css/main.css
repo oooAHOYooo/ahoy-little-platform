@@ -4802,6 +4802,10 @@ a:hover {
 /* Checkout overlay + glass card */
 .checkout-overlay {
     animation: fadeIn .3s ease forwards;
+    /* soften the blur and background so the content stays readable */
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.45);
 }
 
 @keyframes fadeIn {
@@ -4836,7 +4840,7 @@ a:hover {
 
 /* Dim rest of app when checkout is active */
 .checkout-mode>*:not(#checkoutContainer) {
-    filter: blur(6px) brightness(0.7);
+    filter: blur(2px) brightness(0.85);
     pointer-events: none;
 }
 
