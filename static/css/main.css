@@ -799,6 +799,7 @@ a:hover {
 .setting-label input[type="checkbox"] {
     display: none;
 }
+
 .toggle-switch {
     position: relative;
     width: 44px;
@@ -1597,6 +1598,7 @@ a:hover {
     transform: translateX(4px);
     text-shadow: 0 0 8px rgba(106, 0, 255, 0.5);
 }
+
 .footer-version-badge {
     margin-top: var(--spacing-lg);
     padding: var(--spacing-sm) var(--spacing-md);
@@ -2395,6 +2397,7 @@ a:hover {
     flex: 1;
     min-width: 200px;
 }
+
 .time-current,
 .time-total {
     font-size: var(--font-size-xs);
@@ -3194,6 +3197,7 @@ a:hover {
 .justify-between {
     justify-content: space-between;
 }
+
 .rounded {
     border-radius: var(--border-radius-md);
 }
@@ -3994,6 +3998,7 @@ a:hover {
     cursor: pointer;
     user-select: none;
 }
+
 .playing-item:active {
     transform: scale(0.98);
 }
@@ -4795,20 +4800,46 @@ a:hover {
 }
 
 /* Checkout overlay + glass card */
-.checkout-overlay { animation: fadeIn .3s ease forwards; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.checkout-overlay {
+    animation: fadeIn .3s ease forwards;
+}
 
-.checkout-card { animation: slideUp .35s ease forwards; transform: translateY(20px); }
-@keyframes slideUp { to { transform: translateY(0px); } }
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
 
-.checkout-steps .step.active { background: rgba(255,255,255,0.35); color: #fff; }
-.complete-checkout { letter-spacing: 0.3px; }
+    to {
+        opacity: 1;
+    }
+}
+
+.checkout-card {
+    animation: slideUp .35s ease forwards;
+    transform: translateY(20px);
+}
+
+@keyframes slideUp {
+    to {
+        transform: translateY(0px);
+    }
+}
+
+.checkout-steps .step.active {
+    background: rgba(255, 255, 255, 0.35);
+    color: #fff;
+}
+
+.complete-checkout {
+    letter-spacing: 0.3px;
+}
 
 /* Dim rest of app when checkout is active */
-.checkout-mode > *:not(#checkoutContainer) {
+.checkout-mode>*:not(#checkoutContainer) {
     filter: blur(6px) brightness(0.7);
     pointer-events: none;
 }
+
 /* Visualizer overlay */
 .viz-overlay {
     transition: opacity .35s ease-in-out;
@@ -5602,6 +5633,7 @@ a:hover {
     background: rgba(25, 25, 30, 0.7);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
 }
+
 .tip-jar-amount-group {
     display: flex;
     align-items: center;
@@ -6401,6 +6433,7 @@ img.loading {
     align-items: center;
     justify-content: center;
 }
+
 .unified-header::before {
     content: '';
     position: absolute;
@@ -7201,6 +7234,7 @@ img.loading {
     transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
     will-change: transform;
 }
+
 .hero-item {
     flex: 0 0 100%;
     background-size: cover;
@@ -7997,6 +8031,7 @@ img.loading {
     font-size: 10px;
     font-weight: 600;
 }
+
 .show-info h4 {
     font-size: var(--font-size-sm);
     font-weight: 600;
@@ -8797,6 +8832,7 @@ img.loading {
     color: var(--primary-color);
     background: rgba(99, 102, 241, 0.1);
 }
+
 /* Featured Artists Section */
 .featured-artists-section {
     padding: var(--spacing-2xl) 0;
@@ -9594,6 +9630,7 @@ img.loading {
 .action-btn.saved {
     background: var(--warning-color);
 }
+
 .show-duration {
     position: absolute;
     bottom: var(--spacing-sm);
@@ -10389,6 +10426,7 @@ img.loading {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-md);
 }
+
 .quick-action {
     display: flex;
     flex-direction: column;
@@ -11181,6 +11219,7 @@ img.loading {
     align-items: flex-end;
     padding: var(--spacing-2xl);
 }
+
 .artist-info {
     display: flex;
     gap: var(--spacing-xl);
@@ -11976,6 +12015,7 @@ img.loading {
     aspect-ratio: 1;
     overflow: hidden;
 }
+
 .item-cover img,
 .playlist-cover img {
     width: 100%;
@@ -12770,6 +12810,7 @@ img.loading {
     color: var(--primary-color);
     border-bottom-color: var(--primary-color);
 }
+
 /* Featured Artist */
 .featured-artist {
     background: var(--background-light);
@@ -13558,6 +13599,7 @@ img.loading {
     align-items: center;
     gap: var(--spacing-sm);
 }
+
 .console-output {
     background: var(--background-dark);
     border-radius: var(--border-radius);
@@ -14270,6 +14312,7 @@ img.loading {
     color: var(--warning-color);
     background: rgba(245, 158, 11, 0.1);
 }
+
 /* Global Player Responsive Design */
 @media (max-width: 480px) {
     .global-player {
@@ -15070,6 +15113,7 @@ img.loading {
 .artists-list .list-item:last-child {
     border-bottom: none;
 }
+
 .col-avatar {
     width: 50px;
     height: 50px;
@@ -15870,6 +15914,7 @@ img.loading {
     text-align: center;
     margin-top: 2px;
 }
+
 /* Account Page Styles */
 .account-page {
     min-height: 100vh;
@@ -16662,6 +16707,7 @@ img.loading {
     opacity: 1;
     animation: emojiBounce 0.3s ease;
 }
+
 @keyframes emojiBounce {
 
     0%,
@@ -17442,6 +17488,7 @@ img.loading {
         min-height: 340px;
     }
 }
+
 @media (max-width: 768px) {
 
     .tv-hero,
@@ -18238,6 +18285,7 @@ img.loading {
 .event-card.featured .event-description {
     color: #fff;
 }
+
 .promo-actions {
     display: flex;
     gap: var(--spacing-lg);
@@ -19036,6 +19084,7 @@ img.loading {
     color: var(--text-primary);
     margin: 0 0 var(--spacing-xs) 0;
 }
+
 .music-details p,
 .show-details p {
     font-size: var(--font-size-sm);
@@ -19832,6 +19881,7 @@ img.loading {
 .stat-item {
     text-align: center;
 }
+
 .stat-number {
     font-size: 2.5rem;
     font-weight: bold;
@@ -20617,6 +20667,7 @@ img.loading {
         box-shadow: 0 0 30px rgba(99, 102, 241, 0.8);
     }
 }
+
 .now-playing-album-overlay {
     position: absolute;
     top: 0;

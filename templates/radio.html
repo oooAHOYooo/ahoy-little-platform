@@ -6,14 +6,23 @@
 <div class="radio-page" x-data="radioPage()" x-init="init()">
     <section class="radio-hero">
         <div class="hero-content" style="text-align: center; margin: 2rem 0;">
-            <h1 style="font-size: 4rem; color: #ff0066;"><i class="fas fa-broadcast-tower" style="font-size: 3.5rem; margin-right: 8px;"></i> Ahoy Radio</h1>
-            <p style="color: #ccc; font-size: 1.5rem;">Tune in for a continuous mix from your indie library.</p>
-            <div class="radio-controls" style="display: flex; justify-content: space-around; align-items: center; margin-top: 2rem;">
-                <button class="btn btn-primary" @click="toggle()" style="background-color: #00b894; border: none; padding: 1rem 2rem; color: white; font-size: 1.5rem; flex-grow: 1; margin: 0 10px; border-radius: 12px;">
-                    <span x-show="!isPlaying"><i class="fas fa-play"></i> Play</span>
-                    <span x-show="isPlaying"><i class="fas fa-pause"></i> Pause</span>
+            <h1 style="font-size: 4rem; color: #ff0066;"><i
+                    class="fas fa-broadcast-tower"
+                    style="font-size: 3.5rem; margin-right: 8px;"></i> Ahoy
+                Radio</h1>
+            <p style="color: #ccc; font-size: 1.5rem;">Tune in for a continuous
+                mix from your indie library.</p>
+            <div class="radio-controls"
+                style="display: flex; justify-content: space-around; align-items: center; margin-top: 2rem;">
+                <button class="btn btn-primary" @click="toggle()"
+                    style="background-color: #00b894; border: none; padding: 1rem 2rem; color: white; font-size: 1.5rem; flex-grow: 1; margin: 0 10px; border-radius: 12px;">
+                    <span x-show="!isPlaying"><i class="fas fa-play"></i>
+                        Play</span>
+                    <span x-show="isPlaying"><i class="fas fa-pause"></i>
+                        Pause</span>
                 </button>
-                <button class="btn" @click="skip()" style="background-color: #0984e3; border: none; padding: 1rem 2rem; color: white; font-size: 1.5rem; flex-grow: 1; margin: 0 10px; border-radius: 12px;">
+                <button class="btn" @click="skip()"
+                    style="background-color: #0984e3; border: none; padding: 1rem 2rem; color: white; font-size: 1.5rem; flex-grow: 1; margin: 0 10px; border-radius: 12px;">
                     <i class="fas fa-forward"></i> Skip
                 </button>
                 <!-- Removed shuffle and experimental badge -->
@@ -28,8 +37,12 @@
             <div class="now-info">
                 <h3 x-text="current.title"></h3>
                 <p x-text="current.artist"></p>
-                <p class="artist-description" style="font-size: 0.85rem; color: #999; margin-top: 8px;" x-text="current.artist_description || 'An amazing indie artist creating outstanding music.'"></p>
-                <button @click="tipArtist(current)" style="background-color: #e17055; border: none; padding: 0.5rem 1rem; color: white; font-size: 1rem; border-radius: 5px; margin-top: 10px;">Tip the Artist</button>
+                <p class="artist-description"
+                    style="font-size: 0.85rem; color: #999; margin-top: 8px;"
+                    x-text="current.artist_description || 'An amazing indie artist creating outstanding music.'"></p>
+                <button @click="tipArtist(current)"
+                    style="background-color: #e17055; border: none; padding: 0.5rem 1rem; color: white; font-size: 1rem; border-radius: 5px; margin-top: 10px;">Tip
+                    the Artist</button>
             </div>
         </div>
     </section>
@@ -123,16 +136,16 @@ function radioPage(){
 </script>
 <!-- Visualizer Overlay Container -->
 <div id="visualizerOverlay"
-     class="viz-overlay hidden fixed inset-0 bg-black/85 backdrop-blur-2xl flex items-center justify-center z-[9999]">
+    class="viz-overlay hidden fixed inset-0 bg-black/85 backdrop-blur-2xl flex items-center justify-center z-[9999]">
     <div id="visualizerCanvasContainer"
-         class="w-[92%] h-[70%] bg-black/40 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
-         <!-- visualizer canvas gets appended here -->
+        class="w-[92%] h-[70%] bg-black/40 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden">
+        <!-- visualizer canvas gets appended here -->
     </div>
     <button id="closeVisualizer"
-            class="absolute top-6 right-6 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 backdrop-blur-md">
+        class="absolute top-6 right-6 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 backdrop-blur-md">
         ✕ Close
     </button>
-    </div>
+</div>
 
 <script>
 // Fullscreen Visualizer → Overlay
@@ -188,4 +201,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 {% endblock %}
-
