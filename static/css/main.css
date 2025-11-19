@@ -799,6 +799,7 @@ a:hover {
 .setting-label input[type="checkbox"] {
     display: none;
 }
+
 .toggle-switch {
     position: relative;
     width: 44px;
@@ -1596,6 +1597,7 @@ a:hover {
     transform: translateX(4px);
     text-shadow: 0 0 8px rgba(106, 0, 255, 0.5);
 }
+
 .footer-version-badge {
     margin-top: var(--spacing-lg);
     padding: var(--spacing-sm) var(--spacing-md);
@@ -2394,6 +2396,7 @@ a:hover {
     flex: 1;
     min-width: 200px;
 }
+
 .time-current,
 .time-total {
     font-size: var(--font-size-xs);
@@ -3193,6 +3196,7 @@ a:hover {
 .justify-between {
     justify-content: space-between;
 }
+
 .rounded {
     border-radius: var(--border-radius-md);
 }
@@ -3993,6 +3997,7 @@ a:hover {
     cursor: pointer;
     user-select: none;
 }
+
 .playing-item:active {
     transform: scale(0.98);
 }
@@ -4793,65 +4798,6 @@ a:hover {
     }
 }
 
-/* Compact Tip Card per refactor */
-.tip-card {
-    background: rgba(10, 10, 10, 0.35);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-radius: 14px;
-    padding: 18px 22px;
-    border: 1px solid rgba(255,255,255,0.08);
-    max-width: 360px;
-    margin-inline: auto;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-    animation: tipCardFadeUp 180ms ease-out both;
-}
-
-.tip-controls-row {
-    display: flex;
-    gap: 12px;
-}
-.tip-controls-row .tip-artist { flex: 0 1 65%; min-width: 0; }
-.tip-controls-row .tip-amount { flex: 1 1 35%; min-width: 0; }
-.tip-controls-row .tip-artist .tip-jar-select,
-.tip-controls-row .tip-amount .tip-jar-amount-input { width: 100%; }
-
-.tip-breakdown-grid {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 4px 10px;
-    font-size: 0.85rem;
-}
-.tip-breakdown-grid .tip-breakdown-row { display: contents; }
-.tip-breakdown-grid .tip-breakdown-label { color: rgba(255,255,255,0.65); }
-.tip-breakdown-grid .tip-breakdown-value { color: rgba(255,255,255,0.85); }
-
-/* Full-width glass button override for tip-card */
-.tip-card .send-tip-button {
-    width: 100%;
-    background: rgba(255,255,255,0.15);
-    border-radius: 10px;
-    padding: 10px 0;
-    text-align: center;
-    transition: background 0.2s ease;
-    border: 1px solid rgba(255,255,255,0.1);
-    color: #fff;
-    box-shadow: 0 8px 18px rgba(0,0,0,0.25);
-}
-.tip-card .send-tip-button:hover { background: rgba(255,255,255,0.22); }
-
-@media (max-width: 520px) {
-    .tip-controls-row { flex-direction: column; }
-    .tip-controls-row .tip-artist, .tip-controls-row .tip-amount { flex: 1 1 auto; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .tip-card { animation: none; }
-}
-@keyframes tipCardFadeUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
 /* ========================================
    Mobile Footer Aspect Ratio Fixes
    ======================================== */
@@ -5646,6 +5592,7 @@ a:hover {
     gap: 0.35rem;
     width: 100%;
 }
+
 .badge-mini {
     width: 100%;
     aspect-ratio: 1;
@@ -6443,6 +6390,7 @@ img.loading {
     object-fit: cover;
     border-radius: var(--border-radius-lg);
 }
+
 .header-title .hero-media-overlay {
     border-radius: var(--border-radius-lg);
 }
@@ -7239,6 +7187,7 @@ img.loading {
     color: var(--primary-color);
     background: rgba(99, 102, 241, 0.1);
 }
+
 /* Artist Spotlight Compact */
 .artist-spotlight {
     min-height: 120px;
@@ -8023,6 +7972,7 @@ img.loading {
     z-index: 1;
     position: relative;
 }
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .grid-container {
@@ -8811,6 +8761,7 @@ img.loading {
 .show-card:hover .show-thumbnail img {
     transform: scale(1.05);
 }
+
 .show-overlay {
     position: absolute;
     top: 0;
@@ -9609,6 +9560,7 @@ img.loading {
     transition: all 0.3s ease;
     border: 1px solid var(--border-color);
 }
+
 .artist-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -10397,6 +10349,7 @@ img.loading {
     transform: translateY(-4px);
     background: var(--background-light);
 }
+
 .quick-access-icon {
     width: 60px;
     height: 60px;
@@ -11191,6 +11144,7 @@ img.loading {
     background: var(--background-medium);
     border-bottom: 1px solid var(--border-color);
 }
+
 .back-btn {
     display: flex;
     align-items: center;
@@ -11991,6 +11945,7 @@ img.loading {
     height: 60px;
     flex-shrink: 0;
 }
+
 .recent-item .item-info {
     flex: 1;
     padding: 0;
@@ -12716,6 +12671,7 @@ img.loading {
     font-size: var(--font-size-xs);
     min-height: 32px;
 }
+
 /* Mobile Responsiveness for Artists */
 @media (max-width: 768px) {
     .artists-container {
@@ -13512,6 +13468,7 @@ img.loading {
     border-left: 4px solid #10b981;
     color: #10b981;
 }
+
 .test-result.error {
     background: rgba(239, 68, 68, 0.1);
     border-left: 4px solid #ef4444;
@@ -14297,6 +14254,7 @@ img.loading {
         height: 28px;
     }
 }
+
 /* Mobile Responsive for My Saves */
 @media (max-width: 768px) {
     .page-header {
@@ -15096,6 +15054,7 @@ img.loading {
     position: relative;
     transition: all 0.2s ease;
 }
+
 .checkbox-label input[type="checkbox"]:checked+.checkmark {
     background: var(--primary-color);
     border-color: var(--primary-color);
@@ -15893,6 +15852,7 @@ img.loading {
     flex-direction: column;
     gap: var(--spacing-md);
 }
+
 .content-item {
     display: flex;
     align-items: center;
@@ -16690,6 +16650,7 @@ img.loading {
     padding-top: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .back-to-home-link {
     display: inline-flex;
     align-items: center;
@@ -17487,6 +17448,7 @@ img.loading {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
+
 .featured-show {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -18271,6 +18233,7 @@ img.loading {
         padding: var(--spacing-sm) var(--spacing-lg);
     }
 }
+
 /* Mobile Responsive for Playlists Widget */
 @media (max-width: 768px) {
     .playlists-widget {
@@ -19070,6 +19033,7 @@ img.loading {
 .avatar-anchor-preview.rose {
     background: linear-gradient(135deg, #f43f5e, #e11d48);
 }
+
 /* Avatar Option Hover Effects */
 .avatar-option:hover .avatar-anchor {
     transform: scale(1.1);
@@ -19865,6 +19829,7 @@ img.loading {
     align-items: center;
     gap: 0.5rem;
 }
+
 .progress-bar-small {
     flex: 1;
     height: 6px;
@@ -20632,6 +20597,7 @@ img.loading {
     font-variant-numeric: tabular-nums;
     font-weight: 500;
 }
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .now-playing-wrapper {
@@ -20771,14 +20737,14 @@ img.loading {
     border-radius: 16px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .dashboard-left .sidebar-item:hover {
     box-shadow:
         0 0 0 1px #4CC9F0,
-        0 10px 28px rgba(0, 0, 0, 0.45);
+        0 10px 28px rgba(0,0,0,0.45);
     border-color: rgba(76, 201, 240, 0.5);
 }
 
@@ -20790,7 +20756,7 @@ img.loading {
     padding: 14px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
 }
 
 /* Card base */
@@ -20800,34 +20766,31 @@ img.loading {
     border-radius: 14px;
     padding: 12px;
     margin: 10px 0;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.28);
     transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.12s ease;
 }
-
 .card:hover {
     box-shadow:
         0 0 0 1px #4CC9F0,
-        0 10px 28px rgba(0, 0, 0, 0.45);
+        0 10px 28px rgba(0,0,0,0.45);
     border-color: rgba(76, 201, 240, 0.5);
 }
 
 /* Artist selector */
 .artist-card .tip-jar-label-inline {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255,255,255,0.6);
     font-weight: 600;
 }
-
 .artist-card .tip-jar-select {
     width: 100%;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255,255,255,0.04);
     color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255,255,255,0.12);
     border-radius: 10px;
     padding: 8px 10px;
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
 .artist-card .tip-jar-select:focus {
     border-color: rgba(76, 201, 240, 0.6);
     box-shadow: 0 0 0 2px rgba(76, 201, 240, 0.25);
@@ -20836,12 +20799,11 @@ img.loading {
 /* Amount input */
 .amount-card .tip-jar-amount-group,
 .amount-card .custom-amount-input {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
     border-radius: 10px;
     padding: 8px 10px;
 }
-
 .amount-card .tip-jar-amount-input,
 .amount-card input[type="number"] {
     background: transparent;
@@ -20850,61 +20812,53 @@ img.loading {
     outline: none;
     width: 100%;
 }
-
 .amount-card .tip-jar-amount-input:focus,
 .amount-card input[type="number"]:focus {
     box-shadow: none;
 }
-
 .amount-card:focus-within {
     border-color: rgba(76, 201, 240, 0.6);
     box-shadow: 0 0 0 2px rgba(76, 201, 240, 0.25);
 }
-
 .tip-amount-buttons .tip-btn {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
     color: #fff;
     border-radius: 10px;
     padding: 8px 12px;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.12s ease;
 }
-
 .tip-amount-buttons .tip-btn:hover {
     box-shadow: 0 0 0 1px #4CC9F0;
-    border-color: rgba(76, 201, 240, 0.5);
+    border-color: rgba(76,201,240,0.5);
     transform: translateY(-1px);
 }
-
 .tip-amount-buttons .tip-btn.active {
-    border-color: rgba(76, 201, 240, 0.8);
-    box-shadow: 0 0 0 2px rgba(76, 201, 240, 0.25);
+    border-color: rgba(76,201,240,0.8);
+    box-shadow: 0 0 0 2px rgba(76,201,240,0.25);
 }
 
 /* Breakdown */
 .breakdown-card .tip-breakdown-title {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255,255,255,0.8);
     font-weight: 700;
     margin-bottom: 8px;
 }
-
 .breakdown-card .tip-breakdown-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255,255,255,0.6);
     padding: 6px 0;
 }
-
 .breakdown-card .tip-breakdown-total .tip-breakdown-label,
 .breakdown-card .tip-breakdown-total .tip-breakdown-value {
     color: #fff;
     font-weight: 700;
 }
-
 .breakdown-card .tip-breakdown-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255,255,255,0.08);
     margin: 6px 0;
 }
 
@@ -20923,13 +20877,11 @@ img.loading {
     box-shadow: 0 10px 28px rgba(27, 190, 110, 0.35);
     transition: transform 0.1s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
-
 .send-tip-button:hover {
     transform: translateY(-1px);
     box-shadow: 0 12px 32px rgba(27, 190, 110, 0.45);
     filter: brightness(1.05);
 }
-
 .send-tip-button:disabled {
     filter: grayscale(0.2) brightness(0.9);
     opacity: 0.8;

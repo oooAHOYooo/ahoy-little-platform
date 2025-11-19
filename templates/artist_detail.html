@@ -76,90 +76,90 @@ endblock %}
     <!-- Tip Jar Section (Component injected) -->
     <section class="tip-jar-section" x-data="tipJar()" x-init="init()">
         <div class="tip-jar-container side-panel">
-            <div class="tip-card">
-                <div class="tip-jar-header" style="margin-bottom: 10px;">
+            <div class="card artist-card">
+                <div class="tip-jar-header">
                     <h2>💝 Tip Jar</h2>
                     <p class="tip-jar-subtitle">Support <span x-text="artist.name"></span> directly</p>
                     <p class="tip-jar-fee-note">Ahoy takes 7.5% platform fee</p>
                 </div>
-                
-                <div class="tip-controls-row" style="margin-bottom: 10px;">
-                    <div class="tip-amount" style="flex: 1;">
-                        <div class="tip-amount-buttons" style="margin-bottom: 8px;">
-                            <button 
-                                @click="selectAmount(1)"
-                                :class="{ 'active': selectedAmount === 1 }"
-                                class="tip-btn">
-                                $1
-                            </button>
-                            <button 
-                                @click="selectAmount(3)"
-                                :class="{ 'active': selectedAmount === 3 }"
-                                class="tip-btn">
-                                $3
-                            </button>
-                            <button 
-                                @click="selectAmount(5)"
-                                :class="{ 'active': selectedAmount === 5 }"
-                                class="tip-btn">
-                                $5
-                            </button>
-                            <button 
-                                @click="selectAmount(10)"
-                                :class="{ 'active': selectedAmount === 10 }"
-                                class="tip-btn">
-                                $10
-                            </button>
-                            <button 
-                                @click="showCustomInput = true"
-                                :class="{ 'active': showCustomInput }"
-                                class="tip-btn custom">
-                                Custom
-                            </button>
-                        </div>
-                        <div x-show="showCustomInput" x-transition class="custom-amount-input">
-                            <label for="custom-amount">Enter amount ($)</label>
-                            <input 
-                                type="number" 
-                                id="custom-amount"
-                                x-model="customAmount"
-                                min="0.50"
-                                step="0.01"
-                                placeholder="0.50"
-                                @input="selectedAmount = null; customAmount = $event.target.value">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card breakdown-card tip-breakdown-grid" x-show="tipAmount">
-                    <div class="tip-breakdown-title">Your Tip Breakdown</div>
-                    <div class="tip-breakdown-row">
-                        <span class="tip-breakdown-label">Tip Amount</span>
-                        <span class="tip-breakdown-value" data-testid="tipAmount" x-text="'$' + (Number(tipAmount||0)).toFixed(2)"></span>
-                    </div>
-                    <div class="tip-breakdown-row">
-                        <span class="tip-breakdown-label">Stripe Fee (2.9% + $0.30)</span>
-                        <span class="tip-breakdown-value" data-testid="stripeFee" x-text="'$' + (Number(tipAmount||0)*0.029 + 0.30).toFixed(2)"></span>
-                    </div>
-                    <div class="tip-breakdown-row">
-                        <span class="tip-breakdown-label">Platform Fee (7.5%)</span>
-                        <span class="tip-breakdown-value" data-testid="platformFee" x-text="'$' + (Number(tipAmount||0)*0.075).toFixed(2)"></span>
-                    </div>
-                    <div class="tip-breakdown-divider"></div>
-                    <div class="tip-breakdown-row tip-breakdown-total">
-                        <span class="tip-breakdown-label">Total Charge</span>
-                        <span class="tip-breakdown-value" data-testid="totalCharge" x-text="'$' + (Number(tipAmount||0) + (Number(tipAmount||0)*0.029 + 0.30) + (Number(tipAmount||0)*0.075)).toFixed(2)"></span>
-                    </div>
-                </div>
-
-                <button 
-                    @click="processTip()"
-                    :disabled="isProcessing || !canTip"
-                    class="tip-submit-btn send-tip-button">
-                    <span x-show="!isProcessing">Send Tip</span>
-                    <span x-show="isProcessing">Processing...</span>
-                </button>
             </div>
+            
+            <div class="card amount-card">
+                <div class="tip-amount-buttons">
+                    <button 
+                        @click="selectAmount(1)"
+                        :class="{ 'active': selectedAmount === 1 }"
+                        class="tip-btn">
+                        $1
+                    </button>
+                    <button 
+                        @click="selectAmount(3)"
+                        :class="{ 'active': selectedAmount === 3 }"
+                        class="tip-btn">
+                        $3
+                    </button>
+                    <button 
+                        @click="selectAmount(5)"
+                        :class="{ 'active': selectedAmount === 5 }"
+                        class="tip-btn">
+                        $5
+                    </button>
+                    <button 
+                        @click="selectAmount(10)"
+                        :class="{ 'active': selectedAmount === 10 }"
+                        class="tip-btn">
+                        $10
+                    </button>
+                    <button 
+                        @click="showCustomInput = true"
+                        :class="{ 'active': showCustomInput }"
+                        class="tip-btn custom">
+                        Custom
+                    </button>
+                </div>
+
+                <div x-show="showCustomInput" x-transition class="custom-amount-input">
+                    <label for="custom-amount">Enter amount ($)</label>
+                    <input 
+                        type="number" 
+                        id="custom-amount"
+                        x-model="customAmount"
+                        min="0.50"
+                        step="0.01"
+                        placeholder="0.50"
+                        @input="selectedAmount = null; customAmount = $event.target.value">
+                </div>
+            </div>
+
+            <!-- Breakdown card -->
+            <div class="card breakdown-card" x-show="tipAmount">
+                <div class="tip-breakdown-title">Your Tip Breakdown</div>
+                <div class="tip-breakdown-row">
+                    <span class="tip-breakdown-label">Tip Amount</span>
+                    <span class="tip-breakdown-value" x-text="'$' + (Number(tipAmount||0)).toFixed(2)"></span>
+                </div>
+                <div class="tip-breakdown-row">
+                    <span class="tip-breakdown-label">Stripe Fee (2.9% + $0.30)</span>
+                    <span class="tip-breakdown-value" x-text="'$' + (Number(tipAmount||0)*0.029 + 0.30).toFixed(2)"></span>
+                </div>
+                <div class="tip-breakdown-row">
+                    <span class="tip-breakdown-label">Platform Fee (7.5%)</span>
+                    <span class="tip-breakdown-value" x-text="'$' + (Number(tipAmount||0)*0.075).toFixed(2)"></span>
+                </div>
+                <div class="tip-breakdown-divider"></div>
+                <div class="tip-breakdown-row tip-breakdown-total">
+                    <span class="tip-breakdown-label">Total Charge</span>
+                    <span class="tip-breakdown-value" x-text="'$' + (Number(tipAmount||0) + (Number(tipAmount||0)*0.029 + 0.30) + (Number(tipAmount||0)*0.075)).toFixed(2)"></span>
+                </div>
+            </div>
+
+            <button 
+                @click="processTip()"
+                :disabled="isProcessing || !canTip"
+                class="tip-submit-btn send-tip-button">
+                <span x-show="!isProcessing">Send Tip</span>
+                <span x-show="isProcessing">Processing...</span>
+            </button>
 
             <!-- Supporter Badge Display -->
             <div x-show="isSupporter" class="supporter-badge" x-transition>

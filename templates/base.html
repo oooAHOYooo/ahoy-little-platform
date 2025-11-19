@@ -804,36 +804,42 @@
 
                         <!-- Tip Jar -->
                         <div class="tip-jar-card sidebar-item side-panel">
-                            <div class="tip-card">
-                                <div class="tip-controls-row">
-                                    <div class="tip-artist">
-                                        <label class="tip-jar-label-inline">Artist</label>
-                                        <select
-                                            x-model="selectedArtistId"
-                                            class="tip-jar-select">
-                                            <option value>Select...</option>
-                                            <template x-for="artist in artists"
-                                                :key="artist.id || artist.name">
-                                                <option
-                                                    :value="artist.id || artist.name"
-                                                    x-text="artist.name"></option>
-                                            </template>
-                                        </select>
+                            <div class="tip-jar-compact">
+                                <div class="card artist-card">
+                                <div class="tip-jar-row">
+                                    <label
+                                        class="tip-jar-label-inline">Artist</label>
+                                    <select
+                                        x-model="selectedArtistId"
+                                        class="tip-jar-select">
+                                        <option value>Select...</option>
+                                        <template x-for="artist in artists"
+                                            :key="artist.id || artist.name">
+                                            <option
+                                                :value="artist.id || artist.name"
+                                                x-text="artist.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                </div>
+
+                                <div class="card amount-card">
+                                <div class="tip-jar-row">
+                                    <label
+                                        class="tip-jar-label-inline">Amount</label>
+                                    <div class="tip-jar-amount-group">
+                                        <span
+                                            class="tip-jar-currency-prefix">$</span>
+                                        <input
+                                            type="number"
+                                            x-model="tipAmount"
+                                            placeholder="0.00"
+                                            min="0.50"
+                                            step="0.01"
+                                            class="tip-jar-amount-input"
+                                            @input="tipAmount = $event.target.value">
                                     </div>
-                                    <div class="tip-amount">
-                                        <label class="tip-jar-label-inline">Amount</label>
-                                        <div class="tip-jar-amount-group">
-                                            <span class="tip-jar-currency-prefix">$</span>
-                                            <input
-                                                type="number"
-                                                x-model="tipAmount"
-                                                placeholder="0.00"
-                                                min="0.50"
-                                                step="0.01"
-                                                class="tip-jar-amount-input"
-                                                @input="tipAmount = $event.target.value">
-                                        </div>
-                                    </div>
+                                </div>
                                 </div>
 
                                 <!-- Tip Breakdown Card -->
@@ -841,21 +847,21 @@
                                     x-transition:enter="transition ease-out duration-200"
                                     x-transition:enter-start="opacity-0"
                                     x-transition:enter-end="opacity-100"
-                                    class="tip-breakdown-card card breakdown-card tip-breakdown-grid">
+                                    class="tip-breakdown-card card breakdown-card">
                                     <div class="tip-breakdown-title">Your Tip
                                         Breakdown</div>
 
                                     <div class="tip-breakdown-row">
                                         <span class="tip-breakdown-label">Tip
                                             Amount</span>
-                                        <span class="tip-breakdown-value" data-testid="tipAmount"
+                                        <span class="tip-breakdown-value"
                                             x-text="'$' + (parseFloat(tipAmount || 0)).toFixed(2)"></span>
                                     </div>
 
                                     <div class="tip-breakdown-row">
                                         <span class="tip-breakdown-label">Stripe
                                             Fee (2.9% + $0.30)</span>
-                                        <span class="tip-breakdown-value" data-testid="stripeFee"
+                                        <span class="tip-breakdown-value"
                                             x-text="'$' + calculateStripeFee(parseFloat(tipAmount || 0)).toFixed(2)"></span>
                                     </div>
 
@@ -863,7 +869,7 @@
                                         <span
                                             class="tip-breakdown-label">Platform
                                             Fee (7.5%)</span>
-                                        <span class="tip-breakdown-value" data-testid="platformFee"
+                                        <span class="tip-breakdown-value"
                                             x-text="'$' + calculatePlatformFee(parseFloat(tipAmount || 0)).toFixed(2)"></span>
                                     </div>
 
@@ -873,7 +879,7 @@
                                         class="tip-breakdown-row tip-breakdown-total">
                                         <span class="tip-breakdown-label">Total
                                             Charge</span>
-                                        <span class="tip-breakdown-value" data-testid="totalCharge"
+                                        <span class="tip-breakdown-value"
                                             x-text="'$' + calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2)"></span>
                                     </div>
 
@@ -895,7 +901,6 @@
                                     <span
                                         x-text="isTipping ? 'Processing...' : 'Send Tip — $' + (isValid ? calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2) : '0.00')"></span>
                                 </button>
-                            </div>
                             </div>
                         </div>
 
