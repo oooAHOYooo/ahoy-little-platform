@@ -330,7 +330,7 @@
 
                     <div x-show="leftMenuOpen"
                         x-transition
-                        @click.away="leftMenuOpen = false"
+                        @click.outside="leftMenuOpen = false"
                         class="mobile-dropdown-menu mobile-left-dropdown">
 
                         <!-- Search in mobile menu -->
@@ -438,7 +438,7 @@
                     <div class="hidden-mobile account-menu-container"
                         x-show="isLoggedIn"
                         x-data="{ accountMenuOpen: false }"
-                        @click.away="accountMenuOpen = false">
+                        @click.outside="accountMenuOpen = false">
                         <button @click="accountMenuOpen = !accountMenuOpen"
                             class="nav-item account-menu-btn"
                             title="Account Features">
@@ -503,6 +503,23 @@
                                         <div
                                             class="text-xs text-neutral-400">Badges</div>
                                     </div>
+                                </div>
+
+                                <!-- Wallet Summary -->
+                                <div class="flex items-center justify-between mt-3 p-2 rounded-md border border-neutral-700/40 bg-neutral-800/30">
+                                    <div class="text-xs text-neutral-300">Wallet</div>
+                                    <div class="text-sm font-semibold text-white"
+                                         x-text="'$' + ((walletBalanceCents || 0) / 100).toFixed(2)"></div>
+                                </div>
+                                <div class="mt-2 flex gap-2">
+                                    <button class="px-2 py-1 text-xs rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
+                                        @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(2000) : null">
+                                        Add $20
+                                    </button>
+                                    <button class="px-2 py-1 text-xs rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
+                                        @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(5000) : null">
+                                        Add $50
+                                    </button>
                                 </div>
                             </div>
 
@@ -631,7 +648,7 @@
 
                     <div x-show="rightMenuOpen"
                         x-transition
-                        @click.away="rightMenuOpen = false"
+                        @click.outside="rightMenuOpen = false"
                         class="mobile-dropdown-menu mobile-right-dropdown">
 
                         <!-- User Profile Section -->
@@ -1630,6 +1647,8 @@
                     email: "",
                     avatar: "/static/img/default-avatar.png"
                 },
+                // Wallet state
+                walletBalanceCents: 0,
                 
                 // Notification state
                 newBookmarkCount: 0,
@@ -1661,6 +1680,41 @@
                     if (window.__ahoyNotificationState) {
                         this.newBookmarkCount = window.__ahoyNotificationState.newBookmarkCount;
                         this.hasNewBookmarks = window.__ahoyNotificationState.hasNewBookmarks;
+                    }
+                    
+                    // Load wallet (best-effort)
+                    this.loadWallet();
+                },
+                
+                async loadWallet() {
+                    try {
+                        const r = await fetch('/payments/wallet', { credentials: 'include' });
+                        if (!r.ok) return;
+                        const data = await r.json();
+                        if (typeof data.balance_cents === 'number') {
+                            this.walletBalanceCents = data.balance_cents;
+                        } else if (typeof data.balance === 'number') {
+                            this.walletBalanceCents = Math.round(data.balance * 100);
+                        }
+                    } catch (_) { /* ignore */ }
+                },
+                
+                async addFunds(cents = 2000) {
+                    try {
+                        const r = await fetch('/payments/topup/checkout-session', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ amount_cents: cents })
+                        });
+                        const data = await r.json();
+                        if (r.ok && data.url) {
+                            window.location.href = data.url;
+                        } else {
+                            document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: data.error || 'Top-up unavailable' }));
+                        }
+                    } catch (e) {
+                        document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Failed to start top-up' }));
                     }
                 },
                 
