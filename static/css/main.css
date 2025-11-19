@@ -799,6 +799,7 @@ a:hover {
 .setting-label input[type="checkbox"] {
     display: none;
 }
+
 .toggle-switch {
     position: relative;
     width: 44px;
@@ -1506,10 +1507,10 @@ a:hover {
 .footer-content {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 24px var(--spacing-lg);
+    padding: 14px var(--spacing-md);
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: var(--spacing-xl);
+    gap: var(--spacing-md);
     align-items: start;
     position: relative;
     z-index: 0;
@@ -1536,7 +1537,7 @@ a:hover {
 }
 
 .footer-logo img {
-    height: 40px;
+    height: 30px;
     width: auto;
     filter: brightness(0) invert(1);
     opacity: 0.9;
@@ -1588,7 +1589,7 @@ a:hover {
     font-size: var(--font-size-sm);
     transition: all 0.3s ease;
     display: inline-block;
-    padding: 4px 0;
+    padding: 2px 0;
 }
 
 .footer-nav-list li a:hover {
@@ -1596,6 +1597,7 @@ a:hover {
     transform: translateX(4px);
     text-shadow: 0 0 8px rgba(106, 0, 255, 0.5);
 }
+
 .footer-version-badge {
     margin-top: var(--spacing-lg);
     padding: var(--spacing-sm) var(--spacing-md);
@@ -1625,7 +1627,7 @@ a:hover {
 
 .footer-bottom {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 24px var(--spacing-lg);
+    padding: 12px var(--spacing-md);
     background: rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -2394,6 +2396,7 @@ a:hover {
     flex: 1;
     min-width: 200px;
 }
+
 .time-current,
 .time-total {
     font-size: var(--font-size-xs);
@@ -3193,6 +3196,7 @@ a:hover {
 .justify-between {
     justify-content: space-between;
 }
+
 .rounded {
     border-radius: var(--border-radius-md);
 }
@@ -3993,6 +3997,7 @@ a:hover {
     cursor: pointer;
     user-select: none;
 }
+
 .playing-item:active {
     transform: scale(0.98);
 }
@@ -4797,28 +4802,35 @@ a:hover {
 .tip-cancel {
     background: transparent;
     border: none;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255, 255, 255, 0.45);
     font-size: 11px;
     padding: 4px 6px;
     cursor: pointer;
     transition: color 0.15s ease, opacity 0.15s ease;
 }
-.tip-cancel:hover { color: rgba(255,255,255,0.7); }
-.tip-cancel:disabled { color: rgba(255,255,255,0.25); cursor: default; }
+
+.tip-cancel:hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.tip-cancel:disabled {
+    color: rgba(255, 255, 255, 0.25);
+    cursor: default;
+}
 
 /* Top status badge */
 #tip-status-badge {
     position: fixed;
     top: 10px;
     right: 14px;
-    background: rgba(0,0,0,0.55);
+    background: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     color: #fff;
     padding: 6px 10px;
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.12);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
     opacity: 0;
     transform: translateY(-8px);
     transition: all 0.25s ease;
@@ -4828,14 +4840,21 @@ a:hover {
     gap: 6px;
     pointer-events: none;
 }
-#tip-status-badge.visible { opacity: 1; transform: translateY(0); }
-#tip-status-badge i { color: #22c55e; }
+
+#tip-status-badge.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#tip-status-badge i {
+    color: #22c55e;
+}
 
 /* XP reinforcement modal */
 .xp-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.35);
+    background: rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     display: flex;
@@ -4843,18 +4862,29 @@ a:hover {
     justify-content: center;
     z-index: 10001;
 }
+
 .xp-card {
     background: rgba(15, 18, 22, 0.7);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     padding: 18px 20px;
     color: #fff;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
     min-width: 260px;
     text-align: center;
 }
-.xp-card .xp-points { font-weight: 800; color: #4CC9F0; }
-.xp-card .xp-close { margin-top: 10px; font-size: 12px; opacity: .8; }
+
+.xp-card .xp-points {
+    font-weight: 800;
+    color: #4CC9F0;
+}
+
+.xp-card .xp-close {
+    margin-top: 10px;
+    font-size: 12px;
+    opacity: .8;
+}
+
 /* Ahoy ephemeral toast */
 .ahoy-toast {
     position: fixed;
@@ -5652,6 +5682,7 @@ a:hover {
     font-weight: 700;
     font-size: var(--font-size-md);
 }
+
 .tip-breakdown-caption {
     margin-top: 12px;
     padding-top: 12px;
@@ -6449,6 +6480,7 @@ img.loading {
     color: var(--background-dark);
     z-index: 1;
 }
+
 .header-search .search-clear {
     position: absolute;
     right: var(--spacing-md);
@@ -7245,6 +7277,7 @@ img.loading {
     background: rgba(0, 0, 0, 0.8);
     transform: scale(1.1);
 }
+
 .hero-indicators {
     position: absolute;
     bottom: var(--spacing-lg);
@@ -8042,6 +8075,7 @@ img.loading {
     opacity: 0;
     transition: opacity 0.2s ease;
 }
+
 .recently-added .playing-list.recently-added-grid .playing-item:hover .play-indicator {
     opacity: 1;
 }
@@ -8837,6 +8871,7 @@ img.loading {
     line-height: 1.6;
     margin: 0 0 var(--spacing-xl) 0;
 }
+
 .artist-stats {
     display: flex;
     gap: var(--spacing-xl);
@@ -9633,6 +9668,7 @@ img.loading {
     border-radius: var(--border-radius-sm);
     overflow: hidden;
 }
+
 .col-thumbnail img {
     width: 100%;
     height: 100%;
@@ -10401,6 +10437,7 @@ img.loading {
     font-size: var(--font-size-xs);
     color: var(--text-tertiary);
 }
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .agenda-header {
@@ -11200,6 +11237,7 @@ img.loading {
     color: var(--primary-color);
     border-bottom-color: var(--primary-color);
 }
+
 .tab-content {
     min-height: 400px;
 }
@@ -12000,6 +12038,7 @@ img.loading {
 .add-btn {
     background: rgba(0, 0, 0, 0.7);
 }
+
 .add-btn:hover {
     background: #10b981;
 }
@@ -12792,6 +12831,7 @@ img.loading {
     color: var(--accent-color);
     font-size: var(--font-size-sm);
 }
+
 .featured-description-compact {
     font-size: var(--font-size-sm);
     color: var(--text-secondary);
@@ -13589,6 +13629,7 @@ img.loading {
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
 }
+
 .test-results {
     background: var(--background-dark);
     border-radius: var(--border-radius);
@@ -14372,6 +14413,7 @@ img.loading {
         font-size: 10px;
     }
 }
+
 /* Ahoy ephemeral toast */
 .ahoy-toast {
     position: fixed;
@@ -15170,6 +15212,7 @@ img.loading {
     border-radius: 4px;
     font-weight: 500;
 }
+
 /* Color Picker */
 .color-picker {
     display: flex;
@@ -15971,6 +16014,7 @@ img.loading {
     color: var(--text-primary);
     margin: 0 0 var(--spacing-lg) 0;
 }
+
 .activity-list {
     display: flex;
     flex-direction: column;
@@ -16767,6 +16811,7 @@ img.loading {
     font-size: 0.75rem;
     animation: slideUp 0.3s ease-out both;
 }
+
 .feedback-success {
     color: #10b981;
     font-weight: 500;
@@ -17566,6 +17611,7 @@ img.loading {
     margin: 0 auto;
     padding: 0 var(--spacing-lg);
 }
+
 .featured-header {
     display: flex;
     justify-content: space-between;
@@ -18308,6 +18354,7 @@ img.loading {
     color: white;
     transform: translateX(4px);
 }
+
 /* Mobile Responsive for New Haven Promotional Banner */
 @media (max-width: 768px) {
     .newhaven-promo-section {
@@ -19073,6 +19120,7 @@ img.loading {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+
 /* Mobile Responsive for Artist Detail */
 @media (max-width: 768px) {
     .artist-hero-content {
@@ -19871,6 +19919,7 @@ img.loading {
     opacity: 0.7;
     color: rgba(255, 255, 255, 0.6);
 }
+
 .new-badge-label {
     position: absolute;
     top: -12px;
@@ -20669,6 +20718,7 @@ img.loading {
     font-size: 18px;
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
+
 .now-playing-play-btn:hover {
     background: var(--secondary-color, #8b5cf6);
     transform: scale(1.1);
