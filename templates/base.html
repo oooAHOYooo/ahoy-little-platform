@@ -760,7 +760,7 @@
         <main class="main-content">
             <div class="dashboard-sidebars">
                 <!-- Left Dashboard: Collection -->
-                <aside class="dashboard-sidebar dashboard-left"
+                <aside class="dashboard-sidebar dashboard-left glass-dashboard"
                     x-data="dashboardCollection()" x-init="init()">
                     <div class="sidebar-content">
                         <!-- User Info Block -->
@@ -803,8 +803,9 @@
                         </div>
 
                         <!-- Tip Jar -->
-                        <div class="tip-jar-card sidebar-item">
+                        <div class="tip-jar-card sidebar-item side-panel">
                             <div class="tip-jar-compact">
+                                <div class="card artist-card">
                                 <div class="tip-jar-row">
                                     <label
                                         class="tip-jar-label-inline">Artist</label>
@@ -820,7 +821,9 @@
                                         </template>
                                     </select>
                                 </div>
+                                </div>
 
+                                <div class="card amount-card">
                                 <div class="tip-jar-row">
                                     <label
                                         class="tip-jar-label-inline">Amount</label>
@@ -837,13 +840,14 @@
                                             @input="tipAmount = $event.target.value">
                                     </div>
                                 </div>
+                                </div>
 
                                 <!-- Tip Breakdown Card -->
                                 <div x-show="isValid"
                                     x-transition:enter="transition ease-out duration-200"
                                     x-transition:enter-start="opacity-0"
                                     x-transition:enter-end="opacity-100"
-                                    class="tip-breakdown-card">
+                                    class="tip-breakdown-card card breakdown-card">
                                     <div class="tip-breakdown-title">Your Tip
                                         Breakdown</div>
 
@@ -889,7 +893,7 @@
                                 <button
                                     @click="sendTip()"
                                     :disabled="!isValid || isTipping"
-                                    class="tip-jar-submit">
+                                    class="tip-jar-submit send-tip-button">
                                     <i class="fas fa-heart"
                                         x-show="!isTipping"></i>
                                     <i class="fas fa-spinner fa-spin"
