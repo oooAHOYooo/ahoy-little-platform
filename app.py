@@ -2696,9 +2696,11 @@ if __name__ == "__main__":
             print(f"⚠️  Port {requested} busy — starting on {alt}")
             chosen = alt
         else:
+            # Fallback: let OS pick an ephemeral port
             print(f"❌ Port {requested} busy and no alternates free in 5001-5020.")
-            print(f"💡 Please free up port {requested} or set PORT environment variable to a different port.")
-            sys.exit(1)
+            print("🔁 Falling back to PORT=0 (OS-assigned ephemeral port).")
+            print("💡 Set explicit PORT env var if you prefer a fixed port, e.g. PORT=5050 python app.py")
+            chosen = 0
 
     # 3) Run with gunicorn if available for parity; else Flask dev server
     gunicorn_bin = shutil.which("gunicorn")
