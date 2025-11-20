@@ -12,6 +12,7 @@
             <div class="step px-4 py-2 rounded-full bg-white/10 text-white/60 text-sm">Complete</div>
         </div>
 
+        <div class="checkout-panel">
         <h1 class="text-2xl font-bold mb-4">Checkout</h1>
 
         {% if error %}
@@ -83,6 +84,7 @@
                 Complete Checkout — ${{ '%.2f'|format(total|float) }}
             </button>
         </form>
+        </div>
     </div>
 </div>
 

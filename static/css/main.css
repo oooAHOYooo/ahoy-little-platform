@@ -4823,6 +4823,28 @@ a:hover {
     transform: translateY(20px);
 }
 
+/* Inner sharp glass panel to avoid softness/jitter */
+.checkout-panel {
+    background: rgba(10, 10, 12, 0.60);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    backdrop-filter: saturate(140%) blur(8px);
+    -webkit-backdrop-filter: saturate(140%) blur(8px);
+    contain: layout paint;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure images inside checkout are crisp and not stretched */
+.checkout-panel img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: auto;
+}
 @keyframes slideUp {
     to {
         transform: translateY(0px);
