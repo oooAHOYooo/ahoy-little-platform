@@ -25,13 +25,12 @@
           <span class="badge">Works anywhere</span>
         </div>
         <div class="cast-actions">
-          <button class="btn btn-primary" @click="openReceiver()"><i
-              class="fas fa-tv"></i> Open Receiver (TV)</button>
-          <button class="btn btn-outline" :disabled="!nowPlaying"
-            @click="sendToReceiver()"><i class="fas fa-paper-plane"></i> Send to
+          <button class="btn btn-primary" @click="openReceiver()"><i class="fas fa-tv"></i> Open Receiver (TV)</button>
+          <button class="btn btn-outline" :disabled="!nowPlaying" @click="sendToReceiver()"><i
+              class="fas fa-paper-plane"></i> Send to
             Receiver</button>
         </div>
-        <p class="hint" x-show="!nowPlaying">Tip: press Play on something first,
+        <p class="hint" x-show="!nowPlaying">Boost: press Play on something first,
           then hit Send.</p>
         <p class="hint" x-show="nowPlaying"><i class="fas fa-music"></i> Now
           Playing: <strong x-text="nowPlaying?.title"></strong></p>
@@ -56,7 +55,8 @@
           <li>In Chrome, click the <strong>Cast</strong> button → choose your
             Chromecast or Android TV.</li>
           <li>Select <strong>Cast tab</strong> for quick casting, or
-            <strong>Cast desktop</strong> for full mirroring.</li>
+            <strong>Cast desktop</strong> for full mirroring.
+          </li>
         </ul>
         <div class="badges"><span class="badge">No account for tab
             casting</span></div>
@@ -93,13 +93,45 @@
   </section>
 
   <style>
-      .cast-page .quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-      .cast-page .quick-card{background:var(--surface,rgba(255,255,255,0.04));border-radius:14px;padding:16px}
-      .cast-page .quick-card h3{margin:0 0 8px}
-      .cast-page .badges .badge{display:inline-block;background:rgba(255,255,255,0.08);padding:4px 8px;border-radius:9999px;margin-right:6px;font-size:.85em;font-weight:600}
-      .cast-page .cast-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-      .cast-page .hint{font-size:.9em;color:#a0a0a0;margin-top:6px}
-    </style>
+    .cast-page .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px
+    }
+
+    .cast-page .quick-card {
+      background: var(--surface, rgba(255, 255, 255, 0.04));
+      border-radius: 14px;
+      padding: 16px
+    }
+
+    .cast-page .quick-card h3 {
+      margin: 0 0 8px
+    }
+
+    .cast-page .badges .badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 4px 8px;
+      border-radius: 9999px;
+      margin-right: 6px;
+      font-size: .85em;
+      font-weight: 600
+    }
+
+    .cast-page .cast-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px
+    }
+
+    .cast-page .hint {
+      font-size: .9em;
+      color: #a0a0a0;
+      margin-top: 6px
+    }
+  </style>
 
   <section class="cast-section">
     <h2>4) DLNA / Miracast (device mirroring)</h2>
@@ -117,57 +149,57 @@
     <p>This opens a minimal fullscreen page that plays a provided media URL. Use
       with the WebRTC sender above or paste a link manually.</p>
     <div class="cast-actions">
-      <button class="btn" @click="openReceiver('/player')"><i
-          class="fas fa-external-link-alt"></i> Open Minimal Player</button>
+      <button class="btn" @click="openReceiver('/player')"><i class="fas fa-external-link-alt"></i> Open Minimal
+        Player</button>
     </div>
   </section>
 </div>
 
 <script>
-function castPage(){
-  return {
-    receiverRef: null,
-    channel: null,
-    nowPlaying: null,
-    init(){},
-    openReceiver(path){
-      const url = path || '/player';
-      this.receiverRef = window.open(url, 'ahoy-cast-receiver');
-      if (!this.receiverRef) alert('Pop-up blocked. Allow pop-ups for this site.');
-    },
-    async sendToReceiver(){
-      try {
-        const item = window.mediaPlayer?.currentTrack;
-        if (!item) { alert('Play something first, then send.'); return; }
-        // Try postMessage to the receiver window
-        if (this.receiverRef && !this.receiverRef.closed) {
-          this.receiverRef.postMessage({ type: 'ahoy:play', payload: item }, '*');
-          alert('Sent to receiver window.');
-          return;
+  function castPage() {
+    return {
+      receiverRef: null,
+      channel: null,
+      nowPlaying: null,
+      init() { },
+      openReceiver(path) {
+        const url = path || '/player';
+        this.receiverRef = window.open(url, 'ahoy-cast-receiver');
+        if (!this.receiverRef) alert('Pop-up blocked. Allow pop-ups for this site.');
+      },
+      async sendToReceiver() {
+        try {
+          const item = window.mediaPlayer?.currentTrack;
+          if (!item) { alert('Play something first, then send.'); return; }
+          // Try postMessage to the receiver window
+          if (this.receiverRef && !this.receiverRef.closed) {
+            this.receiverRef.postMessage({ type: 'ahoy:play', payload: item }, '*');
+            alert('Sent to receiver window.');
+            return;
+          }
+          // Fallback: open player URL directly
+          const type = (item.type === 'show' || item.video_url) ? 'show' : 'music';
+          const href = `/player?id=${encodeURIComponent(item.id)}&type=${type}`;
+          this.openReceiver(href);
+        } catch (e) {
+          console.error(e);
+          alert('Failed to send to receiver.');
         }
-        // Fallback: open player URL directly
-        const type = (item.type === 'show' || item.video_url) ? 'show' : 'music';
-        const href = `/player?id=${encodeURIComponent(item.id)}&type=${type}`;
-        this.openReceiver(href);
-      } catch(e){
-        console.error(e);
-        alert('Failed to send to receiver.');
       }
-    }
-  };
-}
-
-// Minimal receiver handler: when a child window receives a play message
-window.addEventListener('message', (e)=>{
-  const data = e.data || {};
-  if (data && data.type === 'ahoy:play' && window.globalPlayer) {
-    window.globalPlayer.play(data.payload);
+    };
   }
-});
 
-// Track now-playing for quick start card
-document.addEventListener('play-track', (e)=>{
-  try { const i = (e.detail && (e.detail.track || e.detail)) || null; if (!i) return; const el = document.querySelector('.cast-page'); if (!el || !el.__x) return; const st = el.__x.$data; st.nowPlaying = i; } catch(_){}
-});
+  // Minimal receiver handler: when a child window receives a play message
+  window.addEventListener('message', (e) => {
+    const data = e.data || {};
+    if (data && data.type === 'ahoy:play' && window.globalPlayer) {
+      window.globalPlayer.play(data.payload);
+    }
+  });
+
+  // Track now-playing for quick start card
+  document.addEventListener('play-track', (e) => {
+    try { const i = (e.detail && (e.detail.track || e.detail)) || null; if (!i) return; const el = document.querySelector('.cast-page'); if (!el || !el.__x) return; const st = el.__x.$data; st.nowPlaying = i; } catch (_) { }
+  });
 </script>
 {% endblock %}

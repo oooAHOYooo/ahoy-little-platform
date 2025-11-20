@@ -25,7 +25,7 @@
         font-size: 3rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .hero-header p {
@@ -44,7 +44,7 @@
         background: white;
         border-radius: 12px;
         padding: 1.5rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         text-align: center;
     }
 
@@ -73,7 +73,7 @@
         background: white;
         border-radius: 12px;
         padding: 2rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .chart-card h3 {
@@ -92,7 +92,7 @@
         background: white;
         border-radius: 12px;
         padding: 2rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .positions-table-section h3 {
@@ -142,7 +142,7 @@
         color: #6b7280;
     }
 
-    .last-tip {
+    .last-boost {
         color: #6b7280;
         font-size: 0.875rem;
     }
@@ -208,7 +208,7 @@
         <div x-show="!isLoading && totalContributed === 0" class="empty-state">
             <i class="fas fa-chart-line"></i>
             <h3>No Positions Yet</h3>
-            <p>Start tipping artists to build your creative portfolio!</p>
+            <p>Start boosting artists to build your creative portfolio!</p>
         </div>
 
         <!-- Portfolio Content -->
@@ -273,7 +273,7 @@
                                     <span class="weight" x-text="position.weight + '%'"></span>
                                 </td>
                                 <td>
-                                    <span class="last-tip" x-text="formatDate(position.last_tip)"></span>
+                                    <span class="last-boost" x-text="formatDate(position.last_boost)"></span>
                                 </td>
                             </tr>
                         </template>
@@ -288,185 +288,184 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script>
-function portfolioWidget() {
-    return {
-        isLoading: true,
-        totalContributed: 0,
-        positionCount: 0,
-        positions: [],
-        timeline: [],
-        pieData: [],
-        pieChart: null,
-        timelineChart: null,
+    function portfolioWidget() {
+        return {
+            isLoading: true,
+            totalContributed: 0,
+            positionCount: 0,
+            positions: [],
+            timeline: [],
+            pieData: [],
+            pieChart: null,
+            timelineChart: null,
 
-        get averageContribution() {
-            return this.positionCount > 0 ? this.totalContributed / this.positionCount : 0;
-        },
+            get averageContribution() {
+                return this.positionCount > 0 ? this.totalContributed / this.positionCount : 0;
+            },
 
-        async init() {
-            await this.loadPortfolioData();
-        },
+            async init() {
+                await this.loadPortfolioData();
+            },
 
-        async loadPortfolioData() {
-            try {
-                this.isLoading = true;
-                const response = await fetch('/portfolio/data');
-                if (!response.ok) {
-                    throw new Error('Failed to load portfolio data');
-                }
-                const data = await response.json();
-                
-                this.totalContributed = data.total_contributed || 0;
-                this.positionCount = data.position_count || 0;
-                this.positions = data.positions || [];
-                this.timeline = data.timeline || [];
-                this.pieData = data.pie_data || [];
-
-                // Render charts after data is loaded
-                this.$nextTick(() => {
-                    this.renderPieChart();
-                    this.renderTimelineChart();
-                });
-            } catch (error) {
-                console.error('Error loading portfolio data:', error);
-            } finally {
-                this.isLoading = false;
-            }
-        },
-
-        renderPieChart() {
-            const ctx = document.getElementById('pieChart');
-            if (!ctx || this.pieData.length === 0) return;
-
-            // Destroy existing chart if it exists
-            if (this.pieChart) {
-                this.pieChart.destroy();
-            }
-
-            const colors = [
-                '#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe',
-                '#43e97b', '#fa709a', '#fee140', '#30cfd0', '#330867'
-            ];
-
-            this.pieChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: this.pieData.map(d => d.artist_name),
-                    datasets: [{
-                        data: this.pieData.map(d => d.amount),
-                        backgroundColor: colors.slice(0, this.pieData.length),
-                        borderWidth: 2,
-                        borderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 15,
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.parsed || 0;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return `${label}: $${value.toFixed(2)} (${percentage}%)`;
-                                }
-                            }
-                        }
+            async loadPortfolioData() {
+                try {
+                    this.isLoading = true;
+                    const response = await fetch('/portfolio/data');
+                    if (!response.ok) {
+                        throw new Error('Failed to load portfolio data');
                     }
+                    const data = await response.json();
+
+                    this.totalContributed = data.total_contributed || 0;
+                    this.positionCount = data.position_count || 0;
+                    this.positions = data.positions || [];
+                    this.timeline = data.timeline || [];
+                    this.pieData = data.pie_data || [];
+
+                    // Render charts after data is loaded
+                    this.$nextTick(() => {
+                        this.renderPieChart();
+                        this.renderTimelineChart();
+                    });
+                } catch (error) {
+                    console.error('Error loading portfolio data:', error);
+                } finally {
+                    this.isLoading = false;
                 }
-            });
-        },
+            },
 
-        renderTimelineChart() {
-            const ctx = document.getElementById('timelineChart');
-            if (!ctx || this.timeline.length === 0) return;
+            renderPieChart() {
+                const ctx = document.getElementById('pieChart');
+                if (!ctx || this.pieData.length === 0) return;
 
-            // Destroy existing chart if it exists
-            if (this.timelineChart) {
-                this.timelineChart.destroy();
-            }
+                // Destroy existing chart if it exists
+                if (this.pieChart) {
+                    this.pieChart.destroy();
+                }
 
-            // Calculate cumulative amounts
-            let cumulative = 0;
-            const cumulativeData = this.timeline.map(item => {
-                cumulative += item.amount;
-                return cumulative;
-            });
+                const colors = [
+                    '#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe',
+                    '#43e97b', '#fa709a', '#fee140', '#30cfd0', '#330867'
+                ];
 
-            this.timelineChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: this.timeline.map(d => this.formatDateShort(d.date)),
-                    datasets: [{
-                        label: 'Cumulative Contributions',
-                        data: cumulativeData,
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `Total: $${context.parsed.y.toFixed(2)}`;
-                                }
-                            }
-                        }
+                this.pieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: this.pieData.map(d => d.artist_name),
+                        datasets: [{
+                            data: this.pieData.map(d => d.amount),
+                            backgroundColor: colors.slice(0, this.pieData.length),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + value.toFixed(0);
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: $${value.toFixed(2)} (${percentage}%)`;
+                                    }
                                 }
                             }
                         }
                     }
+                });
+            },
+
+            renderTimelineChart() {
+                const ctx = document.getElementById('timelineChart');
+                if (!ctx || this.timeline.length === 0) return;
+
+                // Destroy existing chart if it exists
+                if (this.timelineChart) {
+                    this.timelineChart.destroy();
                 }
-            });
-        },
 
-        formatDate(dateString) {
-            if (!dateString) return 'Never';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-            });
-        },
+                // Calculate cumulative amounts
+                let cumulative = 0;
+                const cumulativeData = this.timeline.map(item => {
+                    cumulative += item.amount;
+                    return cumulative;
+                });
 
-        formatDateShort(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
-            });
-        }
-    };
-}
+                this.timelineChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: this.timeline.map(d => this.formatDateShort(d.date)),
+                        datasets: [{
+                            label: 'Cumulative Contributions',
+                            data: cumulativeData,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `Total: $${context.parsed.y.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return '$' + value.toFixed(0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+
+            formatDate(dateString) {
+                if (!dateString) return 'Never';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            },
+
+            formatDateShort(dateString) {
+                if (!dateString) return '';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+        };
+    }
 </script>
 {% endblock %}
-

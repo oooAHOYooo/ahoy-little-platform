@@ -65,22 +65,22 @@ def portfolio_data():
                     "artist_name": artist_name,
                     "total_contributed": float(pos.total_contributed),
                     "weight": round(weight, 2),
-                    "last_tip": pos.last_tip.isoformat() if pos.last_tip else None,
+                    "last_boost": pos.boost_datetime.isoformat() if pos.boost_datetime else None,
                     "created_at": pos.created_at.isoformat(),
                 })
 
             # Get timeline data (contributions over time)
-            tips = db_session.query(Tip).filter(
+            boosts = db_session.query(Tip).filter(
                 Tip.user_id == user_id
             ).order_by(Tip.created_at.asc()).all()
 
             # Group by date
             timeline_data = {}
-            for tip in tips:
-                date_key = tip.created_at.date().isoformat()
+            for boost in boosts:
+                date_key = boost.created_at.date().isoformat()
                 if date_key not in timeline_data:
                     timeline_data[date_key] = 0
-                timeline_data[date_key] += float(tip.amount)
+                timeline_data[date_key] += float(boost.boost_amount)
 
             # Convert to sorted list
             timeline_list = [

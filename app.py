@@ -157,7 +157,7 @@ def create_app():
     
     # Register blueprints
     # app.register_blueprint(auth_bp)  # Disabled: using JWT-based auth under /api/auth
-    # app.register_blueprint(api_auth_bp)  # Disabled for simple session-based auth today
+    app.register_blueprint(api_auth_bp)  # JWT-based API auth
     app.register_blueprint(activity_bp)
     app.register_blueprint(playlists_bp)
     app.register_blueprint(bookmarks_bp)
@@ -536,9 +536,9 @@ def checkout_page():
     """
     from decimal import Decimal
     from utils.csrf import generate_csrf_token
-    from blueprints.payments import calculate_tip_fees
+    from blueprints.payments import calculate_boost_fees
     q = request.args
-    kind = (q.get('type') or 'tip').strip()
+    kind = (q.get('type') or 'boost').strip()
     artist_id = q.get('artist_id') or ''
     amount = q.get('amount') or ''
     title = q.get('title') or ''
@@ -548,8 +548,8 @@ def checkout_page():
     stripe_fee = platform_fee = total = None
     try:
         amt = Decimal(str(amount or '0'))
-        if kind == 'tip' and amt > 0:
-            stripe_fee, platform_fee, total, _, _ = calculate_tip_fees(amt)
+        if kind in ['boost', 'tip'] and amt > 0:
+            stripe_fee, platform_fee, total, _, _ = calculate_boost_fees(amt)
         else:
             total = amt
     except Exception:
@@ -582,7 +582,7 @@ def checkout_process():
         return render_template('checkout.html', error="Invalid CSRF token.", csrf_token=generate_csrf_token()), 400
 
     form = request.form
-    kind = (form.get('type') or 'tip').strip()
+    kind = (form.get('type') or 'boost').strip()
     artist_id = form.get('artist_id') or None
     item_id = form.get('item_id') or None
     qty = int(form.get('qty') or '1')

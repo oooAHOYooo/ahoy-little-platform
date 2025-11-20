@@ -4863,7 +4863,7 @@ a:hover {
 
 /* Dim rest of app when checkout is active */
 .checkout-mode>*:not(#checkoutContainer) {
-    filter: blur(2px) brightness(0.85);
+    /* filter: blur(2px) brightness(0.85); - Removed for glass effect */
     pointer-events: none;
 }
 
@@ -5012,16 +5012,16 @@ a:hover {
     font-size: 12px;
 }
 
-.tip-mini-field .tip-jar-currency-prefix {
+.tip-mini-field .boost-jar-currency-prefix {
     font-size: 12px;
 }
 
-.tip-mini-field.tip-jar-amount-group {
+.tip-mini-field.boost-jar-amount-group {
     padding: 6px 8px;
     border-radius: 8px;
 }
 
-.tip-mini-field.tip-jar-amount-group .tip-jar-amount-input {
+.tip-mini-field.boost-jar-amount-group .boost-jar-amount-input {
     font-size: 12px;
 }
 
@@ -5593,7 +5593,7 @@ a:hover {
 }
 
 /* Tip Jar Compact Card */
-.tip-jar-card {
+.boost-jar-card {
     background: var(--glass-bg);
     border-radius: var(--border-radius-md);
     padding: var(--spacing-4);
@@ -5603,28 +5603,28 @@ a:hover {
     box-shadow: var(--shadow-md);
 }
 
-.tip-jar-card:last-child {
+.boost-jar-card:last-child {
     margin-bottom: 0;
 }
 
-.tip-jar-card:hover {
+.boost-jar-card:hover {
     background: rgba(0, 0, 0, 0.5);
 }
 
-.tip-jar-compact {
+.boost-jar-compact {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.tip-jar-row {
+.boost-jar-row {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-bottom: 4px;
 }
 
-.tip-jar-label-inline {
+.boost-jar-label-inline {
     font-size: 0.7rem;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.7);
@@ -5634,7 +5634,7 @@ a:hover {
     flex-shrink: 0;
 }
 
-.tip-jar-select {
+.boost-jar-select {
     flex: 1;
     height: 42px;
     padding: 0 12px;
@@ -5655,13 +5655,13 @@ a:hover {
     box-sizing: border-box;
 }
 
-.tip-jar-select:focus {
+.boost-jar-select:focus {
     border-color: rgba(99, 102, 241, 0.5);
     background: rgba(25, 25, 30, 0.7);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
 }
 
-.tip-jar-amount-group {
+.boost-jar-amount-group {
     display: flex;
     align-items: center;
     flex: 1;
@@ -5674,13 +5674,13 @@ a:hover {
     box-sizing: border-box;
 }
 
-.tip-jar-amount-group:focus-within {
+.boost-jar-amount-group:focus-within {
     border-color: rgba(99, 102, 241, 0.5);
     background: rgba(25, 25, 30, 0.7);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
 }
 
-.tip-jar-currency-prefix {
+.boost-jar-currency-prefix {
     padding: 0 8px;
     height: 100%;
     display: flex;
@@ -5693,7 +5693,7 @@ a:hover {
     flex-shrink: 0;
 }
 
-.tip-jar-amount-input {
+.boost-jar-amount-input {
     flex: 1;
     padding: 0 12px;
     height: 100%;
@@ -5707,7 +5707,7 @@ a:hover {
     box-sizing: border-box;
 }
 
-.tip-jar-amount-input::placeholder {
+.boost-jar-amount-input::placeholder {
     color: rgba(255, 255, 255, 0.3);
 }
 
@@ -5789,7 +5789,7 @@ a:hover {
     font-style: italic;
 }
 
-.tip-jar-submit {
+.boost-jar-submit {
     width: 100%;
     height: 42px;
     padding: 0 16px;
@@ -5809,27 +5809,27 @@ a:hover {
     margin-top: 8px;
 }
 
-.tip-jar-submit:hover:not(:disabled) {
+.boost-jar-submit:hover:not(:disabled) {
     background: #4f46e5;
     transform: translateY(-1px);
 }
 
-.tip-jar-submit:disabled {
+.boost-jar-submit:disabled {
     background: rgba(255, 255, 255, 0.1);
     cursor: not-allowed;
     opacity: 0.5;
 }
 
-.tip-jar-submit:active:not(:disabled) {
+.boost-jar-submit:active:not(:disabled) {
     transform: translateY(0);
 }
 
 @media (min-width: 400px) {
-    .tip-jar-row {
+    .boost-jar-row {
         flex-direction: row;
     }
 
-    .tip-jar-label-inline {
+    .boost-jar-label-inline {
         min-width: 50px;
     }
 }
@@ -18680,7 +18680,7 @@ img.loading {
 }
 
 /* Tip Jar Styles */
-.tip-jar-section {
+.boost-jar-section {
     max-width: 1200px;
     margin: 0 auto;
     padding: var(--spacing-2xl) var(--spacing-lg);
@@ -18689,32 +18689,32 @@ img.loading {
     margin-bottom: var(--spacing-2xl);
 }
 
-.tip-jar-container {
+.boost-jar-container {
     max-width: 600px;
     margin: 0 auto;
     text-align: center;
 }
 
-.tip-jar-header h2 {
+.boost-jar-header h2 {
     font-size: var(--font-size-3xl);
     font-weight: 700;
     margin: 0 0 var(--spacing-sm) 0;
     color: var(--text-primary);
 }
 
-.tip-jar-subtitle {
+.boost-jar-subtitle {
     font-size: var(--font-size-lg);
     color: var(--text-secondary);
     margin: 0 0 var(--spacing-xs) 0;
 }
 
-.tip-jar-fee-note {
+.boost-jar-fee-note {
     font-size: var(--font-size-sm);
     color: var(--text-muted);
     margin: 0 0 var(--spacing-xl) 0;
 }
 
-.tip-amount-buttons {
+.boost-amount-buttons {
     display: flex;
     gap: var(--spacing-md);
     justify-content: center;
@@ -18722,7 +18722,7 @@ img.loading {
     margin-bottom: var(--spacing-lg);
 }
 
-.tip-btn {
+.boost-btn {
     padding: var(--spacing-md) var(--spacing-xl);
     font-size: var(--font-size-lg);
     font-weight: 600;
@@ -18735,7 +18735,7 @@ img.loading {
     min-width: 80px;
 }
 
-.tip-btn:hover {
+.boost-btn:hover {
     border-color: var(--primary-color);
     background: var(--primary-color);
     color: white;
@@ -18743,14 +18743,14 @@ img.loading {
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.tip-btn.active {
+.boost-btn.active {
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.tip-btn.custom {
+.boost-btn.custom {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
     border: none;
@@ -18786,7 +18786,7 @@ img.loading {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.tip-submit-btn {
+.boost-submit-btn {
     width: 100%;
     padding: var(--spacing-lg) var(--spacing-xl);
     font-size: var(--font-size-lg);
@@ -18801,12 +18801,12 @@ img.loading {
     margin-bottom: var(--spacing-lg);
 }
 
-.tip-submit-btn:hover:not(:disabled) {
+.boost-submit-btn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
-.tip-submit-btn:disabled {
+.boost-submit-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
@@ -18897,15 +18897,15 @@ img.loading {
 }
 
 @media (max-width: 768px) {
-    .tip-jar-section {
+    .boost-jar-section {
         padding: var(--spacing-lg) var(--spacing-md);
     }
 
-    .tip-amount-buttons {
+    .boost-amount-buttons {
         gap: var(--spacing-sm);
     }
 
-    .tip-btn {
+    .boost-btn {
         min-width: 70px;
         padding: var(--spacing-sm) var(--spacing-md);
         font-size: var(--font-size-md);

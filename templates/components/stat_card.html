@@ -1,0 +1,19 @@
+{% macro stat_card(title, value, icon, trend=None, trend_up=True, subtitle=None) %}
+<div class="glass-panel stat-card">
+    <div class="stat-icon">
+        <i class="{{ icon }}"></i>
+    </div>
+    <div class="stat-content">
+        <h3>{{ title }}</h3>
+        <div class="stat-value">{{ value }}</div>
+        {% if trend %}
+        <div class="stat-trend {{ 'trend-up' if trend_up else 'trend-down' }}">
+            <i class="fas fa-arrow-{{ 'up' if trend_up else 'down' }}"></i> {{ trend }}
+        </div>
+        {% endif %}
+        {% if subtitle %}
+        <div class="stat-subtitle">{{ subtitle }}</div>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}

@@ -74,43 +74,43 @@ endblock %}
     </section>
 
     <!-- Boost Jar Section (Component injected) -->
-    <section class="tip-jar-section" x-data="tipJar()" x-init="init()">
-        <div class="tip-jar-container">
-            <div class="tip-jar-header">
+    <section class="boost-jar-section" x-data="boostJar()" x-init="init()">
+        <div class="boost-jar-container">
+            <div class="boost-jar-header">
                 <h2>💝 Boost Jar</h2>
-                <p class="tip-jar-subtitle">Support <span x-text="artist.name"></span> directly</p>
-                <p class="tip-jar-fee-note">Ahoy takes 7.5% platform fee</p>
+                <p class="boost-jar-subtitle">Support <span x-text="artist.name"></span> directly</p>
+                <p class="boost-jar-fee-note">Ahoy takes 7.5% platform fee</p>
             </div>
             
-            <div class="tip-amount-buttons">
+            <div class="boost-amount-buttons">
                 <button 
                     @click="selectAmount(1)"
                     :class="{ 'active': selectedAmount === 1 }"
-                    class="tip-btn">
+                    class="boost-btn">
                     $1
                 </button>
                 <button 
                     @click="selectAmount(3)"
                     :class="{ 'active': selectedAmount === 3 }"
-                    class="tip-btn">
+                    class="boost-btn">
                     $3
                 </button>
                 <button 
                     @click="selectAmount(5)"
                     :class="{ 'active': selectedAmount === 5 }"
-                    class="tip-btn">
+                    class="boost-btn">
                     $5
                 </button>
                 <button 
                     @click="selectAmount(10)"
                     :class="{ 'active': selectedAmount === 10 }"
-                    class="tip-btn">
+                    class="boost-btn">
                     $10
                 </button>
                 <button 
                     @click="showCustomInput = true"
                     :class="{ 'active': showCustomInput }"
-                    class="tip-btn custom">
+                    class="boost-btn custom">
                     Custom
                 </button>
             </div>
@@ -128,9 +128,9 @@ endblock %}
             </div>
 
             <button 
-                @click="processTip()"
-                :disabled="isProcessing || !canTip"
-                class="tip-submit-btn">
+                @click="processBoost()"
+                :disabled="isProcessing || !canBoost"
+                class="boost-submit-btn">
                 <span x-show="!isProcessing">Send Boost</span>
                 <span x-show="isProcessing">Processing...</span>
             </button>
@@ -145,7 +145,7 @@ endblock %}
             </div>
 
             <!-- Success Animation -->
-            <div x-show="showSuccess" x-transition class="tip-success-animation">
+            <div x-show="showSuccess" x-transition class="boost-success-animation">
                 <div class="success-icon">✨</div>
                 <p>Thank you for your support!</p>
             </div>
@@ -372,7 +372,7 @@ function artistDetail() {
     };
 }
 
-function tipJar() {
+function boostJar() {
     return {
         artist: {{ artist|tojson }},
         selectedAmount: null,
@@ -400,7 +400,7 @@ function tipJar() {
 
         async checkSupporterStatus() {
             try {
-                const response = await fetch('/payments/user/total-tips');
+                const response = await fetch('/payments/user/total-boosts');
                 if (response.ok) {
                     const data = await response.json();
                     this.isSupporter = data.is_supporter || false;
@@ -416,11 +416,11 @@ function tipJar() {
             this.customAmount = '';
         },
 
-        get canTip() {
+        get canBoost() {
             return this.selectedAmount !== null || (this.customAmount && parseFloat(this.customAmount) >= 0.50);
         },
 
-        get tipAmount() {
+        get boostAmount() {
             if (this.selectedAmount !== null) {
                 return this.selectedAmount;
             }
@@ -431,14 +431,14 @@ function tipJar() {
             return null;
         },
 
-        async processTip() {
-            const amount = this.tipAmount;
+        async processBoost() {
+            const amount = this.boostAmount;
             if (!amount || this.isProcessing) return;
 
             this.isProcessing = true;
 
             try {
-                const response = await fetch('/payments/tip-session', {
+                const response = await fetch('/payments/boost-session', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -476,7 +476,7 @@ function tipJar() {
                     alert(data.error || 'Failed to create payment session');
                 }
             } catch (e) {
-                console.error('Tip processing error:', e);
+                console.error('Boost processing error:', e);
                 alert('An error occurred. Please try again.');
             } finally {
                 this.isProcessing = false;

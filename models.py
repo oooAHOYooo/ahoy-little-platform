@@ -279,6 +279,14 @@ class Tip(Base):
     def __repr__(self) -> str:
         return f"<Tip id={self.id} user_id={self.user_id} artist_id={self.artist_id} amount={self.amount} total_paid={self.total_paid}>"
 
+    @property
+    def boost_amount(self):
+        return self.amount
+
+    @boost_amount.setter
+    def boost_amount(self, value):
+        self.amount = value
+
 
 class UserArtistFollow(Base):
     __tablename__ = 'user_artist_follows'
@@ -321,6 +329,14 @@ class UserArtistPosition(Base):
             f"<UserArtistPosition id={self.id} user_id={self.user_id} artist_id={self.artist_id} "
             f"total_contributed={self.total_contributed}>"
         )
+
+    @property
+    def boost_datetime(self):
+        return self.last_tip
+
+    @boost_datetime.setter
+    def boost_datetime(self, value):
+        self.last_tip = value
 
 
 class Purchase(Base):

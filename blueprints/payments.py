@@ -16,9 +16,9 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
 
 # ==========================================
-# TIPPING SYSTEM - FEE CALCULATION
-# New Logic: Artist receives 100% of tipAmount
-# Tipper pays: tipAmount + stripeFee + platformFee
+# BOOSTING SYSTEM - FEE CALCULATION
+# New Logic: Artist receives 100% of boostAmount
+# Tipper pays: boostAmount + stripeFee + platformFee
 # ==========================================
 
 # Fee Constants
@@ -27,31 +27,31 @@ STRIPE_PERCENTAGE = Decimal("0.029")     # 2.9%
 STRIPE_FIXED = Decimal("0.30")           # $0.30
 
 
-def calculate_tip_fees(tip_amount: Decimal):
+def calculate_boost_fees(boost_amount: Decimal):
     """
-    Calculate all fees for a tip.
+    Calculate all fees for a boost.
     
     New Logic:
-    - Artist receives 100% of tipAmount
-    - Tipper pays: tipAmount + stripeFee + platformFee
+    - Artist receives 100% of boostAmount
+    - Tipper pays: boostAmount + stripeFee + platformFee
     
     Returns:
         tuple: (stripe_fee, platform_fee, total_charge, artist_payout, platform_revenue)
     """
-    # Round tip amount to 2 decimals
-    tip_amount = round(tip_amount, 2)
+    # Round boost amount to 2 decimals
+    boost_amount = round(boost_amount, 2)
     
-    # Calculate Stripe fee: (tipAmount * 2.9%) + $0.30
-    stripe_fee = round((tip_amount * STRIPE_PERCENTAGE) + STRIPE_FIXED, 2)
+    # Calculate Stripe fee: (boostAmount * 2.9%) + $0.30
+    stripe_fee = round((boost_amount * STRIPE_PERCENTAGE) + STRIPE_FIXED, 2)
     
-    # Calculate platform fee: tipAmount * 7.5%
-    platform_fee = round(tip_amount * PLATFORM_FEE_PERCENT, 2)
+    # Calculate platform fee: boostAmount * 7.5%
+    platform_fee = round(boost_amount * PLATFORM_FEE_PERCENT, 2)
     
     # Total charge to tipper
-    total_charge = round(tip_amount + stripe_fee + platform_fee, 2)
+    total_charge = round(boost_amount + stripe_fee + platform_fee, 2)
     
-    # Artist receives 100% of tip amount
-    artist_payout = tip_amount
+    # Artist receives 100% of boost amount
+    artist_payout = boost_amount
     
     # Platform revenue is the platform fee
     platform_revenue = platform_fee
@@ -67,15 +67,15 @@ def calculate_fee_and_net(amount: Decimal):
     return fee, net
 
 
-def update_user_artist_position(user_id: int, artist_id: str, tip_amount: Decimal, tip_datetime: datetime, db_session):
+def update_user_artist_position(user_id: int, artist_id: str, boost_amount: Decimal, boost_datetime: datetime, db_session):
     """
-    Update or create a user's position for an artist after a tip.
+    Update or create a user's position for an artist after a boost.
     
     Args:
-        user_id: The user ID who made the tip
+        user_id: The user ID who made the boost
         artist_id: The artist ID/slug
-        tip_amount: The tip amount
-        tip_datetime: When the tip was made
+        boost_amount: The boost amount
+        boost_datetime: When the boost was made
         db_session: Database session
     """
     if not user_id:
@@ -89,16 +89,16 @@ def update_user_artist_position(user_id: int, artist_id: str, tip_amount: Decima
     
     if position:
         # Update existing position
-        position.total_contributed += tip_amount
-        position.last_tip = tip_datetime
+        position.total_contributed += boost_amount
+        position.last_tip = boost_datetime
         position.updated_at = datetime.utcnow()
     else:
         # Create new position
         position = UserArtistPosition(
             user_id=user_id,
             artist_id=str(artist_id),
-            total_contributed=tip_amount,
-            last_tip=tip_datetime,
+            total_contributed=boost_amount,
+            last_tip=boost_datetime,
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow()
         )
@@ -107,14 +107,14 @@ def update_user_artist_position(user_id: int, artist_id: str, tip_amount: Decima
     db_session.flush()  # Flush to ensure position is saved
 
 
-@bp.route("/tip-session", methods=["POST"])
-def create_tip_session():
+@bp.route("/boost-session", methods=["POST"])
+def create_boost_session():
     """
-    Create a Stripe Checkout session for tipping an artist.
+    Create a Stripe Checkout session for boosting an artist.
     
     New Logic:
-    - Artist receives 100% of tipAmount
-    - Tipper pays: tipAmount + stripeFee + platformFee
+    - Artist receives 100% of boostAmount
+    - Tipper pays: boostAmount + stripeFee + platformFee
     - Stripe Checkout shows 3 line items
     """
     if not stripe.api_key:
@@ -122,27 +122,42 @@ def create_tip_session():
 
     data = request.get_json(silent=True) or {}
     artist_id = data.get("artist_id")
-    tip_amount = data.get("tip_amount") or data.get("amount")  # Support both field names
+    boost_amount = data.get("boost_amount") or data.get("amount")  # Support both field names
 
     if not artist_id:
         return jsonify({"error": "artist_id required"}), 400
 
     try:
-        tip_amount_decimal = Decimal(str(tip_amount))
+        boost_amount_decimal = Decimal(str(boost_amount))
     except (ValueError, TypeError):
-        return jsonify({"error": "Invalid tip amount"}), 400
+        return jsonify({"error": "Invalid boost amount"}), 400
 
-    if tip_amount_decimal < 0.50:  # Stripe minimum
-        return jsonify({"error": "Minimum tip amount is $0.50"}), 400
+    if boost_amount_decimal < 0.50:  # Stripe minimum
+        return jsonify({"error": "Minimum boost amount is $0.50"}), 400
 
     # Get user ID if logged in
     user_id = resolve_db_user_id()
 
     # Calculate all fees
-    stripe_fee, platform_fee, total_charge, artist_payout, platform_revenue = calculate_tip_fees(tip_amount_decimal)
+    stripe_fee, platform_fee, total_charge, artist_payout, platform_revenue = calculate_boost_fees(boost_amount_decimal)
 
     # Create Stripe Checkout Session with 3 line items
     try:
+        # Mock mode for development/preview
+        if stripe.api_key and "placeholder" in stripe.api_key:
+            import uuid
+            mock_id = f"cs_test_{uuid.uuid4()}"
+            return jsonify({
+                "checkout_url": f"{request.host_url.rstrip('/')}/payments/success?session_id={mock_id}&mock=true&artist_id={artist_id}&amount={boost_amount_decimal}&user_id={user_id or ''}",
+                "session_id": mock_id,
+                "breakdown": {
+                    "boost_amount": float(boost_amount_decimal),
+                    "stripe_fee": float(stripe_fee),
+                    "platform_fee": float(platform_fee),
+                    "total_charge": float(total_charge),
+                }
+            }), 200
+
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             line_items=[
@@ -153,7 +168,7 @@ def create_tip_session():
                             "name": "Boost Amount",
                             "description": "100% goes directly to the artist",
                         },
-                        "unit_amount": int(tip_amount_decimal * 100),  # Convert to cents
+                        "unit_amount": int(boost_amount_decimal * 100),  # Convert to cents
                     },
                     "quantity": 1,
                 },
@@ -186,7 +201,7 @@ def create_tip_session():
             metadata={
                 "artist_id": str(artist_id),
                 "user_id": str(user_id) if user_id else "",
-                "tip_amount": str(tip_amount_decimal),
+                "boost_amount": str(boost_amount_decimal),
                 "stripe_fee": str(stripe_fee),
                 "platform_fee": str(platform_fee),
                 "total_paid": str(total_charge),
@@ -199,7 +214,7 @@ def create_tip_session():
             "checkout_url": checkout_session.url,
             "session_id": checkout_session.id,
             "breakdown": {
-                "tip_amount": float(tip_amount_decimal),
+                "boost_amount": float(boost_amount_decimal),
                 "stripe_fee": float(stripe_fee),
                 "platform_fee": float(platform_fee),
                 "total_charge": float(total_charge),
@@ -249,7 +264,7 @@ def stripe_webhook():
         user_id_str = metadata.get("user_id")
         
         # New metadata fields
-        tip_amount_str = metadata.get("tip_amount") or metadata.get("amount")
+        boost_amount_str = metadata.get("boost_amount") or metadata.get("amount")
         stripe_fee_str = metadata.get("stripe_fee")
         platform_fee_str = metadata.get("platform_fee")
         total_paid_str = metadata.get("total_paid")
@@ -257,19 +272,19 @@ def stripe_webhook():
         platform_revenue_str = metadata.get("platform_revenue")
         
         # Legacy fallback for old tips
-        if not tip_amount_str:
+        if not boost_amount_str:
             amount_str = metadata.get("amount")
             fee_str = metadata.get("fee")
             net_amount_str = metadata.get("net_amount")
             if amount_str and fee_str and net_amount_str:
-                tip_amount_str = amount_str
+                boost_amount_str = amount_str
                 stripe_fee_str = "0.00"
                 platform_fee_str = fee_str
                 total_paid_str = amount_str
                 artist_payout_str = net_amount_str
                 platform_revenue_str = fee_str
 
-        if not all([artist_id, tip_amount_str, stripe_fee_str, platform_fee_str, total_paid_str]):
+        if not all([artist_id, boost_amount_str, stripe_fee_str, platform_fee_str, total_paid_str]):
             print(f"⚠️  Missing metadata in webhook: {metadata}")
             return jsonify({"error": "Missing metadata"}), 400
 
@@ -283,7 +298,7 @@ def stripe_webhook():
                 tip = Tip(
                     user_id=user_id,
                     artist_id=str(artist_id),
-                    amount=Decimal(tip_amount_str),  # This is the tip amount (artist receives 100%)
+                    amount=Decimal(boost_amount_str),  # This is the boost amount (artist receives 100%)
                     fee=Decimal(platform_fee_str),  # Legacy: platform fee
                     platform_fee=Decimal(platform_fee_str),
                     net_amount=Decimal(artist_payout_str),  # Artist receives 100% of tip
@@ -297,23 +312,23 @@ def stripe_webhook():
                 )
                 db_session.add(tip)
                 
-                # Update or create user artist position (use tip_amount, not net)
+                # Update or create user artist position (use boost_amount, not net)
                 if user_id:
                     update_user_artist_position(
                         user_id=user_id,
                         artist_id=str(artist_id),
-                        tip_amount=Decimal(tip_amount_str),  # Full tip amount
-                        tip_datetime=tip_datetime,
+                        boost_amount=Decimal(boost_amount_str),  # Full boost amount
+                        boost_datetime=tip_datetime,
                         db_session=db_session
                     )
                 
                 db_session.commit()
 
-                print(f"✅ Tip recorded: ${tip_amount_str} to artist {artist_id} (artist receives: ${artist_payout_str}, total paid: ${total_paid_str})")
+                print(f"✅ Boost recorded: ${boost_amount_str} to artist {artist_id} (artist receives: ${artist_payout_str}, total paid: ${total_paid_str})")
                 return jsonify({"status": "success"}), 200
 
         except Exception as e:
-            print(f"❌ Error recording tip: {e}")
+            print(f"❌ Error recording boost: {e}")
             return jsonify({"error": str(e)}), 500
 
     elif event["type"] == "payment_intent.succeeded":
@@ -327,6 +342,54 @@ def stripe_webhook():
 def payment_success():
     """Payment success page."""
     session_id = request.args.get("session_id")
+    is_mock = request.args.get("mock") == "true"
+    
+    if is_mock:
+        # In mock mode, record the boost directly since there's no webhook
+        try:
+            artist_id = request.args.get("artist_id")
+            amount_str = request.args.get("amount")
+            user_id_str = request.args.get("user_id")
+            user_id = int(user_id_str) if user_id_str else None
+            
+            if artist_id and amount_str:
+                from datetime import datetime
+                from models import Tip
+                from blueprints.payments import update_user_artist_position
+                
+                boost_amount = Decimal(amount_str)
+                stripe_fee, platform_fee, total_charge, artist_payout, platform_revenue = calculate_boost_fees(boost_amount)
+                
+                with get_session() as db_session:
+                    # Check if already recorded (simple check by session_id)
+                    existing = db_session.query(Tip).filter(Tip.stripe_checkout_session_id == session_id).first()
+                    if not existing:
+                        tip = Tip(
+                            user_id=user_id,
+                            artist_id=str(artist_id),
+                            amount=boost_amount,
+                            platform_fee=platform_fee,
+                            stripe_fee=stripe_fee,
+                            total_paid=total_charge,
+                            artist_payout=artist_payout,
+                            platform_revenue=platform_revenue,
+                            stripe_checkout_session_id=session_id,
+                            stripe_payment_intent_id=f"pi_mock_{session_id}",
+                            created_at=datetime.utcnow(),
+                        )
+                        db_session.add(tip)
+                        
+                        if user_id:
+                            update_user_artist_position(
+                                user_id=user_id,
+                                artist_id=str(artist_id),
+                                boost_amount=boost_amount,
+                                boost_datetime=datetime.utcnow(),
+                                db_session=db_session
+                            )
+                        db_session.commit()
+        except Exception:
+            pass
     return f"""
     <!DOCTYPE html>
     <html>
@@ -368,7 +431,7 @@ def payment_success():
         <div class="container">
             <div class="success-icon">✅</div>
             <h1>Thank You!</h1>
-            <p>Your tip was processed successfully.</p>
+            <p>Your boost was processed successfully.</p>
             <p><a href="/">Return to Ahoy</a></p>
         </div>
         <script>
@@ -422,12 +485,12 @@ def payment_cancel():
     """
 
 
-@bp.route("/user/total-tips", methods=["GET"])
-def get_user_total_tips():
-    """Get total amount a user has tipped (for supporter badge eligibility)."""
+@bp.route("/user/total-boosts", methods=["GET"])
+def get_user_total_boosts():
+    """Get total amount a user has boosted (for supporter badge eligibility)."""
     user_id = resolve_db_user_id()
     if not user_id:
-        return jsonify({"total_tips": 0, "is_supporter": False}), 200
+        return jsonify({"total_boosts": 0, "is_supporter": False}), 200
 
     try:
         with get_session() as db_session:
@@ -436,28 +499,28 @@ def get_user_total_tips():
             is_supporter = total >= 10.0
 
             return jsonify({
-                "total_tips": round(total, 2),
+                "total_boosts": round(total, 2),
                 "is_supporter": is_supporter,
             }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
-@bp.route("/artist/<artist_id>/tips", methods=["GET"])
-def get_artist_tips(artist_id):
-    """Get tip statistics for an artist."""
+@bp.route("/artist/<artist_id>/boosts", methods=["GET"])
+def get_artist_boosts(artist_id):
+    """Get boost statistics for an artist."""
     try:
         with get_session() as db_session:
             tips = db_session.query(Tip).filter(Tip.artist_id == str(artist_id)).all()
             total_amount = sum(float(tip.amount) for tip in tips)
             total_net = sum(float(tip.net_amount) for tip in tips)
-            tip_count = len(tips)
+            boost_count = len(tips)
 
             return jsonify({
                 "artist_id": artist_id,
-                "total_tips": round(total_amount, 2),
+                "total_boosts": round(total_amount, 2),
                 "total_net": round(total_net, 2),
-                "tip_count": tip_count,
+                "boost_count": boost_count,
             }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
