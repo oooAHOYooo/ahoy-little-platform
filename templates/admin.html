@@ -3,31 +3,64 @@
 {% block title %}Admin - User Management{% endblock %}
 
 {% block content %}
-<div class="admin-page" x-data="adminPage()" x-init="loadUsers()">
-    <div class="admin-header">
-        <h1>Admin Panel - User Management</h1>
-        <p>Manage users, reset passwords, and view user statistics</p>
-    </div>
+<div class="admin-layout" x-data="adminPage()" x-init="loadUsers()">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-title">Ahoy Admin</div>
+        <nav class="sidebar-nav">
+            <a href="#artist-mgmt" class="nav-item"><i class="fas fa-users"></i> Artist Management</a>
+            <a href="#boost-reporting" class="nav-item"><i class="fas fa-bolt"></i> Boost Reporting</a>
+            <a href="#content-uploads" class="nav-item"><i class="fas fa-upload"></i> Content Uploads</a>
+            <a href="#stripe-logs" class="nav-item"><i class="fas fa-credit-card"></i> Stripe Logs / Payments</a>
+            <a href="#system-status" class="nav-item"><i class="fas fa-server"></i> System Status</a>
+            <a href="#search" class="nav-item"><i class="fas fa-search"></i> Search</a>
+        </nav>
+    </aside>
 
-    <div class="admin-stats">
-        <div class="stat-card">
-            <h3>Total Users</h3>
-            <span class="stat-number" x-text="totalUsers">0</span>
+    <!-- Main -->
+    <div class="admin-main">
+        <!-- Topbar -->
+        <div class="admin-topbar">
+            <div class="status">
+                <span class="status-dot ok"></span> All systems operational
+            </div>
+            <div class="topbar-actions">
+                <button class="btn btn-secondary" onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">
+                    <i class="fas fa-moon"></i> Theme
+                </button>
+            </div>
         </div>
-        <div class="stat-card">
-            <h3>Active Users</h3>
-            <span class="stat-number" x-text="activeUsers">0</span>
-        </div>
-        <div class="stat-card">
-            <h3>Total Saves</h3>
-            <span class="stat-number" x-text="totalSaves">0</span>
-        </div>
-    </div>
 
-    <div class="admin-content">
+        <!-- Overview Cards -->
+        <div class="admin-stats card-grid">
+            <div class="card glass hover-raise">
+                <div class="card-header"><i class="fas fa-user"></i> Total Users</div>
+                <div class="card-body">
+                    <div class="stat-lg" x-text="totalUsers">0</div>
+                </div>
+            </div>
+            <div class="card glass hover-raise">
+                <div class="card-header"><i class="fas fa-signal"></i> Active Users</div>
+                <div class="card-body">
+                    <div class="stat-lg" x-text="activeUsers">0</div>
+                </div>
+            </div>
+            <div class="card glass hover-raise">
+                <div class="card-header"><i class="fas fa-bookmark"></i> Total Saves</div>
+                <div class="card-body">
+                    <div class="stat-lg" x-text="totalSaves">0</div>
+                </div>
+            </div>
+            <div class="card glass hover-raise">
+                <div class="card-header"><i class="fas fa-bolt"></i> Boost Analytics</div>
+                <div class="card-body muted">Coming soon</div>
+            </div>
+        </div>
+
+        <div class="admin-content">
         <div class="users-section">
             <div class="section-header">
-                <h2>Users</h2>
+                <h2 id="artist-mgmt">Users</h2>
                 <div class="search-box">
                     <input type="text" x-model="searchQuery"
                         placeholder="Search users..."
@@ -35,7 +68,7 @@
                 </div>
             </div>
 
-            <div class="users-table">
+            <div class="users-table glass card">
                 <div class="table-header">
                     <div class="col-username">Username</div>
                     <div class="col-email">Email</div>
@@ -84,32 +117,20 @@
         <!-- Feedback Section -->
         <div class="feedback-section">
             <div class="section-header">
-                <h2>User Feedback</h2>
+                <h2 id="search">User Feedback</h2>
                 <button @click="loadFeedback()"
                     class="btn btn-sm btn-primary">Refresh</button>
             </div>
 
-            <div class="feedback-stats">
-                <div class="stat-card">
-                    <h3>Total Feedback</h3>
-                    <span class="stat-number"
-                        x-text="feedbackStats.total">0</span>
-                </div>
-                <div class="stat-card">
-                    <h3>New</h3>
-                    <span class="stat-number"
-                        x-text="feedbackStats.new">0</span>
-                </div>
-                <div class="stat-card">
-                    <h3>Avg Rating</h3>
-                    <span class="stat-number"
-                        x-text="feedbackStats.avgRating">0</span>
-                </div>
+            <div class="feedback-stats card-grid">
+                <div class="card glass"><div class="card-header">Total Feedback</div><div class="card-body"><div class="stat-lg" x-text="feedbackStats.total">0</div></div></div>
+                <div class="card glass"><div class="card-header">New</div><div class="card-body"><div class="stat-lg" x-text="feedbackStats.new">0</div></div></div>
+                <div class="card glass"><div class="card-header">Avg Rating</div><div class="card-body"><div class="stat-lg" x-text="feedbackStats.avgRating">0</div></div></div>
             </div>
 
             <div class="feedback-list">
                 <template x-for="feedback in feedbackList" :key="feedback.id">
-                    <div class="feedback-item"
+                    <div class="feedback-item glass card"
                         :class="'status-' + feedback.status">
                         <div class="feedback-header">
                             <div class="feedback-meta">
@@ -174,6 +195,39 @@
                         </div>
                     </div>
                 </template>
+            </div>
+        </div>
+        </div>
+
+        <!-- Pro Admin Panels -->
+        <div class="card-grid" style="margin-top: 16px;">
+            <div id="boost-reporting" class="card glass hover-raise">
+                <div class="card-header"><i class="fas fa-bolt"></i> Boost Reporting</div>
+                <div class="card-body muted">Charts and metrics coming soon.</div>
+            </div>
+            <div id="content-uploads" class="card glass hover-raise">
+                <div class="card-header"><i class="fas fa-upload"></i> Content Uploads</div>
+                <div class="card-body muted">Upload queue and status will appear here.</div>
+            </div>
+            <div id="stripe-logs" class="card glass hover-raise">
+                <div class="card-header"><i class="fas fa-credit-card"></i> Stripe Logs / Payments</div>
+                <div class="card-body muted">Recent payment events placeholder.</div>
+            </div>
+            <div id="system-status" class="card glass hover-raise">
+                <div class="card-header"><i class="fas fa-server"></i> System Status</div>
+                <div class="card-body muted">All services healthy.</div>
+            </div>
+            <div class="card glass hover-raise">
+                <div class="card-header"><i class="fas fa-chart-area"></i> Boost Analytics</div>
+                <div class="card-body muted">Coming soon</div>
+            </div>
+            <div class="card glass hover-raise">
+                <div class="card-header"><i class="fas fa-hand-holding-heart"></i> Recent Support Activity</div>
+                <div class="card-body muted">Latest boosts and contributions will appear here.</div>
+            </div>
+            <div class="card glass hover-raise">
+                <div class="card-header"><i class="fas fa-tachometer-alt"></i> Creator Output Velocity</div>
+                <div class="card-body muted">Content cadence metrics placeholder.</div>
             </div>
         </div>
     </div>

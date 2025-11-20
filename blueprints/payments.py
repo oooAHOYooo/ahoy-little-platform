@@ -150,7 +150,7 @@ def create_tip_session():
                     "price_data": {
                         "currency": "usd",
                         "product_data": {
-                            "name": "Tip Amount",
+                            "name": "Boost Amount",
                             "description": "100% goes directly to the artist",
                         },
                         "unit_amount": int(tip_amount_decimal * 100),  # Convert to cents

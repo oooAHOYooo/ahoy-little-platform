@@ -66,6 +66,12 @@
                 <i class="fas fa-chart-line"></i>
                 Overview
             </button>
+            <button @click="activeTab = 'portfolio'"
+                :class="{'active': activeTab === 'portfolio'}"
+                class="account-tab">
+                <i class="fas fa-bolt"></i>
+                Boost Portfolio
+            </button>
             <button @click="activeTab = 'activity'"
                 :class="{'active': activeTab === 'activity'}"
                 class="account-tab">
@@ -97,6 +103,39 @@
             <!-- Overview Tab -->
             <div x-show="activeTab === 'overview'" class="tab-panel">
                 <div class="overview-grid">
+                    <!-- Quick Stats -->
+                    <div class="overview-quick-stats card-grid">
+                        <div class="card glass hover-raise">
+                            <div class="card-header"><i class="fas fa-bookmark"></i> Saves</div>
+                            <div class="card-body">
+                                <div class="stat-lg" x-text="userStats.total_saves || 0"></div>
+                            </div>
+                        </div>
+                        <div class="card glass hover-raise">
+                            <div class="card-header"><i class="fas fa-play"></i> Plays</div>
+                            <div class="card-body">
+                                <div class="stat-lg" x-text="userStats.total_plays || 0"></div>
+                            </div>
+                        </div>
+                        <div class="card glass hover-raise">
+                            <div class="card-header"><i class="fas fa-bolt"></i> Boosts</div>
+                            <div class="card-body">
+                                <div class="stat-lg">—</div>
+                            </div>
+                        </div>
+                        <div class="card glass hover-raise">
+                            <div class="card-header"><i class="fas fa-trophy"></i> XP</div>
+                            <div class="card-body">
+                                <div class="stat-lg" x-text="xp"></div>
+                            </div>
+                        </div>
+                        <div class="card glass hover-raise">
+                            <div class="card-header"><i class="fas fa-award"></i> Badges</div>
+                            <div class="card-body">
+                                <div class="stat-lg" x-text="(achievements || []).filter(a => a.unlocked).length"></div>
+                            </div>
+                        </div>
+                    </div>
                     <template x-if="!isGuest && recentActivity.length">
                         <div class="overview-card">
                             <h3>Recent Activity</h3>
@@ -253,6 +292,84 @@
                             <a href="/bookmarks" class="bookmark-view-all" x-show="bookmarksList().length > 4">
                                 View All Bookmarks
                             </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boost Portfolio Tab -->
+            <div x-show="activeTab === 'portfolio'" class="tab-panel">
+                <div class="card glass hover-raise">
+                    <div class="card-header"><i class="fas fa-rocket"></i> Boost Portfolio</div>
+                    <div class="card-body">
+                        <!-- Summary Band -->
+                        <div class="card-grid">
+                            <div class="card glass">
+                                <div class="card-header subtle">Total Boosts</div>
+                                <div class="card-body">
+                                    <div class="stat-lg">$—</div>
+                                </div>
+                            </div>
+                            <div class="card glass">
+                                <div class="card-header subtle">Artists Boosted</div>
+                                <div class="card-body">
+                                    <div class="stat-lg">—</div>
+                                </div>
+                            </div>
+                            <div class="card glass">
+                                <div class="card-header subtle">Avg Boost Size</div>
+                                <div class="card-body">
+                                    <div class="stat-lg">$—</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Your Artists -->
+                        <div class="section mt-lg">
+                            <div class="section-title"><i class="fas fa-user-music"></i> Your Artists</div>
+                            <div class="card-grid">
+                                <div class="card glass">
+                                    <div class="card-body">
+                                        <div class="row between">
+                                            <div>
+                                                <div class="title">Artist Name</div>
+                                                <div class="muted">Recent boost: $—</div>
+                                            </div>
+                                            <div class="trend up"><i class="fas fa-arrow-up"></i> —%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card glass">
+                                    <div class="card-body">
+                                        <div class="row between">
+                                            <div>
+                                                <div class="title">Artist Name</div>
+                                                <div class="muted">Recent boost: $—</div>
+                                            </div>
+                                            <div class="trend down"><i class="fas fa-arrow-down"></i> —%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Transaction History -->
+                        <div class="section mt-lg">
+                            <div class="section-title"><i class="fas fa-list"></i> Transaction History</div>
+                            <div class="table glass">
+                                <div class="table-header grid-5">
+                                    <div>Date</div>
+                                    <div>Artist</div>
+                                    <div>Boost Amount</div>
+                                    <div>Total Charged</div>
+                                    <div>Status</div>
+                                </div>
+                                <div class="table-row grid-5">
+                                    <div>—</div>
+                                    <div>—</div>
+                                    <div>$—</div>
+                                    <div>$—</div>
+                                    <div><span class="badge badge-success">Paid</span></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

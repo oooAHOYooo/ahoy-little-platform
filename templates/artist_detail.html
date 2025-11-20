@@ -73,11 +73,11 @@ endblock %}
         </div>
     </section>
 
-    <!-- Tip Jar Section (Component injected) -->
+    <!-- Boost Jar Section (Component injected) -->
     <section class="tip-jar-section" x-data="tipJar()" x-init="init()">
         <div class="tip-jar-container">
             <div class="tip-jar-header">
-                <h2>💝 Tip Jar</h2>
+                <h2>💝 Boost Jar</h2>
                 <p class="tip-jar-subtitle">Support <span x-text="artist.name"></span> directly</p>
                 <p class="tip-jar-fee-note">Ahoy takes 7.5% platform fee</p>
             </div>
@@ -131,7 +131,7 @@ endblock %}
                 @click="processTip()"
                 :disabled="isProcessing || !canTip"
                 class="tip-submit-btn">
-                <span x-show="!isProcessing">Send Tip</span>
+                <span x-show="!isProcessing">Send Boost</span>
                 <span x-show="isProcessing">Processing...</span>
             </button>
 
@@ -140,7 +140,7 @@ endblock %}
                 <div class="badge-icon">⭐</div>
                 <div class="badge-text">
                     <strong>Supporter Badge</strong>
-                    <p>You've tipped over $10! Thank you for supporting artists.</p>
+                    <p>You've boosted over $10! Thank you for supporting artists.</p>
                 </div>
             </div>
 

@@ -782,7 +782,7 @@
         <!-- Top tip status badge -->
         <div id="tip-status-badge" aria-live="polite" class="hidden">
             <i class="fas fa-check-circle"></i>
-            <span class="tip-status-text">Tip Sent</span>
+            <span class="tip-status-text">Boost Sent</span>
         </div>
 
         <!-- Main Content -->
@@ -838,7 +838,7 @@
                                 <div class="tip-jar-row tip-compact-row">
                                     <select x-model="selectedArtistId"
                                         class="tip-jar-select tip-compact-select tip-mini-field"
-                                        aria-label="Select artist to tip">
+                                        aria-label="Select artist to boost">
                                         <option value>Select artist…</option>
                                         <template x-for="artist in artists"
                                             :key="artist.id || artist.name">
@@ -868,11 +868,11 @@
                                     x-transition:enter-start="opacity-0"
                                     x-transition:enter-end="opacity-100"
                                     class="tip-breakdown-card">
-                                    <div class="tip-breakdown-title">Your Tip
+                                    <div class="tip-breakdown-title">Your Boost
                                         Breakdown</div>
 
                                     <div class="tip-breakdown-row">
-                                        <span class="tip-breakdown-label">Tip
+                                        <span class="tip-breakdown-label">Boost
                                             Amount</span>
                                         <span class="tip-breakdown-value"
                                             x-text="'$' + (parseFloat(tipAmount || 0)).toFixed(2)"></span>
@@ -904,7 +904,7 @@
                                     </div>
 
                                     <div class="tip-breakdown-caption">
-                                        100% of your tip goes directly to the
+                                        100% of your boost goes directly to the
                                         artist.
                                     </div>
                                 </div>
@@ -919,12 +919,12 @@
                                     <i class="fas fa-spinner fa-spin"
                                         x-show="isTipping"></i>
                                     <span
-                                        x-text="isTipping ? 'Processing...' : 'Send Tip — $' + (isValid ? calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2) : '0.00')"></span>
+                                        x-text="isTipping ? 'Processing...' : 'Send Boost — $' + (isValid ? calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2) : '0.00')"></span>
                                 </button>
                                 <div class="text-right">
                                     <button type="button" class="tip-cancel"
                                         :disabled="!tipAmount || parseFloat(tipAmount || 0) <= 0"
-                                        @click="tipAmount=''; document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Tip canceled.' }))">
+                                        @click="tipAmount=''; document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Boost canceled.' }))">
                                         Cancel
                                     </button>
                                 </div>
@@ -944,7 +944,7 @@
                                 <i class="fas fa-check-circle text-2xl"></i>
                             </div>
                             <div>
-                                <p class="font-semibold">Thanks for supporting
+                                <p class="font-semibold">Thanks for boosting
                                     independent artists!</p>
                             </div>
                         </div>
@@ -2252,7 +2252,7 @@
                     
                     const tipAmount = parseFloat(this.tipAmount);
                     if (tipAmount < 0.50) {
-                        document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Enter a valid tip amount (min $0.50).' }));
+                        document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Enter a valid boost amount (min $0.50).' }));
                         return;
                     }
                     
@@ -2276,7 +2276,7 @@
                             // Friendly toast
                             try {
                                 const artistName = (this.artists.find(a => (a.id || a.name) == this.selectedArtistId)?.name) || 'artist';
-                                document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: `Thank you! Your $${tipAmount.toFixed(2)} tip went to ${artistName} 🙌` }));
+                                document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: `Thank you! Your $${tipAmount.toFixed(2)} boost went to ${artistName} 🙌` }));
                             } catch (_) {}
                             
                             // Monitor for window close (payment completion)
@@ -2313,12 +2313,12 @@
                                 }
                             }, 500);
                         } else {
-                            const errorMsg = data.error || 'Failed to create tip session';
+                            const errorMsg = data.error || 'Failed to create boost session';
                             document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: errorMsg }));
                         }
                     } catch (e) {
                         console.error('Tip error:', e);
-                        document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Error processing tip. Please try again.' }));
+                        document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Error processing boost. Please try again.' }));
                     } finally {
                         this.isTipping = false;
                     }
