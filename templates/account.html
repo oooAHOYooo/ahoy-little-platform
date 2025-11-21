@@ -8,16 +8,25 @@
     <div class="account-header">
         <div class="account-hero">
             <div class="account-avatar">
-                <img
-                    :src="userProfile.avatar_url || '/static/img/default-avatar.png'"
-                    :alt="userProfile.display_name || 'User'">
-                <div class="avatar-edit-overlay">
-                    <i class="fas fa-camera"></i>
-                </div>
-                <button @click="editAvatar()" class="avatar-edit-btn"
-                    title="Change Avatar">
-                    <i class="fas fa-camera"></i>
-                </button>
+                <template x-if="!isGuest">
+                    <img
+                        :src="userProfile.avatar_url || '/static/img/default-avatar.png'"
+                        :alt="userProfile.display_name || 'User'">
+                </template>
+                <template x-if="isGuest">
+                    <span class="user-label">Guest</span>
+                </template>
+                <template x-if="!isGuest">
+                    <div class="avatar-edit-overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </template>
+                <template x-if="!isGuest">
+                    <button @click="editAvatar()" class="avatar-edit-btn"
+                        title="Change Avatar">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </template>
             </div>
             <div class="account-info">
                 <h1 x-text="userProfile.display_name || 'User'"></h1>

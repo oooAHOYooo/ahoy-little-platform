@@ -210,7 +210,7 @@ a:hover {
         0 1px 0 rgba(255, 255, 255, 0.03) inset,
         0 2px 8px rgba(0, 0, 0, 0.4),
         0 1px 2px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
+    z-index: 10000;
     height: 44px;
     -webkit-app-region: drag;
     /* For Electron apps */
@@ -227,7 +227,7 @@ a:hover {
     margin: 0 auto;
     padding: 0 12px;
     gap: 8px;
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* macOS-style Window Controls */
@@ -613,6 +613,22 @@ a:hover {
     transition: all 0.2s ease;
 }
 
+/* Simple text pill for guest label */
+.user-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .account-menu-btn:hover .account-chevron {
     color: rgba(255, 255, 255, 0.7);
 }
@@ -624,7 +640,8 @@ a:hover {
     right: 0;
     width: 280px;
     max-width: calc(100vw - 32px);
-    background: var(--glass-bg);
+    /* Make background less transparent for better readability */
+    background: rgba(15, 15, 18, 0.92);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);

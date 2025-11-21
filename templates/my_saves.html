@@ -11,10 +11,15 @@
         <div class="profile-content">
             <div class="profile-avatar-section">
                 <div class="profile-avatar-large">
-                    <img
-                        :src="userProfile.avatar || '/static/img/default-avatar.png'"
-                        :alt="userProfile.display_name || 'User'"
-                        class="avatar-image">
+                    <template x-if="window.LOGGED_IN">
+                        <img
+                            :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                            :alt="userProfile.display_name || 'User'"
+                            class="avatar-image">
+                    </template>
+                    <template x-if="!window.LOGGED_IN">
+                        <span class="user-label">Guest</span>
+                    </template>
                 </div>
             </div>
             <div class="profile-info">

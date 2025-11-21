@@ -1,82 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="description"
-        content="{% block description %}Discover and save indie music, shows, and media. Create playlists, save favorites, and explore new artists on Ahoy Indie Media.{% endblock %}">
-    <meta name="keywords"
-        content="indie music, indie shows, music discovery, save music, music playlists, indie artists, music platform">
-    <meta name="author" content="Ahoy Indie Media">
-    <meta name="robots" content="index, follow">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <meta name="description"
+            content="{% block description %}Discover and save indie music, shows, and media. Create playlists, save favorites, and explore new artists on Ahoy Indie Media.{% endblock %}">
+        <meta name="keywords"
+            content="indie music, indie shows, music discovery, save music, music playlists, indie artists, music platform">
+        <meta name="author" content="Ahoy Indie Media">
+        <meta name="robots" content="index, follow">
 
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#111111">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Ahoy">
-    <link rel="manifest" href="/static/manifest.webmanifest">
-    <link rel="apple-touch-icon" href="/static/images/icon-192.png">
+        <!-- PWA Meta Tags -->
+        <meta name="theme-color" content="#111111">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style"
+            content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="Ahoy">
+        <link rel="manifest" href="/static/manifest.webmanifest">
+        <link rel="apple-touch-icon" href="/static/images/icon-192.png">
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ request.url }}">
-    <meta property="og:title"
-        content="{% block og_title %}Ahoy Indie Media - Discover Indie Music & Shows{% endblock %}">
-    <meta property="og:description"
-        content="{% block og_description %}Discover and save indie music, shows, and media. Create playlists, save favorites, and explore new artists.{% endblock %}">
-    <meta property="og:image" content="{{ url_for('static', filename='img/ahoy_logo.png', _external=True) }}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:site_name" content="Ahoy Indie Media">
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ request.url }}">
+        <meta property="og:title"
+            content="{% block og_title %}Ahoy Indie Media - Discover Indie Music & Shows{% endblock %}">
+        <meta property="og:description"
+            content="{% block og_description %}Discover and save indie music, shows, and media. Create playlists, save favorites, and explore new artists.{% endblock %}">
+        <meta property="og:image"
+            content="{{ url_for('static', filename='img/ahoy_logo.png', _external=True) }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:site_name" content="Ahoy Indie Media">
 
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="{{ request.url }}">
-    <meta name="twitter:title"
-        content="{% block twitter_title %}Ahoy Indie Media - Discover Indie Music & Shows{% endblock %}">
-    <meta name="twitter:description"
-        content="{% block twitter_description %}Discover and save indie music, shows, and media. Create playlists, save favorites, and explore new artists.{% endblock %}">
-    <meta name="twitter:image" content="{{ url_for('static', filename='img/ahoy_logo.png', _external=True) }}">
-    <meta name="twitter:image:alt" content="Ahoy Indie Media Logo">
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:url" content="{{ request.url }}">
+        <meta name="twitter:title"
+            content="{% block twitter_title %}Ahoy Indie Media - Discover Indie Music & Shows{% endblock %}">
+        <meta name="twitter:description"
+            content="{% block twitter_description %}Discover and save indie music, shows, and media. Create playlists, save favorites, and explore new artists.{% endblock %}">
+        <meta name="twitter:image"
+            content="{{ url_for('static', filename='img/ahoy_logo.png', _external=True) }}">
+        <meta name="twitter:image:alt" content="Ahoy Indie Media Logo">
 
-    <!-- Canonical URL -->
-    <link rel="canonical" href="{{ request.url }}">
+        <!-- Canonical URL -->
+        <link rel="canonical" href="{{ request.url }}">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/ahoy-fall2025-favicon.png') }}">
-    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='img/ahoy-fall2025-favicon.png') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/ahoy-fall2025-favicon.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180"
-        href="{{ url_for('static', filename='img/ahoy-fall2025-favicon.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32"
-        href="{{ url_for('static', filename='img/ahoy-fall2025-favicon.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16"
-        href="{{ url_for('static', filename='img/ahoy-fall2025-favicon.png') }}">
+        <!-- Favicon -->
+        <link rel="icon" type="image/png"
+            href="{{ url_for('static', filename='img/ahoy-fall2025-favicon.png') }}">
+        <link rel="shortcut icon" type="image/png"
+            href="{{ url_for('static', filename='img/ahoy-fall2025-favicon.png') }}">
+        <link rel="apple-touch-icon"
+            href="{{ url_for('static', filename='img/ahoy-fall2025-favicon.png') }}">
+        <link rel="apple-touch-icon" sizes="180x180"
+            href="{{ url_for('static', filename='img/ahoy-fall2025-favicon.png') }}">
+        <link rel="icon" type="image/png" sizes="32x32"
+            href="{{ url_for('static', filename='img/ahoy-fall2025-favicon.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16"
+            href="{{ url_for('static', filename='img/ahoy-fall2025-favicon.png') }}">
 
-    <title>{% block title %}Ahoy Indie Media{% endblock %}</title>
+        <title>{% block title %}Ahoy Indie Media{% endblock %}</title>
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    {% block extra_css %}{% endblock %}
+        <!-- CSS -->
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/main.css') }}">
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/global.css') }}">
+        {% block extra_css %}{% endblock %}
 
-    <!-- Google Fonts - Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <!-- Google Fonts - Inter -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet">
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <!-- Font Awesome -->
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <!-- Alpine.js for reactive components -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <!-- Alpine.js for reactive components -->
+        <script defer
+            src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <!-- Three.js for visualizer -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <!-- Three.js for visualizer -->
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <!-- Debug Alpine.js loading -->
-    <script>
+        <!-- Debug Alpine.js loading -->
+        <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Hide loading indicator
             const loadingIndicator = document.getElementById('loading-indicator');
@@ -86,7 +101,7 @@
             }
         });
     </script>
-    <script>
+        <script>
         // Global cast receiver: accept ahoy:play messages from /cast sender
         window.addEventListener('message', (e) => {
             try {
@@ -106,8 +121,8 @@
         });
     </script>
 
-    <!-- Portfolio Widget Styles -->
-    <style>
+        <!-- Portfolio Widget Styles -->
+        <style>
         .portfolio-widget-container {
             position: relative;
         }
@@ -282,746 +297,754 @@
         }
     </style>
 
-    {% block extra_head %}{% endblock %}
-</head>
+        {% block extra_head %}{% endblock %}
+    </head>
 
-<body>
-    <!-- Loading indicator -->
-    <div id="loading-indicator"
-        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 9999; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
-        <div>Loading Ahoy Indie Media...</div>
-    </div>
+    <body x-data="{ navOpen: false, accountOpen: false }"
+        class="overflow-x-hidden">
+        <!-- Loading indicator -->
+        <div id="loading-indicator"
+            style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 9999; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
+            <div>Loading Ahoy Indie Media...</div>
+        </div>
 
-    <!-- Navigation -->
-    <nav class="navbar" x-data="navbar()" x-init="init()">
-        <div class="nav-container max-w-7xl mx-auto px-4">
+        <!-- Header -->
+        <header class="app-header">
+            <!-- Navigation -->
+            <nav class="navbar" x-data="navbar()" x-init="init()">
+                <div class="nav-container max-w-7xl mx-auto px-4">
 
-            <!-- Logo -->
-            <div class="nav-logo">
-                <a href="{{ url_for('home') }}">
-                    <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}" alt="Ahoy Indie Media">
-                </a>
-            </div>
-
-            <!-- Mobile Left Menu (Features) -->
-            <div class="mobile-left-menu mobile-only">
-                <button @click="
-                        rightMenuOpen = false; // Close right menu
-                        leftMenuOpen = !leftMenuOpen;
-                    " class="mobile-menu-button" :class="{'active': leftMenuOpen}" title="Features Menu">
-                    <i class="fas fa-bars"></i>
-                </button>
-
-                <div x-show="leftMenuOpen" x-transition @click.outside="leftMenuOpen = false"
-                    class="mobile-dropdown-menu mobile-left-dropdown">
-
-                    <!-- Search in mobile menu -->
-                    <div class="mobile-search">
-                        <div class="search-container">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" placeholder="Search music, shows, artists..." x-model="searchQuery"
-                                @keyup.enter="performSearch()" class="search-input">
-                            <button @click="clearSearch()" class="search-clear" x-show="searchQuery">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
+                    <!-- Logo -->
+                    <div class="nav-logo">
+                        <a href="{{ url_for('home') }}">
+                            <img
+                                src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+                                alt="Ahoy Indie Media">
+                        </a>
                     </div>
 
-                    <!-- Features Navigation -->
-                    <div class="menu-section">
-                        <h4>Features</h4>
-                        <a href="{{ url_for('home') }}"
-                            class="mobile-menu-item {% if request.endpoint == 'home' %}active{% endif %}"
-                            @click="leftMenuOpen = false">
-                            <i class="fas fa-home"></i>
-                            <span>Home</span>
-                        </a>
+                    <!-- Mobile Hamburger -->
+                    <button class="mobile-hamburger mobile-only"
+                        @click="navOpen = true; accountOpen = false"
+                        title="Menu"
+                        aria-label="Open Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+
+                    <!-- Main Navigation (desktop) -->
+                    <div class="nav-features">
                         <a href="{{ url_for('music') }}"
-                            class="mobile-menu-item {% if request.endpoint == 'music' %}active{% endif %}"
-                            @click="leftMenuOpen = false">
+                            class="feature-btn {% if request.endpoint == 'music' %}active{% endif %}"
+                            title="Music Library">
                             <i class="fas fa-music"></i>
                             <span>Music</span>
                         </a>
                         <a href="{{ url_for('shows') }}"
-                            class="mobile-menu-item {% if request.endpoint == 'shows' %}active{% endif %}"
-                            @click="leftMenuOpen = false">
+                            class="feature-btn {% if request.endpoint == 'shows' %}active{% endif %}"
+                            title="Live Shows">
                             <i class="fas fa-play-circle"></i>
                             <span>Shows</span>
                         </a>
                         <a href="{{ url_for('artists') }}"
-                            class="mobile-menu-item {% if request.endpoint == 'artists' %}active{% endif %}"
-                            @click="leftMenuOpen = false">
+                            class="feature-btn {% if request.endpoint == 'artists' %}active{% endif %}"
+                            title="Artists">
                             <i class="fas fa-users"></i>
                             <span>Artists</span>
                         </a>
-                        <a href="{{ url_for('cast_page') }}"
-                            class="mobile-menu-item {% if request.endpoint == 'cast_page' %}active{% endif %}"
-                            @click="leftMenuOpen = false">
-                            <i class="fas fa-tv"></i>
-                            <span>Cast</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Desktop Features (hidden on mobile) -->
-            <div class="nav-features">
-                <a href="{{ url_for('music') }}"
-                    class="feature-btn {% if request.endpoint == 'music' %}active{% endif %}" title="Music Library">
-                    <i class="fas fa-music"></i>
-                    <span>Music</span>
-                </a>
-                <a href="{{ url_for('shows') }}"
-                    class="feature-btn {% if request.endpoint == 'shows' %}active{% endif %}" title="Live Shows">
-                    <i class="fas fa-play-circle"></i>
-                    <span>Shows</span>
-                </a>
-                <a href="{{ url_for('artists') }}"
-                    class="feature-btn {% if request.endpoint == 'artists' %}active{% endif %}" title="Artists">
-                    <i class="fas fa-users"></i>
-                    <span>Artists</span>
-                </a>
-            </div>
-
-            <!-- Search Bar -->
-            <div class="nav-search">
-                <div class="search-container">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" placeholder="Search music, shows, artists..." x-model="searchQuery"
-                        @keyup.enter="performSearch()" class="search-input">
-                    <button @click="clearSearch()" class="search-clear" x-show="searchQuery">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- App Menu - Compact Right Side -->
-            <div class="nav-menu flex items-center gap-1">
-                <!-- Home (Desktop Only) -->
-                <a href="{{ url_for('home') }}"
-                    class="nav-item hidden md:flex {% if request.endpoint == 'home' %}active{% endif %}" title="Home">
-                    <i class="fas fa-home"></i>
-                </a>
-
-                <!-- Account Features Dropdown (Desktop Only - Logged In) -->
-                <div class="hidden-mobile account-menu-container" x-show="isLoggedIn"
-                    @click.outside="accountMenuOpen = false">
-                    <button
-                        @click="accountMenuOpen = !accountMenuOpen; console.log('Account menu clicked, new state:', accountMenuOpen)"
-                        class="nav-item account-menu-btn" title="Account Features">
-                        <img :src="userProfile.avatar || '/static/img/default-avatar.png'"
-                            :alt="userProfile.display_name || 'User'" class="account-avatar">
-                        <i class="fas fa-chevron-down account-chevron"></i>
-                    </button>
-
-                    <!-- Unified Account Features Dropdown -->
-                    <div x-show="accountMenuOpen" x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 scale-95 translate-y-1"
-                        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                        x-transition:leave-end="opacity-0 scale-95 translate-y-1" class="account-dropdown-menu">
-
-                        <!-- User Header with Stats -->
-                        <div
-                            class="px-4 py-4 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 border-b border-neutral-700/50">
-                            <div class="flex items-center gap-3 mb-3">
-                                <img :src="userProfile.avatar || '/static/img/default-avatar.png'"
-                                    :alt="userProfile.display_name || 'User'"
-                                    class="w-12 h-12 rounded-full border-2 border-white/20">
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-semibold text-white truncate"
-                                        x-text="userProfile.display_name || 'User'"></p>
-                                    <p class="text-xs text-neutral-300 truncate" x-text="userProfile.email || ''"></p>
-                                </div>
-                            </div>
-
-                            <!-- Quick Stats -->
-                            <div class="grid grid-cols-3 gap-2 pt-3 border-t border-neutral-700/50">
-                                <div class="text-center">
-                                    <div class="text-lg font-bold text-pink-400" x-text="totalBookmarkCount || 0"></div>
-                                    <div class="text-xs text-neutral-400">Bookmarks</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-lg font-bold text-purple-400"
-                                        x-text="'$' + (totalInvested || 0).toFixed(0)"></div>
-                                    <div class="text-xs text-neutral-400">Invested</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-lg font-bold text-yellow-400" x-text="badges?.length || 0"></div>
-                                    <div class="text-xs text-neutral-400">Badges</div>
-                                </div>
-                            </div>
-
-                            <!-- Wallet Summary -->
-                            <div
-                                class="flex items-center justify-between mt-3 p-2 rounded-md border border-neutral-700/40 bg-neutral-800/30">
-                                <div class="text-xs text-neutral-300">Wallet</div>
-                                <div class="text-sm font-semibold text-white"
-                                    x-text="'$' + ((walletBalanceCents || 0) / 100).toFixed(2)"></div>
-                            </div>
-                            <div class="mt-2 flex gap-2">
-                                <button
-                                    class="px-2 py-1 text-xs rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
-                                    @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(2000) : null">
-                                    Add $20
-                                </button>
-                                <button
-                                    class="px-2 py-1 text-xs rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
-                                    @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(5000) : null">
-                                    Add $50
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Main Menu Items -->
-                        <div class="account-menu-items">
-                            <a href="/portfolio" class="account-menu-item" @click="accountMenuOpen = false">
-                                <i class="fas fa-chart-line account-menu-icon"></i>
-                                <div class="account-menu-text">
-                                    <div class="account-menu-label">Portfolio</div>
-                                    <div class="account-menu-desc">Creative
-                                        positions</div>
-                                </div>
-                            </a>
-
-                            <a href="/dashboard" class="account-menu-item" @click="accountMenuOpen = false">
-                                <i class="fas fa-trophy account-menu-icon"></i>
-                                <div class="account-menu-text">
-                                    <div class="account-menu-label">Dashboard</div>
-                                    <div class="account-menu-desc">Achievements
-                                        & progress</div>
-                                </div>
-                            </a>
-
-                            <a href="/bookmarks" class="account-menu-item account-menu-item-badge"
-                                @click="accountMenuOpen = false">
-                                <i class="fas fa-bookmark account-menu-icon"></i>
-                                <div class="account-menu-text">
-                                    <div class="account-menu-label">Bookmarks</div>
-                                    <div class="account-menu-desc">Saved
-                                        content</div>
-                                </div>
-                                <span x-show="totalBookmarkCount > 0" class="account-menu-badge"
-                                    x-text="totalBookmarkCount"></span>
-                            </a>
-
-                            <a href="/settings" class="account-menu-item" @click="accountMenuOpen = false">
-                                <i class="fas fa-cog account-menu-icon"></i>
-                                <div class="account-menu-text">
-                                    <div class="account-menu-label">Settings</div>
-                                    <div class="account-menu-desc">Preferences</div>
-                                </div>
-                            </a>
-
-                            <a href="/account" class="account-menu-item" @click="accountMenuOpen = false">
-                                <i class="fas fa-user-circle account-menu-icon"></i>
-                                <div class="account-menu-text">
-                                    <div class="account-menu-label">Account</div>
-                                    <div class="account-menu-desc">Profile &
-                                        security</div>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Divider -->
-                        <div class="account-menu-divider"></div>
-
-                        <!-- Sign Out -->
-                        <div class="account-menu-items">
-                            <button @click="logout(); accountMenuOpen = false"
-                                class="account-menu-item account-menu-item-signout">
-                                <i class="fas fa-sign-out-alt account-menu-icon"></i>
-                                <div class="account-menu-text">
-                                    <div class="account-menu-label">Sign
-                                        Out</div>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Login Button (Not Logged In) -->
-                <div class="hidden-mobile" x-show="!isLoggedIn">
-                    <a href="/account" class="nav-item px-3 py-2 rounded-lg hover:bg-neutral-800/50 transition-colors"
-                        title="Account">
-                        <i class="fas fa-user"></i>
-                    </a>
-                </div>
-
-                <!-- Fullscreen Toggle (Desktop Only) -->
-                <button @click="toggleFullscreen()" class="nav-item hidden-mobile" title="Fullscreen">
-                    <i class="fas fa-expand"></i>
-                </button>
-            </div>
-
-            <!-- Mobile Right Menu (User & Bookmarks) -->
-            <div class="mobile-right-menu mobile-only">
-                <button @click="
-                        leftMenuOpen = false; // Close left menu
-                        rightMenuOpen = !rightMenuOpen;
-                    " class="mobile-menu-button" :class="{'active': rightMenuOpen}" title="User & Bookmarks Menu">
-                    <i class="fas fa-user" x-show="!isLoggedIn"></i>
-                    <img x-show="isLoggedIn" :src="userProfile.avatar || '/static/img/default-avatar.png'"
-                        :alt="userProfile.display_name || 'User'" class="mobile-user-avatar">
-                </button>
-
-                <div x-show="rightMenuOpen" x-transition @click.outside="rightMenuOpen = false"
-                    class="mobile-dropdown-menu mobile-right-dropdown">
-
-                    <!-- User Profile Section -->
-                    <div x-show="isLoggedIn" class="menu-section user-profile-section">
-                        <div class="user-profile-header">
-                            <img :src="userProfile.avatar || '/static/img/default-avatar.png'"
-                                :alt="userProfile.display_name || 'User'" class="profile-avatar">
-                            <div class="profile-info">
-                                <h4 x-text="userProfile.display_name || 'User'"></h4>
-                                <p x-text="userProfile.email || ''"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bookmarks Section -->
-                    <div class="menu-section">
-                        <h4>My Content</h4>
                         <a href="/bookmarks"
-                            class="mobile-menu-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
-                            @click="rightMenuOpen = false">
+                            class="feature-btn {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
+                            title="Bookmarks">
                             <i class="fas fa-bookmark"></i>
-                            <span>My Bookmarks</span>
-                            <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount"></span>
+                            <span>Bookmarks</span>
                         </a>
                     </div>
 
-                    <!-- Account Section -->
-                    <div class="menu-section">
-                        <h4>Account</h4>
-                        <a x-show="isLoggedIn" href="/account"
-                            class="mobile-menu-item {% if request.endpoint == 'account' %}active{% endif %}"
-                            @click="rightMenuOpen = false">
-                            <i class="fas fa-user-circle"></i>
-                            <span>My Profile</span>
-                        </a>
-                        <a x-show="isLoggedIn" href="/settings"
-                            class="mobile-menu-item {% if request.endpoint == 'settings' %}active{% endif %}"
-                            @click="rightMenuOpen = false">
-                            <i class="fas fa-cog"></i>
-                            <span>Settings</span>
-                        </a>
-                        <button class="mobile-menu-item"
-                            onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())"
-                            @click="rightMenuOpen = false">
-                            <i class="fas fa-palette"></i>
-                            <span>🎨 Themes</span>
-                        </button>
-                        <a x-show="!isLoggedIn" href="/account" class="mobile-menu-item" @click="rightMenuOpen = false">
-                            <i class="fas fa-user-circle"></i>
-                            <span>Account</span>
-                        </a>
-                    </div>
-
-                    <!-- App Info Section -->
-                    <div class="menu-section">
-                        <h4>Information</h4>
-                        <a href="{{ url_for('sitemap_page') }}"
-                            class="mobile-menu-item {% if request.endpoint == 'sitemap_page' %}active{% endif %}"
-                            @click="rightMenuOpen = false">
-                            <i class="fas fa-sitemap"></i>
-                            <span>App Structure</span>
-                        </a>
-                        <a href="/privacy" class="mobile-menu-item" @click="rightMenuOpen = false">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Privacy</span>
-                        </a>
-                        <a href="/terms" class="mobile-menu-item" @click="rightMenuOpen = false">
-                            <i class="fas fa-file-contract"></i>
-                            <span>Terms</span>
-                        </a>
-                        <a href="/debug" class="mobile-menu-item" @click="rightMenuOpen = false">
-                            <i class="fas fa-bug"></i>
-                            <span>Debug</span>
-                        </a>
-                        <a href="/debug-report" class="mobile-menu-item" @click="rightMenuOpen = false">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Debug Report</span>
-                        </a>
-                        <a href="/downloads" class="mobile-menu-item" @click="rightMenuOpen = false">
-                            <i class="fas fa-download"></i>
-                            <span>Downloads</span>
-                        </a>
-                        <a href="/admin" class="mobile-menu-item" @click="rightMenuOpen = false" {% if
-                            session.get('is_admin') or (g.get('real_user') and g.real_user.is_admin)
-                            %}style="display:block" {% else %}style="display:none" {% endif %}>
-                            <i class="fas fa-user-shield"></i>
-                            <span>Admin</span>
-                        </a>
-                    </div>
-
-                    <!-- Sign Out Section -->
-                    <div x-show="isLoggedIn" class="menu-section">
-                        <button @click="logout(); rightMenuOpen = false" class="mobile-menu-item logout-button">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Sign Out</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Top boost status badge -->
-    <div id="boost-status-badge" aria-live="polite" class="hidden">
-        <i class="fas fa-check-circle"></i>
-        <span class="boost-status-text">Boost Sent</span>
-    </div>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="dashboard-sidebars">
-            <!-- Left Dashboard: Collection -->
-            <aside class="dashboard-sidebar dashboard-left" x-data="dashboardCollection()" x-init="init()">
-                <div class="sidebar-content">
-                    <!-- User Info Block -->
-                    <div class="sidebar-user-block">
-                        <div class="user-block-content">
-                            <img :src="(window.userProfile && window.userProfile.avatar) || '/static/img/default-avatar.png'"
-                                :alt="(window.userProfile && window.userProfile.display_name) || 'Guest'"
-                                class="user-block-avatar">
-                            <div class="user-block-info">
-                                <div class="user-block-name"
-                                    x-text="(window.userProfile && window.userProfile.display_name) || 'Guest'"></div>
-                                <div class="user-block-stats">
-                                    <span>Bookmarks</span> •
-                                    <span>Badges</span> • <span
-                                        x-text="'$' + (window.totalInvested || 0).toFixed(0) + ' invested'"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="user-block-divider"></div>
-                    </div>
-
-                    <!-- Global Search -->
-                    <div class="sidebar-panel sidebar-item">
-                        <div class="section-title">Search</div>
-                        <div class="sidebar-search-container">
-                            <i class="fas fa-search sidebar-search-icon"></i>
-                            <input type="text" placeholder="Search music, shows, artists..." x-model="searchQuery"
-                                @keyup.enter="performSearch()" class="sidebar-search-input">
-                            <button @click="clearSearch()" class="sidebar-search-clear" x-show="searchQuery">
+                    <!-- Search Bar -->
+                    <div class="nav-search">
+                        <div class="search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text"
+                                placeholder="Search music, shows, artists..."
+                                x-model="searchQuery"
+                                @keyup.enter="performSearch()"
+                                class="search-input">
+                            <button @click="clearSearch()" class="search-clear"
+                                x-show="searchQuery">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Tip Jar (Compact) -->
-                    <div class="tip-jar-card sidebar-item">
-                        <div class="tip-jar-compact">
-                            <!-- Compact select (top) -->
-                            <div class="tip-jar-row tip-compact-row">
-                                <select x-model="selectedArtistId"
-                                    class="tip-jar-select tip-compact-select tip-mini-field"
-                                    aria-label="Select artist to boost">
-                                    <option value>Select artist…</option>
-                                    <template x-for="artist in artists" :key="artist.id || artist.name">
-                                        <option :value="artist.id || artist.name" x-text="artist.name"></option>
-                                    </template>
-                                </select>
-                            </div>
-                            <!-- Compact amount input (below) -->
-                            <div class="tip-jar-row tip-compact-row">
-                                <div class="tip-jar-amount-group tip-mini-field">
-                                    <span class="tip-jar-currency-prefix">$</span>
-                                    <input type="number" x-model="tipAmount" min="0.50" step="0.01" placeholder="0.50"
-                                        class="tip-jar-amount-input" @input="tipAmount = $event.target.value">
-                                </div>
-                            </div>
+                    <!-- App Menu - Compact Right Side -->
+                    <div class="nav-menu flex items-center gap-1">
+                        <!-- Home (Desktop Only) -->
+                        <a href="{{ url_for('home') }}"
+                            class="nav-item hidden md:flex {% if request.endpoint == 'home' %}active{% endif %}"
+                            title="Home">
+                            <i class="fas fa-home"></i>
+                        </a>
 
-                            <!-- Tip Breakdown Card -->
-                            <div x-show="isValid" x-transition:enter="transition ease-out duration-200"
-                                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                                class="tip-breakdown-card">
-                                <div class="tip-breakdown-title">Your Boost
-                                    Breakdown</div>
-
-                                <div class="tip-breakdown-row">
-                                    <span class="tip-breakdown-label">Boost
-                                        Amount</span>
-                                    <span class="tip-breakdown-value"
-                                        x-text="'$' + (parseFloat(tipAmount || 0)).toFixed(2)"></span>
-                                </div>
-
-                                <div class="tip-breakdown-row">
-                                    <span class="tip-breakdown-label">Stripe
-                                        Fee (2.9% + $0.30)</span>
-                                    <span class="tip-breakdown-value"
-                                        x-text="'$' + calculateStripeFee(parseFloat(tipAmount || 0)).toFixed(2)"></span>
-                                </div>
-
-                                <div class="tip-breakdown-row">
-                                    <span class="tip-breakdown-label">Platform
-                                        Fee (7.5%)</span>
-                                    <span class="tip-breakdown-value"
-                                        x-text="'$' + calculatePlatformFee(parseFloat(tipAmount || 0)).toFixed(2)"></span>
-                                </div>
-
-                                <div class="tip-breakdown-divider"></div>
-
-                                <div class="tip-breakdown-row tip-breakdown-total">
-                                    <span class="tip-breakdown-label">Total
-                                        Charge</span>
-                                    <span class="tip-breakdown-value"
-                                        x-text="'$' + calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2)"></span>
-                                </div>
-
-                                <div class="tip-breakdown-caption">
-                                    100% of your boost goes directly to the
-                                    artist.
-                                </div>
-                            </div>
-
-                            <!-- Send Tip Button -->
+                        <!-- Account Features Dropdown (Desktop Only - Logged In) -->
+                        <div class="hidden-mobile account-menu-container"
+                            x-show="isLoggedIn"
+                            @click.outside="accountMenuOpen = false">
                             <button
-                                @click="window.location.href = `/checkout?type=tip&artist_id=${encodeURIComponent(selectedArtistId||'')}&amount=${encodeURIComponent(tipAmount||'')}`"
-                                :disabled="!isValid || isTipping" class="tip-jar-submit">
-                                <i class="fas fa-heart" x-show="!isTipping"></i>
-                                <i class="fas fa-spinner fa-spin" x-show="isTipping"></i>
-                                <span
-                                    x-text="isTipping ? 'Processing...' : 'Send Boost — $' + (isValid ? calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2) : '0.00')"></span>
+                                @click="accountMenuOpen = !accountMenuOpen; console.log('Account menu clicked, new state:', accountMenuOpen)"
+                                class="nav-item account-menu-btn"
+                                title="Account Features">
+                                <img
+                                    :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                                    :alt="userProfile.display_name || 'User'"
+                                    class="account-avatar">
+                                <i
+                                    class="fas fa-chevron-down account-chevron"></i>
                             </button>
-                            <div class="text-right">
-                                <button type="button" class="tip-cancel"
-                                    :disabled="!tipAmount || parseFloat(tipAmount || 0) <= 0"
-                                    @click="tipAmount=''; document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Boost canceled.' }))">
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Success Toast -->
-                    <div x-show="showTipSuccess" x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                        x-transition:leave="transition ease-in duration-200"
-                        x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                        class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-check-circle text-2xl"></i>
-                        </div>
-                        <div>
-                            <p class="font-semibold">Thanks for boosting
-                                independent artists!</p>
-                        </div>
-                    </div>
+                            <!-- Unified Account Features Dropdown -->
+                            <div x-show="accountMenuOpen"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-95 translate-y-1"
+                                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                x-transition:leave-end="opacity-0 scale-95 translate-y-1"
+                                class="account-dropdown-menu">
 
-                    <!-- XP Reinforcement Modal -->
-                    <template x-if="showXpReward">
-                        <div class="xp-overlay" @click.self="showXpReward=false">
-                            <div class="xp-card">
-                                <div style="font-size:18px; font-weight:800; margin-bottom:6px;">Great
-                                    job!</div>
-                                <div>You earned <span class="xp-points" x-text="'+' + (xpGain || 0)"></span>
-                                    XP</div>
-                                <div style="opacity:.8; font-size:12px; margin-top:6px;">Total
-                                    XP: <span x-text="xpTotal"></span></div>
-                                <button class="xp-close tip-cancel" @click="showXpReward=false">Close</button>
-                            </div>
-                        </div>
-                    </template>
+                                <!-- User Header with Stats -->
+                                <div
+                                    class="px-4 py-4 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 border-b border-neutral-700/50">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <img
+                                            :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                                            :alt="userProfile.display_name || 'User'"
+                                            class="w-12 h-12 rounded-full border-2 border-white/20">
+                                        <div class="flex-1 min-w-0">
+                                            <p
+                                                class="text-sm font-semibold text-white truncate"
+                                                x-text="userProfile.display_name || 'User'"></p>
+                                            <p
+                                                class="text-xs text-neutral-300 truncate"
+                                                x-text="userProfile.email || ''"></p>
+                                        </div>
+                                    </div>
 
-                    <!-- Merit Badges -->
-                    <div class="sidebar-panel sidebar-item">
-                        <div class="section-title">Merit Badges</div>
-                        <div class="badges-mini">
-                            <template x-for="badge in badges.slice(0, 4)" :key="badge.key">
-                                <div class="badge-mini" :class="'badge-' + (badge.tier || 'bronze')"
-                                    :title="badge.title">
-                                    <i :class="badge.icon || 'fas fa-medal'"></i>
+                                    <!-- Quick Stats -->
+                                    <div
+                                        class="grid grid-cols-3 gap-2 pt-3 border-t border-neutral-700/50">
+                                        <div class="text-center">
+                                            <div
+                                                class="text-lg font-bold text-pink-400"
+                                                x-text="totalBookmarkCount || 0"></div>
+                                            <div
+                                                class="text-xs text-neutral-400">Bookmarks</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div
+                                                class="text-lg font-bold text-purple-400"
+                                                x-text="'$' + (totalInvested || 0).toFixed(0)"></div>
+                                            <div
+                                                class="text-xs text-neutral-400">Invested</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div
+                                                class="text-lg font-bold text-yellow-400"
+                                                x-text="badges?.length || 0"></div>
+                                            <div
+                                                class="text-xs text-neutral-400">Badges</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Wallet Summary -->
+                                    <div
+                                        class="flex items-center justify-between mt-3 p-2 rounded-md border border-neutral-700/40 bg-neutral-800/30">
+                                        <div
+                                            class="text-xs text-neutral-300">Wallet</div>
+                                        <div
+                                            class="text-sm font-semibold text-white"
+                                            x-text="'$' + ((walletBalanceCents || 0) / 100).toFixed(2)"></div>
+                                    </div>
+                                    <div class="mt-2 flex gap-2">
+                                        <button
+                                            class="px-2 py-1 text-xs rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
+                                            @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(2000) : null">
+                                            Add $20
+                                        </button>
+                                        <button
+                                            class="px-2 py-1 text-xs rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
+                                            @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(5000) : null">
+                                            Add $50
+                                        </button>
+                                    </div>
                                 </div>
-                            </template>
-                            <button @click="showCodeEntry = !showCodeEntry" class="btn-code-mini" title="Enter code">
-                                Code
-                            </button>
-                        </div>
-                    </div>
 
-                    <!-- Bookmarks -->
-                    <div class="sidebar-panel sidebar-item">
-                        <div class="section-title">Bookmarks</div>
-                        <div class="collections-mini">
-                            <button @click="goToCollections()" class="item-mini collection-add-btn">
-                                <i class="fas fa-plus"></i>
-                                <span>Add Collection</span>
-                            </button>
-                        </div>
-                    </div>
+                                <!-- Main Menu Items -->
+                                <div class="account-menu-items">
+                                    <a href="/portfolio"
+                                        class="account-menu-item"
+                                        @click="accountMenuOpen = false">
+                                        <i
+                                            class="fas fa-chart-line account-menu-icon"></i>
+                                        <div class="account-menu-text">
+                                            <div
+                                                class="account-menu-label">Portfolio</div>
+                                            <div
+                                                class="account-menu-desc">Creative
+                                                positions</div>
+                                        </div>
+                                    </a>
 
-                    <!-- Mini Player Footer -->
-                    <div class="sidebar-mini-player" x-show="currentTrack">
-                        <img :src="currentTrack?.cover_art || currentTrack?.thumbnail || '/static/img/default-cover.jpg'"
-                            alt="Track cover" class="mini-player-cover">
-                        <div class="mini-player-info">
-                            <div class="mini-player-title" x-text="currentTrack?.title || 'No track'"></div>
-                            <div class="mini-player-artist" x-text="currentTrack?.artist || ''"></div>
+                                    <a href="/dashboard"
+                                        class="account-menu-item"
+                                        @click="accountMenuOpen = false">
+                                        <i
+                                            class="fas fa-trophy account-menu-icon"></i>
+                                        <div class="account-menu-text">
+                                            <div
+                                                class="account-menu-label">Dashboard</div>
+                                            <div
+                                                class="account-menu-desc">Achievements
+                                                & progress</div>
+                                        </div>
+                                    </a>
+
+                                    <a href="/bookmarks"
+                                        class="account-menu-item account-menu-item-badge"
+                                        @click="accountMenuOpen = false">
+                                        <i
+                                            class="fas fa-bookmark account-menu-icon"></i>
+                                        <div class="account-menu-text">
+                                            <div
+                                                class="account-menu-label">Bookmarks</div>
+                                            <div class="account-menu-desc">Saved
+                                                content</div>
+                                        </div>
+                                        <span x-show="totalBookmarkCount > 0"
+                                            class="account-menu-badge"
+                                            x-text="totalBookmarkCount"></span>
+                                    </a>
+
+                                    <a href="/settings"
+                                        class="account-menu-item"
+                                        @click="accountMenuOpen = false">
+                                        <i
+                                            class="fas fa-cog account-menu-icon"></i>
+                                        <div class="account-menu-text">
+                                            <div
+                                                class="account-menu-label">Settings</div>
+                                            <div
+                                                class="account-menu-desc">Preferences</div>
+                                        </div>
+                                    </a>
+
+                                    <a href="/account" class="account-menu-item"
+                                        @click="accountMenuOpen = false">
+                                        <i
+                                            class="fas fa-user-circle account-menu-icon"></i>
+                                        <div class="account-menu-text">
+                                            <div
+                                                class="account-menu-label">Account</div>
+                                            <div
+                                                class="account-menu-desc">Profile
+                                                &
+                                                security</div>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- Divider -->
+                                <div class="account-menu-divider"></div>
+
+                                <!-- Sign Out -->
+                                <div class="account-menu-items">
+                                    <button
+                                        @click="logout(); accountMenuOpen = false"
+                                        class="account-menu-item account-menu-item-signout">
+                                        <i
+                                            class="fas fa-sign-out-alt account-menu-icon"></i>
+                                        <div class="account-menu-text">
+                                            <div class="account-menu-label">Sign
+                                                Out</div>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <button @click="toggleTinyPlayer()" class="mini-player-control">
-                            <i :class="isTinyPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+
+                        <!-- Login Button (Not Logged In) -->
+                        <div class="hidden-mobile" x-show="!isLoggedIn">
+                            <a href="/account"
+                                class="nav-item px-3 py-2 rounded-lg hover:bg-neutral-800/50 transition-colors"
+                                title="Account">
+                                <i class="fas fa-user"></i>
+                            </a>
+                        </div>
+
+                        <!-- Fullscreen Toggle (Desktop Only) -->
+                        <button @click="toggleFullscreen()"
+                            class="nav-item hidden-mobile" title="Fullscreen">
+                            <i class="fas fa-expand"></i>
                         </button>
                     </div>
 
-                    <!-- Code Entry Modal -->
-                    <div x-show="showCodeEntry" class="modal-overlay" @click="showCodeEntry = false">
-                        <div class="modal-mini" @click.stop>
-                            <h4>Enter Show Code</h4>
-                            <p class="text-small">Got a code from a
-                                show?</p>
-                            <input type="text" x-model="codeEntry" placeholder="Enter code..." class="input-field"
-                                maxlength="20">
-                            <button @click="redeemCode()" class="btn-mini">Redeem</button>
-                        </div>
-                    </div>
+                    <!-- Mobile Account trigger -->
+                    <button class="nav-item mobile-only"
+                        @click="accountOpen = true; navOpen = false"
+                        title="Account">
+                        <i class="fas fa-user" x-show="!isLoggedIn"></i>
+                        <img x-show="isLoggedIn"
+                            :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                            :alt="userProfile.display_name || 'User'"
+                            class="mobile-user-avatar">
+                    </button>
                 </div>
-            </aside>
+            </nav>
+        </header>
+        {% include '_nav_main.html' %}
+        {% include '_nav_user.html' %}
 
-            <!-- Center Content -->
-            <div class="content-area">
-                {% block content %}{% endblock %}
-            </div>
+        <!-- Top boost status badge -->
+        <div id="boost-status-badge" aria-live="polite" class="hidden">
+            <i class="fas fa-check-circle"></i>
+            <span class="boost-status-text">Boost Sent</span>
+        </div>
 
-            <!-- Right Dashboard: Up Next -->
-            <aside class="dashboard-sidebar dashboard-right" x-data="dashboardUpNext()" x-init="init()">
-                <div class="sidebar-header">
-                    <h3>Up Next</h3>
-                </div>
-                <div class="sidebar-content">
-                    <!-- Now Playing -->
-                    <div class="section-title">Playing Now</div>
-                    <div class="now-playing-mini" x-show="nowPlaying">
-                        <div class="item-mini" @click="goToMediaItem(nowPlaying)"
-                            :class="{'radio-track': isRadioTrack(nowPlaying)}">
-                            <img :src="nowPlaying.cover_art || '/static/img/default-cover.jpg'" class="mini-cover">
-                            <div>
-                                <div class="mini-title" x-text="nowPlaying.title"></div>
-                                <div class="mini-artist" x-text="nowPlaying.artist"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="empty-mini" x-show="!nowPlaying">
-                        <span>Nothing playing</span>
-                    </div>
-
-                    <!-- Up Next Queue -->
-                    <div class="section-title">Up Next</div>
-                    <div class="queue-mini" x-show="queueItems.length > 0">
-                        <template x-for="(item, index) in queueItems" :key="item.id || index">
-                            <div class="item-mini queue-item" @click="goToMediaItem(item)">
-                                <img :src="item.cover_art || item.thumbnail" class="mini-thumb">
-                                <div class="mini-info">
-                                    <span class="mini-title" x-text="item.title"></span>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dashboard-sidebars">
+                <!-- Left Dashboard: Collection -->
+                <aside class="dashboard-sidebar dashboard-left"
+                    x-data="dashboardCollection()" x-init="init()">
+                    <div class="sidebar-content">
+                        <!-- User Info Block -->
+                        <div class="sidebar-user-block">
+                            <div class="user-block-content">
+                                <template x-if="window.LOGGED_IN">
+                                    <img
+                                        :src="(window.userProfile && window.userProfile.avatar) || '/static/img/default-avatar.png'"
+                                        :alt="(window.userProfile && window.userProfile.display_name) || 'Guest'"
+                                        class="user-block-avatar">
+                                </template>
+                                <template x-if="!window.LOGGED_IN">
+                                    <span class="user-label">Guest</span>
+                                </template>
+                                <div class="user-block-info">
+                                    <div class="user-block-name"
+                                        x-text="(window.userProfile && window.userProfile.display_name) || 'Guest'"></div>
+                                    <div class="user-block-stats">
+                                        <span>Bookmarks</span> •
+                                        <span>Badges</span> • <span
+                                            x-text="'$' + (window.totalInvested || 0).toFixed(0) + ' invested'"></span>
+                                    </div>
                                 </div>
-                                <button @click.stop="removeFromQueue(index)" class="queue-remove-btn"
-                                    title="Remove from queue">
+                            </div>
+                            <div class="user-block-divider"></div>
+                        </div>
+
+                        <!-- Global Search -->
+                        <div class="sidebar-panel sidebar-item">
+                            <div class="section-title">Search</div>
+                            <div class="sidebar-search-container">
+                                <i
+                                    class="fas fa-search sidebar-search-icon"></i>
+                                <input type="text"
+                                    placeholder="Search music, shows, artists..."
+                                    x-model="searchQuery"
+                                    @keyup.enter="performSearch()"
+                                    class="sidebar-search-input">
+                                <button @click="clearSearch()"
+                                    class="sidebar-search-clear"
+                                    x-show="searchQuery">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                        </template>
-                    </div>
-                    <div class="empty-mini" x-show="queueItems.length === 0">
-                        <span>Queue is empty</span>
-                    </div>
+                        </div>
 
-                    <!-- Recently Added -->
-                    <div class="section-title">Recently Added</div>
-                    <div class="recent-mini">
-                        <template x-for="item in recent.slice(0, 3)" :key="item.id">
-                            <div class="item-mini" @click="goToMediaItem(item)">
-                                <img :src="item.cover_art" class="mini-thumb">
-                                <div class="mini-info">
-                                    <span class="mini-title" x-text="item.title"></span>
+                        <!-- Tip Jar (Compact) -->
+                        <div class="tip-jar-card sidebar-item">
+                            <div class="tip-jar-compact">
+                                <!-- Compact select (top) -->
+                                <div class="tip-jar-row tip-compact-row">
+                                    <select x-model="selectedArtistId"
+                                        class="tip-jar-select tip-compact-select tip-mini-field"
+                                        aria-label="Select artist to boost">
+                                        <option value>Select artist…</option>
+                                        <template x-for="artist in artists"
+                                            :key="artist.id || artist.name">
+                                            <option
+                                                :value="artist.id || artist.name"
+                                                x-text="artist.name"></option>
+                                        </template>
+                                    </select>
                                 </div>
-                                <button @click.stop="addToQueue(item)" class="queue-add-btn" title="Add to queue">
-                                    <i class="fas fa-plus"></i>
+                                <!-- Compact amount input (below) -->
+                                <div class="tip-jar-row tip-compact-row">
+                                    <div
+                                        class="tip-jar-amount-group tip-mini-field">
+                                        <span
+                                            class="tip-jar-currency-prefix">$</span>
+                                        <input type="number" x-model="tipAmount"
+                                            min="0.50" step="0.01"
+                                            placeholder="0.50"
+                                            class="tip-jar-amount-input"
+                                            @input="tipAmount = $event.target.value">
+                                    </div>
+                                </div>
+
+                                <!-- Tip Breakdown Card -->
+                                <div x-show="isValid"
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0"
+                                    x-transition:enter-end="opacity-100"
+                                    class="tip-breakdown-card">
+                                    <div class="tip-breakdown-title">Your Boost
+                                        Breakdown</div>
+
+                                    <div class="tip-breakdown-row">
+                                        <span class="tip-breakdown-label">Boost
+                                            Amount</span>
+                                        <span class="tip-breakdown-value"
+                                            x-text="'$' + (parseFloat(tipAmount || 0)).toFixed(2)"></span>
+                                    </div>
+
+                                    <div class="tip-breakdown-row">
+                                        <span class="tip-breakdown-label">Stripe
+                                            Fee (2.9% + $0.30)</span>
+                                        <span class="tip-breakdown-value"
+                                            x-text="'$' + calculateStripeFee(parseFloat(tipAmount || 0)).toFixed(2)"></span>
+                                    </div>
+
+                                    <div class="tip-breakdown-row">
+                                        <span
+                                            class="tip-breakdown-label">Platform
+                                            Fee (7.5%)</span>
+                                        <span class="tip-breakdown-value"
+                                            x-text="'$' + calculatePlatformFee(parseFloat(tipAmount || 0)).toFixed(2)"></span>
+                                    </div>
+
+                                    <div class="tip-breakdown-divider"></div>
+
+                                    <div
+                                        class="tip-breakdown-row tip-breakdown-total">
+                                        <span class="tip-breakdown-label">Total
+                                            Charge</span>
+                                        <span class="tip-breakdown-value"
+                                            x-text="'$' + calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2)"></span>
+                                    </div>
+
+                                    <div class="tip-breakdown-caption">
+                                        100% of your boost goes directly to the
+                                        artist.
+                                    </div>
+                                </div>
+
+                                <!-- Send Tip Button -->
+                                <button
+                                    @click="window.location.href = `/checkout?type=tip&artist_id=${encodeURIComponent(selectedArtistId||'')}&amount=${encodeURIComponent(tipAmount||'')}`"
+                                    :disabled="!isValid || isTipping"
+                                    class="tip-jar-submit">
+                                    <i class="fas fa-heart"
+                                        x-show="!isTipping"></i>
+                                    <i class="fas fa-spinner fa-spin"
+                                        x-show="isTipping"></i>
+                                    <span
+                                        x-text="isTipping ? 'Processing...' : 'Send Boost — $' + (isValid ? calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2) : '0.00')"></span>
                                 </button>
+                                <div class="text-right">
+                                    <button type="button" class="tip-cancel"
+                                        :disabled="!tipAmount || parseFloat(tipAmount || 0) <= 0"
+                                        @click="tipAmount=''; document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Boost canceled.' }))">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Success Toast -->
+                        <div x-show="showTipSuccess"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95"
+                            class="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Thanks for boosting
+                                    independent artists!</p>
+                            </div>
+                        </div>
+
+                        <!-- XP Reinforcement Modal -->
+                        <template x-if="showXpReward">
+                            <div class="xp-overlay"
+                                @click.self="showXpReward=false">
+                                <div class="xp-card">
+                                    <div
+                                        style="font-size:18px; font-weight:800; margin-bottom:6px;">Great
+                                        job!</div>
+                                    <div>You earned <span class="xp-points"
+                                            x-text="'+' + (xpGain || 0)"></span>
+                                        XP</div>
+                                    <div
+                                        style="opacity:.8; font-size:12px; margin-top:6px;">Total
+                                        XP: <span x-text="xpTotal"></span></div>
+                                    <button class="xp-close tip-cancel"
+                                        @click="showXpReward=false">Close</button>
+                                </div>
                             </div>
                         </template>
-                    </div>
 
-                    <!-- Quick Actions -->
-                    <div class="section-title">Quick</div>
-                    <div class="actions-mini actions-mini-vertical">
-                        <div class="action-mini" @click="goTo('/music')">Music</div>
-                        <div class="action-mini" @click="goTo('/shows')">Shows</div>
-                        <div class="action-mini" @click="goTo('/artists')">Artists</div>
+                        <!-- Merit Badges -->
+                        <div class="sidebar-panel sidebar-item">
+                            <div class="section-title">Merit Badges</div>
+                            <div class="badges-mini">
+                                <template x-for="badge in badges.slice(0, 4)"
+                                    :key="badge.key">
+                                    <div class="badge-mini"
+                                        :class="'badge-' + (badge.tier || 'bronze')"
+                                        :title="badge.title">
+                                        <i
+                                            :class="badge.icon || 'fas fa-medal'"></i>
+                                    </div>
+                                </template>
+                                <button @click="showCodeEntry = !showCodeEntry"
+                                    class="btn-code-mini" title="Enter code">
+                                    Code
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Bookmarks -->
+                        <div class="sidebar-panel sidebar-item">
+                            <div class="section-title">Bookmarks</div>
+                            <div class="collections-mini">
+                                <button @click="goToCollections()"
+                                    class="item-mini collection-add-btn">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add Collection</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mini Player Footer -->
+                        <div class="sidebar-mini-player" x-show="currentTrack">
+                            <img
+                                :src="currentTrack?.cover_art || currentTrack?.thumbnail || '/static/img/default-cover.jpg'"
+                                alt="Track cover" class="mini-player-cover">
+                            <div class="mini-player-info">
+                                <div class="mini-player-title"
+                                    x-text="currentTrack?.title || 'No track'"></div>
+                                <div class="mini-player-artist"
+                                    x-text="currentTrack?.artist || ''"></div>
+                            </div>
+                            <button @click="toggleTinyPlayer()"
+                                class="mini-player-control">
+                                <i
+                                    :class="isTinyPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+                            </button>
+                        </div>
+
+                        <!-- Code Entry Modal -->
+                        <div x-show="showCodeEntry" class="modal-overlay"
+                            @click="showCodeEntry = false">
+                            <div class="modal-mini" @click.stop>
+                                <h4>Enter Show Code</h4>
+                                <p class="text-small">Got a code from a
+                                    show?</p>
+                                <input type="text" x-model="codeEntry"
+                                    placeholder="Enter code..."
+                                    class="input-field"
+                                    maxlength="20">
+                                <button @click="redeemCode()"
+                                    class="btn-mini">Redeem</button>
+                            </div>
+                        </div>
                     </div>
+                </aside>
+
+                <!-- Center Content -->
+                <div class="content-area">
+                    {% block content %}{% endblock %}
                 </div>
-            </aside>
-        </div>
-    </main>
 
-    <!-- Global Player - Glassy Now Playing -->
-    <div class="now-playing-wrapper" x-data="globalPlayer()" x-show="currentTrack || isPlaying"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="transform translate-y-full opacity-0"
-        x-transition:enter-end="transform translate-y-0 opacity-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="transform translate-y-0 opacity-100"
-        x-transition:leave-end="transform translate-y-full opacity-0">
-
-        <!-- Three.js Visualizer Background -->
-        <div id="now-playing-visualizer" class="now-playing-visualizer"></div>
-
-        <!-- Glassy Now Playing Bar -->
-        <div class="now-playing-glass">
-            <div class="now-playing-container">
-                <!-- Left: Album Artwork -->
-                <div class="now-playing-album-art" @click="openFullPlayer()">
-                    <img :src="currentTrack?.cover_art || '/static/img/default-cover.jpg'" :alt="currentTrack?.title"
-                        class="now-playing-album-img" :class="{'spinning': isPlaying}">
-                    <div class="now-playing-album-overlay" x-show="!isPlaying">
-                        <i class="fas fa-play"></i>
+                <!-- Right Dashboard: Up Next -->
+                <aside class="dashboard-sidebar dashboard-right"
+                    x-data="dashboardUpNext()" x-init="init()">
+                    <div class="sidebar-header">
+                        <h3>Up Next</h3>
                     </div>
-                </div>
+                    <div class="sidebar-content">
+                        <!-- Now Playing -->
+                        <div class="section-title">Playing Now</div>
+                        <div class="now-playing-mini" x-show="nowPlaying">
+                            <div class="item-mini"
+                                @click="goToMediaItem(nowPlaying)"
+                                :class="{'radio-track': isRadioTrack(nowPlaying)}">
+                                <img
+                                    :src="nowPlaying.cover_art || '/static/img/default-cover.jpg'"
+                                    class="mini-cover">
+                                <div>
+                                    <div class="mini-title"
+                                        x-text="nowPlaying.title"></div>
+                                    <div class="mini-artist"
+                                        x-text="nowPlaying.artist"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="empty-mini" x-show="!nowPlaying">
+                            <span>Nothing playing</span>
+                        </div>
 
-                <!-- Center: Track Info -->
-                <div class="now-playing-info">
-                    <div class="now-playing-title" x-text="currentTrack?.title || 'Unknown Title'"></div>
-                    <div class="now-playing-artist" x-show="currentTrack?.type === 'show'"
-                        x-text="currentTrack?.host || currentTrack?.creator || 'Unknown Host'"></div>
-                    <div class="now-playing-artist" x-show="currentTrack?.type !== 'show'"
-                        x-text="currentTrack?.artist || 'Unknown Artist'"></div>
-                    <div class="now-playing-category">
-                        <span x-show="currentTrack?.type === 'show'" class="category-pill">
-                            <i class="fas fa-play-circle"></i> Video
-                        </span>
-                        <span x-show="currentTrack?.type !== 'show'" class="category-pill">
-                            <i class="fas fa-music"></i> Music
-                        </span>
+                        <!-- Up Next Queue -->
+                        <div class="section-title">Up Next</div>
+                        <div class="queue-mini" x-show="queueItems.length > 0">
+                            <template x-for="(item, index) in queueItems"
+                                :key="item.id || index">
+                                <div class="item-mini queue-item"
+                                    @click="goToMediaItem(item)">
+                                    <img :src="item.cover_art || item.thumbnail"
+                                        class="mini-thumb">
+                                    <div class="mini-info">
+                                        <span class="mini-title"
+                                            x-text="item.title"></span>
+                                    </div>
+                                    <button @click.stop="removeFromQueue(index)"
+                                        class="queue-remove-btn"
+                                        title="Remove from queue">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="empty-mini"
+                            x-show="queueItems.length === 0">
+                            <span>Queue is empty</span>
+                        </div>
+
+                        <!-- Recently Added -->
+                        <div class="section-title">Recently Added</div>
+                        <div class="recent-mini">
+                            <template x-for="item in recent.slice(0, 3)"
+                                :key="item.id">
+                                <div class="item-mini"
+                                    @click="goToMediaItem(item)">
+                                    <img :src="item.cover_art"
+                                        class="mini-thumb">
+                                    <div class="mini-info">
+                                        <span class="mini-title"
+                                            x-text="item.title"></span>
+                                    </div>
+                                    <button @click.stop="addToQueue(item)"
+                                        class="queue-add-btn"
+                                        title="Add to queue">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="section-title">Quick</div>
+                        <div class="actions-mini actions-mini-vertical">
+                            <div class="action-mini"
+                                @click="goTo('/music')">Music</div>
+                            <div class="action-mini"
+                                @click="goTo('/shows')">Shows</div>
+                            <div class="action-mini"
+                                @click="goTo('/artists')">Artists</div>
+                        </div>
                     </div>
-                </div>
+                </aside>
+            </div>
+        </main>
 
-                <!-- Right: Controls -->
-                <div class="now-playing-controls">
-                    <button @click="previousTrack()" class="now-playing-btn" title="Previous">
-                        <i class="fas fa-step-backward"></i>
-                    </button>
-                    <button @click="togglePlay()" class="now-playing-btn now-playing-play-btn"
-                        :title="isPlaying ? 'Pause' : 'Play'">
-                        <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
-                    </button>
-                    <button @click="nextTrack()" class="now-playing-btn" title="Next">
-                        <i class="fas fa-step-forward"></i>
-                    </button>
-                    <button @click="toggleShuffle()" class="now-playing-btn" :class="{'active': isShuffled}"
-                        title="Shuffle">
-                        <i class="fas fa-random"></i>
-                    </button>
-                    <button @click="toggleRepeat()" class="now-playing-btn" :class="{'active': isRepeated}"
-                        title="Repeat">
-                        <i class="fas fa-redo"></i>
-                    </button>
-                    <button @click="toggleLike()" class="now-playing-btn" :class="{'active': isLiked}" title="Like">
-                        <i class="fas fa-heart"></i>
-                    </button>
-                    <button @click="
+        <!-- Global Player - Glassy Now Playing -->
+        <div class="now-playing-wrapper" x-data="globalPlayer()"
+            x-show="currentTrack || isPlaying"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="transform translate-y-full opacity-0"
+            x-transition:enter-end="transform translate-y-0 opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="transform translate-y-0 opacity-100"
+            x-transition:leave-end="transform translate-y-full opacity-0">
+
+            <!-- Three.js Visualizer Background -->
+            <div id="now-playing-visualizer"
+                class="now-playing-visualizer"></div>
+
+            <!-- Glassy Now Playing Bar -->
+            <div class="now-playing-glass">
+                <div class="now-playing-container">
+                    <!-- Left: Album Artwork -->
+                    <div class="now-playing-album-art"
+                        @click="openFullPlayer()">
+                        <img
+                            :src="currentTrack?.cover_art || '/static/img/default-cover.jpg'"
+                            :alt="currentTrack?.title"
+                            class="now-playing-album-img"
+                            :class="{'spinning': isPlaying}">
+                        <div class="now-playing-album-overlay"
+                            x-show="!isPlaying">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+
+                    <!-- Center: Track Info -->
+                    <div class="now-playing-info">
+                        <div class="now-playing-title"
+                            x-text="currentTrack?.title || 'Unknown Title'"></div>
+                        <div class="now-playing-artist"
+                            x-show="currentTrack?.type === 'show'"
+                            x-text="currentTrack?.host || currentTrack?.creator || 'Unknown Host'"></div>
+                        <div class="now-playing-artist"
+                            x-show="currentTrack?.type !== 'show'"
+                            x-text="currentTrack?.artist || 'Unknown Artist'"></div>
+                        <div class="now-playing-category">
+                            <span x-show="currentTrack?.type === 'show'"
+                                class="category-pill">
+                                <i class="fas fa-play-circle"></i> Video
+                            </span>
+                            <span x-show="currentTrack?.type !== 'show'"
+                                class="category-pill">
+                                <i class="fas fa-music"></i> Music
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Controls -->
+                    <div class="now-playing-controls">
+                        <button @click="previousTrack()" class="now-playing-btn"
+                            title="Previous">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button @click="togglePlay()"
+                            class="now-playing-btn now-playing-play-btn"
+                            :title="isPlaying ? 'Pause' : 'Play'">
+                            <i
+                                :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+                        </button>
+                        <button @click="nextTrack()" class="now-playing-btn"
+                            title="Next">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                        <button @click="toggleShuffle()" class="now-playing-btn"
+                            :class="{'active': isShuffled}"
+                            title="Shuffle">
+                            <i class="fas fa-random"></i>
+                        </button>
+                        <button @click="toggleRepeat()" class="now-playing-btn"
+                            :class="{'active': isRepeated}"
+                            title="Repeat">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                        <button @click="toggleLike()" class="now-playing-btn"
+                            :class="{'active': isLiked}" title="Like">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button @click="
                             currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.toggle({ 
                                 type: (currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), 
                                 id: currentTrack.id, 
@@ -1031,102 +1054,132 @@
                             isSaved = currentTrack ? !!(window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), currentTrack.id)) : false;
                             $nextTick(()=>{ document.dispatchEvent(new CustomEvent('bookmarks:changed', { detail: { items: window.AhoyBookmarks?.all?.() || {}, action: isSaved ? 'add' : 'remove', item: currentTrack } })); });
                         " class="now-playing-btn"
-                        :class="{'active': currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)}"
-                        title="Bookmark">
-                        <i class="fas fa-bookmark"></i>
-                    </button>
-                    <button @click="toggleFullscreenVisualizer()" class="now-playing-btn now-playing-fullscreen-btn"
-                        :class="{'active': isFullscreenVisualizer}"
-                        :title="isFullscreenVisualizer ? 'Exit Fullscreen' : 'Fullscreen Visualizer'"
-                        x-show="currentTrack && currentTrack.type !== 'show'">
-                        <i :class="isFullscreenVisualizer ? 'fas fa-compress' : 'fas fa-expand'"></i>
-                    </button>
-                </div>
-
-                <!-- Progress Bar -->
-                <div class="now-playing-progress">
-                    <div class="now-playing-progress-bar" @click="seekTo($event)">
-                        <div class="now-playing-progress-fill" :style="`width: ${progressPercent}%`"></div>
-                        <div class="now-playing-progress-handle" :style="`left: ${progressPercent}%`"></div>
+                            :class="{'active': currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)}"
+                            title="Bookmark">
+                            <i class="fas fa-bookmark"></i>
+                        </button>
+                        <button @click="toggleFullscreenVisualizer()"
+                            class="now-playing-btn now-playing-fullscreen-btn"
+                            :class="{'active': isFullscreenVisualizer}"
+                            :title="isFullscreenVisualizer ? 'Exit Fullscreen' : 'Fullscreen Visualizer'"
+                            x-show="currentTrack && currentTrack.type !== 'show'">
+                            <i
+                                :class="isFullscreenVisualizer ? 'fas fa-compress' : 'fas fa-expand'"></i>
+                        </button>
                     </div>
-                    <div class="now-playing-time">
-                        <span x-text="formatTime(currentTime)"></span>
-                        <span x-text="formatTime(currentTrack?.duration_seconds || 0)"></span>
+
+                    <!-- Progress Bar -->
+                    <div class="now-playing-progress">
+                        <div class="now-playing-progress-bar"
+                            @click="seekTo($event)">
+                            <div class="now-playing-progress-fill"
+                                :style="`width: ${progressPercent}%`"></div>
+                            <div class="now-playing-progress-handle"
+                                :style="`left: ${progressPercent}%`"></div>
+                        </div>
+                        <div class="now-playing-time">
+                            <span x-text="formatTime(currentTime)"></span>
+                            <span
+                                x-text="formatTime(currentTrack?.duration_seconds || 0)"></span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Legacy Global Player (hidden, kept for compatibility) -->
-    <div class="global-player" x-data="globalPlayer()" x-show="false" style="display: none;">
-        <div class="player-container">
-            <div class="player-info">
-                <div class="player-cover-container">
-                    <img :src="currentTrack?.cover_art || '/static/img/default-cover.jpg'" :alt="currentTrack?.title"
-                        class="player-cover" :class="{'spinning': isPlaying}">
-                    <div class="play-overlay" x-show="!isPlaying">
-                        <i class="fas fa-play"></i>
+        <!-- Legacy Global Player (hidden, kept for compatibility) -->
+        <div class="global-player" x-data="globalPlayer()" x-show="false"
+            style="display: none;">
+            <div class="player-container">
+                <div class="player-info">
+                    <div class="player-cover-container">
+                        <img
+                            :src="currentTrack?.cover_art || '/static/img/default-cover.jpg'"
+                            :alt="currentTrack?.title"
+                            class="player-cover"
+                            :class="{'spinning': isPlaying}">
+                        <div class="play-overlay" x-show="!isPlaying">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                    <div class="player-details">
+                        <h4
+                            x-text="currentTrack?.title || 'Unknown Title'"></h4>
+                        <p x-show="currentTrack?.type === 'show'"
+                            x-text="currentTrack?.host || currentTrack?.creator || 'Unknown Host'"></p>
+                        <p x-show="currentTrack?.type !== 'show'"
+                            x-text="currentTrack?.artist || 'Unknown Artist'"></p>
+                        <div class="player-meta">
+                            <span x-show="currentTrack?.type === 'show'"
+                                class="media-type">
+                                <i class="fas fa-play-circle"></i> Video
+                            </span>
+                            <span x-show="currentTrack?.type !== 'show'"
+                                class="media-type">
+                                <i class="fas fa-music"></i> Music
+                            </span>
+                        </div>
                     </div>
                 </div>
-                <div class="player-details">
-                    <h4 x-text="currentTrack?.title || 'Unknown Title'"></h4>
-                    <p x-show="currentTrack?.type === 'show'"
-                        x-text="currentTrack?.host || currentTrack?.creator || 'Unknown Host'"></p>
-                    <p x-show="currentTrack?.type !== 'show'" x-text="currentTrack?.artist || 'Unknown Artist'"></p>
-                    <div class="player-meta">
-                        <span x-show="currentTrack?.type === 'show'" class="media-type">
-                            <i class="fas fa-play-circle"></i> Video
-                        </span>
-                        <span x-show="currentTrack?.type !== 'show'" class="media-type">
-                            <i class="fas fa-music"></i> Music
-                        </span>
+
+                <div class="player-controls">
+                    <button @click="previousTrack()" class="control-btn"
+                        title="Previous">
+                        <i class="fas fa-step-backward"></i>
+                    </button>
+                    <button @click="seekBackward()" class="control-btn"
+                        title="15 seconds back">
+                        <i class="fas fa-backward"></i>
+                    </button>
+                    <button @click="togglePlay()" class="control-btn play-btn"
+                        :title="isPlaying ? 'Pause' : 'Play'">
+                        <i
+                            :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+                    </button>
+                    <button @click="toggleBookmarkCurrent()" class="control-btn"
+                        :aria-pressed="isSaved" title="Bookmark">
+                        <i
+                            :class="isSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+                    </button>
+                    <button @click="seekForward()" class="control-btn"
+                        title="15 seconds forward">
+                        <i class="fas fa-forward"></i>
+                    </button>
+                    <button @click="nextTrack()" class="control-btn"
+                        title="Next">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                    <button @click="toggleShuffle()" class="control-btn"
+                        :class="{'active': isShuffled}" title="Shuffle">
+                        <i class="fas fa-random"></i>
+                    </button>
+                    <button @click="toggleRepeat()" class="control-btn"
+                        :class="{'active': isRepeated}" title="Repeat">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                    <canvas x-ref="clock" class="analog-clock" width="40"
+                        height="40" aria-hidden="true"></canvas>
+                </div>
+
+                <div class="player-progress">
+                    <span class="time-current"
+                        x-text="formatTime(currentTime)"></span>
+                    <div class="progress-bar" @click="seekTo($event)">
+                        <div class="progress-fill"
+                            :style="`width: ${progressPercent}%`"></div>
+                        <div class="progress-handle"
+                            :style="`left: ${progressPercent}%`"></div>
                     </div>
+                    <span class="time-total"
+                        x-text="formatTime(currentTrack?.duration_seconds || 0)"></span>
                 </div>
-            </div>
 
-            <div class="player-controls">
-                <button @click="previousTrack()" class="control-btn" title="Previous">
-                    <i class="fas fa-step-backward"></i>
-                </button>
-                <button @click="seekBackward()" class="control-btn" title="15 seconds back">
-                    <i class="fas fa-backward"></i>
-                </button>
-                <button @click="togglePlay()" class="control-btn play-btn" :title="isPlaying ? 'Pause' : 'Play'">
-                    <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
-                </button>
-                <button @click="toggleBookmarkCurrent()" class="control-btn" :aria-pressed="isSaved" title="Bookmark">
-                    <i :class="isSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
-                </button>
-                <button @click="seekForward()" class="control-btn" title="15 seconds forward">
-                    <i class="fas fa-forward"></i>
-                </button>
-                <button @click="nextTrack()" class="control-btn" title="Next">
-                    <i class="fas fa-step-forward"></i>
-                </button>
-                <button @click="toggleShuffle()" class="control-btn" :class="{'active': isShuffled}" title="Shuffle">
-                    <i class="fas fa-random"></i>
-                </button>
-                <button @click="toggleRepeat()" class="control-btn" :class="{'active': isRepeated}" title="Repeat">
-                    <i class="fas fa-redo"></i>
-                </button>
-                <canvas x-ref="clock" class="analog-clock" width="40" height="40" aria-hidden="true"></canvas>
-            </div>
-
-            <div class="player-progress">
-                <span class="time-current" x-text="formatTime(currentTime)"></span>
-                <div class="progress-bar" @click="seekTo($event)">
-                    <div class="progress-fill" :style="`width: ${progressPercent}%`"></div>
-                    <div class="progress-handle" :style="`left: ${progressPercent}%`"></div>
-                </div>
-                <span class="time-total" x-text="formatTime(currentTrack?.duration_seconds || 0)"></span>
-            </div>
-
-            <div class="player-actions">
-                <button @click="toggleLike()" class="action-btn" :class="{'liked': isLiked}" title="Like">
-                    <i class="fas fa-heart"></i>
-                </button>
-                <button @click="
+                <div class="player-actions">
+                    <button @click="toggleLike()" class="action-btn"
+                        :class="{'liked': isLiked}" title="Like">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                    <button @click="
                         currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.toggle({ 
                             type: (currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), 
                             id: currentTrack.id, 
@@ -1136,232 +1189,278 @@
                         isSaved = currentTrack ? !!(window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), currentTrack.id)) : false;
                         $nextTick(()=>{ document.dispatchEvent(new CustomEvent('bookmarks:changed', { detail: { items: window.AhoyBookmarks?.all?.() || {}, action: isSaved ? 'add' : 'remove', item: currentTrack } })); });
                     " class="action-btn bm-btn"
-                    :class="{'saved': currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)}"
-                    :aria-pressed="currentTrack && window.AhoyBookmarks ? window.AhoyBookmarks.isBookmarked((currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), currentTrack.id) : false"
-                    title="Bookmark">
-                    <span aria-hidden="true">
-                        <i x-show="currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)"
-                            class="fas fa-bookmark" style="color: var(--accent-color);"></i>
-                        <i x-show="!(currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id))"
-                            class="far fa-bookmark"></i>
-                    </span>
-                    <span class="sr-only">Bookmark</span>
-                </button>
-                <button @click="addToPlaylist()" class="action-btn" title="Add to Playlist">
-                    <i class="fas fa-plus"></i>
-                </button>
-                <button @click="toggleMute()" class="action-btn" :class="{'muted': isMuted}" title="Mute">
-                    <i :class="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
-                </button>
-                <button @click="openFullPlayer()" class="action-btn" title="Full Player">
-                    <i class="fas fa-expand"></i>
-                </button>
+                        :class="{'saved': currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)}"
+                        :aria-pressed="currentTrack && window.AhoyBookmarks ? window.AhoyBookmarks.isBookmarked((currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), currentTrack.id) : false"
+                        title="Bookmark">
+                        <span aria-hidden="true">
+                            <i
+                                x-show="currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)"
+                                class="fas fa-bookmark"
+                                style="color: var(--accent-color);"></i>
+                            <i
+                                x-show="!(currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id))"
+                                class="far fa-bookmark"></i>
+                        </span>
+                        <span class="sr-only">Bookmark</span>
+                    </button>
+                    <button @click="addToPlaylist()" class="action-btn"
+                        title="Add to Playlist">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button @click="toggleMute()" class="action-btn"
+                        :class="{'muted': isMuted}" title="Mute">
+                        <i
+                            :class="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
+                    </button>
+                    <button @click="openFullPlayer()" class="action-btn"
+                        title="Full Player">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Login Modal -->
-    <div x-show="showLogin" x-cloak class="modal-overlay" @click.away="showLogin = false">
-        <div class="modal">
-            <h3>Login to Ahoy Indie Media</h3>
-            <form @submit.prevent="login()">
-                <input type="text" x-model="loginForm.username" placeholder="Username" required>
-                <input type="password" x-model="loginForm.password" placeholder="Password" required>
-                <button type="submit" class="btn btn-primary" :disabled="isLoading">
-                    <span x-show="!isLoading">Login</span>
-                    <span x-show="isLoading">Logging in...</span>
-                </button>
-            </form>
-            <p class="modal-footer">
-                Don't have an account?
-                <a href="#" @click="showLogin = false; showRegister = true">Sign
-                    up</a>
-            </p>
+        <!-- Login Modal -->
+        <div x-show="showLogin" x-cloak class="modal-overlay"
+            @click.away="showLogin = false">
+            <div class="modal">
+                <h3>Login to Ahoy Indie Media</h3>
+                <form @submit.prevent="login()">
+                    <input type="text" x-model="loginForm.username"
+                        placeholder="Username" required>
+                    <input type="password" x-model="loginForm.password"
+                        placeholder="Password" required>
+                    <button type="submit" class="btn btn-primary"
+                        :disabled="isLoading">
+                        <span x-show="!isLoading">Login</span>
+                        <span x-show="isLoading">Logging in...</span>
+                    </button>
+                </form>
+                <p class="modal-footer">
+                    Don't have an account?
+                    <a href="#"
+                        @click="showLogin = false; showRegister = true">Sign
+                        up</a>
+                </p>
+            </div>
         </div>
-    </div>
 
-    <!-- Register Modal -->
-    <div x-show="showRegister" x-cloak class="modal-overlay" @click.away="showRegister = false">
-        <div class="modal">
-            <h3>Join Ahoy Indie Media</h3>
-            <form @submit.prevent="register()">
-                <input type="text" x-model="registerForm.username" placeholder="Username" required>
-                <input type="email" x-model="registerForm.email" placeholder="Email" required>
-                <input type="password" x-model="registerForm.password" placeholder="Password" required>
-                <button type="submit" class="btn btn-primary" :disabled="isLoading">
-                    <span x-show="!isLoading">Sign Up</span>
-                    <span x-show="isLoading">Creating account...</span>
-                </button>
-            </form>
-            <p class="modal-footer">
-                Already have an account?
-                <a href="#" @click="showRegister = false; showLogin = true">Login</a>
-            </p>
+        <!-- Register Modal -->
+        <div x-show="showRegister" x-cloak class="modal-overlay"
+            @click.away="showRegister = false">
+            <div class="modal">
+                <h3>Join Ahoy Indie Media</h3>
+                <form @submit.prevent="register()">
+                    <input type="text" x-model="registerForm.username"
+                        placeholder="Username" required>
+                    <input type="email" x-model="registerForm.email"
+                        placeholder="Email" required>
+                    <input type="password" x-model="registerForm.password"
+                        placeholder="Password" required>
+                    <button type="submit" class="btn btn-primary"
+                        :disabled="isLoading">
+                        <span x-show="!isLoading">Sign Up</span>
+                        <span x-show="isLoading">Creating account...</span>
+                    </button>
+                </form>
+                <p class="modal-footer">
+                    Already have an account?
+                    <a href="#"
+                        @click="showRegister = false; showLogin = true">Login</a>
+                </p>
+            </div>
         </div>
-    </div>
 
-    <!-- Footer -->
-    <footer class="site-footer">
-        <!-- Neon Gradient Accent Bar -->
-        <div class="footer-accent-bar"></div>
+        <!-- Footer -->
+        <footer class="site-footer">
+            <!-- Neon Gradient Accent Bar -->
+            <div class="footer-accent-bar"></div>
 
-        <div class="footer-content">
-            <!-- Left Column: Logo + Tagline -->
-            <div class="footer-column footer-brand-column">
-                <div class="footer-brand">
-                    <div class="footer-logo">
-                        <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}" alt="Ahoy Indie Media">
+            <div class="footer-content">
+                <!-- Left Column: Logo + Tagline -->
+                <div class="footer-column footer-brand-column">
+                    <div class="footer-brand">
+                        <div class="footer-logo">
+                            <img
+                                src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+                                alt="Ahoy Indie Media">
+                        </div>
+                        <p class="footer-tagline">Your gateway to independent
+                            music discovery and organization</p>
                     </div>
-                    <p class="footer-tagline">Your gateway to independent
-                        music discovery and organization</p>
+                </div>
+
+                <!-- Center Column: App Navigation -->
+                <div class="footer-column footer-nav-column">
+                    <h4 class="footer-column-title">App Navigation</h4>
+                    <ul class="footer-nav-list">
+                        <li><a href="{{ url_for('music') }}">Music</a></li>
+                        <li><a href="{{ url_for('shows') }}">Shows</a></li>
+                        <li><a href="{{ url_for('artists') }}">Artists</a></li>
+                        <li><a href="{{ url_for('cast_page') }}">Cast</a></li>
+                        <li><a href="/downloads">Downloads</a></li>
+                        <li><a href="/bookmarks">My Bookmarks</a></li>
+                        <li><a href="/settings">Settings</a></li>
+                        <li><a href="/feedback">Feedback</a></li>
+                    </ul>
+                </div>
+
+                <!-- Right Column: Legal + Developer Tools + Version -->
+                <div class="footer-column footer-legal-column">
+                    <h4 class="footer-column-title">Legal</h4>
+                    <ul class="footer-nav-list">
+                        <li><a href="/privacy" rel="nofollow">Privacy
+                                Policy</a></li>
+                        <li><a href="/terms" rel="nofollow">Terms of
+                                Service</a></li>
+                        <li><a href="/security">Security</a></li>
+                        <li><a
+                                href="{{ url_for('sitemap_page') }}">Sitemap</a></li>
+                    </ul>
+
+                    <h4 class="footer-column-title footer-dev-title">Developer
+                        Tools</h4>
+                    <ul class="footer-nav-list">
+                        <li><a href="/debug-report">Debug Report</a></li>
+                        <li><a href="/radio">Radio (Experimental)</a></li>
+                    </ul>
+
+                    <div class="footer-version-badge">
+                        <span class="version-text">Ahoy Engine v1.1.1 — Indie
+                            Build</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Center Column: App Navigation -->
-            <div class="footer-column footer-nav-column">
-                <h4 class="footer-column-title">App Navigation</h4>
-                <ul class="footer-nav-list">
-                    <li><a href="{{ url_for('music') }}">Music</a></li>
-                    <li><a href="{{ url_for('shows') }}">Shows</a></li>
-                    <li><a href="{{ url_for('artists') }}">Artists</a></li>
-                    <li><a href="{{ url_for('cast_page') }}">Cast</a></li>
-                    <li><a href="/downloads">Downloads</a></li>
-                    <li><a href="/bookmarks">My Bookmarks</a></li>
-                    <li><a href="/settings">Settings</a></li>
-                    <li><a href="/feedback">Feedback</a></li>
-                </ul>
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 Ahoy Indie Media. All rights reserved.</p>
+                </div>
             </div>
+        </footer>
 
-            <!-- Right Column: Legal + Developer Tools + Version -->
-            <div class="footer-column footer-legal-column">
-                <h4 class="footer-column-title">Legal</h4>
-                <ul class="footer-nav-list">
-                    <li><a href="/privacy" rel="nofollow">Privacy
-                            Policy</a></li>
-                    <li><a href="/terms" rel="nofollow">Terms of
-                            Service</a></li>
-                    <li><a href="/security">Security</a></li>
-                    <li><a href="{{ url_for('sitemap_page') }}">Sitemap</a></li>
+        <!-- Bottom Sheet -->
+        <div id="playlist-sheet"
+            class="hidden fixed inset-0 z-50 grid place-items-end bg-black/30 transition opacity-0">
+            <div class="w-full max-w-xl m-4 rounded-2xl bg-white shadow-lg p-5">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">Create Playlist from <span
+                            data-col-name class="italic"></span></h3>
+                    <button class="text-gray-500 hover:text-black"
+                        onclick="document.getElementById('playlist-sheet').classList.remove('opacity-100'); setTimeout(()=>document.getElementById('playlist-sheet').classList.add('hidden'), 150)">✕</button>
+                </div>
+
+                <form class="mt-4 space-y-3">
+                    <input type="hidden" name="owner"
+                        value="{% if session.username %}{{ session.username }}{% endif %}">
+                    <label class="block">
+                        <span class="text-sm text-gray-600">Playlist name</span>
+                        <input name="playlist_name"
+                            class="mt-1 w-full rounded-xl border p-2"
+                            placeholder="Road Trip Mix"
+                            required>
+                    </label>
+
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="is_public" class="rounded">
+                        <span class="text-sm text-gray-700">Make it public
+                            (shareable)</span>
+                    </label>
+
+                    <div class="flex items-center gap-2 pt-2">
+                        <button type="submit"
+                            class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition">Create
+                            Playlist</button>
+                        <button type="button"
+                            class="px-3 py-2 rounded-xl border"
+                            onclick="document.getElementById('playlist-sheet').classList.remove('opacity-100'); setTimeout(()=>document.getElementById('playlist-sheet').classList.add('hidden'), 150)">Cancel</button>
+                    </div>
+
+                    <p class="text-xs text-gray-500 pt-2">Pro tip: you can
+                        reorder items later for the perfect flow.</p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div id="playlist-toast"
+            class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-black text-white px-4 py-2 rounded-full shadow">
+            Playlist created!
+        </div>
+
+        <!-- Global Toast -->
+        <div id="app-toast"
+            class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-black text-white px-4 py-2 rounded-full shadow">
+        </div>
+
+        <!-- Celebration overlay -->
+        <div id="celebrate"
+            class="hidden fixed inset-0 z-[70] grid place-items-center bg-black/20 backdrop-blur-sm transition opacity-0">
+            <div
+                class="px-5 py-3 rounded-2xl bg-white text-black text-lg font-semibold shadow-2xl">
+                <span data-celebrate-text>You bookmarked!</span>
+            </div>
+        </div>
+
+        <!-- Simple Paywall Modal -->
+        <div id="paywall"
+            class="hidden fixed inset-0 z-50 grid place-items-center bg-black/40">
+            <div class="bg-white rounded-2xl p-6 w-[28rem] shadow-xl">
+                <h3 class="text-xl font-semibold">Go Plus to unlock more</h3>
+                <p class="text-sm text-gray-600 mt-2">Free plan allows up to 3
+                    Collections & 3 Playlists.</p>
+                <ul class="text-sm text-gray-700 mt-3 list-disc ml-5">
+                    <li>Unlimited Collections & Playlists</li>
+                    <li>Reorder with drag & drop</li>
+                    <li>Public share links</li>
                 </ul>
-
-                <h4 class="footer-column-title footer-dev-title">Developer
-                    Tools</h4>
-                <ul class="footer-nav-list">
-                    <li><a href="/debug-report">Debug Report</a></li>
-                    <li><a href="/radio">Radio (Experimental)</a></li>
-                </ul>
-
-                <div class="footer-version-badge">
-                    <span class="version-text">Ahoy Engine v1.1.1 — Indie
-                        Build</span>
+                <div class="flex gap-2 mt-4">
+                    <button id="paywall-upgrade"
+                        class="px-4 py-2 rounded-xl bg-blue-600 text-white">Upgrade
+                        – $3/mo</button>
+                    <button class="px-3 py-2 rounded-xl border"
+                        onclick="document.getElementById('paywall').classList.add('hidden')">Not
+                        now</button>
                 </div>
             </div>
         </div>
 
-        <div class="footer-bottom">
-            <div class="footer-bottom-content">
-                <p>&copy; 2025 Ahoy Indie Media. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+        <!-- JavaScript -->
+        <script>window.LOGGED_IN = {{ LOGGED_IN | tojson }};</script>
+        <script>
+        // Hard env switch (default to 'development'). Override to 'production' to enable prod-only behaviors.
+        window.APP_ENV = window.APP_ENV || 'development';
+    </script>
+        <script
+            src="{{ url_for('static', filename='js/guest-bootstrap.js') }}"></script>
+        <script
+            src="{{ url_for('static', filename='js/bookmarks.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/player.js') }}"></script>
 
-    <!-- Bottom Sheet -->
-    <div id="playlist-sheet" class="hidden fixed inset-0 z-50 grid place-items-end bg-black/30 transition opacity-0">
-        <div class="w-full max-w-xl m-4 rounded-2xl bg-white shadow-lg p-5">
-            <div class="flex items-center justify-between">
-                <h3 class="text-lg font-semibold">Create Playlist from <span data-col-name class="italic"></span></h3>
-                <button class="text-gray-500 hover:text-black"
-                    onclick="document.getElementById('playlist-sheet').classList.remove('opacity-100'); setTimeout(()=>document.getElementById('playlist-sheet').classList.add('hidden'), 150)">✕</button>
-            </div>
+        <!-- Now Playing Component Modules -->
+        <script
+            src="{{ url_for('static', filename='js/colorExtractor.js') }}"></script>
+        <script
+            src="{{ url_for('static', filename='js/audioAnalyser.js') }}"></script>
+        <script
+            src="{{ url_for('static', filename='js/visualizer.js') }}"></script>
+        <script
+            src="{{ url_for('static', filename='js/nowPlaying.js') }}"></script>
+        <script
+            src="{{ url_for('static', filename='js/playlist-manager.js') }}"></script>
+        <script
+            src="{{ url_for('static', filename='js/collections-manager.js') }}"></script>
+        <script type="module"
+            src="{{ url_for('static', filename='js/playlist-ui.js') }}"></script>
+        <script type="module"
+            src="{{ url_for('static', filename='js/collections-quickassign.js') }}"></script>
+        <script type="module"
+            src="{{ url_for('static', filename='js/player-queue.js') }}"></script>
+        <script type="module"
+            src="{{ url_for('static', filename='js/reinforce.js') }}"></script>
 
-            <form class="mt-4 space-y-3">
-                <input type="hidden" name="owner" value="{% if session.username %}{{ session.username }}{% endif %}">
-                <label class="block">
-                    <span class="text-sm text-gray-600">Playlist name</span>
-                    <input name="playlist_name" class="mt-1 w-full rounded-xl border p-2" placeholder="Road Trip Mix"
-                        required>
-                </label>
-
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="is_public" class="rounded">
-                    <span class="text-sm text-gray-700">Make it public
-                        (shareable)</span>
-                </label>
-
-                <div class="flex items-center gap-2 pt-2">
-                    <button type="submit"
-                        class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition">Create
-                        Playlist</button>
-                    <button type="button" class="px-3 py-2 rounded-xl border"
-                        onclick="document.getElementById('playlist-sheet').classList.remove('opacity-100'); setTimeout(()=>document.getElementById('playlist-sheet').classList.add('hidden'), 150)">Cancel</button>
-                </div>
-
-                <p class="text-xs text-gray-500 pt-2">Pro tip: you can
-                    reorder items later for the perfect flow.</p>
-            </form>
-        </div>
-    </div>
-
-    <!-- Toast -->
-    <div id="playlist-toast"
-        class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-black text-white px-4 py-2 rounded-full shadow">
-        Playlist created!
-    </div>
-
-    <!-- Global Toast -->
-    <div id="app-toast"
-        class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-black text-white px-4 py-2 rounded-full shadow">
-    </div>
-
-    <!-- Celebration overlay -->
-    <div id="celebrate"
-        class="hidden fixed inset-0 z-[70] grid place-items-center bg-black/20 backdrop-blur-sm transition opacity-0">
-        <div class="px-5 py-3 rounded-2xl bg-white text-black text-lg font-semibold shadow-2xl">
-            <span data-celebrate-text>You bookmarked!</span>
-        </div>
-    </div>
-
-    <!-- Simple Paywall Modal -->
-    <div id="paywall" class="hidden fixed inset-0 z-50 grid place-items-center bg-black/40">
-        <div class="bg-white rounded-2xl p-6 w-[28rem] shadow-xl">
-            <h3 class="text-xl font-semibold">Go Plus to unlock more</h3>
-            <p class="text-sm text-gray-600 mt-2">Free plan allows up to 3
-                Collections & 3 Playlists.</p>
-            <ul class="text-sm text-gray-700 mt-3 list-disc ml-5">
-                <li>Unlimited Collections & Playlists</li>
-                <li>Reorder with drag & drop</li>
-                <li>Public share links</li>
-            </ul>
-            <div class="flex gap-2 mt-4">
-                <button id="paywall-upgrade" class="px-4 py-2 rounded-xl bg-blue-600 text-white">Upgrade
-                    – $3/mo</button>
-                <button class="px-3 py-2 rounded-xl border"
-                    onclick="document.getElementById('paywall').classList.add('hidden')">Not
-                    now</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript -->
-    <script>window.LOGGED_IN = {{ LOGGED_IN | tojson }};</script>
-    <script src="{{ url_for('static', filename='js/guest-bootstrap.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bookmarks.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/player.js') }}"></script>
-
-    <!-- Now Playing Component Modules -->
-    <script src="{{ url_for('static', filename='js/colorExtractor.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/audioAnalyser.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/visualizer.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/nowPlaying.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/playlist-manager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/collections-manager.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/playlist-ui.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/collections-quickassign.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/player-queue.js') }}"></script>
-    <script type="module" src="{{ url_for('static', filename='js/reinforce.js') }}"></script>
-
-    <script type="module">
+        <script type="module">
         import { showToast } from "{{ url_for('static', filename='js/toast.js') }}";
 
         // Listen for 402 responses globally and open paywall
@@ -1384,10 +1483,15 @@
         });
     </script>
 
-    <!-- Navbar JavaScript -->
-    <script>
+        <!-- Navbar JavaScript -->
+        <script>
         function navbar() {
             return {
+                // Environment flags
+                appEnv: window.APP_ENV || 'development',
+                enableAccountNetworkCalls: (window.APP_ENV === 'production'),
+                // Mobile nav state
+                mobileNav: false,
                 // User state - TEMPORARILY FORCED TO TRUE FOR TESTING
                 isLoggedIn: true, // window.LOGGED_IN || false,
                 userProfile: window.userProfile || {
@@ -1438,8 +1542,10 @@
                         this.hasNewBookmarks = window.__ahoyNotificationState.hasNewBookmarks;
                     }
 
-                    // Load wallet (best-effort)
-                    this.loadWallet();
+                    // Load wallet only in production to avoid 404s during development
+                    if (this.enableAccountNetworkCalls) {
+                        this.loadWallet();
+                    }
                 },
 
                 async loadWallet() {
@@ -1530,8 +1636,8 @@
         }
     </script>
 
-    <!-- Image Loading Styles -->
-    <style>
+        <!-- Image Loading Styles -->
+        <style>
         img[data-src] {
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -1578,8 +1684,8 @@
         }
     </style>
 
-    <!-- Simple Image Deduplication Script -->
-    <script>
+        <!-- Simple Image Deduplication Script -->
+        <script>
         // Enhanced image loading to prevent infinite loops
         (function () {
             const loadedImages = new Set();
@@ -1922,8 +2028,8 @@
         window.globalPlayer.play = (item) => window.globalPlayer.playTrack(item);
     </script>
 
-    <!-- Global Dashboard Sidebars Script -->
-    <script>
+        <!-- Global Dashboard Sidebars Script -->
+        <script>
         function dashboardCollection() {
             return {
                 badges: [],
@@ -2292,8 +2398,8 @@
         }
     </script>
 
-    <!-- Portfolio Nav Widget -->
-    <script>
+        <!-- Portfolio Nav Widget -->
+        <script>
         function portfolioNavWidget() {
             return {
                 portfolioDropdownOpen: false,
@@ -2327,10 +2433,10 @@
         }
     </script>
 
-    {% block extra_scripts %}{% endblock %}
+        {% block extra_scripts %}{% endblock %}
 
-    <!-- Service Worker Registration -->
-    <script>
+        <!-- Service Worker Registration -->
+        <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/static/service-worker.js')
@@ -2343,6 +2449,6 @@
             });
         }
     </script>
-</body>
+    </body>
 
 </html>

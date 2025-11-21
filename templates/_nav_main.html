@@ -1,0 +1,20 @@
+<!-- LEFT NAV MENU (Off-canvas) -->
+<div class="offcanvas-overlay" x-show="navOpen" @click.self="navOpen = false" x-transition.opacity></div>
+<aside class="offcanvas-panel offcanvas-left" :class="navOpen ? 'open' : ''" x-transition>
+    <div class="offcanvas-header">
+        <h2>Explore</h2>
+        <button class="offcanvas-close" @click="navOpen = false" aria-label="Close navigation">✕</button>
+    </div>
+    <nav class="offcanvas-nav">
+        <a href="{{ url_for('music') }}"><i class="fas fa-music"></i><span>Music</span></a>
+        <a href="{{ url_for('shows') }}"><i class="fas fa-play-circle"></i><span>Shows</span></a>
+        <a href="{{ url_for('artists') }}"><i class="fas fa-users"></i><span>Artists</span></a>
+        <a href="/radio"><i class="fas fa-broadcast-tower"></i><span>Radio</span></a>
+        <a href="{{ url_for('cast_page') }}"><i class="fas fa-tv"></i><span>Cast</span></a>
+        <a href="/bookmarks"><i class="fas fa-bookmark"></i><span>Bookmarks</span></a>
+        <a href="/downloads"><i class="fas fa-download"></i><span>Downloads</span></a>
+        <a href="/settings"><i class="fas fa-cog"></i><span>Settings</span></a>
+        <a href="/feedback"><i class="fas fa-comment-dots"></i><span>Feedback</span></a>
+    </nav>
+</aside>
+

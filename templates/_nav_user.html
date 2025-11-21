@@ -1,0 +1,32 @@
+<!-- ACCOUNT MENU (Off-canvas) -->
+<div class="offcanvas-overlay" x-show="accountOpen" @click.self="accountOpen = false" x-transition.opacity></div>
+<aside class="offcanvas-panel offcanvas-right" :class="accountOpen ? 'open' : ''" x-transition>
+    <div class="offcanvas-header">
+        <h2>Account</h2>
+        <button class="offcanvas-close" @click="accountOpen = false" aria-label="Close account menu">✕</button>
+    </div>
+
+    <div class="offcanvas-user-summary">
+        <div class="name" x-text="isLoggedIn ? (userProfile.display_name || 'User') : 'Guest'"></div>
+        <div class="meta" x-show="isLoggedIn">
+            <span x-text="'$' + ((walletBalanceCents || 0)/100).toFixed(2) + ' Wallet'"></span>
+            <span>•</span>
+            <span x-text="(badges?.length || 0) + ' Badges'"></span>
+            <span>•</span>
+            <span x-text="(totalBookmarkCount || 0) + ' Bookmarks'"></span>
+        </div>
+    </div>
+
+    <nav class="offcanvas-nav">
+        <a href="/account"><i class="fas fa-user-circle"></i><span>My Profile</span></a>
+        <a href="/portfolio"><i class="fas fa-chart-line"></i><span>My Portfolio</span></a>
+        <a href="/dashboard"><i class="fas fa-trophy"></i><span>Achievements</span></a>
+        <a href="/bookmarks"><i class="fas fa-bookmark"></i><span>Bookmarks</span></a>
+        <a href="/settings"><i class="fas fa-sliders-h"></i><span>Preferences</span></a>
+        <button class="offcanvas-action danger" x-show="isLoggedIn" @click="logout(); accountOpen = false">
+            <i class="fas fa-sign-out-alt"></i><span>Sign Out</span>
+        </button>
+        <a href="/account" x-show="!isLoggedIn"><i class="fas fa-sign-in-alt"></i><span>Sign In</span></a>
+    </nav>
+</aside>
+
