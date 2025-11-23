@@ -4912,22 +4912,25 @@ a:hover {
 
 /* Subtle compact cancel */
 .tip-cancel {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.45);
-    font-size: 11px;
-    padding: 4px 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #aaa;
+    font-size: 12px;
+    padding: 10px 16px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: color 0.15s ease, opacity 0.15s ease;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .tip-cancel:hover {
-    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #ddd;
 }
 
 .tip-cancel:disabled {
-    color: rgba(255, 255, 255, 0.25);
-    cursor: default;
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 /* Top status badge */
@@ -5078,6 +5081,207 @@ a:hover {
 /* Compact select */
 .tip-compact-select {
     width: 100%;
+}
+
+/* Ahoy Indie Media - Sidebar Boost (Tip Jar) Visual System */
+/* Wrapper card for Tip Jar Compact */
+.tip-jar-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: var(--spacing-4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    box-sizing: border-box;
+}
+
+/* Select - Artist */
+.tip-jar-select {
+    width: 100%;
+    height: 42px;
+    padding: 10px 40px 10px 14px;
+    color: #f0f0f7;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    color-scheme: dark;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: background 0.15s ease, border-color 0.15s ease;
+    box-sizing: border-box;
+    background-image: url("data:image/svg+xml,%3Csvg width='16' height='10' viewBox='0 0 16 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 2l6 6 6-6' stroke='%23a3a3b2' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px 12px;
+}
+.tip-jar-select::-ms-expand { display: none; }
+.tip-jar-select:hover,
+.tip-jar-select:focus {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.12);
+    outline: none;
+}
+/* Darken native popup list where supported */
+.tip-jar-select option,
+.sidebar-panel select option,
+.sidebar-panel select optgroup {
+    background-color: #0f0f14;
+    color: #f0f0f7;
+}
+
+/* Amount input group */
+.tip-jar-amount-group {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    min-height: 42px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: background 0.15s ease, border-color 0.15s ease;
+    box-sizing: border-box;
+}
+.tip-jar-amount-group:focus-within,
+.tip-jar-amount-group:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+.tip-jar-currency-prefix {
+    color: #7a7a89;
+    padding-right: 8px;
+}
+.tip-jar-amount-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    color: #f0f0f7;
+    padding: 0 4px;
+    height: 100%;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+}
+.tip-jar-amount-input::placeholder {
+    color: #7a7a89;
+}
+/* Remove number input spinners */
+.tip-jar-amount-input::-webkit-outer-spin-button,
+.tip-jar-amount-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.tip-jar-amount-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* Primary Boost button */
+.tip-jar-submit {
+    width: 100%;
+    height: 36px;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #ff73e0, #b872ff);
+    color: #ffffff;
+    font-weight: 600;
+    border: 0;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(255, 115, 224, 0.3);
+    transition: transform 0.1s ease, filter 0.15s ease, opacity 0.15s ease;
+}
+.tip-jar-submit:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+}
+.tip-jar-submit:active:not(:disabled) {
+    transform: translateY(0);
+}
+.tip-jar-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Sidebar Compact Overrides (left dashboard) */
+.dashboard-sidebar .sidebar-search-container {
+    height: 36px;
+    min-height: 36px;
+    border-radius: 10px;
+}
+.dashboard-sidebar .sidebar-search-icon {
+    left: 10px;
+    font-size: 12px;
+}
+.dashboard-sidebar .sidebar-search-input {
+    font-size: 0.8rem;
+    padding-left: 32px;
+    padding-right: 32px;
+}
+.dashboard-sidebar .sidebar-search-container::before {
+    left: 32px;
+    font-size: 9px;
+}
+/* Avoid double “Search” label overlap: show placeholder only on focus */
+.dashboard-sidebar .sidebar-search-input::placeholder {
+    color: transparent;
+}
+.dashboard-sidebar .sidebar-search-input:focus::placeholder {
+    color: #7a7a89;
+}
+
+.dashboard-sidebar .tip-jar-select {
+    height: 36px;
+    padding: 8px 36px 8px 12px;
+    font-size: 13px;
+    border-radius: 10px;
+}
+.dashboard-sidebar .tip-jar-amount-group {
+    height: 36px;
+    min-height: 36px;
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+.dashboard-sidebar .tip-jar-currency-prefix {
+    font-size: 12px;
+    padding-right: 6px;
+}
+.dashboard-sidebar .tip-jar-amount-input {
+    font-size: 13px;
+}
+.dashboard-sidebar .tip-jar-submit {
+    height: 34px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+.dashboard-sidebar .tip-jar-card {
+    border-radius: 10px;
+}
+.dashboard-sidebar .tip-breakdown-card {
+    padding: 10px 12px;
+    border-radius: 10px;
+}
+.dashboard-sidebar .tip-breakdown-row,
+.dashboard-sidebar .tip-breakdown-total .tip-breakdown-label,
+.dashboard-sidebar .tip-breakdown-total .tip-breakdown-value {
+    font-size: 13px;
+}
+.dashboard-sidebar .tip-cancel {
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+.dashboard-sidebar .section-title {
+    margin-bottom: 6px;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+}
+.dashboard-sidebar .tip-compact-row {
+    margin: 4px 0;
 }
 
 /* Screen-reader only utility */
@@ -5328,6 +5532,12 @@ a:hover {
     border-radius: 2px;
 }
 
+/* Force dark theme on the left sidebar */
+.dashboard-sidebar {
+    background: #0f0f14;
+    color-scheme: dark;
+}
+
 .sidebar-header {
     margin-bottom: 1rem;
     padding-bottom: 0.75rem;
@@ -5436,16 +5646,17 @@ a:hover {
 
 /* Sidebar Panel - Unified Glass Panel */
 .sidebar-panel {
-    background: var(--glass-bg);
-    border-radius: var(--border-radius-md);
+    background: #0f0f14;
+    border-radius: 10px;
     padding: var(--spacing-4);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     margin-bottom: var(--spacing-4);
     transition: all 0.2s ease;
     position: relative;
     box-shadow: var(--shadow-md);
+    color-scheme: dark;
 }
 
 .sidebar-panel:last-child {
@@ -5474,7 +5685,7 @@ a:hover {
 /* Typography for Sidebar Panels */
 .sidebar-panel * {
     font-family: 'Inter', sans-serif;
-    color: #ffffff;
+    color: #f0f0f7;
     line-height: 1.25;
 }
 
@@ -5540,22 +5751,20 @@ a:hover {
     position: relative;
     display: flex;
     align-items: center;
-    background: rgba(20, 20, 24, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    transition: all 0.2s ease-in-out;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) inset;
     height: 42px;
     min-height: 42px;
 }
 
 .sidebar-search-container:focus-within {
-    border-color: rgba(139, 92, 246, 0.4);
-    background: rgba(25, 25, 30, 0.7);
-    box-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.3) inset,
-        0 1px 1px rgba(255, 255, 255, 0.05),
-        0 0 0 2px rgba(139, 92, 246, 0.15);
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.07);
 }
 
 .sidebar-search-icon {
@@ -5574,7 +5783,7 @@ a:hover {
     padding-right: 36px;
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.9);
+    color: #f0f0f7;
     font-size: 0.875rem;
     outline: none;
     height: 100%;
@@ -5582,7 +5791,28 @@ a:hover {
 }
 
 .sidebar-search-input::placeholder {
-    color: rgba(255, 255, 255, 0.35);
+    color: #7a7a89;
+}
+
+/* Tiny persistent 'Search' label to guarantee visibility */
+.sidebar-search-container::before {
+    content: 'Search';
+    position: absolute;
+    left: 36px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7a7a89;
+    font-size: 10px;
+    line-height: 1;
+    pointer-events: none;
+}
+/* Hide tiny label when user has typed something */
+.sidebar-search-container:has(.sidebar-search-input:not(:placeholder-shown))::before {
+    display: none;
+}
+/* Also hide tiny label while focused to avoid overlap with placeholder */
+.sidebar-search-container:has(.sidebar-search-input:focus)::before {
+    display: none;
 }
 
 .sidebar-search-clear {
@@ -5731,12 +5961,12 @@ a:hover {
 /* Tip Breakdown Card - Clean Transparent Card */
 .tip-breakdown-card {
     margin-top: 12px;
-    padding: 16px;
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--border-radius-md);
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
     box-shadow: var(--shadow-md);
 }
 
@@ -5772,15 +6002,15 @@ a:hover {
 }
 
 .tip-breakdown-divider {
-    height: 1px;
-    background: var(--glass-border);
+    height: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     margin: 12px 0;
 }
 
 .tip-breakdown-total {
     margin-top: 4px;
     padding-top: 8px;
-    border-top: 1px solid var(--glass-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .tip-breakdown-total .tip-breakdown-label {
@@ -5798,7 +6028,7 @@ a:hover {
 .tip-breakdown-caption {
     margin-top: 12px;
     padding-top: 12px;
-    border-top: 1px solid var(--glass-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     font-size: var(--font-size-xs);
     color: var(--text-muted);
     text-align: center;

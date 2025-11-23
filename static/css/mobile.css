@@ -1,0 +1,291 @@
+/* Mobile-first overrides and utilities for <768px */
+
+/* Visibility helpers */
+.mobile-only {
+    display: none;
+}
+
+.hidden-mobile {
+    display: initial;
+}
+
+@media (max-width: 768px) {
+    .mobile-only {
+        display: initial;
+    }
+
+    .hidden-mobile {
+        display: none !important;
+    }
+}
+
+/* Mobile spacing & typography normalization */
+@media (max-width: 768px) {
+    .h-mobile {
+        font-size: 1.125rem;
+        font-weight: 600;
+    }
+
+    /* text-lg font-semibold */
+    .label-mobile {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+    }
+
+    /* text-sm uppercase tracking-wide */
+    .body-mobile {
+        font-size: 0.875rem;
+    }
+
+    /* text-sm */
+    .input-mobile {
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    /* rounded-md px-3 py-2 text-sm */
+    .section-mobile {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Horizontal scroll carousels */
+@media (max-width: 768px) {
+    .h-scroll {
+        display: flex;
+        overflow-x: auto;
+        gap: 1rem;
+        scroll-snap-type: x mandatory;
+        /* snap-x snap-mandatory */
+        padding-bottom: 6px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .h-card {
+        min-width: 180px;
+        scroll-snap-align: start;
+        /* snap-start */
+    }
+}
+
+/* (Removed forced hides on account to avoid content disappearing) */
+
+/* Mobile account tabs: horizontal scroll */
+@media (max-width: 768px) {
+    .mobile-tabs {
+        display: flex;
+        overflow-x: auto;
+        gap: 0.75rem;
+        /* gap-3 */
+        padding: 0.5rem 0.5rem;
+        /* px-2 py-2 */
+    }
+
+    .mobile-tab {
+        white-space: nowrap;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.04);
+        color: inherit;
+        border-radius: 9999px;
+        padding: 0.375rem 0.625rem;
+        font-size: 0.75rem;
+        /* text-xs */
+    }
+}
+
+/* Bottom drawer (mobile) */
+@media (max-width: 768px) {
+    .mobile-sheet-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 10010;
+    }
+
+    .mobile-sheet {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 72vh;
+        background: #0a0a0a;
+        /* bg-neutral-900 */
+        color: #e5e7eb;
+        /* text-neutral-200 */
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        border-top: 1px solid #374151;
+        /* border-neutral-700 */
+        box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.35);
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+        z-index: 10011;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .mobile-sheet.open {
+        transform: translateY(0);
+    }
+
+    .mobile-sheet .sheet-head {
+        position: sticky;
+        top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        background: #0a0a0a;
+        border-bottom: 1px solid #374151;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+    }
+
+    .mobile-sheet .sheet-title {
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+
+    .mobile-sheet .sheet-handle {
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 4px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    .mobile-sheet .sheet-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 14px 16px;
+    }
+
+    .mobile-sheet .sheet-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #e5e7eb;
+        text-decoration: none;
+    }
+
+    .mobile-sheet .sheet-item.danger {
+        color: #fca5a5;
+        border-color: rgba(239, 68, 68, 0.35);
+        background: rgba(239, 68, 68, 0.08);
+    }
+
+    .mobile-sheet .sheet-item i {
+        width: 18px;
+        text-align: center;
+    }
+}
+
+/* Sticky Now Playing footer (mobile) */
+@media (max-width: 768px) {
+    .now-playing-sticky {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 10005;
+        background: #0a0a0a;
+        color: #e5e7eb;
+        border-top: 1px solid #374151;
+        padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    }
+
+    .content-pad-bottom {
+        padding-bottom: 88px;
+        /* space for player on mobile */
+    }
+}
+
+/* Dark mode alignment for menus (hamburger/account/bottom drawer) */
+@media (max-width: 768px) {
+    .mobile-hamburger {
+        color: rgba(229, 231, 235, 0.9);
+        border-color: rgba(55, 65, 81, 0.6);
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .account-dropdown-menu {
+        background: #0a0a0a !important;
+        color: #e5e7eb !important;
+        border: 1px solid #374151 !important;
+    }
+
+    .account-menu-item {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+}
+
+/* Unified dark inputs (fallback when Tailwind utilities are unavailable) */
+.unified-input {
+    width: 100%;
+    border-radius: 0.5rem;
+    background: #111;
+    border: 1px solid #1e1e1e;
+    color: #e5e7eb;
+    padding: 0.5rem 0.75rem;
+}
+
+.unified-input:focus {
+    outline: none;
+    border-color: #a3e635;
+}
+
+.unified-input[disabled] {
+    opacity: .6;
+}
+
+.unified-select {
+    appearance: none;
+    background-color: #111;
+    border-radius: 0.5rem;
+    border: 1px solid #1e1e1e;
+    color: #e5e7eb;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 8l4 4 4-4' stroke='%23a3a3a3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+}
+
+.unified-select:focus {
+    outline: none;
+    border-color: #a3e635;
+}
+
+/* Extra: force dark background for any mobile drawers */
+@media (max-width: 768px) {
+
+    .offcanvas-panel,
+    .sheet-panel {
+        background: #0f0f0f !important;
+        color: #e5e7eb !important;
+        border-color: rgba(163, 230, 53, 0.2) !important;
+    }
+}
+
+/* Ahoy Indie Media - Mobile consistency for sidebar/boost inputs */
+@media (max-width: 768px) {
+    .sidebar-search-container,
+    .tip-jar-select,
+    .tip-jar-amount-group {
+        height: 42px;
+        min-height: 42px;
+        box-sizing: border-box;
+    }
+}
