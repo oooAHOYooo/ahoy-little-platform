@@ -4,10 +4,12 @@
 
 {% block extra_css %}
 <style>
+    /* Fintech-inspired dark UI for portfolio */
     .portfolio-page {
         min-height: 100vh;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #0f0f14;
         padding: 2rem 1rem;
+        color: #f0f0f7;
     }
 
     .portfolio-container {
@@ -17,70 +19,77 @@
 
     .hero-header {
         text-align: center;
-        color: white;
-        margin-bottom: 3rem;
+        color: #f0f0f7;
+        margin-bottom: 2rem;
     }
 
     .hero-header h1 {
-        font-size: 3rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+        letter-spacing: 0.2px;
     }
 
     .hero-header p {
-        font-size: 1.25rem;
-        opacity: 0.9;
+        font-size: 0.95rem;
+        color: #a6a6b3;
     }
 
+    /* KPI strip */
     .portfolio-stats {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 3rem;
+        gap: 1rem;
+        margin-bottom: 2rem;
     }
 
     .stat-card {
-        background: white;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        text-align: center;
+        padding: 1rem 1.25rem;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
     }
 
     .stat-card .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #667eea;
-        margin-bottom: 0.5rem;
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum";
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #f0f0f7;
+        margin-bottom: 0.25rem;
     }
 
     .stat-card .stat-label {
-        color: #6b7280;
-        font-size: 0.875rem;
+        color: #7a7a89;
+        font-size: 0.75rem;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.06em;
     }
 
+    /* Charts */
     .charts-section {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-        gap: 2rem;
-        margin-bottom: 3rem;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
     }
 
     .chart-card {
-        background: white;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1rem 1.25rem;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
     }
 
     .chart-card h3 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        color: #1f2937;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #e6e6f0;
     }
 
     .chart-container {
@@ -88,103 +97,123 @@
         height: 300px;
     }
 
+    /* Positions table */
     .positions-table-section {
-        background: white;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1rem 1.25rem;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
     }
 
     .positions-table-section h3 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        color: #1f2937;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #e6e6f0;
     }
 
     .positions-table {
         width: 100%;
         border-collapse: collapse;
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum";
     }
 
-    .positions-table thead {
-        background: #f9fafb;
+    .positions-table thead th {
+        position: sticky;
+        top: 0;
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
     }
 
     .positions-table th {
-        padding: 1rem;
+        padding: 0.75rem;
         text-align: left;
-        font-weight: 600;
-        color: #374151;
-        border-bottom: 2px solid #e5e7eb;
+        font-weight: 700;
+        color: #c6c6d0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
     }
 
     .positions-table td {
-        padding: 1rem;
-        border-bottom: 1px solid #e5e7eb;
+        padding: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        color: #e6e6f0;
+    }
+
+    .positions-table tbody tr:nth-child(odd) {
+        background: rgba(255, 255, 255, 0.02);
     }
 
     .positions-table tbody tr:hover {
-        background: #f9fafb;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Column alignment: amount and weight right aligned */
+    .positions-table td:nth-child(2),
+    .positions-table td:nth-child(3) {
+        text-align: right;
     }
 
     .artist-name {
-        font-weight: 600;
-        color: #1f2937;
+        font-weight: 700;
+        color: #f0f0f7;
     }
 
     .amount {
-        font-weight: 600;
-        color: #059669;
+        font-weight: 800;
+        color: #8be1c7;
     }
 
     .weight {
-        color: #6b7280;
+        display: inline-block;
+        background: rgba(139, 225, 199, 0.08);
+        border: 1px solid rgba(139, 225, 199, 0.25);
+        color: #b5f2de;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
     }
 
     .last-boost {
-        color: #6b7280;
-        font-size: 0.875rem;
+        color: #a6a6b3;
+        font-size: 0.82rem;
     }
 
+    /* Empty states */
     .empty-state {
         text-align: center;
         padding: 4rem 2rem;
-        color: white;
+        color: #e6e6f0;
     }
 
     .empty-state i {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        opacity: 0.7;
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.65;
     }
 
     .empty-state h3 {
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+        font-weight: 700;
     }
 
     .empty-state p {
-        opacity: 0.8;
+        color: #a6a6b3;
     }
 
     @media (max-width: 768px) {
-        .hero-header h1 {
-            font-size: 2rem;
-        }
-
-        .charts-section {
-            grid-template-columns: 1fr;
-        }
-
-        .positions-table {
-            font-size: 0.875rem;
-        }
-
-        .positions-table th,
-        .positions-table td {
-            padding: 0.5rem;
-        }
+        .hero-header h1 { font-size: 1.5rem; }
+        .charts-section { grid-template-columns: 1fr; }
+        .positions-table { font-size: 0.875rem; }
+        .positions-table th, .positions-table td { padding: 0.5rem; }
     }
 </style>
 {% endblock %}
