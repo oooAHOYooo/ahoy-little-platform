@@ -6,7 +6,8 @@
     style="pointer-events: auto;">
 
     <div
-        class="checkout-card w-full max-w-xl bg-black/50 rounded-2xl border border-white/10 shadow-2xl p-8 text-white relative">
+        class="checkout-card w-full max-w-xl bg-black/50 rounded-2xl border border-white/10 shadow-2xl p-8 text-white relative"
+        style="pointer-events: auto; z-index: 9999; position: relative;">
 
         <div class="checkout-steps flex items-center justify-center gap-3 mb-6">
             <div class="step active px-4 py-2 rounded-full bg-white/20 text-white text-sm">Review</div>
@@ -79,7 +80,7 @@
                 {% endif %}
             </div>
 
-            <form method="POST" action="/checkout/process" class="space-y-3">
+            <form method="POST" action="/checkout/process" class="space-y-3" style="pointer-events: auto; position: relative; z-index: 10000;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <input type="hidden" name="type" value="{{ kind }}">
                 <input type="hidden" name="artist_id" value="{{ artist_id }}">
@@ -90,9 +91,9 @@
 
                 <button type="submit"
                     class="complete-checkout w-full py-4 mt-6 rounded-2xl text-white text-lg font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: saturate(140%) blur(12px); -webkit-backdrop-filter: saturate(140%) blur(12px); pointer-events: auto; cursor: pointer;"
+                    style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: saturate(140%) blur(12px); -webkit-backdrop-filter: saturate(140%) blur(12px); pointer-events: auto !important; cursor: pointer !important; position: relative; z-index: 10001;"
                     id="completeCheckoutBtn"
-                    onclick="console.log('Button clicked - submitting form');"
+                    onclick="console.log('Button clicked - submitting form'); return true;"
                     {% if total is none or total <= 0 %}disabled{% endif %}>
                     <span class="flex items-center justify-center gap-2">
                         <i class="fas fa-lock"></i>
