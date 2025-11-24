@@ -1765,24 +1765,30 @@
                 isFullscreenVisualizer: false,
 
                 init() {
-                    // Ensure mediaPlayer exists; if not, create a minimal one
-                    if (!window.mediaPlayer || typeof window.mediaPlayer.play !== 'function') {
-                        try { import('/static/js/player.js'); } catch (e) { /* noop */ }
-                    }
+                    // Wrap entire initialization in try-catch to prevent blocking page execution
+                    try {
+                        // Ensure mediaPlayer exists; if not, create a minimal one
+                        if (!window.mediaPlayer || typeof window.mediaPlayer.play !== 'function') {
+                            try { import('/static/js/player.js'); } catch (e) { /* noop */ }
+                        }
 
-                    // Hydrate initial state from mediaPlayer if available
-                    const mp = window.mediaPlayer;
-                    if (mp) {
-                        this.currentTrack = mp.currentTrack || null;
-                        this.isPlaying = !!mp.isPlaying;
-                        this.currentTime = mp.currentTime || 0;
-                        this.duration = mp.duration || 0;
-                        this.isMuted = !!mp.isMuted;
-                        this.volume = (typeof mp.volume === 'number') ? Math.round(mp.volume * 100) : 50;
-                        this.isShuffled = !!mp.isShuffled;
-                        this.isRepeated = !!mp.isRepeated;
+                        // Hydrate initial state from mediaPlayer if available
+                        const mp = window.mediaPlayer;
+                        if (mp && typeof mp === 'object') {
+                            try {
+                                this.currentTrack = mp.currentTrack || null;
+                                this.isPlaying = !!mp.isPlaying;
+                                this.currentTime = mp.currentTime || 0;
+                                this.duration = mp.duration || 0;
+                                this.isMuted = !!mp.isMuted;
+                                this.volume = (typeof mp.volume === 'number') ? Math.round(mp.volume * 100) : 50;
+                                this.isShuffled = !!mp.isShuffled;
+                                this.isRepeated = !!mp.isRepeated;
+                            } catch (e) {
+                                console.warn('Error hydrating mediaPlayer state:', e);
+                            }
 
-                        // Bind mediaPlayer events to update Alpine state (with error handling)
+                            // Bind mediaPlayer events to update Alpine state (with error handling)
                         try {
                             if (mp.on && typeof mp.on === 'function') {
                                 mp.on('play', () => {
@@ -1877,17 +1883,32 @@
                         } catch (e) {
                             console.warn('Error setting up playlistchange event:', e);
                         }
+                        }
+                    } catch (e) {
+                        console.warn('Error initializing mediaPlayer:', e);
                     }
 
                     // Listen for custom play events from anywhere
-                    document.addEventListener('play-track', (e) => {
-                        const track = e.detail && (e.detail.track || e.detail);
-                        if (track) this.playTrack(track);
-                    });
+                    try {
+                        document.addEventListener('play-track', (e) => {
+                            try {
+                                const track = e.detail && (e.detail.track || e.detail);
+                                if (track) this.playTrack(track);
+                            } catch (err) {
+                                console.warn('Error in play-track handler:', err);
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('Error setting up play-track listener:', e);
+                    }
 
                     // Initialize bookmark state and start clock animation
-                    this.updateSavedState();
-                    this.startClock();
+                    try {
+                        this.updateSavedState();
+                        this.startClock();
+                    } catch (e) {
+                        console.warn('Error initializing bookmark state or clock:', e);
+                    }
 
                     // Listen for fullscreen changes (simplified to avoid Illegal invocation errors)
                     // Just set to false initially - fullscreen detection is not critical for functionality
