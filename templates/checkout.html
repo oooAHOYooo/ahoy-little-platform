@@ -92,7 +92,7 @@
                     class="complete-checkout w-full py-4 mt-6 rounded-2xl text-white text-lg font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: saturate(140%) blur(12px); -webkit-backdrop-filter: saturate(140%) blur(12px); pointer-events: auto; cursor: pointer;"
                     id="completeCheckoutBtn"
-                    onclick="this.closest('form').submit(); return false;"
+                    onclick="console.log('Button clicked - submitting form');"
                     {% if total is none or total <= 0 %}disabled{% endif %}>
                     <span class="flex items-center justify-center gap-2">
                         <i class="fas fa-lock"></i>
