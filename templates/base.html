@@ -86,6 +86,119 @@
         <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+        <!-- App data component - must load before Alpine.js -->
+        <script>
+        // Stub for toast function (will be defined later in app.js)
+        window.__ahoyToast = window.__ahoyToast || function(msg) {
+          console.log('Toast:', msg);
+        };
+        
+        // Define the main app component for Alpine.js (body element)
+        // This must be defined before Alpine.js loads
+        window.appData = function() {
+          return {
+            // Navigation state
+            navOpen: false,
+            accountOpen: false,
+            mobileDrawer: false,
+            
+            // Auth modals state
+            showLogin: false,
+            showRegister: false,
+            loginForm: {
+              username: '',
+              password: ''
+            },
+            registerForm: {
+              username: '',
+              email: '',
+              password: ''
+            },
+            isLoading: false,
+            
+            // Auth methods
+            async login() {
+              if (!this.loginForm.username || !this.loginForm.password) {
+                window.__ahoyToast && window.__ahoyToast('Please enter username and password');
+                return;
+              }
+              
+              this.isLoading = true;
+              try {
+                const response = await fetch('/api/auth/login', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({
+                    username: this.loginForm.username,
+                    password: this.loginForm.password
+                  })
+                });
+                
+                if (response.ok) {
+                  const data = await response.json();
+                  window.__ahoyToast && window.__ahoyToast('Login successful!');
+                  this.showLogin = false;
+                  this.loginForm = { username: '', password: '' };
+                  // Reload page to update UI
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 500);
+                } else {
+                  const error = await response.json();
+                  window.__ahoyToast && window.__ahoyToast(error.message || error.error || 'Login failed');
+                }
+              } catch (error) {
+                console.error('Login error:', error);
+                window.__ahoyToast && window.__ahoyToast('Login failed. Please try again.');
+              } finally {
+                this.isLoading = false;
+              }
+            },
+            
+            async register() {
+              if (!this.registerForm.username || !this.registerForm.email || !this.registerForm.password) {
+                window.__ahoyToast && window.__ahoyToast('Please fill in all fields');
+                return;
+              }
+              
+              this.isLoading = true;
+              try {
+                const response = await fetch('/api/auth/register', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({
+                    username: this.registerForm.username,
+                    email: this.registerForm.email,
+                    password: this.registerForm.password
+                  })
+                });
+                
+                if (response.ok) {
+                  const data = await response.json();
+                  window.__ahoyToast && window.__ahoyToast('Registration successful!');
+                  this.showRegister = false;
+                  this.registerForm = { username: '', email: '', password: '' };
+                  // Reload page to update UI
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 500);
+                } else {
+                  const error = await response.json();
+                  window.__ahoyToast && window.__ahoyToast(error.message || error.error || 'Registration failed');
+                }
+              } catch (error) {
+                console.error('Registration error:', error);
+                window.__ahoyToast && window.__ahoyToast('Registration failed. Please try again.');
+              } finally {
+                this.isLoading = false;
+              }
+            }
+          };
+        };
+        </script>
+        
         <!-- Alpine.js for reactive components -->
         <script defer
             src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -131,7 +244,7 @@
         {% block extra_head %}{% endblock %}
     </head>
 
-    <body x-data="{ navOpen: false, accountOpen: false, mobileDrawer:false }"
+    <body x-data="appData()"
         class="overflow-x-hidden">
         <!-- Loading indicator -->
         <div id="loading-indicator"

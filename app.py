@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, session, send_from_directory, make_response
+from flask import Flask, render_template, jsonify, request, session, send_from_directory, make_response, redirect, url_for
 try:
     from flask_session import Session as FlaskSession
 except Exception:  # ImportError or env issues
@@ -2764,7 +2764,7 @@ def trending_content():
 
 # Allow `python -m app` locally if needed
 if __name__ == "__main__":
-    import os, socket, subprocess, shutil, sys
+    import os, socket, subprocess, shutil, sys, platform
 
     def _is_port_free(p: int) -> bool:
         """Check if port is free on all interfaces (0.0.0.0) to match gunicorn binding"""
@@ -2808,11 +2808,16 @@ if __name__ == "__main__":
             chosen = 0
 
     # 3) Run with gunicorn if available for parity; else Flask dev server
-    gunicorn_bin = shutil.which("gunicorn")
+    # Skip gunicorn on Windows (it requires fcntl which is Unix-only)
+    is_windows = platform.system() == "Windows"
+    gunicorn_bin = shutil.which("gunicorn") if not is_windows else None
     if gunicorn_bin:
         print(f"🚀 Starting gunicorn on port {chosen}…")
         # Use the same interface as Render's script but single worker for local
         os.execv(gunicorn_bin, ["gunicorn", "app:app", "--workers", "2", "--threads", "4", "--timeout", "120", "-b", f"0.0.0.0:{chosen}"])
     else:
-        print(f"🚀 Starting Flask dev server on http://127.0.0.1:{chosen}")
+        if is_windows:
+            print(f"🚀 Starting Flask dev server on http://127.0.0.1:{chosen} (Windows detected, skipping gunicorn)")
+        else:
+            print(f"🚀 Starting Flask dev server on http://127.0.0.1:{chosen}")
         app.run(port=chosen, use_reloader=False)

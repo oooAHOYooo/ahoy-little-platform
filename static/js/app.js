@@ -333,3 +333,6 @@ window.navbar = function() {
     }
   };
 };
+
+// Note: appData() is now defined inline in base.html before Alpine.js loads
+// This ensures it's available when Alpine initializes

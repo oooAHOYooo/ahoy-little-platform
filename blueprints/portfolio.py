@@ -31,19 +31,27 @@ def get_artist_name(artist_id):
 
 
 @bp.route("")
-@login_required
+# @login_required  # Disabled for development
 def portfolio_page():
     """Portfolio page showing user's creative positions"""
     return render_template("portfolio.html")
 
 
 @bp.route("/data")
-@login_required
+# @login_required  # Disabled for development
 def portfolio_data():
     """Get portfolio data for charts and tables"""
     user_id = resolve_db_user_id()
     if not user_id:
-        return jsonify({"error": "Not authenticated"}), 401
+        # Return empty data for development (login disabled)
+        return jsonify({
+            "total_contributed": 0,
+            "position_count": 0,
+            "positions": [],
+            "timeline": [],
+            "pie_data": [],
+            "top_artists": [],
+        }), 200
 
     try:
         with get_session() as db_session:

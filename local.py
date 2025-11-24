@@ -9,6 +9,7 @@ import socket
 import subprocess
 import shutil
 import sys
+import platform
 import webbrowser
 import time
 import threading
@@ -88,14 +89,19 @@ if __name__ == "__main__":
     open_browser_after_delay(url, delay=2.0)
 
     # 6) Run with gunicorn if available for parity; else Flask dev server
-    gunicorn_bin = shutil.which("gunicorn")
+    # Skip gunicorn on Windows (it requires fcntl which is Unix-only)
+    is_windows = platform.system() == "Windows"
+    gunicorn_bin = shutil.which("gunicorn") if not is_windows else None
     if gunicorn_bin:
         print(f"🚀 Starting gunicorn on port {chosen}…")
         print(f"🌐 Browser will open at {url}")
         # Use the same interface as Render's script but single worker for local
         os.execv(gunicorn_bin, ["gunicorn", "app:app", "--workers", "2", "--threads", "4", "--timeout", "120", "-b", f"0.0.0.0:{chosen}"])
     else:
-        print(f"🚀 Starting Flask dev server on {url}")
+        if is_windows:
+            print(f"🚀 Starting Flask dev server on {url} (Windows detected, skipping gunicorn)")
+        else:
+            print(f"🚀 Starting Flask dev server on {url}")
         print(f"🌐 Browser will open automatically...")
         app.run(port=chosen, host="127.0.0.1", use_reloader=False)
 
