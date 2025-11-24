@@ -88,10 +88,14 @@
                 <input type="hidden" name="computed_total" value="{{ total if total is not none else amount }}">
 
                 <button type="submit"
-                    class="complete-checkout w-full py-3 mt-4 rounded-xl bg-gradient-to-r from-rose-500 to-purple-500 text-white text-lg font-semibold shadow-lg hover:opacity-90 transition"
+                    class="complete-checkout w-full py-4 mt-6 rounded-2xl text-white text-lg font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: saturate(140%) blur(12px); -webkit-backdrop-filter: saturate(140%) blur(12px);"
                     id="completeCheckoutBtn"
                     {% if total is none or total <= 0 %}disabled{% endif %}>
-                    Complete Checkout{% if total is not none and total > 0 %} — ${{ '%.2f'|format(total) }}{% endif %}
+                    <span class="flex items-center justify-center gap-2">
+                        <i class="fas fa-lock"></i>
+                        <span>Complete Checkout{% if total is not none and total > 0 %} — ${{ '%.2f'|format(total) }}{% endif %}</span>
+                    </span>
                 </button>
             </form>
         </div>
@@ -113,31 +117,45 @@
         const steps = document.querySelectorAll('.checkout-steps .step');
         const completeBtn = document.getElementById('completeCheckoutBtn');
         
-        if (form && completeBtn) {
-            // Handle button click for visual feedback
-            completeBtn.addEventListener('click', (e) => {
-                console.log('Checkout button clicked');
-                // Animate steps immediately for visual feedback
-                if (steps && steps.length === 3) {
-                    steps[0].classList.remove('active');
-                    steps[1].classList.add('active'); // Pay
-                }
-                // Form will submit naturally since button is type="submit"
-            });
-            
-            // Handle form submission (for additional logging)
-            form.addEventListener('submit', (e) => {
-                console.log('Checkout form submitting to:', form.action);
-                // Animate steps
-                if (steps && steps.length === 3) {
-                    steps[0].classList.remove('active');
-                    steps[1].classList.add('active'); // Pay
-                }
-                // Don't prevent default - let form submit
-            });
-        } else {
-            console.error('Checkout form or button not found', { form, completeBtn });
+        if (!form) {
+            console.error('Checkout form not found');
+            return;
         }
+        
+        if (!completeBtn) {
+            console.error('Checkout button not found');
+            return;
+        }
+        
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            console.log('Checkout form submitting to:', form.action);
+            
+            // Animate steps
+            if (steps && steps.length === 3) {
+                steps[0].classList.remove('active');
+                steps[1].classList.add('active'); // Pay
+            }
+            
+            // Show loading state
+            completeBtn.disabled = true;
+            completeBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><i class="fas fa-spinner fa-spin"></i><span>Processing...</span></span>';
+            
+            // Let form submit naturally - don't prevent default
+        });
+        
+        // Handle button click for visual feedback (before form submits)
+        completeBtn.addEventListener('click', function(e) {
+            console.log('Checkout button clicked');
+            
+            // Animate steps immediately for visual feedback
+            if (steps && steps.length === 3) {
+                steps[0].classList.remove('active');
+                steps[1].classList.add('active'); // Pay
+            }
+            
+            // Don't prevent default - let form submit naturally
+        });
     });
 </script>
 {% endblock %}
