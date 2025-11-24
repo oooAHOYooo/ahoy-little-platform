@@ -1782,26 +1782,101 @@
                         this.isShuffled = !!mp.isShuffled;
                         this.isRepeated = !!mp.isRepeated;
 
-                        // Bind mediaPlayer events to update Alpine state
-                        mp.on && mp.on('play', () => {
-                            this.isPlaying = true;
-                            this.currentTrack = mp.currentTrack;
-                            // Trigger track change for visualizer
-                            if (window.nowPlayingController && mp.currentTrack) {
-                                window.nowPlayingController.onTrackChange(mp.currentTrack);
+                        // Bind mediaPlayer events to update Alpine state (with error handling)
+                        try {
+                            if (mp.on && typeof mp.on === 'function') {
+                                mp.on('play', () => {
+                                    try {
+                                        this.isPlaying = true;
+                                        this.currentTrack = mp.currentTrack;
+                                        // Trigger track change for visualizer
+                                        if (window.nowPlayingController && mp.currentTrack) {
+                                            window.nowPlayingController.onTrackChange(mp.currentTrack);
+                                        }
+                                    } catch (e) {
+                                        console.warn('Error in play handler:', e);
+                                    }
+                                });
                             }
-                        });
-                        mp.on && mp.on('pause', () => { this.isPlaying = false; });
-                        mp.on && mp.on('timeupdate', (t) => { this.currentTime = t; this.progressPercent = this.duration ? (t / this.duration) * 100 : 0; });
-                        mp.on && mp.on('durationchange', (d) => { this.duration = d; });
-                        mp.on && mp.on('volumechange', ({ volume, muted }) => { this.volume = Math.round(volume * 100); this.isMuted = !!muted; });
-                        mp.on && mp.on('playlistchange', () => {
-                            this.currentTrack = mp.currentTrack;
-                            // Trigger track change for visualizer
-                            if (window.nowPlayingController && mp.currentTrack) {
-                                window.nowPlayingController.onTrackChange(mp.currentTrack);
+                        } catch (e) {
+                            console.warn('Error setting up play event:', e);
+                        }
+                        
+                        try {
+                            if (mp.on && typeof mp.on === 'function') {
+                                mp.on('pause', () => {
+                                    try {
+                                        this.isPlaying = false;
+                                    } catch (e) {
+                                        console.warn('Error in pause handler:', e);
+                                    }
+                                });
                             }
-                        });
+                        } catch (e) {
+                            console.warn('Error setting up pause event:', e);
+                        }
+                        
+                        try {
+                            if (mp.on && typeof mp.on === 'function') {
+                                mp.on('timeupdate', (t) => {
+                                    try {
+                                        this.currentTime = t;
+                                        this.progressPercent = this.duration ? (t / this.duration) * 100 : 0;
+                                    } catch (e) {
+                                        console.warn('Error in timeupdate handler:', e);
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            console.warn('Error setting up timeupdate event:', e);
+                        }
+                        
+                        try {
+                            if (mp.on && typeof mp.on === 'function') {
+                                mp.on('durationchange', (d) => {
+                                    try {
+                                        this.duration = d;
+                                    } catch (e) {
+                                        console.warn('Error in durationchange handler:', e);
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            console.warn('Error setting up durationchange event:', e);
+                        }
+                        
+                        try {
+                            if (mp.on && typeof mp.on === 'function') {
+                                mp.on('volumechange', ({ volume, muted }) => {
+                                    try {
+                                        this.volume = Math.round(volume * 100);
+                                        this.isMuted = !!muted;
+                                    } catch (e) {
+                                        console.warn('Error in volumechange handler:', e);
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            console.warn('Error setting up volumechange event:', e);
+                        }
+                        
+                        try {
+                            if (mp.on && typeof mp.on === 'function') {
+                                mp.on('playlistchange', () => {
+                                    try {
+                                        this.currentTrack = mp.currentTrack;
+                                        // Trigger track change for visualizer
+                                        if (window.nowPlayingController && mp.currentTrack) {
+                                            window.nowPlayingController.onTrackChange(mp.currentTrack);
+                                        }
+                                    } catch (e) {
+                                        console.warn('Error in playlistchange handler:', e);
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            console.warn('Error setting up playlistchange event:', e);
+                        }
                     }
 
                     // Listen for custom play events from anywhere
