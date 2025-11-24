@@ -89,11 +89,26 @@
                 <input type="hidden" name="qty" value="{{ qty }}">
                 <input type="hidden" name="computed_total" value="{{ total if total is not none else amount }}">
 
+                <!-- New working checkout button -->
+                <div id="checkoutButtonContainer" style="margin-top: 1.5rem;">
+                    <button type="button"
+                        id="newCheckoutBtn"
+                        style="width: 100%; padding: 1rem; border-radius: 1rem; background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: saturate(140%) blur(12px); -webkit-backdrop-filter: saturate(140%) blur(12px); color: white; font-size: 1.125rem; font-weight: 600; cursor: pointer; pointer-events: auto; position: relative; z-index: 10002; transition: all 0.3s; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);"
+                        onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 15px 40px rgba(0, 0, 0, 0.4)';"
+                        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 10px 30px rgba(0, 0, 0, 0.3)';"
+                        onclick="submitCheckoutForm();">
+                        <span style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <i class="fas fa-lock"></i>
+                            <span>Complete Checkout{% if total is not none and total > 0 %} — ${{ '%.2f'|format(total) }}{% endif %}</span>
+                        </span>
+                    </button>
+                </div>
+                
+                <!-- Keep original button hidden as backup -->
                 <button type="submit"
                     class="complete-checkout w-full py-4 mt-6 rounded-2xl text-white text-lg font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: saturate(140%) blur(12px); -webkit-backdrop-filter: saturate(140%) blur(12px); pointer-events: auto !important; cursor: pointer !important; position: relative; z-index: 10001;"
+                    style="display: none;"
                     id="completeCheckoutBtn"
-                    onclick="console.log('Button clicked - submitting form'); this.style.boxShadow = '0 0 30px rgba(255, 215, 0, 0.8)'; setTimeout(() => this.style.boxShadow = '', 300); return true;"
                     {% if total is none or total <= 0 %}disabled{% endif %}>
                     <span class="flex items-center justify-center gap-2">
                         <i class="fas fa-lock"></i>
@@ -113,6 +128,104 @@
     window.addEventListener('beforeunload', () => {
         try { document.body.classList.remove('checkout-mode'); } catch (_) { }
     });
+
+    // Direct form submission function - works independently
+    function submitCheckoutForm() {
+        console.log('=== SUBMIT CHECKOUT FORM CALLED ===');
+        
+        // Create confetti immediately for visual feedback
+        createConfetti();
+        
+        const form = document.querySelector('form[action="/checkout/process"]');
+        if (!form) {
+            console.error('Form not found!');
+            alert('Error: Form not found. Please refresh the page.');
+            return;
+        }
+        
+        console.log('Form found:', form);
+        console.log('Form action:', form.action);
+        console.log('Form method:', form.method);
+        
+        // Show loading state
+        const btn = document.getElementById('newCheckoutBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><i class="fas fa-spinner fa-spin"></i><span>Processing...</span></span>';
+        }
+        
+        // Animate steps
+        const steps = document.querySelectorAll('.checkout-steps .step');
+        if (steps && steps.length === 3) {
+            steps[0].classList.remove('active');
+            steps[1].classList.add('active');
+        }
+        
+        // Submit the form directly
+        try {
+            console.log('Submitting form...');
+            form.submit();
+        } catch (e) {
+            console.error('Error submitting form:', e);
+            // Fallback: create a hidden submit button and click it
+            const hiddenSubmit = document.createElement('button');
+            hiddenSubmit.type = 'submit';
+            hiddenSubmit.style.display = 'none';
+            form.appendChild(hiddenSubmit);
+            hiddenSubmit.click();
+        }
+    }
+    
+    // Confetti function for visual feedback
+    function createConfetti() {
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7', '#a29bfe'];
+        const confettiCount = 50;
+        
+        for (let i = 0; i < confettiCount; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-10px';
+                confetti.style.borderRadius = '50%';
+                confetti.style.pointerEvents = 'none';
+                confetti.style.zIndex = '99999';
+                confetti.style.boxShadow = '0 0 6px ' + confetti.style.backgroundColor;
+                
+                document.body.appendChild(confetti);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 2 + Math.random() * 3;
+                const rotation = Math.random() * 360;
+                const rotationSpeed = (Math.random() - 0.5) * 10;
+                
+                let x = parseFloat(confetti.style.left);
+                let y = -10;
+                let currentRotation = rotation;
+                
+                const animate = () => {
+                    x += Math.cos(angle) * velocity;
+                    y += Math.sin(angle) * velocity + 0.5; // gravity
+                    currentRotation += rotationSpeed;
+                    
+                    confetti.style.left = x + '%';
+                    confetti.style.top = y + 'px';
+                    confetti.style.transform = `rotate(${currentRotation}deg)`;
+                    
+                    if (y < window.innerHeight + 50) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        confetti.remove();
+                    }
+                };
+                
+                animate();
+            }, i * 10);
+        }
+    }
 
     // Steps animation and form submission
     // Note: Form will work without JavaScript since it's a standard HTML form
