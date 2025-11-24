@@ -4,8 +4,10 @@ class BaseConfig:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-not-secret")
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
-    SESSION_COOKIE_SECURE = True
-    REMEMBER_COOKIE_SECURE = True
+    # Only use secure cookies in production (HTTPS required)
+    # In development (HTTP), secure cookies won't work
+    SESSION_COOKIE_SECURE = os.environ.get("FLASK_ENV", "development").lower() == "production"
+    REMEMBER_COOKIE_SECURE = os.environ.get("FLASK_ENV", "development").lower() == "production"
     SESSION_TYPE = "filesystem"
     REMEMBER_COOKIE_HTTPONLY = True
     JSON_SORT_KEYS = False

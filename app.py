@@ -150,17 +150,11 @@ def create_app():
     app.register_blueprint(create_csp_report_blueprint())
     
     # Initialize CSRF protection
-    global csrf
     csrf = init_csrf(app)
     
     # Exempt checkout_process from Flask-WTF CSRF (uses custom validation)
-    if csrf:
-        csrf.exempt(checkout_process)
-    
-    # Exempt checkout_process from Flask-WTF CSRF (uses custom validation)
-    @csrf.exempt
-    def exempt_checkout_process():
-        return request.path == '/checkout/process'
+    # This must be done after the route is defined, so we do it here
+    csrf.exempt(checkout_process)
     
     # Log startup configuration
     startup_logging(app)
