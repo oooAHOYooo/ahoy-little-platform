@@ -52,7 +52,7 @@
             </div>
         </section>
         <!-- Unified Header Section -->
-        <section class="unified-header">
+        <section class="unified-header artists-subheader">
             <div class="header-content">
                 <div class="header-title">
                     <div class="title-text">
@@ -82,22 +82,26 @@
                         <button @click="setType('all')"
                             :class="{'active': selectedType === 'all'}"
                             class="filter-tab">
-                            All Artists
+                            <i class="fas fa-users" aria-hidden="true"></i>
+                            <span>All Artists</span>
                         </button>
                         <button @click="setType('musician')"
                             :class="{'active': selectedType === 'musician'}"
                             class="filter-tab">
-                            Musicians
+                            <i class="fas fa-music" aria-hidden="true"></i>
+                            <span>Musicians</span>
                         </button>
                         <button @click="setType('host')"
                             :class="{'active': selectedType === 'host'}"
                             class="filter-tab">
-                            Hosts
+                            <i class="fas fa-microphone" aria-hidden="true"></i>
+                            <span>Hosts</span>
                         </button>
                         <button @click="setType('producer')"
                             :class="{'active': selectedType === 'producer'}"
                             class="filter-tab">
-                            Producers
+                            <i class="fas fa-sliders-h" aria-hidden="true"></i>
+                            <span>Producers</span>
                         </button>
                     </div>
                 </div>
@@ -364,6 +368,26 @@ function artistsPage() {
                     } else {
                         artist.followers = (artist.followers || 0) + 1;
                     }
+                    
+                    // Sync with Saved (Bookmarks)
+                    try {
+                        if (window.AhoyBookmarks) {
+                            const idStr = String(artist.slug || artist.id || artist.name);
+                            const isSaved = window.AhoyBookmarks.isBookmarked('artist', idStr);
+                            const item = {
+                                type: 'artist',
+                                id: idStr,
+                                title: artist?.name || 'Artist',
+                                artwork: artist?.image || ''
+                            };
+                            if (artist.following && !isSaved) {
+                                window.AhoyBookmarks.toggle(item);
+                            } else if (!artist.following && isSaved) {
+                                window.AhoyBookmarks.toggle(item);
+                            }
+                        }
+                    } catch (e) { console.warn('Bookmark sync failed:', e); }
+                    
                     this.showNotification(isCurrentlyFollowing ? 'Unfollowed artist' : 'Following artist', 'success');
                 }
             } catch (error) {

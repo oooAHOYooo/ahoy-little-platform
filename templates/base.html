@@ -198,7 +198,7 @@
           };
         };
         </script>
-        
+
         <!-- Alpine.js for reactive components -->
         <script defer
             src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -254,8 +254,62 @@
 
         <!-- Header -->
         <header class="app-header" style="padding-top:8px; padding-bottom:8px;">
+            <!-- Mobile Top Bar -->
+            <div class="mobile-nav-root"
+                x-data="{ open:false, searchOpen:false, boostOpen:false }">
+                <nav class="mobile-top-nav mobile-only" role="navigation"
+                    aria-label="Primary">
+                    <a href="{{ url_for('music') }}"
+                        class="mobile-tab {% if request.endpoint == 'music' %}active{% endif %}">
+                        <i class="fas fa-music" aria-hidden="true"></i>
+                        <span>Music</span>
+                    </a>
+                    <a href="{{ url_for('shows') }}"
+                        class="mobile-tab {% if request.endpoint == 'shows' %}active{% endif %}">
+                        <i class="fas fa-play-circle" aria-hidden="true"></i>
+                        <span>Shows</span>
+                    </a>
+                    <a href="{{ url_for('artists') }}"
+                        class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        <span>Artists</span>
+                    </a>
+                    <a href="/radio" class="mobile-tab">
+                        <i class="fas fa-broadcast-tower"
+                            aria-hidden="true"></i>
+                        <span>Radio</span>
+                    </a>
+                    <a href="/bookmarks"
+                        class="mobile-tab {% if request.endpoint == 'bookmarks_page' %}active{% endif %}">
+                        <i class="fas fa-bookmark" aria-hidden="true"></i>
+                        <span>Saved</span>
+                    </a>
+                </nav>
+                <div
+                    x-show="open"
+                    x-transition
+                    class="mobile-menu-overlay"
+                    style="display:none;">
+                    <button @click="open = false" class="close-btn"
+                        aria-label="Close menu">✕</button>
+                    <a href="/music">Music</a>
+                    <a href="/shows">Shows</a>
+                    <a href="/artists">Artists</a>
+                    <a href="/radio">Radio</a>
+                    <a href="/bookmarks">Saved</a>
+                    <a href="/settings">Settings</a>
+                </div>
+                <div x-show="searchOpen" class="mobile-search-panel"
+                    style="display:none;">
+                    <!-- existing search input -->
+                </div>
+                <div x-show="boostOpen" class="mobile-boost-panel"
+                    style="display:none;">
+                    <!-- existing boost UI -->
+                </div>
+            </div>
             <!-- Navigation -->
-            <nav class="navbar" x-data="navbar()" x-init="init()">
+            <nav class="navbar desktop-nav" x-data="navbar()" x-init="init()">
                 <div class="nav-container max-w-7xl mx-auto px-4">
 
                     <!-- Logo -->
@@ -748,7 +802,7 @@
                                     <i class="fas fa-spinner fa-spin"
                                         x-show="isTipping"></i>
                                     <span
-                                        x-text="isTipping ? 'Processing...' : 'Send Boost — $' + (isValid ? calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2) : '0.00')"></span>
+                                        x-text="isTipping ? 'Processing…' : 'Boost $' + (isValid ? calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2) : '0.00')"></span>
                                 </button>
                                 <div class="text-right">
                                     <button type="button" class="tip-cancel"

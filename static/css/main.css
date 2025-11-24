@@ -91,6 +91,40 @@
     --glass-border: rgba(255, 255, 255, 0.1);
 }
 
+/* ========== Mobile-only top nav refactor helpers ========== */
+@media (max-width: 768px) {
+
+    /* Hide desktop nav structures on small screens */
+    .desktop-nav,
+    .top-nav-links,
+    .top-nav-search,
+    .top-nav-boost,
+    .account-menu-desktop,
+    .left-sidebar,
+    .right-sidebar {
+        display: none !important;
+    }
+
+    /* Ensure content isn't hidden behind fixed mobile bar */
+    body {
+        padding-top: 60px;
+    }
+
+    /* Dark theme for generic menus on mobile */
+    .menu,
+    .dropdown,
+    .account-menu,
+    .mobile-menu-overlay {
+        background: #0e0e10 !important;
+        color: #ffffff !important;
+    }
+
+    /* Hide image logo on mobile in favor of text */
+    img[alt="Ahoy Indie Media"] {
+        display: none !important;
+    }
+}
+
 /* Reset and Base Styles */
 * {
     margin: 0;
@@ -5117,13 +5151,18 @@ a:hover {
     background-position: right 12px center;
     background-size: 12px 12px;
 }
-.tip-jar-select::-ms-expand { display: none; }
+
+.tip-jar-select::-ms-expand {
+    display: none;
+}
+
 .tip-jar-select:hover,
 .tip-jar-select:focus {
     background: rgba(255, 255, 255, 0.07);
     border-color: rgba(255, 255, 255, 0.12);
     outline: none;
 }
+
 /* Darken native popup list where supported */
 .tip-jar-select option,
 .sidebar-panel select option,
@@ -5147,15 +5186,18 @@ a:hover {
     transition: background 0.15s ease, border-color 0.15s ease;
     box-sizing: border-box;
 }
+
 .tip-jar-amount-group:focus-within,
 .tip-jar-amount-group:hover {
     background: rgba(255, 255, 255, 0.07);
     border-color: rgba(255, 255, 255, 0.12);
 }
+
 .tip-jar-currency-prefix {
     color: #7a7a89;
     padding-right: 8px;
 }
+
 .tip-jar-amount-input {
     flex: 1;
     min-width: 0;
@@ -5167,15 +5209,18 @@ a:hover {
     outline: none;
     font-family: 'Inter', sans-serif;
 }
+
 .tip-jar-amount-input::placeholder {
     color: #7a7a89;
 }
+
 /* Remove number input spinners */
 .tip-jar-amount-input::-webkit-outer-spin-button,
 .tip-jar-amount-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+
 .tip-jar-amount-input[type=number] {
     -moz-appearance: textfield;
 }
@@ -5193,13 +5238,16 @@ a:hover {
     box-shadow: 0 0 12px rgba(255, 115, 224, 0.3);
     transition: transform 0.1s ease, filter 0.15s ease, opacity 0.15s ease;
 }
+
 .tip-jar-submit:hover:not(:disabled) {
     transform: translateY(-1px);
     filter: brightness(1.03);
 }
+
 .tip-jar-submit:active:not(:disabled) {
     transform: translateY(0);
 }
+
 .tip-jar-submit:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -5211,23 +5259,28 @@ a:hover {
     min-height: 36px;
     border-radius: 10px;
 }
+
 .dashboard-sidebar .sidebar-search-icon {
     left: 10px;
     font-size: 12px;
 }
+
 .dashboard-sidebar .sidebar-search-input {
     font-size: 0.8rem;
     padding-left: 32px;
     padding-right: 32px;
 }
+
 .dashboard-sidebar .sidebar-search-container::before {
     left: 32px;
     font-size: 9px;
 }
+
 /* Avoid double “Search” label overlap: show placeholder only on focus */
 .dashboard-sidebar .sidebar-search-input::placeholder {
     color: transparent;
 }
+
 .dashboard-sidebar .sidebar-search-input:focus::placeholder {
     color: #7a7a89;
 }
@@ -5238,37 +5291,46 @@ a:hover {
     font-size: 13px;
     border-radius: 10px;
 }
+
 .dashboard-sidebar .tip-jar-amount-group {
     height: 36px;
     min-height: 36px;
     padding: 8px 12px;
     border-radius: 10px;
 }
+
 .dashboard-sidebar .tip-jar-currency-prefix {
     font-size: 12px;
     padding-right: 6px;
 }
+
 .dashboard-sidebar .tip-jar-amount-input {
     font-size: 13px;
 }
+
 .dashboard-sidebar .tip-jar-submit {
-    height: 34px;
-    padding: 8px 12px;
+    height: 30px;
+    padding: 6px 10px;
     border-radius: 10px;
-    font-size: 13px;
+    font-size: 12px;
+    letter-spacing: 0;
 }
+
 .dashboard-sidebar .tip-jar-card {
     border-radius: 10px;
 }
+
 .dashboard-sidebar .tip-breakdown-card {
     padding: 10px 12px;
     border-radius: 10px;
 }
+
 .dashboard-sidebar .tip-breakdown-row,
 .dashboard-sidebar .tip-breakdown-total .tip-breakdown-label,
 .dashboard-sidebar .tip-breakdown-total .tip-breakdown-value {
     font-size: 13px;
 }
+
 .dashboard-sidebar .tip-cancel {
     font-size: 11px;
     padding: 6px 10px;
@@ -5280,6 +5342,7 @@ a:hover {
     font-size: 0.72rem;
     letter-spacing: 0.06em;
 }
+
 .dashboard-sidebar .tip-compact-row {
     margin: 4px 0;
 }
@@ -5806,10 +5869,12 @@ a:hover {
     line-height: 1;
     pointer-events: none;
 }
+
 /* Hide tiny label when user has typed something */
 .sidebar-search-container:has(.sidebar-search-input:not(:placeholder-shown))::before {
     display: none;
 }
+
 /* Also hide tiny label while focused to avoid overlap with placeholder */
 .sidebar-search-container:has(.sidebar-search-input:focus)::before {
     display: none;
@@ -6697,7 +6762,6 @@ img.loading {
 
 /* Unified Header Styles */
 .unified-header {
-    background: #ff0060;
     padding: var(--spacing-xl) 0;
     color: white;
     position: relative;

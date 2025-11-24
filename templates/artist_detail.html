@@ -253,6 +253,27 @@ function artistDetail() {
                     const data = await response.json();
                     this.isFollowing = data.following;
                     
+                    // Sync with Saved (Bookmarks): add on follow, remove on unfollow
+                    try {
+                        if (window.AhoyBookmarks) {
+                            const artistIdStr = String(artistId);
+                            const isSaved = window.AhoyBookmarks.isBookmarked('artist', artistIdStr);
+                            const bookmarkItem = {
+                                type: 'artist',
+                                id: artistIdStr,
+                                title: this.artist?.name || this.artist?.title || 'Artist',
+                                artwork: this.artist?.image || this.artist?.avatar || ''
+                            };
+                            if (this.isFollowing && !isSaved) {
+                                window.AhoyBookmarks.toggle(bookmarkItem);
+                            } else if (!this.isFollowing && isSaved) {
+                                window.AhoyBookmarks.toggle(bookmarkItem);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Bookmark sync failed:', e);
+                    }
+                    
                     if (window.ahoyApp?.showNotification) {
                         window.ahoyApp.showNotification(data.message || 'Updated', 'success');
                     }

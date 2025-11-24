@@ -5,6 +5,174 @@
     display: none;
 }
 
+/* MOBILE ONLY */
+@media (max-width: 768px) {
+    .desktop-nav,
+    .top-nav-links,
+    .top-nav-search,
+    .top-nav-boost,
+    .account-menu-desktop,
+    .left-sidebar,
+    .right-sidebar {
+        display: none !important;
+    }
+}
+
+/* Fresh Mobile Top Bar */
+@media (max-width: 768px) {
+    .mobile-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #0e0e10;
+        padding: 12px;
+        color: white;
+        border-bottom: 1px solid #222;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 9999;
+    }
+
+    .mobile-logo {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    body {
+        padding-top: 60px; /* Prevent content overlap */
+    }
+}
+
+/* Fullscreen Mobile Menu Overlay */
+@media (max-width: 768px) {
+    .mobile-menu-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #0e0e10;
+        color: white;
+        padding: 20px;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        font-size: 1.4rem;
+    }
+
+    .close-btn {
+        margin-left: auto;
+        font-size: 2rem;
+        background: none;
+        border: none;
+        color: white;
+    }
+}
+
+/* Mobile fixed top navigation (mirrors bottom bar style) */
+@media (max-width: 767px) {
+    /* Hide duplicate top menu; keep only bottom bar on mobile */
+    .mobile-top-nav {
+        display: none !important;
+    }
+
+    .mobile-top-nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        padding: 10px 12px;
+        background:
+            radial-gradient(120% 180% at 50% 100%, rgba(84, 255, 143, 0.10) 0%, rgba(84, 255, 143, 0) 55%),
+            linear-gradient(180deg, rgba(17, 17, 17, 0.85) 0%, rgba(10, 10, 10, 0.78) 100%);
+        backdrop-filter: saturate(180%) blur(18px) contrast(1.05);
+        -webkit-backdrop-filter: saturate(180%) blur(18px) contrast(1.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45), inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+        z-index: 10021;
+    }
+
+    .mobile-top-nav .mobile-tab {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 8px 6px;
+        color: #d4d4d4;
+        text-decoration: none;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        font-size: 11px;
+        line-height: 1;
+        transition: transform .12s ease, background .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease;
+        will-change: transform, filter;
+    }
+
+    .mobile-top-nav .mobile-tab i {
+        font-size: 18px;
+        line-height: 1;
+    }
+
+    .mobile-top-nav .mobile-tab:active {
+        transform: translateY(1px) scale(0.985);
+    }
+
+    .mobile-top-nav .mobile-tab.active {
+        color: #f1f5f9;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.05) 100%);
+        border-color: rgba(255, 255, 255, 0.18);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 10px 28px rgba(0, 0, 0, 0.28);
+    }
+}
+
+/* Mobile search/boost drawers + action buttons */
+@media (max-width: 768px) {
+    .mobile-search-panel,
+    .mobile-boost-panel {
+        background: #1a1a1d;
+        padding: 12px;
+        border-bottom: 1px solid #333;
+    }
+
+    .mobile-actions button {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.4rem;
+        margin-right: 8px;
+    }
+}
+
+/* Dark theme alignment for any mobile menus */
+@media (max-width: 768px) {
+    .menu, .dropdown, .account-menu, .mobile-menu-overlay {
+        background: #0e0e10 !important;
+        color: white !important;
+    }
+}
+
+/* Remove image logo on mobile in favor of text */
+@media (max-width: 768px) {
+    img[alt="Ahoy Indie Media"] {
+        display: none !important;
+    }
+}
+
+/* Hide tip widget on tablet and mobile */
+@media (max-width: 1024px) {
+    .tip-jar-card {
+        display: none !important;
+    }
+}
+
 .hidden-mobile {
     display: initial;
 }

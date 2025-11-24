@@ -152,10 +152,6 @@ def create_app():
     # Initialize CSRF protection
     csrf = init_csrf(app)
     
-    # Exempt checkout_process from Flask-WTF CSRF (uses custom validation)
-    # This must be done after the route is defined, so we do it here
-    csrf.exempt(checkout_process)
-    
     # Log startup configuration
     startup_logging(app)
     
@@ -671,6 +667,11 @@ def checkout_process():
 
     # Placeholder: mark paid_test and redirect to success
     return redirect(url_for('checkout_success', pid=purchase_id))
+
+# Exempt checkout_process from Flask-WTF CSRF after route is registered
+_csrf_ext = app.extensions.get('csrf')
+if _csrf_ext is not None:
+    _csrf_ext.exempt(checkout_process)
 
 
 @app.route('/success')

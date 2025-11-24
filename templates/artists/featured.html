@@ -108,8 +108,36 @@ function featuredArtists() {
                     const data = await response.json();
                     if (data.following) {
                         this.following.add(artistId);
+                        // Add to Saved (Bookmarks) on follow
+                        try {
+                            if (window.AhoyBookmarks) {
+                                const isSaved = window.AhoyBookmarks.isBookmarked('artist', String(artistId));
+                                if (!isSaved) {
+                                    window.AhoyBookmarks.toggle({
+                                        type: 'artist',
+                                        id: String(artistId),
+                                        title: artist?.name || 'Artist',
+                                        artwork: artist?.image || ''
+                                    });
+                                }
+                            }
+                        } catch (e) { console.warn('Bookmark add failed:', e); }
                     } else {
                         this.following.delete(artistId);
+                        // Remove from Saved (Bookmarks) on unfollow
+                        try {
+                            if (window.AhoyBookmarks) {
+                                const isSaved = window.AhoyBookmarks.isBookmarked('artist', String(artistId));
+                                if (isSaved) {
+                                    window.AhoyBookmarks.toggle({
+                                        type: 'artist',
+                                        id: String(artistId),
+                                        title: artist?.name || 'Artist',
+                                        artwork: artist?.image || ''
+                                    });
+                                }
+                            }
+                        } catch (e) { console.warn('Bookmark remove failed:', e); }
                     }
                     
                     if (window.ahoyApp?.showNotification) {

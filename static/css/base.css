@@ -77,3 +77,494 @@
 }
 
 
+/* ===== Artists Subheader Enhancements (scoped, additive) ===== */
+.artists-page .unified-header.artists-subheader {
+    margin-top: 10px;
+    margin-bottom: 12px;
+}
+
+.artists-page .artists-subheader .header-content {
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px 12px;
+    text-align: center;
+    /* liquid glass card */
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.03) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+}
+
+/* Refined H1 and accent bar */
+.artists-page .artists-subheader .title-text h1 {
+    font-size: 1.45rem; /* compact refinement within 1.4–1.6rem */
+    line-height: 1.18;
+    font-weight: 800;
+    margin-bottom: 4px;
+    display: inline-block;
+    color: #ffffff;
+    letter-spacing: 0.2px;
+}
+
+.artists-page .artists-subheader .title-text h1::after {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 3px; /* slim accent bar */
+    margin: 6px auto 0;
+    border-radius: 999px;
+    background:
+        linear-gradient(90deg, rgba(236, 72, 153, 0.15) 0%, rgba(236, 72, 153, 0.65) 50%, rgba(236, 72, 153, 0.15) 100%);
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.35);
+}
+
+/* Softer subtitle */
+.artists-page .artists-subheader .title-text p {
+    color: #b0b3bb;
+    max-width: 420px;
+    margin: 6px auto 0;
+    font-weight: 400;
+    font-size: 0.95rem;
+}
+
+/* Search bar – dark theme with pink focus ring */
+.artists-page .artists-subheader .header-search .search-bar {
+    max-width: 560px;
+    margin: 10px auto 0; /* compact */
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.04) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    padding: 6px 10px; /* compact */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    backdrop-filter: saturate(140%) blur(8px);
+    -webkit-backdrop-filter: saturate(140%) blur(8px);
+}
+
+.artists-page .artists-subheader .header-search .search-bar:focus-within {
+    border-color: #ec4899;
+    box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.06) 100%);
+}
+
+.artists-page .artists-subheader .header-search .search-bar i {
+    color: #e7e7e7;
+    font-size: 13px; /* compact */
+}
+
+.artists-page .artists-subheader .header-search .search-input {
+    background: transparent;
+    border: 0;
+    outline: none;
+    color: #f3f4f6; /* higher contrast */
+    width: 100%;
+}
+
+.artists-page .artists-subheader .header-search .search-input::placeholder {
+    color: #c0c4cc;
+}
+
+/* Filter tabs -> soft rounded pink-outline pills with hover/active */
+.artists-page .artists-subheader .filter-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px; /* compact */
+    justify-content: center;
+    margin-top: 10px; /* compact */
+}
+
+.artists-page .artists-subheader .filter-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 11px; /* compact */
+    border-radius: 9999px;
+    background:
+        linear-gradient(180deg, rgba(236, 72, 153, 0.12) 0%, rgba(236, 72, 153, 0.06) 100%);
+    border: 1px solid rgba(236, 72, 153, 0.55); /* stronger for contrast */
+    color: #f8fafc; /* higher contrast */
+    font-weight: 600;
+    transition: color .2s ease, border-color .2s ease, background .2s ease, transform .1s ease;
+    backdrop-filter: saturate(140%) blur(6px);
+    -webkit-backdrop-filter: saturate(140%) blur(6px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.artists-page .artists-subheader .filter-tab:hover {
+    color: #ffffff;
+    border-color: #ec4899;
+    background:
+        linear-gradient(180deg, rgba(236, 72, 153, 0.18) 0%, rgba(236, 72, 153, 0.10) 100%);
+}
+
+.artists-page .artists-subheader .filter-tab:active {
+    transform: translateY(1px);
+}
+
+.artists-page .artists-subheader .filter-tab.active {
+    color: #ffffff;
+    border-color: #ec4899;
+    background:
+        linear-gradient(180deg, rgba(236, 72, 153, 0.24) 0%, rgba(236, 72, 153, 0.12) 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+.artists-page .artists-subheader .filter-tab i {
+    font-size: 12px; /* small optional icons */
+    line-height: 1;
+    color: currentColor;
+}
+
+/* Compact header-actions spacing inside artists subheader (non-destructive) */
+.artists-page .artists-subheader .header-actions {
+    margin-top: 10px;
+    gap: 8px;
+}
+
+.artists-page .artists-subheader .header-actions .view-btn,
+.artists-page .artists-subheader .header-actions .btn {
+    padding: 8px 12px;
+    border-radius: 12px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.06) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #f8fafc;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.artists-page .artists-subheader .header-actions .btn-primary {
+    border-color: #ec4899;
+    background:
+        linear-gradient(180deg, rgba(236, 72, 153, 0.22) 0%, rgba(236, 72, 153, 0.12) 100%);
+    box-shadow: 0 8px 22px rgba(236, 72, 153, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* ===== Mobile compact overrides (≤768px) for Artists subheader ===== */
+@media (max-width: 768px) {
+    .artists-page .unified-header.artists-subheader {
+        margin-top: 8px;
+        margin-bottom: 10px;
+    }
+
+    .artists-page .artists-subheader .header-content {
+        padding: 8px 10px;
+        border-radius: 14px;
+    }
+
+    .artists-page .artists-subheader .title-text h1 {
+        font-size: 1.3rem;
+        margin-bottom: 2px;
+        letter-spacing: 0.15px;
+    }
+
+    .artists-page .artists-subheader .title-text h1::after {
+        width: 40px;
+        height: 2px;
+        margin-top: 4px;
+        box-shadow: 0 0 14px rgba(236, 72, 153, 0.28);
+    }
+
+    .artists-page .artists-subheader .title-text p {
+        font-size: 0.9rem;
+        margin-top: 4px;
+    }
+
+    .artists-page .artists-subheader .header-search .search-bar {
+        max-width: 520px;
+        margin-top: 8px;
+        padding: 6px 8px;
+        border-radius: 10px;
+    }
+
+    .artists-page .artists-subheader .header-search .search-bar i {
+        font-size: 12px;
+    }
+
+    .artists-page .artists-subheader .filter-tabs {
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .artists-page .artists-subheader .filter-tab {
+        padding: 6px 10px;
+        font-size: 0.875rem;
+        border-radius: 9999px;
+    }
+
+    .artists-page .artists-subheader .filter-tab i {
+        font-size: 11px;
+    }
+
+    .artists-page .artists-subheader .header-actions {
+        margin-top: 8px;
+        gap: 6px;
+    }
+
+    .artists-page .artists-subheader .header-actions .view-btn,
+    .artists-page .artists-subheader .header-actions .btn {
+        padding: 7px 10px;
+        border-radius: 10px;
+    }
+}
+
+/* ===== Shared Glassy Subheader Theme for Music, Shows, Bookmarks ===== */
+/* Container spacing */
+.music-subheader,
+.shows-subheader,
+.bookmarks-subheader {
+    margin-top: 10px;
+    margin-bottom: 12px;
+}
+
+/* Glass card container */
+.music-subheader .header-content,
+.shows-subheader .header-content,
+.bookmarks-subheader .header-content {
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px 12px;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.03) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+}
+
+/* H1 + pink accent */
+.music-subheader .title-text h1,
+.shows-subheader .title-text h1,
+.bookmarks-subheader .title-text h1 {
+    font-size: 1.45rem;
+    line-height: 1.18;
+    font-weight: 800;
+    margin-bottom: 4px;
+    display: inline-block;
+    color: #ffffff;
+    letter-spacing: 0.2px;
+}
+
+.music-subheader .title-text h1::after,
+.shows-subheader .title-text h1::after,
+.bookmarks-subheader .title-text h1::after {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: 6px auto 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(236, 72, 153, 0.15) 0%, rgba(236, 72, 153, 0.65) 50%, rgba(236, 72, 153, 0.15) 100%);
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.35);
+}
+
+/* Subtitle */
+.music-subheader .title-text p,
+.shows-subheader .title-text p,
+.bookmarks-subheader .title-text p {
+    color: #b0b3bb;
+    max-width: 420px;
+    margin: 6px auto 0;
+    font-weight: 400;
+    font-size: 0.95rem;
+}
+
+/* Search bar glass style */
+.music-subheader .header-search .search-bar,
+.shows-subheader .header-search .search-bar,
+.bookmarks-subheader .header-search .search-bar {
+    max-width: 560px;
+    margin: 10px auto 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.04) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    backdrop-filter: saturate(140%) blur(8px);
+    -webkit-backdrop-filter: saturate(140%) blur(8px);
+}
+
+.music-subheader .header-search .search-bar:focus-within,
+.shows-subheader .header-search .search-bar:focus-within,
+.bookmarks-subheader .header-search .search-bar:focus-within {
+    border-color: #ec4899;
+    box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.06) 100%);
+}
+
+.music-subheader .header-search .search-bar i,
+.shows-subheader .header-search .search-bar i,
+.bookmarks-subheader .header-search .search-bar i {
+    color: #e7e7e7;
+    font-size: 13px;
+}
+
+.music-subheader .header-search .search-input,
+.shows-subheader .header-search .search-input,
+.bookmarks-subheader .header-search .search-input {
+    background: transparent;
+    border: 0;
+    outline: none;
+    color: #f3f4f6;
+    width: 100%;
+}
+
+.music-subheader .header-search .search-input::placeholder,
+.shows-subheader .header-search .search-input::placeholder,
+.bookmarks-subheader .header-search .search-input::placeholder {
+    color: #c0c4cc;
+}
+
+/* Filter tabs (where present) */
+.shows-subheader .filter-tabs,
+.bookmarks-subheader .filter-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.shows-subheader .filter-tab,
+.bookmarks-subheader .filter-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 11px;
+    border-radius: 9999px;
+    background: linear-gradient(180deg, rgba(236, 72, 153, 0.12) 0%, rgba(236, 72, 153, 0.06) 100%);
+    border: 1px solid rgba(236, 72, 153, 0.55);
+    color: #f8fafc;
+    font-weight: 600;
+    transition: color .2s ease, border-color .2s ease, background .2s ease, transform .1s ease;
+    backdrop-filter: saturate(140%) blur(6px);
+    -webkit-backdrop-filter: saturate(140%) blur(6px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.shows-subheader .filter-tab:hover,
+.bookmarks-subheader .filter-tab:hover {
+    color: #ffffff;
+    border-color: #ec4899;
+    background: linear-gradient(180deg, rgba(236, 72, 153, 0.18) 0%, rgba(236, 72, 153, 0.10) 100%);
+}
+
+.shows-subheader .filter-tab.active,
+.bookmarks-subheader .filter-tab.active {
+    color: #ffffff;
+    border-color: #ec4899;
+    background: linear-gradient(180deg, rgba(236, 72, 153, 0.24) 0%, rgba(236, 72, 153, 0.12) 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+.shows-subheader .filter-tab i,
+.bookmarks-subheader .filter-tab i {
+    font-size: 12px;
+    line-height: 1;
+    color: currentColor;
+}
+
+/* Header actions (buttons) */
+.music-subheader .header-actions,
+.shows-subheader .header-actions,
+.bookmarks-subheader .header-actions {
+    margin-top: 10px;
+    gap: 8px;
+}
+
+.music-subheader .header-actions .view-btn,
+.music-subheader .header-actions .btn,
+.shows-subheader .header-actions .view-btn,
+.shows-subheader .header-actions .btn,
+.bookmarks-subheader .header-actions .view-btn,
+.bookmarks-subheader .header-actions .btn {
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.06) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #f8fafc;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.music-subheader .header-actions .btn-primary,
+.shows-subheader .header-actions .btn-primary,
+.bookmarks-subheader .header-actions .btn-primary {
+    border-color: #ec4899;
+    background: linear-gradient(180deg, rgba(236, 72, 153, 0.22) 0%, rgba(236, 72, 153, 0.12) 100%);
+    box-shadow: 0 8px 22px rgba(236, 72, 153, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* Mobile compact overrides for shared subheaders */
+@media (max-width: 768px) {
+    .music-subheader,
+    .shows-subheader,
+    .bookmarks-subheader {
+        margin-top: 8px;
+        margin-bottom: 10px;
+    }
+
+    .music-subheader .header-content,
+    .shows-subheader .header-content,
+    .bookmarks-subheader .header-content {
+        padding: 8px 10px;
+        border-radius: 14px;
+    }
+
+    .music-subheader .title-text h1,
+    .shows-subheader .title-text h1,
+    .bookmarks-subheader .title-text h1 {
+        font-size: 1.3rem;
+        margin-bottom: 2px;
+        letter-spacing: 0.15px;
+    }
+
+    .music-subheader .title-text h1::after,
+    .shows-subheader .title-text h1::after,
+    .bookmarks-subheader .title-text h1::after {
+        width: 40px;
+        height: 2px;
+        margin-top: 4px;
+        box-shadow: 0 0 14px rgba(236, 72, 153, 0.28);
+    }
+
+    .music-subheader .title-text p,
+    .shows-subheader .title-text p,
+    .bookmarks-subheader .title-text p {
+        font-size: 0.9rem;
+        margin-top: 4px;
+    }
+
+    .music-subheader .header-search .search-bar,
+    .shows-subheader .header-search .search-bar,
+    .bookmarks-subheader .header-search .search-bar {
+        max-width: 520px;
+        margin-top: 8px;
+        padding: 6px 8px;
+        border-radius: 10px;
+    }
+
+    .shows-subheader .filter-tabs,
+    .bookmarks-subheader .filter-tabs {
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .shows-subheader .filter-tab,
+    .bookmarks-subheader .filter-tab {
+        padding: 6px 10px;
+        font-size: 0.875rem;
+    }
+}
+
