@@ -112,50 +112,66 @@
     });
 
     // Steps animation and form submission
+    // Note: Form will work without JavaScript since it's a standard HTML form
     document.addEventListener('DOMContentLoaded', () => {
-        const form = document.querySelector('form[action="/checkout/process"]');
-        const steps = document.querySelectorAll('.checkout-steps .step');
-        const completeBtn = document.getElementById('completeCheckoutBtn');
-        
-        if (!form) {
-            console.error('Checkout form not found');
-            return;
-        }
-        
-        if (!completeBtn) {
-            console.error('Checkout button not found');
-            return;
-        }
-        
-        // Handle form submission
-        form.addEventListener('submit', function(e) {
-            console.log('Checkout form submitting to:', form.action);
+        try {
+            const form = document.querySelector('form[action="/checkout/process"]');
+            const steps = document.querySelectorAll('.checkout-steps .step');
+            const completeBtn = document.getElementById('completeCheckoutBtn');
             
-            // Animate steps
-            if (steps && steps.length === 3) {
-                steps[0].classList.remove('active');
-                steps[1].classList.add('active'); // Pay
+            if (!form) {
+                console.error('Checkout form not found');
+                return;
             }
             
-            // Show loading state
-            completeBtn.disabled = true;
-            completeBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><i class="fas fa-spinner fa-spin"></i><span>Processing...</span></span>';
-            
-            // Let form submit naturally - don't prevent default
-        });
-        
-        // Handle button click for visual feedback (before form submits)
-        completeBtn.addEventListener('click', function(e) {
-            console.log('Checkout button clicked');
-            
-            // Animate steps immediately for visual feedback
-            if (steps && steps.length === 3) {
-                steps[0].classList.remove('active');
-                steps[1].classList.add('active'); // Pay
+            if (!completeBtn) {
+                console.error('Checkout button not found');
+                return;
             }
             
-            // Don't prevent default - let form submit naturally
-        });
+            // Handle form submission (enhancement only - form works without this)
+            form.addEventListener('submit', function(e) {
+                try {
+                    console.log('Checkout form submitting to:', form.action);
+                    
+                    // Animate steps
+                    if (steps && steps.length === 3) {
+                        steps[0].classList.remove('active');
+                        steps[1].classList.add('active'); // Pay
+                    }
+                    
+                    // Show loading state
+                    completeBtn.disabled = true;
+                    completeBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><i class="fas fa-spinner fa-spin"></i><span>Processing...</span></span>';
+                    
+                    // Let form submit naturally - don't prevent default
+                } catch (err) {
+                    console.warn('Error in form submit handler:', err);
+                    // Form will still submit naturally
+                }
+            });
+            
+            // Handle button click for visual feedback (before form submits)
+            completeBtn.addEventListener('click', function(e) {
+                try {
+                    console.log('Checkout button clicked');
+                    
+                    // Animate steps immediately for visual feedback
+                    if (steps && steps.length === 3) {
+                        steps[0].classList.remove('active');
+                        steps[1].classList.add('active'); // Pay
+                    }
+                    
+                    // Don't prevent default - let form submit naturally
+                } catch (err) {
+                    console.warn('Error in button click handler:', err);
+                    // Form will still submit naturally
+                }
+            });
+        } catch (err) {
+            console.error('Error setting up checkout form:', err);
+            // Form will still work without JavaScript
+        }
     });
 </script>
 {% endblock %}

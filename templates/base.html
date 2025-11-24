@@ -1898,31 +1898,45 @@
                 },
 
                 playTrack(track) {
-                    this.currentTrack = track;
-                    if (window.mediaPlayer && typeof window.mediaPlayer.play === 'function') {
-                        window.mediaPlayer.play(track);
-                        return;
+                    try {
+                        this.currentTrack = track;
+                        if (window.mediaPlayer && typeof window.mediaPlayer === 'object' && typeof window.mediaPlayer.play === 'function') {
+                            window.mediaPlayer.play(track);
+                            return;
+                        }
+                    } catch (e) {
+                        console.warn('Error in playTrack:', e);
                     }
                     // Fallback: navigate to appropriate player page
-                    if (track && (track.type === 'show' || track.video_url || track.mp4_link)) {
-                        window.location.href = `/player?id=${track.id}&type=show`;
-                    } else if (track && track.id) {
-                        window.location.href = `/music?highlight=${track.id}`;
+                    try {
+                        if (track && (track.type === 'show' || track.video_url || track.mp4_link)) {
+                            window.location.href = `/player?id=${track.id}&type=show`;
+                        } else if (track && track.id) {
+                            window.location.href = `/music?highlight=${track.id}`;
+                        }
+                    } catch (e) {
+                        console.warn('Error navigating to player:', e);
                     }
                 },
 
                 togglePlay() {
-                    if (window.mediaPlayer) {
-                        if (this.isPlaying) {
-                            window.mediaPlayer.pause();
-                        } else {
-                            if (this.currentTrack) {
-                                window.mediaPlayer.play(this.currentTrack);
+                    try {
+                        if (window.mediaPlayer && typeof window.mediaPlayer === 'object') {
+                            if (this.isPlaying) {
+                                if (typeof window.mediaPlayer.pause === 'function') {
+                                    window.mediaPlayer.pause();
+                                }
                             } else {
-                                window.mediaPlayer.resume && window.mediaPlayer.resume();
+                                if (this.currentTrack && typeof window.mediaPlayer.play === 'function') {
+                                    window.mediaPlayer.play(this.currentTrack);
+                                } else if (typeof window.mediaPlayer.resume === 'function') {
+                                    window.mediaPlayer.resume();
+                                }
                             }
+                            return;
                         }
-                        return;
+                    } catch (e) {
+                        console.warn('Error in togglePlay:', e);
                     }
                 },
 
@@ -1950,40 +1964,87 @@
                     this.isSaved = !!window.AhoyBookmarks.isBookmarked?.(type, this.currentTrack.id);
                 },
 
-                previousTrack() { window.mediaPlayer && window.mediaPlayer.previousTrack && window.mediaPlayer.previousTrack(); },
-                nextTrack() { window.mediaPlayer && window.mediaPlayer.nextTrack && window.mediaPlayer.nextTrack(); },
+                previousTrack() {
+                    try {
+                        if (window.mediaPlayer && typeof window.mediaPlayer.previousTrack === 'function') {
+                            window.mediaPlayer.previousTrack();
+                        }
+                    } catch (e) {
+                        console.warn('Error in previousTrack:', e);
+                    }
+                },
+                
+                nextTrack() {
+                    try {
+                        if (window.mediaPlayer && typeof window.mediaPlayer.nextTrack === 'function') {
+                            window.mediaPlayer.nextTrack();
+                        }
+                    } catch (e) {
+                        console.warn('Error in nextTrack:', e);
+                    }
+                },
 
                 seekBackward() {
-                    if (!window.mediaPlayer) return;
-                    const t = Math.max(0, (window.mediaPlayer.currentTime || 0) - 15);
-                    window.mediaPlayer.seekTo && window.mediaPlayer.seekTo(t);
+                    try {
+                        if (!window.mediaPlayer) return;
+                        const t = Math.max(0, (window.mediaPlayer.currentTime || 0) - 15);
+                        if (typeof window.mediaPlayer.seekTo === 'function') {
+                            window.mediaPlayer.seekTo(t);
+                        }
+                    } catch (e) {
+                        console.warn('Error in seekBackward:', e);
+                    }
                 },
 
                 seekForward() {
-                    if (!window.mediaPlayer) return;
-                    const t = Math.min(this.duration || (window.mediaPlayer.duration || 0), (window.mediaPlayer.currentTime || 0) + 15);
-                    window.mediaPlayer.seekTo && window.mediaPlayer.seekTo(t);
+                    try {
+                        if (!window.mediaPlayer) return;
+                        const t = Math.min(this.duration || (window.mediaPlayer.duration || 0), (window.mediaPlayer.currentTime || 0) + 15);
+                        if (typeof window.mediaPlayer.seekTo === 'function') {
+                            window.mediaPlayer.seekTo(t);
+                        }
+                    } catch (e) {
+                        console.warn('Error in seekForward:', e);
+                    }
                 },
 
                 seekTo(event) {
-                    if (!window.mediaPlayer) return;
-                    const progressBar = event.currentTarget;
-                    const rect = progressBar.getBoundingClientRect();
-                    const clickX = event.clientX - rect.left;
-                    const percentage = clickX / rect.width;
-                    const newTime = percentage * (this.duration || 0);
-                    window.mediaPlayer.seekTo && window.mediaPlayer.seekTo(newTime);
+                    try {
+                        if (!window.mediaPlayer) return;
+                        const progressBar = event.currentTarget;
+                        const rect = progressBar.getBoundingClientRect();
+                        const clickX = event.clientX - rect.left;
+                        const percentage = clickX / rect.width;
+                        const newTime = percentage * (this.duration || 0);
+                        if (typeof window.mediaPlayer.seekTo === 'function') {
+                            window.mediaPlayer.seekTo(newTime);
+                        }
+                    } catch (e) {
+                        console.warn('Error in seekTo:', e);
+                    }
                 },
 
                 setVolume(volume) {
-                    this.volume = volume;
-                    const v = Math.max(0, Math.min(1, volume / 100));
-                    window.mediaPlayer && window.mediaPlayer.setVolume && window.mediaPlayer.setVolume(v);
+                    try {
+                        this.volume = volume;
+                        const v = Math.max(0, Math.min(1, volume / 100));
+                        if (window.mediaPlayer && typeof window.mediaPlayer.setVolume === 'function') {
+                            window.mediaPlayer.setVolume(v);
+                        }
+                    } catch (e) {
+                        console.warn('Error in setVolume:', e);
+                    }
                 },
 
                 toggleMute() {
-                    this.isMuted = !this.isMuted;
-                    window.mediaPlayer && window.mediaPlayer.setMuted && window.mediaPlayer.setMuted(this.isMuted);
+                    try {
+                        this.isMuted = !this.isMuted;
+                        if (window.mediaPlayer && typeof window.mediaPlayer.setMuted === 'function') {
+                            window.mediaPlayer.setMuted(this.isMuted);
+                        }
+                    } catch (e) {
+                        console.warn('Error in toggleMute:', e);
+                    }
                 },
 
                 formatTime(seconds) {
