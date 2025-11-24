@@ -132,6 +132,18 @@
                 return;
             }
             
+            // Verify button is accessible
+            console.log('Checkout button found:', completeBtn);
+            console.log('Button disabled?', completeBtn.disabled);
+            console.log('Button computed style:', window.getComputedStyle(completeBtn).pointerEvents);
+            console.log('Button z-index:', window.getComputedStyle(completeBtn).zIndex);
+            
+            // Force button to be clickable
+            completeBtn.style.pointerEvents = 'auto';
+            completeBtn.style.cursor = 'pointer';
+            completeBtn.style.zIndex = '10001';
+            completeBtn.style.position = 'relative';
+            
             // Handle form submission (enhancement only - form works without this)
             form.addEventListener('submit', function(e) {
                 try {
