@@ -33,8 +33,7 @@
                     <h3 class="font-semibold text-lg mb-3">Breakdown</h3>
                     <div class="flex justify-between py-1">
                         <span class="text-white/80">Boost Amount</span>
-                        <span id="boostAmount">${{ '%.2f'|format(amount|float)
-                            }}</span>
+                        <span id="boostAmount">${{ '%.2f'|format(amount|float if amount else 0) }}</span>
                     </div>
                     {% if stripe_fee is not none %}
                     <div class="flex justify-between py-1">
@@ -53,7 +52,7 @@
                     <div class="flex justify-between pt-3 mt-2 border-t border-white/10">
                         <span class="font-semibold">Total</span>
                         <span id="checkoutTotal" class="font-semibold">${{
-                            '%.2f'|format(total|float) }}</span>
+                            '%.2f'|format(total if total is not none else 0) }}</span>
                     </div>
                 </div>
                 {% else %}
@@ -68,12 +67,12 @@
                     <div class="flex justify-between text-sm">
                         <span class="text-white/70">Amount</span>
                         <span class="text-white font-medium">${{
-                            '%.2f'|format(amount|float) }}</span>
+                            '%.2f'|format(amount|float if amount else 0) }}</span>
                     </div>
                     <div class="flex justify-between pt-3 mt-2 border-t border-white/10">
                         <span class="font-semibold">Total</span>
                         <span class="font-semibold">${{
-                            '%.2f'|format(total|float) }}</span>
+                            '%.2f'|format(total if total is not none else (amount|float if amount else 0)) }}</span>
                     </div>
                 </div>
                 {% endif %}
@@ -86,12 +85,13 @@
                 <input type="hidden" name="amount" value="{{ amount }}">
                 <input type="hidden" name="item_id" value="{{ item_id }}">
                 <input type="hidden" name="qty" value="{{ qty }}">
-                <input type="hidden" name="computed_total" value="{{ total }}">
+                <input type="hidden" name="computed_total" value="{{ total if total is not none else amount }}">
 
                 <button type="submit"
                     class="complete-checkout w-full py-3 mt-4 rounded-xl bg-gradient-to-r from-rose-500 to-purple-500 text-white text-lg font-semibold shadow-lg hover:opacity-90 transition"
-                    id="completeCheckoutBtn">
-                    Complete Checkout — ${{ '%.2f'|format(total|float) }}
+                    id="completeCheckoutBtn"
+                    {% if total is none or total <= 0 %}disabled{% endif %}>
+                    Complete Checkout{% if total is not none and total > 0 %} — ${{ '%.2f'|format(total) }}{% endif %}
                 </button>
             </form>
         </div>
@@ -107,19 +107,36 @@
         try { document.body.classList.remove('checkout-mode'); } catch (_) { }
     });
 
-    // Steps animation (Review → Pay → Complete)
+    // Steps animation and form submission
     document.addEventListener('DOMContentLoaded', () => {
+        const form = document.querySelector('form[action="/checkout/process"]');
         const steps = document.querySelectorAll('.checkout-steps .step');
         const completeBtn = document.getElementById('completeCheckoutBtn');
-        if (completeBtn && steps && steps.length === 3) {
-            completeBtn.addEventListener('click', () => {
-                steps[0].classList.remove('active');
-                steps[1].classList.add('active'); // Pay
-                setTimeout(() => {
-                    steps[1].classList.remove('active');
-                    steps[2].classList.add('active'); // Complete
-                }, 800);
+        
+        if (form && completeBtn) {
+            // Handle button click for visual feedback
+            completeBtn.addEventListener('click', (e) => {
+                console.log('Checkout button clicked');
+                // Animate steps immediately for visual feedback
+                if (steps && steps.length === 3) {
+                    steps[0].classList.remove('active');
+                    steps[1].classList.add('active'); // Pay
+                }
+                // Form will submit naturally since button is type="submit"
             });
+            
+            // Handle form submission (for additional logging)
+            form.addEventListener('submit', (e) => {
+                console.log('Checkout form submitting to:', form.action);
+                // Animate steps
+                if (steps && steps.length === 3) {
+                    steps[0].classList.remove('active');
+                    steps[1].classList.add('active'); // Pay
+                }
+                // Don't prevent default - let form submit
+            });
+        } else {
+            console.error('Checkout form or button not found', { form, completeBtn });
         }
     });
 </script>
