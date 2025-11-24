@@ -150,7 +150,17 @@ def create_app():
     app.register_blueprint(create_csp_report_blueprint())
     
     # Initialize CSRF protection
-    init_csrf(app)
+    global csrf
+    csrf = init_csrf(app)
+    
+    # Exempt checkout_process from Flask-WTF CSRF (uses custom validation)
+    if csrf:
+        csrf.exempt(checkout_process)
+    
+    # Exempt checkout_process from Flask-WTF CSRF (uses custom validation)
+    @csrf.exempt
+    def exempt_checkout_process():
+        return request.path == '/checkout/process'
     
     # Log startup configuration
     startup_logging(app)
@@ -575,11 +585,54 @@ def checkout_process():
     """
     Universal checkout processor (POST)
     Validates CSRF, records a Purchase, and (optionally) creates Stripe PI.
+    Note: This route uses custom CSRF validation, not Flask-WTF's automatic validation.
     """
-    from utils.csrf import validate_csrf, generate_csrf_token
+    from utils.csrf import validate_csrf, generate_csrf_token, CSRF_SESSION_KEY
+    import structlog
+    logger = structlog.get_logger()
+    
+    # Debug CSRF validation - log everything
+    sent_token = request.form.get("csrf_token") or request.headers.get("X-CSRF-Token")
+    session_token = session.get(CSRF_SESSION_KEY)
+    
+    # Log all form data for debugging
+    logger.info("CSRF validation attempt",
+                sent_token_present=bool(sent_token),
+                sent_token_preview=sent_token[:20] + "..." if sent_token and len(sent_token) > 20 else sent_token,
+                session_token_present=bool(session_token),
+                session_token_preview=str(session_token)[:20] + "..." if session_token and len(str(session_token)) > 20 else str(session_token),
+                form_keys=list(request.form.keys()),
+                session_keys=list(session.keys()) if session else [])
+    
+    # Check if session is working
+    if not session_token:
+        logger.error("No CSRF token in session! Session might not be persisting.")
+        # Generate a new token and try again
+        new_token = generate_csrf_token()
+        logger.info("Generated new CSRF token", token_preview=new_token[:20] + "...")
+        return render_template('checkout.html', 
+                             error="Session expired. Please try again.", 
+                             csrf_token=new_token,
+                             kind=request.form.get('type', 'boost'),
+                             artist_id=request.form.get('artist_id', ''),
+                             amount=request.form.get('amount', ''),
+                             item_id=request.form.get('item_id', ''),
+                             qty=int(request.form.get('qty', '1'))), 400
+    
     if not validate_csrf():
+        logger.warning("CSRF validation failed",
+                      sent_token_present=bool(sent_token),
+                      session_token_present=bool(session_token),
+                      tokens_match=(sent_token == str(session_token)) if (sent_token and session_token) else False)
         # Re-render checkout with a new token and error
-        return render_template('checkout.html', error="Invalid CSRF token.", csrf_token=generate_csrf_token()), 400
+        return render_template('checkout.html', 
+                             error="Invalid CSRF token. Please refresh and try again.", 
+                             csrf_token=generate_csrf_token(),
+                             kind=request.form.get('type', 'boost'),
+                             artist_id=request.form.get('artist_id', ''),
+                             amount=request.form.get('amount', ''),
+                             item_id=request.form.get('item_id', ''),
+                             qty=int(request.form.get('qty', '1'))), 400
 
     form = request.form
     kind = (form.get('type') or 'boost').strip()

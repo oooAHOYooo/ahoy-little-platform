@@ -80,7 +80,7 @@
                 {% endif %}
             </div>
 
-            <form method="POST" action="/checkout/process" class="space-y-3" style="pointer-events: auto; position: relative; z-index: 10000;">
+            <form method="POST" action="/checkout/process" id="checkoutForm" class="space-y-3" style="pointer-events: auto; position: relative; z-index: 10000;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <input type="hidden" name="type" value="{{ kind }}">
                 <input type="hidden" name="artist_id" value="{{ artist_id }}">
@@ -88,55 +88,87 @@
                 <input type="hidden" name="item_id" value="{{ item_id }}">
                 <input type="hidden" name="qty" value="{{ qty }}">
                 <input type="hidden" name="computed_total" value="{{ total if total is not none else amount }}">
-
-                <!-- New working checkout button -->
-                <div id="checkoutButtonContainer" style="margin-top: 1.5rem;">
-                    <button type="button"
-                        id="newCheckoutBtn"
-                        style="width: 100%; padding: 1rem; border-radius: 1rem; background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: saturate(140%) blur(12px); -webkit-backdrop-filter: saturate(140%) blur(12px); color: white; font-size: 1.125rem; font-weight: 600; cursor: pointer; pointer-events: auto; position: relative; z-index: 10002; transition: all 0.3s; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);"
-                        onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 15px 40px rgba(0, 0, 0, 0.4)';"
-                        onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 10px 30px rgba(0, 0, 0, 0.3)';"
-                        onclick="submitCheckoutForm();">
-                        <span style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                            <i class="fas fa-lock"></i>
-                            <span>Complete Checkout{% if total is not none and total > 0 %} — ${{ '%.2f'|format(total) }}{% endif %}</span>
-                        </span>
-                    </button>
-                </div>
-                
-                <!-- Keep original button hidden as backup -->
+            </form>
+            
+            <!-- NEW WORKING BUTTON - Completely outside form, programmatically submits -->
+            <div style="margin-top: 1.5rem; width: 100%;">
                 <button type="submit"
-                    class="complete-checkout w-full py-4 mt-6 rounded-2xl text-white text-lg font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    style="display: none;"
-                    id="completeCheckoutBtn"
-                    {% if total is none or total <= 0 %}disabled{% endif %}>
-                    <span class="flex items-center justify-center gap-2">
+                    id="newCheckoutBtn"
+                    form="checkoutForm"
+                    style="width: 100%; padding: 1rem; border-radius: 1rem; background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; backdrop-filter: saturate(140%) blur(12px); -webkit-backdrop-filter: saturate(140%) blur(12px); color: white !important; font-size: 1.125rem; font-weight: 600; cursor: pointer !important; pointer-events: auto !important; position: relative; z-index: 10002 !important; transition: all 0.3s; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); opacity: 1 !important;"
+                    onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 15px 40px rgba(0, 0, 0, 0.4)'; this.style.opacity='1';"
+                    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 10px 30px rgba(0, 0, 0, 0.3)'; this.style.opacity='1';"
+                    onclick="console.log('=== NATIVE SUBMIT BUTTON CLICKED ==='); if (window.createConfetti) { window.createConfetti(); } return true;">
+                    <span style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                         <i class="fas fa-lock"></i>
-                        <span>Complete Checkout{% if total is not none and total > 0 %} — ${{ '%.2f'|format(total) }}{% endif %}</span>
+                        <span>Complete Checkout{% if total is not none and total > 0 %} — ${{ '%.2f'|format(total) }}{% else %} — ${{ '%.2f'|format(amount|float if amount else 0) }}{% endif %}</span>
                     </span>
                 </button>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
     // Dim rest of page while checkout open
+    // FORCE ENABLE THE BUTTON IMMEDIATELY - Run this ASAP
+    (function forceEnableButton() {
+        const btn = document.getElementById('newCheckoutBtn');
+        if (btn) {
+            console.log('=== FORCING BUTTON ENABLE (IMMEDIATE) ===');
+            btn.disabled = false;
+            btn.removeAttribute('disabled');
+            btn.style.opacity = '1 !important';
+            btn.style.cursor = 'pointer !important';
+            btn.style.pointerEvents = 'auto !important';
+            btn.style.color = 'white !important';
+            btn.setAttribute('aria-disabled', 'false');
+            console.log('Button disabled?', btn.disabled);
+            console.log('Button is now enabled!');
+        }
+    })();
+    
     document.addEventListener('DOMContentLoaded', () => {
         try { document.body.classList.add('checkout-mode'); } catch (_) { }
+        
+        // FORCE ENABLE THE BUTTON AGAIN - Remove any disabled state
+        const btn = document.getElementById('newCheckoutBtn');
+        if (btn) {
+            console.log('=== FORCING BUTTON ENABLE (DOMContentLoaded) ===');
+            btn.disabled = false;
+            btn.removeAttribute('disabled');
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.style.pointerEvents = 'auto';
+            btn.style.color = 'white';
+            btn.setAttribute('aria-disabled', 'false');
+            console.log('Button disabled?', btn.disabled);
+            console.log('Button style.opacity:', btn.style.opacity);
+            console.log('Button computed opacity:', window.getComputedStyle(btn).opacity);
+            console.log('Button is now enabled!');
+        } else {
+            console.error('Button not found!');
+        }
     });
     window.addEventListener('beforeunload', () => {
         try { document.body.classList.remove('checkout-mode'); } catch (_) { }
     });
 
     // Direct form submission function - works independently
-    function submitCheckoutForm() {
+    // Make it globally accessible
+    window.submitCheckoutForm = function submitCheckoutForm() {
         console.log('=== SUBMIT CHECKOUT FORM CALLED ===');
         
         // Create confetti immediately for visual feedback
-        createConfetti();
+        if (window.createConfetti) {
+            window.createConfetti();
+        }
         
-        const form = document.querySelector('form[action="/checkout/process"]');
+        // Find form by ID first, then fallback to selector
+        let form = document.getElementById('checkoutForm');
+        if (!form) {
+            form = document.querySelector('form[action="/checkout/process"]');
+        }
         if (!form) {
             console.error('Form not found!');
             alert('Error: Form not found. Please refresh the page.');
@@ -147,10 +179,10 @@
         console.log('Form action:', form.action);
         console.log('Form method:', form.method);
         
-        // Show loading state
+        // Show loading state (don't disable - let form submit)
         const btn = document.getElementById('newCheckoutBtn');
         if (btn) {
-            btn.disabled = true;
+            // Don't disable - just show loading state
             btn.innerHTML = '<span style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><i class="fas fa-spinner fa-spin"></i><span>Processing...</span></span>';
         }
         
@@ -161,23 +193,120 @@
             steps[1].classList.add('active');
         }
         
-        // Submit the form directly
+        // Submit the form - ensure CSRF token is included
         try {
             console.log('Submitting form...');
-            form.submit();
+            
+            // Verify CSRF token exists in form
+            const csrfInput = form.querySelector('input[name="csrf_token"]');
+            if (csrfInput) {
+                const tokenValue = csrfInput.value;
+                console.log('CSRF token found:', tokenValue ? `Yes (length: ${tokenValue.length}, first 10 chars: ${tokenValue.substring(0, 10)}...)` : 'No (empty)');
+                if (!tokenValue) {
+                    console.error('CSRF token is empty!');
+                    alert('Error: CSRF token is missing. Please refresh the page and try again.');
+                    return;
+                }
+            } else {
+                console.error('CSRF token input not found in form!');
+                alert('Error: CSRF token input not found. Please refresh the page and try again.');
+                return;
+            }
+            
+            // Log all form fields to verify they're present
+            const formData = new FormData(form);
+            console.log('Form fields being submitted:');
+            for (let [key, value] of formData.entries()) {
+                if (key === 'csrf_token') {
+                    console.log(`  ${key}: ${value ? `Present (length: ${value.length})` : 'Missing'}`);
+                } else {
+                    console.log(`  ${key}: ${value}`);
+                }
+            }
+            
+            // Use the most reliable method: create a real submit button and click it
+            // This ensures all form fields (including CSRF token) are included
+            console.log('Creating submit button and submitting form...');
+            const submitBtn = document.createElement('button');
+            submitBtn.type = 'submit';
+            submitBtn.style.position = 'absolute';
+            submitBtn.style.left = '-9999px';
+            submitBtn.style.opacity = '0';
+            submitBtn.style.pointerEvents = 'none';
+            form.appendChild(submitBtn);
+            
+            // Submit immediately
+            submitBtn.click();
+            
         } catch (e) {
             console.error('Error submitting form:', e);
-            // Fallback: create a hidden submit button and click it
-            const hiddenSubmit = document.createElement('button');
-            hiddenSubmit.type = 'submit';
-            hiddenSubmit.style.display = 'none';
-            form.appendChild(hiddenSubmit);
-            hiddenSubmit.click();
+            // Fallback: submit via fetch with proper CSRF token
+            submitFormViaFetch(form);
         }
-    }
+        
+        // Fallback function to submit form via fetch (ensures CSRF token is included)
+        function submitFormViaFetch(formElement) {
+            console.log('Using fetch to submit form...');
+            const formData = new FormData(formElement);
+            
+            // Verify CSRF token is in FormData
+            const csrfToken = formData.get('csrf_token');
+            console.log('CSRF token in FormData:', csrfToken ? 'Yes' : 'No');
+            
+            if (!csrfToken) {
+                console.error('CSRF token missing from FormData!');
+                alert('Error: CSRF token missing. Please refresh the page and try again.');
+                return;
+            }
+            
+            fetch(formElement.action, {
+                method: formElement.method,
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin' // Important for cookies/session
+            }).then(response => {
+                console.log('Form submitted via fetch, status:', response.status);
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else if (response.ok) {
+                    return response.text().then(html => {
+                        // If response is HTML, replace the page
+                        if (html.trim().startsWith('<!')) {
+                            document.open();
+                            document.write(html);
+                            document.close();
+                        } else {
+                            // If it's JSON (error), handle it
+                            try {
+                                const json = JSON.parse(html);
+                                if (json.error) {
+                                    alert('Error: ' + json.reason || json.error);
+                                }
+                            } catch (e) {
+                                // Not JSON, treat as HTML
+                                document.open();
+                                document.write(html);
+                                document.close();
+                            }
+                        }
+                    });
+                } else {
+                    return response.json().then(json => {
+                        console.error('Form submission error:', json);
+                        alert('Error: ' + (json.reason || json.error || 'Unknown error'));
+                    });
+                }
+            }).catch(err => {
+                console.error('Fetch submission failed:', err);
+                alert('Error submitting checkout. Please try again.');
+            });
+        }
+    };
     
-    // Confetti function for visual feedback
-    function createConfetti() {
+    // Confetti function for visual feedback - make globally accessible
+    window.createConfetti = function createConfetti() {
         const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7', '#a29bfe'];
         const confettiCount = 50;
         
@@ -281,9 +410,11 @@
             }, true); // Use capture phase to catch early
             
             // Handle form submission (enhancement only - form works without this)
+            // IMPORTANT: Do NOT prevent default - let form submit naturally with CSRF token
             form.addEventListener('submit', function(e) {
                 try {
                     console.log('Checkout form submitting to:', form.action);
+                    console.log('CSRF token in form:', form.querySelector('input[name="csrf_token"]')?.value ? 'Present' : 'Missing');
                     
                     // Animate steps
                     if (steps && steps.length === 3) {
@@ -291,11 +422,14 @@
                         steps[1].classList.add('active'); // Pay
                     }
                     
-                    // Show loading state
-                    completeBtn.disabled = true;
-                    completeBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><i class="fas fa-spinner fa-spin"></i><span>Processing...</span></span>';
+                    // Show loading state (but don't prevent submission)
+                    if (completeBtn) {
+                        completeBtn.disabled = true;
+                        completeBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><i class="fas fa-spinner fa-spin"></i><span>Processing...</span></span>';
+                    }
                     
-                    // Let form submit naturally - don't prevent default
+                    // CRITICAL: Do NOT call e.preventDefault() - let form submit naturally
+                    // The form must submit normally so CSRF token is included
                 } catch (err) {
                     console.warn('Error in form submit handler:', err);
                     // Form will still submit naturally
@@ -308,7 +442,9 @@
                     console.log('Checkout button clicked');
                     
                     // Create confetti effect
-                    createConfetti();
+                    if (window.createConfetti) {
+                        window.createConfetti();
+                    }
                     
                     // Animate steps immediately for visual feedback
                     if (steps && steps.length === 3) {
@@ -322,57 +458,6 @@
                     // Form will still submit naturally
                 }
             });
-            
-            // Confetti function for visual feedback
-            function createConfetti() {
-                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7', '#a29bfe'];
-                const confettiCount = 50;
-                
-                for (let i = 0; i < confettiCount; i++) {
-                    setTimeout(() => {
-                        const confetti = document.createElement('div');
-                        confetti.style.position = 'fixed';
-                        confetti.style.width = '10px';
-                        confetti.style.height = '10px';
-                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                        confetti.style.left = Math.random() * 100 + '%';
-                        confetti.style.top = '-10px';
-                        confetti.style.borderRadius = '50%';
-                        confetti.style.pointerEvents = 'none';
-                        confetti.style.zIndex = '99999';
-                        confetti.style.boxShadow = '0 0 6px ' + confetti.style.backgroundColor;
-                        
-                        document.body.appendChild(confetti);
-                        
-                        const angle = Math.random() * Math.PI * 2;
-                        const velocity = 2 + Math.random() * 3;
-                        const rotation = Math.random() * 360;
-                        const rotationSpeed = (Math.random() - 0.5) * 10;
-                        
-                        let x = parseFloat(confetti.style.left);
-                        let y = -10;
-                        let currentRotation = rotation;
-                        
-                        const animate = () => {
-                            x += Math.cos(angle) * velocity;
-                            y += Math.sin(angle) * velocity + 0.5; // gravity
-                            currentRotation += rotationSpeed;
-                            
-                            confetti.style.left = x + '%';
-                            confetti.style.top = y + 'px';
-                            confetti.style.transform = `rotate(${currentRotation}deg)`;
-                            
-                            if (y < window.innerHeight + 50) {
-                                requestAnimationFrame(animate);
-                            } else {
-                                confetti.remove();
-                            }
-                        };
-                        
-                        animate();
-                    }, i * 10);
-                }
-            }
         } catch (err) {
             console.error('Error setting up checkout form:', err);
             // Form will still work without JavaScript
