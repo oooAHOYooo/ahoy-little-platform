@@ -1,0 +1,79 @@
+/* Ahoy Indie Media — Mobile Base (≤800px only) */
+@media (max-width: 800px) {
+    :root {
+        --mobile-padding: 14px;
+        --mobile-gap: 12px;
+        --mobile-radius: 12px;
+        --mobile-accent: #1B6CFF;
+        --mobile-bg: #0A0A0A;
+        --mobile-text: #ffffff;
+        --mobile-muted: #a1a1aa;
+        --mobile-border: rgba(255, 255, 255, 0.12);
+        --mobile-card: rgba(255, 255, 255, 0.05);
+        --mobile-card-strong: rgba(255, 255, 255, 0.08);
+    }
+
+    html, body {
+        background: var(--mobile-bg);
+        color: var(--mobile-text);
+        overflow-x: hidden !important;
+    }
+
+    /* One-column flow and spacing rhythm */
+    main, .content-area {
+        padding-left: var(--mobile-padding) !important;
+        padding-right: var(--mobile-padding) !important;
+        gap: var(--mobile-gap);
+    }
+
+    section, .section, .block, .panel {
+        margin-top: 16px;
+        margin-bottom: 16px;
+    }
+
+    /* Full-width cards and images */
+    .card, .item-mini, .queue-item, .recent-mini .item-mini, .now-playing-container {
+        width: 100% !important;
+        border-radius: 14px !important;
+        overflow: hidden;
+        background: linear-gradient(180deg, var(--mobile-card) 0%, rgba(255,255,255,0.03) 100%);
+        border: 1px solid var(--mobile-border);
+        backdrop-filter: saturate(140%) blur(12px);
+        -webkit-backdrop-filter: saturate(140%) blur(12px);
+    }
+
+    /* Buttons and form controls */
+    button, input, select, textarea {
+        width: 100%;
+        font-size: 16px;
+        padding: 12px;
+        border-radius: 10px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.06) 100%);
+        border: 1px solid rgba(255,255,255,0.18);
+        color: var(--mobile-text);
+    }
+
+    input::placeholder, textarea::placeholder {
+        color: var(--mobile-muted);
+    }
+
+    /* Kill sidebars and drawers on mobile */
+    .dashboard-sidebar,
+    .sidebar-left,
+    .sidebar-right,
+    .account-sidebar,
+    .radio-sidebar,
+    .mobile-sheet,
+    .mobile-sheet-overlay,
+    .offcanvas-overlay,
+    .offcanvas-panel {
+        display: none !important;
+    }
+
+    /* Duplicate nav blocks hidden below 800px */
+    .desktop-only {
+        display: none !important;
+    }
+}
+
+

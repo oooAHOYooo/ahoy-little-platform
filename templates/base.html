@@ -68,7 +68,11 @@
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/main.css') }}">
         <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/base.css') }}">
+        <link rel="stylesheet"
             href="{{ url_for('static', filename='css/global.css') }}">
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/mobile.css') }}">
         {% block extra_css %}{% endblock %}
 
         <!-- Google Fonts - Inter -->
@@ -85,6 +89,9 @@
         <!-- Alpine.js for reactive components -->
         <script defer
             src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <!-- Mobile helpers -->
+        <script defer
+            src="{{ url_for('static', filename='js/mobile.js') }}"></script>
 
         <!-- Three.js for visualizer -->
         <script
@@ -121,186 +128,10 @@
         });
     </script>
 
-        <!-- Portfolio Widget Styles -->
-        <style>
-        .portfolio-widget-container {
-            position: relative;
-        }
-
-        .portfolio-widget-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: transparent;
-            border: none;
-            color: inherit;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-
-        .portfolio-widget-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .portfolio-widget-btn.has-investment {
-            background: rgba(236, 72, 153, 0.2);
-        }
-
-        .portfolio-icon {
-            font-size: 1.2rem;
-        }
-
-        .portfolio-amount {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .portfolio-label {
-            font-size: 0.875rem;
-        }
-
-        .portfolio-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 0.5rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            min-width: 300px;
-            max-width: 400px;
-            z-index: 1000;
-            overflow: hidden;
-        }
-
-        .portfolio-dropdown-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .portfolio-dropdown-header h4 {
-            margin: 0;
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .portfolio-view-all {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .portfolio-view-all:hover {
-            text-decoration: underline;
-        }
-
-        .portfolio-empty {
-            padding: 2rem;
-            text-align: center;
-            color: #6b7280;
-        }
-
-        .portfolio-empty p {
-            margin: 0.5rem 0;
-        }
-
-        .portfolio-empty .text-muted {
-            font-size: 0.875rem;
-            opacity: 0.7;
-        }
-
-        .portfolio-total {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: #f9fafb;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .portfolio-total-label {
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-
-        .portfolio-total-amount {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #059669;
-        }
-
-        .portfolio-artists-list {
-            padding: 0.5rem;
-        }
-
-        .portfolio-artist-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-
-        .portfolio-artist-item:hover {
-            background: #f9fafb;
-        }
-
-        .portfolio-artist-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-            flex: 1;
-        }
-
-        .portfolio-artist-name {
-            font-weight: 600;
-            color: #1f2937;
-            font-size: 0.875rem;
-        }
-
-        .portfolio-artist-amount {
-            font-size: 0.75rem;
-            color: #059669;
-            font-weight: 500;
-        }
-
-        .portfolio-boost-btn {
-            padding: 0.375rem 0.75rem;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .portfolio-boost-btn:hover {
-            background: #5568d3;
-        }
-
-        @media (max-width: 768px) {
-            .portfolio-dropdown {
-                right: auto;
-                left: 0;
-                min-width: 280px;
-            }
-        }
-    </style>
-
         {% block extra_head %}{% endblock %}
     </head>
 
-    <body x-data="{ navOpen: false, accountOpen: false }"
+    <body x-data="{ navOpen: false, accountOpen: false, mobileDrawer:false }"
         class="overflow-x-hidden">
         <!-- Loading indicator -->
         <div id="loading-indicator"
@@ -309,7 +140,7 @@
         </div>
 
         <!-- Header -->
-        <header class="app-header">
+        <header class="app-header" style="padding-top:8px; padding-bottom:8px;">
             <!-- Navigation -->
             <nav class="navbar" x-data="navbar()" x-init="init()">
                 <div class="nav-container max-w-7xl mx-auto px-4">
@@ -322,10 +153,13 @@
                                 alt="Ahoy Indie Media">
                         </a>
                     </div>
+                    <!-- Mobile Title (text instead of logo) -->
+                    <div class="nav-title-mobile mobile-only">Ahoy Indie
+                        Media</div>
 
                     <!-- Mobile Hamburger -->
                     <button class="mobile-hamburger mobile-only"
-                        @click="navOpen = true; accountOpen = false"
+                        @click="navOpen = true; accountOpen = false; $store?.mobileNav ? ($store.mobileNav.open = true, $store.mobileNav.account = false) : null"
                         title="Menu"
                         aria-label="Open Menu">
                         <i class="fas fa-bars"></i>
@@ -359,8 +193,8 @@
                         </a>
                     </div>
 
-                    <!-- Search Bar -->
-                    <div class="nav-search">
+                    <!-- Desktop-only Search Bar -->
+                    <div class="nav-search hidden-mobile">
                         <div class="search-container">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text"
@@ -384,6 +218,14 @@
                             <i class="fas fa-home"></i>
                         </a>
 
+                        <!-- Boost pill -->
+                        <button class="nav-item px-3 rounded-full hidden-mobile"
+                            style="height:44px"
+                            title="Boost"
+                            @click="document.dispatchEvent(new CustomEvent('boost:open'))">
+                            Boost $
+                        </button>
+
                         <!-- Account Features Dropdown (Desktop Only - Logged In) -->
                         <div class="hidden-mobile account-menu-container"
                             x-show="isLoggedIn"
@@ -392,7 +234,7 @@
                                 @click="accountMenuOpen = !accountMenuOpen; console.log('Account menu clicked, new state:', accountMenuOpen)"
                                 class="nav-item account-menu-btn"
                                 title="Account Features">
-                                <img
+                                <img loading="lazy"
                                     :src="userProfile.avatar || '/static/img/default-avatar.png'"
                                     :alt="userProfile.display_name || 'User'"
                                     class="account-avatar">
@@ -414,7 +256,7 @@
                                 <div
                                     class="px-4 py-4 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 border-b border-neutral-700/50">
                                     <div class="flex items-center gap-3 mb-3">
-                                        <img
+                                        <img loading="lazy"
                                             :src="userProfile.avatar || '/static/img/default-avatar.png'"
                                             :alt="userProfile.display_name || 'User'"
                                             class="w-12 h-12 rounded-full border-2 border-white/20">
@@ -586,21 +428,67 @@
                         </button>
                     </div>
 
-                    <!-- Mobile Account trigger -->
-                    <button class="nav-item mobile-only"
-                        @click="accountOpen = true; navOpen = false"
-                        title="Account">
-                        <i class="fas fa-user" x-show="!isLoggedIn"></i>
-                        <img x-show="isLoggedIn"
-                            :src="userProfile.avatar || '/static/img/default-avatar.png'"
-                            :alt="userProfile.display_name || 'User'"
-                            class="mobile-user-avatar">
-                    </button>
+                    <!-- Mobile Right: Explore + Guest (text) -->
+                    <div class="mobile-only" style="display:flex; gap:8px;">
+                        <button id="openExplore" class="nav-item"
+                            style="min-width:44px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#e5e7eb;">
+                            Explore
+                        </button>
+                        <button id="openAccount" class="nav-item"
+                            style="min-width:44px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#e5e7eb;">
+                            Guest
+                        </button>
+                    </div>
                 </div>
             </nav>
         </header>
-        {% include '_nav_main.html' %}
-        {% include '_nav_user.html' %}
+        <!-- Mobile Explore replaced by overlay -->
+        <!-- Mobile Bottom Tab Bar (Spotify-like) -->
+        <nav class="mobile-bottom-nav mobile-only" role="navigation"
+            aria-label="Primary">
+            <a href="{{ url_for('music') }}"
+                class="mobile-tab {% if request.endpoint == 'music' %}active{% endif %}">
+                <i class="fas fa-music"></i>
+                <span>Music</span>
+            </a>
+            <a href="{{ url_for('shows') }}"
+                class="mobile-tab {% if request.endpoint == 'shows' %}active{% endif %}">
+                <i class="fas fa-play-circle"></i>
+                <span>Shows</span>
+            </a>
+            <a href="{{ url_for('artists') }}"
+                class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
+                <i class="fas fa-users"></i>
+                <span>Artists</span>
+            </a>
+            <a href="/radio" class="mobile-tab">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>Radio</span>
+            </a>
+            <a href="/bookmarks"
+                class="mobile-tab {% if request.endpoint == 'bookmarks_page' %}active{% endif %}">
+                <i class="fas fa-bookmark"></i>
+                <span>Saved</span>
+            </a>
+        </nav>
+        <div class="desktop-only">
+            {% include '_nav_main.html' %}
+            {% include '_nav_user.html' %}
+        </div>
+
+        <!-- New Mobile Overlays -->
+        <div id="mobileMenu" class="mobile-menu hidden mobile-only"
+            aria-hidden="true"></div>
+        <div id="accountMenu" class="mobile-account hidden mobile-only"
+            aria-hidden="true"></div>
+
+        <!-- Compact Mobile Action Bar -->
+        <div class="mobile-only" style="padding:8px 12px;">
+            <div class="mobile-action-bar" style="display:flex; gap:10px;">
+                <button id="openSearch">Search</button>
+                <button id="openBoost">Boost</button>
+            </div>
+        </div>
 
         <!-- Top boost status badge -->
         <div id="boost-status-badge" aria-live="polite" class="hidden">
@@ -866,7 +754,7 @@
                 </aside>
 
                 <!-- Center Content -->
-                <div class="content-area">
+                <div class="content-area content-pad-bottom">
                     {% block content %}{% endblock %}
                 </div>
 
@@ -884,13 +772,13 @@
                                 @click="goToMediaItem(nowPlaying)"
                                 :class="{'radio-track': isRadioTrack(nowPlaying)}">
                                 <img
-                                    :src="nowPlaying.cover_art || '/static/img/default-cover.jpg'"
+                                    :src="nowPlaying?.cover_art || '/static/img/default-cover.jpg'"
                                     class="mini-cover">
                                 <div>
                                     <div class="mini-title"
-                                        x-text="nowPlaying.title"></div>
+                                        x-text="nowPlaying?.title || ''"></div>
                                     <div class="mini-artist"
-                                        x-text="nowPlaying.artist"></div>
+                                        x-text="nowPlaying?.artist || ''"></div>
                                 </div>
                             </div>
                         </div>
@@ -976,7 +864,7 @@
                 class="now-playing-visualizer"></div>
 
             <!-- Glassy Now Playing Bar -->
-            <div class="now-playing-glass">
+            <div class="now-playing-glass now-playing-sticky mobile-only">
                 <div class="now-playing-container">
                     <!-- Left: Album Artwork -->
                     <div class="now-playing-album-art"
@@ -1612,6 +1500,18 @@
                 }
             };
         }
+        // Bridge: expose navbar state to external components (e.g., account sheet include)
+        function navbarProxy() {
+            const getNavbar = () => document.querySelector('.navbar')?.__x?.$data || {};
+            return {
+                get isLoggedIn() { return !!getNavbar().isLoggedIn; },
+                get userProfile() { return getNavbar().userProfile || {}; },
+                get walletBalanceCents() { return getNavbar().walletBalanceCents || 0; },
+                get badges() { return getNavbar().badges || []; },
+                get totalBookmarkCount() { return getNavbar().totalBookmarkCount || 0; },
+                logout() { try { getNavbar().logout && getNavbar().logout(); } catch (_) {} }
+            };
+        }
 
         function portfolioNavWidget() {
             return {
@@ -1635,54 +1535,6 @@
             };
         }
     </script>
-
-        <!-- Image Loading Styles -->
-        <style>
-        img[data-src] {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        img[data-src].loaded {
-            opacity: 1;
-        }
-
-        img[data-src].error {
-            opacity: 1;
-        }
-
-        /* Prevent images from loading until Alpine.js processes them */
-        .image-placeholder {
-            background: #f0f0f0;
-            min-height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .image-placeholder:not([src]) {
-            background: #e0e0e0;
-        }
-
-        .image-placeholder[src] {
-            background: none;
-        }
-
-        /* Prevent multiple identical images from loading */
-        img[src*="default-cover.jpg"] {
-            max-width: 100%;
-            height: auto;
-        }
-
-        /* Collection badge styling */
-        [data-collection-badge] {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(4px);
-            border-radius: 9999px;
-            padding: 3px 8px;
-            font-weight: 600;
-        }
-    </style>
 
         <!-- Simple Image Deduplication Script -->
         <script>
@@ -1723,7 +1575,8 @@
                     }
                     loadingImages.add(url);
                 }
-                return originalFetch.call(this, url, options);
+                // Avoid illegal invocation by not rebinding native fetch
+                return originalFetch(url, options);
             };
 
             // Monitor Alpine.js image updates

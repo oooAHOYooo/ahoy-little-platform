@@ -810,67 +810,66 @@ def playlists_index():
         playlists = [p for p in playlists if p.get("owner") == session["username"]]
     return render_template("playlists.html", playlists=playlists)
 
-
-    # API Endpoints
-    @app.route('/api/now-playing')
-    @limiter.exempt
-    def api_now_playing():
-        """Get curated now playing feed with 30s previews - randomized on each request"""
-        music_data = load_json_data('music.json', {'tracks': []})
-        shows_data = load_json_data('shows.json', {'shows': []})
-        
-        # Combine and curate content for discovery feed
-        feed_items = []
-        
-        # Get all available tracks and shows
-        all_tracks = music_data.get('tracks', [])
-        all_shows = shows_data.get('shows', [])
-        
-        # Filter for content with preview URLs
-        tracks_with_preview = [t for t in all_tracks if t.get('preview_url')]
-        shows_with_preview = [s for s in all_shows if s.get('trailer_url')]
-        
-        # Randomly select tracks (up to 8)
-        selected_tracks = random.sample(tracks_with_preview, min(len(tracks_with_preview), 8))
-        for track in selected_tracks:
-            feed_items.append({
-                'id': track['id'],
-                'type': 'music',
-                'title': track['title'],
-                'artist': track['artist'],
-                'preview_url': track['preview_url'],
-                'cover_art': track['cover_art'],
-                'duration': 30,  # Preview length
-                'full_url': track['audio_url'],
-                'duration_seconds': track.get('duration_seconds', 180),
-                'description': track.get('description', ''),
-                'genre': track.get('genre', '')
-            })
-        
-        # Randomly select shows (up to 5)
-        selected_shows = random.sample(shows_with_preview, min(len(shows_with_preview), 5))
-        for show in selected_shows:
-            feed_items.append({
-                'id': show['id'],
-                'type': 'show',
-                'title': show['title'],
-                'artist': show.get('host', 'Ahoy Indie Media'),
-                'preview_url': show['trailer_url'],
-                'cover_art': show['thumbnail'],
-                'duration': 30,
-                'full_url': show['video_url'],
-                'duration_seconds': show.get('duration_seconds', 300),
-                'description': show.get('description', ''),
-                'genre': show.get('genre', '')
-            })
-        
-        # Shuffle for discovery - this will be different on each request
-        random.shuffle(feed_items)
-        
-        # Limit to 12 items for better performance
-        feed_items = feed_items[:12]
-        
-        return jsonify({'feed': feed_items})
+# API Endpoints
+@app.route('/api/now-playing')
+@limiter.exempt
+def api_now_playing():
+    """Get curated now playing feed with 30s previews - randomized on each request"""
+    music_data = load_json_data('music.json', {'tracks': []})
+    shows_data = load_json_data('shows.json', {'shows': []})
+    
+    # Combine and curate content for discovery feed
+    feed_items = []
+    
+    # Get all available tracks and shows
+    all_tracks = music_data.get('tracks', [])
+    all_shows = shows_data.get('shows', [])
+    
+    # Filter for content with preview URLs
+    tracks_with_preview = [t for t in all_tracks if t.get('preview_url')]
+    shows_with_preview = [s for s in all_shows if s.get('trailer_url')]
+    
+    # Randomly select tracks (up to 8)
+    selected_tracks = random.sample(tracks_with_preview, min(len(tracks_with_preview), 8))
+    for track in selected_tracks:
+        feed_items.append({
+            'id': track['id'],
+            'type': 'music',
+            'title': track['title'],
+            'artist': track['artist'],
+            'preview_url': track['preview_url'],
+            'cover_art': track['cover_art'],
+            'duration': 30,  # Preview length
+            'full_url': track['audio_url'],
+            'duration_seconds': track.get('duration_seconds', 180),
+            'description': track.get('description', ''),
+            'genre': track.get('genre', '')
+        })
+    
+    # Randomly select shows (up to 5)
+    selected_shows = random.sample(shows_with_preview, min(len(shows_with_preview), 5))
+    for show in selected_shows:
+        feed_items.append({
+            'id': show['id'],
+            'type': 'show',
+            'title': show['title'],
+            'artist': show.get('host', 'Ahoy Indie Media'),
+            'preview_url': show['trailer_url'],
+            'cover_art': show['thumbnail'],
+            'duration': 30,
+            'full_url': show['video_url'],
+            'duration_seconds': show.get('duration_seconds', 300),
+            'description': show.get('description', ''),
+            'genre': show.get('genre', '')
+        })
+    
+    # Shuffle for discovery - this will be different on each request
+    random.shuffle(feed_items)
+    
+    # Limit to 12 items for better performance
+    feed_items = feed_items[:12]
+    
+    return jsonify({'feed': feed_items})
 
     # Minimal listening hooks (optional endpoints for client player)
     @app.post('/api/listening/start')

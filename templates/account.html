@@ -227,10 +227,8 @@
                                         <button class="btn btn-primary"
                                             @click="toggleQuest(q)"
                                             :disabled="q.done">
-                                            <span
-                                                x-show="!q.done">Complete</span>
-                                            <span x-show="q.done"><i
-                                                    class="fas fa-check"></i></span>
+                                            <span x-show="!q.done">Complete</span>
+                                            <span x-show="q.done"><i class="fas fa-check"></i></span>
                                         </button>
                                     </div>
                                 </div>
@@ -278,7 +276,12 @@
                     <div class="overview-card" x-data="{}">
                         <h3>My Bookmarks</h3>
                         <div class="bookmarks-content">
-                            <div class="bookmarks-empty" x-show="bookmarksList().length === 0">
+                            <!-- Collapsible empty (mobile) -->
+                            <details class="mobile-only" x-show="bookmarksList().length === 0">
+                                <summary class="text-xs" style="text-transform:uppercase;letter-spacing:.08em;">My Bookmarks (0)</summary>
+                                <p class="text-sm" style="color:#9ca3af;margin:10px 0;">Nothing here yet. Explore artists to get started.</p>
+                            </details>
+                            <div class="bookmarks-empty hidden-mobile" x-show="bookmarksList().length === 0">
                                 <div class="empty-state">
                                     <i class="fas fa-bookmark"></i>
                                     <h4>No Bookmarks Yet</h4>
@@ -286,7 +289,22 @@
                                     <a href="/bookmarks" class="btn btn-primary">Go to Bookmarks</a>
                                 </div>
                             </div>
-                            <div class="bookmarks-preview playing-list" x-show="bookmarksList().length > 0">
+                            <!-- Mobile horizontal scroll -->
+                            <div class="mobile-only h-scroll" x-show="bookmarksList().length > 0">
+                                <template x-for="bookmark in bookmarksList()" :key="bookmark.key">
+                                    <div class="h-card" @click="$dispatch('play-track', bookmark)"
+                                        style="position:relative;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);min-height:100px;">
+                                        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.0),rgba(0,0,0,.5));z-index:1;"></div>
+                                        <div style="position:absolute;bottom:8px;left:8px;right:8px;z-index:2;">
+                                            <div style="font-size:1rem;font-weight:600;" x-text="bookmark.title"></div>
+                                            <div class="text-xs" style="opacity:.8;" x-text="(bookmark.type || 'track')"></div>
+                                        </div>
+                                        <img :src="bookmark.artwork || '/static/img/default-cover.jpg'" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+                                    </div>
+                                </template>
+                            </div>
+                            <!-- Desktop preview preserved -->
+                            <div class="bookmarks-preview playing-list hidden-mobile" x-show="bookmarksList().length > 0">
                                 <template x-for="bookmark in bookmarksList().slice(0, 4)" :key="bookmark.key">
                                     <div class="playing-item" @click="$dispatch('play-track', bookmark)">
                                         <div class="item-details">
@@ -308,11 +326,12 @@
 
             <!-- Boost Portfolio Tab -->
             <div x-show="activeTab === 'portfolio'" class="tab-panel">
+                
                 <div class="card glass hover-raise">
                     <div class="card-header"><i class="fas fa-rocket"></i> Boost Portfolio</div>
                     <div class="card-body">
                         <!-- Summary Band -->
-                        <div class="card-grid">
+                        <div class="card-grid hidden-mobile">
                             <div class="card glass">
                                 <div class="card-header subtle">Total Boosts</div>
                                 <div class="card-body">
@@ -333,7 +352,7 @@
                             </div>
                         </div>
                         <!-- Your Artists -->
-                        <div class="section mt-lg">
+                        <div class="section mt-lg hidden-mobile">
                             <div class="section-title"><i class="fas fa-user-music"></i> Your Artists</div>
                             <div class="card-grid">
                                 <div class="card glass">
@@ -361,7 +380,7 @@
                             </div>
                         </div>
                         <!-- Transaction History -->
-                        <div class="section mt-lg">
+                        <div class="section mt-lg hidden-mobile">
                             <div class="section-title"><i class="fas fa-list"></i> Transaction History</div>
                             <div class="table glass">
                                 <div class="table-header grid-5">
@@ -489,27 +508,31 @@
                             <h4>Profile Information</h4>
                             <div class="form-group">
                                 <label for="display_name">Display Name</label>
-                                <input type="text" id="display_name"
+                        <input type="text" id="display_name"
                                     x-model="profileForm.display_name"
-                                    placeholder="Enter your display name">
+                                    placeholder="Enter your display name"
+                                    class="w-full rounded-lg bg-[#111] border border-[#1e1e1e] text-gray-200 px-3 py-2 focus:outline-none focus:border-lime-400 unified-input">
                             </div>
                             <div class="form-group">
                                 <label for="bio">Bio</label>
-                                <textarea id="bio" x-model="profileForm.bio"
+                        <textarea id="bio" x-model="profileForm.bio"
                                     placeholder="Tell us about yourself"
-                                    rows="3"></textarea>
+                                    rows="3"
+                                    class="w-full rounded-lg bg-[#111] border border-[#1e1e1e] text-gray-200 px-3 py-2 focus:outline-none focus:border-lime-400 unified-input"></textarea>
                             </div>
                             <div class="form-group">
                                 <label for="location">Location</label>
-                                <input type="text" id="location"
+                        <input type="text" id="location"
                                     x-model="profileForm.location"
-                                    placeholder="Where are you from?">
+                                    placeholder="Where are you from?"
+                                    class="w-full rounded-lg bg-[#111] border border-[#1e1e1e] text-gray-200 px-3 py-2 focus:outline-none focus:border-lime-400 unified-input">
                             </div>
                             <div class="form-group">
                                 <label for="website">Website</label>
-                                <input type="url" id="website"
+                        <input type="url" id="website"
                                     x-model="profileForm.website"
-                                    placeholder="https://yourwebsite.com">
+                                    placeholder="https://yourwebsite.com"
+                                    class="w-full rounded-lg bg-[#111] border border-[#1e1e1e] text-gray-200 px-3 py-2 focus:outline-none focus:border-lime-400 unified-input">
                             </div>
                         </div>
 
@@ -533,8 +556,9 @@
                             </div>
                             <div class="form-group">
                                 <label for="privacy">Privacy Level</label>
-                                <select id="privacy"
-                                    x-model="profileForm.privacy">
+                        <select id="privacy"
+                                    x-model="profileForm.privacy"
+                                    class="w-full rounded-lg bg-[#111] border border-[#1e1e1e] text-gray-200 px-3 py-2 focus:outline-none focus:border-lime-400 unified-select">
                                     <option value="public">Public</option>
                                     <option value="friends">Friends
                                         Only</option>
@@ -716,6 +740,7 @@ function accountPage() {
         userStats: {},
         userBoards: [],
         isGuest: false,
+        addFundsModal: false,
         showAvatarCustomizer: false,
         selectedAvatar: 'red',
         recentActivity: [],
@@ -723,6 +748,7 @@ function accountPage() {
         activityTimeline: [],
         activeTab: 'overview',
         isUpdating: false,
+        themePicker: false,
         // Habit systems
         streakDays: 0,
         lastActiveDate: null,
@@ -1226,4 +1252,5 @@ function accountPage() {
     };
 }
 </script>
+ 
 {% endblock %}
