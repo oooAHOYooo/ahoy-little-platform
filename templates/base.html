@@ -1858,12 +1858,12 @@
                                         this.volume = Math.round(volume * 100);
                                         this.isMuted = !!muted;
                                     } catch (e) {
-                                        console.warn('Error in volumechange handler:', e);
+                                        // Silently ignore - don't log to avoid console spam
                                     }
                                 });
                             }
                         } catch (e) {
-                            console.warn('Error setting up volumechange event:', e);
+                            // Silently ignore - don't log to avoid console spam
                         }
                         
                         try {
