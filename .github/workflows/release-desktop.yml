@@ -68,27 +68,27 @@ jobs:
     
     - name: Upload macOS artifacts
       if: matrix.os == 'macos-latest'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: AhoyIndieMedia-macOS
         path: dist/AhoyIndieMedia-macOS.zip
     
     - name: Upload Windows artifacts
       if: matrix.os == 'windows-latest'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: AhoyIndieMedia-Windows
         path: dist/*.exe
     
     - name: Upload Linux artifacts
       if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: AhoyIndieMedia-Linux
         path: dist/AhoyIndieMedia*
     
     - name: Upload checksums
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: SHA256SUMS-${{ matrix.os }}
         path: dist/SHA256SUMS.txt
@@ -103,7 +103,7 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: artifacts
     
