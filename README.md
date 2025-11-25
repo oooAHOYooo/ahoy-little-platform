@@ -469,11 +469,13 @@ Example:
 export AHOY_ENV=sandbox
 export SQUARE_APPLICATION_ID_SANDBOX=your-sandbox-app-id
 export SQUARE_ACCESS_TOKEN_SANDBOX=your-sandbox-access-token
+export SQUARE_LOCATION_ID_SANDBOX=YOUR_SANDBOX_LOCATION_ID
 
 # Production
 # export AHOY_ENV=production
 # export SQUARE_APPLICATION_ID_PRODUCTION=your-prod-app-id
 # export SQUARE_ACCESS_TOKEN_PRODUCTION=your-prod-access-token
+# export SQUARE_LOCATION_ID_PRODUCTION=YOUR_PROD_LOCATION_ID
 ```
 
 The app reads `AHOY_ENV` to choose config, and the Square client uses the matching environment automatically.

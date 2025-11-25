@@ -23,11 +23,13 @@ class ProductionConfig(BaseConfig):
     SQUARE_ENV = "production"
     SQUARE_APPLICATION_ID = os.environ.get("SQUARE_APPLICATION_ID_PRODUCTION", "")
     SQUARE_ACCESS_TOKEN = os.environ.get("SQUARE_ACCESS_TOKEN_PRODUCTION", "")
+    SQUARE_LOCATION_ID = os.environ.get("SQUARE_LOCATION_ID_PRODUCTION", "")
 
 class SandboxConfig(BaseConfig):
     SQUARE_ENV = "sandbox"
     SQUARE_APPLICATION_ID = os.environ.get("SQUARE_APPLICATION_ID_SANDBOX", "")
     SQUARE_ACCESS_TOKEN = os.environ.get("SQUARE_ACCESS_TOKEN_SANDBOX", "")
+    SQUARE_LOCATION_ID = os.environ.get("SQUARE_LOCATION_ID_SANDBOX", "")
 
 def get_config():
     # AHOY_ENV determines payment environment targeting

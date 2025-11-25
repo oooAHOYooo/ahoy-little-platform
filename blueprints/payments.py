@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session, url_for
+from flask import Blueprint, request, jsonify, session, url_for, current_app
 from flask_login import current_user
 import os
 import json
@@ -8,6 +8,8 @@ from datetime import datetime
 from db import get_session
 from models import Tip, User, UserArtistPosition
 from services.user_resolver import resolve_db_user_id
+from services.square_client import get_square_client
+import uuid
 
 bp = Blueprint("payments", __name__, url_prefix="/payments")
 
@@ -484,6 +486,122 @@ def payment_cancel():
     </html>
     """
 
+
+@bp.route("/sq/charge", methods=["POST"])
+def square_charge():
+    """
+    Create a Square payment for a boost (environment auto-selected by AHOY_ENV).
+    Body: { "artist_id": str, "boost_amount": number|string, "sourceId": str }
+    """
+    data = request.get_json(silent=True) or {}
+    artist_id = data.get("artist_id")
+    boost_amount = data.get("boost_amount") or data.get("amount")
+    source_id = data.get("sourceId") or data.get("source_id")
+
+    if not artist_id:
+        return jsonify({"error": "artist_id required"}), 400
+    if not source_id:
+        return jsonify({"error": "sourceId required"}), 400
+
+    try:
+        boost_amount_decimal = Decimal(str(boost_amount))
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid boost amount"}), 400
+    if boost_amount_decimal < Decimal("0.50"):
+        return jsonify({"error": "Minimum boost amount is $0.50"}), 400
+
+    # Calculate all fees and totals
+    processing_fee, platform_fee, total_charge, artist_payout, platform_revenue = calculate_boost_fees(boost_amount_decimal)
+
+    # Resolve user if logged in
+    user_id = resolve_db_user_id()
+
+    # Prepare Square client and location
+    try:
+        client = get_square_client()
+    except Exception as e:
+        return jsonify({"error": f"Square client not configured: {e}"}), 500
+
+    location_id = current_app.config.get("SQUARE_LOCATION_ID") or os.getenv(
+        "SQUARE_LOCATION_ID_PRODUCTION" if current_app.config.get("SQUARE_ENV") == "production" else "SQUARE_LOCATION_ID_SANDBOX"
+    )
+    if not location_id:
+        return jsonify({"error": "Square location ID not configured"}), 500
+
+    idempotency_key = f"boost-{uuid.uuid4()}"
+    amount_money = {"amount": int(boost_amount_decimal * 100), "currency": "USD"}
+
+    body = {
+        "idempotency_key": idempotency_key,
+        "source_id": source_id,
+        "amount_money": amount_money,
+        "location_id": location_id,
+        "note": f"Boost for artist {artist_id}",
+        "metadata": {
+            "artist_id": str(artist_id),
+            "user_id": str(user_id or ""),
+            "boost_amount": str(boost_amount_decimal),
+            "platform_fee": str(platform_fee),
+            "processing_fee": str(processing_fee),
+            "total_paid": str(total_charge),
+        },
+    }
+
+    try:
+        result = client.payments.create_payment(body)
+        if result.is_success():
+            payment = result.body.get("payment", {})
+            payment_id = payment.get("id")
+            try:
+                # Persist boost immediately (idempotent-ish via unique provider id reuse)
+                with get_session() as db_session:
+                    tip_datetime = datetime.utcnow()
+                    tip = Tip(
+                        user_id=user_id,
+                        artist_id=str(artist_id),
+                        amount=boost_amount_decimal,
+                        fee=platform_fee,
+                        platform_fee=platform_fee,
+                        net_amount=artist_payout,
+                        stripe_fee=processing_fee,
+                        total_paid=total_charge,
+                        artist_payout=artist_payout,
+                        platform_revenue=platform_revenue,
+                        # reuse provider id field to avoid schema change
+                        stripe_payment_intent_id=payment_id,
+                        created_at=tip_datetime,
+                    )
+                    db_session.add(tip)
+                    if user_id:
+                        update_user_artist_position(
+                            user_id=user_id,
+                            artist_id=str(artist_id),
+                            boost_amount=boost_amount_decimal,
+                            boost_datetime=tip_datetime,
+                            db_session=db_session
+                        )
+                    db_session.commit()
+            except Exception as e:
+                return jsonify({
+                    "status": "payment_success_persist_error",
+                    "error": str(e),
+                    "payment_id": payment_id
+                }), 200
+
+            return jsonify({
+                "status": "success",
+                "payment_id": payment_id,
+                "breakdown": {
+                    "boost_amount": float(boost_amount_decimal),
+                    "processing_fee": float(processing_fee),
+                    "platform_fee": float(platform_fee),
+                    "total_charge": float(total_charge),
+                }
+            }), 200
+        else:
+            return jsonify({"error": result.errors}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 @bp.route("/user/total-boosts", methods=["GET"])
 def get_user_total_boosts():

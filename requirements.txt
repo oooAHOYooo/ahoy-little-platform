@@ -29,3 +29,4 @@ structlog
 itsdangerous
 requests
 stripe>=7.0.0
+squareup>=35.0.0
