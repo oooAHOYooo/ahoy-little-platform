@@ -18,11 +18,24 @@ limiter = Limiter(
 )
 
 def init_cors(app):
-    if app.config.get("CORS_ORIGINS"):
-        CORS(app, resources={
-            r"/api/*": {
-                "origins": app.config["CORS_ORIGINS"],
-                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-                "supports_credentials": True,
-            }
-        })
+    # Default allowed origins for Ahoy Indie Media
+    default_allowed = [
+        "https://app.ahoy.ooo",
+        "https://api.ahoy.ooo",
+        "http://localhost:5173",
+        "http://localhost:5000",
+    ]
+    # Merge with any origins provided via env/config
+    extra = app.config.get("CORS_ORIGINS") or []
+    # Deduplicate while preserving order
+    allowed_origins = list(dict.fromkeys(default_allowed + extra))
+
+    CORS(
+        app,
+        resources={r"/*": {"origins": allowed_origins}},
+        supports_credentials=True,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+        expose_headers=["Content-Type"],
+        max_age=86400,  # help browsers cache preflight
+    )

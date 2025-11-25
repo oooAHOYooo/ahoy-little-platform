@@ -27,7 +27,7 @@ jobs:
       run: python scripts/check_deps.py > deps-check-output.txt
     
     - name: Upload dependency check results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: deps-check-output.txt
         path: deps-check-output.txt

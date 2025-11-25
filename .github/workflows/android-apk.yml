@@ -59,14 +59,14 @@ jobs:
     
     - name: Upload signed APK
       if: env.ANDROID_KEYSTORE_BASE64 != ''
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: AhoyIndieMedia-Android
         path: AhoyIndieMedia-Android-release.apk
     
     - name: Upload unsigned APK
       if: env.ANDROID_KEYSTORE_BASE64 == ''
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: AhoyIndieMedia-Android
         path: AhoyIndieMedia-Android-unsigned.apk

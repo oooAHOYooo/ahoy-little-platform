@@ -459,6 +459,25 @@ The platform uses a simple file-based user system with:
 
 ### Production Setup
 
+### Square Payments (AHOY_ENV)
+
+To toggle Square environments automatically, set `AHOY_ENV` to `sandbox` or `production`. Provide corresponding credentials via environment variables (or `.env`).
+
+Example:
+```bash
+# Sandbox
+export AHOY_ENV=sandbox
+export SQUARE_APPLICATION_ID_SANDBOX=your-sandbox-app-id
+export SQUARE_ACCESS_TOKEN_SANDBOX=your-sandbox-access-token
+
+# Production
+# export AHOY_ENV=production
+# export SQUARE_APPLICATION_ID_PRODUCTION=your-prod-app-id
+# export SQUARE_ACCESS_TOKEN_PRODUCTION=your-prod-access-token
+```
+
+The app reads `AHOY_ENV` to choose config, and the Square client uses the matching environment automatically.
+
 1. **Set environment variables:**
    ```bash
    export FLASK_ENV=production
