@@ -269,6 +269,11 @@
                         <i class="fas fa-play-circle" aria-hidden="true"></i>
                         <span>Shows</span>
                     </a>
+                    <a href="{{ url_for('live_tv_page') }}"
+                        class="mobile-tab {% if request.endpoint == 'live_tv_page' %}active{% endif %}">
+                        <i class="fas fa-tv" aria-hidden="true"></i>
+                        <span>Live TV</span>
+                    </a>
                     <a href="{{ url_for('artists') }}"
                         class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
                         <i class="fas fa-users" aria-hidden="true"></i>
@@ -294,6 +299,7 @@
                         aria-label="Close menu">✕</button>
                     <a href="/music">Music</a>
                     <a href="/shows">Shows</a>
+                    <a href="/live-tv">Live TV</a>
                     <a href="/artists">Artists</a>
                     <a href="/radio">Radio</a>
                     <a href="/bookmarks">Saved</a>
@@ -345,6 +351,12 @@
                             title="Live Shows">
                             <i class="fas fa-play-circle"></i>
                             <span>Shows</span>
+                        </a>
+                        <a href="{{ url_for('live_tv_page') }}"
+                            class="feature-btn {% if request.endpoint == 'live_tv_page' %}active{% endif %}"
+                            title="Live TV">
+                            <i class="fas fa-tv"></i>
+                            <span>Live TV</span>
                         </a>
                         <a href="{{ url_for('artists') }}"
                             class="feature-btn {% if request.endpoint == 'artists' %}active{% endif %}"
@@ -1008,6 +1020,8 @@
                                 @click="goTo('/music')">Music</div>
                             <div class="action-mini"
                                 @click="goTo('/shows')">Shows</div>
+                            <div class="action-mini"
+                                @click="goTo('/live-tv')">Live TV</div>
                             <div class="action-mini"
                                 @click="goTo('/artists')">Artists</div>
                         </div>

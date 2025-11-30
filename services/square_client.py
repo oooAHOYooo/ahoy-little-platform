@@ -14,6 +14,7 @@ def get_square_client(app=None):
     - AHOY_ENV=production -> Square production
     Reads credentials from Flask config if available, else from environment variables.
     """
+    global Client  # type: ignore
     if Client is None:
         # Import lazily to give a clearer error if the SDK isn't installed
         try:
@@ -22,7 +23,6 @@ def get_square_client(app=None):
             raise RuntimeError(
                 "Square Python SDK is not installed. Install with: pip install squareup"
             ) from exc
-        global Client  # type: ignore
         Client = _Client  # type: ignore
 
     # Prefer Flask app config if available

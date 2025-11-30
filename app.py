@@ -764,6 +764,13 @@ def shows():
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
+@app.route('/live-tv')
+def live_tv_page():
+    """Live TV page with four channels and guide."""
+    response = make_response(render_template('live_tv.html'))
+    response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
+    return response
+
 @app.route('/artists')
 def artists():
     """Artists directory page"""
@@ -1084,6 +1091,67 @@ def api_shows():
     """Get all shows/video content"""
     shows_data = load_json_data('shows.json', {'shows': []})
     return jsonify(shows_data)
+
+@app.route('/api/live-tv/channels')
+@limiter.exempt
+def api_live_tv_channels():
+    """Return four Live TV channels built from available media content."""
+    shows_data = load_json_data('shows.json', {'shows': []})
+
+    def normalize_show(item):
+        # Map show to a unified structure
+        return {
+            'id': item.get('id'),
+            'title': item.get('title'),
+            'type': 'show',  # treated as video for player behavior
+            'video_url': item.get('video_url') or item.get('mp4_link') or item.get('trailer_url'),
+            'thumbnail': item.get('thumbnail'),
+            'duration_seconds': item.get('duration_seconds') or 0,
+            'description': item.get('description') or '',
+            'category': (item.get('category') or '').lower(),
+            'tags': item.get('tags') or [],
+        }
+
+    shows = [normalize_show(s) for s in shows_data.get('shows', []) if s.get('video_url') or s.get('mp4_link') or s.get('trailer_url')]
+
+    # Channel categorization
+    music_videos = [s for s in shows if (s.get('category') == 'music video' or 'music-video' in s.get('tags', []) or 'musicvideos' in ' '.join(s.get('tags', [])))]
+    films = [s for s in shows if (s.get('category') == 'short film' or s.get('category') == 'film' or 'short-film' in s.get('tags', []))]
+    live_shows = [s for s in shows if (s.get('category') == 'broadcast' or 'live' in ' '.join(s.get('tags', [])) or 'episode' in s.get('category', ''))]
+
+    # Misc: everything not already in the other channels (video only)
+    included_ids = {s['id'] for s in music_videos + films + live_shows}
+    misc_videos = [s for s in shows if s['id'] not in included_ids]
+    misc = misc_videos
+
+    # Sort each channel deterministically (by title) for stable guide, but could randomize later
+    def sort_items(items):
+        return sorted(items, key=lambda x: (x.get('title') or '').lower())
+
+    channels = [
+        {
+            'id': 'misc',
+            'name': 'Misc',
+            'items': sort_items(misc),
+        },
+        {
+            'id': 'music-videos',
+            'name': 'Music Videos',
+            'items': sort_items(music_videos),
+        },
+        {
+            'id': 'films',
+            'name': 'Films',
+            'items': sort_items(films),
+        },
+        {
+            'id': 'live-shows',
+            'name': 'Live Shows',
+            'items': sort_items(live_shows),
+        },
+    ]
+
+    return jsonify({'channels': channels})
 
 @app.route('/api/show/<show_id>')
 def api_show(show_id):
