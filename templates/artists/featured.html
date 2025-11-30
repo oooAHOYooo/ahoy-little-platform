@@ -3,9 +3,11 @@
 {% block title %}Featured Artists - Ahoy Indie Media{% endblock %}
 
 {% block meta %}
-<meta name="description" content="Discover featured independent artists on Ahoy Indie Media. Support emerging talent and explore their music and shows.">
+<meta name="description"
+    content="Discover featured independent artists on Ahoy Indie Media. Support emerging talent and explore their music and shows.">
 <meta property="og:title" content="Featured Artists - Ahoy Indie Media">
-<meta property="og:description" content="Discover featured independent artists on Ahoy Indie Media">
+<meta property="og:description"
+    content="Discover featured independent artists on Ahoy Indie Media">
 {% endblock %}
 
 {% block content %}
@@ -14,37 +16,43 @@
     <section class="featured-hero">
         <div class="hero-content">
             <h1 class="hero-title">Featured Artists</h1>
-            <p class="hero-subtitle">Discover and support independent talent</p>
+            <p class="hero-subtitle">Discover and support independent work</p>
         </div>
     </section>
 
     <!-- Featured Artists Grid -->
     <section class="featured-artists-grid">
         <div class="artists-container">
-            <template x-for="artist in artists" :key="artist.id || artist.slug || artist.name">
+            <template x-for="artist in artists"
+                :key="artist.id || artist.slug || artist.name">
                 <div class="artist-card-featured">
-                    <a :href="`/artist/${getArtistSlug(artist)}`" class="artist-card-link">
+                    <a :href="`/artist/${getArtistSlug(artist)}`"
+                        class="artist-card-link">
                         <div class="artist-hero-image-container">
-                            <img 
+                            <img
                                 :src="artist.hero_image_url || artist.cover_image || artist.image || '/static/img/default-avatar.png'"
                                 :alt="artist.name"
                                 class="artist-hero-image"
                                 loading="lazy">
                             <div class="artist-overlay">
                                 <div class="artist-info-overlay">
-                                    <h3 class="artist-name" x-text="artist.name"></h3>
-                                    <p class="artist-genre" x-text="artist.genre || artist.type || 'Artist'"></p>
+                                    <h3 class="artist-name"
+                                        x-text="artist.name"></h3>
+                                    <p class="artist-genre"
+                                        x-text="artist.genre || artist.type || 'Artist'"></p>
                                 </div>
                             </div>
                         </div>
                     </a>
                     <div class="artist-card-actions">
-                        <button 
+                        <button
                             @click.stop="toggleFollow(artist)"
                             :class="{ 'following': isFollowing(artist) }"
                             class="follow-btn">
-                            <i :class="isFollowing(artist) ? 'fas fa-check' : 'fas fa-plus'"></i>
-                            <span x-text="isFollowing(artist) ? 'Following' : 'Follow'"></span>
+                            <i
+                                :class="isFollowing(artist) ? 'fas fa-check' : 'fas fa-plus'"></i>
+                            <span
+                                x-text="isFollowing(artist) ? 'Following' : 'Follow'"></span>
                         </button>
                     </div>
                 </div>
@@ -53,8 +61,8 @@
 
         <div x-show="artists.length === 0" class="empty-state">
             <i class="fas fa-music"></i>
-            <h3>No featured artists yet</h3>
-            <p>Check back soon for featured independent artists!</p>
+            <h3>No featured work yet</h3>
+            <p>Check back soon for featured independent work!</p>
         </div>
     </section>
 </div>
@@ -342,4 +350,3 @@ function featuredArtists() {
 }
 </style>
 {% endblock %}
-
