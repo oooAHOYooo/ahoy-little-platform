@@ -1,5 +1,242 @@
 /* Ahoy Indie Media - Main Stylesheet */
 
+/* Panelstream styles */
+.panelstream-container {
+	background: #0a0a0a;
+	color: #fff;
+	overflow-x: hidden;
+}
+
+.panelstream-player {
+	width: 100%;
+	max-width: 100%;
+	height: 45vh;
+	background: #111;
+}
+
+.panelstream-player video {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.panelstream-title {
+	font-size: 1.4rem;
+	font-weight: 700;
+	padding: 12px 0 6px 16px;
+	margin: 0;
+}
+
+.panelstream-rail {
+	display: flex;
+	gap: 14px;
+	padding-left: 16px;
+	padding-bottom: 18px;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+}
+
+.panelstream-rail::-webkit-scrollbar {
+	display: none;
+}
+
+.panelstream-item {
+	width: 200px;
+	height: 115px;
+	background: #222;
+	border-radius: 8px;
+	overflow: hidden;
+	scroll-snap-align: start;
+	transition: all 0.18s ease-out;
+}
+
+.panelstream-item img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.panelstream-item:hover,
+.panelstream-item:focus {
+	transform: scale(1.08);
+	box-shadow: 0 0 16px rgba(255,255,255,0.4);
+	border: 2px solid rgba(255,255,255,0.5);
+}
+
+/* Hero gradient and playing now */
+.hero-player {
+	position: relative;
+	overflow: hidden;
+}
+.hero-player .hero-glass {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0));
+}
+.glass {
+	backdrop-filter: blur(12px);
+	background: rgba(0,0,0,0.4);
+}
+#playing-now {
+	display: grid;
+	grid-template-columns: 140px 1fr 1fr;
+	gap: 12px;
+	align-items: center;
+	margin: 12px 16px 6px 16px;
+	padding: 10px;
+	border-radius: 10px;
+}
+#playing-now img {
+	width: 100%;
+	aspect-ratio: 16/9;
+	object-fit: cover;
+	border-radius: 8px;
+	background: #1a1a1a;
+}
+#playing-now h4 {
+	margin: 0 0 4px 0;
+	font-size: 0.95rem;
+	opacity: 0.9;
+}
+#playing-now p {
+	margin: 0;
+	opacity: 0.95;
+}
+
+/* Time strip */
+.time-strip {
+	display: flex;
+	gap: 24px;
+	padding: 10px 16px 16px 16px;
+	overflow-x: auto;
+	white-space: nowrap;
+	border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.time-strip .tick {
+	color: #cfcfcf;
+	font-size: 13px;
+	min-width: 90px;
+	text-align: left;
+	flex: 0 0 auto;
+}
+.time-strip::-webkit-scrollbar { display: none; }
+
+/* Channel rows */
+.channel-row {
+	margin: 12px 0 6px 0;
+}
+.channel-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 16px;
+	background: rgba(255,255,255,0.08);
+	border-left: 4px solid #ffffff22;
+}
+.channel-badge {
+	display: inline-block;
+	font-size: 12px;
+	padding: 4px 8px;
+	border-radius: 999px;
+	background: #1b1b1b;
+	border: 1px solid #2a2a2a;
+}
+.channel-title {
+	font-weight: 800;
+	letter-spacing: .3px;
+}
+.channel-cards {
+	display: flex;
+	gap: 16px;
+	padding: 12px 16px 18px 16px;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+}
+.channel-cards::-webkit-scrollbar { display: none; }
+
+/* TV cards */
+.tv-card {
+	width: 300px;
+	aspect-ratio: 16/9;
+	position: relative;
+	border-radius: 12px;
+	overflow: hidden;
+	background: #222;
+	box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+	scroll-snap-align: start;
+	border: 1px solid #2a2a2a;
+	cursor: pointer;
+}
+.tv-card img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+.tv-card .overlay {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0.0) 60%);
+}
+.tv-card .meta {
+	position: absolute;
+	left: 10px;
+	bottom: 8px;
+	right: 10px;
+	display: grid;
+	gap: 2px;
+}
+.tv-card .meta .title {
+	font-weight: 700;
+	font-size: 14px;
+}
+.tv-card .meta .time {
+	font-size: 12px;
+	opacity: .9;
+}
+.tv-card:focus,
+.tv-card:hover {
+	outline: 2px solid rgba(255,255,255,0.5);
+	transform: scale(1.03);
+	transition: transform 0.15s ease-out;
+}
+
+/* Live TV UTC progress bar */
+#ltv-progress-wrap {
+	position: relative;
+	height: 4px;
+	background: rgba(255,255,255,0.12);
+	margin: 8px 16px 6px 16px;
+	border-radius: 999px;
+	overflow: hidden;
+}
+#ltv-progress {
+	height: 100%;
+	width: 0%;
+	background: #e50914;
+	transition: width 0.5s linear;
+}
+
+/* EPG current highlighting */
+.program.epg-current {
+	border-color: #e50914 !important;
+	box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.35) inset, 0 0 18px rgba(229,9,20,0.3);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+	#playing-now {
+		grid-template-columns: 1fr;
+	}
+	.channel-cards {
+		overflow-x: auto;
+	}
+	.tv-card {
+		width: 100%;
+	}
+}
+
 /* ========================================
    GLOBAL DESIGN SYSTEM
    Unified visual language for Ahoy Indie Media

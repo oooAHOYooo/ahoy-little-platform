@@ -63,7 +63,75 @@
 {% endblock %}
 
 {% block content %}
-<div class="live-tv-container" id="liveTvRoot" data-initial-channel="misc">
+<div class="panelstream-container" id="liveTvPanelstream">
+	<!-- HERO VIDEO PLAYER WITH GLASS GRADIENT -->
+	<div class="panelstream-player hero-player">
+		<video id="livePlayer" controls autoplay muted playsinline webkit-playsinline></video>
+		<div class="hero-glass"></div>
+	</div>
+
+	<!-- LIVE TV PROGRESS BAR -->
+	<div id="ltv-progress-wrap"><div id="ltv-progress"></div></div>
+
+	<!-- PLAYING NOW MINI PANEL -->
+	<div id="playing-now" class="playing-now glass">
+		<img id="playingNowThumb" alt="" />
+		<div class="now-col">
+			<h4>Now Playing</h4>
+			<p id="playingNowTitle">Select a program</p>
+		</div>
+		<div class="next-col">
+			<h4>Up Next</h4>
+			<p id="upNextTitle">—</p>
+		</div>
+	</div>
+
+	<!-- TIME STRIP -->
+	<div class="time-strip" id="timeStrip" aria-hidden="false"></div>
+
+	<!-- CHANNEL ROWS -->
+	<div class="channel-row" data-channel="clips">
+		<div class="channel-header">
+			<span class="channel-badge">Channel 01</span>
+			<span class="channel-title">Clips</span>
+		</div>
+		<div class="channel-cards" id="row-clips" role="list"></div>
+	</div>
+
+	<div class="channel-row" data-channel="promos">
+		<div class="channel-header">
+			<span class="channel-badge">Channel 02</span>
+			<span class="channel-title">Promos</span>
+		</div>
+		<div class="channel-cards" id="row-promos" role="list"></div>
+	</div>
+
+	<div class="channel-row" data-channel="music_videos">
+		<div class="channel-header">
+			<span class="channel-badge">Channel 03</span>
+			<span class="channel-title">Music Videos</span>
+		</div>
+		<div class="channel-cards" id="row-music-videos" role="list"></div>
+	</div>
+
+	<div class="channel-row" data-channel="films">
+		<div class="channel-header">
+			<span class="channel-badge">Channel 04</span>
+			<span class="channel-title">Films</span>
+		</div>
+		<div class="channel-cards" id="row-films" role="list"></div>
+	</div>
+
+	<div class="channel-row" data-channel="live_shows">
+		<div class="channel-header">
+			<span class="channel-badge">Channel 05</span>
+			<span class="channel-title">Live Shows</span>
+		</div>
+		<div class="channel-cards" id="row-live-shows" role="list"></div>
+	</div>
+</div>
+
+<div class="live-tv-container" id="liveTvRoot" data-initial-channel="misc" style="display:none" aria-hidden="true">
 	<!-- Left sidebar: channels -->
 	<aside class="live-tv-sidebar" aria-label="Channels">
 		<ul class="channel-list" id="channelList" role="listbox" aria-label="Live TV Channels" tabindex="0">
@@ -109,6 +177,8 @@
 
 {% block extra_head %}
 <script src="{{ url_for('static', filename='js/live-tv.js') }}"></script>
+<script src="{{ url_for('static', filename='js/live-tv-rows.js') }}"></script>
+<script src="{{ url_for('static', filename='js/live-tv-engine.js') }}"></script>
 {% endblock %}
 
 

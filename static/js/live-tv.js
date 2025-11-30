@@ -27,7 +27,7 @@
     state.nowLineEl = qs('nowLine');
     state.btnWatchEl = qs('btnWatch');
     state.btnLaterEl = qs('btnLater');
-    state.videoEl = qs('tvPlayer');
+    state.videoEl = qs('tvPlayer') || qs('livePlayer');
     state.nowTitleEl = qs('nowTitle');
     state.nowMetaEl = qs('nowMeta');
 
