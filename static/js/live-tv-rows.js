@@ -6,10 +6,10 @@
   const state = {
     channels: [],
     rowOrder: [
-      { key: 'clips', titles: ['clips', 'misc', 'clip'] },
-      { key: 'promos', titles: ['promos', 'promo'] },
+      { key: 'misc', titles: ['misc', 'clips', 'clip'] },
+      { key: 'short_films', titles: ['short films', 'short film', 'films', 'film', 'movies', 'movie'] },
       { key: 'music_videos', titles: ['music videos', 'music_video', 'music'] },
-      { key: 'films', titles: ['films', 'movies', 'film', 'movie'] },
+      { key: 'films', titles: ['films', 'movies', 'film', 'movie'] }, // kept for fallback; not used as a rail key
       { key: 'live_shows', titles: ['live shows', 'broadcast', 'shows', 'live'] },
     ],
     focus: { row: 0, col: 0 },
@@ -33,7 +33,7 @@
         state.channels.forEach(c => { if (!Array.isArray(c.items)) c.items = []; });
         renderRows();
         autoFocusFirst();
-        wireGlobalKeys();
+        // keyboard navigation omitted for smooth cross-browser behavior
       })
       .catch(err => console.error('live-tv-rows load failed', err));
   }
@@ -101,7 +101,8 @@
     const preview = () => updatePreview(el);
     el.addEventListener('mouseenter', preview);
     el.addEventListener('focus', preview);
-    el.addEventListener('click', () => playCard(el));
+    el.addEventListener('touchstart', preview, { passive: true });
+    // No on-demand click-to-play in linear TV mode
 
     return el;
   }
@@ -116,6 +117,11 @@
       ch.items.forEach((item, colIdx) => {
         const card = makeCard(item, rowIdx, colIdx);
         container.appendChild(card);
+      });
+      // highlight active rail on pointer hover
+      container.addEventListener('mouseenter', () => setActiveRail(rowIdx));
+      container.addEventListener('mouseleave', () => {
+        container.classList.remove('rail-active');
       });
     });
   }
@@ -177,9 +183,8 @@
         state.focus.col = state.focus.col + 1;
         focusCurrent();
       } else if (e.key === 'Enter') {
+        // In linear TV mode, do not trigger on-demand playback.
         e.preventDefault();
-        const el = getCurrentCard();
-        if (el) playCard(el);
       }
     });
   }
@@ -199,7 +204,22 @@
       try { el.focus(); } catch (_) {}
       el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       updatePreview(el);
+      // Highlight active rail
+      const rowIdx = Number(el.dataset.row || 0);
+      setActiveRail(rowIdx);
     }
+  }
+
+  function setActiveRail(rowIdx) {
+    state.rowOrder.forEach((rowDef, idx) => {
+      const container = byId(`row-${rowDef.key.replace('_', '-')}`);
+      if (!container) return;
+      if (idx === rowIdx) {
+        container.classList.add('rail-active');
+      } else {
+        container.classList.remove('rail-active');
+      }
+    });
   }
 
   if (document.readyState === 'loading') {

@@ -10,8 +10,10 @@
 .panelstream-player {
 	width: 100%;
 	max-width: 100%;
-	height: 45vh;
-	background: #111;
+	aspect-ratio: 16/9;
+	max-height: 45vh;
+	background: #000;
+	box-shadow: 0 20px 40px rgba(0,0,0,0.45), 0 0 40px rgba(0,0,0,0.35);
 }
 
 .panelstream-player video {
@@ -74,17 +76,60 @@
 	pointer-events: none;
 	background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0));
 }
+.video-header {
+	position: absolute;
+	left: 16px;
+	top: 12px;
+	z-index: 3;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
 .glass {
 	backdrop-filter: blur(12px);
 	background: rgba(0,0,0,0.4);
+}
+#channelNameLabel, .now-playing-label {
+	display: inline-block;
+	background: rgba(0,0,0,0.6);
+	border: 1px solid rgba(255,255,255,0.15);
+	padding: 6px 10px;
+	border-radius: 999px;
+	font-weight: 700;
+	letter-spacing: .2px;
+}
+
+/* Remote buttons */
+.channel-remote {
+	position: absolute;
+	right: 12px;
+	top: 12px;
+	display: flex;
+	gap: 8px;
+	z-index: 4;
+}
+.remote-btn {
+	background: rgba(0,0,0,0.6);
+	border: 1px solid rgba(255,255,255,0.25);
+	color: #fff;
+	border-radius: 999px;
+	padding: 8px 12px;
+	font-weight: 800;
+	font-size: 12px;
+	cursor: pointer;
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+}
+.remote-btn:hover {
+	background: rgba(255,255,255,0.12);
 }
 #playing-now {
 	display: grid;
 	grid-template-columns: 140px 1fr 1fr;
 	gap: 12px;
 	align-items: center;
-	margin: 12px 16px 6px 16px;
-	padding: 10px;
+	margin: 12px 0 6px 0;
+	padding: 10px 12px 6px 12px;
 	border-radius: 10px;
 }
 #playing-now img {
@@ -125,6 +170,8 @@
 /* Channel rows */
 .channel-row {
 	margin: 12px 0 6px 0;
+	background: rgba(255,255,255,0.04);
+	padding-bottom: 8px;
 }
 .channel-header {
 	display: flex;
@@ -143,7 +190,7 @@
 	border: 1px solid #2a2a2a;
 }
 .channel-title {
-	font-weight: 800;
+	font-weight: 600;
 	letter-spacing: .3px;
 }
 .channel-cards {
@@ -157,7 +204,7 @@
 
 /* TV cards */
 .tv-card {
-	width: 300px;
+	width: 220px;
 	aspect-ratio: 16/9;
 	position: relative;
 	border-radius: 12px;
@@ -205,9 +252,9 @@
 /* Live TV UTC progress bar */
 #ltv-progress-wrap {
 	position: relative;
-	height: 4px;
-	background: rgba(255,255,255,0.12);
-	margin: 8px 16px 6px 16px;
+	height: 3px;
+	background: rgba(255,255,255,0.15);
+	margin: 8px 0 0 0;
 	border-radius: 999px;
 	overflow: hidden;
 }
@@ -223,6 +270,85 @@
 	border-color: #e50914 !important;
 	box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.35) inset, 0 0 18px rgba(229,9,20,0.3);
 }
+
+/* Spotlight grid and right dashboard (liquid glass) */
+.spotlight-grid {
+	display: grid;
+	grid-template-columns: 1fr 320px;
+	gap: 16px;
+	align-items: start;
+	max-width: 1280px;
+	margin: 0 auto;
+}
+.right-dashboard {
+	position: sticky;
+	top: 10px;
+	display: grid;
+	gap: 10px;
+	padding: 12px;
+	border-radius: 12px;
+	background: rgba(255,255,255,0.07);
+	border: 1px solid rgba(255,255,255,0.12);
+	backdrop-filter: blur(14px) saturate(140%);
+	-webkit-backdrop-filter: blur(14px) saturate(140%);
+	color: #fff;
+}
+.right-dashboard .rd-thumb {
+	width: 100%;
+	aspect-ratio: 16/9;
+	border-radius: 10px;
+	object-fit: cover;
+	background: #111;
+}
+.right-dashboard .rd-label {
+	font-size: 11px;
+	opacity: 0.9;
+	text-transform: uppercase;
+	letter-spacing: .4px;
+}
+.right-dashboard .rd-title {
+	font-weight: 700;
+	font-size: 0.95rem;
+}
+.right-dashboard .rd-meta {
+	font-size: 0.8rem;
+	opacity: 0.95;
+}
+
+/* Guide compact and high-contrast */
+.guide {
+	color: #fff;
+}
+.guide-header {
+	padding: 6px 8px;
+}
+.guide-row {
+	padding: 6px 8px;
+}
+.program {
+	padding: 6px;
+	border-color: #2a2a2a;
+}
+.program-title { color: #fff; }
+.program-meta { color: rgba(255,255,255,0.85); }
+
+/* Rail active highlighting */
+.channel-cards.rail-active .tv-card:focus,
+.channel-cards.rail-active .tv-card:hover {
+	transform: scale(1.08);
+	box-shadow: 0 12px 30px rgba(0,0,0,0.55), 0 0 18px rgba(255,255,255,0.15);
+	outline: 2px solid rgba(255,255,255,0.5);
+}
+.channel-cards:not(.rail-active) .tv-card {
+	opacity: 0.7;
+}
+
+/* Sticky spotlight section and no body scrollbar */
+.tv-container { display: grid; grid-template-rows: auto 1fr; height: 100vh; }
+.video-spotlight { position: sticky; top: 0; z-index: 5; background: radial-gradient(1200px 300px at 50% -50px, rgba(0,0,0,0.75), rgba(0,0,0,0)) , #000; padding-bottom: 8px; }
+html, body { height: 100%; }
+body { overflow-y: hidden; }
+*::-webkit-scrollbar { display: none; }
 
 /* Responsive */
 @media (max-width: 900px) {

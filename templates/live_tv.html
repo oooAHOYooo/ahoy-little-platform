@@ -63,71 +63,93 @@
 {% endblock %}
 
 {% block content %}
-<div class="panelstream-container" id="liveTvPanelstream">
-	<!-- HERO VIDEO PLAYER WITH GLASS GRADIENT -->
-	<div class="panelstream-player hero-player">
-		<video id="livePlayer" controls autoplay muted playsinline webkit-playsinline></video>
-		<div class="hero-glass"></div>
+<div class="tv-container">
+	<div class="video-spotlight">
+		<div class="spotlight-grid">
+			<div class="spotlight-left">
+				<!-- HERO VIDEO PLAYER WITH GLASS GRADIENT AND HEADER -->
+				<div class="panelstream-player hero-player">
+					<video id="livePlayer" controls autoplay muted playsinline webkit-playsinline></video>
+					<div class="video-header">
+						<span class="now-playing-label">Now Playing</span>
+						<span class="channel-name-label" id="channelNameLabel" aria-live="polite">Channel —</span>
+					</div>
+					<div class="channel-remote" aria-label="Channel Controls">
+						<button id="btnChUp" class="remote-btn" title="Channel Up">CH ▲</button>
+						<button id="btnChDown" class="remote-btn" title="Channel Down">CH ▼</button>
+					</div>
+					<div class="hero-glass"></div>
+				</div>
+
+				<!-- PLAYING NOW THIN BAR WITH PROGRESS -->
+				<div id="playing-now" class="playing-now glass">
+					<img id="playingNowThumb" alt="" />
+					<div class="now-col">
+						<div class="np-title" id="playingNowTitle">Select a program</div>
+						<div class="np-sub" id="playingNowMeta">—</div>
+					</div>
+					<div class="next-col">
+						<div class="np-label">Up Next</div>
+						<div class="np-next" id="upNextTitle">—</div>
+					</div>
+					<div id="ltv-progress-wrap"><div id="ltv-progress"></div></div>
+				</div>
+
+				<!-- TIME STRIP -->
+				<div class="time-strip" id="timeStrip" aria-hidden="false"></div>
+			</div>
+			<aside class="right-dashboard glass" id="rightDashboard" aria-label="Channel Dashboard">
+				<img id="rd-thumb" alt="" class="rd-thumb"/>
+				<div class="rd-now">
+					<div class="rd-label">Playing Now</div>
+					<div class="rd-title" id="rd-now-title">—</div>
+					<div class="rd-meta"><span id="rd-category">—</span></div>
+				</div>
+				<div class="rd-next">
+					<div class="rd-label">Up Next</div>
+					<div class="rd-title" id="rd-next-title">—</div>
+				</div>
+			</aside>
+		</div>
 	</div>
 
-	<!-- LIVE TV PROGRESS BAR -->
-	<div id="ltv-progress-wrap"><div id="ltv-progress"></div></div>
+	<!-- CHANNEL RAILS -->
+	<div class="channel-rows">
+		<section class="channel-row" data-channel="misc">
+			<div class="channel-header">
+				<span class="channel-badge">Channel 01</span>
+				<span class="channel-title">Misc</span>
+			</div>
+			<div class="channel-divider"></div>
+			<div class="channel-cards" id="row-misc" role="list"></div>
+		</section>
 
-	<!-- PLAYING NOW MINI PANEL -->
-	<div id="playing-now" class="playing-now glass">
-		<img id="playingNowThumb" alt="" />
-		<div class="now-col">
-			<h4>Now Playing</h4>
-			<p id="playingNowTitle">Select a program</p>
-		</div>
-		<div class="next-col">
-			<h4>Up Next</h4>
-			<p id="upNextTitle">—</p>
-		</div>
-	</div>
+		<section class="channel-row" data-channel="short_films">
+			<div class="channel-header">
+				<span class="channel-badge">Channel 02</span>
+				<span class="channel-title">Short Films</span>
+			</div>
+			<div class="channel-divider"></div>
+			<div class="channel-cards" id="row-short-films" role="list"></div>
+		</section>
 
-	<!-- TIME STRIP -->
-	<div class="time-strip" id="timeStrip" aria-hidden="false"></div>
+		<section class="channel-row" data-channel="music_videos">
+			<div class="channel-header">
+				<span class="channel-badge">Channel 03</span>
+				<span class="channel-title">Music Videos</span>
+			</div>
+			<div class="channel-divider"></div>
+			<div class="channel-cards" id="row-music-videos" role="list"></div>
+		</section>
 
-	<!-- CHANNEL ROWS -->
-	<div class="channel-row" data-channel="clips">
-		<div class="channel-header">
-			<span class="channel-badge">Channel 01</span>
-			<span class="channel-title">Clips</span>
-		</div>
-		<div class="channel-cards" id="row-clips" role="list"></div>
-	</div>
-
-	<div class="channel-row" data-channel="promos">
-		<div class="channel-header">
-			<span class="channel-badge">Channel 02</span>
-			<span class="channel-title">Promos</span>
-		</div>
-		<div class="channel-cards" id="row-promos" role="list"></div>
-	</div>
-
-	<div class="channel-row" data-channel="music_videos">
-		<div class="channel-header">
-			<span class="channel-badge">Channel 03</span>
-			<span class="channel-title">Music Videos</span>
-		</div>
-		<div class="channel-cards" id="row-music-videos" role="list"></div>
-	</div>
-
-	<div class="channel-row" data-channel="films">
-		<div class="channel-header">
-			<span class="channel-badge">Channel 04</span>
-			<span class="channel-title">Films</span>
-		</div>
-		<div class="channel-cards" id="row-films" role="list"></div>
-	</div>
-
-	<div class="channel-row" data-channel="live_shows">
-		<div class="channel-header">
-			<span class="channel-badge">Channel 05</span>
-			<span class="channel-title">Live Shows</span>
-		</div>
-		<div class="channel-cards" id="row-live-shows" role="list"></div>
+		<section class="channel-row" data-channel="live_shows">
+			<div class="channel-header">
+				<span class="channel-badge">Channel 04</span>
+				<span class="channel-title">Live Shows</span>
+			</div>
+			<div class="channel-divider"></div>
+			<div class="channel-cards" id="row-live-shows" role="list"></div>
+		</section>
 	</div>
 </div>
 

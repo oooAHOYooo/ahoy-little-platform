@@ -15,6 +15,7 @@
     schedule: [],
     lastSrc: '',
     video: null,
+    selectedRow: 0,
     els: {
       nowThumb: null,
       nowTitle: null,
@@ -82,6 +83,37 @@
       const seek = getSeekTimeForSlot(slot);
       if (Math.abs((video.currentTime || 0) - seek) > 3) {
         resync();
+      }
+    });
+    // Auto-advance to the next scheduled slot when a video ends
+    video.addEventListener('ended', () => {
+      const now = Date.now();
+      const curr = getCurrentSlot(engine.schedule);
+      const next = getNextSlot(engine.schedule);
+      // Prefer the true next scheduled slot; if it's in the future, wait until its start to preserve "Always On"
+      const startNext = () => {
+        const playSlot = getCurrentSlot(engine.schedule) || next;
+        if (!playSlot || !playSlot.src) return;
+        engine.lastSrc = ''; // force reload in playCurrentSlot
+        const seekSec = getSeekTimeForSlot(playSlot);
+        try { video.pause(); } catch (_) {}
+        video.src = playSlot.src;
+        try { video.load(); } catch (_) {}
+        try { video.currentTime = seekSec; } catch (_) {}
+        video.muted = false;
+        const p = video.play();
+        if (p && typeof p.catch === 'function') p.catch(() => {});
+      };
+      if (next) {
+        if (now < next.startUTC) {
+          // Wait until the scheduled next slot start time
+          setTimeout(startNext, Math.max(0, next.startUTC - now + 50));
+        } else {
+          startNext();
+        }
+      } else if (curr) {
+        // If no next found (end of horizon), try to re-sync with current slot timeline
+        startNext();
       }
     });
   }
@@ -153,20 +185,22 @@
     window.CHANNEL_SCHEDULE = schedule; // expose for debugging
   }
 
-  function getCurrentSlot(schedule) {
+  function getCurrentSlot(schedule, rowFilter) {
     const now = Date.now();
     for (let i = 0; i < schedule.length; i++) {
       const s = schedule[i];
+      if (rowFilter != null && s.row !== rowFilter) continue;
       if (now >= s.startUTC && now < s.endUTC) return s;
     }
     return null;
   }
 
-  function getNextSlot(schedule) {
+  function getNextSlot(schedule, rowFilter) {
     const now = Date.now();
     let candidate = null;
     for (let i = 0; i < schedule.length; i++) {
       const s = schedule[i];
+      if (rowFilter != null && s.row !== rowFilter) continue;
       if (s.startUTC > now) {
         if (!candidate || s.startUTC < candidate.startUTC) candidate = s;
       }
@@ -183,7 +217,7 @@
 
   function playCurrentSlot() {
     if (!engine.video || engine.schedule.length === 0) return;
-    const slot = getCurrentSlot(engine.schedule);
+    const slot = getCurrentSlot(engine.schedule, engine.selectedRow);
     if (!slot || !slot.src) return;
     const needSrc = slot.src !== engine.lastSrc;
     const seekSec = getSeekTimeForSlot(slot);
@@ -206,19 +240,31 @@
   }
 
   function updateNowNext() {
-    const slot = getCurrentSlot(engine.schedule);
-    const next = getNextSlot(engine.schedule);
+    const slot = getCurrentSlot(engine.schedule, engine.selectedRow);
+    const next = getNextSlot(engine.schedule, engine.selectedRow);
     if (slot) {
       if (engine.els.nowTitle) engine.els.nowTitle.textContent = slot.title || 'Now Playing';
       if (engine.els.nowThumb && slot.thumb) engine.els.nowThumb.src = slot.thumb;
+      const npMeta = document.getElementById('playingNowMeta');
+      if (npMeta) npMeta.textContent = slot.category || '';
+      // Right dashboard
+      const rdThumb = document.getElementById('rd-thumb');
+      const rdNow = document.getElementById('rd-now-title');
+      const rdCat = document.getElementById('rd-category');
+      if (rdThumb && slot.thumb) rdThumb.src = slot.thumb;
+      if (rdNow) rdNow.textContent = slot.title || '—';
+      if (rdCat) rdCat.textContent = slot.category || '—';
     }
     if (next) {
       if (engine.els.nextTitle) engine.els.nextTitle.textContent = next.title || '—';
+      // Right dashboard next
+      const rdNext = document.getElementById('rd-next-title');
+      if (rdNext) rdNext.textContent = next.title || '—';
     }
   }
 
   function updateProgressBar() {
-    const slot = getCurrentSlot(engine.schedule);
+    const slot = getCurrentSlot(engine.schedule, engine.selectedRow);
     if (!slot || !engine.els.progress) return;
     const now = Date.now();
     const pct = Math.max(0, Math.min(100, ((now - slot.startUTC) / (slot.endUTC - slot.startUTC)) * 100));
@@ -226,7 +272,7 @@
   }
 
   function highlightCurrentEPG() {
-    const slot = getCurrentSlot(engine.schedule);
+    const slot = getCurrentSlot(engine.schedule, engine.selectedRow);
     qsa('.program.epg-current').forEach(n => n.classList.remove('epg-current'));
     if (slot && slot.el) {
       slot.el.classList.add('epg-current');
@@ -251,6 +297,33 @@
     engine.timer = setInterval(tick, 1000);
     tick();
     log('engine started');
+    wireRemoteControls();
+    updateChannelLabel();
+  }
+
+  function wireRemoteControls() {
+    const btnUp = document.getElementById('btnChUp');
+    const btnDown = document.getElementById('btnChDown');
+    const totalRows = engine.channels.length;
+    const setRow = (row) => {
+      engine.selectedRow = Math.max(0, Math.min(totalRows - 1, row));
+      engine.lastSrc = ''; // force reload on next tick
+      tick();
+      log('channel changed to row', engine.selectedRow);
+      updateChannelLabel();
+    };
+    if (btnUp) btnUp.addEventListener('click', () => setRow(engine.selectedRow + 1 >= totalRows ? 0 : engine.selectedRow + 1));
+    if (btnDown) btnDown.addEventListener('click', () => setRow(engine.selectedRow - 1 < 0 ? totalRows - 1 : engine.selectedRow - 1));
+  }
+
+  function updateChannelLabel() {
+    const label = document.getElementById('channelNameLabel');
+    if (!label) return;
+    const idx = engine.selectedRow;
+    const total = Math.max(1, engine.channels.length);
+    const ch = engine.channels[idx];
+    const num = (idx + 1).toString().padStart(2, '0');
+    label.textContent = `Channel ${num} — ${ch?.name || 'Live TV'}`;
   }
 
   if (document.readyState === 'loading') {
