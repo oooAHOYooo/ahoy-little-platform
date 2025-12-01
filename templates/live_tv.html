@@ -95,8 +95,6 @@
 					<div id="ltv-progress-wrap"><div id="ltv-progress"></div></div>
 				</div>
 
-				<!-- TIME STRIP -->
-				<div class="time-strip" id="timeStrip" aria-hidden="false"></div>
 			</div>
 			<aside class="right-dashboard glass" id="rightDashboard" aria-label="Channel Dashboard">
 				<img id="rd-thumb" alt="" class="rd-thumb"/>
@@ -113,43 +111,35 @@
 		</div>
 	</div>
 
-	<!-- CHANNEL RAILS -->
-	<div class="channel-rows">
-		<section class="channel-row" data-channel="misc">
-			<div class="channel-header">
-				<span class="channel-badge">Channel 01</span>
-				<span class="channel-title">Misc</span>
-			</div>
-			<div class="channel-divider"></div>
-			<div class="channel-cards" id="row-misc" role="list"></div>
-		</section>
+	<!-- NEW TV GUIDE LAYOUT -->
+	<div class="tv-guide-container">
+		<!-- LEFT SIDEBAR -->
+		<aside class="channel-list" aria-label="Channels">
+			<button class="channel-btn" data-target="#sec-misc">Channel 01 — Misc</button>
+			<button class="channel-btn" data-target="#sec-short-films">Channel 02 — Short Films</button>
+			<button class="channel-btn" data-target="#sec-music-videos">Channel 03 — Music Videos</button>
+			<button class="channel-btn" data-target="#sec-live-shows">Channel 04 — Live Shows</button>
+		</aside>
 
-		<section class="channel-row" data-channel="short_films">
-			<div class="channel-header">
-				<span class="channel-badge">Channel 02</span>
-				<span class="channel-title">Short Films</span>
-			</div>
-			<div class="channel-divider"></div>
-			<div class="channel-cards" id="row-short-films" role="list"></div>
-		</section>
-
-		<section class="channel-row" data-channel="music_videos">
-			<div class="channel-header">
-				<span class="channel-badge">Channel 03</span>
-				<span class="channel-title">Music Videos</span>
-			</div>
-			<div class="channel-divider"></div>
-			<div class="channel-cards" id="row-music-videos" role="list"></div>
-		</section>
-
-		<section class="channel-row" data-channel="live_shows">
-			<div class="channel-header">
-				<span class="channel-badge">Channel 04</span>
-				<span class="channel-title">Live Shows</span>
-			</div>
-			<div class="channel-divider"></div>
-			<div class="channel-cards" id="row-live-shows" role="list"></div>
-		</section>
+		<!-- RIGHT SCROLLABLE GUIDE -->
+		<main class="guide-grid">
+			<section id="sec-misc" class="guide-row" data-channel="misc">
+				<h2>Channel 01 — Misc</h2>
+				<div class="guide-scroll channel-cards" id="row-misc" role="list"></div>
+			</section>
+			<section id="sec-short-films" class="guide-row" data-channel="short_films">
+				<h2>Channel 02 — Short Films</h2>
+				<div class="guide-scroll channel-cards" id="row-short-films" role="list"></div>
+			</section>
+			<section id="sec-music-videos" class="guide-row" data-channel="music_videos">
+				<h2>Channel 03 — Music Videos</h2>
+				<div class="guide-scroll channel-cards" id="row-music-videos" role="list"></div>
+			</section>
+			<section id="sec-live-shows" class="guide-row" data-channel="live_shows">
+				<h2>Channel 04 — Live Shows</h2>
+				<div class="guide-scroll channel-cards" id="row-live-shows" role="list"></div>
+			</section>
+		</main>
 	</div>
 </div>
 
