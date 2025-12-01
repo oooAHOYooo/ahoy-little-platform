@@ -100,7 +100,7 @@
         video.src = playSlot.src;
         try { video.load(); } catch (_) {}
         try { video.currentTime = seekSec; } catch (_) {}
-        video.muted = false;
+        video.muted = true; // keep muted when auto-advancing
         const p = video.play();
         if (p && typeof p.catch === 'function') p.catch(() => {});
       };
@@ -227,7 +227,7 @@
       engine.video.src = slot.src;
       try { engine.video.load(); } catch (_) {}
       engine.video.currentTime = seekSec;
-      engine.video.muted = false;
+      engine.video.muted = true; // keep audio off by default
       const p = engine.video.play();
       if (p && typeof p.catch === 'function') p.catch(() => {});
       log('play slot', slot.title, 'seek', seekSec, 'sec');
@@ -304,6 +304,10 @@
   function wireRemoteControls() {
     const btnUp = document.getElementById('btnChUp');
     const btnDown = document.getElementById('btnChDown');
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const btnMute = document.getElementById('btnMute');
+    const btnFullscreen = document.getElementById('btnFullscreen');
+    const btnGoGuide = document.getElementById('btnGoGuide');
     const totalRows = engine.channels.length;
     const setRow = (row) => {
       engine.selectedRow = Math.max(0, Math.min(totalRows - 1, row));
@@ -314,6 +318,38 @@
     };
     if (btnUp) btnUp.addEventListener('click', () => setRow(engine.selectedRow + 1 >= totalRows ? 0 : engine.selectedRow + 1));
     if (btnDown) btnDown.addEventListener('click', () => setRow(engine.selectedRow - 1 < 0 ? totalRows - 1 : engine.selectedRow - 1));
+
+    if (btnPlayPause) btnPlayPause.addEventListener('click', () => {
+      if (!engine.video) return;
+      try {
+        if (engine.video.paused) {
+          const p = engine.video.play();
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+        } else {
+          engine.video.pause();
+        }
+      } catch (_) {}
+    });
+    if (btnMute) btnMute.addEventListener('click', () => {
+      if (!engine.video) return;
+      engine.video.muted = !engine.video.muted;
+    });
+    if (btnFullscreen) btnFullscreen.addEventListener('click', () => {
+      const target = engine.video || document.documentElement;
+      try {
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        } else if (target && target.requestFullscreen) {
+          target.requestFullscreen().catch(() => {});
+        }
+      } catch (_) {}
+    });
+    if (btnGoGuide) btnGoGuide.addEventListener('click', () => {
+      const guide = document.querySelector('.tv-guide-container');
+      if (guide && typeof guide.scrollIntoView === 'function') {
+        guide.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
   }
 
   function updateChannelLabel() {

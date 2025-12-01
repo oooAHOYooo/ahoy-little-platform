@@ -86,6 +86,11 @@
         <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+        <!-- Stripe publishable key and JS -->
+        <meta name="stripe-publishable-key" content="{{ STRIPE_PUBLISHABLE_KEY }}">
+        <script src="https://js.stripe.com/v3/"></script>
+        <script defer src="{{ url_for('static', filename='js/stripeBoost.js') }}"></script>
+
         <!-- App data component - must load before Alpine.js -->
         <script>
         // Stub for toast function (will be defined later in app.js)
@@ -1337,6 +1342,18 @@
                     <a href="#"
                         @click="showRegister = false; showLogin = true">Login</a>
                 </p>
+            </div>
+        </div>
+
+        <!-- Stripe Boost Modal -->
+        <div id="stripe-boost-modal" class="modal-overlay" style="display:none; align-items:center; justify-content:center;">
+            <div class="modal-mini" @click.stop>
+                <h4 style="margin-bottom:10px;">Enter Card Details</h4>
+                <div id="card-element" style="padding:10px; border:1px solid #333; border-radius:8px; background:#1e1e1e;"></div>
+                <div id="stripe-errors" style="color:#ff6b6b; margin-top:10px; display:none;"></div>
+                <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+                    <button id="stripe-boost-close" type="button" class="btn-mini">Close</button>
+                </div>
             </div>
         </div>
 

@@ -459,26 +459,28 @@ The platform uses a simple file-based user system with:
 
 ### Production Setup
 
-### Square Payments (AHOY_ENV)
+### Stripe Payments (AHOY_ENV)
 
-To toggle Square environments automatically, set `AHOY_ENV` to `sandbox` or `production`. Provide corresponding credentials via environment variables (or `.env`).
+Set `AHOY_ENV` to select Stripe keys:
+- If `AHOY_ENV=development` (or `sandbox`), the app uses test keys.
+- Otherwise, it uses live keys.
 
-Example:
+Required environment variables (DO NOT paste real keys in this repo):
 ```bash
-# Sandbox
-export AHOY_ENV=sandbox
-export SQUARE_APPLICATION_ID_SANDBOX=your-sandbox-app-id
-export SQUARE_ACCESS_TOKEN_SANDBOX=your-sandbox-access-token
-export SQUARE_LOCATION_ID_SANDBOX=YOUR_SANDBOX_LOCATION_ID
+# Test (development)
+export AHOY_ENV=development
+export STRIPE_PUBLISHABLE_KEY_TEST="<your_test_publishable_key>"
+export STRIPE_SECRET_KEY_TEST="<your_test_secret_key>"
+export STRIPE_WEBHOOK_SECRET_TEST="<your_test_webhook_secret>"
 
-# Production
+# Production (live)
 # export AHOY_ENV=production
-# export SQUARE_APPLICATION_ID_PRODUCTION=your-prod-app-id
-# export SQUARE_ACCESS_TOKEN_PRODUCTION=your-prod-access-token
-# export SQUARE_LOCATION_ID_PRODUCTION=YOUR_PROD_LOCATION_ID
+# export STRIPE_PUBLISHABLE_KEY="<your_live_publishable_key>"
+# export STRIPE_SECRET_KEY="<your_live_secret_key>"
+# export STRIPE_WEBHOOK_SECRET="<your_live_webhook_secret>"
 ```
 
-The app reads `AHOY_ENV` to choose config, and the Square client uses the matching environment automatically.
+The app reads `AHOY_ENV` to choose between test and live Stripe keys automatically.
 
 1. **Set environment variables:**
    ```bash

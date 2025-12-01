@@ -13,23 +13,29 @@ class BaseConfig:
     JSON_SORT_KEYS = False
     RATELIMIT_DEFAULT = "200/hour"
     CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").split(",") if os.environ.get("CORS_ORIGINS") else []
-    # Square defaults (overridden in env-specific configs)
-    SQUARE_ENV = os.environ.get("AHOY_ENV", "sandbox").lower()
-    SQUARE_APPLICATION_ID = os.environ.get("SQUARE_APPLICATION_ID_SANDBOX", "")
-    SQUARE_ACCESS_TOKEN = os.environ.get("SQUARE_ACCESS_TOKEN_SANDBOX", "")
+    # Stripe configuration (test vs live based on AHOY_ENV)
+    # If AHOY_ENV == "development" (or "sandbox"), use *_TEST keys. Otherwise use live keys.
+    _AHOY_ENV = os.environ.get("AHOY_ENV", "development").lower()
+    _USE_TEST_KEYS = _AHOY_ENV in ("development", "sandbox")
+    STRIPE_PUBLISHABLE_KEY = os.environ.get(
+        "STRIPE_PUBLISHABLE_KEY_TEST" if _USE_TEST_KEYS else "STRIPE_PUBLISHABLE_KEY",
+        ""
+    )
+    STRIPE_SECRET_KEY = os.environ.get(
+        "STRIPE_SECRET_KEY_TEST" if _USE_TEST_KEYS else "STRIPE_SECRET_KEY",
+        ""
+    )
+    STRIPE_WEBHOOK_SECRET = os.environ.get(
+        "STRIPE_WEBHOOK_SECRET_TEST" if _USE_TEST_KEYS else "STRIPE_WEBHOOK_SECRET",
+        ""
+    )
 
 class ProductionConfig(BaseConfig):
     RATELIMIT_DEFAULT = "600/hour"
-    SQUARE_ENV = "production"
-    SQUARE_APPLICATION_ID = os.environ.get("SQUARE_APPLICATION_ID_PRODUCTION", "")
-    SQUARE_ACCESS_TOKEN = os.environ.get("SQUARE_ACCESS_TOKEN_PRODUCTION", "")
-    SQUARE_LOCATION_ID = os.environ.get("SQUARE_LOCATION_ID_PRODUCTION", "")
+    pass
 
 class SandboxConfig(BaseConfig):
-    SQUARE_ENV = "sandbox"
-    SQUARE_APPLICATION_ID = os.environ.get("SQUARE_APPLICATION_ID_SANDBOX", "")
-    SQUARE_ACCESS_TOKEN = os.environ.get("SQUARE_ACCESS_TOKEN_SANDBOX", "")
-    SQUARE_LOCATION_ID = os.environ.get("SQUARE_LOCATION_ID_SANDBOX", "")
+    pass
 
 def get_config():
     # AHOY_ENV determines payment environment targeting

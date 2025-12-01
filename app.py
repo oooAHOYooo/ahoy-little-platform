@@ -32,6 +32,9 @@ from blueprints.bookmarks import bp as bookmarks_bp
 from blueprints.collections import bp as collections_bp
 from blueprints.api.gamify import bp as gamify_api_bp
 from blueprints.payments import bp as payments_bp
+from routes.boost_stripe import bp as boost_stripe_bp
+from routes.boost_stripe import boost_api_bp
+from routes.stripe_webhooks import bp as stripe_webhooks_bp
 from blueprints.portfolio import bp as portfolio_bp
 from services.listening import start_session as listening_start_session, end_session as listening_end_session
 from services.user_resolver import resolve_db_user_id
@@ -164,6 +167,9 @@ def create_app():
     app.register_blueprint(collections_bp)
     app.register_blueprint(gamify_api_bp)
     app.register_blueprint(payments_bp)
+    app.register_blueprint(boost_stripe_bp)
+    app.register_blueprint(boost_api_bp)
+    app.register_blueprint(stripe_webhooks_bp)
     app.register_blueprint(portfolio_bp)
     
     # Initialize search index
@@ -241,6 +247,15 @@ def create_app():
     @app.context_processor
     def inject_login_flag():
         return {"LOGGED_IN": bool(session.get("username"))}
+
+    # Expose Stripe publishable key in templates
+    @app.context_processor
+    def inject_stripe_publishable_key():
+        try:
+            key = app.config.get("STRIPE_PUBLISHABLE_KEY", "")
+        except Exception:
+            key = ""
+        return {"STRIPE_PUBLISHABLE_KEY": key}
 
     # Enable compression (optional)
     try:
@@ -1123,31 +1138,37 @@ def api_live_tv_channels():
     included_ids = {s['id'] for s in music_videos + films + live_shows}
     misc_videos = [s for s in shows if s['id'] not in included_ids]
     misc = misc_videos
-
-    # Sort each channel deterministically (by title) for stable guide, but could randomize later
-    def sort_items(items):
-        return sorted(items, key=lambda x: (x.get('title') or '').lower())
+    
+    # Daily-seeded shuffle so the mix changes every day but stays stable within the day
+    def daily_shuffle(items, salt=''):
+        today = datetime.utcnow().strftime('%Y-%m-%d')
+        seed_src = f'{today}:{salt}'
+        seed = int(hashlib.sha1(seed_src.encode('utf-8')).hexdigest()[:8], 16)
+        rnd = random.Random(seed)
+        items_copy = [i for i in items]
+        rnd.shuffle(items_copy)
+        return items_copy
 
     channels = [
         {
             'id': 'misc',
             'name': 'Misc',
-            'items': sort_items(misc),
+            'items': daily_shuffle(misc, 'misc'),
         },
         {
             'id': 'music-videos',
             'name': 'Music Videos',
-            'items': sort_items(music_videos),
+            'items': daily_shuffle(music_videos, 'music'),
         },
         {
             'id': 'films',
             'name': 'Films',
-            'items': sort_items(films),
+            'items': daily_shuffle(films, 'films'),
         },
         {
             'id': 'live-shows',
             'name': 'Live Shows',
-            'items': sort_items(live_shows),
+            'items': daily_shuffle(live_shows, 'live'),
         },
     ]
 

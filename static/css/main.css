@@ -101,13 +101,11 @@
 
 /* Remote buttons */
 .channel-remote {
-	position: absolute;
-	right: 12px;
-	top: 12px;
 	display: flex;
 	gap: 8px;
 	z-index: 4;
 }
+.remote-below { margin-top: 8px; }
 .remote-btn {
 	background: rgba(0,0,0,0.6);
 	border: 1px solid rgba(255,255,255,0.25);
@@ -157,10 +155,14 @@
 	overflow-x: auto;
 	white-space: nowrap;
 	border-bottom: 1px solid rgba(255,255,255,0.06);
+	background: rgba(0,0,0,0.45);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	border-radius: 12px;
 }
 .time-strip .tick {
-	color: #cfcfcf;
-	font-size: 13px;
+	color: #f0f0f0;
+	font-size: 14px;
 	min-width: 90px;
 	text-align: left;
 	flex: 0 0 auto;
@@ -169,34 +171,45 @@
 
 /* Channel rows */
 .channel-row {
-	margin: 12px 0 6px 0;
-	background: rgba(255,255,255,0.04);
-	padding-bottom: 8px;
+	margin: 12px 0 10px 0;
+	background: rgba(0,0,0,0.35);
+	border: 1px solid rgba(255,255,255,0.12);
+	border-radius: 12px;
+	/* two-column rail: left label, right scroller */
+	display: grid;
+	grid-template-columns: 180px 1fr;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 0 8px 0;
 }
 .channel-header {
+	grid-column: 1;
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	padding: 10px 16px;
-	background: rgba(255,255,255,0.08);
-	border-left: 4px solid #ffffff22;
+	padding: 12px 16px 8px 16px;
+	background: transparent;
+	border-left: none;
+	color: #fff;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 .channel-badge {
 	display: inline-block;
 	font-size: 12px;
 	padding: 4px 8px;
 	border-radius: 999px;
-	background: #1b1b1b;
-	border: 1px solid #2a2a2a;
+	background: rgba(0,0,0,0.65);
+	border: 1px solid rgba(255,255,255,0.18);
 }
 .channel-title {
 	font-weight: 600;
 	letter-spacing: .3px;
 }
 .channel-cards {
+	grid-column: 2;
 	display: flex;
 	gap: 16px;
-	padding: 12px 16px 18px 16px;
+	padding: 12px 16px 18px 0;
 	overflow-x: auto;
 	scroll-snap-type: x mandatory;
 }
@@ -204,8 +217,11 @@
 
 /* TV cards */
 .tv-card {
-	width: 220px;
-	aspect-ratio: 16/9;
+	/* Fixed, universal card height; width is flexible and set by JS per duration */
+	height: 160px;
+	min-width: 200px;
+	max-width: 520px;
+	width: auto;
 	position: relative;
 	border-radius: 12px;
 	overflow: hidden;
@@ -214,6 +230,28 @@
 	scroll-snap-align: start;
 	border: 1px solid #2a2a2a;
 	cursor: pointer;
+}
+.tv-card.glass-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
+.tv-card.glass-card .bg {
+	position: absolute;
+	inset: 0;
+	background-size: cover;
+	background-position: center;
+	filter: blur(10px) brightness(0.35);
+	transform: scale(1.2);
+}
+.tv-card.compact { background: #111; box-shadow: none; border: 1px solid #252525; }
+.tv-card.compact .bg,
+.tv-card.compact .overlay { display: none; }
+.tv-card.compact .meta { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; padding: 10px; }
+.tv-card.compact .meta .title { font-size: 0.85rem; }
+.tv-card.compact .meta .time { display: none; }
+.tv-card.glass-card::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: rgba(0,0,0,0.35);
+	pointer-events: none;
 }
 .tv-card img {
 	width: 100%;
@@ -224,7 +262,7 @@
 .tv-card .overlay {
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0.0) 60%);
+	background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2) 60%);
 }
 .tv-card .meta {
 	position: absolute;
@@ -234,13 +272,24 @@
 	display: grid;
 	gap: 2px;
 }
+.tv-card.glass-card .meta {
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	background: rgba(0,0,0,0.6);
+	border: 1px solid rgba(255,255,255,0.16);
+	border-radius: 10px;
+	padding: 8px;
+}
 .tv-card .meta .title {
 	font-weight: 700;
-	font-size: 14px;
+	font-size: 0.9rem;
+	color: #fff;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 .tv-card .meta .time {
-	font-size: 12px;
+	font-size: 0.75rem;
 	opacity: .9;
+	color: rgba(255,255,255,0.85);
 }
 .tv-card:focus,
 .tv-card:hover {
@@ -274,7 +323,7 @@
 /* Spotlight grid and right dashboard (liquid glass) */
 .spotlight-grid {
 	display: grid;
-	grid-template-columns: 1fr 320px;
+	grid-template-columns: 1fr minmax(280px, 360px);
 	gap: 16px;
 	align-items: start;
 	max-width: 1280px;
@@ -282,16 +331,18 @@
 }
 .right-dashboard {
 	position: sticky;
-	top: 10px;
+	top: 12px;
 	display: grid;
 	gap: 10px;
 	padding: 12px;
 	border-radius: 12px;
-	background: rgba(255,255,255,0.07);
+	background: rgba(0,0,0,0.55);
 	border: 1px solid rgba(255,255,255,0.12);
 	backdrop-filter: blur(14px) saturate(140%);
 	-webkit-backdrop-filter: blur(14px) saturate(140%);
 	color: #fff;
+	max-height: calc(100vh - 24px);
+	overflow: auto;
 }
 .right-dashboard .rd-thumb {
 	width: 100%;
@@ -343,12 +394,111 @@
 	opacity: 0.7;
 }
 
-/* Sticky spotlight section and no body scrollbar */
-.tv-container { display: grid; grid-template-rows: auto 1fr; height: 100vh; }
-.video-spotlight { position: sticky; top: 0; z-index: 5; background: radial-gradient(1200px 300px at 50% -50px, rgba(0,0,0,0.75), rgba(0,0,0,0)) , #000; padding-bottom: 8px; }
-html, body { height: 100%; }
-body { overflow-y: hidden; }
-*::-webkit-scrollbar { display: none; }
+/* Sticky spotlight section; allow page scrolling */
+.tv-container { display: grid; grid-template-rows: auto 1fr; min-height: 100vh; }
+.video-spotlight { position: static; z-index: 5; background: radial-gradient(1200px 300px at 50% -50px, rgba(0,0,0,0.75), rgba(0,0,0,0)) , #000; padding-bottom: 8px; }
+html, body { height: auto; }
+body { overflow-y: auto; background: #000; }
+/* Keep rails smooth without visible bars; retain vertical scrollbars */
+.channel-cards::-webkit-scrollbar, .time-strip::-webkit-scrollbar { display: none; }
+
+/* Channel rows container */
+.channel-rows { max-width: 1280px; margin: 0 auto; padding: 0 16px 24px 16px; }
+.channels-layout { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: start; }
+.channel-index { display: grid; gap: 8px; position: sticky; top: 8px; align-self: start; }
+.channel-link {
+	display: block;
+	padding: 10px 12px;
+	border-radius: 999px;
+	color: #fff;
+	text-decoration: none;
+	background: rgba(0,0,0,0.6);
+	border: 1px solid rgba(255,255,255,0.18);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	font-weight: 700;
+}
+.channel-link:hover { background: rgba(0,0,0,0.72); }
+.channels-stack { min-width: 0; }
+
+@media (max-width: 900px) {
+	.channels-layout { grid-template-columns: 1fr; }
+	.channel-index { position: static; grid-auto-flow: column; overflow-x: auto; white-space: nowrap; padding-bottom: 6px; }
+	.channel-link { display: inline-block; }
+}
+
+/* === New TV Guide 2-column layout === */
+.tv-guide-container {
+	display: grid;
+	grid-template-columns: 280px 1fr;
+	height: calc(100vh - 360px);
+	gap: 16px;
+	max-width: 1280px;
+	margin: 0 auto;
+	padding: 0 16px 24px 16px;
+}
+.channel-list {
+	background: #111;
+	padding: 12px;
+	border-right: 2px solid #222;
+	border-radius: 12px;
+	overflow-y: auto;
+}
+.channel-btn {
+	width: 100%;
+	background: #181818;
+	border: none;
+	padding: 12px 14px;
+	margin-bottom: 8px;
+	text-align: left;
+	color: #fff;
+	font-size: 1rem;
+	border-radius: 10px;
+	cursor: pointer;
+}
+.channel-btn:hover,
+.channel-btn.active { background: #333; }
+.guide-grid {
+	padding: 12px 0;
+	overflow-y: auto;
+}
+.guide-row {
+	margin-bottom: 24px;
+	position: relative; /* for rail arrows */
+}
+.guide-row h2 {
+	font-size: 1rem;
+	color: #ddd;
+	margin: 0 0 6px 0;
+}
+.guide-scroll {
+	display: flex;
+	gap: 12px;
+	overflow-x: auto;
+	padding: 0 48px; /* room for rail arrows */
+	padding-bottom: 8px;
+	scroll-snap-type: x proximity;
+}
+.guide-row .nav-arrow {
+	position: absolute;
+	top: calc(50% + 14px);
+	transform: translateY(-50%);
+	z-index: 3;
+}
+.guide-row .nav-arrow-left { left: 8px; }
+.guide-row .nav-arrow-right { right: 8px; }
+.guide-item {
+	min-width: 200px;
+	background: #111;
+	padding: 8px;
+	border-radius: 8px;
+	color: #fff;
+}
+.guide-item img {
+	width: 100%;
+	border-radius: 6px;
+	margin-bottom: 6px;
+}
 
 /* Responsive */
 @media (max-width: 900px) {

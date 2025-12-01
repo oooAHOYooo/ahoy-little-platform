@@ -32,8 +32,11 @@
         state.channels = (data && data.channels) || [];
         state.channels.forEach(c => { if (!Array.isArray(c.items)) c.items = []; });
         renderRows();
+        addRailArrows();
         autoFocusFirst();
-        // keyboard navigation omitted for smooth cross-browser behavior
+        // enable simple keyboard navigation
+        wireGlobalKeys();
+        wireChannelButtons();
       })
       .catch(err => console.error('live-tv-rows load failed', err));
   }
@@ -64,7 +67,7 @@
 
   function makeCard(item, rowIdx, colIdx) {
     const el = document.createElement('button');
-    el.className = 'tv-card panelstream-item';
+    el.className = 'tv-card compact panelstream-item';
     el.type = 'button';
     el.setAttribute('role', 'listitem');
     el.setAttribute('tabindex', '0');
@@ -73,13 +76,6 @@
     el.dataset.src = item.video_url || item.mp4_link || item.trailer_url || '';
     el.dataset.thumb = item.thumbnail || '/static/img/default-cover.jpg';
     el.dataset.title = item.title || 'Untitled';
-
-    const img = document.createElement('img');
-    img.alt = item.title || '';
-    img.src = el.dataset.thumb;
-
-    const overlay = document.createElement('div');
-    overlay.className = 'overlay';
 
     const meta = document.createElement('div');
     meta.className = 'meta';
@@ -93,9 +89,12 @@
     meta.appendChild(title);
     meta.appendChild(time);
 
-    el.appendChild(img);
-    el.appendChild(overlay);
     el.appendChild(meta);
+
+    // Width reflects duration while keeping universal height (CSS).
+    // Clamp to reasonable bounds for usability.
+    const widthPx = Math.max(220, Math.min(520, Math.round(160 + mins * 6)));
+    el.style.width = widthPx + 'px';
 
     // Preview on hover/focus
     const preview = () => updatePreview(el);
@@ -123,6 +122,45 @@
       container.addEventListener('mouseleave', () => {
         container.classList.remove('rail-active');
       });
+    });
+  }
+
+  function wireChannelButtons() {
+    const btns = qsa('.channel-btn');
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-target');
+        if (target) {
+          const el = document.querySelector(target);
+          if (el && typeof el.scrollIntoView === 'function') {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  }
+
+  function addRailArrows() {
+    const rows = qsa('.guide-row');
+    rows.forEach((row) => {
+      const scroller = qs('.channel-cards', row);
+      if (!scroller || row.querySelector('.nav-arrow')) return;
+      const makeBtn = (side) => {
+        const b = document.createElement('button');
+        b.className = `nav-arrow nav-arrow-${side}`;
+        b.type = 'button';
+        b.setAttribute('aria-label', side === 'left' ? 'Scroll left' : 'Scroll right');
+        b.textContent = side === 'left' ? '‹' : '›';
+        b.addEventListener('click', () => {
+          const delta = (side === 'left' ? -1 : 1) * Math.round(scroller.clientWidth * 0.8);
+          scroller.scrollBy({ left: delta, behavior: 'smooth' });
+        });
+        return b;
+      };
+      row.appendChild(makeBtn('left'));
+      row.appendChild(makeBtn('right'));
     });
   }
 
@@ -227,6 +265,12 @@
   } else {
     init();
   }
+
+  // After initial render, mount rail arrows and keyboard navigation
+  document.addEventListener('DOMContentLoaded', () => {
+    addRailArrows();
+    wireGlobalKeys();
+  });
 })();
 
 
