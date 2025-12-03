@@ -5,6 +5,11 @@
     display: none;
 }
 
+/* Alpine.js x-cloak */
+[x-cloak] {
+    display: none !important;
+}
+
 /* Desktop-only - hide on mobile */
 @media (max-width: 767px) {
     .desktop-only {
@@ -1346,5 +1351,398 @@
     .mini-thumb,
     .mini-cover {
         border-radius: 10px;
+    }
+}
+
+/* Mobile Account Page Fixes */
+@media (max-width: 767px) {
+    .account-page {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    .account-header {
+        padding: 1rem;
+        margin: 0;
+    }
+
+    .account-hero {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1rem 0.5rem;
+        gap: 1rem;
+    }
+
+    .account-avatar {
+        margin: 0 auto;
+    }
+
+    .account-avatar img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .account-info {
+        width: 100%;
+    }
+
+    .account-info h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .account-username,
+    .account-email {
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .account-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+        margin-top: 1rem;
+        width: 100%;
+    }
+
+    .stat-item {
+        padding: 0.5rem;
+    }
+
+    .stat-number {
+        font-size: 1.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+    }
+
+    .account-content {
+        padding: 0 0.75rem;
+        max-width: 100%;
+    }
+
+    .account-tabs {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+    }
+
+    .account-tab {
+        flex: 0 0 auto;
+        min-width: 100px;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        scroll-snap-align: start;
+    }
+
+    .account-tab i {
+        font-size: 0.875rem;
+    }
+
+    .tab-panel {
+        padding: 1rem;
+        margin: 0;
+        border-radius: 12px;
+    }
+
+    .overview-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .overview-quick-stats.card-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .card {
+        padding: 1rem;
+    }
+
+    .card-header {
+        font-size: 0.75rem;
+    }
+
+    .stat-lg {
+        font-size: 1.5rem;
+    }
+
+    .overview-card {
+        padding: 1rem;
+    }
+
+    .overview-card h3 {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .achievements-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
+
+    .activity-list {
+        gap: 0.75rem;
+    }
+
+    .activity-item {
+        padding: 0.75rem;
+    }
+
+    .activity-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+    }
+}
+
+/* Mobile Search Popup - Beautiful Design */
+@media (max-width: 767px) {
+    .mobile-search-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 10030;
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .mobile-search-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .mobile-search-container {
+        position: relative;
+        width: 100%;
+        max-height: 85vh;
+        background: linear-gradient(180deg, rgba(17, 17, 17, 0.98) 0%, rgba(10, 10, 10, 0.95) 100%);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        border-top-left-radius: 24px;
+        border-top-right-radius: 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.5);
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .mobile-search-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .mobile-search-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #f0f0f7;
+        margin: 0;
+    }
+
+    .mobile-search-close {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .mobile-search-close:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: scale(1.05);
+    }
+
+    .mobile-search-input-wrapper {
+        position: relative;
+        margin: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .mobile-search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 18px;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .mobile-search-input {
+        width: 100%;
+        padding: 16px 50px 16px 48px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+        color: #f0f0f7;
+        font-size: 16px;
+        font-weight: 500;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+    .mobile-search-input:focus {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(102, 126, 234, 0.6);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    }
+
+    .mobile-search-input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .mobile-search-clear {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .mobile-search-clear:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .mobile-search-suggestions,
+    .mobile-search-recents {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 0 1.5rem 1.5rem;
+    }
+
+    .suggestions-header,
+    .recents-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .clear-recents-btn {
+        background: none;
+        border: none;
+        color: rgba(102, 126, 234, 0.8);
+        font-size: 0.75rem;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .clear-recents-btn:hover {
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    .suggestions-list,
+    .recents-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .suggestion-item,
+    .recent-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        color: #f0f0f7;
+        text-align: left;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .suggestion-item:hover,
+    .recent-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(102, 126, 234, 0.4);
+        transform: translateX(4px);
+    }
+
+    .suggestion-item i,
+    .recent-item i {
+        font-size: 1.25rem;
+        color: rgba(102, 126, 234, 0.8);
+        width: 24px;
+        text-align: center;
+    }
+
+    .suggestion-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .suggestion-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #f0f0f7;
+        margin-bottom: 0.25rem;
+    }
+
+    .suggestion-subtitle {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .recent-item span {
+        flex: 1;
+        font-size: 0.9rem;
     }
 }
