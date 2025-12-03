@@ -5,6 +5,34 @@
     display: none;
 }
 
+/* Desktop-only - hide on mobile */
+@media (max-width: 767px) {
+    .desktop-only {
+        display: none !important;
+    }
+}
+
+/* Desktop-only - show on desktop */
+@media (min-width: 768px) {
+    .desktop-only {
+        display: block !important;
+    }
+    
+    .desktop-only.inline,
+    .desktop-only.flex,
+    .desktop-only.grid {
+        display: inline-block !important;
+    }
+    
+    .desktop-only.flex {
+        display: flex !important;
+    }
+    
+    .desktop-only.grid {
+        display: grid !important;
+    }
+}
+
 /* Ensure mobile bottom nav is always visible on mobile - override any conflicting rules */
 @media (max-width: 768px) {
     .mobile-bottom-nav.mobile-only,
@@ -16,15 +44,47 @@
 }
 
 /* MOBILE ONLY */
-@media (max-width: 768px) {
+@media (max-width: 767px) {
     .desktop-nav,
     .top-nav-links,
     .top-nav-search,
     .top-nav-boost,
     .account-menu-desktop,
     .left-sidebar,
-    .right-sidebar {
+    .right-sidebar,
+    .desktop-only,
+    .hidden-mobile,
+    .nav-search,
+    .sidebar-panel[data-sidebar-section="search"],
+    .collection-add-btn,
+    .mobile-action-bar {
         display: none !important;
+    }
+    
+    /* Remove mobile action bar completely */
+    .mobile-action-bar,
+    .mobile-action-bar + * {
+        display: none !important;
+    }
+    
+    /* Fix layout padding on mobile - remove space for hidden elements */
+    main,
+    .main-content,
+    .content,
+    .content-area,
+    .music-list,
+    .radio-content,
+    .grid,
+    .collections-wrapper,
+    .dashboard-sidebars {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+    
+    /* Dashboard sidebars should not take space on mobile */
+    .dashboard-sidebars {
+        display: block !important;
+        grid-template-columns: 1fr !important;
     }
 }
 
@@ -579,10 +639,16 @@
         justify-self: end;
     }
 
-    /* Show logo image centered; hide text title */
+    /* Show logo image centered on mobile */
+    .nav-logo {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+    
     .nav-logo img {
         display: inline-block !important;
-        height: 18px;
+        height: 20px;
         max-width: 120px;
         object-fit: contain;
     }
@@ -773,13 +839,17 @@
     .status-left {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
     }
 
     .status-time {
         font-variant-numeric: tabular-nums;
         font-size: 11px;
         font-weight: 600;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
     
     .status-weather {
@@ -790,6 +860,7 @@
         background: rgba(255, 255, 255, 0.05);
         border-radius: 6px;
         border: 1px solid rgba(255, 255, 255, 0.08);
+        flex-shrink: 0;
     }
     
     .weather-icon {
@@ -803,6 +874,13 @@
         font-variant-numeric: tabular-nums;
         color: #e5e7eb;
     }
+    
+    .status-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+    }
 
     .status-actions {
         display: flex;
@@ -813,6 +891,8 @@
     .status-action-btn {
         width: 24px;
         height: 24px;
+        min-width: 24px;
+        min-height: 24px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -825,6 +905,7 @@
         transition: all 0.15s ease;
         position: relative;
         text-decoration: none;
+        flex-shrink: 0;
     }
 
     .status-action-btn:hover {
@@ -857,14 +938,18 @@
 
     .status-indicators {
         display: flex;
-        gap: 4px;
+        gap: 6px;
         align-items: center;
         font-size: 10px;
         opacity: 0.85;
+        flex-shrink: 0;
+        margin-left: auto;
     }
 
     .status-indicators i {
         font-size: 10px;
+        width: 12px;
+        text-align: center;
     }
 
     /* Adjust body padding for compact status bar */

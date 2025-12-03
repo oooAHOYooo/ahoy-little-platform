@@ -260,9 +260,9 @@
                         <span class="weather-icon" x-text="weatherIcon"></span>
                         <span class="weather-temp" x-text="weatherTemp + '°'"></span>
                     </span>
-                    <a href="/search" class="status-action-btn" title="Search">
+                    <button @click="openMobileSearch()" class="status-action-btn" title="Search" type="button">
                         <i class="fas fa-search"></i>
-                    </a>
+                    </button>
                     <a href="/bookmarks" class="status-action-btn" title="Notifications">
                         <i class="fas fa-bell"></i>
                         <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
@@ -271,7 +271,6 @@
                 <div class="status-indicators">
                     <i class="fas fa-signal"></i>
                     <i class="fas fa-wifi"></i>
-                    <i class="fas fa-battery-three-quarters"></i>
                 </div>
             </div>
         </div>
@@ -355,8 +354,8 @@
                                 alt="Ahoy Indie Media">
                         </a>
                     </div>
-                    <!-- Mobile Title (text instead of logo) -->
-                    <div class="nav-title-mobile mobile-only">Ahoy Indie
+                    <!-- Mobile Title (text instead of logo) - Hidden, logo shows instead -->
+                    <div class="nav-title-mobile mobile-only" style="display: none;">Ahoy Indie
                         Media</div>
 
                     <!-- Mobile Hamburger -->
@@ -402,7 +401,7 @@
                     </div>
 
                     <!-- Desktop-only Search Bar -->
-                    <div class="nav-search hidden-mobile">
+                    <div class="nav-search desktop-only">
                         <div class="search-container">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text"
@@ -719,13 +718,6 @@
         <div id="accountMenu" class="mobile-account hidden mobile-only"
             aria-hidden="true"></div>
 
-        <!-- Compact Mobile Action Bar -->
-        <div class="mobile-only" style="padding:8px 12px;">
-            <div class="mobile-action-bar" style="display:flex; gap:10px;">
-                <button id="openSearch">Search</button>
-                <button id="openBoost">Boost</button>
-            </div>
-        </div>
 
         <!-- Top boost status badge -->
         <div id="boost-status-badge" aria-live="polite" class="hidden">
@@ -737,7 +729,7 @@
         <main class="main-content">
             <div class="dashboard-sidebars">
                 <!-- Left Dashboard: Collection -->
-                <aside class="dashboard-sidebar dashboard-left"
+                <aside class="dashboard-sidebar dashboard-left desktop-only"
                     x-data="dashboardCollection()" x-init="init()">
                     <div class="sidebar-content">
                         <!-- User Info Block -->
@@ -766,7 +758,7 @@
                         </div>
 
                         <!-- Global Search -->
-                        <div class="sidebar-panel sidebar-item" data-sidebar-section="search">
+                        <div class="sidebar-panel sidebar-item desktop-only" data-sidebar-section="search">
                             <div class="section-title">Search</div>
                             <div class="sidebar-search-container">
                                 <i
@@ -947,7 +939,7 @@
                             <div class="section-title">Bookmarks</div>
                             <div class="collections-mini">
                                 <button @click="goToCollections()"
-                                    class="item-mini collection-add-btn">
+                                    class="item-mini collection-add-btn desktop-only">
                                     <i class="fas fa-plus"></i>
                                     <span>Add Collection</span>
                                 </button>

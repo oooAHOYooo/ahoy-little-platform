@@ -159,7 +159,7 @@
                         </button>
                         <!-- Make Playlist Button -->
                         <button 
-                            class="px-3 py-2 rounded-xl bg-black/80 text-white hover:bg-black transition text-sm"
+                            class="px-3 py-2 rounded-xl bg-black/80 text-white hover:bg-black transition text-sm desktop-only"
                             data-make-playlist
                             :data-collection-id="collection.id"
                             :data-collection-name="collection.name"
@@ -177,7 +177,7 @@
             <div class="icon">📁</div>
             <h3>No collections yet</h3>
             <p>Create collections to organize your favorite content.</p>
-            <button @click="showCreateCollection = true" class="btn">Create Collection</button>
+            <button @click="showCreateCollection = true" class="btn desktop-only">Create Collection</button>
         </div>
     </div>
 
