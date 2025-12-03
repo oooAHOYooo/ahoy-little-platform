@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Tip Artists - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="tip-artist-page" x-data="tipArtistPage()" x-init="init()" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+    <div class="tip-header" style="text-align: center; margin-bottom: 3rem;">
+        <h1 style="font-size: 3rem; color: #ff0066; margin-bottom: 1rem;">
+            <i class="fas fa-heart" style="color: #e17055;"></i> Tip Artists
+        </h1>
+        <p style="font-size: 1.2rem; color: #ccc;">Support the indie artists you love</p>
+    </div>
+
+    <div class="tip-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <!-- Left: Artist Selection -->
+        <div class="tip-form-card" style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 2rem;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: #fff;">
+                <i class="fas fa-user-music"></i> Select Artist
+            </h2>
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #ccc; font-weight: 500;">
+                    Choose an Artist
+                </label>
+                <select x-model="selectedArtist" 
+                        @change="onArtistChange()"
+                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; font-size: 1rem;">
+                    <option value="">-- Select an artist --</option>
+                    <template x-for="artist in artists" :key="artist.id || artist.name">
+                        <option :value="artist.name" x-text="artist.name"></option>
+                    </template>
+                </select>
+            </div>
+
+            <div x-show="selectedArtist" class="selected-artist-info" style="padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <img :src="selectedArtistInfo?.image || '/static/img/default-cover.jpg'" 
+                         alt="Artist" 
+                         style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover;">
+                    <div>
+                        <h3 style="margin: 0; color: #fff;" x-text="selectedArtist"></h3>
+                        <p style="margin: 0.25rem 0 0 0; color: #999; font-size: 0.9rem;" x-text="selectedArtistInfo?.description || 'Indie artist'"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #ccc; font-weight: 500;">
+                    Amount (USD)
+                </label>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button @click="setAmount(5)" 
+                            :class="{'active': tipAmount === 5}"
+                            style="padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; cursor: pointer; transition: all 0.2s;"
+                            :style="tipAmount === 5 ? 'border-color: #00d4ff; background: rgba(0,212,255,0.2);' : ''">
+                        $5
+                    </button>
+                    <button @click="setAmount(10)"
+                            :class="{'active': tipAmount === 10}"
+                            style="padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; cursor: pointer; transition: all 0.2s;"
+                            :style="tipAmount === 10 ? 'border-color: #00d4ff; background: rgba(0,212,255,0.2);' : ''">
+                        $10
+                    </button>
+                    <button @click="setAmount(25)"
+                            :class="{'active': tipAmount === 25}"
+                            style="padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; cursor: pointer; transition: all 0.2s;"
+                            :style="tipAmount === 25 ? 'border-color: #00d4ff; background: rgba(0,212,255,0.2);' : ''">
+                        $25
+                    </button>
+                    <button @click="setAmount(50)"
+                            :class="{'active': tipAmount === 50}"
+                            style="padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; cursor: pointer; transition: all 0.2s;"
+                            :style="tipAmount === 50 ? 'border-color: #00d4ff; background: rgba(0,212,255,0.2);' : ''">
+                        $50
+                    </button>
+                </div>
+                <input type="number" 
+                       x-model="tipAmount" 
+                       min="1" 
+                       step="1"
+                       placeholder="Or enter custom amount"
+                       style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; font-size: 1rem;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #ccc; font-weight: 500;">
+                    Optional Message
+                </label>
+                <textarea x-model="tipNote" 
+                          placeholder="Leave a message for the artist..."
+                          rows="3"
+                          style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; font-size: 1rem; resize: vertical;"></textarea>
+            </div>
+
+            <button @click="submitTip()" 
+                    :disabled="!selectedArtist || !tipAmount || tipAmount < 1 || isSubmitting"
+                    style="width: 100%; padding: 1rem; background: linear-gradient(135deg, #e17055, #ff0066); border: none; border-radius: 8px; color: #fff; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                    :style="(!selectedArtist || !tipAmount || tipAmount < 1 || isSubmitting) ? 'opacity: 0.5; cursor: not-allowed;' : 'opacity: 1;'">
+                <span x-show="!isSubmitting">
+                    <i class="fas fa-heart"></i> Tip $<span x-text="tipAmount || 0"></span>
+                </span>
+                <span x-show="isSubmitting">
+                    <i class="fas fa-spinner fa-spin"></i> Processing...
+                </span>
+            </button>
+        </div>
+
+        <!-- Right: Recent Tips -->
+        <div class="tips-history-card" style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 2rem;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: #fff;">
+                <i class="fas fa-history"></i> Your Tips
+            </h2>
+            
+            <div x-show="recentTips.length === 0" style="text-align: center; padding: 2rem; color: #999;">
+                <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <p>No tips yet. Start supporting artists!</p>
+            </div>
+
+            <div class="tips-list" style="max-height: 500px; overflow-y: auto;">
+                <template x-for="tip in recentTips" :key="tip.id">
+                    <div class="tip-item" style="padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0; color: #fff;" x-text="tip.artist_name"></h4>
+                                <p style="margin: 0.25rem 0 0 0; color: #999; font-size: 0.9rem;" x-text="formatDate(tip.created_at)"></p>
+                                <p x-show="tip.note" style="margin: 0.5rem 0 0 0; color: #ccc; font-size: 0.85rem; font-style: italic;" x-text="'\"' + tip.note + '\"'"></p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 1.5rem; font-weight: 600; color: #00d4ff;" x-text="'$' + (tip.amount / 100).toFixed(2)"></div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div x-show="recentTips.length > 0" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #ccc; font-weight: 600;">Total Tips:</span>
+                    <span style="font-size: 1.5rem; font-weight: 600; color: #00d4ff;" x-text="'$' + (totalTips / 100).toFixed(2)"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function tipArtistPage() {
+    return {
+        artists: [],
+        selectedArtist: '',
+        selectedArtistInfo: null,
+        tipAmount: 10,
+        tipNote: '',
+        isSubmitting: false,
+        recentTips: [],
+        totalTips: 0,
+        
+        async init() {
+            await this.loadArtists();
+            await this.loadRecentTips();
+        },
+        
+        async loadArtists() {
+            try {
+                const response = await fetch('/api/artists');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.artists = data.artists || [];
+                    // Also get unique artists from music tracks
+                    const musicResponse = await fetch('/api/music');
+                    if (musicResponse.ok) {
+                        const musicData = await musicResponse.json();
+                        const trackArtists = new Set();
+                        (musicData.tracks || []).forEach(track => {
+                            if (track.artist) trackArtists.add(track.artist);
+                        });
+                        // Merge with existing artists
+                        trackArtists.forEach(artistName => {
+                            if (!this.artists.find(a => a.name === artistName)) {
+                                this.artists.push({ name: artistName, id: `artist_${artistName}`, description: 'Indie artist' });
+                            }
+                        });
+                        // Sort by name
+                        this.artists.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading artists:', error);
+            }
+        },
+        
+        onArtistChange() {
+            if (this.selectedArtist) {
+                this.selectedArtistInfo = this.artists.find(a => a.name === this.selectedArtist) || null;
+            } else {
+                this.selectedArtistInfo = null;
+            }
+        },
+        
+        setAmount(amount) {
+            this.tipAmount = amount;
+        },
+        
+        async submitTip() {
+            if (!this.selectedArtist || !this.tipAmount || this.tipAmount < 1) return;
+            
+            this.isSubmitting = true;
+            try {
+                const response = await fetch('/api/tips', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        artist_name: this.selectedArtist,
+                        amount: Math.round(this.tipAmount * 100), // Convert to cents
+                        note: this.tipNote
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    // Reset form
+                    this.selectedArtist = '';
+                    this.selectedArtistInfo = null;
+                    this.tipAmount = 10;
+                    this.tipNote = '';
+                    // Reload tips
+                    await this.loadRecentTips();
+                    // Show success message
+                    if (window.ahoyApp?.showNotification) {
+                        window.ahoyApp.showNotification('Tip sent successfully!', 'success');
+                    } else {
+                        alert('Tip sent successfully!');
+                    }
+                } else {
+                    const error = await response.json();
+                    if (window.ahoyApp?.showNotification) {
+                        window.ahoyApp.showNotification(error.error || 'Failed to send tip', 'error');
+                    } else {
+                        alert(error.error || 'Failed to send tip');
+                    }
+                }
+            } catch (error) {
+                console.error('Error submitting tip:', error);
+                if (window.ahoyApp?.showNotification) {
+                    window.ahoyApp.showNotification('Failed to send tip. Please try again.', 'error');
+                } else {
+                    alert('Failed to send tip. Please try again.');
+                }
+            } finally {
+                this.isSubmitting = false;
+            }
+        },
+        
+        async loadRecentTips() {
+            try {
+                const response = await fetch('/api/tips');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.recentTips = data.tips || [];
+                    this.totalTips = this.recentTips.reduce((sum, tip) => sum + tip.amount, 0);
+                }
+            } catch (error) {
+                console.error('Error loading tips:', error);
+            }
+        },
+        
+        formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+    };
+}
+</script>
+{% endblock %}
+
+
+

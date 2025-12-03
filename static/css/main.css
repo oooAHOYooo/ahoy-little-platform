@@ -500,6 +500,60 @@ body { overflow-y: auto; background: #000; }
 	margin-bottom: 6px;
 }
 
+/* CHANNEL SELECTOR - Simple 4 button layout */
+#channel-selector {
+	padding: 32px 16px;
+	background: #000;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 20px;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.channel-button {
+	background: #111;
+	border: 2px solid #222;
+	border-radius: 12px;
+	padding: 24px;
+	cursor: pointer;
+	transition: all 0.2s;
+	text-align: center;
+	color: #fff;
+}
+
+.channel-button:hover {
+	background: #1a1a1a;
+	border-color: #444;
+	transform: translateY(-2px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.channel-button.active {
+	background: #1a1a1a;
+	border-color: #3b82f6;
+	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.channel-button-name {
+	font-size: 20px;
+	font-weight: 700;
+	margin-bottom: 8px;
+}
+
+.channel-button-next {
+	font-size: 13px;
+	color: #999;
+	margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+	#channel-selector {
+		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+}
+
 /* Responsive */
 @media (max-width: 900px) {
 	#playing-now {

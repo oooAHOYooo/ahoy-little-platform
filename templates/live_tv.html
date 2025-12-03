@@ -59,6 +59,60 @@
   .live-tv-main { grid-template-columns: 1fr; }
   .details-panel { position: static; }
 }
+
+/* CHANNEL SELECTOR */
+#channel-selector {
+  padding: 32px 16px;
+  background: #000;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.channel-button {
+  background: #111;
+  border: 2px solid #222;
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  color: #fff;
+}
+
+.channel-button:hover {
+  background: #1a1a1a;
+  border-color: #444;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.channel-button.active {
+  background: #1a1a1a;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.channel-button-name {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.channel-button-next {
+  font-size: 13px;
+  color: #999;
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  #channel-selector {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
 </style>
 {% endblock %}
 
@@ -116,35 +170,9 @@
 		</div>
 	</div>
 
-	<!-- NEW TV GUIDE LAYOUT -->
-	<div class="tv-guide-container">
-		<!-- LEFT SIDEBAR -->
-		<aside class="channel-list" aria-label="Channels">
-			<button class="channel-btn" data-target="#sec-misc">Channel 01 — Misc</button>
-			<button class="channel-btn" data-target="#sec-short-films">Channel 02 — Short Films</button>
-			<button class="channel-btn" data-target="#sec-music-videos">Channel 03 — Music Videos</button>
-			<button class="channel-btn" data-target="#sec-live-shows">Channel 04 — Live Shows</button>
-		</aside>
-
-		<!-- RIGHT SCROLLABLE GUIDE -->
-		<main class="guide-grid">
-			<section id="sec-misc" class="guide-row" data-channel="misc">
-				<h2>Channel 01 — Misc</h2>
-				<div class="guide-scroll channel-cards" id="row-misc" role="list"></div>
-			</section>
-			<section id="sec-short-films" class="guide-row" data-channel="short_films">
-				<h2>Channel 02 — Short Films</h2>
-				<div class="guide-scroll channel-cards" id="row-short-films" role="list"></div>
-			</section>
-			<section id="sec-music-videos" class="guide-row" data-channel="music_videos">
-				<h2>Channel 03 — Music Videos</h2>
-				<div class="guide-scroll channel-cards" id="row-music-videos" role="list"></div>
-			</section>
-			<section id="sec-live-shows" class="guide-row" data-channel="live_shows">
-				<h2>Channel 04 — Live Shows</h2>
-				<div class="guide-scroll channel-cards" id="row-live-shows" role="list"></div>
-			</section>
-		</main>
+	<!-- CHANNEL SELECTOR -->
+	<div id="channel-selector">
+		<!-- Channel buttons will be populated by JavaScript -->
 	</div>
 </div>
 

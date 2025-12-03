@@ -6,11 +6,10 @@
   const state = {
     channels: [],
     rowOrder: [
-      { key: 'misc', titles: ['misc', 'clips', 'clip'] },
-      { key: 'short_films', titles: ['short films', 'short film', 'films', 'film', 'movies', 'movie'] },
-      { key: 'music_videos', titles: ['music videos', 'music_video', 'music'] },
-      { key: 'films', titles: ['films', 'movies', 'film', 'movie'] }, // kept for fallback; not used as a rail key
-      { key: 'live_shows', titles: ['live shows', 'broadcast', 'shows', 'live'] },
+      { key: 'misc', titles: ['misc', 'clips', 'clip'], label: 'Channel 01 — Misc' },
+      { key: 'films', titles: ['films', 'film', 'movies', 'movie', 'short films', 'short film'], label: 'Channel 02 — Short Films' },
+      { key: 'music-videos', titles: ['music videos', 'music_video', 'music'], label: 'Channel 03 — Music Videos' },
+      { key: 'live-shows', titles: ['live shows', 'broadcast', 'shows', 'live'], label: 'Channel 04 — Live Shows' },
     ],
     focus: { row: 0, col: 0 },
     videoEl: null,
@@ -32,11 +31,9 @@
         state.channels = (data && data.channels) || [];
         state.channels.forEach(c => { if (!Array.isArray(c.items)) c.items = []; });
         renderRows();
-        addRailArrows();
         autoFocusFirst();
         // enable simple keyboard navigation
         wireGlobalKeys();
-        wireChannelButtons();
       })
       .catch(err => console.error('live-tv-rows load failed', err));
   }
@@ -65,199 +62,118 @@
     });
   }
 
-  function makeCard(item, rowIdx, colIdx) {
-    const el = document.createElement('button');
-    el.className = 'tv-card compact panelstream-item';
-    el.type = 'button';
-    el.setAttribute('role', 'listitem');
-    el.setAttribute('tabindex', '0');
-    el.dataset.row = String(rowIdx);
-    el.dataset.col = String(colIdx);
-    el.dataset.src = item.video_url || item.mp4_link || item.trailer_url || '';
-    el.dataset.thumb = item.thumbnail || '/static/img/default-cover.jpg';
-    el.dataset.title = item.title || 'Untitled';
-
-    const meta = document.createElement('div');
-    meta.className = 'meta';
-    const title = document.createElement('div');
-    title.className = 'title';
-    title.textContent = item.title || 'Untitled';
-    const time = document.createElement('div');
-    time.className = 'time';
-    const mins = Math.round(Math.max(60, item.duration_seconds || 0) / 60);
-    time.textContent = `${mins} min`;
-    meta.appendChild(title);
-    meta.appendChild(time);
-
-    el.appendChild(meta);
-
-    // Width reflects duration while keeping universal height (CSS).
-    // Clamp to reasonable bounds for usability.
-    const widthPx = Math.max(220, Math.min(520, Math.round(160 + mins * 6)));
-    el.style.width = widthPx + 'px';
-
-    // Preview on hover/focus
-    const preview = () => updatePreview(el);
-    el.addEventListener('mouseenter', preview);
-    el.addEventListener('focus', preview);
-    el.addEventListener('touchstart', preview, { passive: true });
-    // No on-demand click-to-play in linear TV mode
-
-    return el;
+  function cleanTitle(title) {
+    if (!title) return 'Untitled';
+    // Strip brackets and their contents: [Brackets], (Parentheses), etc.
+    return title.replace(/\[[^\]]*\]/g, '').replace(/\([^)]*\)/g, '').trim() || 'Untitled';
   }
+
+  function getChannelLabel(key, channelName) {
+    const rowDef = state.rowOrder.find(r => r.key === key);
+    return rowDef?.label || `Channel — ${channelName || 'Unknown'}`;
+  }
+
 
   function renderRows() {
+    const selectorContainer = byId('channel-selector');
+    if (!selectorContainer) return;
+
+    selectorContainer.innerHTML = '';
+
     state.rowOrder.forEach((rowDef, rowIdx) => {
-      const container = byId(`row-${rowDef.key.replace('_', '-')}`);
-      if (!container) return;
-      container.innerHTML = '';
       const ch = findChannelForKey(rowDef.key, rowDef.titles) || state.channels[rowIdx] || null;
       if (!ch) return;
-      ch.items.forEach((item, colIdx) => {
-        const card = makeCard(item, rowIdx, colIdx);
-        container.appendChild(card);
-      });
-      // highlight active rail on pointer hover
-      container.addEventListener('mouseenter', () => setActiveRail(rowIdx));
-      container.addEventListener('mouseleave', () => {
-        container.classList.remove('rail-active');
-      });
-    });
-  }
 
-  function wireChannelButtons() {
-    const btns = qsa('.channel-btn');
-    btns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const target = btn.getAttribute('data-target');
-        if (target) {
-          const el = document.querySelector(target);
-          if (el && typeof el.scrollIntoView === 'function') {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Create channel button
+      const button = document.createElement('button');
+      button.className = 'channel-button';
+      button.type = 'button';
+      button.dataset.channel = rowDef.key;
+      button.dataset.channelIndex = String(rowIdx);
+
+      // Channel name
+      const name = document.createElement('div');
+      name.className = 'channel-button-name';
+      name.textContent = getChannelLabel(rowDef.key, ch.name);
+      button.appendChild(name);
+
+      // Next up (optional - show first item title if available)
+      if (ch.items && ch.items.length > 0) {
+        const firstItem = ch.items[0];
+        const next = document.createElement('div');
+        next.className = 'channel-button-next';
+        next.textContent = `Next: ${cleanTitle(firstItem.title)}`;
+        button.appendChild(next);
+      }
+
+      // Click handler
+      button.addEventListener('click', () => {
+        // Remove active class from all buttons
+        qsa('.channel-button').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        // Load first item from this channel
+        if (ch.items && ch.items.length > 0) {
+          const firstItem = ch.items[0];
+          const src = firstItem.video_url || firstItem.mp4_link || firstItem.trailer_url;
+          if (src && state.videoEl) {
+            try { state.videoEl.pause(); } catch (_) {}
+            state.videoEl.src = src;
+            try { state.videoEl.load(); } catch (_) {}
+            state.videoEl.muted = false;
+            const p = state.videoEl.play();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+            
+            // Update preview
+            if (state.nowThumb) state.nowThumb.src = firstItem.thumbnail || '/static/img/default-cover.jpg';
+            if (state.nowTitle) state.nowTitle.textContent = cleanTitle(firstItem.title);
+            if (state.nextTitle && ch.items.length > 1) {
+              state.nextTitle.textContent = cleanTitle(ch.items[1].title);
+            }
           }
         }
-        btns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
       });
+
+      selectorContainer.appendChild(button);
     });
-  }
-
-  function addRailArrows() {
-    const rows = qsa('.guide-row');
-    rows.forEach((row) => {
-      const scroller = qs('.channel-cards', row);
-      if (!scroller || row.querySelector('.nav-arrow')) return;
-      const makeBtn = (side) => {
-        const b = document.createElement('button');
-        b.className = `nav-arrow nav-arrow-${side}`;
-        b.type = 'button';
-        b.setAttribute('aria-label', side === 'left' ? 'Scroll left' : 'Scroll right');
-        b.textContent = side === 'left' ? '‹' : '›';
-        b.addEventListener('click', () => {
-          const delta = (side === 'left' ? -1 : 1) * Math.round(scroller.clientWidth * 0.8);
-          scroller.scrollBy({ left: delta, behavior: 'smooth' });
-        });
-        return b;
-      };
-      row.appendChild(makeBtn('left'));
-      row.appendChild(makeBtn('right'));
-    });
-  }
-
-  function updatePreview(cardEl) {
-    const thumb = cardEl?.dataset?.thumb;
-    const title = cardEl?.dataset?.title || 'Untitled';
-    if (state.videoEl) {
-      state.videoEl.poster = thumb || '';
-      // do not autoplay audio; keep muted and don't call play()
-    }
-    if (state.nowThumb) state.nowThumb.src = thumb || '';
-    if (state.nowTitle) state.nowTitle.textContent = title;
-    // Up next: next sibling in same row
-    const row = Number(cardEl.dataset.row || 0);
-    const col = Number(cardEl.dataset.col || 0);
-    const next = qsa(`.tv-card[data-row="${row}"]`)[col + 1];
-    if (state.nextTitle) state.nextTitle.textContent = next?.dataset?.title || '—';
-    state.focus = { row, col };
-  }
-
-  function playCard(cardEl) {
-    const src = cardEl?.dataset?.src;
-    if (!src || !state.videoEl) return;
-    try { state.videoEl.pause(); } catch (_) {}
-    state.videoEl.src = src;
-    try { state.videoEl.load(); } catch (_) {}
-    state.videoEl.muted = false;
-    const p = state.videoEl.play();
-    if (p && typeof p.catch === 'function') p.catch(() => {});
-    updatePreview(cardEl);
   }
 
   function autoFocusFirst() {
-    const first = qs('.tv-card');
+    const first = qs('.channel-button');
     if (first) {
       try { first.focus(); } catch (_) {}
-      updatePreview(first);
     }
   }
 
   function wireGlobalKeys() {
     document.addEventListener('keydown', (e) => {
-      const rows = state.rowOrder.length;
-      if (e.key === 'ArrowUp') {
+      const buttons = qsa('.channel-button');
+      if (buttons.length === 0) return;
+      
+      if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
         e.preventDefault();
         state.focus.row = Math.max(0, state.focus.row - 1);
         focusCurrent();
-      } else if (e.key === 'ArrowDown') {
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault();
-        state.focus.row = Math.min(rows - 1, state.focus.row + 1);
+        state.focus.row = Math.min(buttons.length - 1, state.focus.row + 1);
         focusCurrent();
-      } else if (e.key === 'ArrowLeft') {
+      } else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        state.focus.col = Math.max(0, state.focus.col - 1);
-        focusCurrent();
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        state.focus.col = state.focus.col + 1;
-        focusCurrent();
-      } else if (e.key === 'Enter') {
-        // In linear TV mode, do not trigger on-demand playback.
-        e.preventDefault();
+        const button = buttons[state.focus.row];
+        if (button) button.click();
       }
     });
-  }
-
-  function getCurrentCard() {
-    const rowContainer = byId(`row-${state.rowOrder[state.focus.row].key.replace('_', '-')}`);
-    if (!rowContainer) return null;
-    const cards = qsa('.tv-card', rowContainer);
-    const col = Math.max(0, Math.min(cards.length - 1, state.focus.col));
-    state.focus.col = col;
-    return cards[col] || null;
   }
 
   function focusCurrent() {
-    const el = getCurrentCard();
-    if (el) {
-      try { el.focus(); } catch (_) {}
-      el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-      updatePreview(el);
-      // Highlight active rail
-      const rowIdx = Number(el.dataset.row || 0);
-      setActiveRail(rowIdx);
+    const buttons = qsa('.channel-button');
+    if (state.focus.row >= buttons.length) return;
+    const button = buttons[state.focus.row];
+    if (button) {
+      try { button.focus(); } catch (_) {}
+      button.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-  }
-
-  function setActiveRail(rowIdx) {
-    state.rowOrder.forEach((rowDef, idx) => {
-      const container = byId(`row-${rowDef.key.replace('_', '-')}`);
-      if (!container) return;
-      if (idx === rowIdx) {
-        container.classList.add('rail-active');
-      } else {
-        container.classList.remove('rail-active');
-      }
-    });
   }
 
   if (document.readyState === 'loading') {
@@ -266,9 +182,8 @@
     init();
   }
 
-  // After initial render, mount rail arrows and keyboard navigation
+  // After initial render, mount keyboard navigation
   document.addEventListener('DOMContentLoaded', () => {
-    addRailArrows();
     wireGlobalKeys();
   });
 })();
