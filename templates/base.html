@@ -630,6 +630,15 @@
         <!-- Mobile Bottom Tab Bar (Spotify-like) -->
         <nav class="mobile-bottom-nav mobile-only" role="navigation"
             aria-label="Primary">
+            <a href="{{ url_for('live_tv_page') }}"
+                class="mobile-tab {% if request.endpoint == 'live_tv_page' %}active{% endif %}">
+                <i class="fas fa-tv"></i>
+                <span>Live TV</span>
+            </a>
+            <a href="/radio" class="mobile-tab">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>Radio</span>
+            </a>
             <a href="{{ url_for('music') }}"
                 class="mobile-tab {% if request.endpoint == 'music' %}active{% endif %}">
                 <i class="fas fa-music"></i>
@@ -644,10 +653,6 @@
                 class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
                 <i class="fas fa-users"></i>
                 <span>Artists</span>
-            </a>
-            <a href="/radio" class="mobile-tab">
-                <i class="fas fa-broadcast-tower"></i>
-                <span>Radio</span>
             </a>
             <a href="/bookmarks"
                 class="mobile-tab {% if request.endpoint == 'bookmarks_page' %}active{% endif %}">
@@ -688,7 +693,7 @@
                     x-data="dashboardCollection()" x-init="init()">
                     <div class="sidebar-content">
                         <!-- User Info Block -->
-                        <div class="sidebar-user-block">
+                        <div class="sidebar-user-block" data-sidebar-section="user">
                             <div class="user-block-content">
                                 <template x-if="window.LOGGED_IN">
                                     <img
@@ -713,7 +718,7 @@
                         </div>
 
                         <!-- Global Search -->
-                        <div class="sidebar-panel sidebar-item">
+                        <div class="sidebar-panel sidebar-item" data-sidebar-section="search">
                             <div class="section-title">Search</div>
                             <div class="sidebar-search-container">
                                 <i
@@ -870,7 +875,7 @@
                         </template>
 
                         <!-- Merit Badges -->
-                        <div class="sidebar-panel sidebar-item">
+                        <div class="sidebar-panel sidebar-item" data-sidebar-section="merit-badges">
                             <div class="section-title">Merit Badges</div>
                             <div class="badges-mini">
                                 <template x-for="badge in badges.slice(0, 4)"
@@ -890,7 +895,7 @@
                         </div>
 
                         <!-- Bookmarks -->
-                        <div class="sidebar-panel sidebar-item">
+                        <div class="sidebar-panel sidebar-item" data-sidebar-section="bookmarks">
                             <div class="section-title">Bookmarks</div>
                             <div class="collections-mini">
                                 <button @click="goToCollections()"

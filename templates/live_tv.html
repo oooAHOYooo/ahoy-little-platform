@@ -60,6 +60,183 @@
   .details-panel { position: static; }
 }
 
+/* Mobile-specific Live TV improvements */
+@media (max-width: 768px) {
+  /* Full-width video player on mobile */
+  .spotlight-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 0 8px;
+  }
+
+  .right-dashboard {
+    position: relative;
+    top: 0;
+    max-height: none;
+    margin-top: 12px;
+  }
+
+  /* Video player adjustments */
+  .hero-player {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .hero-player video {
+    width: 100%;
+    height: auto;
+    min-height: 200px;
+    max-height: 50vh;
+  }
+
+  /* Compact controls */
+  .channel-remote {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px;
+    justify-content: center;
+  }
+
+  .remote-btn {
+    flex: 1 1 auto;
+    min-width: 60px;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 8px;
+  }
+
+  /* Playing now bar - stack vertically on mobile */
+  #playing-now {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  #playing-now img {
+    width: 60px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  .now-col, .next-col {
+    flex: 1;
+  }
+
+  .np-title, .np-next {
+    font-size: 14px;
+  }
+
+  .np-sub, .np-label {
+    font-size: 11px;
+  }
+
+  /* Channel selector - single column on mobile */
+  #channel-selector {
+    padding: 16px 8px;
+    gap: 12px;
+  }
+
+  .channel-button {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .channel-button-name {
+    font-size: 16px;
+  }
+
+  .channel-button-next {
+    font-size: 12px;
+  }
+
+  /* Channel list improvements */
+  .live-tv-sidebar {
+    padding: 8px;
+  }
+
+  .channel-item {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  /* Player frame adjustments */
+  .player-frame {
+    min-height: 40vh;
+    border-radius: 10px;
+  }
+
+  .now-playing-overlay {
+    left: 8px;
+    bottom: 8px;
+    padding: 8px 10px;
+  }
+
+  .now-title {
+    font-size: 14px;
+  }
+
+  .now-meta {
+    font-size: 11px;
+  }
+
+  .player-actions {
+    right: 8px;
+    bottom: 8px;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  /* Guide improvements */
+  .guide {
+    min-height: auto;
+    border-radius: 10px;
+  }
+
+  .guide-header {
+    padding: 8px;
+  }
+
+  .guide-timebar {
+    padding: 6px 8px;
+    gap: 16px;
+  }
+
+  .time-marker {
+    font-size: 10px;
+    min-width: 50px;
+  }
+
+  .guide-row {
+    padding: 8px;
+  }
+
+  .guide-channel-label {
+    width: 100px;
+    font-size: 12px;
+  }
+
+  .program {
+    padding: 6px;
+    min-width: 100px;
+  }
+
+  .program-title {
+    font-size: 11px;
+  }
+
+  .program-meta {
+    font-size: 10px;
+  }
+}
+
 /* CHANNEL SELECTOR */
 #channel-selector {
   padding: 32px 16px;

@@ -4,6 +4,45 @@
     position: relative;
 }
 
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    /* Optimize rendering performance */
+    * {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Prevent text size adjustment on iOS */
+    html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    /* Optimize scrolling */
+    body {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+    }
+
+    /* Better touch targets */
+    a, button, input, select, textarea, [role="button"] {
+        touch-action: manipulation;
+    }
+
+    /* Optimize images */
+    img {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+
+    /* Reduce repaints */
+    .app-header,
+    .mobile-bottom-nav {
+        transform: translateZ(0);
+        will-change: transform;
+    }
+}
+
 /* Mobile hamburger */
 .mobile-hamburger {
     display: none;

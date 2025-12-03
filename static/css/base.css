@@ -87,6 +87,45 @@
     .desktop-only {
         display: none !important;
     }
+
+    /* Ensure mobile bottom nav is visible */
+    .mobile-bottom-nav {
+        display: grid !important;
+    }
+
+    /* Optimize mobile performance */
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Smooth scrolling on mobile */
+    html {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+
+    /* Optimize images for mobile */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Better touch targets */
+    button, a, input, select, textarea {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Reduce animations on mobile for performance */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
 }
 
 
