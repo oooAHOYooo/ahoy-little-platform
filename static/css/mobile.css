@@ -740,12 +740,221 @@
     }
 }
 
-/* Mobile fixed bottom navigation (Spotify-like) */
+/* Mobile Status Bar (fixed top, compact - 32px) */
 @media (max-width: 767px) {
-    body {
-        padding-bottom: calc(112px + env(safe-area-inset-bottom));
+    .mobile-status-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 32px;
+        max-height: 32px;
+        background: linear-gradient(180deg, rgba(10, 10, 10, 0.98) 0%, rgba(10, 10, 10, 0.92) 100%);
+        backdrop-filter: saturate(180%) blur(10px) contrast(1.05);
+        -webkit-backdrop-filter: saturate(180%) blur(10px) contrast(1.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        z-index: 10025;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        box-sizing: border-box;
     }
 
+    .status-bar-content {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 11px;
+        font-weight: 600;
+        color: #e5e7eb;
+    }
+
+    .status-left {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .status-time {
+        font-variant-numeric: tabular-nums;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    
+    .status-weather {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        padding: 2px 6px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .weather-icon {
+        font-size: 12px;
+        line-height: 1;
+    }
+    
+    .weather-temp {
+        font-size: 10px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        color: #e5e7eb;
+    }
+
+    .status-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .status-action-btn {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #e5e7eb;
+        font-size: 10px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        position: relative;
+        text-decoration: none;
+    }
+
+    .status-action-btn:hover {
+        background: rgba(255, 255, 255, 0.10);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .status-action-btn:active {
+        transform: scale(0.95);
+    }
+
+    .status-action-btn .notification-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background: #dc3545;
+        color: white;
+        border-radius: 50%;
+        min-width: 14px;
+        height: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 8px;
+        font-weight: 700;
+        padding: 0 3px;
+        box-shadow: 0 2px 4px rgba(220, 53, 69, 0.4);
+        line-height: 1;
+    }
+
+    .status-indicators {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        font-size: 10px;
+        opacity: 0.85;
+    }
+
+    .status-indicators i {
+        font-size: 10px;
+    }
+
+    /* Adjust body padding for compact status bar */
+    body {
+        padding-top: 32px;
+        padding-bottom: calc(141px + env(safe-area-inset-bottom));
+    }
+}
+
+/* Mobile Account Features Bar (above bottom nav) */
+@media (max-width: 767px) {
+    .mobile-account-bar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: calc(85px + env(safe-area-inset-bottom));
+        display: grid !important;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        padding: 0 8px;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 10002 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        background:
+            radial-gradient(120% 180% at 50% 100%, rgba(84, 255, 143, 0.08) 0%, rgba(84, 255, 143, 0) 55%),
+            linear-gradient(180deg, rgba(17, 17, 17, 0.50) 0%, rgba(10, 10, 10, 0.70) 100%);
+        backdrop-filter: saturate(180%) blur(16px) contrast(1.05);
+        -webkit-backdrop-filter: saturate(180%) blur(16px) contrast(1.05);
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 -16px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        will-change: transform, filter;
+        height: 48px;
+        align-items: center;
+    }
+
+    .mobile-account-bar .account-bar-item {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 0;
+        height: 100%;
+        min-height: 48px;
+        color: #d4d4d4;
+        text-decoration: none;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.025);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 9px;
+        line-height: 1.1;
+        transition: transform .12s ease, background .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease;
+        will-change: transform, filter;
+    }
+
+    .mobile-account-bar .account-bar-item i {
+        font-size: 18px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobile-account-bar .account-bar-item span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        font-size: 9px;
+    }
+
+    .mobile-account-bar .account-bar-item:active {
+        transform: translateY(1px) scale(0.985);
+    }
+
+    .mobile-account-bar .account-bar-item:hover,
+    .mobile-account-bar .account-bar-item.active {
+        color: #f1f5f9;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.20), 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+}
+
+/* Mobile fixed bottom navigation (Spotify-like) */
+@media (max-width: 767px) {
     /* Force mobile bottom nav to be visible - highest specificity */
     nav.mobile-bottom-nav.mobile-only,
     .mobile-bottom-nav.mobile-only,
@@ -843,7 +1052,7 @@
 @media (max-width: 767px) {
     .app-header {
         position: sticky;
-        top: 0;
+        top: 32px;
         background: linear-gradient(180deg, rgba(17, 17, 17, 0.85) 0%, rgba(17, 17, 17, 0.45) 100%);
         backdrop-filter: saturate(180%) blur(16px) contrast(1.03);
         -webkit-backdrop-filter: saturate(180%) blur(16px) contrast(1.03);

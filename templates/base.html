@@ -251,6 +251,30 @@
 
     <body x-data="appData()"
         class="overflow-x-hidden">
+        <!-- Mobile Status Bar (fixed top, compact) -->
+        <div class="mobile-status-bar mobile-only" x-data="statusBar()">
+            <div class="status-bar-content">
+                <div class="status-left">
+                    <span class="status-time" id="statusTime"></span>
+                    <span class="status-weather" x-show="weatherLoaded">
+                        <span class="weather-icon" x-text="weatherIcon"></span>
+                        <span class="weather-temp" x-text="weatherTemp + '°'"></span>
+                    </span>
+                    <a href="/search" class="status-action-btn" title="Search">
+                        <i class="fas fa-search"></i>
+                    </a>
+                    <a href="/bookmarks" class="status-action-btn" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
+                    </a>
+                </div>
+                <div class="status-indicators">
+                    <i class="fas fa-signal"></i>
+                    <i class="fas fa-wifi"></i>
+                    <i class="fas fa-battery-three-quarters"></i>
+                </div>
+            </div>
+        </div>
         <!-- Loading indicator -->
         <div id="loading-indicator"
             style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 9999; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
@@ -627,6 +651,30 @@
             </nav>
         </header>
         <!-- Mobile Explore replaced by overlay -->
+        <!-- Mobile Account Features Bar (above bottom nav) -->
+        <nav class="mobile-account-bar mobile-only" role="navigation"
+            aria-label="Account Features">
+            <a href="/account" class="account-bar-item {% if request.endpoint == 'account' or request.endpoint == 'account_page' %}active{% endif %}">
+                <i class="fas fa-user-circle"></i>
+                <span>Profile</span>
+            </a>
+            <a href="/portfolio" class="account-bar-item {% if request.endpoint == 'portfolio' or request.endpoint == 'portfolio_page' %}active{% endif %}">
+                <i class="fas fa-chart-line"></i>
+                <span>Portfolio</span>
+            </a>
+            <a href="/dashboard" class="account-bar-item {% if request.endpoint == 'dashboard' or request.endpoint == 'dashboard_page' %}active{% endif %}">
+                <i class="fas fa-trophy"></i>
+                <span>Achievements</span>
+            </a>
+            <a href="/bookmarks" class="account-bar-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}">
+                <i class="fas fa-bookmark"></i>
+                <span>Saved</span>
+            </a>
+            <a href="/settings" class="account-bar-item {% if request.endpoint == 'settings' or request.endpoint == 'settings_page' %}active{% endif %}">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
         <!-- Mobile Bottom Tab Bar (Spotify-like) -->
         <nav class="mobile-bottom-nav mobile-only" role="navigation"
             aria-label="Primary">
@@ -1573,6 +1621,121 @@
             document.getElementById('paywall').classList.add('hidden');
         });
     </script>
+
+        <!-- Status Bar JavaScript -->
+        <script>
+        function statusBar() {
+            return {
+                // Notification state
+                newBookmarkCount: 0,
+                hasNewBookmarks: false,
+                
+                // Weather state
+                weatherLoaded: false,
+                weatherIcon: '☀️',
+                weatherTemp: '--',
+                weatherCondition: '',
+
+                init() {
+                    // Load bookmark count
+                    this.loadBookmarkCount();
+                    
+                    // Load weather
+                    this.loadWeather();
+                    
+                    // Listen for bookmark notifications
+                    document.addEventListener('bookmark:notified', (e) => {
+                        this.newBookmarkCount = e.detail.count;
+                        this.hasNewBookmarks = true;
+                    });
+                    
+                    // Listen for notification clearing
+                    document.addEventListener('bookmark:notifications-cleared', () => {
+                        this.newBookmarkCount = 0;
+                        this.hasNewBookmarks = false;
+                    });
+                    
+                    // Periodic refresh
+                    setInterval(() => {
+                        this.loadBookmarkCount();
+                    }, 5000);
+                    
+                    // Refresh weather every 10 minutes
+                    setInterval(() => {
+                        this.loadWeather();
+                    }, 600000);
+                },
+
+                async loadBookmarkCount() {
+                    try {
+                        // Get bookmark count from navbar if available
+                        const navbar = document.querySelector('body')?.__x?.$data;
+                        if (navbar && navbar.newBookmarkCount !== undefined) {
+                            this.newBookmarkCount = navbar.newBookmarkCount || 0;
+                            this.hasNewBookmarks = navbar.hasNewBookmarks || false;
+                            return;
+                        }
+                        
+                        // Fallback: try to get from global notification state
+                        if (window.__ahoyNotificationState) {
+                            this.newBookmarkCount = window.__ahoyNotificationState.newBookmarkCount || 0;
+                            this.hasNewBookmarks = window.__ahoyNotificationState.hasNewBookmarks || false;
+                        }
+                    } catch (err) {
+                        // Silently fail
+                    }
+                },
+                
+                async loadWeather() {
+                    try {
+                        // Try to get user's location from geolocation API
+                        let lat = null;
+                        let lon = null;
+                        
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                                (position) => {
+                                    lat = position.coords.latitude;
+                                    lon = position.coords.longitude;
+                                    this.fetchWeather(lat, lon);
+                                },
+                                () => {
+                                    // If geolocation fails, use default location
+                                    this.fetchWeather();
+                                },
+                                { timeout: 2000, maximumAge: 300000 } // 5 min cache
+                            );
+                        } else {
+                            // No geolocation support, use default
+                            this.fetchWeather();
+                        }
+                    } catch (err) {
+                        // Silently fail
+                    }
+                },
+                
+                async fetchWeather(lat = null, lon = null) {
+                    try {
+                        let url = '/api/weather';
+                        if (lat && lon) {
+                            url += `?lat=${lat}&lon=${lon}`;
+                        }
+                        
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.weatherIcon = data.icon || '☀️';
+                            this.weatherTemp = data.temperature || '--';
+                            this.weatherCondition = data.condition || '';
+                            this.weatherLoaded = true;
+                        }
+                    } catch (err) {
+                        // Silently fail - weather is optional
+                    }
+                }
+            };
+        }
+        </script>
 
         <!-- Navbar JavaScript -->
         <script>

@@ -110,6 +110,24 @@
         if (!inMobile()) return;
         setupHandlers();
     });
+
+    // Update status bar time
+    function updateStatusTime() {
+        const statusTime = $('#statusTime');
+        if (statusTime) {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            statusTime.textContent = timeString;
+        }
+    }
+
+    // Update time immediately and then every minute
+    if (inMobile()) {
+        updateStatusTime();
+        setInterval(updateStatusTime, 60000);
+    }
 })();
 
 // Lightweight Alpine helpers for mobile accordions/drawers
