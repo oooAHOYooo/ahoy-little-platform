@@ -10,15 +10,15 @@
     display: none !important;
 }
 
-/* Desktop-only - hide on mobile */
-@media (max-width: 767px) {
+/* Desktop-only - hide on tablets and below */
+@media (max-width: 1023px) {
     .desktop-only {
         display: none !important;
     }
 }
 
-/* Desktop-only - show on desktop */
-@media (min-width: 768px) {
+/* Desktop-only - show on desktop (≥1024px) */
+@media (min-width: 1024px) {
     .desktop-only {
         display: block !important;
     }
