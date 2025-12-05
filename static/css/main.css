@@ -2558,8 +2558,8 @@ a:hover {
 
     .footer-content {
         grid-template-columns: 1fr;
-        gap: 0.75rem;
-        padding: 12px 1rem;
+        gap: 0.64rem;
+        padding: 10px 0.85rem;
     }
 
     .footer-column {
@@ -2572,19 +2572,19 @@ a:hover {
     }
 
     .footer-logo img {
-        height: 18px;
+        height: 12px;
     }
 
     .footer-tagline {
         text-align: center;
-        font-size: 0.78rem;
-        line-height: 1.3;
+        font-size: 0.66rem;
+        line-height: 1.25;
     }
 
     .footer-column-title {
         text-align: center;
-        font-size: 0.72rem;
-        margin: 0.25rem 0;
+        font-size: 0.61rem;
+        margin: 0.2rem 0;
     }
 
     .footer-nav-list {
@@ -2593,7 +2593,7 @@ a:hover {
 
     .footer-nav-list li a {
         text-align: center;
-        font-size: 0.82rem;
+        font-size: 0.70rem;
     }
 
     .footer-version-badge {
@@ -2602,7 +2602,7 @@ a:hover {
     }
 
     .footer-bottom {
-        padding: 12px 1rem;
+        padding: 10px 0.85rem;
     }
 
     /* Hide redundant footer columns on mobile */
@@ -2613,7 +2613,7 @@ a:hover {
 
     /* Compact mobile footer */
     .footer-compact {
-        padding: 5px 8px;
+        padding: 4px 7px;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
         background: rgba(255, 255, 255, 0.03);
     }
@@ -2681,22 +2681,23 @@ a:hover {
 
     .footer-compact-secondary {
         text-align: center;
-        color: var(--text-muted);
-        font-size: 0.56rem;
+        color: rgba(255, 255, 255, 0.45);
+        font-size: 0.48rem;
         line-height: 1.2;
     }
 
     .footer-compact-secondary a {
-        color: var(--text-muted);
+        color: rgba(255, 255, 255, 0.55);
         text-decoration: none;
     }
 
     /* Monospaced year + tighter footer bottom text */
     .footer-bottom p {
-        font-size: 0.6rem;
+        font-size: 0.3rem;
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         font-variant-numeric: tabular-nums;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
     }
 
     .debug-message {
