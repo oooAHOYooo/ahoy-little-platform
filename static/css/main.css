@@ -1347,26 +1347,22 @@ a:hover {
 .account-menu-btn {
     width: auto !important;
     min-width: auto;
-    padding: 4px 6px !important;
-    gap: 6px;
+    padding: 2px 4px !important;
+    gap: 4px;
     display: flex;
     align-items: center;
 }
 
 .account-avatar {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1.5px solid rgba(139, 92, 246, 0.4);
+    border: 1.25px solid rgba(139, 92, 246, 0.35);
     flex-shrink: 0;
 }
 
-.account-chevron {
-    font-size: 9px;
-    color: rgba(255, 255, 255, 0.4);
-    transition: all 0.2s ease;
-}
+/* Removed chevron on desktop */
 
 /* Simple text pill for guest label */
 .user-label {
@@ -1393,15 +1389,18 @@ a:hover {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    width: 280px;
+    width: 260px;
     max-width: calc(100vw - 32px);
-    /* Make background less transparent for better readability */
-    background: rgba(15, 15, 18, 0.92);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-md);
+    /* Dark, compact, neuromorphic glass */
+    background: rgba(10, 10, 12, 0.88);
+    backdrop-filter: saturate(160%) blur(18px) contrast(1.05);
+    -webkit-backdrop-filter: saturate(160%) blur(18px) contrast(1.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    box-shadow:
+        12px 12px 28px rgba(0, 0, 0, 0.45),
+        -2px -2px 6px rgba(255, 255, 255, 0.04) inset,
+        0 1px 0 rgba(255, 255, 255, 0.06) inset;
     z-index: 9999;
     overflow: hidden;
     max-height: calc(100vh - 100px);
@@ -1409,14 +1408,14 @@ a:hover {
 }
 
 .account-menu-items {
-    padding: var(--spacing-2) 0;
+    padding: 4px 0;
 }
 
 .account-menu-item {
     display: flex;
     align-items: center;
-    gap: var(--spacing-3);
-    padding: var(--spacing-2) var(--spacing-4);
+    gap: 8px;
+    padding: 8px 12px;
     color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
     transition: all 0.2s ease;
@@ -1426,7 +1425,7 @@ a:hover {
 }
 
 .account-menu-item:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.04);
     border-left-color: var(--accent-color);
     color: rgba(255, 255, 255, 0.95);
     opacity: 1;
@@ -1443,13 +1442,13 @@ a:hover {
 }
 
 .account-menu-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.65);
     flex-shrink: 0;
     transition: color 0.2s ease;
 }
@@ -1464,15 +1463,15 @@ a:hover {
 }
 
 .account-menu-label {
-    font-size: 0.875rem;
+    font-size: 0.84rem;
     font-weight: 500;
     line-height: 1.25;
     margin-bottom: 2px;
 }
 
 .account-menu-desc {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.55);
     line-height: 1.25;
 }
 
