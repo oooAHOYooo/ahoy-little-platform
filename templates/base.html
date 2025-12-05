@@ -256,6 +256,10 @@
             <div class="status-bar-content">
                 <div class="status-left">
                     <span class="status-time" id="statusTime"></span>
+                    <a href="/" class="status-logo" title="Ahoy" aria-label="Ahoy">
+                        <img src="/static/img/favicon.svg" alt="Ahoy Indie Media"
+                            style="height:12px;width:auto;opacity:.9;vertical-align:middle;">
+                    </a>
                     <span class="status-weather" x-show="weatherLoaded">
                         <span class="weather-icon" x-text="weatherIcon"></span>
                         <span class="weather-temp" x-text="weatherTemp + '°'"></span>
@@ -434,9 +438,10 @@
                             @click.outside="accountMenuOpen = false">
                             <button
                                 @click="accountMenuOpen = !accountMenuOpen; console.log('Account menu clicked, new state:', accountMenuOpen)"
-                                class="nav-item account-menu-btn"
+                                class="nav-item account-menu-btn flex items-center gap-1"
                                 title="Account">
-                                <i class="fas fa-user-circle" style="font-size:20px;color:#bdbdbd;"></i>
+                                <i class="fas fa-user" style="font-size:18px;color:#bdbdbd;"></i>
+                                <i class="fas fa-chevron-down" style="font-size:12px;color:#bdbdbd;transition:transform .2s;" :class="{'rotate-180': accountMenuOpen}"></i>
                             </button>
 
                             <!-- Unified Account Features Dropdown -->
@@ -452,64 +457,54 @@
                                 <!-- User Header with Stats -->
                                 <div
                                     class="px-4 py-4 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 border-b border-neutral-700/50">
-                                    <div class="flex items-center gap-3 mb-3">
-                                        <img loading="lazy"
-                                            :src="userProfile.avatar || '/static/img/default-avatar.png'"
-                                            :alt="userProfile.display_name || 'User'"
-                                            class="w-12 h-12 rounded-full border-2 border-white/20">
-                                        <div class="flex-1 min-w-0">
-                                            <p
-                                                class="text-sm font-semibold text-white truncate"
-                                                x-text="userProfile.display_name || 'User'"></p>
-                                            <p
-                                                class="text-xs text-neutral-300 truncate"
-                                                x-text="userProfile.email || ''"></p>
-                                        </div>
+                                    <div class="mb-2">
+                                        <p class="text-sm font-semibold text-white truncate"
+                                           x-text="userProfile.display_name || userProfile.username || 'Guest'"></p>
                                     </div>
 
                                     <!-- Quick Stats -->
                                     <div
-                                        class="grid grid-cols-3 gap-2 pt-3 border-t border-neutral-700/50">
+                                        class="grid grid-cols-3 gap-2 pt-2 border-t border-neutral-700/50">
                                         <div class="text-center">
                                             <div
-                                                class="text-lg font-bold text-pink-400"
+                                                class="text-base font-semibold text-pink-400"
                                                 x-text="totalBookmarkCount || 0"></div>
                                             <div
-                                                class="text-xs text-neutral-400">Bookmarks</div>
+                                                class="text-[11px] text-neutral-400">Bookmarks</div>
                                         </div>
                                         <div class="text-center">
                                             <div
-                                                class="text-lg font-bold text-purple-400"
+                                                class="text-base font-semibold text-purple-400"
                                                 x-text="'$' + (totalInvested || 0).toFixed(0)"></div>
                                             <div
-                                                class="text-xs text-neutral-400">Invested</div>
+                                                class="text-[11px] text-neutral-400">Invested</div>
                                         </div>
                                         <div class="text-center">
                                             <div
-                                                class="text-lg font-bold text-yellow-400"
+                                                class="text-base font-semibold text-yellow-400"
                                                 x-text="badges?.length || 0"></div>
                                             <div
-                                                class="text-xs text-neutral-400">Badges</div>
+                                                class="text-[11px] text-neutral-400">Badges</div>
                                         </div>
                                     </div>
 
                                     <!-- Wallet Summary -->
                                     <div
-                                        class="flex items-center justify-between mt-3 p-2 rounded-md border border-neutral-700/40 bg-neutral-800/30">
+                                        class="flex items-center justify-between mt-2 p-2 rounded-md border border-neutral-700/40 bg-neutral-800/30">
                                         <div
-                                            class="text-xs text-neutral-300">Wallet</div>
+                                            class="text-[11px] text-neutral-300">Wallet</div>
                                         <div
                                             class="text-sm font-semibold text-white"
                                             x-text="'$' + ((walletBalanceCents || 0) / 100).toFixed(2)"></div>
                                     </div>
-                                    <div class="mt-2 flex gap-2">
+                                    <div class="mt-1 flex gap-2">
                                         <button
-                                            class="px-2 py-1 text-xs rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
+                                            class="px-2 py-0.5 text-[11px] rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
                                             @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(2000) : null">
                                             Add $20
                                         </button>
                                         <button
-                                            class="px-2 py-1 text-xs rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
+                                            class="px-2 py-0.5 text-[11px] rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
                                             @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(5000) : null">
                                             Add $50
                                         </button>
@@ -609,14 +604,7 @@
                             </div>
                         </div>
 
-                        <!-- Login Button (Not Logged In) -->
-                        <div class="hidden-mobile" x-show="!isLoggedIn">
-                            <a href="/account"
-                                class="nav-item px-3 py-2 rounded-lg hover:bg-neutral-800/50 transition-colors"
-                                title="Account">
-                                <i class="fas fa-user"></i>
-                            </a>
-                        </div>
+                        
 
                         <!-- Fullscreen Toggle (Desktop Only) -->
                         <button @click="toggleFullscreen()"
