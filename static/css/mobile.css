@@ -948,6 +948,21 @@
         min-width: 0;
     }
 
+    /* Ensure the tiny logo is always visible as white on dark or colored assets */
+    .status-logo {
+        display: flex;
+        align-items: center;
+        line-height: 0;
+        flex-shrink: 0;
+    }
+    .status-logo img {
+        height: 12px;
+        width: auto;
+        /* Make black logos render white and boost contrast */
+        filter: brightness(0) invert(1) drop-shadow(0 0 1px rgba(255,255,255,0.25));
+        opacity: .95;
+    }
+
     .status-time {
         font-variant-numeric: tabular-nums;
         font-size: 11px;
