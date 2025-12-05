@@ -458,13 +458,13 @@
                                 <div
                                     class="px-4 py-4 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 border-b border-neutral-700/50">
                                     <div class="mb-2">
-                                        <p class="text-sm font-semibold text-white truncate"
+                                        <p class="hdr-username text-sm font-semibold text-white truncate"
                                            x-text="userProfile.display_name || userProfile.username || 'Guest'"></p>
                                     </div>
 
                                     <!-- Quick Stats -->
                                     <div
-                                        class="grid grid-cols-3 gap-2 pt-2 border-t border-neutral-700/50">
+                                        class="account-stats grid grid-cols-3 gap-2 pt-2 border-t border-neutral-700/50">
                                         <div class="text-center">
                                             <div
                                                 class="text-base font-semibold text-pink-400"
@@ -490,21 +490,21 @@
 
                                     <!-- Wallet Summary -->
                                     <div
-                                        class="flex items-center justify-between mt-2 p-2 rounded-md border border-neutral-700/40 bg-neutral-800/30">
+                                        class="account-wallet flex items-center justify-between mt-2 p-2 rounded-md border border-neutral-700/40 bg-neutral-800/30">
                                         <div
                                             class="text-[11px] text-neutral-300">Wallet</div>
                                         <div
                                             class="text-sm font-semibold text-white"
                                             x-text="'$' + ((walletBalanceCents || 0) / 100).toFixed(2)"></div>
                                     </div>
-                                    <div class="mt-1 flex gap-2">
+                                    <div class="account-wallet-actions mt-1 flex gap-2">
                                         <button
-                                            class="px-2 py-0.5 text-[11px] rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
+                                            class="pill px-2 py-0.5 text-[11px] rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
                                             @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(2000) : null">
                                             Add $20
                                         </button>
                                         <button
-                                            class="px-2 py-0.5 text-[11px] rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
+                                            class="pill px-2 py-0.5 text-[11px] rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
                                             @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(5000) : null">
                                             Add $50
                                         </button>
