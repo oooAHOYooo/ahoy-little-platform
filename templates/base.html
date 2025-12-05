@@ -428,14 +428,6 @@
                             <i class="fas fa-home"></i>
                         </a>
 
-                        <!-- Boost pill -->
-                        <button class="nav-item px-3 rounded-full hidden-mobile"
-                            style="height:44px"
-                            title="Boost"
-                            @click="document.dispatchEvent(new CustomEvent('boost:open'))">
-                            Boost $
-                        </button>
-
                         <!-- Account Features Dropdown (Desktop Only - Logged In) -->
                         <div class="hidden-mobile account-menu-container"
                             x-show="isLoggedIn"
@@ -443,11 +435,8 @@
                             <button
                                 @click="accountMenuOpen = !accountMenuOpen; console.log('Account menu clicked, new state:', accountMenuOpen)"
                                 class="nav-item account-menu-btn"
-                                title="Account Features">
-                                <img loading="lazy"
-                                    :src="userProfile.avatar || '/static/img/default-avatar.png'"
-                                    :alt="userProfile.display_name || 'User'"
-                                    class="account-avatar">
+                                title="Account">
+                                <i class="fas fa-user-circle" style="font-size:20px;color:#bdbdbd;"></i>
                             </button>
 
                             <!-- Unified Account Features Dropdown -->

@@ -12,6 +12,48 @@
         color: #f0f0f7;
     }
 
+    /* Sandbox banner */
+    .sandbox-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px dashed rgba(255, 255, 255, 0.18);
+        color: #eaeaf2;
+        padding: .65rem .9rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    .sandbox-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        padding: .25rem .6rem;
+        border-radius: 999px;
+        background: #1b1b22;
+        border: 1px solid rgba(255,255,255,.15);
+        color: #cfd1da;
+        font-size: .8rem;
+        font-weight: 700;
+    }
+    .sandbox-banner .actions {
+        display: flex;
+        gap: .5rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .btn-ghost {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,.18);
+        color: #f0f0f7;
+        border-radius: 8px;
+        padding: .45rem .7rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,.06); }
+
     .portfolio-container {
         max-width: 1200px;
         margin: 0 auto;
@@ -215,12 +257,103 @@
         .positions-table { font-size: 0.875rem; }
         .positions-table th, .positions-table td { padding: 0.5rem; }
     }
+
+    /* Sticky Make it Real bar */
+    .make-real-bar {
+        position: sticky;
+        bottom: 0;
+        margin-top: 1.25rem;
+        background: linear-gradient(180deg, rgba(15,15,20,0) 0%, rgba(15,15,20,0.9) 20%, rgba(15,15,20,1) 100%);
+        padding-top: 1rem;
+    }
+    .make-real-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        border: 1px solid rgba(255,255,255,.08);
+        background: rgba(255,255,255,.04);
+        border-radius: 12px;
+        padding: .75rem .9rem;
+    }
+    .btn-primary {
+        background: #6366f1;
+        border: 1px solid #6366f1;
+        color: #fff;
+        border-radius: 10px;
+        padding: .6rem .9rem;
+        font-weight: 800;
+        cursor: pointer;
+    }
+    .btn-primary:hover { filter: brightness(1.05); }
+
+    /* Compact wizard */
+    .wizard-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.55);
+        display: grid;
+        place-items: center;
+        z-index: 60;
+    }
+    .wizard {
+        width: 96%;
+        max-width: 520px;
+        background: #111119;
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0,0,0,.55);
+    }
+    .wizard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: .9rem 1rem;
+        background: linear-gradient(135deg, rgba(99,102,241,.15), rgba(168,85,247,.12));
+        border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .wizard-title { font-weight: 800; }
+    .wizard-body { padding: 1rem; color: #dfe1ea; }
+    .wizard-steps {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: .5rem;
+        margin-bottom: .75rem;
+    }
+    .wizard-step {
+        height: .35rem;
+        border-radius: 999px;
+        background: rgba(255,255,255,.12);
+    }
+    .wizard-step.active { background: linear-gradient(90deg,#6366f1,#a855f7); }
+    .wizard-actions { display: flex; justify-content: flex-end; gap: .5rem; padding: .75rem 1rem 1rem; }
+    .btn-secondary {
+        background: rgba(255,255,255,.06);
+        border: 1px solid rgba(255,255,255,.16);
+        color: #f0f0f7;
+        border-radius: 10px;
+        padding: .5rem .8rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="portfolio-page" x-data="portfolioWidget()" x-init="init()">
     <div class="portfolio-container">
+        <!-- Practice (Sandbox) banner -->
+        <div class="sandbox-banner" x-show="sandboxEnabled">
+            <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+                <span class="sandbox-pill"><i class="fas fa-coins"></i> Practice mode</span>
+                <span style="color:#c7c8d4">You’re using sample “fake money” to preview your portfolio.</span>
+            </div>
+            <div class="actions">
+                <button class="btn-ghost" @click="resetSandbox()">Reset practice data</button>
+                <button class="btn-ghost" @click="disableSandbox()">Use real data</button>
+            </div>
+        </div>
         <!-- Hero Header -->
         <div class="hero-header">
             <h1>Your Creative Portfolio</h1>
@@ -237,7 +370,10 @@
         <div x-show="!isLoading && totalContributed === 0" class="empty-state">
             <i class="fas fa-chart-line"></i>
             <h3>No Positions Yet</h3>
-            <p>Start boosting artists to build your creative portfolio!</p>
+            <p x-show="!sandboxEnabled">Start boosting artists to build your creative portfolio!</p>
+            <div x-show="sandboxEnabled" style="margin-top:10px">
+                <button class="btn-primary" @click="seedSandbox()">Generate sample positions</button>
+            </div>
         </div>
 
         <!-- Portfolio Content -->
@@ -310,7 +446,62 @@
                 </table>
             </div>
         </div>
+
+        <!-- Sticky Make it real bar -->
+        <div class="make-real-bar" x-show="sandboxEnabled">
+            <div class="make-real-inner">
+                <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;">
+                    <i class="fas fa-info-circle" style="opacity:.9"></i>
+                    <div>
+                        <div style="font-weight:700;">You’re previewing with practice dollars</div>
+                        <div style="font-size:.85rem;color:#b9bcc9;">Create an account to make your portfolio real.</div>
+                    </div>
+                </div>
+                <button class="btn-primary" @click="openWizard()">Make it real</button>
+            </div>
+        </div>
     </div>
+
+    <!-- Wizard modal -->
+    <template x-if="wizardOpen">
+        <div class="wizard-backdrop" @click.self="closeWizard()">
+            <div class="wizard" role="dialog" aria-modal="true">
+                <div class="wizard-header">
+                    <div class="wizard-title">Get Started</div>
+                    <button class="btn-ghost" @click="closeWizard()">Close</button>
+                </div>
+                <div class="wizard-body">
+                    <div class="wizard-steps">
+                        <div class="wizard-step" :class="{'active': wizardStep >= 1}"></div>
+                        <div class="wizard-step" :class="{'active': wizardStep >= 2}"></div>
+                        <div class="wizard-step" :class="{'active': wizardStep >= 3}"></div>
+                        <div class="wizard-step" :class="{'active': wizardStep >= 4}"></div>
+                    </div>
+                    <div x-show="wizardStep === 1">
+                        <h3 style="margin:0 0 .35rem 0;">Create your account</h3>
+                        <p style="color:#bfc2cf;margin:0 0 .5rem 0;">We’ll set up a profile so you can track your real positions.</p>
+                        <button class="btn-primary" @click="goToAccount()">Sign up / Log in</button>
+                    </div>
+                    <div x-show="wizardStep === 2">
+                        <h3 style="margin:0 0 .35rem 0;">Verify your email</h3>
+                        <p style="color:#bfc2cf;margin:0;">We’ll send a code to confirm it’s you.</p>
+                    </div>
+                    <div x-show="wizardStep === 3">
+                        <h3 style="margin:0 0 .35rem 0;">Add a payment method</h3>
+                        <p style="color:#bfc2cf;margin:0;">Securely add a card to fund your boosts.</p>
+                    </div>
+                    <div x-show="wizardStep === 4">
+                        <h3 style="margin:0 0 .35rem 0;">Start boosting artists</h3>
+                        <p style="color:#bfc2cf;margin:0;">Your portfolio will update as you support creators.</p>
+                    </div>
+                </div>
+                <div class="wizard-actions">
+                    <button class="btn-secondary" @click="prevStep()" :disabled="wizardStep===1">Back</button>
+                    <button class="btn-primary" @click="nextStep()">{{ wizardStep < 4 ? 'Continue' : 'Finish' }}</button>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>
 
 <!-- Chart.js -->
@@ -327,13 +518,22 @@
             pieData: [],
             pieChart: null,
             timelineChart: null,
+            // Sandbox state
+            sandboxEnabled: true,
+            wizardOpen: false,
+            wizardStep: 1,
 
             get averageContribution() {
                 return this.positionCount > 0 ? this.totalContributed / this.positionCount : 0;
             },
 
             async init() {
-                await this.loadPortfolioData();
+                // Load sandbox flag from storage (default: true for first-time visitors)
+                try {
+                    const stored = localStorage.getItem('portfolio:sandboxEnabled');
+                    this.sandboxEnabled = stored === null ? true : stored === 'true';
+                } catch (_) {}
+                await (this.sandboxEnabled ? this.loadSandboxData() : this.loadPortfolioData());
             },
 
             async loadPortfolioData() {
@@ -362,6 +562,83 @@
                     this.isLoading = false;
                 }
             },
+
+            async loadSandboxData() {
+                this.isLoading = true;
+                try {
+                    // Load or seed local sample data
+                    const saved = localStorage.getItem('portfolio:sandboxData');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        this.applyData(data);
+                    } else {
+                        this.seedSandbox();
+                    }
+                } catch (e) {
+                    this.seedSandbox();
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
+            seedSandbox() {
+                // Simple sample dataset
+                const now = new Date();
+                const daysAgo = (n) => {
+                    const d = new Date(now); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10);
+                };
+                const data = {
+                    total_contributed: 75,
+                    position_count: 3,
+                    positions: [
+                        { artist_id: 'artist-a', artist_name: 'Echo Valence', total_contributed: 35, weight: 46.67, last_boost: new Date().toISOString(), created_at: now.toISOString() },
+                        { artist_id: 'artist-b', artist_name: 'Neon Harbor', total_contributed: 25, weight: 33.33, last_boost: new Date(Date.now()-86400000*3).toISOString(), created_at: now.toISOString() },
+                        { artist_id: 'artist-c', artist_name: 'Analog Vista', total_contributed: 15, weight: 20.00, last_boost: new Date(Date.now()-86400000*8).toISOString(), created_at: now.toISOString() },
+                    ],
+                    timeline: [
+                        { date: daysAgo(14), amount: 10 },
+                        { date: daysAgo(7), amount: 15 },
+                        { date: daysAgo(3), amount: 25 },
+                        { date: daysAgo(0), amount: 25 },
+                    ],
+                    pie_data: [
+                        { artist_id: 'artist-a', artist_name: 'Echo Valence', amount: 35 },
+                        { artist_id: 'artist-b', artist_name: 'Neon Harbor', amount: 25 },
+                        { artist_id: 'artist-c', artist_name: 'Analog Vista', amount: 15 },
+                    ]
+                };
+                try { localStorage.setItem('portfolio:sandboxData', JSON.stringify(data)); } catch (_) {}
+                this.applyData(data);
+            },
+
+            applyData(data) {
+                this.totalContributed = data.total_contributed || 0;
+                this.positionCount = data.position_count || 0;
+                this.positions = data.positions || [];
+                this.timeline = data.timeline || [];
+                this.pieData = data.pie_data || [];
+                this.$nextTick(() => {
+                    this.renderPieChart();
+                    this.renderTimelineChart();
+                });
+            },
+
+            resetSandbox() {
+                try { localStorage.removeItem('portfolio:sandboxData'); } catch (_) {}
+                this.seedSandbox();
+            },
+
+            disableSandbox() {
+                this.sandboxEnabled = false;
+                try { localStorage.setItem('portfolio:sandboxEnabled', 'false'); } catch (_) {}
+                this.loadPortfolioData();
+            },
+
+            openWizard() { this.wizardOpen = true; this.wizardStep = 1; },
+            closeWizard() { this.wizardOpen = false; },
+            nextStep() { if (this.wizardStep < 4) this.wizardStep += 1; else this.closeWizard(); },
+            prevStep() { if (this.wizardStep > 1) this.wizardStep -= 1; },
+            goToAccount() { window.location.href = '/account'; },
 
             renderPieChart() {
                 const ctx = document.getElementById('pieChart');

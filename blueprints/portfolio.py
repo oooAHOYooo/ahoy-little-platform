@@ -36,6 +36,12 @@ def portfolio_page():
     """Portfolio page showing user's creative positions"""
     return render_template("portfolio.html")
 
+@bp.route("/sandbox")
+def portfolio_sandbox_page():
+    """Client-only sandbox to practice with 'fake money' using localStorage.
+    No server state is persisted. Intended for UX testing and education.
+    """
+    return render_template("portfolio_sandbox.html")
 
 @bp.route("/data")
 # @login_required  # Disabled for development

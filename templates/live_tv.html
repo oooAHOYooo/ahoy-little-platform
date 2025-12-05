@@ -300,10 +300,12 @@
 			<div class="spotlight-left">
 				<!-- HERO VIDEO PLAYER WITH GLASS GRADIENT AND HEADER -->
 				<div class="panelstream-player hero-player">
-					<video id="livePlayer" controls autoplay muted playsinline webkit-playsinline></video>
+					<video id="livePlayer" controls autoplay muted playsinline
+						webkit-playsinline></video>
 					<div class="video-header">
 						<span class="now-playing-label">Now Playing</span>
-						<span class="channel-name-label" id="channelNameLabel" aria-live="polite">Channel —</span>
+						<span class="channel-name-label" id="channelNameLabel"
+							aria-live="polite">Channel —</span>
 					</div>
 					<div class="hero-glass"></div>
 				</div>
@@ -312,14 +314,16 @@
 					<button id="btnPlayPause" class="remote-btn" title="Play/Pause">⏯</button>
 					<button id="btnMute" class="remote-btn" title="Mute">🔇</button>
 					<button id="btnFullscreen" class="remote-btn" title="Fullscreen">⛶</button>
-					<button id="btnGoGuide" class="remote-btn" title="Go to Guide">Guide</button>
+					<button id="btnGoGuide" class="remote-btn"
+						title="Go to Guide">Guide</button>
 					<button id="btnChUp" class="remote-btn" title="Channel Up">CH ▲</button>
-					<button id="btnChDown" class="remote-btn" title="Channel Down">CH ▼</button>
+					<button id="btnChDown" class="remote-btn" title="Channel Down">CH
+						▼</button>
 				</div>
 
 				<!-- PLAYING NOW THIN BAR WITH PROGRESS -->
 				<div id="playing-now" class="playing-now glass">
-					<img id="playingNowThumb" alt="" />
+					<img id="playingNowThumb" alt />
 					<div class="now-col">
 						<div class="np-title" id="playingNowTitle">Select a program</div>
 						<div class="np-sub" id="playingNowMeta">—</div>
@@ -332,8 +336,9 @@
 				</div>
 
 			</div>
-			<aside class="right-dashboard glass hidden-mobile" id="rightDashboard" aria-label="Channel Dashboard">
-				<img id="rd-thumb" alt="" class="rd-thumb"/>
+			<aside class="right-dashboard glass hidden-mobile" id="rightDashboard"
+				aria-label="Channel Dashboard">
+				<img id="rd-thumb" alt class="rd-thumb" />
 				<div class="rd-now">
 					<div class="rd-label">Playing Now</div>
 					<div class="rd-title" id="rd-now-title">—</div>
@@ -353,21 +358,32 @@
 	</div>
 </div>
 
-<div class="live-tv-container" id="liveTvRoot" data-initial-channel="misc" style="display:none" aria-hidden="true">
+<div class="live-tv-container" id="liveTvRoot" data-initial-channel="misc"
+	style="display:none" aria-hidden="true">
 	<!-- Left sidebar: channels -->
 	<aside class="live-tv-sidebar" aria-label="Channels">
-		<ul class="channel-list" id="channelList" role="listbox" aria-label="Live TV Channels" tabindex="0">
+		<ul class="channel-list" id="channelList" role="listbox"
+			aria-label="Live TV Channels" tabindex="0">
 			<!-- Filled by JS -->
 		</ul>
 	</aside>
 
 	<!-- Main content: player and guide -->
 	<section class="live-tv-main">
+		<!-- Mobile: Channels toggle -->
+		<div class="mobile-only" style="padding:8px 10px;">
+			<button class="channels-btn" type="button"
+				onclick="(function(){try{const sb=document.querySelector('.live-tv-sidebar'); const ov=document.getElementById('ltvOverlay'); if(sb&&ov){sb.classList.add('open'); ov.classList.add('show');}}catch(_){}})()">
+				<i class="fas fa-list"></i> Channels
+			</button>
+		</div>
 		<div class="player-frame" aria-live="polite">
-			<video id="tvPlayer" playsinline webkit-playsinline controls preload="metadata"></video>
+			<video id="tvPlayer" playsinline webkit-playsinline controls
+				preload="metadata"></video>
 			<div class="now-playing-overlay">
 				<div class="now-title" id="nowTitle">Select a program</div>
-				<div class="now-meta" id="nowMeta">Use arrow keys and press Enter to play</div>
+				<div class="now-meta" id="nowMeta">Use arrow keys and press Enter to
+					play</div>
 			</div>
 			<div class="player-actions">
 				<button class="btn btn-primary" id="btnWatch">Watch</button>
@@ -387,13 +403,17 @@
 			</div>
 			<div class="guide-timebar" id="timebar"></div>
 			<div class="guide-scroller">
-				<div class="guide-rows" id="guideRows" role="grid" aria-label="Channel Guide">
+				<div class="guide-rows" id="guideRows" role="grid"
+					aria-label="Channel Guide">
 					<div class="now-line" id="nowLine" style="left:0"></div>
 					<!-- Filled by JS -->
 				</div>
 			</div>
 		</div>
 	</section>
+	<!-- Mobile overlay for channel drawer -->
+	<div id="ltvOverlay" class="ltv-overlay"
+		onclick="(function(){try{const sb=document.querySelector('.live-tv-sidebar'); const ov=document.getElementById('ltvOverlay'); if(sb&&ov){sb.classList.remove('open'); ov.classList.remove('show');}}catch(_){}})()"></div>
 </div>
 {% endblock %}
 
@@ -402,5 +422,3 @@
 <script src="{{ url_for('static', filename='js/live-tv-rows.js') }}"></script>
 <script src="{{ url_for('static', filename='js/live-tv-engine.js') }}"></script>
 {% endblock %}
-
-
