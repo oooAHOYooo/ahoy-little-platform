@@ -2682,7 +2682,7 @@ a:hover {
     .footer-compact-secondary {
         text-align: center;
         color: rgba(255, 255, 255, 0.45);
-        font-size: 0.48rem;
+        font-size: 0.72rem;
         line-height: 1.2;
     }
 
@@ -2693,7 +2693,7 @@ a:hover {
 
     /* Monospaced year + tighter footer bottom text */
     .footer-bottom p {
-        font-size: 0.3rem;
+        font-size: 0.45rem;
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         font-variant-numeric: tabular-nums;
         letter-spacing: 0.08em;
