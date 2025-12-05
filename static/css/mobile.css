@@ -22,17 +22,17 @@
     .desktop-only {
         display: block !important;
     }
-    
+
     .desktop-only.inline,
     .desktop-only.flex,
     .desktop-only.grid {
         display: inline-block !important;
     }
-    
+
     .desktop-only.flex {
         display: flex !important;
     }
-    
+
     .desktop-only.grid {
         display: grid !important;
     }
@@ -40,6 +40,7 @@
 
 /* Ensure mobile bottom nav is always visible on mobile - override any conflicting rules */
 @media (max-width: 768px) {
+
     .mobile-bottom-nav.mobile-only,
     .mobile-bottom-nav {
         display: grid !important;
@@ -50,6 +51,7 @@
 
 /* MOBILE ONLY */
 @media (max-width: 767px) {
+
     .desktop-nav,
     .top-nav-links,
     .top-nav-search,
@@ -65,13 +67,13 @@
     .mobile-action-bar {
         display: none !important;
     }
-    
+
     /* Remove mobile action bar completely */
     .mobile-action-bar,
-    .mobile-action-bar + * {
+    .mobile-action-bar+* {
         display: none !important;
     }
-    
+
     /* Fix layout padding on mobile - remove space for hidden elements */
     main,
     .main-content,
@@ -85,7 +87,7 @@
         padding-top: 0 !important;
         margin-top: 0 !important;
     }
-    
+
     /* Dashboard sidebars should not take space on mobile */
     .dashboard-sidebars {
         display: block !important;
@@ -115,7 +117,8 @@
     }
 
     body {
-        padding-top: 60px; /* Prevent content overlap */
+        padding-top: 60px;
+        /* Prevent content overlap */
     }
 }
 
@@ -148,6 +151,7 @@
 
 /* Mobile fixed top navigation (mirrors bottom bar style) */
 @media (max-width: 767px) {
+
     /* Hide duplicate top menu; keep only bottom bar on mobile */
     .mobile-top-nav {
         display: none !important;
@@ -210,6 +214,7 @@
 
 /* Mobile search/boost drawers + action buttons */
 @media (max-width: 768px) {
+
     .mobile-search-panel,
     .mobile-boost-panel {
         background: #1a1a1d;
@@ -228,7 +233,11 @@
 
 /* Dark theme alignment for any mobile menus */
 @media (max-width: 768px) {
-    .menu, .dropdown, .account-menu, .mobile-menu-overlay {
+
+    .menu,
+    .dropdown,
+    .account-menu,
+    .mobile-menu-overlay {
         background: #0e0e10 !important;
         color: white !important;
     }
@@ -650,7 +659,7 @@
         align-items: center;
         justify-content: center;
     }
-    
+
     .nav-logo img {
         display: inline-block !important;
         height: 20px;
@@ -811,6 +820,13 @@
     }
 }
 
+/* Hide Mobile Widget Stack (keep overall glass UI elsewhere) */
+@media (max-width: 767px) {
+    .mobile-widget-stack {
+        display: none !important;
+    }
+}
+
 /* Mobile Status Bar (fixed top, compact - 32px) */
 @media (max-width: 767px) {
     .mobile-status-bar {
@@ -856,7 +872,7 @@
         white-space: nowrap;
         flex-shrink: 0;
     }
-    
+
     .status-weather {
         display: flex;
         align-items: center;
@@ -867,19 +883,19 @@
         border: 1px solid rgba(255, 255, 255, 0.08);
         flex-shrink: 0;
     }
-    
+
     .weather-icon {
         font-size: 12px;
         line-height: 1;
     }
-    
+
     .weather-temp {
         font-size: 10px;
         font-weight: 600;
         font-variant-numeric: tabular-nums;
         color: #e5e7eb;
     }
-    
+
     .status-actions {
         display: flex;
         align-items: center;
@@ -1045,6 +1061,7 @@
 
 /* Mobile fixed bottom navigation (Spotify-like) */
 @media (max-width: 767px) {
+
     /* Force mobile bottom nav to be visible - highest specificity */
     nav.mobile-bottom-nav.mobile-only,
     .mobile-bottom-nav.mobile-only,
