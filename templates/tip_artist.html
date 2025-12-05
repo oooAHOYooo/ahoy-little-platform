@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Tip Artists - Ahoy Indie Media{% endblock %}
+{% block title %}Boost Artists - Ahoy Indie Media{% endblock %}
 
 {% block content %}
 <div class="tip-artist-page" x-data="tipArtistPage()" x-init="init()" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
     <div class="tip-header" style="text-align: center; margin-bottom: 3rem;">
         <h1 style="font-size: 3rem; color: #ff0066; margin-bottom: 1rem;">
-            <i class="fas fa-heart" style="color: #e17055;"></i> Tip Artists
+            <i class="fas fa-heart" style="color: #e17055;"></i> Boost Artists
         </h1>
         <p style="font-size: 1.2rem; color: #ccc;">Support the indie artists you love</p>
     </div>
@@ -97,7 +97,7 @@
                     style="width: 100%; padding: 1rem; background: linear-gradient(135deg, #e17055, #ff0066); border: none; border-radius: 8px; color: #fff; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;"
                     :style="(!selectedArtist || !tipAmount || tipAmount < 1 || isSubmitting) ? 'opacity: 0.5; cursor: not-allowed;' : 'opacity: 1;'">
                 <span x-show="!isSubmitting">
-                    <i class="fas fa-heart"></i> Tip $<span x-text="tipAmount || 0"></span>
+                    <i class="fas fa-heart"></i> Boost $<span x-text="tipAmount || 0"></span>
                 </span>
                 <span x-show="isSubmitting">
                     <i class="fas fa-spinner fa-spin"></i> Processing...
@@ -108,12 +108,12 @@
         <!-- Right: Recent Tips -->
         <div class="tips-history-card" style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 2rem;">
             <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: #fff;">
-                <i class="fas fa-history"></i> Your Tips
+                <i class="fas fa-history"></i> Your Boosts
             </h2>
             
             <div x-show="recentTips.length === 0" style="text-align: center; padding: 2rem; color: #999;">
                 <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                <p>No tips yet. Start supporting artists!</p>
+                <p>No boosts yet. Start supporting artists!</p>
             </div>
 
             <div class="tips-list" style="max-height: 500px; overflow-y: auto;">
@@ -135,7 +135,7 @@
 
             <div x-show="recentTips.length > 0" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #ccc; font-weight: 600;">Total Tips:</span>
+                    <span style="color: #ccc; font-weight: 600;">Total Boosts:</span>
                     <span style="font-size: 1.5rem; font-weight: 600; color: #00d4ff;" x-text="'$' + (totalTips / 100).toFixed(2)"></span>
                 </div>
             </div>
@@ -229,24 +229,24 @@ function tipArtistPage() {
                     await this.loadRecentTips();
                     // Show success message
                     if (window.ahoyApp?.showNotification) {
-                        window.ahoyApp.showNotification('Tip sent successfully!', 'success');
+                        window.ahoyApp.showNotification('Boost sent successfully!', 'success');
                     } else {
-                        alert('Tip sent successfully!');
+                        alert('Boost sent successfully!');
                     }
                 } else {
                     const error = await response.json();
                     if (window.ahoyApp?.showNotification) {
-                        window.ahoyApp.showNotification(error.error || 'Failed to send tip', 'error');
+                        window.ahoyApp.showNotification(error.error || 'Failed to send boost', 'error');
                     } else {
-                        alert(error.error || 'Failed to send tip');
+                        alert(error.error || 'Failed to send boost');
                     }
                 }
             } catch (error) {
                 console.error('Error submitting tip:', error);
                 if (window.ahoyApp?.showNotification) {
-                    window.ahoyApp.showNotification('Failed to send tip. Please try again.', 'error');
+                    window.ahoyApp.showNotification('Failed to send boost. Please try again.', 'error');
                 } else {
-                    alert('Failed to send tip. Please try again.');
+                    alert('Failed to send boost. Please try again.');
                 }
             } finally {
                 this.isSubmitting = false;

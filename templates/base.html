@@ -808,7 +808,7 @@
                             </div>
                         </div>
 
-                        <!-- Tip Jar (Compact) -->
+                        <!-- Boost (Compact) -->
                         <div class="tip-jar-card sidebar-item">
                             <div class="tip-jar-compact">
                                 <!-- Compact select (top) -->
@@ -839,7 +839,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Tip Breakdown Card -->
+                                <!-- Boost Breakdown Card -->
                                 <div x-show="isValid"
                                     x-transition:enter="transition ease-out duration-200"
                                     x-transition:enter-start="opacity-0"
@@ -886,9 +886,9 @@
                                     </div>
                                 </div>
 
-                                <!-- Send Tip Button -->
+                                <!-- Send Boost Button -->
                                 <button
-                                    @click="window.location.href = `/checkout?type=tip&artist_id=${encodeURIComponent(selectedArtistId||'')}&amount=${encodeURIComponent(tipAmount||'')}`"
+                                    @click="window.location.href = `/checkout?type=boost&artist_id=${encodeURIComponent(selectedArtistId||'')}&amount=${encodeURIComponent(tipAmount||'')}`"
                                     :disabled="!isValid || isTipping"
                                     class="tip-jar-submit">
                                     <i class="fas fa-heart"
@@ -2603,7 +2603,7 @@
                 xpTotal: 0,
                 currentTrack: null,
                 isTinyPlaying: false,
-                // Tip jar state
+                // Boost state
                 artists: [],
                 selectedArtistId: '',
                 tipAmount: '',
@@ -2659,7 +2659,7 @@
                     // Load XP total (local positions helper)
                     try { this.xpTotal = parseInt(localStorage.getItem('ahoyXp') || '0', 10) || 0; } catch (_) { this.xpTotal = 0; }
 
-                    // Load artists for tip jar
+                    // Load artists for boost
                     await this.loadArtists();
 
                     // Sync with media player
@@ -2680,7 +2680,7 @@
                             this.artists = data.artists || [];
                         }
                     } catch (e) {
-                        console.log('Artists not available for tip jar');
+                        console.log('Artists not available for boost');
                         this.artists = [];
                     }
                 },
@@ -2988,8 +2988,8 @@
                 },
 
                 tipAgain(artistId) {
-                    // Find artist page or open tip modal
-                    window.location.href = `/artists?tip=${encodeURIComponent(artistId)}`;
+                    // Find artist page or open boost modal
+                    window.location.href = `/artists?boost=${encodeURIComponent(artistId)}`;
                 }
             };
         }
