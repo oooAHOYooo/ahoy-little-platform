@@ -356,6 +356,40 @@
       "tags": ["episode", "ahoy-cabaret", "best-video", "live-performance"],
       "host_slug": "ahoy-indie-media",
       "category": "Broadcast"
+    },
+    {
+      "id": "poets_3",
+      "title": "Poets and Friends #3",
+      "host": "Ahoy Indie Media",
+      "description": "Live poetry + performance @ Koffee? featuring local poets. Doors open at 6pm, showtime 6:30pm SHARP. Hosted by Mickey Vampiro. Show runs 60-90 minutes. Merch available (maybe).",
+      "duration_seconds": 5400,
+      "video_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Ahoy_poets%20and%20friends%20-%203%20-%20ready.mov",
+      "trailer_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Ahoy_poets%20and%20friends%20-%203%20-%20ready.mov",
+      "thumbnail": "",
+      "published_date": "2025-09-15",
+      "views": 0,
+      "type": "broadcast",
+      "is_live": false,
+      "tags": ["live", "poets", "poets-and-friends", "koffee", "poetry", "live-performance"],
+      "host_slug": "ahoy-indie-media",
+      "category": "Broadcast"
+    },
+    {
+      "id": "poets_4",
+      "title": "Poets & Friends #4: Spooky Edition",
+      "host": "Ahoy Indie Media",
+      "description": "Poets & Friends #4 (Spooky Edition). Thursday, Oct 30, 2025. Doors 6:00 PM. Readings 6:30–8:00 PM. Koffee? — 104 Audubon St, New Haven, CT. Costumes encouraged. Food available at Koffee?. Bring friends.",
+      "duration_seconds": 5400,
+      "video_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Poets4Total.mp4",
+      "trailer_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Poets4Total.mp4",
+      "thumbnail": "",
+      "published_date": "2025-10-30",
+      "views": 0,
+      "type": "broadcast",
+      "is_live": false,
+      "tags": ["live", "poets", "poets-and-friends", "koffee", "poetry", "live-performance", "spooky"],
+      "host_slug": "ahoy-indie-media",
+      "category": "Broadcast"
     }
   ]
 }
