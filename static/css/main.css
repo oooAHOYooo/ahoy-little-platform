@@ -2572,7 +2572,7 @@ a:hover {
     }
 
     .footer-logo img {
-        height: 22px;
+        height: 18px;
     }
 
     .footer-tagline {
@@ -2613,14 +2613,14 @@ a:hover {
 
     /* Compact mobile footer */
     .footer-compact {
-        padding: 6px 10px;
+        padding: 5px 8px;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
         background: rgba(255, 255, 255, 0.03);
     }
 
     .footer-compact-primary {
         display: flex;
-        gap: 6px;
+        gap: 5px;
         align-items: center;
         justify-content: center;
         flex-wrap: wrap;
@@ -2630,9 +2630,9 @@ a:hover {
     .footer-compact-link {
         color: var(--text-secondary);
         text-decoration: none;
-        font-size: 0.78rem;
+        font-size: 0.62rem;
         line-height: 1.4;
-        padding: 4px 6px;
+        padding: 3px 5px;
         border-radius: 8px;
         background: rgba(255, 255, 255, 0.04);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2640,7 +2640,7 @@ a:hover {
 
     .footer-accordion {
         display: inline-block;
-        font-size: 0.78rem;
+        font-size: 0.62rem;
         border-radius: 8px;
         border: 1px solid rgba(255, 255, 255, 0.08);
         background: rgba(255, 255, 255, 0.04);
@@ -2650,7 +2650,7 @@ a:hover {
     .footer-accordion-summary {
         list-style: none;
         cursor: pointer;
-        padding: 5px 8px;
+        padding: 4px 6px;
         color: var(--text-secondary);
         user-select: none;
     }
@@ -2662,17 +2662,17 @@ a:hover {
     .footer-accordion-panel {
         display: grid;
         grid-template-columns: repeat(4, auto);
-        gap: 6px;
-        padding: 6px 8px;
+        gap: 5px;
+        padding: 5px 6px;
         justify-content: center;
     }
 
     .footer-accordion-link {
         color: var(--text-secondary);
         text-decoration: none;
-        font-size: 0.74rem;
+        font-size: 0.6rem;
         line-height: 1.2;
-        padding: 3px 5px;
+        padding: 2px 4px;
         border-radius: 6px;
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.06);
@@ -2682,7 +2682,7 @@ a:hover {
     .footer-compact-secondary {
         text-align: center;
         color: var(--text-muted);
-        font-size: 0.7rem;
+        font-size: 0.56rem;
         line-height: 1.2;
     }
 
@@ -2693,7 +2693,7 @@ a:hover {
 
     /* Monospaced year + tighter footer bottom text */
     .footer-bottom p {
-        font-size: 0.75rem;
+        font-size: 0.6rem;
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         font-variant-numeric: tabular-nums;
         letter-spacing: 0.02em;
