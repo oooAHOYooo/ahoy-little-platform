@@ -124,8 +124,16 @@ def portfolio_data():
                 "top_artists": top_artists,
             }), 200
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        # Fail-soft for non-critical portfolio view; return empty dataset
+        return jsonify({
+            "total_contributed": 0,
+            "position_count": 0,
+            "positions": [],
+            "timeline": [],
+            "pie_data": [],
+            "top_artists": [],
+        }), 200
 
 
 @bp.route("/widget-data")
