@@ -41,93 +41,134 @@
 
 {% block content %}
 <div class="sandbox-page" x-data="portfolioSandbox()" x-init="init()">
-  <div class="sandbox-container">
-    <div class="sandbox-header">
-      <h1>Portfolio Sandbox (Fake Money)</h1>
-      <p>Practice funding and allocation flows with play credits. Nothing here touches real accounts.</p>
-    </div>
-
-    <div class="grid">
-      <!-- Left: Wallet + Allocation + Charts -->
-      <div class="stack">
-        <div class="card">
-          <h3>Wallet & Inflows</h3>
-          <div class="kpis" style="margin-bottom:8px;">
-            <div class="kpi">
-              <div class="v" x-text="formatMoney(walletBalance)"></div>
-              <div class="l">Wallet Balance</div>
-            </div>
-            <div class="kpi">
-              <div class="v" x-text="formatMoney(portfolioValue)"></div>
-              <div class="l">Portfolio Value</div>
-            </div>
-            <div class="kpi">
-              <div class="v" x-text="formatMoney(totalInflows)"></div>
-              <div class="l">Total Inflows</div>
-            </div>
-          </div>
-          <div class="row" style="margin-bottom:6px;">
-            <input type="number" min="0" step="1" x-model.number="depositAmount" placeholder="Amount" />
-            <button class="btn primary" @click="deposit()">Add Funds</button>
-            <span class="note">Tip: use this to simulate loading money into Ahoy.</span>
-          </div>
+    <div class="sandbox-container">
+        <div class="sandbox-header">
+            <h1>Portfolio Sandbox (Fake Money)</h1>
+            <p>Practice funding and allocation flows with play credits. Nothing
+                here touches real accounts.</p>
         </div>
 
-        <div class="card">
-          <h3>Allocate to Artists (like positions)</h3>
-          <div class="row" style="margin-bottom:6px;">
-            <input type="text" x-model="newAssetName" placeholder="Artist or Asset Name" />
-            <input type="number" min="0" step="1" x-model.number="newAssetAmount" placeholder="Amount" />
-            <button class="btn primary" @click="allocate()">Allocate</button>
-            <button class="btn ghost" @click="distributeEven()">Distribute Even</button>
-            <span class="note">Allocations reduce wallet and increase portfolio.</span>
-          </div>
-          <div class="alloc-list" x-show="positions.length > 0">
-            <template x-for="(pos, idx) in positions" :key="pos.id">
-              <div class="alloc-item">
-                <div class="alloc-name" x-text="pos.name"></div>
-                <div class="alloc-amt" x-text="formatMoney(pos.amount)"></div>
-                <div class="alloc-actions row">
-                  <button class="btn" @click="change(idx, 5)">+5</button>
-                  <button class="btn" @click="change(idx, -5)">-5</button>
-                  <button class="btn" @click="remove(idx)">Remove</button>
+        <div class="grid">
+            <!-- Left: Wallet + Allocation + Charts -->
+            <div class="stack">
+                <div class="card">
+                    <h3>Wallet & Inflows</h3>
+                    <div class="kpis" style="margin-bottom:8px;">
+                        <div class="kpi">
+                            <div class="v"
+                                x-text="formatMoney(walletBalance)"></div>
+                            <div class="l">Wallet Balance</div>
+                        </div>
+                        <div class="kpi">
+                            <div class="v"
+                                x-text="formatMoney(portfolioValue)"></div>
+                            <div class="l">Portfolio Value</div>
+                        </div>
+                        <div class="kpi">
+                            <div class="v"
+                                x-text="formatMoney(totalInflows)"></div>
+                            <div class="l">Total Inflows</div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom:6px;">
+                        <input type="number" min="0" step="1"
+                            x-model.number="depositAmount"
+                            placeholder="Amount" />
+                        <button class="btn primary" @click="deposit()">Add
+                            Funds</button>
+                        <span class="note">Tip: use this to simulate loading
+                            money into Ahoy.</span>
+                    </div>
+                    <div class="row" style="margin-top:6px;">
+                        <select x-model="boostArtistId"
+                            @click="artists.length===0 && loadArtists()"
+                            style="min-width:180px; background:#12141a; color:#e8e8f1; border:1px solid #222532; border-radius:10px; padding:.5rem .6rem;">
+                            <option value>Select artist for Boost…</option>
+                            <template x-for="a in artists" :key="a.id">
+                                <option :value="a.id" x-text="a.name"></option>
+                            </template>
+                        </select>
+                        <input type="number" min="1" step="1"
+                            x-model.number="boostAmount"
+                            placeholder="Boost Amount" />
+                        <button class="btn primary"
+                            @click="simulateBoost()">Simulate Boost</button>
+                        <span class="note">This mirrors the real Boost flow but
+                            only affects your fake portfolio.</span>
+                    </div>
                 </div>
-              </div>
-            </template>
-            <div class="muted" x-show="positions.length === 0">No allocations yet.</div>
-          </div>
-        </div>
 
-        <div class="card">
-          <h3>Distribution</h3>
-          <div class="chart-wrap"><canvas id="pieSandbox"></canvas></div>
-        </div>
+                <div class="card">
+                    <h3>Allocate to Artists (like positions)</h3>
+                    <div class="row" style="margin-bottom:6px;">
+                        <input type="text" x-model="newAssetName"
+                            placeholder="Artist or Asset Name" />
+                        <input type="number" min="0" step="1"
+                            x-model.number="newAssetAmount"
+                            placeholder="Amount" />
+                        <button class="btn primary"
+                            @click="allocate()">Allocate</button>
+                        <button class="btn ghost"
+                            @click="distributeEven()">Distribute Even</button>
+                        <span class="note">Allocations reduce wallet and
+                            increase portfolio.</span>
+                    </div>
+                    <div class="alloc-list" x-show="positions.length > 0">
+                        <template x-for="(pos, idx) in positions" :key="pos.id">
+                            <div class="alloc-item">
+                                <div class="alloc-name" x-text="pos.name"></div>
+                                <div class="alloc-amt"
+                                    x-text="formatMoney(pos.amount)"></div>
+                                <div class="alloc-actions row">
+                                    <button class="btn"
+                                        @click="change(idx, 5)">+5</button>
+                                    <button class="btn"
+                                        @click="change(idx, -5)">-5</button>
+                                    <button class="btn"
+                                        @click="remove(idx)">Remove</button>
+                                </div>
+                            </div>
+                        </template>
+                        <div class="muted" x-show="positions.length === 0">No
+                            allocations yet.</div>
+                    </div>
+                </div>
 
-        <div class="card">
-          <h3>Balance Over Time</h3>
-          <div class="chart-wrap"><canvas id="lineSandbox"></canvas></div>
-        </div>
-      </div>
+                <div class="card">
+                    <h3>Distribution</h3>
+                    <div class="chart-wrap"><canvas
+                            id="pieSandbox"></canvas></div>
+                </div>
 
-      <!-- Right: History -->
-      <div class="card">
-        <h3>Activity</h3>
-        <div class="muted" x-show="history.length === 0">No activity yet. Add funds or allocate.</div>
-        <ul style="list-style:none; padding-left:0; margin:0;">
-          <template x-for="evt in history" :key="evt.id">
-            <li style="padding:.4rem 0; border-bottom:1px solid rgba(255,255,255,.06); display:flex; justify-content:space-between; gap:8px;">
-              <span x-text="evt.label"></span>
-              <strong x-text="formatMoney(evt.amount)"></strong>
-            </li>
-          </template>
-        </ul>
-      </div>
+                <div class="card">
+                    <h3>Balance Over Time</h3>
+                    <div class="chart-wrap"><canvas
+                            id="lineSandbox"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Right: History -->
+            <div class="card">
+                <h3>Activity</h3>
+                <div class="muted" x-show="history.length === 0">No activity
+                    yet. Add funds or allocate.</div>
+                <ul style="list-style:none; padding-left:0; margin:0;">
+                    <template x-for="evt in history" :key="evt.id">
+                        <li
+                            style="padding:.4rem 0; border-bottom:1px solid rgba(255,255,255,.06); display:flex; justify-content:space-between; gap:8px;">
+                            <span x-text="evt.label"></span>
+                            <strong x-text="formatMoney(evt.amount)"></strong>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script>
 function portfolioSandbox() {
@@ -140,6 +181,10 @@ function portfolioSandbox() {
     depositAmount: 20,
     newAssetName: '',
     newAssetAmount: 10,
+    // Boost (practice) state
+    artists: [],
+    boostArtistId: '',
+    boostAmount: 3,
     pie: null,
     line: null,
 
@@ -153,6 +198,14 @@ function portfolioSandbox() {
     init() {
       this.load();
       this.$nextTick(() => { this.renderCharts(); });
+    },
+
+    async loadArtists() {
+      try {
+        const r = await fetch('/api/artists');
+        const d = await r.json();
+        this.artists = (d.artists || []).map(a => ({ id: a.id || a.name, name: a.name || 'Artist' }));
+      } catch (_) { this.artists = []; }
     },
 
     save() {
@@ -194,6 +247,20 @@ function portfolioSandbox() {
       else this.positions.push({ id: crypto.randomUUID(), name, amount: amt });
       this.history.unshift({ id: crypto.randomUUID(), type: 'allocate', amount: amt, label: `Allocate → ${name}` });
       this.newAssetAmount = 10; this.newAssetName = '';
+      this.save();
+    },
+
+    simulateBoost() {
+      const artist = (this.artists || []).find(a => String(a.id) === String(this.boostArtistId));
+      const name = artist ? artist.name : 'Unknown Artist';
+      const amt = Math.max(0, Number(this.boostAmount || 0));
+      if (!artist || !amt) return alert('Pick an artist and amount.');
+      if (this.walletBalance < amt) return alert('Not enough wallet balance. Add funds first.');
+      this.walletBalance -= amt;
+      const idx = this.positions.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
+      if (idx >= 0) this.positions[idx].amount += amt;
+      else this.positions.push({ id: crypto.randomUUID(), name, amount: amt });
+      this.history.unshift({ id: crypto.randomUUID(), type: 'boost', amount: amt, label: `Boost → ${name}` });
       this.save();
     },
 
@@ -287,5 +354,3 @@ function portfolioSandbox() {
 }
 </script>
 {% endblock %}
-
-

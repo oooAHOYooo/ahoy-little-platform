@@ -104,8 +104,6 @@
                 </div>
             </div>
 
-            
-
             <!-- Recently Added (Latest Updates) -->
             <div class="grid-item recently-added" x-data="recentlyAdded()"
                 x-init="init()">
@@ -151,7 +149,8 @@
     <section class="mobile-widget-stack mobile-only" style="margin-top:12px;">
         <!-- Boost -->
         <div class="widget boost-widget" style="padding:12px;">
-            <div class="body-mobile" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div class="body-mobile"
+                style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                 <div class="label-mobile">Boost an Artist</div>
                 <button class="mobile-hamburger" title="Boost"
                     @click="document.dispatchEvent(new CustomEvent('boost:open'))">
@@ -165,12 +164,15 @@
             <div class="label-mobile" style="margin-bottom:6px;">Radio Now</div>
             <div style="display:flex;align-items:center;gap:10px;">
                 <div style="flex:1;min-width:0;">
-                    <div class="body-mobile" x-text="(radioCurrent || radioUpNext[0])?.title || 'No track playing'"></div>
+                    <div class="body-mobile"
+                        x-text="(radioCurrent || radioUpNext[0])?.title || 'No track playing'"></div>
                     <div style="opacity:.7;font-size:.8rem;"
                         x-text="(radioCurrent || radioUpNext[0])?.artist || ''"></div>
                 </div>
-                <button class="mobile-hamburger" @click="toggleRadio()" :title="radioIsPlaying ? 'Pause' : 'Play'">
-                    <i :class="radioIsPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+                <button class="mobile-hamburger" @click="toggleRadio()"
+                    :title="radioIsPlaying ? 'Pause' : 'Play'">
+                    <i
+                        :class="radioIsPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
                 </button>
             </div>
         </div>
@@ -179,33 +181,45 @@
         <div class="widget live-now-widget" style="padding:12px;">
             <div class="label-mobile" style="margin-bottom:6px;">Live Now</div>
             <template x-if="featuredShows && featuredShows.length">
-                <div style="display:flex;gap:10px;align-items:center;cursor:pointer;"
+                <div
+                    style="display:flex;gap:10px;align-items:center;cursor:pointer;"
                     @click="playShow(featuredShows[0], 0)">
-                    <div style="width:56px;height:56px;border-radius:8px;background-size:cover;background-position:center;"
+                    <div
+                        style="width:56px;height:56px;border-radius:8px;background-size:cover;background-position:center;"
                         :style="`background-image:url(${featuredShows[0]?.thumbnail || '/static/img/default-cover.jpg'})`"></div>
                     <div style="flex:1;min-width:0;">
-                        <div class="body-mobile" x-text="featuredShows[0]?.title || 'Show'"></div>
-                        <div style="opacity:.7;font-size:.8rem;" x-text="featuredShows[0]?.host || ''"></div>
+                        <div class="body-mobile"
+                            x-text="featuredShows[0]?.title || 'Show'"></div>
+                        <div style="opacity:.7;font-size:.8rem;"
+                            x-text="featuredShows[0]?.host || ''"></div>
                     </div>
                     <i class="fas fa-play"></i>
                 </div>
             </template>
-            <div x-show="!featuredShows || featuredShows.length===0" style="opacity:.6;">Loading…</div>
+            <div x-show="!featuredShows || featuredShows.length===0"
+                style="opacity:.6;">Loading…</div>
         </div>
 
         <!-- Recently Added -->
-        <div class="widget recently-added-widget" x-data="recentlyAdded()" x-init="init()" style="padding:10px;">
-            <div class="label-mobile" style="margin-bottom:6px;">Recently Added</div>
+        <div class="widget recently-added-widget" x-data="recentlyAdded()"
+            x-init="init()" style="padding:10px;">
+            <div class="label-mobile" style="margin-bottom:6px;">Recently
+                Added</div>
             <div style="display:flex;gap:6px;overflow:auto;">
-                <template x-for="item in latestItems.slice(0, 8)" :key="item.id">
-                    <div style="min-width:96px;border-radius:10px;overflow:hidden;background:#111;border:1px solid #222;cursor:pointer;"
+                <template x-for="item in latestItems.slice(0, 8)"
+                    :key="item.id">
+                    <div
+                        style="min-width:96px;border-radius:10px;overflow:hidden;background:#111;border:1px solid #222;cursor:pointer;"
                         @click="play(item)">
-                        <div style="width:100%;height:56px;background-size:cover;background-position:center;"
+                        <div
+                            style="width:100%;height:56px;background-size:cover;background-position:center;"
                             :style="`background-image:url(${item.cover_art || item.thumbnail || '/static/img/default-cover.jpg'})`"></div>
                         <div style="padding:6px;">
-                            <div style="font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                            <div
+                                style="font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
                                 x-text="item.title"></div>
-                            <div style="opacity:.7;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                            <div
+                                style="opacity:.7;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
                                 x-text="item.artist || ''"></div>
                         </div>
                     </div>
@@ -214,18 +228,23 @@
         </div>
 
         <!-- Bookmarks -->
-        <div class="widget bookmark-widget" x-data="homeBookmarksWidget()" x-init="loadBookmarks()" style="padding:12px;">
-            <div class="label-mobile" style="margin-bottom:6px;">Your Bookmarks</div>
+        <div class="widget bookmark-widget" x-data="homeBookmarksWidget()"
+            x-init="loadBookmarks()" style="padding:12px;">
+            <div class="label-mobile" style="margin-bottom:6px;">Your
+                Bookmarks</div>
             <div style="display:flex;gap:8px;overflow:auto;">
                 <template x-for="b in bookmarksList().slice(0, 8)" :key="b.key">
                     <button @click="playBookmark(b)"
                         style="display:flex;gap:8px;align-items:center;min-width:160px;border-radius:10px;background:#111;border:1px solid #222;padding:8px 10px;color:inherit;text-align:left;">
-                        <div style="width:40px;height:40px;border-radius:8px;background-size:cover;background-position:center;"
+                        <div
+                            style="width:40px;height:40px;border-radius:8px;background-size:cover;background-position:center;"
                             :style="`background-image:url(${b.cover_art || b.thumbnail || '/static/img/default-cover.jpg'})`"></div>
                         <div style="flex:1;min-width:0;">
-                            <div style="font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                            <div
+                                style="font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
                                 x-text="b.title"></div>
-                            <div style="opacity:.7;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                            <div
+                                style="opacity:.7;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
                                 x-text="b.artist || ''"></div>
                         </div>
                     </button>
@@ -294,51 +313,7 @@
         <!-- Repeat for more badges -->
     </div>
 
-    <!-- Mini Media Player directly below merit badges -->
-    <div class="mini-media-player"
-        style="background-color: #202020; padding: 1rem; border-radius: 5px; color: white; margin-top: 1rem; display: flex; align-items: center; justify-content: space-between;">
-        <div class="mini-player-info">
-            <div style="font-size: 1rem; font-weight: bold;"
-                x-text="window.homePage?.radioCurrent?.title || 'No track playing'"></div>
-            <div style="font-size: 0.85rem; opacity: 0.8;"
-                x-text="window.homePage?.radioCurrent?.artist || ''"></div>
-        </div>
-        <button @click="window.homePage?.toggleRadio && window.homePage.toggleRadio()"
-            style="background: none; border: none; color: inherit; font-size: 1.5rem;">
-            <i
-                :class="{'fas fa-pause': window.homePage?.radioIsPlaying, 'fas fa-play': !window.homePage?.radioIsPlaying}"></i>
-        </button>
-    </div>
-
-    <!-- Media Player -->
-    <div class="media-player"
-        style="background-color: #303030; padding: 1rem; border-radius: 5px; color: white;">
-        <div class="media-title" style="font-size: 1.2rem;">Media Player</div>
-        <div x-show="window.homePage?.radioCurrent || ((window.homePage?.radioUpNext?.length || 0) > 0)">
-            <div class="current-track">
-                <div x-text="window.homePage?.radioCurrent?.title || 'No track playing'"
-                    style="font-weight: bold;"></div>
-                <div x-text="window.homePage?.radioCurrent?.artist || ''"></div>
-            </div>
-            <div class="media-player-controls"
-                style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 1.5rem; color: white;">
-                <button @click="window.homePage?.toggleRadio && window.homePage.toggleRadio()"
-                    style="background: none; border: none; color: inherit;">
-                    <i
-                        :class="{'fas fa-pause': window.homePage?.radioIsPlaying, 'fas fa-play': !window.homePage?.radioIsPlaying}"
-                        style="font-size: 2rem;"></i>
-                </button>
-                <button @click="window.homePage?.skipRadio && window.homePage.skipRadio()"
-                    style="background: none; border: none; color: inherit;">
-                    <i class="fas fa-forward" style="font-size: 2rem;"></i>
-                </button>
-            </div>
-        </div>
-        <div x-show="!window.homePage?.radioCurrent && ((window.homePage?.radioUpNext?.length || 0) === 0)"
-            style="color: grey;">
-            <div>No media playing at the moment.</div>
-        </div>
-    </div>
+    <!-- (Removed legacy media players to avoid duplication with global Now Playing bar) -->
 </div>
 
 <script>

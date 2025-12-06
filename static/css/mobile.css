@@ -1376,6 +1376,7 @@
     .actions-mini .action-mini,
     .now-playing-container {
         width: 100% !important;
+        padding-bottom: 36px !important;
     }
 
     body,

@@ -692,7 +692,21 @@ if _csrf_ext is not None:
 @app.route('/success')
 def checkout_success():
     pid = request.args.get('pid')
-    return render_template('success.html', pid=pid)
+    artist_id = None
+    amount = None
+    try:
+        if pid:
+            from db import get_session
+            from models import Purchase
+            with get_session() as s:
+                p = s.query(Purchase).filter(Purchase.id == int(pid)).first()
+                if p:
+                    artist_id = p.artist_id
+                    amount = p.amount
+    except Exception:
+        artist_id = None
+        amount = None
+    return render_template('success.html', pid=pid, artist_id=artist_id, amount=amount)
 
 @app.route('/debug-report')
 def debug_report():

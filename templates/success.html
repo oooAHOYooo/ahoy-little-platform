@@ -2,16 +2,32 @@
 {% block title %}Success - Ahoy Indie Media{% endblock %}
 {% block content %}
 <div class="max-w-xl mx-auto px-4 py-16">
-    <div class="bg-[#0a0a0a]/70 backdrop-blur-xl border border-white/10 rounded-2xl p-8 text-white space-y-4 text-center">
+    <div class="bg-[#0a0a0a]/70 backdrop-blur-xl border border-white/10 rounded-2xl p-8 text-white space-y-5 text-center">
         <div class="text-4xl">🎉</div>
         <h1 class="text-2xl font-bold">Thank you!</h1>
         <p>Your purchase was completed successfully.</p>
         {% if pid %}
         <p class="text-white/70 text-sm">Reference: #{{ pid }}</p>
         {% endif %}
-        <a href="/" class="inline-block mt-2 px-4 py-2 rounded-lg bg-white/10 border border-white/20 hover:bg-white/15">
-            Back to Ahoy
-        </a>
+        <div class="flex flex-col sm:flex-row gap-2 justify-center mt-2">
+            <a href="/" class="inline-block px-4 py-2 rounded-lg bg-white/10 border border-white/20 hover:bg-white/15">
+                Back to Ahoy
+            </a>
+            {% if artist_id %}
+            <a href="/checkout?type=boost&artist_id={{ artist_id }}&amount={{ amount or 1.00 }}"
+               class="inline-block px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500">
+                Add {{ amount or 1.00 | round(2) }} more
+            </a>
+            <a href="/checkout?type=boost&artist_id={{ artist_id }}&amount=5"
+               class="inline-block px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500">
+                Add $5
+            </a>
+            <a href="/checkout?type=boost&artist_id={{ artist_id }}&amount=10"
+               class="inline-block px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500">
+                Add $10
+            </a>
+            {% endif %}
+        </div>
     </div>
     </div>
 {% endblock %}

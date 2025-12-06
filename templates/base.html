@@ -1127,7 +1127,7 @@
                 class="now-playing-visualizer"></div>
 
             <!-- Glassy Now Playing Bar -->
-            <div class="now-playing-glass now-playing-sticky mobile-only">
+            <div class="now-playing-glass now-playing-sticky">
                 <div class="now-playing-container">
                     <!-- Left: Album Artwork -->
                     <div class="now-playing-album-art"
@@ -1147,13 +1147,13 @@
                     <div class="now-playing-info">
                         <div class="now-playing-title"
                             x-text="currentTrack?.title || 'Unknown Title'"></div>
-                        <div class="now-playing-artist"
-                            x-show="currentTrack?.type === 'show'"
-                            x-text="currentTrack?.host || currentTrack?.creator || 'Unknown Host'"></div>
-                        <div class="now-playing-artist"
-                            x-show="currentTrack?.type !== 'show'"
-                            x-text="currentTrack?.artist || 'Unknown Artist'"></div>
-                        <div class="now-playing-category">
+                        <div class="now-playing-secondary">
+                            <div class="now-playing-artist"
+                                x-show="currentTrack?.type === 'show'"
+                                x-text="currentTrack?.host || currentTrack?.creator || 'Unknown Host'"></div>
+                            <div class="now-playing-artist"
+                                x-show="currentTrack?.type !== 'show'"
+                                x-text="currentTrack?.artist || 'Unknown Artist'"></div>
                             <span x-show="currentTrack?.type === 'show'"
                                 class="category-pill">
                                 <i class="fas fa-play-circle"></i> Video
@@ -1191,9 +1191,9 @@
                             title="Repeat">
                             <i class="fas fa-redo"></i>
                         </button>
-                        <button @click="toggleLike()" class="now-playing-btn"
-                            :class="{'active': isLiked}" title="Like">
-                            <i class="fas fa-heart"></i>
+                        <button @click="openBoost()" class="now-playing-btn"
+                            title="Boost">
+                            <i class="fas fa-bolt"></i>
                         </button>
                         <button @click="
                             currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.toggle({ 
@@ -1230,8 +1230,7 @@
                         </div>
                         <div class="now-playing-time">
                             <span x-text="formatTime(currentTime)"></span>
-                            <span
-                                x-text="formatTime(currentTrack?.duration_seconds || 0)"></span>
+                            <span x-text="formatTime(duration)"></span>
                         </div>
                     </div>
                 </div>
@@ -2401,8 +2400,43 @@
 
                 previousTrack() {
                     try {
-                        if (window.mediaPlayer && typeof window.mediaPlayer.previousTrack === 'function') {
+                        // Prefer playlist navigation when a playlist exists
+                        if (window.mediaPlayer && Array.isArray(window.mediaPlayer.playlist) && window.mediaPlayer.playlist.length > 0 && typeof window.mediaPlayer.previousTrack === 'function') {
                             window.mediaPlayer.previousTrack();
+                            return;
+                        }
+                        // Fallback: if homepage radio is active, try its previous logic
+                        if (window.homePage && window.homePage.radioPrevious && typeof window.homePage.playRadioTrack === 'function') {
+                            window.homePage.playRadioTrack(window.homePage.radioPrevious);
+                            return;
+                        }
+                        // Fallback: step left in home indexes (music/shows)
+                        if (window.homePage) {
+                            const cur = window.mediaPlayer && window.mediaPlayer.currentTrack || this.currentTrack;
+                            if (cur && (cur.type === 'show' || cur.video_url || cur.mp4_link)) {
+                                const shows = (window.homePage.featuredShows || []);
+                                if (shows.length) {
+                                    const idx = shows.findIndex(s => String(s.id) === String(cur.id));
+                                    const prev = shows[(idx > 0 ? idx - 1 : shows.length - 1)];
+                                    if (prev) { window.location.href = `/player?id=${prev.id}&type=show`; return; }
+                                }
+                            } else if (cur) {
+                                const tracks = (window.homePage.feedItems || []).filter(i => (i.type || 'track') !== 'show');
+                                if (tracks.length) {
+                                    const curId = String(cur.id || cur.track_id);
+                                    const idx = tracks.findIndex(t => String(t.id || t.track_id) === curId);
+                                    const prev = tracks[(idx > 0 ? idx - 1 : tracks.length - 1)];
+                                    if (prev && window.mediaPlayer && typeof window.mediaPlayer.play === 'function') {
+                                        const playItem = { ...prev, type: 'track', audio_url: prev.audio_url || prev.preview_url || prev.full_url, cover_art: prev.cover_art || prev.thumbnail };
+                                        window.mediaPlayer.play(playItem);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        // Last resort: restart current track if available
+                        if (window.mediaPlayer && window.mediaPlayer.currentTrack && typeof window.mediaPlayer.play === 'function') {
+                            window.mediaPlayer.play(window.mediaPlayer.currentTrack);
                         }
                     } catch (e) {
                         console.warn('Error in previousTrack:', e);
@@ -2411,9 +2445,42 @@
                 
                 nextTrack() {
                     try {
-                        if (window.mediaPlayer && typeof window.mediaPlayer.nextTrack === 'function') {
+                        // Prefer playlist navigation when available
+                        if (window.mediaPlayer && Array.isArray(window.mediaPlayer.playlist) && window.mediaPlayer.playlist.length > 0 && typeof window.mediaPlayer.nextTrack === 'function') {
                             window.mediaPlayer.nextTrack();
+                            return;
                         }
+                        // Fallback: if homepage radio is present, ask it to advance
+                        if (window.homePage && typeof window.homePage._playNextRadio === 'function') {
+                            window.homePage._playNextRadio();
+                            return;
+                        }
+                        // Fallback: step right in home indexes (music/shows)
+                        if (window.homePage) {
+                            const cur = window.mediaPlayer && window.mediaPlayer.currentTrack || this.currentTrack;
+                            if (cur && (cur.type === 'show' || cur.video_url || cur.mp4_link)) {
+                                const shows = (window.homePage.featuredShows || []);
+                                if (shows.length) {
+                                    const idx = shows.findIndex(s => String(s.id) === String(cur.id));
+                                    const next = shows[(idx >= 0 ? (idx + 1) % shows.length : 0)];
+                                    if (next) { window.location.href = `/player?id=${next.id}&type=show`; return; }
+                                }
+                            } else if (cur) {
+                                const tracks = (window.homePage.feedItems || []).filter(i => (i.type || 'track') !== 'show');
+                                if (tracks.length) {
+                                    const curId = String(cur.id || cur.track_id);
+                                    const idx = tracks.findIndex(t => String(t.id || t.track_id) === curId);
+                                    const next = tracks[(idx >= 0 ? (idx + 1) % tracks.length : 0)];
+                                    if (next && window.mediaPlayer && typeof window.mediaPlayer.play === 'function') {
+                                        const playItem = { ...next, type: 'track', audio_url: next.audio_url || next.preview_url || next.full_url, cover_art: next.cover_art || next.thumbnail };
+                                        window.mediaPlayer.play(playItem);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        // Last resort: do nothing but notify
+                        document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'No next item available' }));
                     } catch (e) {
                         console.warn('Error in nextTrack:', e);
                     }
@@ -2493,6 +2560,34 @@
                 toggleLike() { this.isLiked = !this.isLiked; },
                 toggleSave() { this.isSaved = !this.isSaved; },
                 addToPlaylist() { },
+                async openBoost() {
+                    try {
+                        const track = this.currentTrack || (window.mediaPlayer && window.mediaPlayer.currentTrack) || {};
+                        const artistName = (track.artist || track.host || '').trim();
+                        const defaultAmount = 1.00;
+                        // Resolve artist id from API cache (best-effort)
+                        let artistId = '';
+                        try {
+                            if (!window.__ahoyArtistsCache) {
+                                const res = await fetch('/api/artists');
+                                const data = await res.json().catch(() => ({}));
+                                window.__ahoyArtistsCache = (data.artists || []);
+                            }
+                            const norm = (s) => String(s || '').trim().toLowerCase();
+                            const match = (window.__ahoyArtistsCache || []).find(a => norm(a.name) === norm(artistName));
+                            artistId = match ? (match.id || match.name || '') : '';
+                        } catch (_) {}
+                        // Use CSRF-protected universal checkout page
+                        const params = new URLSearchParams({
+                            type: 'boost',
+                            artist_id: String(artistId || ''),
+                            amount: String(defaultAmount)
+                        });
+                        window.location.href = `/checkout?${params.toString()}`;
+                    } catch (e) {
+                        console.warn('Boost open failed:', e);
+                    }
+                },
                 toggleShuffle() {
                     this.isShuffled = !this.isShuffled;
                     window.mediaPlayer && window.mediaPlayer.setShuffle && window.mediaPlayer.setShuffle(this.isShuffled);

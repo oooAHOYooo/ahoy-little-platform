@@ -64,8 +64,54 @@ class MediaPlayer {
                 console.error('Audio element error, code:', code, this.audioElement.error);
                 document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Audio failed to load. Trying again…' }));
             } catch (_) {}
-            // Soft retry by reloading once
+            // Try fallbacks: if we have alternative sources for the current track, rotate to the next one
+            try {
+                if (this._fallbackSources && Array.isArray(this._fallbackSources) && this._fallbackIndex != null) {
+                    const nextIdx = this._fallbackIndex + 1;
+                    if (nextIdx < this._fallbackSources.length) {
+                        this._fallbackIndex = nextIdx;
+                        const nextSrc = this._fallbackSources[this._fallbackIndex];
+                        if (typeof nextSrc === 'string' && nextSrc.trim()) {
+                            // Bust cache slightly to avoid stale errors
+                            const srcWithBuster = nextSrc + (nextSrc.includes('?') ? '&' : '?') + 'v=' + Date.now();
+                            this.audioElement.src = srcWithBuster;
+                            try { this.audioElement.load(); } catch (_) {}
+                            this.audioElement.play().catch(() => {/* ignore; policy-locked will retry on gesture */});
+                            return;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Fallback rotation failed:', e);
+            }
+            // Last fallback: if crossOrigin is set, clear it and retry once (disables analyser but may allow playback)
+            try {
+                if (!this._clearedCorsOnce) {
+                    this._clearedCorsOnce = true;
+                    try { this.audioElement.removeAttribute('crossorigin'); } catch (_) {}
+                    const cur = this.audioElement.currentSrc || this.audioElement.src;
+                    if (cur) {
+                        // reload same URL (no extra cache buster to avoid 403 loops)
+                        this.audioElement.src = cur;
+                        try { this.audioElement.load(); } catch (_) {}
+                        this.audioElement.play().catch(() => {});
+                        return;
+                    }
+                }
+            } catch (_) {}
+            // Final soft retry by reloading the current source once
             try { this.audioElement.load(); } catch (_) {}
+        });
+        // Network hiccup handling - attempt a single gentle retry
+        ['stalled','suspend','abort'].forEach(evt => {
+            this.audioElement.addEventListener(evt, () => {
+                if (!this._networkRetried && this.currentTrack) {
+                    this._networkRetried = true;
+                    try { this.audioElement.load(); } catch (_) {}
+                    this.audioElement.play().catch(()=>{});
+                    setTimeout(() => { this._networkRetried = false; }, 5000);
+                }
+            });
         });
         
         this.audioElement.addEventListener('timeupdate', () => {
@@ -181,12 +227,18 @@ class MediaPlayer {
             this.videoElement.pause();
         }
         
-        // Set source - try multiple possible URL fields
+        // Set source - try multiple possible URL fields and prepare fallback list
         let source = null;
         if (isVideo) {
-            source = track.video_url || track.mp4_link || track.url;
+            const candidates = [track.video_url, track.mp4_link, track.url].filter(Boolean);
+            this._fallbackSources = candidates;
+            this._fallbackIndex = 0;
+            source = candidates[0] || null;
         } else {
-            source = track.audio_url || track.preview_url || track.full_url || track.url || track.src;
+            const candidates = [track.audio_url, track.preview_url, track.full_url, track.url, track.src].filter(Boolean);
+            this._fallbackSources = candidates;
+            this._fallbackIndex = 0;
+            source = candidates[0] || null;
         }
         
         if (!source) {
@@ -197,7 +249,9 @@ class MediaPlayer {
         
         // Ensure source is a valid URL
         if (typeof source === 'string' && source.trim()) {
-            mediaElement.src = source;
+            // Avoid stale caching issues on certain CDNs by adding a light cache-buster for first play
+            const srcWithBuster = source + (String(source).includes('?') ? '&' : '?') + 'v=' + Date.now();
+            mediaElement.src = srcWithBuster;
             try { mediaElement.load(); } catch (_) {}
         } else {
             console.error('Invalid source URL:', source);
