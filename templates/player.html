@@ -51,8 +51,6 @@
                         <i
                             :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'"
                             :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
-                        <span
-                            x-text="isBookmarked() ? 'Bookmarked' : 'Bookmark'"></span>
                     </button>
                 </div>
             </div>
@@ -88,8 +86,15 @@
             </div>
 
             <!-- Bookmark Button -->
-            <button type="button" @click="toggleBookmark(currentMedia.id)" class="bookmark-button">
-                <span :class="{'bookmarked': isBookmarked(currentMedia.id)}">Bookmark</span>
+            <button type="button"
+                @click="toggleBookmark(currentMedia.id)"
+                class="bookmark-button bm-btn save-btn"
+                :aria-pressed="isBookmarked(currentMedia.id)"
+                title="Bookmark this media">
+                <i
+                    :class="isBookmarked(currentMedia.id) ? 'fas fa-bookmark' : 'far fa-bookmark'"
+                    :style="isBookmarked(currentMedia.id) ? 'color: var(--accent-color)' : ''"></i>
+                <span x-text="isBookmarked(currentMedia.id) ? 'Bookmarked' : 'Bookmark'"></span>
             </button>
         </div>
 
@@ -112,8 +117,6 @@
                         <i
                             :class="isBookmarked() ? 'fas fa-bookmark' : 'far fa-bookmark'"
                             :style="isBookmarked() ? 'color: var(--accent-color)' : ''"></i>
-                        <span
-                            x-text="isBookmarked() ? 'Bookmarked' : 'Bookmark'"></span>
                     </button>
                 </div>
             </div>
