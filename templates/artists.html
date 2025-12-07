@@ -76,6 +76,20 @@
                         </button>
                     </div>
                 </div>
+                <div class="header-search mobile-only">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text"
+                            x-model="searchQuery"
+                            @input="filterArtists()"
+                            placeholder="Search artists..."
+                            class="search-input">
+                        <button @click="clearSearch()" class="search-clear"
+                            x-show="searchQuery">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
 
                 <div class="header-filters">
                     <div class="filter-tabs">
@@ -240,6 +254,35 @@
                         </div>
                     </template>
                 </div>
+            </div>
+        </section>
+        <!-- Mobile: Compact Artist List (mobile-only) -->
+        <section class="artists-compact-section">
+            <div class="artists-list">
+                <template x-for="artist in filteredArtists"
+                    :key="artist.id || artist.slug">
+                    <div class="artist-item" role="button"
+                        @click="viewArtist(artist)">
+                        <img class="artist-avatar"
+                            :src="artist.image || '/static/img/default-avatar.png'"
+                            :alt="artist.name" />
+                        <div class="artist-text">
+                            <div class="artist-name" x-text="artist.name"></div>
+                            <div class="artist-meta"
+                                x-text="artist.genres?.join(', ') || (artist.type || '')"></div>
+                        </div>
+                        <div class="artist-actions">
+                            <span class="artist-bookmark"
+                                role="button"
+                                tabindex="0"
+                                :aria-pressed="isBookmarked('artist', artist.id || artist.slug)"
+                                @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image })">
+                                <i
+                                    :class="isBookmarked('artist', artist.id || artist.slug) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+                            </span>
+                        </div>
+                    </div>
+                </template>
             </div>
         </section>
 
@@ -456,4 +499,134 @@ function artistsPage() {
 
 {% block extra_head %}
 <script src="{{ url_for('static', filename='js/unified-hero.js') }}"></script>
+<style>
+/* Defaults */
+.mobile-only { display: none; }
+.artists-compact-section { display: none; }
+
+/* Mobile artist list pattern and sticky controls */
+@media (max-width: 768px) {
+    /* Toggle mobile/desktop helpers */
+    .mobile-only { display: block; }
+    .desktop-only { display: none !important; }
+
+    /* Optionally hide large hero on mobile so list takes over quickly */
+    .unified-hero.tv-hero { display: none; }
+
+    /* Sticky subheader with search + filters */
+    .unified-header.artists-subheader {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: blur(6px);
+        background: rgba(0, 0, 0, 0.6);
+    }
+    .unified-header.artists-subheader .header-content {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    .unified-header.artists-subheader .title-text h1 {
+        margin: 0;
+        font-size: 1.1rem;
+        line-height: 1.2;
+    }
+    .unified-header.artists-subheader .title-text p {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        max-height: 3rem;
+        margin: 0.25rem 0 0;
+        line-height: 1.2;
+        font-size: 0.9rem;
+        opacity: 0.85;
+    }
+    .header-filters .filter-tabs {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        white-space: nowrap;
+    }
+    .header-filters .filter-tab {
+        scroll-snap-align: start;
+        flex: 0 0 auto;
+    }
+
+    /* Hide desktop/grid/table implementations on mobile */
+    .artists-grid-section .section-header,
+    .artists-grid-section .view-controls,
+    .artists-grid-section .artists-grid,
+    .artists-grid-section .list-header,
+    .artists-grid-section .list-items {
+        display: none !important;
+    }
+
+    /* NEW: Compact mobile list */
+    .artists-compact-section { display: block; }
+    .artists-compact-section .artists-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 0.5rem 0.75rem 5rem; /* extra bottom padding for bottom player */
+    }
+    .artists-compact-section .artist-item {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        text-align: left;
+        gap: 0.75rem;
+        min-height: 56px; /* consistent row height */
+    }
+    .artists-compact-section .artist-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        object-fit: cover;
+        flex-shrink: 0;
+        background: #111;
+    }
+    .artists-compact-section .artist-text {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .artists-compact-section .artist-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+    }
+    .artists-compact-section .artist-meta {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+    }
+    .artists-compact-section .artist-actions {
+        margin-left: 0.5rem;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+    }
+    .artists-compact-section .artist-bookmark i {
+        font-size: 1.1rem;
+        color: inherit;
+    }
+    .artists-compact-section .artist-bookmark[aria-pressed="true"] i {
+        color: var(--accent-color);
+    }
+}
+</style>
 {% endblock %}
