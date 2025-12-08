@@ -62,6 +62,10 @@
 
 /* Mobile-specific Live TV improvements */
 @media (max-width: 768px) {
+  /* Focused mobile experience: hide large selector in favor of drawer */
+  #channel-selector { display: none; }
+  .live-tv-container { padding-bottom: 80px; } /* respect bottom player bar */
+
   /* Full-width video player on mobile */
   .spotlight-grid {
     grid-template-columns: 1fr;

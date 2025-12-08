@@ -860,7 +860,7 @@ html {
 
 body {
     font-family: var(--font-family);
-    background-image: url('https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaHR4emR2d3ZkamprdXlrMTZsZWExN3VhdXh1dXNoZXJ3b3Zvem4xcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/w6WE0AKTT6XE3kKmv8/giphy.gif');
+    background-image: url('https://media2.giphy.com/media/v1.Y2lkPTZjMDliOTUyOWk4dmRjZDRtaDFkYXVhYWR5bjlxOXlwM2YwajcxeWg3YjMxaG15dyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/X4fPTLm2TCtkNiJnhE/giphy-downsized-large.gif');
     background-size: cover;
     background-position: center center;
     animation: rotateBackground 10s infinite;
@@ -873,14 +873,18 @@ body {
 
     0%,
     100% {
+        background-image: url('https://media2.giphy.com/media/v1.Y2lkPTZjMDliOTUyOWk4dmRjZDRtaDFkYXVhYWR5bjlxOXlwM2YwajcxeWg3YjMxaG15dyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/X4fPTLm2TCtkNiJnhE/giphy-downsized-large.gif');
+    }
+
+    25% {
         background-image: url('https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaHR4emR2d3ZkamprdXlrMTZsZWExN3VhdXh1dXNoZXJ3b3Zvem4xcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/w6WE0AKTT6XE3kKmv8/giphy.gif');
     }
 
-    33% {
+    50% {
         background-image: url('https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGhubDcwbmNpMGdvMmlmM3B5Z3J6NnZ3a3NkdmRreWNjYTVkeDgwbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Byour3OgR0nWnRR6Tc/giphy.gif');
     }
 
-    66% {
+    75% {
         background-image: url('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdmQ1bWJqd2FnOXJzN2VwOHkybDRsMWx0M3pkam8zaGc2OGNtMXg3NyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Wy3Q0fuNIJmYn62Lcv/giphy.gif');
     }
 }
@@ -2287,7 +2291,7 @@ a:hover {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     color: var(--text-secondary);
-    margin-top: var(--spacing-lg);
+    margin-top: var(--spacing-3);
     border-top: 1px solid rgba(255, 255, 255, 0.15);
     position: relative;
     width: 100%;
@@ -2320,10 +2324,10 @@ a:hover {
 .footer-content {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 10px var(--spacing-md);
+    padding: 5px var(--spacing-sm);
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
     align-items: start;
     position: relative;
     z-index: 0;
@@ -2332,7 +2336,7 @@ a:hover {
 .footer-column {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
 }
 
 .footer-brand-column {
@@ -2342,11 +2346,11 @@ a:hover {
 .footer-brand {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
 }
 
 .footer-logo {
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
 }
 
 .footer-logo img {
@@ -2372,7 +2376,7 @@ a:hover {
 
 .footer-column-title {
     color: rgba(255, 255, 255, 0.9);
-    margin: 0 0 var(--spacing-md) 0;
+    margin: 0 0 var(--spacing-sm) 0;
     font-size: var(--font-size-sm);
     font-weight: 600;
     text-transform: uppercase;
@@ -2381,7 +2385,7 @@ a:hover {
 }
 
 .footer-dev-title {
-    margin-top: var(--spacing-lg);
+    margin-top: var(--spacing-3);
 }
 
 .footer-nav-list {
@@ -2390,7 +2394,7 @@ a:hover {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xs);
+    gap: 2px;
 }
 
 .footer-nav-list li {
@@ -2403,7 +2407,7 @@ a:hover {
     font-size: var(--font-size-sm);
     transition: all 0.3s ease;
     display: inline-block;
-    padding: 3px 0;
+    padding: 1px 0;
 }
 
 .footer-nav-list li a:hover {
@@ -2413,8 +2417,8 @@ a:hover {
 }
 
 .footer-version-badge {
-    margin-top: var(--spacing-lg);
-    padding: var(--spacing-xs) var(--spacing-sm);
+    margin-top: var(--spacing-3);
+    padding: 2px var(--spacing-xs);
     background: rgba(106, 0, 255, 0.15);
     border: 1px solid rgba(106, 0, 255, 0.3);
     border-radius: 6px;

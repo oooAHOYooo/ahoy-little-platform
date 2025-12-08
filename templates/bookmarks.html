@@ -67,6 +67,16 @@
                 <span class="tab-count"
                     x-text="list().filter(item => item.type === 'artist').length"></span>
             </button>
+            <button
+                class="filter-tab"
+                :class="{ active: filterType === 'merch' }"
+                @click="filterType = 'merch'; filterNest = null"
+                x-show="list().filter(item => item.type === 'merch').length > 0">
+                <i class="fas fa-shopping-bag"></i>
+                Merch
+                <span class="tab-count"
+                    x-text="list().filter(item => item.type === 'merch').length"></span>
+            </button>
 
             <!-- Collections Filter -->
             <template x-for="collection in Object.values(collections)"
@@ -359,6 +369,7 @@
                        'track-card': item.type === 'track', 
                        'show-card': item.type === 'show', 
                        'artist-card': item.type === 'artist',
+                       'merch-card': item.type === 'merch',
                        'age-new': getBookmarkAgeCategory(item) === 'new',
                        'age-recent': getBookmarkAgeCategory(item) === 'recent',
                        'age-older': getBookmarkAgeCategory(item) === 'older',
@@ -431,6 +442,12 @@
                                 x-show="item.type === 'artist'">
                                 <i class="fas fa-eye"></i>
                             </button>
+                            <button
+                                @click.stop="buyItem(item); markAccessed(item.key)"
+                                class="buy-btn"
+                                x-show="item.type === 'merch'">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
 
                             <!-- Bookmark Actions -->
                             <div class="card-actions">
@@ -481,7 +498,7 @@
                     <div class="card-info">
                         <div class="card-type-badge">
                             <i
-                                :class="item.type === 'track' ? 'fas fa-music' : item.type === 'show' ? 'fas fa-tv' : 'fas fa-user-music'"></i>
+                                :class="item.type === 'track' ? 'fas fa-music' : item.type === 'show' ? 'fas fa-tv' : item.type === 'merch' ? 'fas fa-shopping-bag' : 'fas fa-user-music'"></i>
                             <span x-text="item.type"></span>
                         </div>
                         <h3 class="card-title" x-text="item.title"></h3>
@@ -713,6 +730,14 @@ function bookmarksPageHandler() {
         viewItem(item) {
             if (item.type === 'artist') {
                 window.location.href = `/artists/${item.id}`;
+            }
+        },
+        
+        buyItem(item) {
+            if (item.checkout_url) {
+                window.open(item.checkout_url, '_blank');
+            } else {
+                window.location.href = '/merch';
             }
         },
         
@@ -1012,7 +1037,7 @@ function bookmarksPageHandler() {
     transform: scale(0.9);
 }
 
-.play-btn, .view-btn {
+.play-btn, .view-btn, .buy-btn {
     background: var(--accent-color);
     color: var(--background-dark);
     border: none;

@@ -4,50 +4,209 @@
 
 {% block content %}
 <div class="radio-page" x-data="radioPage()" x-init="init()">
+    <style>
+        /* Monochrome, background-bleed styling */
+        .radio-page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 2rem 3rem;
+            background: transparent;
+        }
+        .neumo {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            backdrop-filter: blur(2px);
+        }
+        .neumo-inset {
+            background: rgba(255,255,255,0.03);
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .lcd {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 54px;
+            padding: .75rem 1rem;
+            color: rgba(255,255,255,.9);
+            letter-spacing: .04em;
+            background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.1));
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,.12);
+        }
+        .radio-controls .btn {
+            background: rgba(255,255,255,0.08);
+            color: #eee;
+            border: 0;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: transform .05s ease, box-shadow .15s ease;
+        }
+        .radio-controls .btn:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+        .now-card {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .now-cover {
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 14px;
+            box-shadow: none;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .playing-list {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .playing-item {
+            position: relative;
+            border-radius: 14px;
+            min-height: 110px;
+            overflow: hidden;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: none;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .playing-item .item-details {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+        }
+        .radio-section-title {
+            margin: 1.5rem 0 .75rem;
+            color: rgba(255,255,255,.85);
+            font-weight: 700;
+            letter-spacing: .06em;
+        }
+        .dial-btn {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(circle at 40% 30%, rgba(255,255,255,.25) 65%, rgba(255,255,255,.12) 100%);
+            border: 1px solid rgba(255,255,255,.22);
+            box-shadow: none;
+            transition: background .16s ease, transform .06s ease;
+        }
+        .dial-btn:active {
+            background: radial-gradient(circle at 40% 30%, rgba(255,255,255,.18) 65%, rgba(255,255,255,.1) 100%);
+            transform: translateY(1px);
+        }
+        .dial-caption {
+            margin-top: 8px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            color: rgba(255,255,255,.85);
+        }
+        @media (max-width: 720px) {
+            .now-card { grid-template-columns: 1fr; }
+            .playing-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+    </style>
     <section class="radio-hero">
         <div class="hero-content" style="text-align: center; margin: 2rem 0;">
-            <h1 style="font-size: 4rem; color: #ff0066;"><i class="fas fa-broadcast-tower"
-                    style="font-size: 3.5rem; margin-right: 8px;"></i> Ahoy
+            <h1 style="font-size: 3rem">
                 Radio</h1>
-            <p style="color: #ccc; font-size: 1.5rem;">Tune in for a continuous
-                mix from your indie library.</p>
+            <div class="lcd" style="margin: 1rem auto; max-width: 680px;">
+                <span style="opacity:.75;">ARTIST:</span>
+                <span x-text="current?.artist || '—'"></span>
+                <span style="opacity:.5;">·</span>
+                <span style="opacity:.75;">TRACK:</span>
+                <span x-text="current?.title || '—'"></span>
+            </div>
+
             <div class="radio-controls"
-                style="display: flex; justify-content: space-around; align-items: center; margin-top: 2rem;">
-                <button class="btn btn-primary" @click="toggle()"
-                    style="background-color: #00b894; border: none; padding: 1rem 2rem; color: white; font-size: 1.5rem; flex-grow: 1; margin: 0 10px; border-radius: 12px;">
-                    <span x-show="!isPlaying"><i class="fas fa-play"></i>
-                        Play</span>
-                    <span x-show="isPlaying"><i class="fas fa-pause"></i>
-                        Pause</span>
-                </button>
-                <button class="btn" @click="skip()"
-                    style="background-color: #0984e3; border: none; padding: 1rem 2rem; color: white; font-size: 1.5rem; flex-grow: 1; margin: 0 10px; border-radius: 12px;">
-                    <i class="fas fa-forward"></i> Skip
-                </button>
-                <!-- Removed shuffle and experimental badge -->
+                style="display: flex; justify-content: center; align-items: center; margin-top: 1.25rem; gap: 40px;">
+                <!-- Play/Pause Dial -->
+                <div
+                    style="display: flex; flex-direction: column; align-items: center;">
+                    <button class="dial-btn" @click="toggle()">
+                        <span x-show="!isPlaying">
+                            <i class="fas fa-play"
+                                style="font-size: 2rem; color: rgba(255,255,255,.9); margin-left: 2px;"></i>
+                        </span>
+                        <span x-show="isPlaying">
+                            <i class="fas fa-pause"
+                                style="font-size: 2rem; color: rgba(255,255,255,.9);"></i>
+                        </span>
+                    </button>
+                    <span class="dial-caption">Play/Pause</span>
+                </div>
+
             </div>
         </div>
     </section>
 
     <section class="radio-now">
-        <div class="now-card" x-show="current">
-            <img :src="current.cover_art || '/static/img/default-cover.jpg'" alt="cover" class="now-cover">
+        <div class="now-card neumo" x-show="current">
+            <img :src="current.cover_art || '/static/img/default-cover.jpg'"
+                alt="cover" class="now-cover">
             <div class="now-info">
                 <h3 x-text="current.title"></h3>
                 <p x-text="current.artist"></p>
-                <p class="artist-description" style="font-size: 0.85rem; color: #999; margin-top: 8px;"
-                    x-text="current.artist_description || 'An amazing indie artist creating outstanding music.'"></p>
-                <button @click="boostArtist(current)"
-                    style="background-color: #e17055; border: none; padding: 0.5rem 1rem; color: white; font-size: 1rem; border-radius: 5px; margin-top: 10px;">Boost
-                    the Artist</button>
+
+                <div style="width:100%;display:flex;justify-content:center;">
+                    <button
+                        @click="boostArtist(current)"
+                        style="
+                          background: linear-gradient(110deg, rgba(34,139,230,0.16) 0%, rgba(255,255,255,0.11) 100%);
+                          backdrop-filter: blur(12px) saturate(180%);
+                          box-shadow:
+                              0 2px 18px 0 rgba(34,139,230, 0.10),
+                              0 1px 6px 0 rgba(35, 115, 247, 0.05) inset;
+                          border: 1.4px solid rgba(34,139,230,0.19);
+                          color: #1c4370;
+                          font-family: 'Inter', 'DM Sans', 'Segoe UI', sans-serif;
+                          font-size: 1.07rem;
+                          letter-spacing: 0.01em;
+                          padding: 0.44rem 1.17rem 0.44rem 1.02rem;
+                          border-radius: 1.15rem;
+                          font-weight: 500;
+                          opacity: 0.95;
+                          transition:
+                              background 0.19s,
+                              box-shadow 0.13s,
+                              border 0.13s;
+                          z-index: 11;
+                          cursor: pointer;
+                          display: flex;
+                          align-items: center;
+                          gap: 0.7em;
+                          margin-top: 8px;
+                      "
+                        @mouseover="
+                          $el.style.background='linear-gradient(110deg, rgba(34,139,230,0.23) 0%, rgba(248,251,255,0.16) 100%)';
+                          $el.style.boxShadow='0 8px 36px 0 rgba(34,139,230, 0.16), 0 2px 10px 0 rgba(35, 115, 247, 0.13) inset';
+                          $el.style.borderColor='rgba(34,139,230,0.25)';
+                          "
+                        @mouseleave="
+                          $el.style.background='linear-gradient(110deg, rgba(34,139,230,0.16) 0%, rgba(255,255,255,0.11) 100%)';
+                          $el.style.boxShadow='0 2px 18px 0 rgba(34,139,230, 0.10), 0 1px 6px 0 rgba(35, 115, 247, 0.05) inset';
+                          $el.style.borderColor='rgba(34,139,230,0.19)';
+                          ">
+
+                        <span>Boost</span>
+                    </button>
+                </div>
             </div>
         </div>
     </section>
 
-    <section class="radio-upnext">
-        <h3>Up Next</h3>
+    <section class="radio-justplayed">
+        <h3 class="radio-section-title">Previously Played</h3>
         <div class="playing-list">
-            <template x-for="item in upNext.slice(0, 8)" :key="item.id">
+            <template x-for="item in justPlayed.slice(0, 8)" :key="item.id">
                 <div class="playing-item"
                     :style="`background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${item.cover_art || '/static/img/default-cover.jpg'}); background-size: cover; background-position: center;`"
                     @click="playNow(item)">
@@ -55,7 +214,8 @@
                         <h4 x-text="item.title"></h4>
                         <p x-text="item.artist"></p>
                     </div>
-                    <div class="play-indicator"><i class="fas fa-play"></i></div>
+                    <div class="play-indicator"><i
+                            class="fas fa-play"></i></div>
                 </div>
             </template>
         </div>
@@ -71,6 +231,7 @@
             queue: [],
             current: null,
             upNext: [],
+            justPlayed: [],
             async init() {
                 try {
                     const r = await fetch('/api/music');
@@ -111,6 +272,10 @@
             skip() { this._playNext(); },
             playNow(item) {
                 if (!window.mediaPlayer) { console.error('Media player not available'); return; }
+                if (this.current) {
+                    this.justPlayed.unshift(this.current);
+                    if (this.justPlayed.length > 20) this.justPlayed.length = 20;
+                }
                 this.current = item;
                 window.mediaPlayer.play(item);
                 this.isPlaying = true;
@@ -119,6 +284,10 @@
                 if (!window.mediaPlayer) { console.error('Media player not available'); return; }
                 if (this.queue.length === 0) this._buildQueue();
                 const next = this.queue.shift();
+                if (this.current) {
+                    this.justPlayed.unshift(this.current);
+                    if (this.justPlayed.length > 20) this.justPlayed.length = 20;
+                }
                 if (next) { this.current = next; window.mediaPlayer.play(next); this.isPlaying = true; }
                 this.upNext = this.queue.slice(0, 20);
             },

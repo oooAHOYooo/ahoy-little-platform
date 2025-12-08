@@ -1,0 +1,51 @@
+[
+
+  {
+    "id": "sample-merch2",
+    "name": "Sample-Merch2",
+    "description": "",
+    "price_cents": 2500,
+    "currency": "USD",
+    "artist": "Ahoy Indie Media",
+    "tags": [],
+    "image": "static/merch/images/sample-merch2.jpg",
+    "square_checkout_url": "",
+    "inventory": "in_stock"
+  },
+  {
+    "id": "sample-merch3",
+    "name": "Sample-Merch3",
+    "description": "",
+    "price_cents": 2500,
+    "currency": "USD",
+    "artist": "Ahoy Indie Media",
+    "tags": [],
+    "image": "static/merch/images/sample-merch3.jpeg",
+    "square_checkout_url": "",
+    "inventory": "in_stock"
+  },
+  {
+    "id": "sample-merch4",
+    "name": "Sample-Merch4",
+    "description": "",
+    "price_cents": 2500,
+    "currency": "USD",
+    "artist": "Ahoy Indie Media",
+    "tags": [],
+    "image": "static/merch/images/sample-merch4.jpeg",
+    "square_checkout_url": "",
+    "inventory": "in_stock"
+  },
+  {
+    "id": "samplemerch1",
+    "name": "Samplemerch1",
+    "description": "",
+    "price_cents": 2500,
+    "currency": "USD",
+    "artist": "Ahoy Indie Media",
+    "tags": [],
+    "image": "static/merch/images/samplemerch1.jpeg",
+    "square_checkout_url": "",
+    "inventory": "in_stock"
+  }
+]

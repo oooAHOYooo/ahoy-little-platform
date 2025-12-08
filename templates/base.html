@@ -87,9 +87,11 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
         <!-- Stripe publishable key and JS -->
-        <meta name="stripe-publishable-key" content="{{ STRIPE_PUBLISHABLE_KEY }}">
+        <meta name="stripe-publishable-key"
+            content="{{ STRIPE_PUBLISHABLE_KEY }}">
         <script src="https://js.stripe.com/v3/"></script>
-        <script defer src="{{ url_for('static', filename='js/stripeBoost.js') }}"></script>
+        <script defer
+            src="{{ url_for('static', filename='js/stripeBoost.js') }}"></script>
 
         <!-- App data component - must load before Alpine.js -->
         <script>
@@ -252,32 +254,32 @@
     <body x-data="appData()"
         class="overflow-x-hidden">
         <!-- Mobile Status Bar (fixed top, compact) -->
-        <div class="mobile-status-bar mobile-only" x-data="statusBar()" x-init="init()">
+        <div class="mobile-status-bar mobile-only" x-data="statusBar()"
+            x-init="init()">
             <div class="status-bar-content">
                 <div class="status-left">
                     <span class="status-time" id="statusTime"></span>
-                    <a href="/" class="status-logo" title="Ahoy" aria-label="Ahoy">
-                        <img src="/static/img/favicon.svg" alt="Ahoy Indie Media"
+                    <a href="/" class="status-logo" title="Ahoy"
+                        aria-label="Ahoy">
+                        <img src="/static/img/favicon.svg"
+                            alt="Ahoy Indie Media"
                             style="height:12px;width:auto;opacity:.9;vertical-align:middle;">
                     </a>
-                    <span class="status-weather" x-show="weatherLoaded">
-                        <span class="weather-icon" x-text="weatherIcon"></span>
-                        <span class="weather-temp" x-text="weatherTemp + '°'"></span>
-                    </span>
-                    <a href="/" class="status-action-btn" title="Home" aria-label="Home">
+                    <a href="/" class="status-action-btn" title="Home"
+                        aria-label="Home">
                         <i class="fas fa-home"></i>
                     </a>
-                    <button @click="openMobileSearch()" class="status-action-btn" title="Search" type="button">
+                    <button @click="openMobileSearch()"
+                        class="status-action-btn" title="Search" type="button">
                         <i class="fas fa-search"></i>
                     </button>
-                    <a href="/bookmarks" class="status-action-btn" title="Notifications">
+                    <a href="/bookmarks" class="status-action-btn"
+                        title="Notifications">
                         <i class="fas fa-bell"></i>
-                        <span class="notification-badge" x-show="hasNewBookmarks" x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
+                        <span class="notification-badge"
+                            x-show="hasNewBookmarks"
+                            x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
                     </a>
-                </div>
-                <div class="status-indicators">
-                    <i class="fas fa-signal"></i>
-                    <i class="fas fa-wifi"></i>
                 </div>
             </div>
         </div>
@@ -336,6 +338,7 @@
                     <a href="/shows">Shows</a>
                     <a href="/live-tv">Live TV</a>
                     <a href="/artists">Artists</a>
+                    <a href="/merch">Merch</a>
                     <a href="/radio">Radio</a>
                     <a href="/bookmarks">Saved</a>
                     <a href="/settings">Settings</a>
@@ -362,7 +365,8 @@
                         </a>
                     </div>
                     <!-- Mobile Title (text instead of logo) - Hidden, logo shows instead -->
-                    <div class="nav-title-mobile mobile-only" style="display: none;">Ahoy Indie
+                    <div class="nav-title-mobile mobile-only"
+                        style="display: none;">Ahoy Indie
                         Media</div>
 
                     <!-- Mobile Hamburger -->
@@ -399,6 +403,12 @@
                             <i class="fas fa-users"></i>
                             <span>Artists</span>
                         </a>
+                        <a href="{{ url_for('merch') }}"
+                            class="feature-btn {% if request.endpoint == 'merch' %}active{% endif %}"
+                            title="Merch Store">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>Merch</span>
+                        </a>
                         <a href="/bookmarks"
                             class="feature-btn {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
                             title="Bookmarks">
@@ -425,6 +435,19 @@
 
                     <!-- App Menu - Compact Right Side -->
                     <div class="nav-menu flex items-center gap-1">
+                        <!-- Weather Widget (Desktop Only) -->
+                        <div
+                            class="nav-item hidden md:flex items-center gap-2 px-3 mr-2"
+                            x-show="weatherLoaded"
+                            title="New Haven, CT"
+                            style="cursor: default; opacity: 0.9;">
+                            <span class="weather-icon" x-text="weatherIcon"
+                                style="font-size: 1.1em;"></span>
+                            <span
+                                class="weather-temp text-sm font-medium text-gray-300"
+                                x-text="weatherTemp + '°'"></span>
+                        </div>
+
                         <!-- Home (Desktop Only) -->
                         <a href="{{ url_for('home') }}"
                             class="nav-item hidden md:flex {% if request.endpoint == 'home' %}active{% endif %}"
@@ -440,8 +463,11 @@
                                 @click="accountMenuOpen = !accountMenuOpen; console.log('Account menu clicked, new state:', accountMenuOpen)"
                                 class="nav-item account-menu-btn flex items-center gap-1"
                                 title="Account">
-                                <i class="fas fa-user" style="font-size:18px;color:#bdbdbd;"></i>
-                                <i class="fas fa-chevron-down" style="font-size:12px;color:#bdbdbd;transition:transform .2s;" :class="{'rotate-180': accountMenuOpen}"></i>
+                                <i class="fas fa-user"
+                                    style="font-size:18px;color:#bdbdbd;"></i>
+                                <i class="fas fa-chevron-down"
+                                    style="font-size:12px;color:#bdbdbd;transition:transform .2s;"
+                                    :class="{'rotate-180': accountMenuOpen}"></i>
                             </button>
 
                             <!-- Unified Account Features Dropdown -->
@@ -458,8 +484,9 @@
                                 <div
                                     class="px-4 py-4 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 border-b border-neutral-700/50">
                                     <div class="mb-2">
-                                        <p class="hdr-username text-sm font-semibold text-white truncate"
-                                           x-text="userProfile.display_name || userProfile.username || 'Guest'"></p>
+                                        <p
+                                            class="hdr-username text-sm font-semibold text-white truncate"
+                                            x-text="userProfile.display_name || userProfile.username || 'Guest'"></p>
                                     </div>
 
                                     <!-- Quick Stats -->
@@ -497,7 +524,8 @@
                                             class="text-sm font-semibold text-white"
                                             x-text="'$' + ((walletBalanceCents || 0) / 100).toFixed(2)"></div>
                                     </div>
-                                    <div class="account-wallet-actions mt-1 flex gap-2">
+                                    <div
+                                        class="account-wallet-actions mt-1 flex gap-2">
                                         <button
                                             class="pill px-2 py-0.5 text-[11px] rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
                                             @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(2000) : null">
@@ -604,8 +632,6 @@
                             </div>
                         </div>
 
-                        
-
                         <!-- Fullscreen Toggle (Desktop Only) -->
                         <button @click="toggleFullscreen()"
                             class="nav-item hidden-mobile" title="Fullscreen">
@@ -631,23 +657,28 @@
         <!-- Mobile Account Features Bar (above bottom nav) -->
         <nav class="mobile-account-bar mobile-only" role="navigation"
             aria-label="Account Features">
-            <a href="/account" class="account-bar-item {% if request.endpoint == 'account' or request.endpoint == 'account_page' %}active{% endif %}">
+            <a href="/account"
+                class="account-bar-item {% if request.endpoint == 'account' or request.endpoint == 'account_page' %}active{% endif %}">
                 <i class="fas fa-user-circle"></i>
                 <span>Profile</span>
             </a>
-            <a href="/portfolio" class="account-bar-item {% if request.endpoint == 'portfolio' or request.endpoint == 'portfolio_page' %}active{% endif %}">
+            <a href="/portfolio"
+                class="account-bar-item {% if request.endpoint == 'portfolio' or request.endpoint == 'portfolio_page' %}active{% endif %}">
                 <i class="fas fa-chart-line"></i>
                 <span>Portfolio</span>
             </a>
-            <a href="/dashboard" class="account-bar-item {% if request.endpoint == 'dashboard' or request.endpoint == 'dashboard_page' %}active{% endif %}">
+            <a href="/dashboard"
+                class="account-bar-item {% if request.endpoint == 'dashboard' or request.endpoint == 'dashboard_page' %}active{% endif %}">
                 <i class="fas fa-trophy"></i>
                 <span>Achievements</span>
             </a>
-            <a href="/bookmarks" class="account-bar-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}">
+            <a href="/bookmarks"
+                class="account-bar-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}">
                 <i class="fas fa-bookmark"></i>
                 <span>Saved</span>
             </a>
-            <a href="/settings" class="account-bar-item {% if request.endpoint == 'settings' or request.endpoint == 'settings_page' %}active{% endif %}">
+            <a href="/settings"
+                class="account-bar-item {% if request.endpoint == 'settings' or request.endpoint == 'settings_page' %}active{% endif %}">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>
@@ -696,52 +727,70 @@
         <div id="accountMenu" class="mobile-account hidden mobile-only"
             aria-hidden="true"></div>
 
-
         <!-- Mobile Search Popup (mobile only) -->
-        <div id="mobile-search-popup" class="mobile-search-popup mobile-only" x-data="mobileSearch()" x-show="isOpen" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4" style="display: none;">
+        <div id="mobile-search-popup" class="mobile-search-popup mobile-only"
+            x-data="mobileSearch()" x-show="isOpen" x-cloak
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-4"
+            style="display: none;">
             <div class="mobile-search-overlay" @click="close()"></div>
             <div class="mobile-search-container">
                 <div class="mobile-search-header">
                     <h2>Search</h2>
-                    <button @click="close()" class="mobile-search-close" aria-label="Close search">
+                    <button @click="close()" class="mobile-search-close"
+                        aria-label="Close search">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div class="mobile-search-input-wrapper">
                     <i class="fas fa-search mobile-search-icon"></i>
-                    <input type="text" 
-                        x-model="searchQuery" 
+                    <input type="text"
+                        x-model="searchQuery"
                         @keyup.enter="performSearch()"
                         @input="handleInput()"
                         placeholder="Search music, shows, artists..."
                         class="mobile-search-input"
                         autofocus>
-                    <button @click="clearSearch()" class="mobile-search-clear" x-show="searchQuery">
+                    <button @click="clearSearch()" class="mobile-search-clear"
+                        x-show="searchQuery">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <div class="mobile-search-suggestions" x-show="searchQuery.length > 0 && suggestions.length > 0">
+                <div class="mobile-search-suggestions"
+                    x-show="searchQuery.length > 0 && suggestions.length > 0">
                     <div class="suggestions-header">Suggestions</div>
                     <div class="suggestions-list">
-                        <template x-for="suggestion in suggestions" :key="suggestion.id">
-                            <button @click="selectSuggestion(suggestion)" class="suggestion-item">
+                        <template x-for="suggestion in suggestions"
+                            :key="suggestion.id">
+                            <button @click="selectSuggestion(suggestion)"
+                                class="suggestion-item">
                                 <i :class="suggestion.icon"></i>
                                 <div class="suggestion-content">
-                                    <div class="suggestion-title" x-text="suggestion.title"></div>
-                                    <div class="suggestion-subtitle" x-text="suggestion.subtitle"></div>
+                                    <div class="suggestion-title"
+                                        x-text="suggestion.title"></div>
+                                    <div class="suggestion-subtitle"
+                                        x-text="suggestion.subtitle"></div>
                                 </div>
                             </button>
                         </template>
                     </div>
                 </div>
-                <div class="mobile-search-recents" x-show="searchQuery.length === 0 && recentSearches.length > 0">
+                <div class="mobile-search-recents"
+                    x-show="searchQuery.length === 0 && recentSearches.length > 0">
                     <div class="recents-header">
                         <span>Recent Searches</span>
-                        <button @click="clearRecents()" class="clear-recents-btn">Clear</button>
+                        <button @click="clearRecents()"
+                            class="clear-recents-btn">Clear</button>
                     </div>
                     <div class="recents-list">
-                        <template x-for="(recent, index) in recentSearches" :key="index">
-                            <button @click="selectRecent(recent)" class="recent-item">
+                        <template x-for="(recent, index) in recentSearches"
+                            :key="index">
+                            <button @click="selectRecent(recent)"
+                                class="recent-item">
                                 <i class="fas fa-clock"></i>
                                 <span x-text="recent"></span>
                             </button>
@@ -764,33 +813,10 @@
                 <aside class="dashboard-sidebar dashboard-left desktop-only"
                     x-data="dashboardCollection()" x-init="init()">
                     <div class="sidebar-content">
-                        <!-- User Info Block -->
-                        <div class="sidebar-user-block" data-sidebar-section="user">
-                            <div class="user-block-content">
-                                <template x-if="window.LOGGED_IN">
-                                    <img
-                                        :src="(window.userProfile && window.userProfile.avatar) || '/static/img/default-avatar.png'"
-                                        :alt="(window.userProfile && window.userProfile.display_name) || 'Guest'"
-                                        class="user-block-avatar">
-                                </template>
-                                <template x-if="!window.LOGGED_IN">
-                                    <span class="user-label">Guest</span>
-                                </template>
-                                <div class="user-block-info">
-                                    <div class="user-block-name"
-                                        x-text="(window.userProfile && window.userProfile.display_name) || 'Guest'"></div>
-                                    <div class="user-block-stats">
-                                        <span>Bookmarks</span> •
-                                        <span>Badges</span> • <span
-                                            x-text="'$' + (window.totalInvested || 0).toFixed(0) + ' invested'"></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="user-block-divider"></div>
-                        </div>
 
                         <!-- Global Search -->
-                        <div class="sidebar-panel sidebar-item desktop-only" data-sidebar-section="search">
+                        <div class="sidebar-panel sidebar-item desktop-only"
+                            data-sidebar-section="search">
                             <div class="section-title">Search</div>
                             <div class="sidebar-search-container">
                                 <i
@@ -808,6 +834,41 @@
                             </div>
                         </div>
 
+                        <!-- Bookmarks -->
+                        <div class="sidebar-panel sidebar-item"
+                            data-sidebar-section="bookmarks">
+                            <div class="section-title">Bookmarks</div>
+
+                            <!-- Collections List -->
+                            <div class="collections-list"
+                                x-show="collections.length > 0">
+                                <template x-for="col in collections"
+                                    :key="col.id">
+                                    <div class="sidebar-list-item"
+                                        @click="goToCollection(col.id)"
+                                        style="cursor: pointer; padding: 8px 0; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-folder"
+                                            style="color: var(--text-muted);"></i>
+                                        <span class="item-name"
+                                            x-text="col.name"
+                                            style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem;"></span>
+                                        <span class="item-count"
+                                            x-text="col.items ? col.items.length : 0"
+                                            style="font-size: 0.75rem; color: var(--text-muted);"></span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="collections-mini"
+                                :class="{'mt-3': collections.length > 0}">
+                                <button @click="goToCollections()"
+                                    class="item-mini collection-add-btn desktop-only">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add Collection</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Boost (Compact) -->
                         <div class="tip-jar-card sidebar-item">
                             <div class="tip-jar-compact">
@@ -816,7 +877,7 @@
                                     <select x-model="selectedArtistId"
                                         class="tip-jar-select tip-compact-select tip-mini-field"
                                         aria-label="Select artist to boost">
-                                        <option value>Select artist…</option>
+                                        <option value>Artist…</option>
                                         <template x-for="artist in artists"
                                             :key="artist.id || artist.name">
                                             <option
@@ -896,7 +957,7 @@
                                     <i class="fas fa-spinner fa-spin"
                                         x-show="isTipping"></i>
                                     <span
-                                        x-text="isTipping ? 'Processing…' : 'Boost $' + (isValid ? calculateTotalCharge(parseFloat(tipAmount || 0)).toFixed(2) : '0.00')"></span>
+                                        x-text="isTipping ? 'Processing…' : 'Boost'"></span>
                                 </button>
                                 <div class="text-right">
                                     <button type="button" class="tip-cancel"
@@ -947,7 +1008,8 @@
                         </template>
 
                         <!-- Merit Badges -->
-                        <div class="sidebar-panel sidebar-item" data-sidebar-section="merit-badges">
+                        <div class="sidebar-panel sidebar-item"
+                            data-sidebar-section="merit-badges">
                             <div class="section-title">Merit Badges</div>
                             <div class="badges-mini">
                                 <template x-for="badge in badges.slice(0, 4)"
@@ -967,7 +1029,8 @@
                         </div>
 
                         <!-- Bookmarks -->
-                        <div class="sidebar-panel sidebar-item" data-sidebar-section="bookmarks">
+                        <div class="sidebar-panel sidebar-item"
+                            data-sidebar-section="bookmarks">
                             <div class="section-title">Bookmarks</div>
                             <div class="collections-mini">
                                 <button @click="goToCollections()"
@@ -1019,11 +1082,24 @@
                     {% block content %}{% endblock %}
                 </div>
 
-                <!-- Right Dashboard: Up Next -->
+                <!-- Right Dashboard: Clock + Content -->
                 <aside class="dashboard-sidebar dashboard-right"
                     x-data="dashboardUpNext()" x-init="init()">
-                    <div class="sidebar-header">
-                        <h3>Up Next</h3>
+                    <div class="sidebar-header"
+                        style="display:flex;align-items:center;justify-content:center;padding: 1rem 0;">
+                        <div
+                            style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+                                    font-weight: 500;
+                                    letter-spacing: .08em;
+                                    font-size: 0.95rem;
+                                    padding:.35rem .9rem;
+                                    border-radius: 20px;
+                                    background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+                                    box-shadow: 2px 2px 5px rgba(0,0,0,0.2), -1px -1px 4px rgba(255,255,255,0.05);
+                                    border: 1px solid rgba(255,255,255,.08);
+                                    backdrop-filter: blur(6px);
+                                    color: rgba(255,255,255,.85);"
+                            x-text="nowTime"></div>
                     </div>
                     <div class="sidebar-content">
                         <!-- Now Playing -->
@@ -1096,7 +1172,7 @@
                         </div>
 
                         <!-- Quick Actions -->
-                        <div class="section-title">Quick</div>
+                        <!-- <div class="section-title">Quick</div>
                         <div class="actions-mini actions-mini-vertical">
                             <div class="action-mini"
                                 @click="goTo('/music')">Music</div>
@@ -1106,7 +1182,7 @@
                                 @click="goTo('/live-tv')">Live TV</div>
                             <div class="action-mini"
                                 @click="goTo('/artists')">Artists</div>
-                        </div>
+                        </div> -->
                     </div>
                 </aside>
             </div>
@@ -1422,13 +1498,18 @@
         </div>
 
         <!-- Stripe Boost Modal -->
-        <div id="stripe-boost-modal" class="modal-overlay" style="display:none; align-items:center; justify-content:center;">
+        <div id="stripe-boost-modal" class="modal-overlay"
+            style="display:none; align-items:center; justify-content:center;">
             <div class="modal-mini" @click.stop>
                 <h4 style="margin-bottom:10px;">Enter Card Details</h4>
-                <div id="card-element" style="padding:10px; border:1px solid #333; border-radius:8px; background:#1e1e1e;"></div>
-                <div id="stripe-errors" style="color:#ff6b6b; margin-top:10px; display:none;"></div>
-                <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
-                    <button id="stripe-boost-close" type="button" class="btn-mini">Close</button>
+                <div id="card-element"
+                    style="padding:10px; border:1px solid #333; border-radius:8px; background:#1e1e1e;"></div>
+                <div id="stripe-errors"
+                    style="color:#ff6b6b; margin-top:10px; display:none;"></div>
+                <div
+                    style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+                    <button id="stripe-boost-close" type="button"
+                        class="btn-mini">Close</button>
                 </div>
             </div>
         </div>
@@ -1485,10 +1566,11 @@
                     <ul class="footer-nav-list">
                         <li><a href="/debug-report">Debug Report</a></li>
                         <li><a href="/radio">Radio (Experimental)</a></li>
+                        <li><a href="/merch">Merch</a></li>
                     </ul>
 
                     <div class="footer-version-badge">
-                        <span class="version-text">Ahoy Engine v1.1.1 — Indie
+                        <span class="version-text">Ahoy Engine v1.1.2 — Indie
                             Build</span>
                     </div>
                 </div>
@@ -1503,7 +1585,10 @@
             <!-- Mobile-optimized compact footer -->
             <div class="footer-compact mobile-only" aria-label="Mobile Footer">
                 <div class="footer-compact-secondary">
-                    <span><a href="/privacy" rel="nofollow">Privacy</a> • <a href="/terms" rel="nofollow">Terms</a> • <a href="/security">Security</a> • <a href="{{ url_for('sitemap_page') }}">Sitemap</a></span>
+                    <span><a href="/privacy" rel="nofollow">Privacy</a> • <a
+                            href="/terms" rel="nofollow">Terms</a> • <a
+                            href="/security">Security</a> • <a
+                            href="{{ url_for('sitemap_page') }}">Sitemap</a></span>
                 </div>
             </div>
         </footer>
@@ -1659,20 +1744,11 @@
                 // Notification state
                 newBookmarkCount: 0,
                 hasNewBookmarks: false,
-                
-                // Weather state
-                weatherLoaded: false,
-                weatherIcon: '☀️',
-                weatherTemp: '--',
-                weatherCondition: '',
 
                 init() {
                     // Load bookmark count
                     this.loadBookmarkCount();
-                    
-                    // Load weather
-                    this.loadWeather();
-                    
+
                     // Listen for bookmark notifications
                     document.addEventListener('bookmark:notified', (e) => {
                         this.newBookmarkCount = e.detail.count;
@@ -1689,11 +1765,6 @@
                     setInterval(() => {
                         this.loadBookmarkCount();
                     }, 5000);
-                    
-                    // Refresh weather every 10 minutes
-                    setInterval(() => {
-                        this.loadWeather();
-                    }, 600000);
                 },
 
                 async loadBookmarkCount() {
@@ -1713,54 +1784,6 @@
                         }
                     } catch (err) {
                         // Silently fail
-                    }
-                },
-                
-                async loadWeather() {
-                    try {
-                        // Try to get user's location from geolocation API
-                        let lat = null;
-                        let lon = null;
-                        
-                        if (navigator.geolocation) {
-                            navigator.geolocation.getCurrentPosition(
-                                (position) => {
-                                    lat = position.coords.latitude;
-                                    lon = position.coords.longitude;
-                                    this.fetchWeather(lat, lon);
-                                },
-                                () => {
-                                    // If geolocation fails, use default location
-                                    this.fetchWeather();
-                                },
-                                { timeout: 2000, maximumAge: 300000 } // 5 min cache
-                            );
-                        } else {
-                            // No geolocation support, use default
-                            this.fetchWeather();
-                        }
-                    } catch (err) {
-                        // Silently fail
-                    }
-                },
-                
-                async fetchWeather(lat = null, lon = null) {
-                    try {
-                        let url = '/api/weather';
-                        if (lat && lon) {
-                            url += `?lat=${lat}&lon=${lon}`;
-                        }
-                        
-                        const response = await fetch(url);
-                        if (response.ok) {
-                            const data = await response.json();
-                            this.weatherIcon = data.icon || '☀️';
-                            this.weatherTemp = data.temperature || '--';
-                            this.weatherCondition = data.condition || '';
-                            this.weatherLoaded = true;
-                        }
-                    } catch (err) {
-                        // Silently fail - weather is optional
                     }
                 },
                 
@@ -1924,6 +1947,12 @@
                 // Search state
                 searchQuery: '',
 
+                // Weather state
+                weatherLoaded: false,
+                weatherIcon: '☀️',
+                weatherTemp: '--',
+                weatherCondition: '',
+
                 // Mobile menu state
                 leftMenuOpen: false,
                 rightMenuOpen: false,
@@ -1960,6 +1989,9 @@
                     if (this.enableAccountNetworkCalls) {
                         this.loadWallet();
                     }
+                    
+                    // Load weather (New Haven)
+                    this.loadWeather();
                 },
 
                 async loadWallet() {
@@ -2047,6 +2079,30 @@
                         }
                     } catch (err) {
                         console.log('Fullscreen toggle error:', err);
+                    }
+                },
+
+                // Weather functionality
+                async loadWeather() {
+                    // Hardcoded New Haven CT coordinates
+                    const lat = 41.3083;
+                    const lon = -72.9279;
+                    this.fetchWeather(lat, lon);
+                },
+
+                async fetchWeather(lat, lon) {
+                    try {
+                        let url = `/api/weather?lat=${lat}&lon=${lon}`;
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.weatherIcon = data.icon || '☀️';
+                            this.weatherTemp = data.temperature || '--';
+                            this.weatherCondition = data.condition || '';
+                            this.weatherLoaded = true;
+                        }
+                    } catch (err) {
+                        // Silently fail
                     }
                 },
 
@@ -2690,6 +2746,7 @@
         function dashboardCollection() {
             return {
                 badges: [],
+                collections: [],
                 showCodeEntry: false,
                 codeEntry: '',
                 // XP / reinforcement
@@ -2756,6 +2813,9 @@
 
                     // Load artists for boost
                     await this.loadArtists();
+                    
+                    // Load collections
+                    await this.loadCollections();
 
                     // Sync with media player
                     this.syncMediaPlayer();
@@ -2778,6 +2838,31 @@
                         console.log('Artists not available for boost');
                         this.artists = [];
                     }
+                },
+                async loadCollections() {
+                    if (!window.LOGGED_IN) return;
+                    try {
+                        const username = window.userProfile?.username;
+                        // If no username, we might not be able to filter by user on the API
+                        // But let's try calling without user if it returns my collections?
+                        // API logic was: if user, filter by user. Else return all.
+                        // We definitely want only ours.
+                        if (!username) return;
+
+                        const response = await fetch(`/api/collections/?user=${encodeURIComponent(username)}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.collections = data || [];
+                        }
+                    } catch (e) {
+                        console.error('Error loading collections:', e);
+                        this.collections = [];
+                    }
+                },
+                goToCollection(id) {
+                    // Navigate to bookmarks/collections page
+                    // Ideally we would filter by collection ID, but simple navigation for now
+                    window.location.href = '/bookmarks';
                 },
                 async sendTip() {
                     if (!this.selectedArtistId || !this.tipAmount) return;
@@ -2914,7 +2999,23 @@
                 nowPlaying: null,
                 recent: [],
                 queueItems: [],
+                nowTime: '',
                 async init() {
+                    // Live clock (updates once per second)
+                    const updateClock = () => {
+                        try {
+                            this.nowTime = new Date().toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit'
+                            });
+                        } catch (e) {
+                            this.nowTime = new Date().toLocaleTimeString();
+                        }
+                    };
+                    updateClock();
+                    setInterval(updateClock, 1000);
+
                     // Check if media player has a current track (radio or player)
                     // Prioritize actively playing radio/player content
                     if (window.mediaPlayer && window.mediaPlayer.currentTrack && window.mediaPlayer.isPlaying) {

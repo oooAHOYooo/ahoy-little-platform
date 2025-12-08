@@ -814,6 +814,13 @@ def performances():
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
+@app.route('/merch')
+def merch():
+    """Merch store page"""
+    response = make_response(render_template('merch.html'))
+    response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
+    return response
+
 @app.route('/player')
 def player():
     """Full-screen player page"""
@@ -1113,6 +1120,11 @@ def api_music():
 def radio_page():
     """Experimental: Ahoy Radio - continuous play from all music."""
     return render_template('radio.html')
+
+@app.route('/merch')
+def merch_page():
+    """Ahoy Merch Store"""
+    return render_template('merch.html')
 
 @app.route('/api/shows')
 @limiter.exempt
