@@ -1515,28 +1515,23 @@
         </div>
 
         <!-- Footer -->
-        <footer class="site-footer">
-            <!-- Neon Gradient Accent Bar -->
-            <div class="footer-accent-bar"></div>
-
+        <footer class="app-footer">
             <div class="footer-content">
-                <!-- Left Column: Logo + Tagline -->
+                <!-- Column 1: Brand / Logo -->
                 <div class="footer-column footer-brand-column">
-                    <div class="footer-brand">
-                        <div class="footer-logo">
-                            <img
-                                src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
-                                alt="Ahoy Indie Media">
-                        </div>
-                        <p class="footer-tagline">Your gateway to independent
-                            music discovery and organization</p>
+                    <div class="footer-logo">
+                        <img
+                            src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+                            alt="Ahoy Indie Media">
                     </div>
+                    <p class="footer-tagline">Your gateway to independent music
+                        discovery and organization</p>
                 </div>
 
-                <!-- Center Column: App Navigation -->
-                <div class="footer-column footer-nav-column">
+                <!-- Column 2: App Navigation -->
+                <div class="footer-column">
                     <h4 class="footer-column-title">App Navigation</h4>
-                    <ul class="footer-nav-list">
+                    <ul>
                         <li><a href="{{ url_for('music') }}">Music</a></li>
                         <li><a href="{{ url_for('shows') }}">Shows</a></li>
                         <li><a href="{{ url_for('artists') }}">Artists</a></li>
@@ -1548,10 +1543,10 @@
                     </ul>
                 </div>
 
-                <!-- Right Column: Legal + Developer Tools + Version -->
-                <div class="footer-column footer-legal-column">
+                <!-- Column 2: Legal -->
+                <div class="footer-column">
                     <h4 class="footer-column-title">Legal</h4>
-                    <ul class="footer-nav-list">
+                    <ul>
                         <li><a href="/privacy" rel="nofollow">Privacy
                                 Policy</a></li>
                         <li><a href="/terms" rel="nofollow">Terms of
@@ -1560,36 +1555,25 @@
                         <li><a
                                 href="{{ url_for('sitemap_page') }}">Sitemap</a></li>
                     </ul>
+                </div>
 
-                    <h4 class="footer-column-title footer-dev-title">Developer
-                        Tools</h4>
-                    <ul class="footer-nav-list">
+                <!-- Column 3: Developer Tools -->
+                <div class="footer-column">
+                    <h4 class="footer-column-title">Developer Tools</h4>
+                    <ul>
                         <li><a href="/debug-report">Debug Report</a></li>
                         <li><a href="/radio">Radio (Experimental)</a></li>
                         <li><a href="/merch">Merch</a></li>
                     </ul>
 
-                    <div class="footer-version-badge">
-                        <span class="version-text">Ahoy Engine v1.1.2 — Indie
-                            Build</span>
+                    <div class="ahoy-engine-box">
+                        AHOY ENGINE V1.1.2 — INDIE BUILD
                     </div>
                 </div>
             </div>
 
             <div class="footer-bottom">
-                <div class="footer-bottom-content">
-                    <p>&copy; 2025 Ahoy Indie Media. All rights reserved.</p>
-                </div>
-            </div>
-
-            <!-- Mobile-optimized compact footer -->
-            <div class="footer-compact mobile-only" aria-label="Mobile Footer">
-                <div class="footer-compact-secondary">
-                    <span><a href="/privacy" rel="nofollow">Privacy</a> • <a
-                            href="/terms" rel="nofollow">Terms</a> • <a
-                            href="/security">Security</a> • <a
-                            href="{{ url_for('sitemap_page') }}">Sitemap</a></span>
-                </div>
+                <p>&copy; 2025 Ahoy Indie Media. All rights reserved.</p>
             </div>
         </footer>
 
