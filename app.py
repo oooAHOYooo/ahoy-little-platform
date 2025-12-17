@@ -849,8 +849,8 @@ def bookmarks_page():
     """Server-rendered bookmarks page (uses Flask + file store for logged-in users)"""
     # If logged in, read server-side bookmarks so page renders on first paint.
     uid = None
-    if session.get("username"):
-        uid = f"user:{session['username']}"
+    if current_user.is_authenticated:
+        uid = f"user:{current_user.id}"
     items = []
     if uid:
         from pathlib import Path
@@ -868,8 +868,8 @@ def playlists_index():
     data = read_json("data/playlists.json", {"playlists": []})
     # Optionally filter by current_user
     playlists = data["playlists"]
-    if session.get("username"):
-        playlists = [p for p in playlists if p.get("owner") == session["username"]]
+    if current_user.is_authenticated:
+        playlists = [p for p in playlists if p.get("owner") == str(current_user.id)]
     return render_template("playlists.html", playlists=playlists)
 
 # API Endpoints
@@ -1669,7 +1669,7 @@ def test_save():
         content_data = data.get('data', {})
         
         # Test the save functionality
-        username = session.get('username')
+        username = current_user.id if current_user.is_authenticated else None
         
         if not username:
             # Test guest save
@@ -1887,12 +1887,9 @@ def cast_page():
     return render_template('cast.html')
 
 @app.route('/admin')
+@admin_required
 def admin_page():
     """Admin page for user management"""
-    # Simple admin check - in production, use proper authentication
-    admin_username = session.get('username')
-    if not admin_username or admin_username != 'admin':
-        return jsonify({'error': 'Admin access required'}), 403
     
     return render_template('admin.html')
 
@@ -2012,11 +2009,9 @@ def submit_feedback():
         return jsonify({'error': 'Failed to submit feedback'}), 500
 
 @app.route('/api/feedback', methods=['GET'])
+@admin_required
 def get_feedback():
     """Get feedback (admin only)"""
-    admin_username = session.get('username')
-    if not admin_username or admin_username != 'admin':
-        return jsonify({'error': 'Admin access required'}), 403
     
     try:
         feedback_file = 'data/feedback.json'
@@ -2035,11 +2030,9 @@ def get_feedback():
         return jsonify({'error': 'Failed to load feedback'}), 500
 
 @app.route('/api/feedback/<feedback_id>/status', methods=['PUT'])
+@admin_required
 def update_feedback_status():
     """Update feedback status (admin only)"""
-    admin_username = session.get('username')
-    if not admin_username or admin_username != 'admin':
-        return jsonify({'error': 'Admin access required'}), 403
     
     try:
         data = request.json
