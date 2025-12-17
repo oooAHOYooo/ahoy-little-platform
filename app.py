@@ -126,8 +126,8 @@ def create_app():
     if os.getenv("CI"):
         app.config.setdefault("RATELIMIT_STORAGE_URI", "memory://")
 
-    # Add secret key for session management (change in production)
-    app.secret_key = os.getenv('SECRET_KEY', 'change-me-in-production')
+    # SECRET_KEY is loaded from config.py (which enforces production requirement)
+    # No need to override here - config.py handles it properly
     # Initialize server-side sessions (filesystem by default per config)
     if FlaskSession is not None:
         FlaskSession(app)

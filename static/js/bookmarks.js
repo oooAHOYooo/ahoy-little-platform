@@ -1,10 +1,9 @@
 (() => {
   const STORAGE_KEY = "ahoy.bookmarks.v1";
   const API = "/api/bookmarks";
-  const ACCESS_KEY = "access_token";
   const state = {
     items: {},
-    loggedIn: !!(window.LOGGED_IN),
+    loggedIn: false, // Will be determined by checking session
     serverLoaded: false
   };
 
@@ -34,7 +33,6 @@
       added_at: it.added_at || now,
       last_accessed: it.last_accessed || now,
       access_count: it.access_count || 0,
-      nest_id: it.nest_id || null,
       tags: it.tags || []
     };
     saveLocal();
@@ -44,21 +42,25 @@
     saveLocal();
   }
 
-  function getAccessToken() {
-    try { return localStorage.getItem(ACCESS_KEY) || null; } catch { return null; }
-  }
+  // Session-based auth (no JWT tokens needed)
   function authHeaders() {
-    const t = getAccessToken();
-    const h = { "Content-Type": "application/json" };
-    if (t) h["Authorization"] = `Bearer ${t}`;
-    return h;
+    return { 
+      "Content-Type": "application/json"
+      // No Authorization header - Flask sessions handle auth via cookies
+    };
   }
 
   async function fetchServer() {
-    const token = getAccessToken();
-    if (!token) return; // guest mode
-    const r = await fetch(`${API}?page=1&per_page=100`, { headers: authHeaders() });
-    if (!r.ok) return;
+    // Check if user is logged in by trying to fetch their bookmarks
+    // Guest mode: just use local storage
+    const r = await fetch(`${API}?page=1&per_page=100`, { 
+      headers: authHeaders(),
+      credentials: 'include' // Include session cookies
+    });
+    if (!r.ok) {
+      // Not logged in or error - continue with guest mode
+      return;
+    }
     const data = await r.json();
     const serverItems = toObj((data.items || []).map((x) => ({
       id: x.media_id,
@@ -83,23 +85,36 @@
     }));
 
     try {
-      const token = getAccessToken();
-      if (!token) return; // guest mode handled via local above
+      // Try to sync with server (session-based auth via cookies)
       if (exists) {
         // Need bookmark id; find it by listing current
-        const rList = await fetch(`${API}?page=1&per_page=100`, { headers: authHeaders() });
+        const rList = await fetch(`${API}?page=1&per_page=100`, { 
+          headers: authHeaders(),
+          credentials: 'include' // Include session cookies
+        });
+        if (!rList.ok) return; // Not logged in - guest mode
         const data = await rList.json();
         const found = (data.items || []).find((x) => x.media_id == it.id && x.media_type === (it.type === 'track' ? 'music' : it.type));
         if (found) {
-          await fetch(`${API}/${found.id}`, { method: "DELETE", headers: authHeaders() });
+          await fetch(`${API}/${found.id}`, { 
+            method: "DELETE", 
+            headers: authHeaders(),
+            credentials: 'include'
+          });
         }
       } else {
         const media_type = it.type === 'track' ? 'music' : it.type;
-        await fetch(API, { method: "POST", headers: authHeaders(), body: JSON.stringify({ media_id: String(it.id), media_type }) });
+        await fetch(API, { 
+          method: "POST", 
+          headers: authHeaders(), 
+          credentials: 'include',
+          body: JSON.stringify({ media_id: String(it.id), media_type }) 
+        });
       }
     } catch (e) {
-      if (String(e?.message || '').includes('401')) {
-        if (confirm('Please log in to sync bookmarks. Go to login now?')) window.location.href = '/auth';
+      if (String(e?.message || '').includes('401') || String(e?.message || '').includes('Unauthorized')) {
+        // Session expired or not logged in - continue with guest mode
+        console.log('Not logged in, using guest mode for bookmarks');
       }
     }
   }

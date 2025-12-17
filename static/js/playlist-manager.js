@@ -1,18 +1,19 @@
-// Playlist Manager - JWT-aware client with guest fallback
+// Playlist Manager - Session-based auth with guest fallback
 
-function getAccessToken() {
-  try { return localStorage.getItem("access_token") || null; } catch { return null; }
-}
-
+// Session-based auth (no JWT tokens needed)
 function authHeaders() {
-  const token = getAccessToken();
-  const headers = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  return headers;
+  return { 
+    "Content-Type": "application/json"
+    // No Authorization header - Flask sessions handle auth via cookies
+  };
 }
 
 async function api(url, method = "GET", payload = null) {
-  const opts = { method, headers: authHeaders() };
+  const opts = { 
+    method, 
+    headers: authHeaders(),
+    credentials: 'include' // Include session cookies for auth
+  };
   if (payload != null) opts.body = JSON.stringify(payload);
   const res = await fetch(url, opts);
   if (res.status === 401) {
@@ -35,6 +36,7 @@ async function postHistory(media_id, media_type, action = "interact") {
     await fetch("/api/history", {
       method: "POST",
       headers: authHeaders(),
+      credentials: 'include', // Include session cookies
       body: JSON.stringify({ media_id, media_type, action })
     });
   } catch {}
@@ -82,9 +84,15 @@ document.addEventListener("submit", async (e) => {
 // Offer to import guest data on first login (bookmarks + playlists from local)
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    const token = getAccessToken();
+    // Check if user is logged in by trying to fetch their profile
     const IMPORT_FLAG = "ahoy.import.done";
-    if (!token || localStorage.getItem(IMPORT_FLAG) === "1") return;
+    if (localStorage.getItem(IMPORT_FLAG) === "1") return;
+    
+    // Check if logged in (session-based)
+    const profileCheck = await fetch("/api/auth/me", { 
+      credentials: 'include' 
+    });
+    if (!profileCheck.ok) return; // Not logged in
 
     // Detect local bookmarks from bookmarks module
     const bmRaw = localStorage.getItem("ahoy.bookmarks.v1");

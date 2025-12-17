@@ -1,14 +1,28 @@
 import os
 
 class BaseConfig:
-    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-not-secret")
+    # SECRET_KEY is REQUIRED in production - fail fast if missing
+    _env = os.environ.get("AHOY_ENV", "sandbox").lower()
+    if _env == "production":
+        SECRET_KEY = os.environ.get("SECRET_KEY")
+        if not SECRET_KEY:
+            raise ValueError("SECRET_KEY environment variable is REQUIRED in production!")
+    else:
+        SECRET_KEY = os.environ.get("SECRET_KEY", "dev-not-secret-change-in-production")
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
     # Only use secure cookies in production (HTTPS required)
     # In development (HTTP), secure cookies won't work
     SESSION_COOKIE_SECURE = os.environ.get("AHOY_ENV", "sandbox").lower() == "production"
     REMEMBER_COOKIE_SECURE = os.environ.get("AHOY_ENV", "sandbox").lower() == "production"
-    SESSION_TYPE = "filesystem"
+    # Use Redis for sessions in production (scales across servers)
+    # Fallback to filesystem for development
+    _env = os.environ.get("AHOY_ENV", "sandbox").lower()
+    if _env == "production" and os.environ.get("REDIS_URL"):
+        SESSION_TYPE = "redis"
+        SESSION_REDIS = os.environ.get("REDIS_URL")
+    else:
+        SESSION_TYPE = "filesystem"  # Fine for single-server dev/staging
     REMEMBER_COOKIE_HTTPONLY = True
     JSON_SORT_KEYS = False
     RATELIMIT_DEFAULT = "200/hour"

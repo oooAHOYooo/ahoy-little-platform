@@ -137,7 +137,7 @@
                   headers: { 'Content-Type': 'application/json' },
                   credentials: 'include',
                   body: JSON.stringify({
-                    username: this.loginForm.username,
+                    email: this.loginForm.username, // Backend accepts email or username
                     password: this.loginForm.password
                   })
                 });

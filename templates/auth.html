@@ -284,7 +284,7 @@ function authPage() {
                     },
                     credentials: 'include',
                     body: JSON.stringify({
-                        username: this.authForm.username,
+                        email: this.authForm.email || this.authForm.username, // Support both email and username
                         password: this.authForm.password
                     })
                 });

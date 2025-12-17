@@ -1,11 +1,11 @@
 // ==== Auth helpers (session/cookie-based) ==================================
 window.AHOY_AUTH = {
-  async login(username, password) {
+  async login(emailOrUsername, password) {
     const r = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      credentials: 'include',
-      body: JSON.stringify({ username, password })
+      credentials: 'include', // Session cookies
+      body: JSON.stringify({ email: emailOrUsername, password }) // Backend accepts email or username
     });
     if (!r.ok) throw new Error((await r.json()).message || 'Login failed');
     return r.json();
