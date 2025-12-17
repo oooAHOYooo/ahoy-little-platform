@@ -6,7 +6,17 @@ Checks that all production dependencies can be imported and reports versions
 
 import json
 import sys
-from pkg_resources import get_distribution
+
+# Try to use importlib.metadata (Python 3.8+) first, fall back to pkg_resources
+try:
+    from importlib.metadata import version as get_version
+    USE_IMPORTLIB = True
+except ImportError:
+    try:
+        from pkg_resources import get_distribution
+        USE_IMPORTLIB = False
+    except ImportError:
+        USE_IMPORTLIB = None
 
 def check_dependency(name, import_name, version_attr=None):
     """Check if a dependency can be imported and get its version"""
@@ -15,9 +25,19 @@ def check_dependency(name, import_name, version_attr=None):
         if version_attr:
             version = getattr(module, version_attr, "unknown")
         else:
-            try:
-                version = get_distribution(name).version
-            except:
+            version = "unknown"
+            # Try multiple methods to get version
+            if USE_IMPORTLIB:
+                try:
+                    version = get_version(name)
+                except Exception:
+                    version = getattr(module, '__version__', "unknown")
+            elif USE_IMPORTLIB is False:
+                try:
+                    version = get_distribution(name).version
+                except Exception:
+                    version = getattr(module, '__version__', "unknown")
+            else:
                 version = getattr(module, '__version__', "unknown")
         
         return {
@@ -44,7 +64,7 @@ def main():
     """Check all production dependencies"""
     dependencies = [
         ("flask", "flask"),
-        ("gunicorn", "gunicorn.app.base"),
+        ("gunicorn", "gunicorn"),
         ("bcrypt", "bcrypt"),
         ("flask-limiter", "flask_limiter"),
         ("limits", "limits"),
