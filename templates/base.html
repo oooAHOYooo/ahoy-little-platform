@@ -647,6 +647,11 @@
                 <i class="fas fa-user-circle"></i>
                 <span>Profile</span>
             </a>
+            <a href="/merch"
+                class="account-bar-item {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Merch</span>
+            </a>
             <a href="/dashboard"
                 class="account-bar-item {% if request.endpoint == 'dashboard' or request.endpoint == 'dashboard_page' %}active{% endif %}">
                 <i class="fas fa-trophy"></i>
