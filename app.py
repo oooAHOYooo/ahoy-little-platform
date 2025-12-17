@@ -725,14 +725,7 @@ except ImportError:
 # Cache configuration
 CACHE_TIMEOUT = 300  # 5 minutes
 
-# Simple user management (no external dependencies)
-USERS_FILE = 'data/users.json'
-ACTIVITY_FILE = 'data/user_activity.json'
-
-# Context processor to inject login flag into templates (duplicate, already in create_app)
-# @app.context_processor
-# def inject_login_flag():
-#     return {"LOGGED_IN": bool(session.get("username"))}
+# Removed: USERS_FILE, ACTIVITY_FILE, load_users(), save_users() - using database now
 
 def load_json_data(filename, default=None):
     """Load JSON data from file with fallback"""
@@ -751,20 +744,6 @@ def load_json_data(filename, default=None):
         import logging
         logging.error(f'Error loading {filename}: {e}')
         return default or {}
-
-def load_users():
-    """Load user data"""
-    try:
-        with open(USERS_FILE, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
-
-def save_users(users):
-    """Save user data"""
-    os.makedirs(os.path.dirname(USERS_FILE), exist_ok=True)
-    with open(USERS_FILE, 'w') as f:
-        json.dump(users, f, indent=2)
 
 # Replaced auth_required with Flask-Login's @login_required
 # Use: from flask_login import login_required
@@ -1109,7 +1088,7 @@ def api_music():
 
 @app.route('/radio')
 def radio_page():
-    """Experimental: Ahoy Radio - continuous play from all music."""
+    """Ahoy Radio - continuous play from all music."""
     return render_template('radio.html')
 
 # @app.route('/merch')

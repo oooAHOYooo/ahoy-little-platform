@@ -9,8 +9,6 @@ from db import get_session
 from models import (
     Achievement,
     UserAchievement,
-    QuestDef,
-    UserQuest,
     ListeningTotal,
 )
 
@@ -87,35 +85,3 @@ def apply_quest_progress(user_id: int, event_kind: str, meta: Dict[str, Any]) ->
 def ensure_user_daily_quests(user_id: int, day_key: str) -> None:
     """Deprecated: Quests simplified out."""
     pass  # Quests system removed
-    Also ensures the current weekly quests using ISO week key.
-    """
-    with get_session() as session:
-        dailies: List[QuestDef] = list(
-            session.execute(select(QuestDef).where((QuestDef.active == True) & (QuestDef.cadence == "daily"))).scalars()
-        )
-        for qd in dailies:
-            _ensure_user_quest_row(session, user_id, str(qd.id), day_key)
-
-        # Weekly
-        week_key = _iso_week_key()
-        weeklies: List[QuestDef] = list(
-            session.execute(select(QuestDef).where((QuestDef.active == True) & (QuestDef.cadence == "weekly"))).scalars()
-        )
-        for qd in weeklies:
-            _ensure_user_quest_row(session, user_id, str(qd.id), week_key)
-
-
-def _iso_week_key() -> str:
-    today = date.today()
-    iso_year, iso_week, _ = today.isocalendar()
-    return f"{iso_year}-W{iso_week:02d}"
-
-
-def _ensure_user_quest_row(session, user_id: int, quest_id: str, day_key: str) -> None:
-    uq = session.execute(
-        select(UserQuest).where(
-            (UserQuest.user_id == user_id) & (UserQuest.quest_id == quest_id) & (UserQuest.day_key == day_key)
-        )
-    ).scalar_one_or_none()
-    if not uq:
-        session.add(UserQuest(user_id=user_id, quest_id=quest_id, day_key=day_key, progress_int=0, done=False))

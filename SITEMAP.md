@@ -159,7 +159,6 @@ ahoy-little-platform/
 ├── app.py                          # Main Flask application
 ├── config.py                       # Configuration settings
 ├── storage.py                      # Thread-safe JSON storage
-├── user_manager.py                 # User management utilities
 ├── extensions.py                   # Flask extensions
 ├── wsgi.py                        # WSGI entry point
 ├── run.py                         # Development runner

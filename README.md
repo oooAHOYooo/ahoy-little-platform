@@ -324,7 +324,6 @@ ahoy-little-platform/
 ├── app.py                          # Main Flask application
 ├── config.py                       # Configuration settings
 ├── storage.py                      # Thread-safe JSON storage
-├── user_manager.py                 # User management utilities
 ├── extensions.py                   # Flask extensions
 ├── wsgi.py                        # WSGI entry point
 ├── desktop_main.py                # Desktop (PyWebview) entrypoint
@@ -992,7 +991,7 @@ For questions or support:
 
 2. **Removed Legacy Code:**
    - Eliminated all "boards" terminology and replaced with "playlists"
-   - Removed unused board-related functions from `user_manager.py`
+   - Removed `user_manager.py` (consolidated to database-based auth)
    - Cleaned up template references to old board system
 
 **Key Features Now Working:**
