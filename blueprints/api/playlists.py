@@ -72,8 +72,11 @@ def list_playlists():
 
 
 @bp.get("/<int:playlist_id>")
-@login_required
 def get_playlist(playlist_id: int):
+    """Get playlist - public playlists visible to guests"""
+    if not current_user.is_authenticated:
+        return jsonify({"error": "login_required"}), 401
+    
     user_id = current_user.id
     with get_session() as session:
         playlist = session.get(Playlist, playlist_id)
@@ -89,8 +92,10 @@ def get_playlist(playlist_id: int):
 
 
 @bp.patch("/<int:playlist_id>")
-@login_required
 def rename_playlist(playlist_id: int):
+    """Rename playlist - requires login"""
+    if not current_user.is_authenticated:
+        return jsonify({"error": "login_required"}), 401
     data = request.get_json(silent=True) or {}
     name = (data.get("name") or "").strip()
     if not name:
@@ -106,8 +111,10 @@ def rename_playlist(playlist_id: int):
 
 
 @bp.delete("/<int:playlist_id>")
-@login_required
 def delete_playlist(playlist_id: int):
+    """Delete playlist - requires login"""
+    if not current_user.is_authenticated:
+        return jsonify({"error": "login_required"}), 401
     user_id = current_user.id
     with get_session() as session:
         playlist = session.get(Playlist, playlist_id)
@@ -119,8 +126,10 @@ def delete_playlist(playlist_id: int):
 
 
 @bp.get("/<int:playlist_id>/items")
-@login_required
 def list_items(playlist_id: int):
+    """List playlist items - requires login"""
+    if not current_user.is_authenticated:
+        return jsonify({"error": "login_required"}), 401
     user_id = current_user.id
     page, per_page, offset = parse_pagination()
     with get_session() as session:
@@ -151,8 +160,10 @@ def list_items(playlist_id: int):
 
 
 @bp.post("/<int:playlist_id>/items")
-@login_required
 def add_item(playlist_id: int):
+    """Add item to playlist - requires login"""
+    if not current_user.is_authenticated:
+        return jsonify({"error": "login_required"}), 401
     data = request.get_json(silent=True) or {}
     media_id = (data.get("media_id") or "").strip()
     media_type = (data.get("media_type") or "").strip()
@@ -196,8 +207,10 @@ def add_item(playlist_id: int):
 
 
 @bp.patch("/<int:playlist_id>/items/<int:item_id>")
-@login_required
 def reorder_item(playlist_id: int, item_id: int):
+    """Reorder playlist item - requires login"""
+    if not current_user.is_authenticated:
+        return jsonify({"error": "login_required"}), 401
     data = request.get_json(silent=True) or {}
     position = data.get("position")
     if position is None:
@@ -223,8 +236,10 @@ def reorder_item(playlist_id: int, item_id: int):
 
 
 @bp.delete("/<int:playlist_id>/items/<int:item_id>")
-@login_required
 def remove_item(playlist_id: int, item_id: int):
+    """Remove item from playlist - requires login"""
+    if not current_user.is_authenticated:
+        return jsonify({"error": "login_required"}), 401
     user_id = current_user.id
     with get_session() as session:
         playlist = session.get(Playlist, playlist_id)
