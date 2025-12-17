@@ -1,9 +1,9 @@
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, jsonify
+from flask_login import login_required, current_user
 from sqlalchemy import asc, func
 
 from db import get_session
 from models import Playlist, PlaylistItem
-from utils.auth import jwt_required
 
 
 bp = Blueprint("api_playlists", __name__, url_prefix="/api/playlists")
@@ -34,14 +34,14 @@ def require_owner(playlist: Playlist, user_id: int):
 
 
 @bp.post("")
-@jwt_required
+@login_required
 def create_playlist():
     data = request.get_json(silent=True) or {}
     name = (data.get("name") or "").strip()
     if not name:
         return jsonify({"error": "name_required"}), 400
 
-    user_id = int(g.jwt.get("sub"))
+    user_id = current_user.id
     with get_session() as session:
         playlist = Playlist(user_id=user_id, name=name)
         session.add(playlist)
@@ -50,9 +50,9 @@ def create_playlist():
 
 
 @bp.get("")
-@jwt_required
+@login_required
 def list_playlists():
-    user_id = int(g.jwt.get("sub"))
+    user_id = current_user.id
     page, per_page, offset = parse_pagination()
     with get_session() as session:
         total = session.query(func.count(Playlist.id)).filter(Playlist.user_id == user_id).scalar() or 0
@@ -69,9 +69,9 @@ def list_playlists():
 
 
 @bp.get("/<int:playlist_id>")
-@jwt_required
+@login_required
 def get_playlist(playlist_id: int):
-    user_id = int(g.jwt.get("sub"))
+    user_id = current_user.id
     with get_session() as session:
         playlist = session.get(Playlist, playlist_id)
         playlist, err = require_owner(playlist, user_id)
@@ -86,13 +86,13 @@ def get_playlist(playlist_id: int):
 
 
 @bp.patch("/<int:playlist_id>")
-@jwt_required
+@login_required
 def rename_playlist(playlist_id: int):
     data = request.get_json(silent=True) or {}
     name = (data.get("name") or "").strip()
     if not name:
         return jsonify({"error": "name_required"}), 400
-    user_id = int(g.jwt.get("sub"))
+    user_id = current_user.id
     with get_session() as session:
         playlist = session.get(Playlist, playlist_id)
         playlist, err = require_owner(playlist, user_id)
@@ -103,9 +103,9 @@ def rename_playlist(playlist_id: int):
 
 
 @bp.delete("/<int:playlist_id>")
-@jwt_required
+@login_required
 def delete_playlist(playlist_id: int):
-    user_id = int(g.jwt.get("sub"))
+    user_id = current_user.id
     with get_session() as session:
         playlist = session.get(Playlist, playlist_id)
         playlist, err = require_owner(playlist, user_id)
@@ -116,9 +116,9 @@ def delete_playlist(playlist_id: int):
 
 
 @bp.get("/<int:playlist_id>/items")
-@jwt_required
+@login_required
 def list_items(playlist_id: int):
-    user_id = int(g.jwt.get("sub"))
+    user_id = current_user.id
     page, per_page, offset = parse_pagination()
     with get_session() as session:
         playlist = session.get(Playlist, playlist_id)
@@ -148,7 +148,7 @@ def list_items(playlist_id: int):
 
 
 @bp.post("/<int:playlist_id>/items")
-@jwt_required
+@login_required
 def add_item(playlist_id: int):
     data = request.get_json(silent=True) or {}
     media_id = (data.get("media_id") or "").strip()
@@ -157,7 +157,7 @@ def add_item(playlist_id: int):
     if not media_id or media_type not in ALLOWED_MEDIA_TYPES:
         return jsonify({"error": "invalid_media"}), 400
 
-    user_id = int(g.jwt.get("sub"))
+    user_id = current_user.id
     with get_session() as session:
         playlist = session.get(Playlist, playlist_id)
         playlist, err = require_owner(playlist, user_id)
@@ -193,7 +193,7 @@ def add_item(playlist_id: int):
 
 
 @bp.patch("/<int:playlist_id>/items/<int:item_id>")
-@jwt_required
+@login_required
 def reorder_item(playlist_id: int, item_id: int):
     data = request.get_json(silent=True) or {}
     position = data.get("position")
@@ -206,7 +206,7 @@ def reorder_item(playlist_id: int, item_id: int):
     if position < 1:
         return jsonify({"error": "invalid_position"}), 400
 
-    user_id = int(g.jwt.get("sub"))
+    user_id = current_user.id
     with get_session() as session:
         playlist = session.get(Playlist, playlist_id)
         playlist, err = require_owner(playlist, user_id)
@@ -220,9 +220,9 @@ def reorder_item(playlist_id: int, item_id: int):
 
 
 @bp.delete("/<int:playlist_id>/items/<int:item_id>")
-@jwt_required
+@login_required
 def remove_item(playlist_id: int, item_id: int):
-    user_id = int(g.jwt.get("sub"))
+    user_id = current_user.id
     with get_session() as session:
         playlist = session.get(Playlist, playlist_id)
         playlist, err = require_owner(playlist, user_id)
