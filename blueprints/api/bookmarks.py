@@ -60,7 +60,7 @@ def add_bookmark():
     media_type = (data.get("media_type") or "").strip()
     if not media_id or media_type not in ALLOWED_MEDIA_TYPES:
         return jsonify({"error": "invalid_media"}), 400
-    user_id = int(g.jwt.get("sub"))
+    user_id = current_user.id
     with get_session() as session:
         # idempotent per user+media
         existing = (
@@ -82,9 +82,9 @@ def add_bookmark():
 
 
 @bp.delete("/<int:bookmark_id>")
-@jwt_required
+@login_required
 def remove_bookmark(bookmark_id: int):
-    user_id = int(g.jwt.get("sub"))
+    user_id = current_user.id
     with get_session() as session:
         b = session.query(Bookmark).filter(Bookmark.id == bookmark_id, Bookmark.user_id == user_id).first()
         if not b:
