@@ -34,8 +34,11 @@ def require_owner(playlist: Playlist, user_id: int):
 
 
 @bp.post("")
-@login_required
 def create_playlist():
+    """Create playlist - requires login"""
+    if not current_user.is_authenticated:
+        return jsonify({"error": "login_required"}), 401
+    
     data = request.get_json(silent=True) or {}
     name = (data.get("name") or "").strip()
     if not name:

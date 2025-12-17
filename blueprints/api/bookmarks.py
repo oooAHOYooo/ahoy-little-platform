@@ -26,8 +26,11 @@ def parse_pagination():
 
 
 @bp.get("")
-@login_required
 def list_bookmarks():
+    """List bookmarks - supports guest mode"""
+    if not current_user.is_authenticated:
+        return jsonify({"items": [], "persisted": False})
+    
     user_id = current_user.id
     page, per_page, offset = parse_pagination()
     with get_session() as session:
@@ -49,17 +52,27 @@ def list_bookmarks():
             }
             for b in rows
         ]
-        return jsonify({"items": items, "page": page, "per_page": per_page, "total": total})
+        return jsonify({"items": items, "page": page, "per_page": per_page, "total": total, "persisted": True})
 
 
 @bp.post("")
-@login_required
 def add_bookmark():
+    """Add bookmark - supports guest mode (returns persisted: false)"""
     data = request.get_json(silent=True) or {}
     media_id = (data.get("media_id") or "").strip()
     media_type = (data.get("media_type") or "").strip()
     if not media_id or media_type not in ALLOWED_MEDIA_TYPES:
         return jsonify({"error": "invalid_media"}), 400
+    
+    # Guest mode - just acknowledge
+    if not current_user.is_authenticated:
+        return jsonify({
+            "id": None,
+            "media_id": media_id,
+            "media_type": media_type,
+            "persisted": False
+        })
+    
     user_id = current_user.id
     with get_session() as session:
         # idempotent per user+media
@@ -82,8 +95,11 @@ def add_bookmark():
 
 
 @bp.delete("/<int:bookmark_id>")
-@login_required
 def remove_bookmark(bookmark_id: int):
+    """Remove bookmark - requires login"""
+    if not current_user.is_authenticated:
+        return jsonify({"error": "login_required"}), 401
+    
     user_id = current_user.id
     with get_session() as session:
         b = session.query(Bookmark).filter(Bookmark.id == bookmark_id, Bookmark.user_id == user_id).first()
