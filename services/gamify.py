@@ -86,7 +86,7 @@ def apply_quest_progress(user_id: int, event_kind: str, meta: Dict[str, Any]) ->
 
 def ensure_user_daily_quests(user_id: int, day_key: str) -> None:
     """Deprecated: Quests simplified out."""
-    passUpsert today's daily quests for a user from active QuestDefs.
+    pass  # Quests system removed
     Also ensures the current weekly quests using ISO week key.
     """
     with get_session() as session:

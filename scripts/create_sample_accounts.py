@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
-Create sample user accounts for testing
+Create sample user accounts for testing - uses database
 """
 
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from user_manager import user_manager
+from db import get_session
+from models import User
+from extensions import bcrypt
 
 def create_sample_accounts():
     """Create sample user accounts"""
@@ -15,32 +17,24 @@ def create_sample_accounts():
     # Sample accounts data
     sample_accounts = [
         {
-            'username': 'musiclover',
-            'password': 'music123',
             'email': 'musiclover@ahoy.com',
+            'password': 'music123',
             'display_name': 'Music Lover',
-            'bio': 'Passionate about discovering new indie music and supporting emerging artists.'
         },
         {
-            'username': 'indieexplorer',
-            'password': 'indie123',
             'email': 'indie@ahoy.com',
+            'password': 'indie123',
             'display_name': 'Indie Explorer',
-            'bio': 'Always on the hunt for the next great indie discovery.'
         },
         {
-            'username': 'showbinger',
-            'password': 'shows123',
             'email': 'shows@ahoy.com',
+            'password': 'shows123',
             'display_name': 'Show Binger',
-            'bio': 'Love watching live performances and indie shows.'
         },
         {
-            'username': 'newuser',
-            'password': 'new123',
             'email': 'new@ahoy.com',
+            'password': 'new123',
             'display_name': 'New User',
-            'bio': 'Just getting started with Ahoy Indie Media.'
         }
     ]
     
@@ -49,36 +43,36 @@ def create_sample_accounts():
     
     for account in sample_accounts:
         try:
-            # Check if user already exists
-            existing_user = user_manager.get_user(account['username'])
-            if existing_user:
-                print(f"⚠️  User '{account['username']}' already exists")
-                existing_count += 1
-                continue
-            
-            # Create the user
-            user_data = user_manager.create_user(
-                username=account['username'],
-                password=account['password'],
-                email=account['email'],
-                display_name=account['display_name']
-            )
-            
-            # Update bio
-            user_manager.update_user_profile(account['username'], {
-                'bio': account['bio']
-            })
-            
-            print(f"✅ Created user: {account['display_name']} (@{account['username']})")
-            created_count += 1
-            
+            with get_session() as db_session:
+                # Check if user already exists
+                existing_user = db_session.query(User).filter(User.email == account['email']).first()
+                if existing_user:
+                    print(f"⚠️  User '{account['email']}' already exists")
+                    existing_count += 1
+                    continue
+                
+                # Create the user
+                user = User(
+                    email=account['email'],
+                    password_hash=bcrypt.generate_password_hash(account['password']).decode('utf-8'),
+                    display_name=account['display_name']
+                )
+                db_session.add(user)
+                db_session.commit()
+                
+                print(f"✅ Created user: {account['display_name']} ({account['email']})")
+                created_count += 1
+                
         except Exception as e:
-            print(f"❌ Error creating user '{account['username']}': {e}")
+            print(f"❌ Error creating user '{account['email']}': {e}")
+    
+    with get_session() as db_session:
+        total_users = db_session.query(User).count()
     
     print(f"\n📊 Summary:")
     print(f"   Created: {created_count} accounts")
     print(f"   Already existed: {existing_count} accounts")
-    print(f"   Total users: {len(user_manager.users)}")
+    print(f"   Total users: {total_users}")
 
 if __name__ == '__main__':
     create_sample_accounts()

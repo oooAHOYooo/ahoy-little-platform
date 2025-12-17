@@ -32,28 +32,38 @@ def manage_playlists():
         return jsonify(pls)
     
     # POST - Create new playlist
-    username = current_user.id if current_user.is_authenticated else None
-    
-    if username:
-        # For logged-in users, use the user_manager system
-        try:
-            from user_manager import user_manager
-            data = request.json
-            name = data.get('name')
-            description = data.get('description', '')
-            color = data.get('color', '#6366f1')
-            is_public = data.get('is_public', False)
-            
-            playlist_id = user_manager.create_playlist(username, name, description, color, is_public)
-            
-            if playlist_id:
-                playlist = user_manager.get_playlist(username, playlist_id)
-                return jsonify({'success': True, 'playlist': playlist, 'guest': False})
-            else:
-                return jsonify({'error': 'Failed to create playlist'}), 400
-        except ImportError:
-            # Fallback to file-based storage if user_manager not available
-            pass
+    if not current_user.is_authenticated:
+        # Guest users use file-based storage (fallback)
+        pass
+    else:
+        # Logged-in users use database via blueprints/playlists.py
+        # This route is handled by the blueprint's database system
+        from db import get_session
+        from models import Playlist
+        data = request.json
+        name = data.get('name')
+        if not name:
+            return jsonify({'error': 'Playlist name required'}), 400
+        
+        with get_session() as db_session:
+            playlist = Playlist(
+                user_id=current_user.id,
+                name=name,
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow()
+            )
+            db_session.add(playlist)
+            db_session.commit()
+            return jsonify({
+                'success': True,
+                'playlist': {
+                    'id': playlist.id,
+                    'name': playlist.name,
+                    'user_id': playlist.user_id,
+                    'created_at': playlist.created_at.isoformat()
+                },
+                'guest': False
+            })
     
     # For guests or fallback, use file-based storage
     data = request.json
@@ -150,26 +160,54 @@ def add_item(playlist_id):
     if not item_id or not item_type:
         return jsonify({"error": "id and type required"}), 400
 
-    username = current_user.id if current_user.is_authenticated else None
-    
-    if username:
-        # For logged-in users, use the user_manager system (same as main app)
-        try:
-            from user_manager import user_manager
-            playlist = user_manager.get_playlist(username, playlist_id)
+    if current_user.is_authenticated:
+        # For logged-in users, use database
+        from db import get_session
+        from models import Playlist, PlaylistItem
+        with get_session() as db_session:
+            playlist = db_session.query(Playlist).filter(
+                Playlist.id == int(playlist_id),
+                Playlist.user_id == current_user.id
+            ).first()
             if not playlist:
                 return jsonify({"error": "not found"}), 404
             
-            # Add item to playlist
-            success = user_manager.add_to_playlist(username, playlist_id, item_type, item_id, {})
-            if success:
-                updated_playlist = user_manager.get_playlist(username, playlist_id)
-                return jsonify(updated_playlist), 200
-            else:
-                return jsonify({"error": "failed to add item"}), 400
-        except ImportError:
-            # Fallback to file-based storage if user_manager not available
-            pass
+            # Check if item already exists
+            existing = db_session.query(PlaylistItem).filter(
+                PlaylistItem.playlist_id == playlist.id,
+                PlaylistItem.media_id == str(item_id),
+                PlaylistItem.media_type == item_type
+            ).first()
+            if existing:
+                return jsonify({"error": "item already in playlist"}), 400
+            
+            # Get max position
+            max_pos = db_session.query(PlaylistItem.position).filter(
+                PlaylistItem.playlist_id == playlist.id
+            ).order_by(PlaylistItem.position.desc()).first()
+            next_pos = (max_pos[0] + 1) if max_pos else 0
+            
+            # Add item
+            item = PlaylistItem(
+                playlist_id=playlist.id,
+                media_id=str(item_id),
+                media_type=item_type,
+                position=next_pos,
+                added_at=datetime.utcnow()
+            )
+            db_session.add(item)
+            db_session.commit()
+            
+            return jsonify({
+                "id": playlist.id,
+                "name": playlist.name,
+                "items": [{
+                    "id": item.id,
+                    "media_id": item.media_id,
+                    "media_type": item.media_type,
+                    "position": item.position
+                }]
+            }), 200
     
     # For guests or fallback, use file-based storage
     data = _ensure(PLAYLISTS_FILE, "playlists")

@@ -1587,476 +1587,62 @@ def user_profile():
 @app.route('/api/user/profile', methods=['PUT'])
 @login_required
 def update_user_profile():
-    """Update user profile"""
-    username = session.get('username')
+    """Update user profile - uses database"""
+    from db import get_session
+    from models import User
     data = request.json
-    success = user_manager.update_user_profile(username, data)
     
-    if success:
-        # Update session data
-        user = user_manager.get_user(username)
-        if user:
-            session['user_data'] = user
-        return jsonify({'success': True})
-    else:
-        return jsonify({'error': 'Failed to update profile'}), 400
+    with get_session() as db_session:
+        user = db_session.get(User, current_user.id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        if 'display_name' in data:
+            user.display_name = data['display_name']
+        if 'avatar_url' in data:
+            user.avatar_url = data['avatar_url']
+        if 'preferences' in data:
+            user.preferences = {**user.preferences, **data['preferences']}
+        
+        db_session.commit()
+        return jsonify({
+            'success': True,
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'display_name': user.display_name,
+                'avatar_url': user.avatar_url
+            }
+        })
 
 @app.route('/api/user/stats')
 @login_required
 def get_user_stats():
-    """Get user statistics"""
-    username = session.get('username')
-    stats = user_manager.get_user_stats(username)
-    return jsonify(stats)
-
-@app.route('/api/user/playlists')
-@login_required
-def get_user_playlists():
-    """Get user playlists and playlists"""
-    username = session.get('username')
-    playlists = user_manager.get_user_playlists(username)
-    playlists = user_manager.get_user_playlists(username)
+    """Get user statistics - uses database"""
+    from db import get_session
+    from models import User, Playlist, Bookmark, PlayHistory
+    from sqlalchemy import func
     
-    # Combine playlists and playlists
-    all_items = []
-    for playlist in playlists:
-        all_items.append({**playlist, 'type': 'playlist'})
-    for playlist in playlists:
-        all_items.append({**playlist, 'type': 'playlist'})
-    
-    # Sort by creation date
-    all_items.sort(key=lambda x: x.get('created_at', ''), reverse=True)
-    
-    return jsonify(all_items)
-
-# Enhanced Saves and Playlists System
-@app.route('/api/saves/save', methods=['POST'])
-def save_content():
-    """Save content (track, show, artist) - works for both logged in and guest users"""
-    username = session.get('username')
-    
-    if not username:
-        # For guest users, use session-based temporary saves
-        if 'guest_saves' not in session:
-            session['guest_saves'] = []
+    with get_session() as db_session:
+        user = db_session.get(User, current_user.id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
         
-        data = request.json
-        content_type = data.get('type')
-        content_id = data.get('id')
-        content_data = data.get('data', {})
-        
-        # Check if already saved
-        existing_save = next((s for s in session['guest_saves'] if s['id'] == content_id and s['type'] == content_type), None)
-        if existing_save:
-            return jsonify({'success': True, 'saved': True, 'guest': True})
-        
-        # Add to guest saves
-        save_item = {
-            'id': content_id,
-            'type': content_type,
-            'saved_at': datetime.now().isoformat(),
-            'data': content_data
+        stats = {
+            'playlists_count': db_session.query(func.count(Playlist.id)).filter(Playlist.user_id == user.id).scalar() or 0,
+            'bookmarks_count': db_session.query(func.count(Bookmark.id)).filter(Bookmark.user_id == user.id).scalar() or 0,
+            'play_history_count': db_session.query(func.count(PlayHistory.id)).filter(PlayHistory.user_id == user.id).scalar() or 0,
         }
-        session['guest_saves'].append(save_item)
-        session.modified = True
-        
-        return jsonify({'success': True, 'saved': True, 'guest': True})
-    
-    # For logged-in users, use the user manager
-    data = request.json
-    content_type = data.get('type')  # track, show, artist
-    content_id = data.get('id')
-    content_data = data.get('data', {})
-    
-    success = user_manager.save_content(username, content_type, content_id, content_data)
-    
-    if success:
-        return jsonify({'success': True, 'saved': True, 'guest': False})
-    else:
-        return jsonify({'error': 'Failed to save content'}), 400
+        return jsonify(stats)
 
-@app.route('/api/saves/unsave', methods=['POST'])
-def unsave_content():
-    """Unsave content - works for both guests and users"""
-    username = session.get('username')
-    data = request.json
-    content_type = data.get('type')
-    content_id = data.get('id')
-    
-    if not username:
-        # For guest users, use session-based storage
-        if 'guest_saves' not in session:
-            session['guest_saves'] = []
-        
-        # Remove from guest saves
-        session['guest_saves'] = [s for s in session['guest_saves'] if not (s['id'] == content_id and s['type'] == content_type)]
-        session.modified = True
-        
-        return jsonify({'success': True, 'saved': False, 'guest': True})
-    
-    # For logged-in users, use the user manager
-    success = user_manager.unsave_content(username, content_type, content_id)
-    
-    if success:
-        return jsonify({'success': True, 'saved': False, 'guest': False})
-    else:
-        return jsonify({'error': 'Failed to unsave content'}), 400
+# Note: Saves/bookmarks are handled by blueprints/bookmarks.py
+# These legacy routes are removed - use /api/bookmarks instead
 
-@app.route('/api/saves/check', methods=['POST'])
-def check_saved():
-    """Check if content is saved - works for both guests and users"""
-    username = session.get('username')
-    data = request.json
-    content_type = data.get('type')
-    content_id = data.get('id')
-    
-    if not username:
-        # For guest users, check session storage
-        guest_saves = session.get('guest_saves', [])
-        is_saved = any(s['id'] == content_id and s['type'] == content_type for s in guest_saves)
-        return jsonify({'saved': is_saved, 'guest': True})
-    
-    # For logged-in users, use the user manager
-    is_saved = user_manager.is_content_saved(username, content_type, content_id)
-    return jsonify({'saved': is_saved, 'guest': False})
+# Note: Likes/recently-played features removed - not part of MVP
+# Use bookmarks and play history instead
 
-@app.route('/api/saves/<content_type>')
-def get_saved_content(content_type):
-    """Get user's saved content - works for both guests and users"""
-    username = session.get('username')
-    
-    if not username:
-        # For guest users, get from session
-        guest_saves = session.get('guest_saves', [])
-        saved_items = [s for s in guest_saves if s['type'] == content_type]
-        guest_mode = True
-    else:
-        # For logged-in users, use the user manager
-        saved_items = user_manager.get_saved_content(username, content_type)
-        guest_mode = False
-    
-    # Get full content data for each saved item
-    full_content = []
-    for item in saved_items:
-        content_id = item['id']
-        content_data = item.get('data', {})
-        
-        # Try to get full content from appropriate API
-        if content_type == 'track':
-            music_data = load_json_data('music.json', {'tracks': []})
-            full_item = next((t for t in music_data['tracks'] if t['id'] == content_id), content_data)
-        elif content_type == 'show':
-            shows_data = load_json_data('shows.json', {'shows': []})
-            full_item = next((s for s in shows_data['shows'] if s['id'] == content_id), content_data)
-        elif content_type == 'artist':
-            artists_data = load_json_data('artists.json', {'artists': []})
-            full_item = next((a for a in artists_data['artists'] if a['id'] == content_id), content_data)
-        else:
-            full_item = content_data
-        
-        # Add save metadata
-        full_item['saved_at'] = item['saved_at']
-        full_item['is_guest'] = guest_mode
-        full_content.append(full_item)
-    
-    return jsonify({'content': full_content, 'guest': guest_mode})
-
-@app.route('/api/likes/like', methods=['POST'])
-@login_required
-def like_content():
-    """Like content"""
-    username = session.get('username')
-    data = request.json
-    content_type = data.get('type')
-    content_id = data.get('id')
-    content_data = data.get('data', {})
-    
-    success = user_manager.like_content(username, content_type, content_id, content_data)
-    
-    if success:
-        return jsonify({'success': True, 'liked': True})
-    else:
-        return jsonify({'error': 'Failed to like content'}), 400
-
-@app.route('/api/likes/unlike', methods=['POST'])
-@login_required
-def unlike_content():
-    """Unlike content"""
-    username = session.get('username')
-    data = request.json
-    content_type = data.get('type')
-    content_id = data.get('id')
-    
-    success = user_manager.unlike_content(username, content_type, content_id)
-    
-    if success:
-        return jsonify({'success': True, 'liked': False})
-    else:
-        return jsonify({'error': 'Failed to unlike content'}), 400
-
-@app.route('/api/likes/check', methods=['POST'])
-@login_required
-def check_liked():
-    """Check if content is liked"""
-    username = session.get('username')
-    data = request.json
-    content_type = data.get('type')
-    content_id = data.get('id')
-    
-    is_liked = user_manager.is_content_liked(username, content_type, content_id)
-    return jsonify({'liked': is_liked})
-
-@app.route('/api/likes')
-@login_required
-def get_liked_content():
-    """Get user's liked content"""
-    username = session.get('username')
-    user = user_manager.get_user(username)
-    
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-    
-    liked_content = user['saves'].get('liked_content', [])
-    return jsonify({'liked_content': liked_content})
-
-@app.route('/api/recently-played')
-@login_required
-def get_recently_played():
-    """Get user's recently played content"""
-    username = session.get('username')
-    user = user_manager.get_user(username)
-    
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-    
-    recently_played = user['saves'].get('recently_played', [])
-    return jsonify({'recently_played': recently_played})
-
-# Pinterest-style Boards/Collections System
-@app.route('/api/playlists', methods=['GET', 'POST'])
-def manage_playlists():
-    """Get all playlists or create new playlist - works for both guests and users"""
-    username = current_user.id if current_user.is_authenticated else None
-    
-    if not username:
-        # For guest users, use session-based storage
-        if 'guest_playlists' not in session:
-            session['guest_playlists'] = []
-        
-        if request.method == 'POST':
-            data = request.json
-            playlist_id = str(uuid.uuid4())
-            playlist = {
-                'id': playlist_id,
-                'name': data.get('name'),
-                'description': data.get('description', ''),
-                'color': data.get('color', '#6366f1'),
-                'is_public': False,  # Guests can't create public playlists
-                'created_at': datetime.now().isoformat(),
-                'updated_at': datetime.now().isoformat(),
-                'tracks': [],
-                'shows': [],
-                'artists': [],
-                'total_items': 0,
-                'cover_art': None,
-                'tags': [],
-                'is_guest': True
-            }
-            
-            session['guest_playlists'].append(playlist)
-            session.modified = True
-            
-            return jsonify({'success': True, 'playlist': playlist, 'guest': True})
-        
-        return jsonify({'playlists': session['guest_playlists'], 'guest': True})
-    
-    # For logged-in users, use the user manager
-    if request.method == 'POST':
-        data = request.json
-        name = data.get('name')
-        description = data.get('description', '')
-        color = data.get('color', '#6366f1')
-        is_public = data.get('is_public', False)
-        
-        playlist_id = user_manager.create_playlist(username, name, description, color, is_public)
-        
-        if playlist_id:
-            playlist = user_manager.get_playlist(username, playlist_id)
-            return jsonify({'success': True, 'playlist': playlist, 'guest': False})
-        else:
-            return jsonify({'error': 'Failed to create playlist'}), 400
-    
-    playlists = user_manager.get_user_playlists(username)
-    return jsonify({'playlists': playlists, 'guest': False})
-
-@app.route('/api/playlists/<playlist_id>', methods=['GET', 'PUT', 'DELETE'])
-def manage_playlist(playlist_id):
-    """Get, update, or delete specific playlist"""
-    username = session.get('username')
-    
-    if not username:
-        return jsonify({'error': 'Authentication required'}), 401
-    
-    if request.method == 'GET':
-        playlist = user_manager.get_playlist(username, playlist_id)
-        if playlist:
-            return jsonify({'playlist': playlist})
-        else:
-            return jsonify({'error': 'Playlist not found'}), 404
-    
-    elif request.method == 'PUT':
-        data = request.json
-        success = user_manager.update_playlist(username, playlist_id, data)
-        
-        if success:
-            playlist = user_manager.get_playlist(username, playlist_id)
-            return jsonify({'success': True, 'playlist': playlist})
-        else:
-            return jsonify({'error': 'Failed to update playlist'}), 400
-    
-    elif request.method == 'DELETE':
-        success = user_manager.delete_playlist(username, playlist_id)
-        if success:
-            return jsonify({'success': True})
-        else:
-            return jsonify({'error': 'Failed to delete playlist'}), 400
-
-@app.route('/api/playlists/<playlist_id>/add', methods=['POST'])
-def add_to_playlist(playlist_id):
-    """Add content to playlist - works for both guests and users"""
-    username = session.get('username')
-    data = request.json
-    content_type = data.get('type')
-    content_id = data.get('id')
-    content_data = data.get('data', {})
-    
-    if not username:
-        # For guest users, use session-based storage
-        if 'guest_playlists' not in session:
-            session['guest_playlists'] = []
-        
-        # Find the playlist
-        playlist = next((b for b in session['guest_playlists'] if b['id'] == playlist_id), None)
-        if not playlist:
-            return jsonify({'error': 'Board not found'}), 404
-        
-        # Check if already in playlist
-        content_list = playlist.get(content_type + 's', [])
-        if any(item['id'] == content_id for item in content_list):
-            return jsonify({'success': True, 'playlist': playlist, 'guest': True, 'message': 'Already in playlist'})
-        
-        # Add to playlist
-        item = {
-            'id': content_id,
-            'added_at': datetime.now().isoformat(),
-            'data': content_data
-        }
-        
-        playlist[content_type + 's'].append(item)
-        playlist['total_items'] = sum(len(playlist.get(key, [])) for key in ['tracks', 'shows', 'artists'])
-        playlist['updated_at'] = datetime.now().isoformat()
-        
-        session.modified = True
-        
-        return jsonify({'success': True, 'playlist': playlist, 'guest': True})
-    
-    # For logged-in users, use the user manager
-    success = user_manager.add_to_playlist(username, playlist_id, content_type, content_id, content_data)
-    
-    if success:
-        playlist = user_manager.get_playlist(username, playlist_id)
-        return jsonify({'success': True, 'playlist': playlist, 'guest': False})
-    else:
-        return jsonify({'error': 'Failed to add to playlist'}), 400
-
-@app.route('/api/playlists/<playlist_id>/remove', methods=['POST'])
-def remove_from_playlist(playlist_id):
-    """Remove content from playlist"""
-    username = session.get('username')
-    
-    if not username:
-        return jsonify({'error': 'Authentication required'}), 401
-    
-    data = request.json
-    content_type = data.get('type')
-    content_id = data.get('id')
-    
-    success = user_manager.remove_from_playlist(username, playlist_id, content_type, content_id)
-    
-    if success:
-        playlist = user_manager.get_playlist(username, playlist_id)
-        return jsonify({'success': True, 'playlist': playlist})
-    else:
-        return jsonify({'error': 'Failed to remove from playlist'}), 400
-
-@app.route('/api/migrate-guest-data', methods=['POST'])
-@login_required
-def migrate_guest_data():
-    """Migrate guest data to user account"""
-    username = session.get('username')
-    data = request.json
-    
-    if not username:
-        return jsonify({'error': 'Not logged in'}), 401
-    
-    migrated_items = {
-        'saves': 0,
-        'playlists': 0,
-        'likes': 0
-    }
-    
-    # Migrate guest saves
-    if 'guest_saves' in data:
-        for save_item in data['guest_saves']:
-            success = user_manager.save_content(
-                username, 
-                save_item['type'], 
-                save_item['id'], 
-                save_item.get('data', {})
-            )
-            if success:
-                migrated_items['saves'] += 1
-    
-    # Migrate guest playlists
-    if 'guest_playlists' in data:
-        for playlist_data in data['guest_playlists']:
-            playlist_id = user_manager.create_playlist(
-                username,
-                playlist_data['name'],
-                playlist_data['description'],
-                playlist_data['color'],
-                False  # Guest playlists become private
-            )
-            if playlist_id:
-                # Add all content from guest playlist
-                for content_type in ['tracks', 'shows', 'artists']:
-                    for item in playlist_data.get(content_type, []):
-                        user_manager.add_to_playlist(
-                            username,
-                            playlist_id,
-                            content_type[:-1],  # Remove 's' from plural
-                            item['id'],
-                            item.get('data', {})
-                        )
-                migrated_items['playlists'] += 1
-    
-    # Migrate guest likes
-    if 'guest_likes' in data:
-        for like_item in data['guest_likes']:
-            success = user_manager.like_content(
-                username,
-                like_item['type'],
-                like_item['id'],
-                like_item.get('data', {})
-            )
-            if success:
-                migrated_items['likes'] += 1
-    
-    return jsonify({
-        'success': True,
-        'migrated': migrated_items,
-        'message': f"Migrated {migrated_items['saves']} saves, {migrated_items['playlists']} playlists, and {migrated_items['likes']} likes"
-    })
+# Note: Playlists are handled by blueprints/playlists.py
+# These legacy routes are removed - use /api/playlists instead
 
 @app.route('/api/guest-data', methods=['GET'])
 def get_guest_data():
@@ -2187,28 +1773,31 @@ def get_debug_logs():
 
 @app.route('/api/debug/users')
 def get_debug_users():
-    """Get user details for debug"""
+    """Get user details for debug - uses database"""
+    from db import get_session
+    from models import User
     try:
-        users = user_manager.load_users()
-        user_list = []
-        for username, user_data in users.items():
-            user_list.append({
-                'username': username,
-                'display_name': user_data.get('display_name', username),
-                'email': user_data.get('email', ''),
-                'created_at': user_data.get('created_at', ''),
-                'last_login': user_data.get('last_login', ''),
-                'total_saves': user_data.get('activity', {}).get('total_saves', 0),
-                'total_plays': user_data.get('activity', {}).get('total_plays', 0)
+        with get_session() as db_session:
+            users = db_session.query(User).all()
+            user_list = []
+            for user in users:
+                user_list.append({
+                    'id': user.id,
+                    'email': user.email,
+                    'display_name': user.display_name,
+                    'created_at': user.created_at.isoformat() if user.created_at else '',
+                    'last_active_at': user.last_active_at.isoformat() if user.last_active_at else '',
+                    'is_admin': user.is_admin,
+                    'disabled': user.disabled
+                })
+            
+            # Sort by creation date (newest first)
+            user_list.sort(key=lambda x: x['created_at'], reverse=True)
+            
+            return jsonify({
+                'total_users': len(user_list),
+                'users': user_list
             })
-        
-        # Sort by creation date (newest first)
-        user_list.sort(key=lambda x: x['created_at'], reverse=True)
-        
-        return jsonify({
-            'total_users': len(user_list),
-            'users': user_list
-        })
     except Exception as e:
         return jsonify({'users': [], 'error': str(e)})
 
@@ -2243,11 +1832,12 @@ def test_save():
                 'guest': True
             })
         else:
-            # Test user save
-            success = user_manager.save_content(username, content_type, content_id, content_data)
+            # Test user save - use bookmarks API instead
+            from blueprints.bookmarks import bp as bookmarks_bp
+            # Note: This test route is deprecated - use /api/bookmarks directly
             return jsonify({
-                'success': success,
-                'message': 'User save test successful' if success else 'User save test failed',
+                'success': True,
+                'message': 'Use /api/bookmarks endpoint for saving content',
                 'guest': False
             })
     except Exception as e:
@@ -2340,8 +1930,16 @@ def debug_sample_accounts():
 def debug_data_viewer(data_type):
     """View application data for debugging"""
     if data_type == 'users':
-        users = user_manager.users
-        return jsonify(users)
+        from db import get_session
+        from models import User
+        with get_session() as db_session:
+            users = db_session.query(User).all()
+            return jsonify([{
+                'id': u.id,
+                'email': u.email,
+                'display_name': u.display_name,
+                'created_at': u.created_at.isoformat() if u.created_at else None
+            } for u in users])
     elif data_type == 'music':
         music_data = load_json_data('music.json', {'tracks': []})
         return jsonify(music_data)
@@ -2359,10 +1957,17 @@ def debug_system_status():
     """Get system status for debugging"""
     import os
 
+    from db import get_session
+    from models import User
+    from sqlalchemy import func
+    
+    with get_session() as db_session:
+        user_count = db_session.query(func.count(User.id)).scalar() or 0
+    
     status = {
         'timestamp': datetime.now().isoformat(),
         'app': {
-            'users_count': len(user_manager.users),
+            'users_count': user_count,
             'session_count': len(session),
             'cache_status': 'active'
         },
@@ -2439,66 +2044,66 @@ def feedback_page():
     return render_template('feedback.html')
 
 @app.route('/api/admin/users', methods=['GET'])
+@admin_required
 def admin_get_users():
-    """Get all users for admin management"""
-    admin_username = session.get('username')
-    if not admin_username or admin_username != 'admin':
-        return jsonify({'error': 'Admin access required'}), 403
-    
-    users = user_manager.users
-    # Return user list without passwords
-    user_list = []
-    for username, user_data in users.items():
-        user_list.append({
-            'username': username,
-            'email': user_data.get('email', ''),
-            'display_name': user_data.get('display_name', username),
-            'created_at': user_data.get('created_at', ''),
-            'last_login': user_data.get('last_login', ''),
-            'activity': user_data.get('activity', {}),
-            'profile': user_data.get('profile', {})
-        })
-    
-    return jsonify({'users': user_list})
+    """Get all users for admin management - uses database"""
+    from db import get_session
+    from models import User
+    with get_session() as db_session:
+        users = db_session.query(User).all()
+        user_list = []
+        for user in users:
+            user_list.append({
+                'id': user.id,
+                'email': user.email,
+                'display_name': user.display_name,
+                'created_at': user.created_at.isoformat() if user.created_at else '',
+                'last_active_at': user.last_active_at.isoformat() if user.last_active_at else '',
+                'is_admin': user.is_admin,
+                'disabled': user.disabled
+            })
+        return jsonify({'users': user_list})
 
-@app.route('/api/admin/users/<username>', methods=['DELETE'])
-def admin_delete_user(username):
-    """Delete a user"""
-    admin_username = session.get('username')
-    if not admin_username or admin_username != 'admin':
-        return jsonify({'error': 'Admin access required'}), 403
-    
-    if username not in user_manager.users:
-        return jsonify({'error': 'User not found'}), 404
-    
-    # Don't allow admin to delete themselves
-    if username == 'admin':
-        return jsonify({'error': 'Cannot delete admin user'}), 400
-    
-    del user_manager.users[username]
-    user_manager.save_users()
-    
-    return jsonify({'success': True, 'message': f'User {username} deleted'})
+@app.route('/api/admin/users/<int:user_id>', methods=['DELETE'])
+@admin_required
+def admin_delete_user(user_id):
+    """Delete a user - uses database"""
+    from db import get_session
+    from models import User
+    with get_session() as db_session:
+        user = db_session.get(User, user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Don't allow admin to delete themselves
+        if user.id == current_user.id:
+            return jsonify({'error': 'Cannot delete yourself'}), 400
+        
+        db_session.delete(user)
+        db_session.commit()
+        return jsonify({'success': True, 'message': f'User {user.email} deleted'})
 
-@app.route('/api/admin/users/<username>/reset-password', methods=['POST'])
-def admin_reset_password(username):
-    """Reset user password"""
-    admin_username = session.get('username')
-    if not admin_username or admin_username != 'admin':
-        return jsonify({'error': 'Admin access required'}), 403
-    
-    if username not in user_manager.users:
-        return jsonify({'error': 'User not found'}), 404
+@app.route('/api/admin/users/<int:user_id>/reset-password', methods=['POST'])
+@admin_required
+def admin_reset_password(user_id):
+    """Reset user password - uses database"""
+    from db import get_session
+    from models import User
+    from extensions import bcrypt
     
     data = request.json
     new_password = data.get('password')
     if not new_password:
         return jsonify({'error': 'Password required'}), 400
     
-    user_manager.users[username]['password'] = user_manager.hash_password(new_password)
-    user_manager.save_users()
-    
-    return jsonify({'success': True, 'message': f'Password reset for {username}'})
+    with get_session() as db_session:
+        user = db_session.get(User, user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        user.password_hash = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        db_session.commit()
+        return jsonify({'success': True, 'message': f'Password reset for {user.email}'})
 
 @app.route('/api/feedback', methods=['POST'])
 def submit_feedback():
