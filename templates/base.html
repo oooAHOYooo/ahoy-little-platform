@@ -403,12 +403,6 @@
                             <i class="fas fa-users"></i>
                             <span>Artists</span>
                         </a>
-                        <a href="{{ url_for('merch') }}"
-                            class="feature-btn {% if request.endpoint == 'merch' %}active{% endif %}"
-                            title="Merch Store">
-                            <i class="fas fa-shopping-bag"></i>
-                            <span>Merch</span>
-                        </a>
                         <a href="/bookmarks"
                             class="feature-btn {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
                             title="Bookmarks">
@@ -501,13 +495,6 @@
                                         </div>
                                         <div class="text-center">
                                             <div
-                                                class="text-base font-semibold text-purple-400"
-                                                x-text="'$' + (totalInvested || 0).toFixed(0)"></div>
-                                            <div
-                                                class="text-[11px] text-neutral-400">Invested</div>
-                                        </div>
-                                        <div class="text-center">
-                                            <div
                                                 class="text-base font-semibold text-yellow-400"
                                                 x-text="badges?.length || 0"></div>
                                             <div
@@ -541,19 +528,6 @@
 
                                 <!-- Main Menu Items -->
                                 <div class="account-menu-items">
-                                    <a href="/portfolio"
-                                        class="account-menu-item"
-                                        @click="accountMenuOpen = false">
-                                        <i
-                                            class="fas fa-chart-line account-menu-icon"></i>
-                                        <div class="account-menu-text">
-                                            <div
-                                                class="account-menu-label">Portfolio</div>
-                                            <div
-                                                class="account-menu-desc">Creative
-                                                positions</div>
-                                        </div>
-                                    </a>
 
                                     <a href="/dashboard"
                                         class="account-menu-item"
@@ -661,11 +635,6 @@
                 class="account-bar-item {% if request.endpoint == 'account' or request.endpoint == 'account_page' %}active{% endif %}">
                 <i class="fas fa-user-circle"></i>
                 <span>Profile</span>
-            </a>
-            <a href="/portfolio"
-                class="account-bar-item {% if request.endpoint == 'portfolio' or request.endpoint == 'portfolio_page' %}active{% endif %}">
-                <i class="fas fa-chart-line"></i>
-                <span>Portfolio</span>
             </a>
             <a href="/dashboard"
                 class="account-bar-item {% if request.endpoint == 'dashboard' or request.endpoint == 'dashboard_page' %}active{% endif %}">
@@ -859,14 +828,6 @@
                                 </template>
                             </div>
 
-                            <div class="collections-mini"
-                                :class="{'mt-3': collections.length > 0}">
-                                <button @click="goToCollections()"
-                                    class="item-mini collection-add-btn desktop-only">
-                                    <i class="fas fa-plus"></i>
-                                    <span>Add Collection</span>
-                                </button>
-                            </div>
                         </div>
 
                         <!-- Boost (Compact) -->
@@ -1032,13 +993,6 @@
                         <div class="sidebar-panel sidebar-item"
                             data-sidebar-section="bookmarks">
                             <div class="section-title">Bookmarks</div>
-                            <div class="collections-mini">
-                                <button @click="goToCollections()"
-                                    class="item-mini collection-add-btn desktop-only">
-                                    <i class="fas fa-plus"></i>
-                                    <span>Add Collection</span>
-                                </button>
-                            </div>
                         </div>
 
                         <!-- Mini Player Footer -->
@@ -1944,7 +1898,6 @@
 
                 // Portfolio widget state
                 totalBookmarkCount: 0,
-                totalInvested: 0,
                 badges: [],
 
                 // Initialize
@@ -2111,29 +2064,6 @@
             };
         }
 
-<!--
-        function portfolioNavWidget() {
-            return {
-                totalBookmarkCount: 0,
-                totalInvested: 0,
-                badges: [],
-
-                init() {
-                    this.updateStats();
-
-                    // Listen for updates
-                    document.addEventListener('bookmarks:changed', () => this.updateStats());
-                    document.addEventListener('bookmark:notified', () => this.updateStats());
-                },
-
-                updateStats() {
-                    this.totalBookmarkCount = window.AhoyBookmarks ? window.AhoyBookmarks.count() : 0;
-                    this.totalInvested = window.totalInvested || 0;
-                    this.badges = window.badges || [];
-                }
-            };
-        }
--->
     </script>
 
         <!-- Simple Image Deduplication Script -->
@@ -2946,9 +2876,6 @@
                     }
                     this.syncMediaPlayer();
                 },
-                goToCollections() {
-                    window.location.href = '/bookmarks';
-                },
                 // Search functionality
                 performSearch() {
                     if (!this.searchQuery.trim()) return;
@@ -3137,43 +3064,6 @@
                 },
                 goTo(url) {
                     window.location.href = url;
-                }
-            };
-        }
-    </script>
-
-        <!-- Portfolio Nav Widget -->
-        <script>
-<!--
-        function portfolioNavWidget() {
--->
-            return {
-                portfolioDropdownOpen: false,
-                totalInvested: 0,
-                topArtists: [],
-
-                async init() {
-                    await this.loadPortfolioData();
-                    // Refresh every 30 seconds
-                    setInterval(() => this.loadPortfolioData(), 30000);
-                },
-
-                async loadPortfolioData() {
-                    try {
-                        const response = await fetch('/portfolio/widget-data');
-                        if (response.ok) {
-                            const data = await response.json();
-                            this.totalInvested = data.total_invested || 0;
-                            this.topArtists = data.top_artists || [];
-                        }
-                    } catch (e) {
-                        console.log('Portfolio data not available');
-                    }
-                },
-
-                tipAgain(artistId) {
-                    // Find artist page or open boost modal
-                    window.location.href = `/artists?boost=${encodeURIComponent(artistId)}`;
                 }
             };
         }

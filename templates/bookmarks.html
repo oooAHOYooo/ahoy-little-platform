@@ -67,17 +67,6 @@
                 <span class="tab-count"
                     x-text="list().filter(item => item.type === 'artist').length"></span>
             </button>
-            <button
-                class="filter-tab"
-                :class="{ active: filterType === 'merch' }"
-                @click="filterType = 'merch'; filterNest = null"
-                x-show="list().filter(item => item.type === 'merch').length > 0">
-                <i class="fas fa-shopping-bag"></i>
-                Merch
-                <span class="tab-count"
-                    x-text="list().filter(item => item.type === 'merch').length"></span>
-            </button>
-
             <!-- Collections Filter -->
             <template x-for="collection in Object.values(collections)"
                 :key="collection.id">
@@ -442,13 +431,6 @@
                                 x-show="item.type === 'artist'">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button
-                                @click.stop="buyItem(item); markAccessed(item.key)"
-                                class="buy-btn"
-                                x-show="item.type === 'merch'">
-                                <i class="fas fa-shopping-cart"></i>
-                            </button>
-
                             <!-- Bookmark Actions -->
                             <div class="card-actions">
                                 <!-- Nest Management -->
@@ -736,8 +718,6 @@ function bookmarksPageHandler() {
         buyItem(item) {
             if (item.checkout_url) {
                 window.open(item.checkout_url, '_blank');
-            } else {
-                window.location.href = '/merch';
             }
         },
         
