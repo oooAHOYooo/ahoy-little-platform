@@ -316,6 +316,11 @@
                         <i class="fas fa-users" aria-hidden="true"></i>
                         <span>Artists</span>
                     </a>
+                    <a href="/merch"
+                        class="mobile-tab {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}">
+                        <i class="fas fa-shopping-bag" aria-hidden="true"></i>
+                        <span>Merch</span>
+                    </a>
                     <a href="/radio" class="mobile-tab">
                         <i class="fas fa-broadcast-tower"
                             aria-hidden="true"></i>
@@ -338,7 +343,7 @@
                     <a href="/shows">Shows</a>
                     <a href="/live-tv">Live TV</a>
                     <a href="/artists">Artists</a>
-                    <!-- <a href="/merch">Merch</a> -->
+                    <a href="/merch">Merch</a>
                     <a href="/radio">Radio</a>
                     <a href="/bookmarks">Saved</a>
                     <a href="/settings">Settings</a>
@@ -402,6 +407,12 @@
                             title="Artists">
                             <i class="fas fa-users"></i>
                             <span>Artists</span>
+                        </a>
+                        <a href="/merch"
+                            class="feature-btn {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}"
+                            title="Merch Store">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>Merch</span>
                         </a>
                         <a href="/bookmarks"
                             class="feature-btn {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
@@ -678,6 +689,11 @@
                 class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
                 <i class="fas fa-users"></i>
                 <span>Artists</span>
+            </a>
+            <a href="/merch"
+                class="mobile-tab {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Merch</span>
             </a>
             <a href="/bookmarks"
                 class="mobile-tab {% if request.endpoint == 'bookmarks_page' %}active{% endif %}">
