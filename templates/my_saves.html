@@ -60,11 +60,6 @@
             class="nav-tab">
             <i class="fas fa-bookmark"></i> Bookmarks
         </button>
-        <button @click="activeTab = 'collections'"
-            :class="{'active': activeTab === 'collections'}"
-            class="nav-tab">
-            <i class="fas fa-folder"></i> Collections
-        </button>
         <button @click="activeTab = 'recent'"
             :class="{'active': activeTab === 'recent'}"
             class="nav-tab">
@@ -134,52 +129,6 @@
         </div>
     </div>
 
-    <!-- Collections Tab -->
-    <div x-show="activeTab === 'collections'" class="collections-content">
-        <div class="collections-header">
-            <h2>My Collections</h2>
-            <button @click="showCreateCollection = true" class="btn btn-primary">
-                <i class="fas fa-plus"></i> New Collection
-            </button>
-        </div>
-
-        <div class="collections-grid">
-            <template x-for="collection in userCollections" :key="collection.id">
-                <div class="collection-card">
-                    <div class="collection-header">
-                        <h3 x-text="collection.name"></h3>
-                        <p x-text="collection.description"></p>
-                        <div class="collection-meta">
-                            <span x-text="collection.items?.length || 0"></span> items
-                        </div>
-                    </div>
-                    <div class="collection-actions">
-                        <button @click="viewCollection(collection)" class="btn btn-secondary">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                        <!-- Make Playlist Button -->
-                        <button 
-                            class="px-3 py-2 rounded-xl bg-black/80 text-white hover:bg-black transition text-sm desktop-only"
-                            data-make-playlist
-                            :data-collection-id="collection.id"
-                            :data-collection-name="collection.name"
-                            :data-owner="userProfile.username"
-                            title="Turn this collection into an ordered playlist"
-                        >
-                            ▶️ Make Playlist
-                        </button>
-                    </div>
-                </div>
-            </template>
-        </div>
-
-        <div x-show="userCollections.length === 0" class="empty-state">
-            <div class="icon">📁</div>
-            <h3>No collections yet</h3>
-            <p>Create collections to organize your favorite content.</p>
-            <button @click="showCreateCollection = true" class="btn desktop-only">Create Collection</button>
-        </div>
-    </div>
 
     <!-- Recently Played Tab -->
     <div x-show="activeTab === 'recent'" class="recent-content">
@@ -227,10 +176,6 @@ function mySavesLibrary() {
         savedFilter: 'all',
         savedContent: [],
         recentlyPlayed: [],
-        userCollections: [],
-        userStats: null,
-        selectedContent: null,
-        showCreateCollection: false,
         
         // Computed
         get filteredSavedContent() {
@@ -246,7 +191,6 @@ function mySavesLibrary() {
                 await Promise.all([
                     this.loadSavedContent(),
                     this.loadRecentlyPlayed(),
-                    this.loadUserCollections(),
                     this.loadUserStats()
                 ]);
                 
@@ -293,17 +237,6 @@ function mySavesLibrary() {
             }
         },
 
-        async loadUserCollections() {
-            try {
-                const response = await fetch('/api/collections/');
-                if (response.ok) {
-                    this.userCollections = await response.json();
-                }
-            } catch (error) {
-                console.error('Error loading collections:', error);
-                this.userCollections = [];
-            }
-        },
         
         async loadUserStats() {
             try {
@@ -342,10 +275,6 @@ function mySavesLibrary() {
             }
         },
 
-        viewCollection(collection) {
-            console.log('Viewing collection:', collection);
-            // TODO: Implement collection detail view
-        },
         
         
 

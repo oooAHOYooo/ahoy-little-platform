@@ -34,7 +34,6 @@
       added_at: it.added_at || now,
       last_accessed: it.last_accessed || now,
       access_count: it.access_count || 0,
-      nest_id: it.nest_id || null,
       tags: it.tags || []
     };
     saveLocal();
@@ -104,91 +103,6 @@
     }
   }
 
-  // Nests system
-  const NESTS_KEY = "ahoy.nests.v1";
-  
-  function loadNests() {
-    try {
-      const raw = localStorage.getItem(NESTS_KEY);
-      if (!raw) return {};
-      return JSON.parse(raw);
-    } catch {
-      return {};
-    }
-  }
-  
-  function saveNests(nests) {
-    localStorage.setItem(NESTS_KEY, JSON.stringify(nests));
-  }
-  
-  function createNest(name, description = "", color = "#00d4ff") {
-    const nestId = `nest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const nests = loadNests();
-    nests[nestId] = {
-      id: nestId,
-      name,
-      description,
-      color,
-      created_at: new Date().toISOString(),
-      item_count: 0
-    };
-    saveNests(nests);
-    return nestId;
-  }
-  
-  function updateNest(nestId, updates) {
-    const nests = loadNests();
-    if (nests[nestId]) {
-      nests[nestId] = { ...nests[nestId], ...updates };
-      saveNests(nests);
-    }
-  }
-  
-  function deleteNest(nestId) {
-    const nests = loadNests();
-    delete nests[nestId];
-    saveNests(nests);
-    
-    // Remove nest_id from all bookmarks
-    Object.values(state.items).forEach(item => {
-      if (item.nest_id === nestId) {
-        item.nest_id = null;
-      }
-    });
-    saveLocal();
-  }
-  
-  function addToNest(itemKey, nestId) {
-    if (state.items[itemKey]) {
-      state.items[itemKey].nest_id = nestId;
-      saveLocal();
-      
-      // Update nest count
-      const nests = loadNests();
-      if (nests[nestId]) {
-        nests[nestId].item_count = Object.values(state.items).filter(item => item.nest_id === nestId).length;
-        saveNests(nests);
-      }
-    }
-  }
-  
-  function removeFromNest(itemKey) {
-    if (state.items[itemKey]) {
-      const oldNestId = state.items[itemKey].nest_id;
-      state.items[itemKey].nest_id = null;
-      saveLocal();
-      
-      // Update nest count
-      if (oldNestId) {
-        const nests = loadNests();
-        if (nests[oldNestId]) {
-          nests[oldNestId].item_count = Object.values(state.items).filter(item => item.nest_id === oldNestId).length;
-          saveNests(nests);
-        }
-      }
-    }
-  }
-  
   // Aging system
   function getBookmarkAge(item) {
     const added = new Date(item.added_at);
@@ -237,13 +151,6 @@
     isBookmarked: (type, id) => !!state.items[keyOf(type, id)],
     count: () => Object.keys(state.items).length,
     toggle,
-    // Nests
-    getNests: () => Object.values(loadNests()),
-    createNest,
-    updateNest,
-    deleteNest,
-    addToNest,
-    removeFromNest,
     // Aging
     getBookmarkAge,
     getBookmarkAgeCategory,
@@ -257,29 +164,11 @@
   document.addEventListener("alpine:init", () => {
     // Global bookmark handler for use in bookmark buttons throughout the site
     Alpine.data("globalBookmarkHandler", () => ({
-      nests: {},
-      showNestMenu: false,
       showCountFade: false,
       showExploreNotification: false,
       bookmarkCount: 0,
 
       init() {
-        this.loadNests();
-        
-        // Listen for nest changes
-        document.addEventListener('bookmarks:changed', () => {
-          this.loadNests();
-        });
-      },
-
-      loadNests() {
-        this.nests = {};
-        if (window.AhoyBookmarks) {
-          const nests = window.AhoyBookmarks.getNests();
-          nests.forEach(nest => {
-            this.nests[nest.id] = nest;
-          });
-        }
       },
 
       toggleBookmark(type, id, title, artwork) {
@@ -335,40 +224,12 @@
           return window.AhoyBookmarks.isBookmarked(type, id);
         }
         return false;
-      },
-
-      addToNest(type, id, nestId) {
-        if (window.AhoyBookmarks) {
-          const itemKey = keyOf(type, id);
-          window.AhoyBookmarks.addToNest(itemKey, nestId);
-        }
-      },
-
-      removeFromNest(type, id) {
-        if (window.AhoyBookmarks) {
-          const itemKey = keyOf(type, id);
-          window.AhoyBookmarks.removeFromNest(itemKey);
-        }
-      },
-
-      getCurrentNest(type, id) {
-        if (window.AhoyBookmarks) {
-          const itemKey = keyOf(type, id);
-          const item = state.items[itemKey];
-          return item?.nest_id || null;
-        }
-        return null;
       }
     }));
 
     Alpine.data("bookmarkHandler", () => ({
       bookmarks: state.items,
       animatingItems: new Set(),
-      nests: {},
-      showNestManager: false,
-      newNestName: '',
-      newNestDescription: '',
-      newNestColor: '#00d4ff',
 
       init() {
         // Listen for bookmark changes
@@ -383,17 +244,6 @@
               this.animatingItems.delete(itemKey);
             }, 600);
           }
-        });
-        
-        // Load nests
-        this.loadNests();
-      },
-
-      loadNests() {
-        this.nests = {};
-        const nests = window.AhoyBookmarks.getNests();
-        nests.forEach(nest => {
-          this.nests[nest.id] = nest;
         });
       },
 
@@ -412,48 +262,6 @@
       isAnimating(item) {
         const key = item.key || keyOf(item.type, item.id);
         return this.animatingItems.has(key);
-      },
-
-      // Nests functionality
-      createNest() {
-        if (!this.newNestName.trim()) return;
-        
-        const nestId = window.AhoyBookmarks.createNest(
-          this.newNestName.trim(),
-          this.newNestDescription.trim(),
-          this.newNestColor
-        );
-        
-        this.loadNests();
-        this.newNestName = '';
-        this.newNestDescription = '';
-        this.newNestColor = '#00d4ff';
-        this.showNestManager = false;
-      },
-
-      deleteNest(nestId) {
-        if (confirm('Are you sure you want to delete this nest? All bookmarks will be moved to "Unorganized".')) {
-          window.AhoyBookmarks.deleteNest(nestId);
-          this.loadNests();
-        }
-      },
-
-      addToNest(itemKey, nestId) {
-        window.AhoyBookmarks.addToNest(itemKey, nestId);
-        this.loadNests();
-      },
-
-      removeFromNest(itemKey) {
-        window.AhoyBookmarks.removeFromNest(itemKey);
-        this.loadNests();
-      },
-
-      getNestName(nestId) {
-        return this.nests[nestId]?.name || 'Unorganized';
-      },
-
-      getNestColor(nestId) {
-        return this.nests[nestId]?.color || '#666';
       },
 
       // Aging functionality

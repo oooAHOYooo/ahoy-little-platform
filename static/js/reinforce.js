@@ -26,10 +26,3 @@ document.addEventListener("bookmark:added", (e) => {
   document.dispatchEvent(new CustomEvent("ahoy:toast", { detail: "Saved to Bookmarks" }));
 });
 
-// Optional: first-visit gentle nudge if everything is unorganized
-window.addEventListener("load", () => {
-  const badges = [...document.querySelectorAll("[data-collection-badge]")];
-  if (badges.length && badges.every(b => /unorganized/i.test(b.textContent.trim()))) {
-    document.dispatchEvent(new CustomEvent("ahoy:toast", { detail: "Tip: Click 📁 on a card to organize into a Collection." }));
-  }
-});

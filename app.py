@@ -17,6 +17,7 @@ load_dotenv()
 import re, pathlib
 from pathlib import Path
 
+from services.radio_sync import get_synced_radio_state
 from config import get_config
 from extensions import bcrypt, login_manager, limiter, init_cors
 from utils.auth import admin_required, get_effective_user
@@ -29,7 +30,6 @@ from blueprints.api.auth import bp as api_auth_bp
 from blueprints.activity import bp as activity_bp
 from blueprints.playlists import bp as playlists_bp
 from blueprints.bookmarks import bp as bookmarks_bp
-from blueprints.collections import bp as collections_bp
 from blueprints.api.gamify import bp as gamify_api_bp
 from blueprints.payments import bp as payments_bp
 from routes.boost_stripe import bp as boost_stripe_bp
@@ -164,7 +164,6 @@ def create_app():
     app.register_blueprint(activity_bp)
     app.register_blueprint(playlists_bp)
     app.register_blueprint(bookmarks_bp)
-    app.register_blueprint(collections_bp)
     app.register_blueprint(gamify_api_bp)
     app.register_blueprint(payments_bp)
     app.register_blueprint(boost_stripe_bp)
@@ -1116,9 +1115,23 @@ def api_music():
     music_data = load_json_data('music.json', {'tracks': []})
     return jsonify(music_data)
 
+from blueprints.api.radio import bp as radio_bp
+app.register_blueprint(radio_bp)
+
+@app.route('/api/radio/now')
+@limiter.exempt
+def api_radio_now():
+    """Get the currently playing radio track (synchronized globally)."""
+    music_data = load_json_data('music.json', {'tracks': []})
+    tracks = music_data.get('tracks', [])
+    state = get_synced_radio_state(tracks)
+    if not state:
+        return jsonify({"error": "No tracks available"}), 404
+    return jsonify(state)
+
 @app.route('/radio')
 def radio_page():
-    """Experimental: Ahoy Radio - continuous play from all music."""
+    """Ahoy Radio - continuous play from all music."""
     return render_template('radio.html')
 
 @app.route('/merch')

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Ahoy Radio (Experimental){% endblock %}
+{% block title %}Ahoy Radio{% endblock %}
 
 {% block content %}
 <div class="radio-page" x-data="radioPage()" x-init="init()">
@@ -51,8 +51,9 @@
         .now-card {
             display: grid;
             grid-template-columns: 160px 1fr;
-            gap: 1rem;
-            padding: 1rem;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            align-items: center; /* Vertically center content */
         }
         .now-cover {
             width: 160px;
@@ -61,58 +62,27 @@
             border-radius: 14px;
             box-shadow: none;
             border: 1px solid rgba(255,255,255,0.08);
+            margin: 0 auto; /* Center image in its cell if resized */
         }
-        .playing-list {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 14px;
+        .now-info {
+            text-align: left; /* Keep left alignment on desktop */
         }
-        .playing-item {
-            position: relative;
-            border-radius: 14px;
-            min-height: 110px;
-            overflow: hidden;
-            color: #fff;
-            cursor: pointer;
-            box-shadow: none;
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-        .playing-item .item-details {
-            position: absolute;
-            left: 12px;
-            right: 12px;
-            bottom: 12px;
-        }
-        .radio-section-title {
-            margin: 1.5rem 0 .75rem;
-            color: rgba(255,255,255,.85);
-            font-weight: 700;
-            letter-spacing: .06em;
-        }
-        .dial-btn {
-            width: 72px; height: 72px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            background: radial-gradient(circle at 40% 30%, rgba(255,255,255,.25) 65%, rgba(255,255,255,.12) 100%);
-            border: 1px solid rgba(255,255,255,.22);
-            box-shadow: none;
-            transition: background .16s ease, transform .06s ease;
-        }
-        .dial-btn:active {
-            background: radial-gradient(circle at 40% 30%, rgba(255,255,255,.18) 65%, rgba(255,255,255,.1) 100%);
-            transform: translateY(1px);
-        }
-        .dial-caption {
-            margin-top: 8px;
-            font-size: 0.92rem;
-            font-weight: 500;
-            letter-spacing: 0.03em;
-            color: rgba(255,255,255,.85);
-        }
+        /* ... */
         @media (max-width: 720px) {
-            .now-card { grid-template-columns: 1fr; }
+            .now-card { 
+                grid-template-columns: 1fr; 
+                text-align: center; /* Center text on mobile */
+            }
+            .now-info {
+                text-align: center; /* Center text on mobile */
+            }
             .playing-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
+
+        /* Ensure global centering as requested */
+        .radio-section-title { text-align: center; }
+        .playing-item .item-details { text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        .now-info { text-align: center !important; }
     </style>
     <section class="radio-hero">
         <div class="hero-content" style="text-align: center; margin: 2rem 0;">
@@ -226,75 +196,102 @@
     function radioPage() {
         return {
             isPlaying: false,
-            shuffle: true,
-            tracks: [],
-            queue: [],
             current: null,
             upNext: [],
             justPlayed: [],
+            serverState: null,
+            
             async init() {
+                await this.fetchState();
+                
+                const setupListener = () => {
+                    if (window.mediaPlayer) {
+                        window.mediaPlayer.on('play', () => this.isPlaying = true);
+                        window.mediaPlayer.on('pause', () => this.isPlaying = false);
+                        // Optional: refetch state when track ends to ensure sync
+                        window.mediaPlayer.on('ended', () => { 
+                            // this.fetchState(); 
+                        });
+                    }
+                };
+
+                if (window.mediaPlayer) {
+                    setupListener();
+                } else {
+                    // Fallback if player.js hasn't run yet
+                    window.addEventListener('load', setupListener);
+                }
+            },
+
+            async fetchState() {
                 try {
-                    const r = await fetch('/api/music');
-                    if (!r.ok) {
-                        console.error('Radio API error:', r.status, r.statusText);
-                        return;
+                    const r = await fetch('/api/radio/now');
+                    if (r.ok) {
+                        this.serverState = await r.json();
+                        this.current = this.serverState.track;
+                        this.upNext = this.serverState.next_tracks || [];
                     }
-                    const data = await r.json();
-                    if (!data || !Array.isArray(data.tracks)) {
-                        console.error('Invalid radio data format');
-                        return;
-                    }
-                    const tracks = (data.tracks || []).filter(t => t.audio_url || t.preview_url);
-                    // Deduplicate by id
-                    const seen = new Set();
-                    this.tracks = tracks.filter(t => { if (seen.has(t.id)) return false; seen.add(t.id); return true; });
-                    this._buildQueue();
                 } catch (e) {
-                    console.error('radio load failed', e);
-                    // Show user-friendly error message
-                    if (window.ahoyApp?.showNotification) {
-                        window.ahoyApp.showNotification('Failed to load radio. Please try again.', 'error');
-                    }
+                    console.error('Radio sync error:', e);
                 }
             },
-            _buildQueue() {
-                const list = [...this.tracks];
-                if (this.shuffle) list.sort(() => 0.5 - Math.random());
-                this.queue = list.map(t => ({ ...t, type: 'track' }));
-                this.upNext = this.queue.slice(0, 20);
-            },
-            toggle() {
-                if (!window.mediaPlayer) { console.error('Media player not available'); return; }
-                if (this.isPlaying) { window.mediaPlayer.pause(); this.isPlaying = false; return; }
-                if (!this.current) { this._playNext(); return; }
-                window.mediaPlayer.resume(); this.isPlaying = true;
-            },
-            skip() { this._playNext(); },
-            playNow(item) {
-                if (!window.mediaPlayer) { console.error('Media player not available'); return; }
-                if (this.current) {
-                    this.justPlayed.unshift(this.current);
-                    if (this.justPlayed.length > 20) this.justPlayed.length = 20;
+
+            async toggle() {
+                if (!window.mediaPlayer) return;
+
+                if (this.isPlaying) {
+                    window.mediaPlayer.pause();
+                    return; // State updates via event listener
                 }
-                this.current = item;
-                window.mediaPlayer.play(item);
+
+                // Starting playback
+                await this.fetchState();
+                if (!this.current) return;
+
+                // Setup global player with radio queue
+                const queue = [this.current, ...this.upNext];
+                
+                // We want to replace the current playlist with our radio queue
+                if (window.mediaPlayer.setPlaylist) {
+                    window.mediaPlayer.setPlaylist(queue);
+                }
+
+                // Play the current track
+                await window.mediaPlayer.play(this.current);
+
+                // Seek to the server-dictated offset
+                // We add a small buffer (e.g. 0.5s) to account for network latency
+                const offset = (this.serverState.offset_seconds || 0);
+                if (offset > 0) {
+                    // Try seeking immediately (might fail if metadata not loaded)
+                    window.mediaPlayer.seekTo(offset);
+                    
+                    // Also try again after a short delay just in case
+                    setTimeout(() => {
+                        // Only seek if we are still near the start (don't jump back if user seeked)
+                        if (window.mediaPlayer.currentTime < 1) {
+                            window.mediaPlayer.seekTo(offset);
+                        }
+                    }, 500);
+                }
+                
                 this.isPlaying = true;
             },
-            _playNext() {
-                if (!window.mediaPlayer) { console.error('Media player not available'); return; }
-                if (this.queue.length === 0) this._buildQueue();
-                const next = this.queue.shift();
-                if (this.current) {
-                    this.justPlayed.unshift(this.current);
-                    if (this.justPlayed.length > 20) this.justPlayed.length = 20;
-                }
-                if (next) { this.current = next; window.mediaPlayer.play(next); this.isPlaying = true; }
-                this.upNext = this.queue.slice(0, 20);
-            },
+
             boostArtist(item) {
-                console.log(`Boosting artist: ${item.artist}`);
-                // Implement boosting functionality here
-                // Example: launch a modal or redirect to a payment page
+                if (window.ahoyApp && window.ahoyApp.boostArtist) {
+                    window.ahoyApp.boostArtist(item);
+                } else {
+                    console.log(`Boosting artist: ${item.artist}`);
+                    window.location.href = `/checkout?type=boost&artist_id=${encodeURIComponent(item.id || item.artist)}&amount=1.00`;
+                }
+            },
+            
+            // "Play Now" on a previously played item just plays it normally (not synced)
+            playNow(item) {
+                if (window.mediaPlayer) {
+                    window.mediaPlayer.play(item);
+                }
             }
         }
     }

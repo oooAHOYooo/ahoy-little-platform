@@ -215,7 +215,6 @@ python scripts/check_ports.py
 
 ### 🎧 User Experience
 - **Playlist Management**: Create, edit, reorder, and share unlimited playlists
-- **Collections**: Organize content into themed folders
 - **Likes & History**: Track everything users interact with
 - **Personalized Recommendations**: AI-driven content suggestions
 - **Universal Search**: Search across all content types

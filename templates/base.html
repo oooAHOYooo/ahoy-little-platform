@@ -834,41 +834,6 @@
                             </div>
                         </div>
 
-                        <!-- Bookmarks -->
-                        <div class="sidebar-panel sidebar-item"
-                            data-sidebar-section="bookmarks">
-                            <div class="section-title">Bookmarks</div>
-
-                            <!-- Collections List -->
-                            <div class="collections-list"
-                                x-show="collections.length > 0">
-                                <template x-for="col in collections"
-                                    :key="col.id">
-                                    <div class="sidebar-list-item"
-                                        @click="goToCollection(col.id)"
-                                        style="cursor: pointer; padding: 8px 0; display: flex; align-items: center; gap: 8px;">
-                                        <i class="fas fa-folder"
-                                            style="color: var(--text-muted);"></i>
-                                        <span class="item-name"
-                                            x-text="col.name"
-                                            style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem;"></span>
-                                        <span class="item-count"
-                                            x-text="col.items ? col.items.length : 0"
-                                            style="font-size: 0.75rem; color: var(--text-muted);"></span>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <div class="collections-mini"
-                                :class="{'mt-3': collections.length > 0}">
-                                <button @click="goToCollections()"
-                                    class="item-mini collection-add-btn desktop-only">
-                                    <i class="fas fa-plus"></i>
-                                    <span>Add Collection</span>
-                                </button>
-                            </div>
-                        </div>
-
                         <!-- Boost (Compact) -->
                         <div class="tip-jar-card sidebar-item">
                             <div class="tip-jar-compact">
@@ -1024,19 +989,6 @@
                                 <button @click="showCodeEntry = !showCodeEntry"
                                     class="btn-code-mini" title="Enter code">
                                     Code
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Bookmarks -->
-                        <div class="sidebar-panel sidebar-item"
-                            data-sidebar-section="bookmarks">
-                            <div class="section-title">Bookmarks</div>
-                            <div class="collections-mini">
-                                <button @click="goToCollections()"
-                                    class="item-mini collection-add-btn desktop-only">
-                                    <i class="fas fa-plus"></i>
-                                    <span>Add Collection</span>
                                 </button>
                             </div>
                         </div>
@@ -1562,7 +1514,7 @@
                     <h4 class="footer-column-title">Developer Tools</h4>
                     <ul>
                         <li><a href="/debug-report">Debug Report</a></li>
-                        <li><a href="/radio">Radio (Experimental)</a></li>
+                        <li><a href="/radio">Radio</a></li>
                         <li><a href="/merch">Merch</a></li>
                     </ul>
 
@@ -1646,59 +1598,55 @@
             <div class="bg-white rounded-2xl p-6 w-[28rem] shadow-xl">
                 <h3 class="text-xl font-semibold">Go Plus to unlock more</h3>
                 <p class="text-sm text-gray-600 mt-2">Free plan allows up to 3
-                    Collections & 3 Playlists.</p>
-                <ul class="text-sm text-gray-700 mt-3 list-disc ml-5">
-                    <li>Unlimited Collections & Playlists</li>
-                    <li>Reorder with drag & drop</li>
-                    <li>Public share links</li>
-                </ul>
-                <div class="flex gap-2 mt-4">
-                    <button id="paywall-upgrade"
-                        class="px-4 py-2 rounded-xl bg-blue-600 text-white">Upgrade
-                        – $3/mo</button>
-                    <button class="px-3 py-2 rounded-xl border"
-                        onclick="document.getElementById('paywall').classList.add('hidden')">Not
-                        now</button>
+                    <p class="mb-4">You have 0 Playlists.</p>
+                    <ul class="text-sm text-gray-700 mt-3 list-disc ml-5">
+                        <li>Unlimited Playlists</li>
+                        <li>Reorder with drag & drop</li>
+                        <li>Public share links</li>
+                    </ul>
+                    <div class="flex gap-2 mt-4">
+                        <button id="paywall-upgrade"
+                            class="px-4 py-2 rounded-xl bg-blue-600 text-white">Upgrade
+                            – $3/mo</button>
+                        <button class="px-3 py-2 rounded-xl border"
+                            onclick="document.getElementById('paywall').classList.add('hidden')">Not
+                            now</button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- JavaScript -->
-        <script>window.LOGGED_IN = {{ LOGGED_IN | tojson }};</script>
-        <script>
+            <!-- JavaScript -->
+            <script>window.LOGGED_IN = {{ LOGGED_IN | tojson }};</script>
+            <script>
         // Hard env switch (default to 'development'). Override to 'production' to enable prod-only behaviors.
         window.APP_ENV = window.APP_ENV || 'development';
     </script>
-        <script
-            src="{{ url_for('static', filename='js/guest-bootstrap.js') }}"></script>
-        <script
-            src="{{ url_for('static', filename='js/bookmarks.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/player.js') }}"></script>
+            <script
+                src="{{ url_for('static', filename='js/guest-bootstrap.js') }}"></script>
+            <script
+                src="{{ url_for('static', filename='js/bookmarks.js') }}"></script>
+            <script
+                src="{{ url_for('static', filename='js/app.js') }}"></script>
+            <script
+                src="{{ url_for('static', filename='js/player.js') }}"></script>
 
-        <!-- Now Playing Component Modules -->
-        <script
-            src="{{ url_for('static', filename='js/colorExtractor.js') }}"></script>
-        <script
-            src="{{ url_for('static', filename='js/audioAnalyser.js') }}"></script>
-        <script
-            src="{{ url_for('static', filename='js/visualizer.js') }}"></script>
-        <script
-            src="{{ url_for('static', filename='js/nowPlaying.js') }}"></script>
-        <script
-            src="{{ url_for('static', filename='js/playlist-manager.js') }}"></script>
-        <script
-            src="{{ url_for('static', filename='js/collections-manager.js') }}"></script>
-        <script type="module"
-            src="{{ url_for('static', filename='js/playlist-ui.js') }}"></script>
-        <script type="module"
-            src="{{ url_for('static', filename='js/collections-quickassign.js') }}"></script>
-        <script type="module"
-            src="{{ url_for('static', filename='js/player-queue.js') }}"></script>
-        <script type="module"
-            src="{{ url_for('static', filename='js/reinforce.js') }}"></script>
+            <!-- Now Playing Component Modules -->
+            <script
+                src="{{ url_for('static', filename='js/colorExtractor.js') }}"></script>
+            <script
+                src="{{ url_for('static', filename='js/audioAnalyser.js') }}"></script>
+            <script
+                src="{{ url_for('static', filename='js/visualizer.js') }}"></script>
+            <script
+                src="{{ url_for('static', filename='js/nowPlaying.js') }}"></script>
+            <script
+                src="{{ url_for('static', filename='js/playlist-manager.js') }}"></script>
+            <script type="module"
+                src="{{ url_for('static', filename='js/player-queue.js') }}"></script>
+            <script type="module"
+                src="{{ url_for('static', filename='js/reinforce.js') }}"></script>
 
-        <script type="module">
+            <script type="module">
         import { showToast } from "{{ url_for('static', filename='js/toast.js') }}";
 
         // Listen for 402 responses globally and open paywall
@@ -1721,8 +1669,8 @@
         });
     </script>
 
-        <!-- Status Bar JavaScript -->
-        <script>
+            <!-- Status Bar JavaScript -->
+            <script>
         function statusBar() {
             return {
                 // Notification state
@@ -1904,8 +1852,8 @@
         }
         </script>
 
-        <!-- Navbar JavaScript -->
-        <script>
+            <!-- Navbar JavaScript -->
+            <script>
         function navbar() {
             return {
                 // Environment flags
@@ -2134,8 +2082,8 @@
         }
     </script>
 
-        <!-- Simple Image Deduplication Script -->
-        <script>
+            <!-- Simple Image Deduplication Script -->
+            <script>
         // Enhanced image loading to prevent infinite loops
         (function () {
             const loadedImages = new Set();
@@ -2725,12 +2673,11 @@
         window.globalPlayer.play = (item) => window.globalPlayer.playTrack(item);
     </script>
 
-        <!-- Global Dashboard Sidebars Script -->
-        <script>
+            <!-- Global Dashboard Sidebars Script -->
+            <script>
         function dashboardCollection() {
             return {
                 badges: [],
-                collections: [],
                 showCodeEntry: false,
                 codeEntry: '',
                 // XP / reinforcement
@@ -2798,8 +2745,8 @@
                     // Load artists for boost
                     await this.loadArtists();
                     
-                    // Load collections
-                    await this.loadCollections();
+                    // Load collections removed
+                    // await this.loadCollections();
 
                     // Sync with media player
                     this.syncMediaPlayer();
@@ -2822,31 +2769,6 @@
                         console.log('Artists not available for boost');
                         this.artists = [];
                     }
-                },
-                async loadCollections() {
-                    if (!window.LOGGED_IN) return;
-                    try {
-                        const username = window.userProfile?.username;
-                        // If no username, we might not be able to filter by user on the API
-                        // But let's try calling without user if it returns my collections?
-                        // API logic was: if user, filter by user. Else return all.
-                        // We definitely want only ours.
-                        if (!username) return;
-
-                        const response = await fetch(`/api/collections/?user=${encodeURIComponent(username)}`);
-                        if (response.ok) {
-                            const data = await response.json();
-                            this.collections = data || [];
-                        }
-                    } catch (e) {
-                        console.error('Error loading collections:', e);
-                        this.collections = [];
-                    }
-                },
-                goToCollection(id) {
-                    // Navigate to bookmarks/collections page
-                    // Ideally we would filter by collection ID, but simple navigation for now
-                    window.location.href = '/bookmarks';
                 },
                 async sendTip() {
                     if (!this.selectedArtistId || !this.tipAmount) return;
@@ -2943,9 +2865,6 @@
                         }
                     }
                     this.syncMediaPlayer();
-                },
-                goToCollections() {
-                    window.location.href = '/bookmarks';
                 },
                 // Search functionality
                 performSearch() {
@@ -3140,8 +3059,8 @@
         }
     </script>
 
-        <!-- Portfolio Nav Widget -->
-        <script>
+            <!-- Portfolio Nav Widget -->
+            <script>
         function portfolioNavWidget() {
             return {
                 portfolioDropdownOpen: false,
@@ -3175,10 +3094,10 @@
         }
     </script>
 
-        {% block extra_scripts %}{% endblock %}
+            {% block extra_scripts %}{% endblock %}
 
-        <!-- Service Worker Registration -->
-        <script>
+            <!-- Service Worker Registration -->
+            <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/static/service-worker.js')
@@ -3191,6 +3110,6 @@
             });
         }
     </script>
-    </body>
+        </body>
 
-</html>
+    </html>

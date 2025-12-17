@@ -9,7 +9,6 @@ from services.activity import track_activity
 bp = Blueprint("playlists", __name__, url_prefix="/api/playlists")
 
 PLAYLISTS_FILE = "data/playlists.json"
-COLLECTIONS_FILE = "data/collections.json"
 
 def _now():
     return datetime.utcnow().isoformat() + "Z"
@@ -82,48 +81,6 @@ def manage_playlists():
     
     return jsonify({'success': True, 'playlist': playlist, 'guest': True})
 
-@bp.post("/from-collection/<collection_id>")
-def create_from_collection(collection_id):
-    payload = request.get_json(silent=True) or {}
-    owner = (payload.get("owner") or "").strip()
-    name  = (payload.get("name")  or "").strip()
-    if not owner:
-        return jsonify({"error": "owner required"}), 400
-
-    # Count existing playlists for owner
-    data_existing = _ensure(PLAYLISTS_FILE, "playlists")
-    owner_count = sum(1 for p in data_existing["playlists"] if p.get("owner") == owner)
-    if not can_create_playlist(owner, owner_count):
-        return jsonify({
-            "error": "limit_reached",
-            "message": "Free plan allows up to 3 Playlists. Upgrade to Ahoy Plus for unlimited.",
-            "paywall": {"plan": "plus", "price_usd": 3.0}
-        }), 402
-
-    cols = _ensure(COLLECTIONS_FILE, "collections")["collections"]
-    src = next((c for c in cols if c["id"] == collection_id), None)
-    if not src:
-        return jsonify({"error": "collection not found"}), 404
-
-    data = _ensure(PLAYLISTS_FILE, "playlists")
-    new_pl = {
-        "id": uuid4().hex,
-        "name": name or f'{src["name"]} — Playlist',
-        "owner": owner,
-        "source_collection": collection_id,
-        "items": list(src.get("items", [])),  # shallow clone preserves order
-        "is_public": bool(payload.get("is_public", False)),
-        "cover_image": payload.get("cover_image") or src.get("cover_image"),
-        "created_at": _now(),
-        "updated_at": _now(),
-    }
-    data["playlists"].append(new_pl)
-    write_json(PLAYLISTS_FILE, data)
-    
-    # Track activity
-    streak = track_activity(owner, "playlist:create_from_collection")
-    
-    return jsonify({**new_pl, "streak": streak}), 201
 
 @bp.patch("/<playlist_id>")
 def update_playlist(playlist_id):
