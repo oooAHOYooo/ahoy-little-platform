@@ -158,11 +158,18 @@ def create_app():
     startup_logging(app)
     
     # Register blueprints
-    # app.register_blueprint(auth_bp)  # Disabled: using JWT-based auth under /api/auth
-    app.register_blueprint(api_auth_bp)  # JWT-based API auth
+    # Removed: blueprints/auth.py (consolidated into api/auth)
+    from blueprints.api.playlists import bp as api_playlists_bp
+    from blueprints.api.bookmarks import bp as api_bookmarks_bp
+    from blueprints.api.tips import bp as api_tips_bp
+    
+    app.register_blueprint(api_auth_bp)  # Session-based API auth
+    app.register_blueprint(api_playlists_bp)  # Database-based playlists API
+    app.register_blueprint(api_bookmarks_bp)  # Database-based bookmarks API
+    app.register_blueprint(api_tips_bp)  # Tips/boost API
     app.register_blueprint(activity_bp)
-    app.register_blueprint(playlists_bp)
-    app.register_blueprint(bookmarks_bp)
+    app.register_blueprint(playlists_bp)  # Legacy file-based playlists (for guests)
+    app.register_blueprint(bookmarks_bp)  # Legacy file-based bookmarks (for guests)
     # Removed: collections_bp (feature removed)
     app.register_blueprint(gamify_api_bp)
     app.register_blueprint(payments_bp)
