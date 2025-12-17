@@ -89,17 +89,17 @@ def create_tip():
         }), 201
 
 
-@bp.get("/tips/portfolio")
+@bp.get("/tips/history")
 @login_required
-def get_tipping_portfolio():
-    """Get user's tipping portfolio (grouped by artist)"""
+def get_tipping_history():
+    """Get user's tipping history (grouped by artist)"""
     user_id = _require_int_user_id()
     if user_id <= 0:
         return jsonify({"error": "unsupported_user_identity"}), 400
 
     with get_session() as session:
         # Get tips grouped by artist
-        portfolio = session.execute(
+        history = session.execute(
             select(
                 ArtistTip.artist_name,
                 func.sum(ArtistTip.amount).label("total_amount"),
@@ -111,22 +111,22 @@ def get_tipping_portfolio():
             .order_by(func.sum(ArtistTip.amount).desc())
         ).all()
 
-        portfolio_list = [
+        history_list = [
             {
                 "artist_name": row.artist_name,
                 "total_amount": row.total_amount,
                 "tip_count": row.tip_count,
                 "last_tip_date": row.last_tip_date.isoformat() if row.last_tip_date else None
             }
-            for row in portfolio
+            for row in history
         ]
 
-        total_all = sum(p["total_amount"] for p in portfolio_list)
+        total_all = sum(p["total_amount"] for p in history_list)
 
         return jsonify({
-            "portfolio": portfolio_list,
+            "history": history_list,
             "total_all": total_all,
-            "artist_count": len(portfolio_list)
+            "artist_count": len(history_list)
         })
 
 

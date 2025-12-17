@@ -12,8 +12,6 @@ from models import (
     Achievement,
     UserAchievement,
     ListeningTotal,
-    QuestDef,
-    UserQuest,
 )
 from services.gamify import on_event
 
@@ -75,31 +73,9 @@ def me_gamification():
         lt = session.get(ListeningTotal, user_id)
         listen = {"total_seconds": int(lt.total_seconds) if lt else 0}
 
-        # quests today (and current week)
-        day_key = _today_key()
-        week_key = _iso_week_key()
-        uq_rows = list(
-            session.execute(
-                select(UserQuest, QuestDef)
-                .join(QuestDef, QuestDef.id == UserQuest.quest_id)
-                .where((UserQuest.user_id == user_id) & (UserQuest.day_key.in_([day_key, week_key])))
-            ).all()
-        )
-        quests_today = [
-            {
-                "key": qd.key,
-                "title": qd.title,
-                "description": qd.description,
-                "kind": qd.kind,
-                "progress_int": int(uq.progress_int or 0),
-                "done": bool(uq.done),
-                "xp": int(qd.xp or 0),
-                "rule": qd.rule or {},
-                "threshold": (qd.rule or {}).get("threshold", 1) if qd.rule else 1,
-            }
-            for (uq, qd) in uq_rows
-        ]
-
+        # quests today (and current week) - SIMPLIFIED: No quests
+        quests_today = []
+        
         # recent achievements (small limit)
         recent_rows = ua_rows[:5]
         achievements_recent = [

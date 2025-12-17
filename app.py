@@ -35,7 +35,6 @@ from blueprints.payments import bp as payments_bp
 from routes.boost_stripe import bp as boost_stripe_bp
 from routes.boost_stripe import boost_api_bp
 from routes.stripe_webhooks import bp as stripe_webhooks_bp
-from blueprints.portfolio import bp as portfolio_bp
 from services.listening import start_session as listening_start_session, end_session as listening_end_session
 from services.user_resolver import resolve_db_user_id
 from db import get_session
@@ -170,7 +169,6 @@ def create_app():
     app.register_blueprint(boost_stripe_bp)
     app.register_blueprint(boost_api_bp)
     app.register_blueprint(stripe_webhooks_bp)
-    app.register_blueprint(portfolio_bp)
     
     # Initialize search index
     with app.app_context():

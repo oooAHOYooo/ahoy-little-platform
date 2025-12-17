@@ -25,14 +25,14 @@ def _today_key() -> str:
 
 def on_event(user_id: int, event_kind: str, meta: Dict[str, Any] | None = None) -> Dict[str, Any]:
     meta = meta or {}
-    ensure_user_daily_quests(user_id, _today_key())
+    # ensure_user_daily_quests(user_id, _today_key()) # Simplified: No quests
     achievements_unlocked = check_achievements(user_id)
-    quests_progressed, xp_earned = apply_quest_progress(user_id, event_kind, meta)
+    # quests_progressed, xp_earned = apply_quest_progress(user_id, event_kind, meta) # Simplified: No quests
     totals = _read_totals(user_id)
     return {
         "achievements_unlocked": achievements_unlocked,
-        "quests_progressed": quests_progressed,
-        "xp_earned": xp_earned,
+        "quests_progressed": 0,
+        "xp_earned": 0,
         "totals": totals,
     }
 
@@ -80,58 +80,13 @@ def check_achievements(user_id: int) -> List[str]:
 
 
 def apply_quest_progress(user_id: int, event_kind: str, meta: Dict[str, Any]) -> Tuple[int, int]:
-    """Increment progress for matching quests based on rule and event_kind.
-    Returns (quests_progressed_count, xp_earned).
-    """
-    progressed = 0
-    xp_total = 0
-    today = _today_key()
-
-    with get_session() as session:
-        # Active quests (daily or weekly) for the user for today/week
-        active_qs: List[QuestDef] = list(
-            session.execute(select(QuestDef).where(QuestDef.active == True)).scalars()
-        )
-
-        # Index quests by cadence
-        for qd in active_qs:
-            if qd.cadence not in ("daily", "weekly"):
-                continue
-            day_key = today if qd.cadence == "daily" else _iso_week_key()
-
-            uq = session.execute(
-                select(UserQuest).where(
-                    (UserQuest.user_id == user_id)
-                    & (UserQuest.quest_id == str(qd.id))
-                    & (UserQuest.day_key == day_key)
-                )
-            ).scalar_one_or_none()
-            if not uq:
-                uq = UserQuest(user_id=user_id, quest_id=str(qd.id), day_key=day_key, progress_int=0, done=False)
-                session.add(uq)
-                session.flush()
-
-            # Match kind
-            if qd.kind != event_kind:
-                continue
-
-            # Simple rule format: {"threshold": int}
-            rule = (qd.rule or {}) if isinstance(qd.rule, dict) else {}
-            threshold = int(rule.get("threshold", 1))
-
-            if not uq.done:
-                uq.progress_int = int(uq.progress_int or 0) + 1
-                progressed += 1
-                if uq.progress_int >= threshold:
-                    uq.done = True
-                    uq.completed_at = _utcnow()
-                    xp_total += int(qd.xp or 0)
-
-    return progressed, xp_total
+    """Deprecated: Quests simplified out."""
+    return 0, 0
 
 
 def ensure_user_daily_quests(user_id: int, day_key: str) -> None:
-    """Upsert today's daily quests for a user from active QuestDefs.
+    """Deprecated: Quests simplified out."""
+    passUpsert today's daily quests for a user from active QuestDefs.
     Also ensures the current weekly quests using ISO week key.
     """
     with get_session() as session:
