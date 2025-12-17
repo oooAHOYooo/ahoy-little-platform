@@ -1,9 +1,9 @@
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, jsonify
+from flask_login import login_required, current_user
 from sqlalchemy import desc, func
 
 from db import get_session
 from models import Bookmark
-from utils.auth import jwt_required
 
 
 bp = Blueprint("api_bookmarks", __name__, url_prefix="/api/bookmarks")
@@ -26,9 +26,9 @@ def parse_pagination():
 
 
 @bp.get("")
-@jwt_required
+@login_required
 def list_bookmarks():
-    user_id = int(g.jwt.get("sub"))
+    user_id = current_user.id
     page, per_page, offset = parse_pagination()
     with get_session() as session:
         total = session.query(func.count(Bookmark.id)).filter(Bookmark.user_id == user_id).scalar() or 0
@@ -53,7 +53,7 @@ def list_bookmarks():
 
 
 @bp.post("")
-@jwt_required
+@login_required
 def add_bookmark():
     data = request.get_json(silent=True) or {}
     media_id = (data.get("media_id") or "").strip()

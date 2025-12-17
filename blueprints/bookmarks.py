@@ -16,9 +16,9 @@ def _save(data):
     DATA_PATH.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 def _uid():
-    username = session.get("username")
-    if username:
-        return f"user:{username}"
+    from flask_login import current_user
+    if current_user.is_authenticated:
+        return f"user:{current_user.id}"
     return None
 
 @bp.get("")

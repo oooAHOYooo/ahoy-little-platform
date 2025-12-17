@@ -56,6 +56,8 @@ def register():
             }), 201
     except IntegrityError:
         return jsonify({"error": "email_already_registered"}), 409
+    except Exception as e:
+        return jsonify({"error": "registration_failed", "detail": str(e)}), 500
 
 
 @bp.post("/login")
