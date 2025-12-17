@@ -244,7 +244,8 @@ def create_app():
     # Context processor to inject login flag into templates
     @app.context_processor
     def inject_login_flag():
-        return {"LOGGED_IN": bool(session.get("username"))}
+        from flask_login import current_user
+        return {"LOGGED_IN": current_user.is_authenticated}
 
     # Expose Stripe publishable key in templates
     @app.context_processor
