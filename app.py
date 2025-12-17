@@ -164,12 +164,14 @@ def create_app():
     from blueprints.api.tips import bp as api_tips_bp
     
     app.register_blueprint(api_auth_bp)  # Session-based API auth
-    app.register_blueprint(api_playlists_bp)  # Database-based playlists API
-    app.register_blueprint(api_bookmarks_bp)  # Database-based bookmarks API
+    app.register_blueprint(api_playlists_bp)  # Database-based playlists API (takes precedence)
+    app.register_blueprint(api_bookmarks_bp)  # Database-based bookmarks API (takes precedence)
     app.register_blueprint(api_tips_bp)  # Tips/boost API
     app.register_blueprint(activity_bp)
-    app.register_blueprint(playlists_bp)  # Legacy file-based playlists (for guests)
-    app.register_blueprint(bookmarks_bp)  # Legacy file-based bookmarks (for guests)
+    # Note: playlists_bp and bookmarks_bp have same prefix but registered after, so they're shadowed
+    # They're kept for backward compatibility but won't be reached
+    app.register_blueprint(playlists_bp)  # Legacy file-based (shadowed by api_playlists_bp)
+    app.register_blueprint(bookmarks_bp)  # Legacy file-based (shadowed by api_bookmarks_bp)
     # Removed: collections_bp (feature removed)
     app.register_blueprint(gamify_api_bp)
     app.register_blueprint(payments_bp)
