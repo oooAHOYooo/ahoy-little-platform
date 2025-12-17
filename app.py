@@ -706,16 +706,15 @@ def checkout_success():
         amount = None
     return render_template('success.html', pid=pid, artist_id=artist_id, amount=amount)
 
-@app.route('/debug-report')
-def debug_report():
-    return render_template('debug_report.html')
 
-# Removed bookmark-test route - template moved to .archive
+# @app.route('/debug-report')
+# def debug_report():
+#     return render_template('debug_report.html')
 
+# @app.route('/debug')
+# def debug_page():
+#    return "Debug disabled"
 
-
-
-# Enable compression (optional)
 try:
     from flask_compress import Compress
     Compress(app)

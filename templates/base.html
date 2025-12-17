@@ -3195,6 +3195,32 @@
             });
         }
     </script>
-    </body>
+        <script>
+        // Initialize NProgress
+        NProgress.configure({ showSpinner: false, minimum: 0.1 });
+
+        // Trigger on page transitions
+        document.addEventListener('DOMContentLoaded', () => { NProgress.done(); });
+        window.addEventListener('beforeunload', () => { NProgress.start(); });
+
+        // Trigger on fetch requests
+        const originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            // Only show for non-background/polling requests
+            const url = args[0] || '';
+            const isPolling = url.includes('/api/radio/now') || url.includes('/widget-data') || url.includes('check');
+            
+            if (!isPolling) NProgress.start();
+            try {
+                const response = await originalFetch(...args);
+                if (!isPolling) NProgress.done();
+                return response;
+            } catch (error) {
+                if (!isPolling) NProgress.done();
+                throw error;
+            }
+        };
+    </script>
+</body>
 
 </html>
