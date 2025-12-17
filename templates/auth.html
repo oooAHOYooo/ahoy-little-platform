@@ -55,7 +55,6 @@
                     <input type="text" 
                         id="login-username"
                         x-model="authForm.username"
-                        @input="updateEmailEmoji()"
                         @focus="focusedField = 'username'"
                         @blur="focusedField = null"
                         class="floating-input"
@@ -124,7 +123,6 @@
                     <input type="text" 
                         id="reg-username"
                         x-model="authForm.username"
-                        @input="updateEmailEmoji()"
                         @focus="focusedField = 'reg-username'"
                         @blur="focusedField = null"
                         class="floating-input"
@@ -134,12 +132,11 @@
                     <label for="reg-username" class="floating-label">Username</label>
                 </div>
 
-                <!-- Email Field with Emoji -->
+                <!-- Email Field -->
                 <div class="floating-input-group" style="animation-delay: 0.1s">
                     <input type="email" 
                         id="reg-email"
                         x-model="authForm.email"
-                        @input="updateEmailEmoji()"
                         @focus="focusedField = 'email'"
                         @blur="focusedField = null"
                         class="floating-input"
@@ -147,13 +144,6 @@
                         placeholder=" "
                         required>
                     <label for="reg-email" class="floating-label">Email</label>
-                    <span class="input-emoji" 
-                          :class="{'input-emoji-active': authForm.email}"
-                          x-text="emailEmoji">📧</span>
-                </div>
-                <div class="input-feedback" x-show="authForm.email" style="animation-delay: 0.15s">
-                    <span x-show="!isValidEmail(authForm.email)" class="feedback-error">Please enter a valid email</span>
-                    <span x-show="isValidEmail(authForm.email)" class="feedback-success">Perfect! 📧</span>
                 </div>
 
                 <!-- Password Field -->
@@ -174,14 +164,7 @@
                         <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                     </button>
                 </div>
-                <div class="password-strength" x-show="authForm.password" style="animation-delay: 0.25s">
-                    <div class="strength-bar">
-                        <div class="strength-fill"
-                            :class="getPasswordStrength(authForm.password).class"
-                            :style="`width: ${getPasswordStrength(authForm.password).width}%`"></div>
-                    </div>
-                    <span class="strength-text" x-text="getPasswordStrength(authForm.password).text"></span>
-                </div>
+                <!-- Simplified: Just basic validation, no animated strength meter -->
 
                 <!-- Confirm Password Field -->
                 <div class="floating-input-group" style="animation-delay: 0.3s">
@@ -245,7 +228,7 @@ function authPage() {
         showPassword: false,
         loginSuccess: false,
         focusedField: null,
-        emailEmoji: '📧',
+        // Removed: emailEmoji
         authForm: {
             username: '',
             email: '',
@@ -260,16 +243,7 @@ function authPage() {
             this.checkAuthStatus();
         },
         
-        updateEmailEmoji() {
-            const email = this.authForm.email || this.authForm.username;
-            if (!email) {
-                this.emailEmoji = '📧';
-                return;
-            }
-            const emojis = ['😊', '🎵', '🎸', '🎤', '🎧', '🎹', '🎺', '🎻', '🥁', '🎪'];
-            const index = email.length % emojis.length;
-            this.emailEmoji = emojis[index];
-        },
+        // Removed: updateEmailEmoji (simplified for MVP)
         
         async checkAuthStatus() {
             try {
@@ -286,22 +260,7 @@ function authPage() {
             return emailRegex.test(email);
         },
 
-        getPasswordStrength(password) {
-            if (!password) return { width: 0, class: '', text: '' };
-            
-            let score = 0;
-            if (password.length >= 8) score += 25;
-            if (password.match(/[a-z]/)) score += 25;
-            if (password.match(/[A-Z]/)) score += 25;
-            if (password.match(/[0-9]/)) score += 25;
-            if (password.match(/[^a-zA-Z0-9]/)) score += 25;
-            
-            if (score < 25) return { width: 20, class: 'strength-weak', text: 'Too weak 😰' };
-            if (score < 50) return { width: 40, class: 'strength-fair', text: 'Getting better 💪' };
-            if (score < 75) return { width: 60, class: 'strength-good', text: 'Good strength! 🔥' };
-            if (score < 100) return { width: 80, class: 'strength-strong', text: 'Very strong! 💪' };
-            return { width: 100, class: 'strength-excellent', text: 'Excellent! 🚀' };
-        },
+        // Removed: getPasswordStrength (simplified for MVP - just require min 8 chars)
 
         isFormValid() {
             if (this.authMode === 'login') {

@@ -3,7 +3,7 @@ try:
     from flask_session import Session as FlaskSession
 except Exception:  # ImportError or env issues
     FlaskSession = None
-from flask_login import current_user
+from flask_login import current_user, login_required
 import os
 import json
 import uuid
@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import random
 import hashlib
 from functools import wraps
-from user_manager import user_manager
+# Removed: user_manager.py (consolidated to database-based auth)
 from dotenv import load_dotenv
 load_dotenv()
 import re, pathlib
@@ -24,12 +24,12 @@ from utils.observability import init_sentry
 from utils.logging_init import init_logging, init_request_logging
 from utils.security_headers import attach_security_headers, create_csp_report_blueprint
 from utils.csrf_init import init_csrf
-from blueprints.auth import bp as auth_bp
+# Removed: blueprints/auth.py (consolidated into api/auth)
 from blueprints.api.auth import bp as api_auth_bp
 from blueprints.activity import bp as activity_bp
 from blueprints.playlists import bp as playlists_bp
 from blueprints.bookmarks import bp as bookmarks_bp
-from blueprints.collections import bp as collections_bp
+# Removed: blueprints/collections.py (feature removed)
 from blueprints.api.gamify import bp as gamify_api_bp
 from blueprints.payments import bp as payments_bp
 from routes.boost_stripe import bp as boost_stripe_bp
@@ -163,7 +163,7 @@ def create_app():
     app.register_blueprint(activity_bp)
     app.register_blueprint(playlists_bp)
     app.register_blueprint(bookmarks_bp)
-    app.register_blueprint(collections_bp)
+    # Removed: collections_bp (feature removed)
     app.register_blueprint(gamify_api_bp)
     app.register_blueprint(payments_bp)
     app.register_blueprint(boost_stripe_bp)
@@ -766,14 +766,8 @@ def save_users(users):
     with open(USERS_FILE, 'w') as f:
         json.dump(users, f, indent=2)
 
-def auth_required(f):
-    """Simple auth decorator"""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'username' not in session:
-            return jsonify({'error': 'Authentication required'}), 401
-        return f(*args, **kwargs)
-    return decorated_function
+# Replaced auth_required with Flask-Login's @login_required
+# Use: from flask_login import login_required
 
 
 @app.route('/music')
@@ -1429,19 +1423,19 @@ def api_daily_playlist():
 
 # Legacy playlist endpoints - redirect to new enhanced system
 @app.route('/api/user/playlists', methods=['GET', 'POST'])
-@auth_required
+@login_required
 def user_playlists():
     """Legacy playlist endpoint - redirects to new system"""
     return manage_playlists()
 
 @app.route('/api/user/playlists/<playlist_id>', methods=['GET', 'PUT', 'DELETE'])
-@auth_required
+@login_required
 def manage_playlist_legacy(playlist_id):
     """Legacy playlist management - redirects to new system"""
     return manage_playlist(playlist_id)
 
 @app.route('/api/user/playlists/<playlist_id>/items', methods=['POST', 'DELETE'])
-@auth_required
+@login_required
 def manage_playlist_items(playlist_id):
     """Legacy playlist items - redirects to new system"""
     if request.method == 'POST':
@@ -1450,14 +1444,14 @@ def manage_playlist_items(playlist_id):
         return remove_from_playlist(playlist_id)
 
 @app.route('/api/user/playlists/<playlist_id>/reorder', methods=['POST'])
-@auth_required
+@login_required
 def reorder_playlist(playlist_id):
     """Legacy reorder - not supported in new system"""
     return jsonify({'error': 'Reordering not supported in new system'}), 400
 
 
 @app.route('/api/user/likes', methods=['GET', 'POST', 'DELETE'])
-@auth_required
+@login_required
 def user_likes():
     """Manage user likes"""
     username = session.get('username')
@@ -1498,7 +1492,7 @@ def user_likes():
     return jsonify(users[username]['likes'])
 
 @app.route('/api/user/history')
-@auth_required
+@login_required
 def user_history():
     """Get user listening/viewing history"""
     username = session.get('username')
@@ -1507,7 +1501,7 @@ def user_history():
     return jsonify(users[username].get('history', []))
 
 @app.route('/api/user/history', methods=['POST'])
-@auth_required
+@login_required
 def add_to_history():
     """Add item to user history"""
     username = session.get('username')
@@ -1531,7 +1525,7 @@ def add_to_history():
     return jsonify({'success': True})
 
 @app.route('/api/user/recommendations')
-@auth_required
+@login_required
 def user_recommendations():
     """Get personalized recommendations based on user activity"""
     username = session.get('username')
@@ -1582,54 +1576,16 @@ def user_recommendations():
     
     return jsonify(recommendations)
 
-# Enhanced User Management
-@app.route('/api/auth/login', methods=['POST'])
-def login():
-    """Enhanced login with user manager"""
-    data = request.json
-    username = data.get('username')
-    password = data.get('password')
-    
-    user = user_manager.authenticate_user(username, password)
-    
-    if user:
-        session['username'] = username
-        session['user_data'] = user
-        return jsonify({'success': True, 'user': user['profile']})
-    
-    return jsonify({'error': 'Invalid credentials'}), 401
-
-@app.route('/api/auth/register', methods=['POST'])
-def register():
-    """Enhanced registration with user manager"""
-    data = request.json
-    username = data.get('username')
-    password = data.get('password')
-    email = data.get('email')
-    display_name = data.get('display_name')
-    
-    try:
-        user = user_manager.create_user(username, password, email, display_name)
-        session['username'] = username
-        session['user_data'] = user
-        return jsonify({'success': True, 'user': user['profile']})
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-
-@app.route('/api/auth/logout', methods=['POST'])
-def logout():
-    """Logout"""
-    session.clear()
-    return jsonify({'success': True})
+# Auth routes moved to blueprints/api/auth.py (database-based, Flask sessions)
 
 @app.route('/api/user/profile')
-@auth_required
+@login_required
 def user_profile():
     """Get user profile"""
     return jsonify(session.get('user_data', {}).get('profile', {}))
 
 @app.route('/api/user/profile', methods=['PUT'])
-@auth_required
+@login_required
 def update_user_profile():
     """Update user profile"""
     username = session.get('username')
@@ -1646,7 +1602,7 @@ def update_user_profile():
         return jsonify({'error': 'Failed to update profile'}), 400
 
 @app.route('/api/user/stats')
-@auth_required
+@login_required
 def get_user_stats():
     """Get user statistics"""
     username = session.get('username')
@@ -1654,7 +1610,7 @@ def get_user_stats():
     return jsonify(stats)
 
 @app.route('/api/user/playlists')
-@auth_required
+@login_required
 def get_user_playlists():
     """Get user playlists and playlists"""
     username = session.get('username')
@@ -1806,7 +1762,7 @@ def get_saved_content(content_type):
     return jsonify({'content': full_content, 'guest': guest_mode})
 
 @app.route('/api/likes/like', methods=['POST'])
-@auth_required
+@login_required
 def like_content():
     """Like content"""
     username = session.get('username')
@@ -1823,7 +1779,7 @@ def like_content():
         return jsonify({'error': 'Failed to like content'}), 400
 
 @app.route('/api/likes/unlike', methods=['POST'])
-@auth_required
+@login_required
 def unlike_content():
     """Unlike content"""
     username = session.get('username')
@@ -1839,7 +1795,7 @@ def unlike_content():
         return jsonify({'error': 'Failed to unlike content'}), 400
 
 @app.route('/api/likes/check', methods=['POST'])
-@auth_required
+@login_required
 def check_liked():
     """Check if content is liked"""
     username = session.get('username')
@@ -1851,7 +1807,7 @@ def check_liked():
     return jsonify({'liked': is_liked})
 
 @app.route('/api/likes')
-@auth_required
+@login_required
 def get_liked_content():
     """Get user's liked content"""
     username = session.get('username')
@@ -1864,7 +1820,7 @@ def get_liked_content():
     return jsonify({'liked_content': liked_content})
 
 @app.route('/api/recently-played')
-@auth_required
+@login_required
 def get_recently_played():
     """Get user's recently played content"""
     username = session.get('username')
@@ -2034,7 +1990,7 @@ def remove_from_playlist(playlist_id):
         return jsonify({'error': 'Failed to remove from playlist'}), 400
 
 @app.route('/api/migrate-guest-data', methods=['POST'])
-@auth_required
+@login_required
 def migrate_guest_data():
     """Migrate guest data to user account"""
     username = session.get('username')
@@ -2117,7 +2073,7 @@ def get_guest_data():
     return jsonify(guest_data)
 
 @app.route('/api/user/favorites', methods=['GET', 'POST'])
-@auth_required
+@login_required
 def user_favorites():
     """Legacy favorites endpoint - redirects to likes"""
     if request.method == 'POST':

@@ -1,38 +1,58 @@
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, jsonify, session
+from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 
 from db import get_session
 from models import User
-from utils.auth import create_access_token, create_refresh_token, jwt_required, decode_token
 from utils.security import hash_password, verify_password
-from extensions import limiter, rate_limit_auth
+from extensions import limiter, rate_limit_auth, login_manager
 
 
 bp = Blueprint("api_auth", __name__, url_prefix="/api/auth")
 
 
+@login_manager.user_loader
+def load_user(user_id):
+    """Load user for Flask-Login"""
+    with get_session() as db_session:
+        user = db_session.get(User, int(user_id))
+        return user
+
+
 @bp.post("/register")
 @limiter.limit(rate_limit_auth)
 def register():
+    """Register new user with Flask sessions"""
     data = request.get_json(silent=True) or {}
     email = (data.get("email") or "").strip().lower()
+    username = (data.get("username") or email.split("@")[0]).strip()
     password = data.get("password") or ""
+    
     if not email or not password:
         return jsonify({"error": "email_and_password_required"}), 400
 
     pw_hash = hash_password(password)
 
     try:
-        with get_session() as session:
-            user = User(email=email, password_hash=pw_hash)
-            session.add(user)
-            session.flush()  # get user.id
-            access = create_access_token(user.id, user.email)
-            refresh = create_refresh_token(user.id, user.email)
+        with get_session() as db_session:
+            user = User(
+                email=email,
+                password_hash=pw_hash,
+                display_name=username
+            )
+            db_session.add(user)
+            db_session.flush()  # get user.id
+            
+            # Log user in with Flask-Login
+            login_user(user, remember=True)
+            
             return jsonify({
-                "user": {"id": user.id, "email": user.email},
-                "access_token": access,
-                "refresh_token": refresh,
+                "success": True,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "display_name": user.display_name
+                }
             }), 201
     except IntegrityError:
         return jsonify({"error": "email_already_registered"}), 409
@@ -41,60 +61,50 @@ def register():
 @bp.post("/login")
 @limiter.limit(rate_limit_auth)
 def login():
+    """Login with Flask sessions"""
     data = request.get_json(silent=True) or {}
     email = (data.get("email") or data.get("username") or "").strip().lower()
     password = data.get("password") or ""
+    
     if not email or not password:
         return jsonify({"error": "email_and_password_required"}), 400
 
-    # Dev user bypass for local testing
-    if email == "devusername" and password == "devpassword":
-        return jsonify({
-            "user": {"id": 999, "email": "dev@local.test", "display_name": "Dev User"},
-            "access_token": "dev_token_placeholder",
-            "refresh_token": "dev_refresh_placeholder",
-        })
-
-    with get_session() as session:
-        user = session.query(User).filter(User.email == email).first()
+    with get_session() as db_session:
+        user = db_session.query(User).filter(User.email == email).first()
         if not user or not verify_password(password, user.password_hash):
             return jsonify({"error": "invalid_credentials"}), 401
 
-        access = create_access_token(user.id, user.email)
-        refresh = create_refresh_token(user.id, user.email)
+        # Log user in with Flask-Login
+        login_user(user, remember=True)
+        
         return jsonify({
-            "user": {"id": user.id, "email": user.email},
-            "access_token": access,
-            "refresh_token": refresh,
+            "success": True,
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "display_name": user.display_name
+            }
         })
 
 
+@bp.post("/logout")
+@login_required
+def logout():
+    """Logout user"""
+    logout_user()
+    return jsonify({"success": True})
+
 
 @bp.get("/me")
-@jwt_required
+@login_required
 def me():
-    # g.jwt is set by jwt_required
+    """Get current user info"""
     return jsonify({
-        "user": {"id": int(g.jwt.get("sub")), "email": g.jwt.get("email")}
+        "user": {
+            "id": current_user.id,
+            "email": current_user.email,
+            "display_name": current_user.display_name
+        }
     })
-
-
-@bp.post("/refresh")
-def refresh():
-    data = request.get_json(silent=True) or {}
-    token = (data.get("refresh_token") or "").strip()
-    if not token:
-        return jsonify({"error": "refresh_token_required"}), 400
-    try:
-        payload = decode_token(token)
-        if payload.get("type") != "refresh":
-            return jsonify({"error": "invalid_token_type"}), 401
-        user_id = int(payload.get("sub"))
-        email = payload.get("email")
-        # Issue new access token
-        new_access = create_access_token(user_id, email)
-        return jsonify({"access_token": new_access})
-    except Exception as e:
-        return jsonify({"error": "invalid_token", "detail": str(e)}), 401
 
 
