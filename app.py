@@ -2837,40 +2837,6 @@ def search_suggestions():
             'items': []
         }), 500
 
-@app.route('/api/search/analytics', methods=['GET'])
-def search_analytics():
-    """Get search analytics and popular queries"""
-    try:
-        from search_indexer import search_index
-        
-        # Get basic stats
-        total_docs = search_index.total_docs
-        
-        # Get popular tags (simplified)
-        all_tags = []
-        for doc in search_index.documents.values():
-            all_tags.extend(doc.get('tags', []))
-            all_tags.extend(doc.get('genres', []))
-        
-        from collections import Counter
-        popular_tags = Counter(all_tags).most_common(10)
-        
-        # Get content type distribution
-        content_types = {}
-        for doc in search_index.documents.values():
-            kind = doc.get('kind', 'unknown')
-            content_types[kind] = content_types.get(kind, 0) + 1
-        
-        return jsonify({
-            'total_documents': total_docs,
-            'content_types': content_types,
-            'popular_tags': [{'tag': tag, 'count': count} for tag, count in popular_tags],
-            'search_ready': True
-        })
-        
-    except Exception as e:
-        print(f"Error in search analytics: {e}")
-        return jsonify({'error': 'Analytics failed'}), 500
 
 @app.route('/api/search/trending', methods=['GET'])
 def trending_content():
