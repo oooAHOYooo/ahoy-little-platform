@@ -27,8 +27,7 @@ from utils.csrf_init import init_csrf
 # Removed: blueprints/auth.py (consolidated into api/auth)
 from blueprints.api.auth import bp as api_auth_bp
 from blueprints.activity import bp as activity_bp
-from blueprints.playlists import bp as playlists_bp
-from blueprints.bookmarks import bp as bookmarks_bp
+# Removed: blueprints/playlists.py and blueprints/bookmarks.py (shadowed by API blueprints)
 # Removed: blueprints/collections.py (feature removed)
 from blueprints.api.gamify import bp as gamify_api_bp
 from blueprints.payments import bp as payments_bp
@@ -168,10 +167,8 @@ def create_app():
     app.register_blueprint(api_bookmarks_bp)  # Database-based bookmarks API (takes precedence)
     app.register_blueprint(api_tips_bp)  # Tips/boost API
     app.register_blueprint(activity_bp)
-    # Note: playlists_bp and bookmarks_bp have same prefix but registered after, so they're shadowed
-    # They're kept for backward compatibility but won't be reached
-    app.register_blueprint(playlists_bp)  # Legacy file-based (shadowed by api_playlists_bp)
-    app.register_blueprint(bookmarks_bp)  # Legacy file-based (shadowed by api_bookmarks_bp)
+    # Removed: playlists_bp and bookmarks_bp - shadowed by API blueprints, never reached
+    # Use blueprints/api/playlists.py and blueprints/api/bookmarks.py instead
     # Removed: collections_bp (feature removed)
     app.register_blueprint(gamify_api_bp)
     app.register_blueprint(payments_bp)
@@ -1426,11 +1423,7 @@ def manage_playlist_items(playlist_id):
     else:
         return remove_from_playlist(playlist_id)
 
-@app.route('/api/user/playlists/<playlist_id>/reorder', methods=['POST'])
-@login_required
-def reorder_playlist(playlist_id):
-    """Legacy reorder - not supported in new system"""
-    return jsonify({'error': 'Reordering not supported in new system'}), 400
+# Removed: /api/user/playlists/<playlist_id>/reorder - always returned error, feature not supported
 
 
 # Removed: /api/user/likes - use bookmarks instead (not part of MVP)
@@ -1519,14 +1512,8 @@ def get_guest_data():
     
     return jsonify(guest_data)
 
-@app.route('/api/user/favorites', methods=['GET', 'POST'])
-@login_required
-def user_favorites():
-    """Legacy favorites endpoint - redirects to likes"""
-    if request.method == 'POST':
-        return like_content()
-    else:
-        return get_liked_content()
+# Removed: /api/user/favorites - was calling non-existent functions (like_content, get_liked_content)
+# Use bookmarks API instead: /api/bookmarks
 
 # Policy Routes
 @app.route('/privacy')
