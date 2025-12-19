@@ -717,13 +717,7 @@ def checkout_success():
     return render_template('success.html', pid=pid, artist_id=artist_id, amount=amount)
 
 
-# @app.route('/debug-report')
-# def debug_report():
-#     return render_template('debug_report.html')
-
-# @app.route('/debug')
-# def debug_page():
-#    return "Debug disabled"
+# Debug routes removed - debug functionality available via /debug endpoint
 
 try:
     from flask_compress import Compress

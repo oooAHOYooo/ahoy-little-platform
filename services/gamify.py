@@ -77,11 +77,4 @@ def check_achievements(user_id: int) -> List[str]:
     return unlocked
 
 
-def apply_quest_progress(user_id: int, event_kind: str, meta: Dict[str, Any]) -> Tuple[int, int]:
-    """Deprecated: Quests simplified out."""
-    return 0, 0
-
-
-def ensure_user_daily_quests(user_id: int, day_key: str) -> None:
-    """Deprecated: Quests simplified out."""
-    pass  # Quests system removed
+# Quest system functions removed - see omit/futures_quest_system.py for archived code

@@ -213,36 +213,7 @@ class UserAchievement(Base):
     )
 
 
-class QuestDef(Base):
-    __tablename__ = 'quest_defs'
-
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    key = Column(String(100), nullable=False, unique=True, index=True)
-    title = Column(String(255), nullable=False)
-    description = Column(String(2000), nullable=True)
-    xp = Column(Integer, nullable=False, default=10, server_default='10')
-    cadence = Column(String(20), nullable=False)  # daily|weekly
-    kind = Column(String(20), nullable=False)  # play|save|queue|playlist|streak|listen_time
-    rule = Column(JSON, nullable=True)
-    active = Column(Boolean, nullable=False, default=True, server_default='true', index=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-
-
-class UserQuest(Base):
-    __tablename__ = 'user_quests'
-
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
-    quest_id = Column(String(36), ForeignKey('quest_defs.id', ondelete='CASCADE'), nullable=False, index=True)
-    day_key = Column(String(20), nullable=False)  # YYYY-MM-DD or ISO week key
-    progress_int = Column(Integer, nullable=False, default=0, server_default='0')
-    done = Column(Boolean, nullable=False, default=False, server_default='false', index=True)
-    completed_at = Column(DateTime, nullable=True)
-
-    __table_args__ = (
-        UniqueConstraint('user_id', 'quest_id', 'day_key', name='uq_user_quest_per_day'),
-        Index('ix_user_quests_user_id_day_key', 'user_id', 'day_key'),
-    )
+# Quest system models removed - see omit/futures_quest_system.py for archived code
 
 
 class Tip(Base):

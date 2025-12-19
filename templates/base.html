@@ -86,6 +86,10 @@
         <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+        <!-- NProgress - Loading Progress Bar -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+
         <!-- Stripe publishable key and JS -->
         <meta name="stripe-publishable-key"
             content="{{ STRIPE_PUBLISHABLE_KEY }}">
@@ -291,6 +295,35 @@
 
         <!-- Header -->
         <header class="app-header" style="padding-top:8px; padding-bottom:8px;">
+            <!-- Mobile Auth Bar (Top) - Beautiful & Accessible -->
+            <div class="mobile-auth-bar mobile-only"
+                x-data="{ menuOpen: false }"
+                x-init="document.body.classList.add('mobile-auth-active')">
+                {% if LOGGED_IN %}
+                <div class="auth-bar-user">
+                    <a href="/account" class="auth-user-link"
+                        aria-label="Account">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Account</span>
+                    </a>
+                    <a href="/settings" class="auth-settings-link"
+                        aria-label="Settings">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                </div>
+                {% else %}
+                <div class="auth-bar-guest">
+                    <a href="/auth" class="auth-login-btn" aria-label="Sign In">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Sign In</span>
+                    </a>
+                    <a href="/auth" class="auth-signup-btn"
+                        aria-label="Create Account">
+                        <span>Sign Up</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
             <!-- Mobile Top Bar -->
             <div class="mobile-nav-root"
                 x-data="{ open:false, searchOpen:false, boostOpen:false }">
@@ -3098,30 +3131,128 @@
         }
     </script>
         <script>
-        // Initialize NProgress
-        NProgress.configure({ showSpinner: false, minimum: 0.1 });
+        // Initialize NProgress with enhanced configuration
+        NProgress.configure({
+            showSpinner: false,
+            minimum: 0.08,
+            trickleSpeed: 200,
+            easing: 'ease',
+            speed: 500,
+            template: '<div class="nprogress-bar" role="bar"><div class="nprogress-peg"></div></div>'
+        });
 
-        // Trigger on page transitions
-        document.addEventListener('DOMContentLoaded', () => { NProgress.done(); });
-        window.addEventListener('beforeunload', () => { NProgress.start(); });
+        // Custom styling for progress bar (purple theme)
+        const style = document.createElement('style');
+        style.textContent = `
+            #nprogress {
+                pointer-events: none;
+                z-index: 99999;
+            }
+            #nprogress .nprogress-bar {
+                background: linear-gradient(90deg, #a855f7 0%, #9333ea 50%, #a855f7 100%);
+                background-size: 200% 100%;
+                animation: nprogress-shimmer 1.5s ease-in-out infinite;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                z-index: 99999;
+            }
+            @media (max-width: 767px) {
+                #nprogress .nprogress-bar {
+                    height: 4px;
+                }
+            }
+            #nprogress .nprogress-peg {
+                display: block;
+                position: absolute;
+                right: 0px;
+                width: 100px;
+                height: 100%;
+                box-shadow: 0 0 10px #a855f7, 0 0 5px #a855f7;
+                opacity: 1.0;
+                transform: rotate(3deg) translate(0px, -4px);
+            }
+            @keyframes nprogress-shimmer {
+                0% { background-position: 200% 0; }
+                100% { background-position: -200% 0; }
+            }
+            /* Fade out animation */
+            #nprogress.nprogress-custom-parent {
+                overflow: hidden;
+                position: relative;
+            }
+            #nprogress.nprogress-custom-parent #nprogress .nprogress-bar {
+                position: absolute;
+            }
+        `;
+        document.head.appendChild(style);
 
-        // Trigger on fetch requests
+        // Trigger on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            NProgress.done();
+        });
+
+        // Trigger on page unload
+        window.addEventListener('beforeunload', () => {
+            NProgress.start();
+        });
+
+        // Enhanced fetch interceptor with better request detection
         const originalFetch = window.fetch;
         window.fetch = async function(...args) {
-            // Only show for non-background/polling requests
-            const url = args[0] || '';
-            const isPolling = url.includes('/api/radio/now') || url.includes('/widget-data') || url.includes('check');
+            const url = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+            const options = args[1] || {};
             
-            if (!isPolling) NProgress.start();
+            // Skip progress bar for:
+            // - Polling/background requests
+            // - Image/media requests
+            // - Service worker requests
+            // - Requests with no-progress header
+            const isPolling = url.includes('/api/radio/now') || 
+                            url.includes('/widget-data') || 
+                            url.includes('/api/check') ||
+                            url.includes('/static/') ||
+                            url.includes('service-worker') ||
+                            options.headers?.['X-No-Progress'] === 'true';
+            
+            if (!isPolling && !url.match(/\.(jpg|jpeg|png|gif|svg|webp|mp3|mp4|webm|ogg)$/i)) {
+                NProgress.start();
+            }
+            
             try {
                 const response = await originalFetch(...args);
-                if (!isPolling) NProgress.done();
+                if (!isPolling && !url.match(/\.(jpg|jpeg|png|gif|svg|webp|mp3|mp4|webm|ogg)$/i)) {
+                    // Delay completion slightly for better UX
+                    setTimeout(() => NProgress.done(), 100);
+                }
                 return response;
             } catch (error) {
-                if (!isPolling) NProgress.done();
+                if (!isPolling && !url.match(/\.(jpg|jpeg|png|gif|svg|webp|mp3|mp4|webm|ogg)$/i)) {
+                    NProgress.done();
+                }
                 throw error;
             }
         };
+
+        // Handle navigation events (for SPA-like behavior)
+        let navigationTimeout;
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a[href]');
+            if (link && link.href && !link.target && !link.hasAttribute('download')) {
+                const href = link.getAttribute('href');
+                // Only show progress for internal links
+                if (href.startsWith('/') || href.startsWith(window.location.origin)) {
+                    clearTimeout(navigationTimeout);
+                    NProgress.start();
+                    // If navigation doesn't happen quickly, it's probably a slow page
+                    navigationTimeout = setTimeout(() => {
+                        NProgress.set(0.3);
+                    }, 200);
+                }
+            }
+        });
     </script>
     </body>
 

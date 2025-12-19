@@ -5,6 +5,153 @@
     display: none;
 }
 
+/* Mobile Auth Bar - Top Navigation */
+@media (max-width: 767px) {
+    .mobile-auth-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10004;
+        background: rgba(17, 17, 17, 0.95);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.625rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-height: 48px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Guest State - Login/Sign Up */
+    .auth-bar-guest {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .auth-login-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: #fff;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .auth-login-btn:active {
+        transform: scale(0.95);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .auth-login-btn i {
+        font-size: 0.875rem;
+        color: #a855f7;
+    }
+
+    .auth-signup-btn {
+        padding: 0.5rem 1.25rem;
+        background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+        border: none;
+        border-radius: 12px;
+        color: #fff;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+        transition: all 0.2s ease;
+    }
+
+    .auth-signup-btn:active {
+        transform: scale(0.95);
+        box-shadow: 0 2px 8px rgba(168, 85, 247, 0.4);
+    }
+
+    /* Logged In State - Account Access */
+    .auth-bar-user {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .auth-user-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: #fff;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .auth-user-link:active {
+        transform: scale(0.95);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .auth-user-link i {
+        font-size: 1rem;
+        color: #a855f7;
+    }
+
+    .auth-settings-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: #9ca3af;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .auth-settings-link:active {
+        transform: scale(0.95);
+        background: rgba(255, 255, 255, 0.08);
+        color: #a855f7;
+    }
+
+    .auth-settings-link i {
+        font-size: 1rem;
+    }
+
+    /* Add top padding to body to account for fixed auth bar */
+    body.mobile-auth-active {
+        padding-top: 48px;
+    }
+
+    /* Adjust sticky headers to account for auth bar */
+    .search-page-header,
+    .unified-header.artists-subheader {
+        top: 48px !important;
+    }
+
+    /* Ensure secondary nav accounts for auth bar */
+    .mobile-secondary-nav {
+        bottom: calc(70px + 48px + env(safe-area-inset-bottom)) !important;
+    }
+}
+
 /* Remove extra top mobile nav if present; keep single mobile top system */
 @media (max-width: 1023px) {
     .mobile-top-nav {
@@ -1071,9 +1218,9 @@
         text-align: center;
     }
 
-    /* Adjust body padding for compact status bar */
-    body {
-        padding-top: 32px;
+    /* Adjust body padding for auth bar and bottom nav */
+    body.mobile-auth-active {
+        padding-top: 48px;
         padding-bottom: calc(141px + env(safe-area-inset-bottom));
     }
 }
