@@ -7,6 +7,8 @@
     "test": "tests"
   },
   "scripts": {
+    "start:dev": "python dev.py",
+    "dev": "python dev.py",
     "electron:dev": "electron .",
     "electron:build:mac": "electron-builder --mac",
     "electron:build:mac:dmg": "electron-builder --mac --publish never",

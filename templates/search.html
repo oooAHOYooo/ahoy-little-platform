@@ -1,59 +1,69 @@
 {% extends "base.html" %}
 
-{% block title %}Search Results - Ahoy Indie Media{% endblock %}
+{% block title %}Search - Ahoy Indie Media{% endblock %}
 
 {% block content %}
 <div class="search-results-page" x-data="searchResults()" x-init="init()">
-    <!-- Header -->
-    <div class="page-header">
-        <div class="search-header">
-            <div class="search-input-container">
-                <input type="text" 
-                    x-model="searchQuery" 
-                    @keyup.enter="performSearch()"
-                    placeholder="Search music, shows, artists..."
-                    class="search-input-large">
-                <button @click="performSearch()" class="search-btn-large">
-                    <i class="fas fa-search"></i>
-                </button>
+    <!-- Mobile-Optimized Header -->
+    <div class="search-page-header">
+        <div class="search-header-content">
+            <h1 class="search-page-title mobile-only">
+                <i class="fas fa-search"></i> Search
+            </h1>
+            <div class="search-input-wrapper">
+                <div class="search-input-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                        x-model="searchQuery" 
+                        @keyup.enter="performSearch()"
+                        @input="if(searchQuery.trim()) performSearch()"
+                        placeholder="Search music, shows, artists..."
+                        class="search-input-large"
+                        autofocus>
+                    <button @click="clearSearch()" 
+                        x-show="searchQuery" 
+                        class="search-clear-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
-            <div class="search-stats" x-show="searchResults.length > 0">
-                <span x-text="`${searchResults.length} results for "${searchQuery}"`"></span>
+            <div class="search-stats" x-show="searchResults.length > 0 && hasSearched">
+                <span x-text="`${searchResults.length} result${searchResults.length !== 1 ? 's' : ''}`"></span>
             </div>
         </div>
     </div>
 
-    <!-- Filters and Controls -->
-    <div class="search-filters" x-show="searchResults.length > 0">
-        <div class="filter-group">
-            <label>Filter by:</label>
-            <select x-model="selectedFilter" @change="filterResults()">
-                <option value="all">All Results</option>
-                <option value="music">Music</option>
-                <option value="show">Shows</option>
-                <option value="artist">Artists</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label>Sort by:</label>
-            <select x-model="sortBy" @change="sortResults()">
-                <option value="relevance">Relevance</option>
-                <option value="title">Title</option>
-                <option value="artist">Artist</option>
-                <option value="date">Date</option>
-            </select>
-        </div>
-        <div class="view-controls">
-            <button @click="viewMode = 'grid'"
-                :class="{'active': viewMode === 'grid'}"
-                class="view-btn">
-                <i class="fas fa-th"></i>
+    <!-- Mobile-Optimized Filters and Controls -->
+    <div class="search-filters" x-show="searchResults.length > 0 && hasSearched">
+        <div class="filter-tabs-mobile">
+            <button @click="selectedFilter = 'all'; filterResults()"
+                :class="{'active': selectedFilter === 'all'}"
+                class="filter-tab-mobile">
+                All
             </button>
-            <button @click="viewMode = 'list'"
-                :class="{'active': viewMode === 'list'}"
-                class="view-btn">
-                <i class="fas fa-list"></i>
+            <button @click="selectedFilter = 'music'; filterResults()"
+                :class="{'active': selectedFilter === 'music'}"
+                class="filter-tab-mobile">
+                <i class="fas fa-music"></i> Music
             </button>
+            <button @click="selectedFilter = 'show'; filterResults()"
+                :class="{'active': selectedFilter === 'show'}"
+                class="filter-tab-mobile">
+                <i class="fas fa-play-circle"></i> Shows
+            </button>
+            <button @click="selectedFilter = 'artist'; filterResults()"
+                :class="{'active': selectedFilter === 'artist'}"
+                class="filter-tab-mobile">
+                <i class="fas fa-users"></i> Artists
+            </button>
+        </div>
+        <div class="search-controls-mobile">
+            <select x-model="sortBy" @change="sortResults()" class="sort-select-mobile">
+                <option value="relevance">Sort: Relevance</option>
+                <option value="title">Sort: Title</option>
+                <option value="artist">Sort: Artist</option>
+                <option value="date">Sort: Date</option>
+            </select>
         </div>
     </div>
 
@@ -303,6 +313,13 @@ function searchResults() {
             return item.liked || false;
         },
 
+        clearSearch() {
+            this.searchQuery = '';
+            this.searchResults = [];
+            this.filteredResults = [];
+            this.hasSearched = false;
+        },
+
         searchSuggestion(suggestion) {
             this.searchQuery = suggestion;
             this.performSearch();
@@ -382,4 +399,356 @@ function searchResults() {
     }
 }
 </script>
+
+<style>
+/* Mobile-First Search Page Styles */
+@media (max-width: 767px) {
+    .search-results-page {
+        padding: 0;
+        min-height: 100vh;
+        background: linear-gradient(180deg, rgba(17, 17, 17, 0.95) 0%, rgba(10, 10, 10, 1) 100%);
+    }
+
+    /* Sticky Header */
+    .search-page-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(17, 17, 17, 0.95);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .search-page-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .search-page-title i {
+        color: #a855f7;
+    }
+
+    .search-input-wrapper {
+        width: 100%;
+    }
+
+    .search-input-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input-container:focus-within {
+        border-color: #a855f7;
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.1);
+    }
+
+    .search-icon {
+        color: #9ca3af;
+        font-size: 1.1rem;
+        margin-right: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .search-input-large {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 1rem;
+        outline: none;
+        padding: 0;
+    }
+
+    .search-input-large::placeholder {
+        color: #6b7280;
+    }
+
+    .search-clear-btn {
+        background: transparent;
+        border: none;
+        color: #9ca3af;
+        font-size: 1rem;
+        padding: 0.25rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 0.5rem;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        transition: all 0.2s ease;
+    }
+
+    .search-clear-btn:active {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(0.9);
+    }
+
+    .search-stats {
+        margin-top: 0.75rem;
+        font-size: 0.875rem;
+        color: #9ca3af;
+        text-align: center;
+    }
+
+    /* Horizontal Filter Tabs */
+    .search-filters {
+        position: sticky;
+        top: calc(var(--header-height, 120px));
+        z-index: 99;
+        background: rgba(17, 17, 17, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.75rem 1rem;
+    }
+
+    .filter-tabs-mobile {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        padding-bottom: 0.5rem;
+        scrollbar-width: none;
+    }
+
+    .filter-tabs-mobile::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filter-tab-mobile {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        color: #d1d5db;
+        font-size: 0.875rem;
+        font-weight: 500;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        transition: all 0.2s ease;
+    }
+
+    .filter-tab-mobile:active {
+        transform: scale(0.95);
+    }
+
+    .filter-tab-mobile.active {
+        background: #a855f7;
+        border-color: #a855f7;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+    }
+
+    .filter-tab-mobile i {
+        font-size: 0.75rem;
+    }
+
+    .search-controls-mobile {
+        margin-top: 0.5rem;
+    }
+
+    .sort-select-mobile {
+        width: 100%;
+        padding: 0.625rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: #fff;
+        font-size: 0.875rem;
+        outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23fff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+    }
+
+    /* Search Results - Mobile Grid */
+    .search-results {
+        padding: 1rem;
+        padding-bottom: calc(140px + env(safe-area-inset-bottom));
+    }
+
+    .search-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .search-card {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.2s ease;
+    }
+
+    .search-card:active {
+        transform: scale(0.98);
+    }
+
+    .card-cover {
+        position: relative;
+        width: 100%;
+        padding-top: 100%;
+        background: rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+    }
+
+    .card-cover img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .card-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .search-card:active .card-overlay {
+        opacity: 1;
+    }
+
+    .card-info {
+        padding: 0.75rem;
+    }
+
+    .card-info h4 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #fff;
+        margin: 0 0 0.25rem 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .card-info p {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* No Results State */
+    .no-results {
+        padding: 3rem 1.5rem;
+        text-align: center;
+        min-height: 50vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .no-results-content i {
+        font-size: 3rem;
+        color: #6b7280;
+        margin-bottom: 1rem;
+    }
+
+    .no-results-content h3 {
+        font-size: 1.25rem;
+        color: #fff;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .no-results-content p {
+        color: #9ca3af;
+        margin: 0 0 1.5rem 0;
+    }
+
+    .suggestion-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .suggestion-tag {
+        padding: 0.5rem 1rem;
+        background: rgba(168, 85, 247, 0.1);
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        border-radius: 20px;
+        color: #c084fc;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .suggestion-tag:active {
+        background: rgba(168, 85, 247, 0.2);
+        transform: scale(0.95);
+    }
+
+    /* Loading State */
+    .loading-section {
+        padding: 3rem;
+        text-align: center;
+        color: #9ca3af;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(168, 85, 247, 0.2);
+        border-top-color: #a855f7;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Hide desktop list view on mobile */
+    .search-list {
+        display: none;
+    }
+}
+
+/* Desktop styles */
+@media (min-width: 768px) {
+    .search-page-title.mobile-only {
+        display: none;
+    }
+}
+</style>
 {% endblock %}

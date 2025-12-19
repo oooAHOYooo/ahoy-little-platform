@@ -639,46 +639,13 @@
             </nav>
         </header>
         <!-- Mobile Explore replaced by overlay -->
-        <!-- Mobile Account Features Bar (above bottom nav) -->
-        <nav class="mobile-account-bar mobile-only" role="navigation"
-            aria-label="Account Features">
-            <a href="/account"
-                class="account-bar-item {% if request.endpoint == 'account' or request.endpoint == 'account_page' %}active{% endif %}">
-                <i class="fas fa-user-circle"></i>
-                <span>Profile</span>
-            </a>
-            <a href="/merch"
-                class="account-bar-item {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}">
-                <i class="fas fa-shopping-bag"></i>
-                <span>Merch</span>
-            </a>
-            <a href="/dashboard"
-                class="account-bar-item {% if request.endpoint == 'dashboard' or request.endpoint == 'dashboard_page' %}active{% endif %}">
-                <i class="fas fa-trophy"></i>
-                <span>Achievements</span>
-            </a>
-            <a href="/bookmarks"
-                class="account-bar-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}">
-                <i class="fas fa-bookmark"></i>
-                <span>Saved</span>
-            </a>
-            <a href="/settings"
-                class="account-bar-item {% if request.endpoint == 'settings' or request.endpoint == 'settings_page' %}active{% endif %}">
-                <i class="fas fa-cog"></i>
-                <span>Settings</span>
-            </a>
-        </nav>
-        <!-- Mobile Bottom Tab Bar (Spotify-like) -->
-        <nav class="mobile-bottom-nav mobile-only" role="navigation"
-            aria-label="Primary">
+        <!-- Mobile Secondary Navigation - Content Discovery (above primary nav) -->
+        <nav class="mobile-secondary-nav mobile-only" role="navigation"
+            aria-label="Content Discovery">
             <a href="{{ url_for('live_tv_page') }}"
                 class="mobile-tab {% if request.endpoint == 'live_tv_page' %}active{% endif %}">
                 <i class="fas fa-tv"></i>
                 <span>Live TV</span>
-            </a>
-            <a href="/radio" class="mobile-tab">
-                <i class="fas fa-broadcast-tower"></i>
-                <span>Radio</span>
             </a>
             <a href="{{ url_for('music') }}"
                 class="mobile-tab {% if request.endpoint == 'music' %}active{% endif %}">
@@ -695,6 +662,25 @@
                 <i class="fas fa-users"></i>
                 <span>Artists</span>
             </a>
+            <a href="/search"
+                class="mobile-tab {% if request.endpoint == 'search' or request.endpoint == 'search_page' %}active{% endif %}">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+            </a>
+        </nav>
+        <!-- Mobile Bottom Navigation - Primary Actions (Single Row with Prominent Active States) -->
+        <nav class="mobile-bottom-nav mobile-only" role="navigation"
+            aria-label="Primary Navigation">
+            <a href="/"
+                class="mobile-tab {% if request.endpoint == 'home' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="/radio"
+                class="mobile-tab {% if request.endpoint == 'radio_page' %}active{% endif %}">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>Radio</span>
+            </a>
             <a href="/merch"
                 class="mobile-tab {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}">
                 <i class="fas fa-shopping-bag"></i>
@@ -704,6 +690,11 @@
                 class="mobile-tab {% if request.endpoint == 'bookmarks_page' %}active{% endif %}">
                 <i class="fas fa-bookmark"></i>
                 <span>Saved</span>
+            </a>
+            <a href="/account"
+                class="mobile-tab {% if request.endpoint == 'account' or request.endpoint == 'account_page' %}active{% endif %}">
+                <i class="fas fa-user-circle"></i>
+                <span>Profile</span>
             </a>
         </nav>
         <div class="desktop-only">

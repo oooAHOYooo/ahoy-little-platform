@@ -794,7 +794,7 @@ def performances():
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
-# @app.route('/merch')
+@app.route('/merch')
 def merch():
     """Merch store page"""
     response = make_response(render_template('merch.html'))

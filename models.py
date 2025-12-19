@@ -359,3 +359,22 @@ class Purchase(Base):
         Index('ix_purchases_type_created_at', 'type', 'created_at'),
     )
 
+
+class ArtistTip(Base):
+    __tablename__ = 'artist_tips'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    artist_name = Column(String(255), nullable=False, index=True)
+    amount = Column(Integer, nullable=False)  # Amount in cents
+    note = Column(String(500), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    __table_args__ = (
+        Index('ix_artist_tips_user_id_created_at', 'user_id', 'created_at'),
+        Index('ix_artist_tips_artist_name', 'artist_name'),
+    )
+
+    def __repr__(self) -> str:
+        return f"<ArtistTip id={self.id} user_id={self.user_id} artist_name={self.artist_name} amount={self.amount}>"
+
