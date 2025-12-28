@@ -210,6 +210,95 @@
             }
           };
         };
+
+        // Compact Footer Component
+        window.compactFooter = function() {
+          return {
+            currentTime: '',
+            temperature: '--',
+            tickerOffset: 0,
+            tickerSpeed: 0.5,
+            announcements: [
+              'Welcome to Ahoy Indie Media',
+              'Discover new indie music and shows',
+              'Create playlists and save your favorites',
+              'Follow your favorite artists',
+              'Explore live shows and events'
+            ],
+            
+            init() {
+              // Update time immediately and every second
+              this.updateTime();
+              setInterval(() => this.updateTime(), 1000);
+              
+              // Fetch weather for New Haven, CT
+              this.fetchWeather();
+              // Refresh weather every 10 minutes
+              setInterval(() => this.fetchWeather(), 600000);
+              
+              // Start ticker animation
+              this.startTicker();
+            },
+            
+            updateTime() {
+              const now = new Date();
+              this.currentTime = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              });
+            },
+            
+            async fetchWeather() {
+              try {
+                // New Haven, CT coordinates
+                const lat = 41.3083;
+                const lon = -72.9279;
+                const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
+                if (response.ok) {
+                  const data = await response.json();
+                  this.temperature = data.temperature || '--';
+                }
+              } catch (err) {
+                // Silently fail
+                console.error('Weather fetch failed:', err);
+              }
+            },
+            
+            startTicker() {
+              // Wait for Alpine to render, then start animation
+              setTimeout(() => {
+                const tickerContent = document.querySelector('.ticker-content');
+                if (!tickerContent) {
+                  // Retry if not ready yet
+                  setTimeout(() => this.startTicker(), 200);
+                  return;
+                }
+                
+                const animate = () => {
+                  this.tickerOffset -= this.tickerSpeed;
+                  
+                  // Get the ticker wrapper
+                  const tickerWrapper = document.querySelector('.ticker-wrapper');
+                  
+                  if (tickerWrapper && tickerContent) {
+                    const contentWidth = tickerContent.scrollWidth / 2; // Half because we duplicate
+                    const wrapperWidth = tickerWrapper.offsetWidth;
+                    
+                    // Reset when scrolled past first set of announcements
+                    if (Math.abs(this.tickerOffset) >= contentWidth) {
+                      this.tickerOffset = 0;
+                    }
+                  }
+                  
+                  requestAnimationFrame(animate);
+                };
+                
+                requestAnimationFrame(animate);
+              }, 300);
+            }
+          };
+        };
         </script>
 
         <!-- Alpine.js for reactive components -->
@@ -1577,6 +1666,37 @@
                 <p>&copy; 2025 Ahoy Indie Media. All rights reserved.</p>
             </div>
         </footer>
+
+        <!-- Compact Fixed Footer -->
+        <div id="compact-footer" class="compact-footer" x-data="compactFooter()"
+            x-init="init()">
+            <div class="compact-footer-content">
+                <div class="compact-footer-time-weather">
+                    <span class="compact-time" x-text="currentTime"></span>
+                    <span class="compact-separator">•</span>
+                    <span class="compact-weather">
+                        <span x-text="temperature"></span>°F
+                    </span>
+                    <span class="compact-location">New Haven, CT</span>
+                </div>
+                <div class="compact-footer-ticker">
+                    <div class="ticker-wrapper">
+                        <div class="ticker-content"
+                            :style="`transform: translateX(${tickerOffset}px)`">
+                            <template x-for="(item, index) in announcements"
+                                :key="index">
+                                <span class="ticker-item" x-text="item"></span>
+                            </template>
+                            <!-- Duplicate for seamless loop -->
+                            <template x-for="(item, index) in announcements"
+                                :key="'dup-' + index">
+                                <span class="ticker-item" x-text="item"></span>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Bottom Sheet -->
         <div id="playlist-sheet"
