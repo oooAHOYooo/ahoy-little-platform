@@ -2428,7 +2428,7 @@ a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
 }
 
 .compact-footer-time-weather {
@@ -2491,6 +2491,30 @@ a:hover {
     padding-right: 24px;
     display: inline-block;
     flex-shrink: 0;
+}
+
+.compact-footer-quicklinks {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.quicklink {
+    color: #888;
+    text-decoration: none;
+    font-size: 9px;
+    transition: color 0.2s;
+}
+
+.quicklink:hover {
+    color: #aaa;
+}
+
+.quicklink-sep {
+    color: #555;
+    font-size: 8px;
 }
 
 /* Mobile Responsiveness */

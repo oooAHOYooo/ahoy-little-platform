@@ -971,35 +971,123 @@ def api_products():
 
 @app.route('/api/weather')
 def api_weather():
-    """Get weather information for user's location"""
+    """Get weather information for New Haven, CT"""
     import requests
     from datetime import datetime
     
-    # For demo purposes, we'll use a default location (San Francisco)
-    # In a real app, you'd get this from user's location or settings
-    lat = request.args.get('lat', '37.7749')
-    lon = request.args.get('lon', '-122.4194')
+    # New Haven, CT coordinates
+    lat = request.args.get('lat', '41.3083')
+    lon = request.args.get('lon', '-72.9279')
     
-    # Mock weather data for demo (in production, use a real weather API)
-    weather_conditions = [
-        {'condition': 'sunny', 'temp': 72, 'description': 'Sunny', 'icon': '☀️'},
-        {'condition': 'cloudy', 'temp': 65, 'description': 'Cloudy', 'icon': '☁️'},
-        {'condition': 'rainy', 'temp': 58, 'description': 'Rainy', 'icon': '🌧️'},
-        {'condition': 'partly_cloudy', 'temp': 68, 'description': 'Partly Cloudy', 'icon': '⛅'},
-        {'condition': 'foggy', 'temp': 62, 'description': 'Foggy', 'icon': '🌫️'}
-    ]
-    
-    # Select random weather for demo
-    weather = random.choice(weather_conditions)
-    
-    return jsonify({
-        'temperature': weather['temp'],
-        'condition': weather['condition'],
-        'description': weather['description'],
-        'icon': weather['icon'],
-        'location': 'San Francisco, CA',
-        'timestamp': datetime.now().isoformat()
-    })
+    try:
+        # Use wttr.in API for free weather data (no API key required)
+        # Format: ?format=j1 returns JSON
+        url = f"https://wttr.in/New+Haven,CT?format=j1"
+        
+        response = requests.get(url, timeout=5, headers={
+            'User-Agent': 'Mozilla/5.0 (compatible; AhoyWeather/1.0)'
+        })
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Extract current weather data
+            current = data.get('current_condition', [{}])[0]
+            # Get temp_F - wttr.in returns it as a string
+            # Make sure we're using temp_F, not FeelsLikeF
+            temp_f = current.get('temp_F')
+            if not temp_f:
+                temp_f = '--'
+            condition = current.get('weatherDesc', [{}])[0].get('value', 'Unknown')
+            weather_code = str(current.get('weatherCode', '113'))  # Ensure it's a string
+            
+            # Map weather codes to emojis (wttr.in uses WMO codes)
+            icon_map = {
+                '113': '☀️',  # Clear/Sunny
+                '116': '⛅',  # Partly cloudy
+                '119': '☁️',  # Cloudy
+                '122': '☁️',  # Overcast
+                '143': '🌫️',  # Mist
+                '176': '🌦️',  # Patchy rain
+                '179': '🌨️',  # Patchy snow
+                '182': '🌨️',  # Patchy sleet
+                '185': '🌨️',  # Patchy freezing drizzle
+                '200': '⛈️',  # Thundery outbreaks
+                '227': '🌨️',  # Blowing snow
+                '230': '🌨️',  # Blizzard
+                '248': '🌫️',  # Fog
+                '260': '🌫️',  # Freezing fog
+                '263': '🌦️',  # Patchy light drizzle
+                '266': '🌦️',  # Light drizzle
+                '281': '🌨️',  # Freezing drizzle
+                '284': '🌨️',  # Heavy freezing drizzle
+                '293': '🌦️',  # Patchy light rain
+                '296': '🌦️',  # Light rain
+                '299': '🌧️',  # Moderate rain
+                '302': '🌧️',  # Heavy rain
+                '305': '🌧️',  # Heavy rain
+                '308': '🌧️',  # Heavy rain
+                '311': '🌨️',  # Light freezing rain
+                '314': '🌨️',  # Moderate or heavy freezing rain
+                '317': '🌨️',  # Light sleet
+                '320': '🌨️',  # Moderate or heavy sleet
+                '323': '🌨️',  # Patchy light snow
+                '326': '🌨️',  # Patchy moderate snow
+                '329': '🌨️',  # Patchy heavy snow
+                '332': '🌨️',  # Moderate snow
+                '335': '🌨️',  # Patchy heavy snow
+                '338': '🌨️',  # Heavy snow
+                '350': '🌨️',  # Ice pellets
+                '353': '🌦️',  # Light rain shower
+                '356': '🌧️',  # Moderate or heavy rain shower
+                '359': '🌧️',  # Torrential rain shower
+                '362': '🌨️',  # Light sleet showers
+                '365': '🌨️',  # Moderate or heavy sleet showers
+                '368': '🌨️',  # Light snow showers
+                '371': '🌨️',  # Moderate or heavy snow showers
+                '374': '🌨️',  # Light showers of ice pellets
+                '377': '🌨️',  # Moderate or heavy showers of ice pellets
+                '386': '⛈️',  # Patchy light rain with thunder
+                '389': '⛈️',  # Moderate or heavy rain with thunder
+                '392': '⛈️',  # Patchy light snow with thunder
+                '395': '⛈️',  # Moderate or heavy snow with thunder
+            }
+            
+            icon = icon_map.get(weather_code, '☀️')
+            
+            # Convert temperature to integer if possible
+            # Handle string temperature from API
+            try:
+                if temp_f and temp_f != '--':
+                    # Remove any whitespace and convert
+                    temp_clean = str(temp_f).strip()
+                    temp_int = int(temp_clean)
+                else:
+                    temp_int = '--'
+            except (ValueError, TypeError) as e:
+                # If parsing fails, try to get it from the raw response
+                print(f"Temperature parsing error: {e}, raw value: {temp_f}")
+                temp_int = '--'
+            
+            return jsonify({
+                'temperature': temp_int,
+                'condition': condition.lower().replace(' ', '_'),
+                'description': condition,
+                'icon': icon,
+                'location': 'New Haven, CT',
+                'timestamp': datetime.now().isoformat()
+            })
+    except Exception as e:
+        # Fallback to a default if API fails
+        print(f"Weather API error: {e}")
+        return jsonify({
+            'temperature': '--',
+            'condition': 'unknown',
+            'description': 'Weather unavailable',
+            'icon': '☀️',
+            'location': 'New Haven, CT',
+            'timestamp': datetime.now().isoformat()
+        })
 
 @app.route('/api/agenda')
 def api_agenda():
