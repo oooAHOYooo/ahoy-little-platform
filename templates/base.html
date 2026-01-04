@@ -506,6 +506,23 @@
                         <i class="fas fa-bars"></i>
                     </button>
 
+                    <!-- Back/Forward (Desktop) -->
+                    <div class="nav-history desktop-only"
+                        aria-label="History navigation">
+                        <button class="nav-history-btn" type="button"
+                            title="Back" aria-label="Back"
+                            @click="goBack()">
+                            <i class="fas fa-chevron-left"
+                                aria-hidden="true"></i>
+                        </button>
+                        <button class="nav-history-btn" type="button"
+                            title="Forward" aria-label="Forward"
+                            @click="goForward()">
+                            <i class="fas fa-chevron-right"
+                                aria-hidden="true"></i>
+                        </button>
+                    </div>
+
                     <!-- Main Navigation (desktop) -->
                     <div class="nav-features">
                         <a href="{{ url_for('music') }}"
@@ -547,11 +564,11 @@
                     </div>
 
                     <!-- Desktop-only Search Bar -->
-                    <div class="nav-search desktop-only">
+                    <div class="nav-search nav-search--pill desktop-only">
                         <div class="search-container">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text"
-                                placeholder="Search music, shows, artists..."
+                                placeholder="Search stations, shows, artists..."
                                 x-model="searchQuery"
                                 @keyup.enter="performSearch()"
                                 class="search-input">
@@ -564,6 +581,23 @@
 
                     <!-- App Menu - Compact Right Side -->
                     <div class="nav-menu flex items-center gap-1">
+                        <!-- Notifications + Premium (Desktop) -->
+                        <button type="button"
+                            class="nav-pill-btn desktop-only"
+                            title="Notifications"
+                            @click="openNotifications()">
+                            <i class="fas fa-bell" aria-hidden="true"></i>
+                            <span>Notifications</span>
+                            <span class="nav-pill-badge"
+                                x-show="hasNewBookmarks"
+                                x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
+                        </button>
+                        <button type="button"
+                            class="nav-premium-btn desktop-only"
+                            @click="goPremium()">
+                            Go Premium
+                        </button>
+
                         <!-- Weather Widget (Desktop Only) -->
                         <div
                             class="nav-item hidden md:flex items-center gap-2 px-3 mr-2"
@@ -2225,6 +2259,20 @@
                     if (confirm('Are you sure you want to sign out?')) {
                         window.location.href = '/logout';
                     }
+                },
+
+                // Desktop nav utilities (screenshot-style)
+                goBack() {
+                    try { window.history.back(); } catch (_) {}
+                },
+                goForward() {
+                    try { window.history.forward(); } catch (_) {}
+                },
+                openNotifications() {
+                    window.location.href = '/bookmarks';
+                },
+                goPremium() {
+                    document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Premium coming soon' }));
                 }
             };
         }

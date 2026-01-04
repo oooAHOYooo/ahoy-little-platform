@@ -1186,6 +1186,41 @@ a:hover {
     -webkit-app-region: no-drag;
 }
 
+.nav-history {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    -webkit-app-region: no-drag;
+}
+
+.nav-history-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(0, 0, 0, 0.18);
+    color: rgba(255, 255, 255, 0.88);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+}
+
+.nav-history-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.nav-history-btn:active {
+    transform: translateY(1px);
+}
+
+.nav-history-btn i {
+    font-size: 12px;
+    opacity: 0.95;
+}
+
 .search-container {
     position: relative;
     display: flex;
@@ -1255,6 +1290,101 @@ a:hover {
 .search-clear:hover {
     color: rgba(255, 255, 255, 0.7);
     background: rgba(255, 255, 255, 0.05);
+}
+
+/* Screenshot-style navbar pills */
+.nav-search--pill {
+    max-width: 520px;
+}
+
+.nav-search--pill .search-container {
+    height: 34px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.18);
+    border-color: rgba(255, 255, 255, 0.10);
+}
+
+.nav-search--pill .search-icon {
+    left: 12px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.nav-search--pill .search-input {
+    font-size: 13px;
+    padding-left: 34px;
+    padding-right: 34px;
+}
+
+.nav-search--pill .search-clear {
+    right: 10px;
+}
+
+.nav-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.18);
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-app-region: no-drag;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.nav-pill-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+.nav-pill-btn i {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.nav-pill-badge {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: rgba(255, 92, 92, 0.95);
+    color: #0b0b0b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.nav-premium-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.92);
+    color: rgba(10, 10, 10, 0.92);
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+    -webkit-app-region: no-drag;
+    transition: transform 0.05s ease, filter 0.15s ease;
+}
+
+.nav-premium-btn:hover {
+    filter: brightness(1.02);
+}
+
+.nav-premium-btn:active {
+    transform: translateY(1px);
 }
 
 /* App Menu */
