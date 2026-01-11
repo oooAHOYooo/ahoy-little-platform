@@ -955,6 +955,13 @@ def podcast_show_page(show_slug):
     }
     return render_template('podcast_show.html', show=show)
 
+@app.route('/events')
+def events_page():
+    """Upcoming live Ahoy events (separate from /dashboard and /performances)."""
+    response = make_response(render_template('events.html'))
+    response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
+    return response
+
 @app.route('/performances')
 def performances():
     """Performances page"""
