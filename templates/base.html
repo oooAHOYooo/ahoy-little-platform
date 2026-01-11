@@ -369,8 +369,8 @@
                         <i class="fas fa-search"></i>
                     </button>
                     <a href="/bookmarks" class="status-action-btn"
-                        title="Notifications">
-                        <i class="fas fa-bell"></i>
+                        title="Bookmarks">
+                        <i class="fas fa-bookmark"></i>
                         <span class="notification-badge"
                             x-show="hasNewBookmarks"
                             x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
@@ -461,22 +461,8 @@
                         <span>Saved</span>
                     </a>
                 </nav>
-                <div
-                    x-show="open"
-                    x-transition
-                    class="mobile-menu-overlay"
-                    style="display:none;">
-                    <button @click="open = false" class="close-btn"
-                        aria-label="Close menu">✕</button>
-                    <a href="/music">Music</a>
-                    <a href="/shows">Shows</a>
-                    <a href="/live-tv">Live TV</a>
-                    <a href="/artists">Artists</a>
-                    <a href="/merch">Merch</a>
-                    <a href="/radio">Radio</a>
-                    <a href="/bookmarks">Saved</a>
-                    <a href="/settings">Settings</a>
-                </div>
+                    <!-- Mobile hamburger overlay removed to avoid duplicate navigation.
+                         Mobile uses the bottom tab bar + the top utility bar. -->
                 <div x-show="searchOpen" class="mobile-search-panel"
                     style="display:none;">
                     <!-- existing search input -->
