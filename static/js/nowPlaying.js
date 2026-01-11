@@ -20,25 +20,9 @@ class NowPlayingController {
         if (this.isInitialized) return;
 
         try {
-            // Wait for Three.js to load
-            if (!window.THREE) {
-                console.warn('Three.js not loaded yet, waiting...');
-                await this.waitForThree();
-            }
-
             // Setup visualizer container
-            const visualizerContainer = document.getElementById('now-playing-visualizer');
-            if (visualizerContainer) {
-                this.visualizer = new Visualizer(visualizerContainer, {
-                    type: 'bars',
-                    maxFPS: 45
-                });
-                
-                if (this.visualizer.init()) {
-                    // Do not start the render loop until playback begins.
-                    // This saves CPU/GPU on mobile when nothing is playing.
-                }
-            }
+            // Visualizer removed (Three.js). Keep container empty.
+            this.visualizer = null;
 
             // Setup audio element connection
             this.setupAudioConnection();
@@ -50,31 +34,6 @@ class NowPlayingController {
         } catch (error) {
             console.error('Error initializing NowPlayingController:', error);
         }
-    }
-
-    /**
-     * Wait for Three.js to be loaded
-     */
-    waitForThree() {
-        return new Promise((resolve) => {
-            if (window.THREE) {
-                resolve();
-                return;
-            }
-
-            const checkInterval = setInterval(() => {
-                if (window.THREE) {
-                    clearInterval(checkInterval);
-                    resolve();
-                }
-            }, 100);
-
-            // Timeout after 5 seconds
-            setTimeout(() => {
-                clearInterval(checkInterval);
-                resolve();
-            }, 5000);
-        });
     }
 
     /**
@@ -121,6 +80,8 @@ class NowPlayingController {
      */
     connectAudio() {
         if (!this.audioElement) return;
+        // Visualizer removed: no analyser loop needed.
+        if (!this.visualizer) return;
 
         // Don't connect if audio is already playing - wait for next track change
         // This prevents breaking existing audio connections
@@ -167,17 +128,6 @@ class NowPlayingController {
                 if (track) {
                     this.onTrackChange(track);
                 }
-                // Start loops only while playing (CPU/GPU win on mobile).
-                try { this.visualizer && this.visualizer.start(); } catch (_) {}
-                try { this.startUpdateLoop(); } catch (_) {}
-            });
-            window.mediaPlayer.on('pause', () => {
-                try { this.stopUpdateLoop(); } catch (_) {}
-                try { this.visualizer && this.visualizer.stop(); } catch (_) {}
-            });
-            window.mediaPlayer.on('ended', () => {
-                try { this.stopUpdateLoop(); } catch (_) {}
-                try { this.visualizer && this.visualizer.stop(); } catch (_) {}
             });
         }
 
@@ -208,11 +158,6 @@ class NowPlayingController {
         // Extract colors from album art
         const coverArt = track.cover_art || track.cover || '/static/img/default-cover.jpg';
         this.currentColors = await window.colorExtractor.extractColors(coverArt);
-
-        // Update visualizer colors
-        if (this.visualizer) {
-            this.visualizer.updateColors(this.currentColors);
-        }
 
         // Update CSS variables for glass effect
         this.updateGlassColors(this.currentColors);
@@ -264,6 +209,8 @@ class NowPlayingController {
      * Start update loop for visualizer
      */
     startUpdateLoop() {
+        // Visualizer removed: no-op.
+        if (!this.visualizer) return;
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
         }
