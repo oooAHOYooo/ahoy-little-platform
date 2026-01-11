@@ -78,30 +78,58 @@
             shows: raw?.shows || [],
             episodes: [],
             init() {
-                // Flatten episodes into a single vertical list (single-row UI).
+                // Prefer server-provided single episode list (from podcastCollection.json).
+                const serverEps = Array.isArray(raw?.episodes) ? raw.episodes : null;
                 const eps = [];
-                for (const s of (this.shows || [])) {
-                    for (const e of (s.episodes || [])) {
+
+                if (serverEps) {
+                    for (const e of serverEps) {
+                        const showSlug = e.show_slug || 'rob';
+                        const show = (this.shows || []).find(s => s.slug === showSlug);
                         eps.push({
-                            key: `${s.slug}:${e.id}`,
-                            showSlug: s.slug,
-                            showTitle: s.title,
+                            key: `${showSlug}:${e.id}`,
+                            showSlug,
+                            showTitle: show?.title || showSlug,
                             id: e.id,
                             title: e.title,
                             description: e.description || '',
                             date: e.date || '',
                             duration: e.duration || '',
                             duration_seconds: e.duration_seconds || 0,
-                            artwork: e.artwork || s.artwork || '/static/img/default-cover.jpg',
+                            artwork: e.artwork || show?.artwork || '/static/img/default-cover.jpg',
                             audio_url: e.audio_url,
                             // Player expects these keys for the bottom bar UI.
                             type: 'track',
-                            artist: s.title,
-                            cover_art: e.artwork || s.artwork || '/static/img/default-cover.jpg'
+                            artist: show?.title || showSlug,
+                            cover_art: e.artwork || show?.artwork || '/static/img/default-cover.jpg'
                         });
                     }
+                } else {
+                    // Fallback: flatten shows -> episodes.
+                    for (const s of (this.shows || [])) {
+                        for (const e of (s.episodes || [])) {
+                            eps.push({
+                                key: `${s.slug}:${e.id}`,
+                                showSlug: s.slug,
+                                showTitle: s.title,
+                                id: e.id,
+                                title: e.title,
+                                description: e.description || '',
+                                date: e.date || '',
+                                duration: e.duration || '',
+                                duration_seconds: e.duration_seconds || 0,
+                                artwork: e.artwork || s.artwork || '/static/img/default-cover.jpg',
+                                audio_url: e.audio_url,
+                                // Player expects these keys for the bottom bar UI.
+                                type: 'track',
+                                artist: s.title,
+                                cover_art: e.artwork || s.artwork || '/static/img/default-cover.jpg'
+                            });
+                        }
+                    }
                 }
-                // Sort newest-first when dates are present (fallback to insertion order).
+
+                // Sort newest-first when dates are present.
                 eps.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
                 this.episodes = eps;
             },
