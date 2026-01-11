@@ -958,7 +958,9 @@ def podcast_show_page(show_slug):
 @app.route('/events')
 def events_page():
     """Upcoming live Ahoy events (separate from /dashboard and /performances)."""
-    response = make_response(render_template('events.html'))
+    events_data = load_json_data('events.json', {'events': []})
+    videos_data = load_json_data('videos.json', {'videos': []})
+    response = make_response(render_template('events.html', events=events_data, videos=videos_data))
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 

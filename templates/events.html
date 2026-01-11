@@ -7,21 +7,46 @@
     <section class="podcasts-hero">
         <div class="podcasts-hero-inner">
             <h1>Events</h1>
-            <p>Upcoming live Ahoy shows.</p>
+            <p>Upcoming live Ahoy shows, plus past events and recordings.</p>
         </div>
     </section>
 
+    <!-- Featured / Upcoming widget -->
     <section class="podcasts-section">
         <div class="podcasts-section-header">
             <h2>Upcoming</h2>
         </div>
 
-        <div class="episode-list">
+        <template x-if="featured">
+            <div class="podcast-show-hero" style="margin-top: 10px;">
+                <img class="podcast-show-hero-art" :src="featured.image || '/static/img/default-cover.jpg'" alt="">
+                <div class="podcast-show-hero-meta">
+                    <div class="podcast-show-hero-kicker">Featured event</div>
+                    <h1 class="podcast-show-hero-title" x-text="featured.title"></h1>
+                    <p class="podcast-show-hero-desc" x-text="featured.description"></p>
+                    <div class="episode-subtitle" style="margin-bottom: 10px;">
+                        <span x-text="formatDate(featured.date)"></span>
+                        <span class="episode-dot">•</span>
+                        <span x-text="featured.time || ''"></span>
+                        <span class="episode-dot" x-show="featured.venue">•</span>
+                        <span x-show="featured.venue" x-text="featured.venue"></span>
+                    </div>
+                    <div class="podcast-show-hero-actions">
+                        <a class="podcast-cta" :href="featured.rsvp_external_url || '/events'" @click.stop
+                            x-text="featured.rsvp_external_url ? 'RSVP' : 'View'"></a>
+                        <button type="button" class="podcast-cta secondary"
+                            @click="copyLink(featured.rsvp_external_url || (window.location.origin + '/events'))">
+                            Copy link
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <div class="episode-list" style="margin-top: 12px;">
             <template x-for="evt in upcoming" :key="evt.id || evt.title">
-                <article class="episode-row" @click="openPerformances()">
-                    <img class="episode-art"
-                        :src="evt.thumbnail || '/static/img/default-cover.jpg'"
-                        alt="">
+                <article class="episode-row">
+                    <img class="episode-art" :src="evt.image || '/static/img/default-cover.jpg'" alt="">
                     <div class="episode-meta">
                         <div class="episode-title" x-text="evt.title || 'Live Show'"></div>
                         <div class="episode-subtitle">
@@ -34,62 +59,136 @@
                         <div class="episode-desc" x-text="evt.description || ''"></div>
                     </div>
                     <div class="episode-actions">
-                        <a class="episode-open" href="/performances" @click.stop>
-                            Details
-                        </a>
+                        <a class="episode-open" :href="evt.rsvp_external_url || '/events'" @click.stop
+                            x-text="evt.rsvp_external_url ? 'RSVP' : 'Open'"></a>
                     </div>
                 </article>
             </template>
         </div>
 
-        <div x-show="!loading && upcoming.length === 0" class="empty-state"
-            style="margin-top:14px;">
+        <div x-show="!loading && upcoming.length === 0" class="empty-state" style="margin-top:14px;">
             <i class="fas fa-calendar-times"></i>
             <h4>No upcoming events</h4>
-            <p>Check back soon, or view <a href="/performances">performances</a>.</p>
+            <p>Check back soon.</p>
+        </div>
+    </section>
+
+    <!-- Past events list -->
+    <section class="podcasts-section">
+        <div class="podcasts-section-header">
+            <h2>Past events</h2>
+        </div>
+
+        <div class="episode-list">
+            <template x-for="evt in past" :key="evt.id || evt.title">
+                <article class="episode-row">
+                    <img class="episode-art" :src="evt.image || '/static/img/default-cover.jpg'" alt="">
+                    <div class="episode-meta">
+                        <div class="episode-title" x-text="evt.title || 'Event'"></div>
+                        <div class="episode-subtitle">
+                            <span x-text="formatDate(evt.date)"></span>
+                            <span class="episode-dot">•</span>
+                            <span x-text="evt.venue || ''"></span>
+                            <span class="episode-dot" x-show="evt.videoStatus">•</span>
+                            <span x-show="evt.videoStatus" x-text="evt.videoStatus"></span>
+                        </div>
+                        <div class="episode-desc" x-text="evt.description || ''"></div>
+                    </div>
+                    <div class="episode-actions">
+                        <a class="episode-open" x-show="evt.videoUrl" :href="evt.videoUrl" target="_blank" rel="noopener"
+                            @click.stop>
+                            Watch
+                        </a>
+                        <span class="episode-open" x-show="!evt.videoUrl && evt.videoStatus" style="opacity:0.7; cursor:default;">
+                            <span x-text="evt.videoStatus"></span>
+                        </span>
+                    </div>
+                </article>
+            </template>
         </div>
     </section>
 </div>
 
 <script>
     function eventsPage() {
+        const rawEvents = {{ events|tojson|safe }};
+        const rawVideos = {{ videos|tojson|safe }};
         return {
             loading: true,
+            featured: null,
             upcoming: [],
+            past: [],
             async init() {
                 this.loading = true;
                 try {
-                    const r = await fetch('/api/performances');
-                    const data = await r.json();
-                    const list = Array.isArray(data.performances) ? data.performances : [];
+                    const events = Array.isArray(rawEvents?.events) ? rawEvents.events : [];
+                    const videos = Array.isArray(rawVideos?.videos) ? rawVideos.videos : [];
+                    const videoByEventId = new Map();
+                    for (const v of videos) {
+                        if (!v?.event_id) continue;
+                        videoByEventId.set(String(v.event_id), v);
+                    }
 
-                    // Best-effort future filter; if dates are missing, include.
-                    const now = new Date();
-                    const upcoming = list.filter(e => {
-                        const ds = e.date;
-                        if (!ds) return true;
-                        const d = new Date(ds);
-                        return isNaN(d.getTime()) ? true : d >= now;
+                    // Normalize + attach video info
+                    const normalized = events.map(e => {
+                        const vid = videoByEventId.get(String(e.id || ''));
+                        return {
+                            ...e,
+                            image: e.image || e.thumbnail,
+                            videoUrl: vid?.url || null,
+                            videoStatus: vid?.status === 'available' ? 'Recording available'
+                                : vid?.status === 'coming_soon' ? 'Recording coming soon'
+                                    : ''
+                        };
                     });
 
-                    // Sort by date asc when possible
-                    upcoming.sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
-                    this.upcoming = upcoming;
+                    // Separate upcoming vs past based on explicit status first.
+                    const upcoming = normalized.filter(e => String(e.status || '').toLowerCase() === 'upcoming');
+                    const past = normalized.filter(e => String(e.status || '').toLowerCase() === 'past');
+
+                    // If status missing/messy, fallback to date comparison.
+                    const unknown = normalized.filter(e => !['upcoming', 'past'].includes(String(e.status || '').toLowerCase()));
+                    const now = new Date();
+                    for (const e of unknown) {
+                        const d = e.date ? new Date(e.date) : null;
+                        if (!d || isNaN(d.getTime())) {
+                            upcoming.push(e);
+                        } else if (d >= now) {
+                            upcoming.push(e);
+                        } else {
+                            past.push(e);
+                        }
+                    }
+
+                    // Sort
+                    upcoming.sort((a, b) => String(a.date || '').localeCompare(String(b.date || ''))); // soonest first
+                    past.sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))); // newest past first
+
+                    this.featured = upcoming[0] || null;
+                    this.upcoming = upcoming.slice(0, 12);
+                    this.past = past;
                 } catch (e) {
-                    console.warn('Failed to load performances:', e);
+                    console.warn('Failed to load events:', e);
                     this.upcoming = [];
+                    this.past = [];
+                    this.featured = null;
                 } finally {
                     this.loading = false;
                 }
-            },
-            openPerformances() {
-                window.location.href = '/performances';
             },
             formatDate(ds) {
                 if (!ds) return '';
                 const d = new Date(ds);
                 if (isNaN(d.getTime())) return String(ds);
                 return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+            },
+            async copyLink(url) {
+                try {
+                    await navigator.clipboard.writeText(url);
+                    document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Link copied.' }));
+                } catch (_) {
+                    // ignore
+                }
             }
         };
     }
