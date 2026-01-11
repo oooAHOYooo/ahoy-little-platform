@@ -1488,11 +1488,216 @@ a:hover {
         0 2px 8px rgba(0, 0, 0, 0.4),
         0 1px 2px rgba(0, 0, 0, 0.2);
     z-index: 10000;
-    height: 44px;
+    height: var(--ds-topbar-height, 48px);
     -webkit-app-region: drag;
     /* For Electron apps */
     user-select: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Keep main content and AppShell aligned with the topbar height */
+:root {
+    --ds-topbar-height: 44px;
+}
+@media (min-width: 1024px) {
+    :root { --ds-topbar-height: 48px; }
+}
+
+.main-content {
+    padding-top: var(--ds-topbar-height);
+}
+
+.app-shell {
+    min-height: calc(100vh - var(--ds-topbar-height));
+}
+.app-sidebar {
+    top: var(--ds-topbar-height);
+    height: calc(100vh - var(--ds-topbar-height));
+}
+
+/* ===== Design System: Status Bar ===== */
+.ds-statusbar{
+height: 44px;
+padding: 0 12px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+}
+
+@media (min-width: 1024px){
+.ds-statusbar{ height: 48px; }
+}
+
+.ds-statusbar__left{
+display:flex;
+align-items:center;
+gap:8px;
+min-width:0;
+}
+
+.ds-crumbs{
+display:flex;
+align-items:center;
+gap:6px;
+min-width:0;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+font-size:13px;
+line-height:1;
+}
+
+.ds-crumbs__sep{ opacity:0.45; }
+.ds-crumbs__muted{ opacity:0.75; }
+
+.ds-statusbar__right{
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+/* One true icon button: identical box for <button> and <a> */
+.ds-iconbtn{
+width:32px;
+height:32px;
+padding:0;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+line-height:0;
+border-radius:10px;
+text-decoration:none;
+position: relative;
+}
+
+/* Normalize Font Awesome / icon font baseline */
+.ds-iconbtn i{
+font-size:18px;
+line-height:1;
+display:block;
+}
+
+.ds-iconbtn svg,
+.ds-iconbtn img{
+width:18px;
+height:18px;
+display:block;
+}
+
+.ds-iconbtn > *{
+line-height:0;
+}
+
+/* Keep badge aligned without affecting baseline */
+.ds-iconbtn .nav-pill-badge{
+position:absolute;
+top:4px;
+right:4px;
+}
+
+.ds-iconbtn--account .fa-chevron-down{
+position:absolute;
+right:6px;
+bottom:6px;
+font-size:10px;
+opacity:0.8;
+}
+
+.ds-statusbar__divider{
+width:1px;
+height:22px;
+opacity:0.15;
+}
+
+.statusbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.statusbar-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -webkit-app-region: no-drag;
+}
+
+.statusbar-crumb {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.statusbar-crumb-link {
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+}
+
+.statusbar-crumb-link:hover {
+    color: rgba(255, 255, 255, 0.92);
+    text-decoration: underline;
+}
+
+.statusbar-crumb-muted {
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.statusbar-crumb-current {
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 700;
+}
+
+.statusbar-sep {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.statusbar-center {
+    margin: 0 auto;
+    flex: 0 0 auto;
+    -webkit-app-region: no-drag;
+}
+
+.statusbar-pill {
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 12px;
+    line-height: 1;
+    max-width: 420px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.statusbar-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    -webkit-app-region: no-drag;
+}
+
+.mobile-status-bar .status-bar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobile-status-bar .status-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .nav-container {
