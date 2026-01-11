@@ -356,8 +356,8 @@
             <div class="status-bar-content">
                 <div class="status-left">
                     <span class="status-time" id="statusTime"></span>
-                    <span class="status-breadcrumb" x-text="breadcrumbText"
-                        title=""
+                      <span class="status-breadcrumb" x-text="breadcrumbText"
+                         :title="breadcrumbText"
                         style="margin-left:10px; max-width: 60vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color: rgba(255,255,255,0.82);"></span>
                 </div>
                 <div class="status-right">
@@ -472,7 +472,7 @@
             </div>
             <!-- Navigation -->
             <nav class="navbar desktop-nav" x-data="navbar()" x-init="init()">
-                <div class="nav-container max-w-7xl mx-auto px-4">
+                <div class="nav-container ds-statusbar max-w-7xl mx-auto px-4">
 
                     <!-- Logo (avoid duplicate logo when AppShell sidebar is present) -->
                     {% if show_dashboard_sidebars %}
@@ -498,39 +498,41 @@
                     </button>
 
                     <!-- Status Bar Layout -->
-                    <div class="statusbar-left">
-                        <!-- Back/Forward (Desktop) -->
-                        <div class="nav-history desktop-only"
-                            aria-label="History navigation">
-                            <button class="nav-history-btn" type="button"
-                                title="Back" aria-label="Back"
-                                @click="goBack()">
-                                <i class="fas fa-chevron-left"
-                                    aria-hidden="true"></i>
-                            </button>
-                            <button class="nav-history-btn" type="button"
-                                title="Forward" aria-label="Forward"
-                                @click="goForward()">
-                                <i class="fas fa-chevron-right"
-                                    aria-hidden="true"></i>
-                            </button>
-                        </div>
+                    <div class="ds-statusbar__left">
+                    <!-- Back/Forward (Desktop) -->
+                    <div class="nav-history desktop-only"
+                        aria-label="History navigation">
+                        <button class="nav-history-btn" type="button"
+                            title="Back" aria-label="Back"
+                            @click="goBack()">
+                            <i class="fas fa-chevron-left"
+                                aria-hidden="true"></i>
+                        </button>
+                        <button class="nav-history-btn" type="button"
+                            title="Forward" aria-label="Forward"
+                            @click="goForward()">
+                            <i class="fas fa-chevron-right"
+                                aria-hidden="true"></i>
+                        </button>
+                    </div>
 
                         <!-- Breadcrumb / Location -->
-                        <nav class="statusbar-breadcrumb" aria-label="Location">
+                        <nav class="ds-crumbs" aria-label="Location">
                             <template x-for="(c, idx) in breadcrumbs"
                                 :key="idx">
-                                <span class="statusbar-crumb">
-                                    <template x-if="c.href && idx < breadcrumbs.length - 1">
+                                <span class="ds-crumbs__item">
+                                    <template
+                                        x-if="c.href && idx < breadcrumbs.length - 1">
                                         <a :href="c.href" x-text="c.label"
-                                            class="statusbar-crumb-link"></a>
+                                            class="ds-crumbs__link"></a>
                                     </template>
-                                    <template x-if="!c.href || idx === breadcrumbs.length - 1">
+                                    <template
+                                        x-if="!c.href || idx === breadcrumbs.length - 1">
                                         <span
-                                            :class="idx === breadcrumbs.length - 1 ? 'statusbar-crumb-current' : 'statusbar-crumb-muted'"
+                                            :class="idx === breadcrumbs.length - 1 ? 'ds-crumbs__current' : 'ds-crumbs__muted'"
                                             x-text="c.label"></span>
                                     </template>
-                                    <span class="statusbar-sep"
+                                    <span class="ds-crumbs__sep"
                                         x-show="idx < breadcrumbs.length - 1">›</span>
                                 </span>
                             </template>
@@ -545,9 +547,10 @@
                     </div>
 
                     <!-- Utilities (Right) -->
-                    <div class="statusbar-right nav-menu flex items-center gap-1">
+                    <div class="ds-statusbar__right">
                         <!-- Search Trigger -->
-                        <button type="button" class="nav-item hidden-mobile"
+                        <button type="button"
+                            class="ds-iconbtn nav-item hidden-mobile"
                             title="Search" aria-label="Search"
                             @click="openSearch()">
                             <i class="fas fa-search" aria-hidden="true"></i>
@@ -555,7 +558,7 @@
 
                         <!-- Bookmarks shortcut -->
                         <a href="/bookmarks"
-                            class="nav-item hidden-mobile"
+                            class="ds-iconbtn nav-item hidden-mobile"
                             title="Bookmarks"
                             aria-label="Bookmarks">
                             <i class="fas fa-bookmark" aria-hidden="true"></i>
@@ -570,7 +573,7 @@
                             @click.outside="accountMenuOpen = false">
                             <button
                                 @click="accountMenuOpen = !accountMenuOpen; console.log('Account menu clicked, new state:', accountMenuOpen)"
-                                class="nav-item account-menu-btn flex items-center gap-1"
+                                class="ds-iconbtn nav-item account-menu-btn flex items-center gap-1"
                                 title="Account">
                                 <i class="fas fa-user"
                                     style="font-size:18px;color:#bdbdbd;"></i>
@@ -668,14 +671,15 @@
 
                         <!-- Guest profile shortcut (Desktop) -->
                         <a href="/account" x-show="!isLoggedIn"
-                            class="nav-item hidden-mobile"
+                            class="ds-iconbtn nav-item hidden-mobile"
                             title="Profile" aria-label="Profile">
                             <i class="fas fa-user" aria-hidden="true"></i>
                         </a>
 
                         <!-- Fullscreen Toggle (Desktop Only) -->
                         <button @click="toggleFullscreen()"
-                            class="nav-item hidden-mobile" title="Fullscreen">
+                            class="ds-iconbtn nav-item hidden-mobile"
+                            title="Fullscreen">
                             <i class="fas fa-expand"></i>
                         </button>
                     </div>
