@@ -954,6 +954,102 @@ a:hover {
     padding: 0 var(--spacing-lg);
 }
 
+/* ==========================================================================
+   AppShell (Spotify-like IA)
+   - Left sidebar = primary navigation
+   - Top bar = utilities (existing fixed .navbar)
+   ========================================================================== */
+.app-shell {
+    display: flex;
+    min-height: calc(100vh - 44px);
+    gap: 0;
+}
+
+.app-sidebar {
+    width: 232px;
+    flex: 0 0 232px;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(12, 12, 14, 0.6);
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+    padding: 16px 12px;
+    position: sticky;
+    top: 44px; /* below fixed navbar */
+    height: calc(100vh - 44px);
+    overflow: auto;
+}
+
+.app-sidebar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 6px 8px 14px 8px;
+}
+
+.app-sidebar-logo img {
+    height: 28px;
+    width: auto;
+    opacity: 0.95;
+}
+
+.app-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.app-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 10px;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.app-sidebar-item i {
+    width: 18px;
+    text-align: center;
+    opacity: 0.9;
+}
+
+.app-sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.app-sidebar-item.active {
+    background: rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.app-sidebar-spacer {
+    height: 16px;
+    flex: 1 1 auto;
+}
+
+.app-main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Navigation moved into AppShell sidebar (keep top bar utilities-only). */
+.navbar .nav-features {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .app-shell {
+        display: block;
+    }
+    .app-sidebar {
+        display: none;
+    }
+}
+
 /* Navigation - Compact Toolbar with Dark Glass Neomorphism */
 .navbar {
     position: fixed;

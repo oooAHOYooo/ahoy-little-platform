@@ -1935,7 +1935,8 @@ def account_page():
 @app.route('/dashboard')
 def dashboard_page():
     """Dashboard page with user collection and quests"""
-    return render_template('dashboard.html')
+    # Keep legacy dashboard sidebars/layout available on /dashboard only.
+    return render_template('dashboard.html', show_dashboard_sidebars=True)
 
 @app.route('/settings')
 def settings_page():

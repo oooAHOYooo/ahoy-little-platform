@@ -440,6 +440,11 @@
                         <i class="fas fa-users" aria-hidden="true"></i>
                         <span>Artists</span>
                     </a>
+                    <a href="/podcasts"
+                        class="mobile-tab {% if request.path.startswith('/podcasts') %}active{% endif %}">
+                        <i class="fas fa-podcast" aria-hidden="true"></i>
+                        <span>Podcasts</span>
+                    </a>
                     <a href="/merch"
                         class="mobile-tab {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}">
                         <i class="fas fa-shopping-bag" aria-hidden="true"></i>
@@ -523,45 +528,7 @@
                         </button>
                     </div>
 
-                    <!-- Main Navigation (desktop) -->
-                    <div class="nav-features">
-                        <a href="{{ url_for('music') }}"
-                            class="feature-btn {% if request.endpoint == 'music' %}active{% endif %}"
-                            title="Music Library">
-                            <i class="fas fa-music"></i>
-                            <span>Music</span>
-                        </a>
-                        <a href="{{ url_for('shows') }}"
-                            class="feature-btn {% if request.endpoint == 'shows' %}active{% endif %}"
-                            title="Live Shows">
-                            <i class="fas fa-play-circle"></i>
-                            <span>Shows</span>
-                        </a>
-                        <a href="{{ url_for('live_tv_page') }}"
-                            class="feature-btn {% if request.endpoint == 'live_tv_page' %}active{% endif %}"
-                            title="Live TV">
-                            <i class="fas fa-tv"></i>
-                            <span>Live TV</span>
-                        </a>
-                        <a href="{{ url_for('artists') }}"
-                            class="feature-btn {% if request.endpoint == 'artists' %}active{% endif %}"
-                            title="Artists">
-                            <i class="fas fa-users"></i>
-                            <span>Artists</span>
-                        </a>
-                        <a href="/merch"
-                            class="feature-btn {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}"
-                            title="Merch Store">
-                            <i class="fas fa-shopping-bag"></i>
-                            <span>Merch</span>
-                        </a>
-                        <a href="/bookmarks"
-                            class="feature-btn {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
-                            title="Bookmarks">
-                            <i class="fas fa-bookmark"></i>
-                            <span>Bookmarks</span>
-                        </a>
-                    </div>
+                    <!-- Main Navigation moved to left sidebar (AppShell). -->
 
                     <!-- Desktop-only Search Bar -->
                     <div class="nav-search nav-search--pill desktop-only">
@@ -581,7 +548,7 @@
 
                     <!-- App Menu - Compact Right Side -->
                     <div class="nav-menu flex items-center gap-1">
-                        <!-- Notifications + Premium (Desktop) -->
+                        <!-- Notifications (Desktop) -->
                         <button type="button"
                             class="nav-pill-btn desktop-only"
                             title="Notifications"
@@ -592,31 +559,7 @@
                                 x-show="hasNewBookmarks"
                                 x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
                         </button>
-                        <button type="button"
-                            class="nav-premium-btn desktop-only"
-                            @click="goPremium()">
-                            Go Premium
-                        </button>
-
-                        <!-- Weather Widget (Desktop Only) -->
-                        <div
-                            class="nav-item hidden md:flex items-center gap-2 px-3 mr-2"
-                            x-show="weatherLoaded"
-                            title="New Haven, CT"
-                            style="cursor: default; opacity: 0.9;">
-                            <span class="weather-icon" x-text="weatherIcon"
-                                style="font-size: 1.1em;"></span>
-                            <span
-                                class="weather-temp text-sm font-medium text-gray-300"
-                                x-text="weatherTemp + '°'"></span>
-                        </div>
-
-                        <!-- Home (Desktop Only) -->
-                        <a href="{{ url_for('home') }}"
-                            class="nav-item hidden md:flex {% if request.endpoint == 'home' %}active{% endif %}"
-                            title="Home">
-                            <i class="fas fa-home"></i>
-                        </a>
+                        <!-- Premium moved into account area/menu (keep top bar minimal). -->
 
                         <!-- Account Features Dropdown (Desktop Only - Logged In) -->
                         <div class="hidden-mobile account-menu-container"
@@ -643,55 +586,13 @@
                                 x-transition:leave-end="opacity-0 scale-95 translate-y-1"
                                 class="account-dropdown-menu">
 
-                                <!-- User Header with Stats -->
+                                <!-- User Header -->
                                 <div
                                     class="px-4 py-4 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 border-b border-neutral-700/50">
                                     <div class="mb-2">
                                         <p
                                             class="hdr-username text-sm font-semibold text-white truncate"
                                             x-text="userProfile.display_name || userProfile.username || 'Guest'"></p>
-                                    </div>
-
-                                    <!-- Quick Stats -->
-                                    <div
-                                        class="account-stats grid grid-cols-3 gap-2 pt-2 border-t border-neutral-700/50">
-                                        <div class="text-center">
-                                            <div
-                                                class="text-base font-semibold text-pink-400"
-                                                x-text="totalBookmarkCount || 0"></div>
-                                            <div
-                                                class="text-[11px] text-neutral-400">Bookmarks</div>
-                                        </div>
-                                        <div class="text-center">
-                                            <div
-                                                class="text-base font-semibold text-yellow-400"
-                                                x-text="badges?.length || 0"></div>
-                                            <div
-                                                class="text-[11px] text-neutral-400">Badges</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Wallet Summary -->
-                                    <div
-                                        class="account-wallet flex items-center justify-between mt-2 p-2 rounded-md border border-neutral-700/40 bg-neutral-800/30">
-                                        <div
-                                            class="text-[11px] text-neutral-300">Wallet</div>
-                                        <div
-                                            class="text-sm font-semibold text-white"
-                                            x-text="'$' + ((walletBalanceCents || 0) / 100).toFixed(2)"></div>
-                                    </div>
-                                    <div
-                                        class="account-wallet-actions mt-1 flex gap-2">
-                                        <button
-                                            class="pill px-2 py-0.5 text-[11px] rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
-                                            @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(2000) : null">
-                                            Add $20
-                                        </button>
-                                        <button
-                                            class="pill px-2 py-0.5 text-[11px] rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
-                                            @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(5000) : null">
-                                            Add $50
-                                        </button>
                                     </div>
                                 </div>
 
@@ -946,7 +847,9 @@
         </div>
 
         <!-- Main Content -->
+        {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false) %}
         <main class="main-content">
+            {% if show_dashboard_sidebars %}
             <div class="dashboard-sidebars">
                 <!-- Left Dashboard: Collection -->
                 <aside class="dashboard-sidebar dashboard-left desktop-only"
@@ -1310,6 +1213,79 @@
                     </div>
                 </aside>
             </div>
+            {% else %}
+            <div class="app-shell">
+                <aside class="app-sidebar" aria-label="Primary">
+                    <a class="app-sidebar-logo" href="{{ url_for('home') }}"
+                        aria-label="Ahoy Home">
+                        <img
+                            src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+                            alt="Ahoy Indie Media" />
+                    </a>
+
+                    <nav class="app-sidebar-nav" aria-label="Primary navigation">
+                        <a class="app-sidebar-item {% if request.path == '/' %}active{% endif %}"
+                            href="{{ url_for('home') }}">
+                            <i class="fas fa-compass" aria-hidden="true"></i>
+                            <span>Explore</span>
+                        </a>
+                        <a class="app-sidebar-item {% if request.endpoint == 'music' %}active{% endif %}"
+                            href="{{ url_for('music') }}">
+                            <i class="fas fa-music" aria-hidden="true"></i>
+                            <span>Music</span>
+                        </a>
+                        <a class="app-sidebar-item {% if request.path.startswith('/podcasts') %}active{% endif %}"
+                            href="/podcasts">
+                            <i class="fas fa-podcast" aria-hidden="true"></i>
+                            <span>Podcasts</span>
+                        </a>
+                        <a class="app-sidebar-item {% if request.endpoint == 'shows' %}active{% endif %}"
+                            href="{{ url_for('shows') }}">
+                            <i class="fas fa-play-circle" aria-hidden="true"></i>
+                            <span>Shows</span>
+                        </a>
+                        <a class="app-sidebar-item {% if request.endpoint == 'artists' %}active{% endif %}"
+                            href="{{ url_for('artists') }}">
+                            <i class="fas fa-users" aria-hidden="true"></i>
+                            <span>Artists</span>
+                        </a>
+                        <a class="app-sidebar-item {% if request.endpoint == 'radio_page' %}active{% endif %}"
+                            href="/radio">
+                            <i class="fas fa-broadcast-tower"
+                                aria-hidden="true"></i>
+                            <span>Radio</span>
+                        </a>
+                        <a class="app-sidebar-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
+                            href="/bookmarks">
+                            <i class="fas fa-bookmark" aria-hidden="true"></i>
+                            <span>Saved</span>
+                        </a>
+                    </nav>
+
+                    <div class="app-sidebar-spacer"></div>
+
+                    <nav class="app-sidebar-nav app-sidebar-nav--secondary"
+                        aria-label="Account">
+                        <a class="app-sidebar-item {% if request.endpoint == 'account_page' %}active{% endif %}"
+                            href="/account">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a class="app-sidebar-item {% if request.endpoint == 'settings_page' %}active{% endif %}"
+                            href="/settings">
+                            <i class="fas fa-cog" aria-hidden="true"></i>
+                            <span>Settings</span>
+                        </a>
+                    </nav>
+                </aside>
+
+                <div class="app-main">
+                    <div class="content-area content-pad-bottom">
+                        {{ self.content() }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </main>
 
         <!-- Global Player - Glassy Now Playing -->
