@@ -1497,10 +1497,10 @@ a:hover {
 
 /* Keep main content and AppShell aligned with the topbar height */
 :root {
-    --ds-topbar-height: 48px;
+    --ds-topbar-height: 44px;
 }
 @media (min-width: 1024px) {
-    :root { --ds-topbar-height: 52px; }
+    :root { --ds-topbar-height: 48px; }
 }
 
 .main-content {
@@ -1517,7 +1517,7 @@ a:hover {
 
 /* ===== Design System: Status Bar ===== */
 .ds-statusbar{
-height: 48px;
+height: 44px;
 padding: 0 12px;
 display:flex;
 align-items:center;
@@ -1526,7 +1526,7 @@ gap:12px;
 }
 
 @media (min-width: 1024px){
-.ds-statusbar{ height: 52px; }
+.ds-statusbar{ height: 48px; }
 }
 
 .ds-statusbar__left{
@@ -1559,8 +1559,8 @@ gap:6px;
 
 /* One true icon button: identical box for <button> and <a> */
 .ds-iconbtn{
-width:36px;
-height:36px;
+width:32px;
+height:32px;
 padding:0;
 display:inline-flex;
 align-items:center;
@@ -1569,6 +1569,13 @@ line-height:0;
 border-radius:10px;
 text-decoration:none;
 position: relative;
+}
+
+/* Normalize Font Awesome / icon font baseline */
+.ds-iconbtn i{
+font-size:18px;
+line-height:1;
+display:block;
 }
 
 .ds-iconbtn svg,

@@ -356,8 +356,8 @@
             <div class="status-bar-content">
                 <div class="status-left">
                     <span class="status-time" id="statusTime"></span>
-                      <span class="status-breadcrumb" x-text="breadcrumbText"
-                         :title="breadcrumbText"
+                    <span class="status-breadcrumb" x-text="breadcrumbText"
+                        :title="breadcrumbText"
                         style="margin-left:10px; max-width: 60vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color: rgba(255,255,255,0.82);"></span>
                 </div>
                 <div class="status-right">
@@ -499,22 +499,22 @@
 
                     <!-- Status Bar Layout -->
                     <div class="ds-statusbar__left">
-                    <!-- Back/Forward (Desktop) -->
-                    <div class="nav-history desktop-only"
-                        aria-label="History navigation">
-                        <button class="nav-history-btn" type="button"
-                            title="Back" aria-label="Back"
-                            @click="goBack()">
-                            <i class="fas fa-chevron-left"
-                                aria-hidden="true"></i>
-                        </button>
-                        <button class="nav-history-btn" type="button"
-                            title="Forward" aria-label="Forward"
-                            @click="goForward()">
-                            <i class="fas fa-chevron-right"
-                                aria-hidden="true"></i>
-                        </button>
-                    </div>
+                        <!-- Back/Forward (Desktop) -->
+                        <div class="nav-history desktop-only"
+                            aria-label="History navigation">
+                            <button class="nav-history-btn" type="button"
+                                title="Back" aria-label="Back"
+                                @click="goBack()">
+                                <i class="fas fa-chevron-left"
+                                    aria-hidden="true"></i>
+                            </button>
+                            <button class="nav-history-btn" type="button"
+                                title="Forward" aria-label="Forward"
+                                @click="goForward()">
+                                <i class="fas fa-chevron-right"
+                                    aria-hidden="true"></i>
+                            </button>
+                        </div>
 
                         <!-- Breadcrumb / Location -->
                         <nav class="ds-crumbs" aria-label="Location">
@@ -573,13 +573,9 @@
                             @click.outside="accountMenuOpen = false">
                             <button
                                 @click="accountMenuOpen = !accountMenuOpen; console.log('Account menu clicked, new state:', accountMenuOpen)"
-                                class="ds-iconbtn nav-item account-menu-btn flex items-center gap-1"
+                                class="ds-iconbtn nav-item account-menu-btn"
                                 title="Account">
-                                <i class="fas fa-user"
-                                    style="font-size:18px;color:#bdbdbd;"></i>
-                                <i class="fas fa-chevron-down"
-                                    style="font-size:12px;color:#bdbdbd;transition:transform .2s;"
-                                    :class="{'rotate-180': accountMenuOpen}"></i>
+                                <i class="fas fa-user" aria-hidden="true"></i>
                             </button>
 
                             <!-- Unified Account Features Dropdown -->
