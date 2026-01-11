@@ -1495,6 +1495,96 @@ a:hover {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.statusbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.statusbar-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -webkit-app-region: no-drag;
+}
+
+.statusbar-crumb {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.statusbar-crumb-link {
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+}
+
+.statusbar-crumb-link:hover {
+    color: rgba(255, 255, 255, 0.92);
+    text-decoration: underline;
+}
+
+.statusbar-crumb-muted {
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.statusbar-crumb-current {
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 700;
+}
+
+.statusbar-sep {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.statusbar-center {
+    margin: 0 auto;
+    flex: 0 0 auto;
+    -webkit-app-region: no-drag;
+}
+
+.statusbar-pill {
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 12px;
+    line-height: 1;
+    max-width: 420px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.statusbar-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    -webkit-app-region: no-drag;
+}
+
+.mobile-status-bar .status-bar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobile-status-bar .status-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .nav-container {
     display: flex;
     align-items: center;

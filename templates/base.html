@@ -356,22 +356,18 @@
             <div class="status-bar-content">
                 <div class="status-left">
                     <span class="status-time" id="statusTime"></span>
-                    <a href="/" class="status-logo" title="Ahoy"
-                        aria-label="Ahoy">
-                        <img src="/static/img/favicon.svg"
-                            alt="Ahoy Indie Media"
-                            style="height:12px;width:auto;opacity:.9;vertical-align:middle;">
-                    </a>
-                    <a href="/" class="status-action-btn" title="Home"
-                        aria-label="Home">
-                        <i class="fas fa-home"></i>
-                    </a>
+                    <span class="status-breadcrumb" x-text="breadcrumbText"
+                        title=""
+                        style="margin-left:10px; max-width: 60vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color: rgba(255,255,255,0.82);"></span>
+                </div>
+                <div class="status-right">
                     <button @click="openMobileSearch()"
-                        class="status-action-btn" title="Search" type="button">
+                        class="status-action-btn" title="Search" type="button"
+                        aria-label="Search">
                         <i class="fas fa-search"></i>
                     </button>
                     <a href="/bookmarks" class="status-action-btn"
-                        title="Bookmarks">
+                        title="Bookmarks" aria-label="Bookmarks">
                         <i class="fas fa-bookmark"></i>
                         <span class="notification-badge"
                             x-show="hasNewBookmarks"
@@ -501,55 +497,72 @@
                         <i class="fas fa-bars"></i>
                     </button>
 
-                    <!-- Back/Forward (Desktop) -->
-                    <div class="nav-history desktop-only"
-                        aria-label="History navigation">
-                        <button class="nav-history-btn" type="button"
-                            title="Back" aria-label="Back"
-                            @click="goBack()">
-                            <i class="fas fa-chevron-left"
-                                aria-hidden="true"></i>
-                        </button>
-                        <button class="nav-history-btn" type="button"
-                            title="Forward" aria-label="Forward"
-                            @click="goForward()">
-                            <i class="fas fa-chevron-right"
-                                aria-hidden="true"></i>
-                        </button>
-                    </div>
-
-                    <!-- Main Navigation moved to left sidebar (AppShell). -->
-
-                    <!-- Desktop-only Search Bar -->
-                    <div class="nav-search nav-search--pill desktop-only">
-                        <div class="search-container">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text"
-                                placeholder="Search stations, shows, artists..."
-                                x-model="searchQuery"
-                                @keyup.enter="performSearch()"
-                                class="search-input">
-                            <button @click="clearSearch()" class="search-clear"
-                                x-show="searchQuery">
-                                <i class="fas fa-times"></i>
+                    <!-- Status Bar Layout -->
+                    <div class="statusbar-left">
+                        <!-- Back/Forward (Desktop) -->
+                        <div class="nav-history desktop-only"
+                            aria-label="History navigation">
+                            <button class="nav-history-btn" type="button"
+                                title="Back" aria-label="Back"
+                                @click="goBack()">
+                                <i class="fas fa-chevron-left"
+                                    aria-hidden="true"></i>
+                            </button>
+                            <button class="nav-history-btn" type="button"
+                                title="Forward" aria-label="Forward"
+                                @click="goForward()">
+                                <i class="fas fa-chevron-right"
+                                    aria-hidden="true"></i>
                             </button>
                         </div>
+
+                        <!-- Breadcrumb / Location -->
+                        <nav class="statusbar-breadcrumb" aria-label="Location">
+                            <template x-for="(c, idx) in breadcrumbs"
+                                :key="idx">
+                                <span class="statusbar-crumb">
+                                    <template x-if="c.href && idx < breadcrumbs.length - 1">
+                                        <a :href="c.href" x-text="c.label"
+                                            class="statusbar-crumb-link"></a>
+                                    </template>
+                                    <template x-if="!c.href || idx === breadcrumbs.length - 1">
+                                        <span
+                                            :class="idx === breadcrumbs.length - 1 ? 'statusbar-crumb-current' : 'statusbar-crumb-muted'"
+                                            x-text="c.label"></span>
+                                    </template>
+                                    <span class="statusbar-sep"
+                                        x-show="idx < breadcrumbs.length - 1">›</span>
+                                </span>
+                            </template>
+                        </nav>
                     </div>
 
-                    <!-- App Menu - Compact Right Side -->
-                    <div class="nav-menu flex items-center gap-1">
-                        <!-- Bookmarks (Desktop) -->
+                    <!-- Now / Live State (subtle) -->
+                    <div class="statusbar-center desktop-only"
+                        aria-label="Now Playing">
+                        <div class="statusbar-pill" x-show="nowPillText"
+                            x-text="nowPillText"></div>
+                    </div>
+
+                    <!-- Utilities (Right) -->
+                    <div class="statusbar-right nav-menu flex items-center gap-1">
+                        <!-- Search Trigger -->
+                        <button type="button" class="nav-item hidden-mobile"
+                            title="Search" aria-label="Search"
+                            @click="openSearch()">
+                            <i class="fas fa-search" aria-hidden="true"></i>
+                        </button>
+
+                        <!-- Bookmarks shortcut -->
                         <a href="/bookmarks"
-                            class="nav-pill-btn desktop-only"
+                            class="nav-item hidden-mobile"
                             title="Bookmarks"
-                            style="display:inline-flex; align-items:center; gap:8px;">
+                            aria-label="Bookmarks">
                             <i class="fas fa-bookmark" aria-hidden="true"></i>
-                            <span>Bookmarks</span>
                             <span class="nav-pill-badge"
                                 x-show="hasNewBookmarks"
                                 x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
                         </a>
-                        <!-- Premium moved into account area/menu (keep top bar minimal). -->
 
                         <!-- Account Features Dropdown (Desktop Only - Logged In) -->
                         <div class="hidden-mobile account-menu-container"
@@ -652,6 +665,13 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Guest profile shortcut (Desktop) -->
+                        <a href="/account" x-show="!isLoggedIn"
+                            class="nav-item hidden-mobile"
+                            title="Profile" aria-label="Profile">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                        </a>
 
                         <!-- Fullscreen Toggle (Desktop Only) -->
                         <button @click="toggleFullscreen()"
@@ -1250,13 +1270,15 @@
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'events_page' or request.path.startswith('/events') %}active{% endif %}"
                             href="/events">
-                            <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                            <i class="fas fa-calendar-alt"
+                                aria-hidden="true"></i>
                             <span>Events</span>
                         </a>
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' or request.path.startswith('/merch') %}active{% endif %}"
                             href="/merch">
-                            <i class="fas fa-shopping-bag" aria-hidden="true"></i>
+                            <i class="fas fa-shopping-bag"
+                                aria-hidden="true"></i>
                             <span>Merch</span>
                         </a>
                         <a
@@ -1942,15 +1964,117 @@
 
         <!-- Status Bar JavaScript -->
         <script>
+        // Shared breadcrumb helper (used by both mobile status bar + desktop navbar status bar)
+        function ahoyBuildBreadcrumb() {
+            const path = (window.location && window.location.pathname ? window.location.pathname : '/') || '/';
+            const normalized = path.replace(/\/+$/, '') || '/';
+
+            const crumbs = [];
+            const add = (label, href = null) => crumbs.push({ label, href });
+
+            const titleFrom = (sel) => {
+                try {
+                    const el = document.querySelector(sel);
+                    const t = (el && (el.textContent || '').trim()) || '';
+                    return t;
+                } catch (_) { return ''; }
+            };
+
+            const artistNameGuess = () => {
+                // Try artist detail hero heading, then fall back to document.title or slug.
+                const fromHero = titleFrom('.artist-detail-page .hero-name') || titleFrom('.artist-detail-page h1');
+                if (fromHero) return fromHero;
+                const docTitle = (document.title || '').split('-')[0].trim();
+                if (docTitle && docTitle.toLowerCase() !== 'artist') return docTitle;
+                const slug = normalized.split('/').pop();
+                return (slug || 'Artist').replace(/-/g, ' ');
+            };
+
+            const artistsFilterLabel = () => {
+                try {
+                    const active = document.querySelector('.filter-tabs .filter-tab.active span')
+                        || document.querySelector('.filter-tabs-mobile .filter-tab-mobile.active span');
+                    const t = (active && active.textContent || '').trim();
+                    return t || 'All Artists';
+                } catch (_) { return 'All Artists'; }
+            };
+
+            if (normalized === '/') {
+                add('Explore', '/');
+                add('Home', null);
+                return crumbs;
+            }
+            if (normalized === '/music') {
+                add('Music', '/music');
+                add('Browse', null);
+                return crumbs;
+            }
+            if (normalized === '/shows') {
+                add('Shows', '/shows');
+                add('Browse', null);
+                return crumbs;
+            }
+            if (normalized === '/artists') {
+                add('Artists', '/artists');
+                add(artistsFilterLabel(), null);
+                return crumbs;
+            }
+            if (normalized.startsWith('/artist/')) {
+                add('Artists', '/artists');
+                add(artistNameGuess(), null);
+                return crumbs;
+            }
+            if (normalized === '/radio') {
+                add('Radio', '/radio');
+                add('Live', null);
+                return crumbs;
+            }
+            if (normalized === '/podcasts') {
+                add('Podcasts', '/podcasts');
+                add('Browse', null);
+                return crumbs;
+            }
+            if (normalized.startsWith('/podcasts/')) {
+                add('Podcasts', '/podcasts');
+                const showTitle = titleFrom('.podcast-show-hero-title') || titleFrom('.podcasts-hero h1') || normalized.split('/').pop().replace(/-/g, ' ');
+                add(showTitle, null);
+                return crumbs;
+            }
+            if (normalized === '/live-tv') {
+                add('Live TV', '/live-tv');
+                add('Now', null);
+                return crumbs;
+            }
+            if (normalized === '/bookmarks') {
+                add('Saved', '/bookmarks');
+                add('Bookmarks', null);
+                return crumbs;
+            }
+            if (normalized === '/settings') {
+                add('Settings', null);
+                return crumbs;
+            }
+            if (normalized === '/account') {
+                add('Profile', null);
+                return crumbs;
+            }
+
+            // Fallback: single crumb derived from path
+            add(normalized.replace('/', '').replace(/-/g, ' ') || 'Explore', null);
+            return crumbs;
+        }
+
         function statusBar() {
             return {
                 // Notification state
                 newBookmarkCount: 0,
                 hasNewBookmarks: false,
+                breadcrumbText: '',
 
                 init() {
                     // Load bookmark count
                     this.loadBookmarkCount();
+                    this.refreshBreadcrumb();
 
                     // Listen for bookmark notifications
                     document.addEventListener('bookmark:notified', (e) => {
@@ -1967,6 +2091,7 @@
                     // Periodic refresh
                     setInterval(() => {
                         this.loadBookmarkCount();
+                        this.refreshBreadcrumb();
                     }, 5000);
                 },
 
@@ -2006,6 +2131,15 @@
                             const input = popup.querySelector('.mobile-search-input');
                             if (input) input.focus();
                         }, 200);
+                    }
+                }
+                ,
+                refreshBreadcrumb() {
+                    try {
+                        const crumbs = ahoyBuildBreadcrumb();
+                        this.breadcrumbText = crumbs.map(c => c.label).join(' › ');
+                    } catch (_) {
+                        this.breadcrumbText = '';
                     }
                 }
             };
@@ -2226,8 +2360,8 @@
                 enableAccountNetworkCalls: (window.APP_ENV === 'production'),
                 // Mobile nav state
                 mobileNav: false,
-                // User state - TEMPORARILY FORCED TO TRUE FOR TESTING
-                isLoggedIn: true, // window.LOGGED_IN || false,
+                // User state
+                isLoggedIn: window.LOGGED_IN || false,
                 userProfile: window.userProfile || {
                     display_name: "Guest",
                     username: "guest",
@@ -2241,10 +2375,11 @@
                 newBookmarkCount: 0,
                 hasNewBookmarks: false,
 
-                // Search state
-                searchQuery: '',
+                // StatusBar state
+                breadcrumbs: [],
+                nowPillText: '',
 
-                // Weather state
+                // Weather state (kept, but not displayed in StatusBar)
                 weatherLoaded: false,
                 weatherIcon: '☀️',
                 weatherTemp: '--',
@@ -2281,13 +2416,17 @@
                         this.hasNewBookmarks = window.__ahoyNotificationState.hasNewBookmarks;
                     }
 
+                    // Location breadcrumb
+                    this.refreshBreadcrumbs();
+                    this.watchArtistsFilter();
+
+                    // Now playing pill (subtle)
+                    this.initNowPlayingPill();
+
                     // Load wallet only in production to avoid 404s during development
                     if (this.enableAccountNetworkCalls) {
                         this.loadWallet();
                     }
-                    
-                    // Load weather (New Haven)
-                    this.loadWeather();
                 },
 
                 async loadWallet() {
@@ -2322,15 +2461,78 @@
                     }
                 },
 
-                // Search functionality
-                performSearch() {
-                    if (!this.searchQuery.trim()) return;
-                    const searchUrl = `/search?q=${encodeURIComponent(this.searchQuery)}`;
-                    window.location.href = searchUrl;
+                // Search trigger (opens the existing search popup/modal)
+                openSearch() {
+                    try {
+                        const popup = document.getElementById('mobile-search-popup');
+                        if (popup && popup.__x && popup.__x.$data) {
+                            popup.__x.$data.isOpen = true;
+                        } else {
+                            document.dispatchEvent(new CustomEvent('open-mobile-search'));
+                        }
+                    } catch (_) { }
                 },
 
-                clearSearch() {
-                    this.searchQuery = '';
+                refreshBreadcrumbs() {
+                    try {
+                        this.breadcrumbs = ahoyBuildBreadcrumb();
+                    } catch (_) {
+                        this.breadcrumbs = [];
+                    }
+                },
+
+                watchArtistsFilter() {
+                    // Optional polish: reflect Artists filter in breadcrumb
+                    try {
+                        const path = (window.location && window.location.pathname) || '';
+                        if (!path.startsWith('/artists')) return;
+                        setInterval(() => {
+                            const next = ahoyBuildBreadcrumb();
+                            // Only update if actually changed (avoid thrash)
+                            const cur = JSON.stringify(this.breadcrumbs || []);
+                            const nxt = JSON.stringify(next || []);
+                            if (cur !== nxt) this.breadcrumbs = next;
+                        }, 600);
+                    } catch (_) { }
+                },
+
+                initNowPlayingPill() {
+                    const update = () => {
+                        try {
+                            const mp = window.mediaPlayer;
+                            const track = mp && mp.currentTrack ? mp.currentTrack : null;
+                            const isPlaying = !!(mp && mp.isPlaying);
+                            if (!track || !isPlaying) {
+                                this.nowPillText = '';
+                                return;
+                            }
+                            const title = (track.title || '').trim();
+                            const artist = (track.artist || track.host || track.creator || '').trim();
+                            const isLive = ((window.location && window.location.pathname) === '/radio') || track.type === 'radio' || !!track.is_live;
+
+                            if (isLive) {
+                                this.nowPillText = `LIVE • Radio: ${title}${artist ? ' — ' + artist : ''}`;
+                            } else {
+                                this.nowPillText = `Playing: ${title || 'Now playing'}`;
+                            }
+                        } catch (_) {
+                            this.nowPillText = '';
+                        }
+                    };
+
+                    // Try to hook into player events (if available), plus a light polling fallback.
+                    try {
+                        const mp = window.mediaPlayer;
+                        if (mp && typeof mp.on === 'function') {
+                            mp.on('play', update);
+                            mp.on('pause', update);
+                            mp.on('ended', update);
+                            mp.on('durationchange', update);
+                        }
+                    } catch (_) { }
+                    setInterval(update, 1500);
+                    document.addEventListener('play-track', update);
+                    update();
                 },
 
                 // Fullscreen functionality (with safe property access)
