@@ -1316,6 +1316,161 @@ a:hover {
     }
 }
 
+/* ==========================================================================
+   Boost modal (simple sheet)
+   ========================================================================== */
+.ahoy-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.ahoy-modal {
+    width: min(520px, calc(100vw - 24px));
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(16,16,18,0.92);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+}
+
+.ahoy-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 14px 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.ahoy-modal-title {
+    font-weight: 800;
+    color: rgba(255,255,255,0.92);
+}
+
+.ahoy-modal-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.9);
+    cursor: pointer;
+}
+
+.ahoy-modal-body {
+    padding: 14px;
+}
+
+.ahoy-boost-recipient-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+}
+
+.ahoy-boost-recipient-name {
+    margin-top: 4px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.92);
+}
+
+.ahoy-boost-amounts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.ahoy-boost-amt {
+    padding: 10px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.92);
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 12px;
+}
+
+.ahoy-boost-amt.active {
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.18);
+}
+
+.ahoy-boost-custom {
+    margin-top: 12px;
+}
+
+.ahoy-boost-custom-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+}
+
+.ahoy-boost-custom-row {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.25);
+}
+
+.ahoy-boost-custom-prefix {
+    color: rgba(255,255,255,0.8);
+    font-weight: 800;
+}
+
+.ahoy-boost-custom-input {
+    flex: 1 1 auto;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: rgba(255,255,255,0.92);
+}
+
+.ahoy-boost-copy {
+    margin-top: 14px;
+}
+
+.ahoy-boost-copy-strong {
+    font-weight: 800;
+    color: rgba(255,255,255,0.92);
+    font-size: 12px;
+}
+
+.ahoy-boost-copy-small {
+    margin-top: 4px;
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+}
+
+.ahoy-boost-actions {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.ahoy-boost-confirm {
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.95);
+    cursor: pointer;
+    font-weight: 900;
+}
+
+@media (max-width: 520px) {
+    .ahoy-boost-amounts {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 /* Navigation - Compact Toolbar with Dark Glass Neomorphism */
 .navbar {
     position: fixed;

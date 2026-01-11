@@ -1626,6 +1626,66 @@
             </div>
         </div>
 
+        <!-- Boost Modal (simple sheet) -->
+        <div id="ahoy-boost-modal" class="ahoy-modal-overlay" style="display:none;"
+            aria-hidden="true">
+            <div class="ahoy-modal" role="dialog" aria-modal="true"
+                aria-label="Boost">
+                <div class="ahoy-modal-header">
+                    <div class="ahoy-modal-title">Boost</div>
+                    <button type="button" class="ahoy-modal-close"
+                        aria-label="Close Boost" data-boost-close>
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                <div class="ahoy-modal-body">
+                    <div class="ahoy-boost-recipient">
+                        <div class="ahoy-boost-recipient-label">Sending to</div>
+                        <div class="ahoy-boost-recipient-name"
+                            id="ahoy-boost-recipient-name">—</div>
+                    </div>
+
+                    <div class="ahoy-boost-amounts">
+                        <button class="ahoy-boost-amt" type="button"
+                            data-boost-amt="1">$1</button>
+                        <button class="ahoy-boost-amt" type="button"
+                            data-boost-amt="3">$3</button>
+                        <button class="ahoy-boost-amt" type="button"
+                            data-boost-amt="5">$5</button>
+                        <button class="ahoy-boost-amt" type="button"
+                            data-boost-amt="custom">Custom</button>
+                    </div>
+
+                    <div class="ahoy-boost-custom" id="ahoy-boost-custom"
+                        style="display:none;">
+                        <label class="ahoy-boost-custom-label"
+                            for="ahoy-boost-custom-input">Custom amount</label>
+                        <div class="ahoy-boost-custom-row">
+                            <span class="ahoy-boost-custom-prefix">$</span>
+                            <input id="ahoy-boost-custom-input"
+                                class="ahoy-boost-custom-input" type="number"
+                                min="0.50" step="0.01" placeholder="0.50">
+                        </div>
+                    </div>
+
+                    <div class="ahoy-boost-copy">
+                        <div class="ahoy-boost-copy-strong">100% goes to the
+                            artist/show.</div>
+                        <div class="ahoy-boost-copy-small">Fees (Stripe + Ahoy)
+                            are shown on checkout.</div>
+                    </div>
+
+                    <div class="ahoy-boost-actions">
+                        <button type="button" class="ahoy-boost-confirm"
+                            data-boost-confirm>
+                            Confirm Boost
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Footer -->
         <footer class="app-footer">
             <div class="footer-content">
@@ -2055,6 +2115,100 @@
                 }
             };
         }
+        </script>
+
+        <script>
+            // Lightweight Boost modal controller (keeps existing /checkout wiring).
+            (function () {
+                const overlay = document.getElementById('ahoy-boost-modal');
+                if (!overlay) return;
+
+                const recipientNameEl = document.getElementById('ahoy-boost-recipient-name');
+                const customWrap = document.getElementById('ahoy-boost-custom');
+                const customInput = document.getElementById('ahoy-boost-custom-input');
+                const amtButtons = overlay.querySelectorAll('[data-boost-amt]');
+                const closeBtn = overlay.querySelector('[data-boost-close]');
+                const confirmBtn = overlay.querySelector('[data-boost-confirm]');
+
+                let state = {
+                    recipientType: 'artist',
+                    recipientId: '',
+                    recipientName: '',
+                    amount: 1
+                };
+
+                function setActiveAmountButton(value) {
+                    amtButtons.forEach(btn => {
+                        const v = btn.getAttribute('data-boost-amt');
+                        btn.classList.toggle('active', String(v) === String(value));
+                    });
+                }
+
+                function open(detail) {
+                    state.recipientType = detail?.recipientType || 'artist';
+                    state.recipientId = detail?.recipientId || '';
+                    state.recipientName = detail?.recipientName || 'Creator';
+                    state.amount = Number(detail?.suggestedAmount || 1);
+
+                    if (recipientNameEl) recipientNameEl.textContent = state.recipientName;
+                    if (customWrap) customWrap.style.display = 'none';
+                    if (customInput) customInput.value = '';
+                    setActiveAmountButton(String(state.amount));
+
+                    overlay.style.display = 'flex';
+                    overlay.setAttribute('aria-hidden', 'false');
+                }
+
+                function close() {
+                    overlay.style.display = 'none';
+                    overlay.setAttribute('aria-hidden', 'true');
+                }
+
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) close();
+                });
+                closeBtn && closeBtn.addEventListener('click', close);
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && overlay.style.display !== 'none') close();
+                });
+
+                amtButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const v = btn.getAttribute('data-boost-amt');
+                        if (v === 'custom') {
+                            setActiveAmountButton('custom');
+                            if (customWrap) customWrap.style.display = 'block';
+                            if (customInput) customInput.focus();
+                            return;
+                        }
+                        if (customWrap) customWrap.style.display = 'none';
+                        state.amount = Number(v || 1);
+                        setActiveAmountButton(v);
+                    });
+                });
+
+                confirmBtn && confirmBtn.addEventListener('click', () => {
+                    let amount = state.amount;
+                    if (customWrap && customWrap.style.display !== 'none') {
+                        const v = parseFloat(String(customInput?.value || ''));
+                        if (!isNaN(v)) amount = v;
+                    }
+                    if (!amount || isNaN(amount) || amount < 0.5) {
+                        try { document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Enter a valid boost amount (min $0.50).' })); } catch (_) { }
+                        return;
+                    }
+                    const params = new URLSearchParams({
+                        type: 'boost',
+                        // Keep param name as-is to preserve existing checkout route contract.
+                        artist_id: String(state.recipientId || state.recipientName || ''),
+                        amount: String(amount.toFixed(2))
+                    });
+                    window.location.href = `/checkout?${params.toString()}`;
+                });
+
+                document.addEventListener('ahoy:boost:open', (e) => open(e.detail || {}));
+                window.AhoyBoost = { open, close };
+            })();
         </script>
 
         <!-- Navbar JavaScript -->
@@ -2748,29 +2902,20 @@
                 async openBoost() {
                     try {
                         const track = this.currentTrack || (window.mediaPlayer && window.mediaPlayer.currentTrack) || {};
-                        const artistName = (track.artist || track.host || '').trim();
-                        const defaultAmount = 1.00;
-                        // Resolve artist id from API cache (best-effort)
-                        let artistId = '';
-                        try {
-                            if (!window.__ahoyArtistsCache) {
-                                const res = await fetch('/api/artists');
-                                const data = await res.json().catch(() => ({}));
-                                window.__ahoyArtistsCache = (data.artists || []);
+                        const recipientName = (track.artist || track.host || track.creator || '').trim();
+                        const recipientId = String(track.artist_id || track.artistId || track.artist || '').trim();
+                        document.dispatchEvent(new CustomEvent('ahoy:boost:open', {
+                            detail: {
+                                recipientType: (track.type === 'show' ? 'show' : 'artist'),
+                                recipientId,
+                                recipientName,
+                                suggestedAmount: 1
                             }
-                            const norm = (s) => String(s || '').trim().toLowerCase();
-                            const match = (window.__ahoyArtistsCache || []).find(a => norm(a.name) === norm(artistName));
-                            artistId = match ? (match.id || match.name || '') : '';
-                        } catch (_) {}
-                        // Use CSRF-protected universal checkout page
-                        const params = new URLSearchParams({
-                            type: 'boost',
-                            artist_id: String(artistId || ''),
-                            amount: String(defaultAmount)
-                        });
-                        window.location.href = `/checkout?${params.toString()}`;
+                        }));
                     } catch (e) {
                         console.warn('Boost open failed:', e);
+                        // Fallback to legacy checkout routing
+                        try { window.location.href = `/checkout?type=boost&amount=1`; } catch (_) {}
                     }
                 },
                 toggleShuffle() {
