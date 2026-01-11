@@ -348,7 +348,8 @@
 
     <body x-data="appData()"
         class="overflow-x-hidden">
-        {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false) %}
+        {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false)
+        %}
         <!-- Mobile Status Bar (fixed top, compact) -->
         <div class="mobile-status-bar mobile-only" x-data="statusBar()"
             x-init="init()">
@@ -1247,6 +1248,18 @@
                             <span>Radio</span>
                         </a>
                         <a
+                            class="app-sidebar-item {% if request.endpoint == 'events_page' or request.path.startswith('/events') %}active{% endif %}"
+                            href="/events">
+                            <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                            <span>Events</span>
+                        </a>
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' or request.path.startswith('/merch') %}active{% endif %}"
+                            href="/merch">
+                            <i class="fas fa-shopping-bag" aria-hidden="true"></i>
+                            <span>Merch</span>
+                        </a>
+                        <a
                             class="app-sidebar-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
                             href="/bookmarks">
                             <i class="fas fa-bookmark" aria-hidden="true"></i>
@@ -1332,7 +1345,8 @@
                                 class="category-pill">
                                 <i class="fas fa-podcast"></i> Podcasts
                             </span>
-                            <span x-show="currentTrack?.type !== 'show' && currentTrack?.type !== 'podcast'"
+                            <span
+                                x-show="currentTrack?.type !== 'show' && currentTrack?.type !== 'podcast'"
                                 class="category-pill">
                                 <i class="fas fa-music"></i> Music
                             </span>
@@ -1442,7 +1456,8 @@
                                 class="media-type">
                                 <i class="fas fa-podcast"></i> Podcasts
                             </span>
-                            <span x-show="currentTrack?.type !== 'show' && currentTrack?.type !== 'podcast'"
+                            <span
+                                x-show="currentTrack?.type !== 'show' && currentTrack?.type !== 'podcast'"
                                 class="media-type">
                                 <i class="fas fa-music"></i> Music
                             </span>
