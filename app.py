@@ -781,124 +781,95 @@ def artists():
 @app.route('/podcasts')
 def podcasts_page():
     """Podcasts hub page"""
+    def slugify(s: str) -> str:
+        s = (s or '').strip().lower()
+        s = re.sub(r"['’]", '', s)
+        s = re.sub(r'[^a-z0-9]+', '-', s)
+        s = re.sub(r'-{2,}', '-', s).strip('-')
+        return s or 'show'
+
+    def extract_show_name(title: str) -> str:
+        t = (title or '').strip()
+        lower = t.lower()
+        # Known patterns
+        if lower.startswith('the rob show'):
+            return 'The Rob Show'
+        if lower.startswith('my friend'):
+            return 'My Friend'
+        if lower.startswith('found cassettes'):
+            return 'Found Cassettes'
+        # Fallback: take leading segment before " - " and strip episode numbering
+        head = re.split(r'\s*[-–—]\s*', t, maxsplit=1)[0].strip()
+        head = re.sub(r'\s*#\s*\d+.*$', '', head).strip()
+        return head or 'Podcast'
+
+    # Keep existing “spot” slugs working while we move to data-driven shows.
+    slug_aliases = {
+        'The Rob Show': 'rob',
+        'Rob Meglio Show': 'rob',
+        'Poets & Friends': 'poets-and-friends',
+        "Tyler’s New Broadcast": 'tyler-broadcast',
+        "Tyler's New Broadcast": 'tyler-broadcast',
+    }
+
     def build_podcasts_payload():
         """
         Build the podcasts payload expected by templates from static/data/podcastCollection.json.
-        Keeps show slugs stable for:
-          /podcasts/rob
-          /podcasts/poets-and-friends
-          /podcasts/tyler-broadcast
+        Each distinct show gets its own URL slug at /podcasts/<slug>.
         """
         collection = load_json_data('podcastCollection.json', {'podcasts': []})
         items = list(collection.get('podcasts', []) or [])
 
-        # Prefer active episodes (but allow missing `active`).
         active_items = [p for p in items if p.get('active', True)]
-        # Sort newest first when dates exist (fallback to id).
-        active_items.sort(key=lambda p: (str(p.get('date') or p.get('releaseDate') or ''), int(p.get('id') or 0)), reverse=True)
+        active_items.sort(
+            key=lambda p: (str(p.get('date') or p.get('releaseDate') or ''), int(p.get('id') or 0)),
+            reverse=True
+        )
 
-        def classify_show_slug(title: str) -> str:
-            t = (title or '').lower().strip()
-            if t.startswith('the rob show'):
-                return 'rob'
-            # Future-proof: if we see poets/tyler in titles, map them.
-            if 'poets' in t:
-                return 'poets-and-friends'
-            if 'tyler' in t:
-                return 'tyler-broadcast'
-            # Default bucket for now: Tyler’s show (so it has real content).
-            return 'tyler-broadcast'
-
-        def to_episode(p):
+        episodes = []
+        for p in active_items:
             title = p.get('title') or 'Untitled Episode'
-            date = p.get('date') or p.get('releaseDate') or ''
-            show_slug = classify_show_slug(title)
-            thumb = p.get('thumbnail') or '/static/img/default-cover.jpg'
-            mp3 = p.get('mp3url') or ''
-            return {
+            show_name = extract_show_name(title)
+            show_slug = slug_aliases.get(show_name) or slugify(show_name)
+            episodes.append({
                 'id': str(p.get('id') or title),
                 'title': title,
                 'description': p.get('description') or '',
-                'date': date,
+                'date': p.get('date') or p.get('releaseDate') or '',
                 'duration': '',  # not provided in collection
                 'duration_seconds': 0,
-                'audio_url': mp3,
-                'artwork': thumb,
-                # For hub UI: which show this belongs to
+                'audio_url': p.get('mp3url') or '',
+                'artwork': p.get('thumbnail') or '/static/img/default-cover.jpg',
                 'show_slug': show_slug,
-            }
+                'show_title': show_name,
+            })
 
-        episodes = [to_episode(p) for p in active_items]
+        # Group into shows
+        shows_by_slug = {}
+        for e in episodes:
+            s = shows_by_slug.setdefault(e['show_slug'], {
+                'slug': e['show_slug'],
+                'title': e.get('show_title') or e['show_slug'],
+                'description': '',
+                'artwork': e.get('artwork') or '/static/img/default-cover.jpg',
+                'last_updated': e.get('date') or '',
+                'episodes': [],
+            })
+            s['episodes'].append({
+                'id': e['id'],
+                'title': e['title'],
+                'description': e['description'],
+                'date': e['date'],
+                'duration': e['duration'],
+                'duration_seconds': e['duration_seconds'],
+                'audio_url': e['audio_url'],
+                'artwork': e['artwork'],
+            })
 
-        # Build the 3 “spot” show pages
-        rob_eps = [e for e in episodes if e['show_slug'] == 'rob']
-        tyler_eps = [e for e in episodes if e['show_slug'] == 'tyler-broadcast']
-        poets_eps = [e for e in episodes if e['show_slug'] == 'poets-and-friends']
+        # Stable ordering in hub: newest-updated first
+        shows = list(shows_by_slug.values())
+        shows.sort(key=lambda s: str(s.get('last_updated') or ''), reverse=True)
 
-        def show_artwork(eps):
-            return (eps[0].get('artwork') if eps else None) or '/static/img/default-cover.jpg'
-
-        shows = [
-            {
-                'slug': 'rob',
-                'title': 'Rob Meglio Show',
-                'description': 'Conversations and community from the Ahoy universe.',
-                'artwork': show_artwork(rob_eps),
-                'last_updated': (rob_eps[0].get('date') if rob_eps else ''),
-                'episodes': [
-                    {
-                        'id': e['id'],
-                        'title': e['title'],
-                        'description': e['description'],
-                        'date': e['date'],
-                        'duration': e['duration'],
-                        'duration_seconds': e['duration_seconds'],
-                        'audio_url': e['audio_url'],
-                        'artwork': e['artwork'],
-                    } for e in rob_eps
-                ],
-            },
-            {
-                'slug': 'poets-and-friends',
-                'title': 'Poets & Friends',
-                'description': 'Readings, interviews, and voices from the community.',
-                'artwork': show_artwork(poets_eps),
-                'last_updated': (poets_eps[0].get('date') if poets_eps else ''),
-                'episodes': [
-                    {
-                        'id': e['id'],
-                        'title': e['title'],
-                        'description': e['description'],
-                        'date': e['date'],
-                        'duration': e['duration'],
-                        'duration_seconds': e['duration_seconds'],
-                        'audio_url': e['audio_url'],
-                        'artwork': e['artwork'],
-                    } for e in poets_eps
-                ],
-            },
-            {
-                'slug': 'tyler-broadcast',
-                'title': "Tyler’s New Broadcast",
-                'description': 'Updates, ideas, and a weekly dispatch for creators.',
-                'artwork': show_artwork(tyler_eps),
-                'last_updated': (tyler_eps[0].get('date') if tyler_eps else ''),
-                'episodes': [
-                    {
-                        'id': e['id'],
-                        'title': e['title'],
-                        'description': e['description'],
-                        'date': e['date'],
-                        'duration': e['duration'],
-                        'duration_seconds': e['duration_seconds'],
-                        'audio_url': e['audio_url'],
-                        'artwork': e['artwork'],
-                    } for e in tyler_eps
-                ],
-            },
-        ]
-
-        # Hub UI uses `episodes` as a single list (vertical rows).
         return {'shows': shows, 'episodes': episodes}
 
     data = build_podcasts_payload()
@@ -907,27 +878,50 @@ def podcasts_page():
 @app.route('/podcasts/<show_slug>')
 def podcast_show_page(show_slug):
     """Podcast show detail page"""
-    # Reuse the same builder used by the hub so we stay consistent.
+    # Build the same payload as the hub, then pick the requested show.
+    # (Kept simple/inline to avoid refactoring outside this feature branch.)
     collection = load_json_data('podcastCollection.json', {'podcasts': []})
-    # Build via the hub helper (kept inline above for now).
-    # NOTE: If this grows, move build_podcasts_payload() to a module.
     items = list(collection.get('podcasts', []) or [])
     active_items = [p for p in items if p.get('active', True)]
-    active_items.sort(key=lambda p: (str(p.get('date') or p.get('releaseDate') or ''), int(p.get('id') or 0)), reverse=True)
+    active_items.sort(
+        key=lambda p: (str(p.get('date') or p.get('releaseDate') or ''), int(p.get('id') or 0)),
+        reverse=True
+    )
 
-    def classify_show_slug(title: str) -> str:
-        t = (title or '').lower().strip()
-        if t.startswith('the rob show'):
-            return 'rob'
-        if 'poets' in t:
-            return 'poets-and-friends'
-        if 'tyler' in t:
-            return 'tyler-broadcast'
-        return 'tyler-broadcast'
+    def slugify(s: str) -> str:
+        s = (s or '').strip().lower()
+        s = re.sub(r"['’]", '', s)
+        s = re.sub(r'[^a-z0-9]+', '-', s)
+        s = re.sub(r'-{2,}', '-', s).strip('-')
+        return s or 'show'
 
-    def to_episode(p):
+    def extract_show_name(title: str) -> str:
+        t = (title or '').strip()
+        lower = t.lower()
+        if lower.startswith('the rob show'):
+            return 'The Rob Show'
+        if lower.startswith('my friend'):
+            return 'My Friend'
+        if lower.startswith('found cassettes'):
+            return 'Found Cassettes'
+        head = re.split(r'\s*[-–—]\s*', t, maxsplit=1)[0].strip()
+        head = re.sub(r'\s*#\s*\d+.*$', '', head).strip()
+        return head or 'Podcast'
+
+    slug_aliases = {
+        'The Rob Show': 'rob',
+        'Rob Meglio Show': 'rob',
+        'Poets & Friends': 'poets-and-friends',
+        "Tyler’s New Broadcast": 'tyler-broadcast',
+        "Tyler's New Broadcast": 'tyler-broadcast',
+    }
+
+    episodes = []
+    for p in active_items:
         title = p.get('title') or 'Untitled Episode'
-        return {
+        show_name = extract_show_name(title)
+        sslug = slug_aliases.get(show_name) or slugify(show_name)
+        episodes.append({
             'id': str(p.get('id') or title),
             'title': title,
             'description': p.get('description') or '',
@@ -936,29 +930,22 @@ def podcast_show_page(show_slug):
             'duration_seconds': 0,
             'audio_url': p.get('mp3url') or '',
             'artwork': p.get('thumbnail') or '/static/img/default-cover.jpg',
-            'show_slug': classify_show_slug(title),
-        }
+            'show_slug': sslug,
+            'show_title': show_name,
+        })
 
-    episodes = [to_episode(p) for p in active_items]
     show_eps = [e for e in episodes if e['show_slug'] == show_slug]
-
-    show_title = {
-        'rob': 'Rob Meglio Show',
-        'poets-and-friends': 'Poets & Friends',
-        'tyler-broadcast': "Tyler’s New Broadcast",
-    }.get(show_slug)
-
-    if not show_title:
-        return render_template('404.html'), 404
+    if not show_eps:
+        # Allow show pages to exist even before episodes arrive if they are in the “known” aliases.
+        # Otherwise, 404.
+        known_slugs = set(slug_aliases.values())
+        if show_slug not in known_slugs:
+            return render_template('404.html'), 404
 
     show = {
         'slug': show_slug,
-        'title': show_title,
-        'description': {
-            'rob': 'Conversations and community from the Ahoy universe.',
-            'poets-and-friends': 'Readings, interviews, and voices from the community.',
-            'tyler-broadcast': 'Updates, ideas, and a weekly dispatch for creators.',
-        }.get(show_slug, ''),
+        'title': (show_eps[0].get('show_title') if show_eps else show_slug.replace('-', ' ').title()),
+        'description': '',
         'artwork': (show_eps[0].get('artwork') if show_eps else '/static/img/default-cover.jpg'),
         'last_updated': (show_eps[0].get('date') if show_eps else ''),
         'episodes': [
@@ -966,8 +953,6 @@ def podcast_show_page(show_slug):
             for e in show_eps
         ],
     }
-    if not show:
-        return render_template('404.html'), 404
     return render_template('podcast_show.html', show=show)
 
 @app.route('/performances')
