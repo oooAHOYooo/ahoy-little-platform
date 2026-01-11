@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Events - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="events-page" x-data="eventsPage()" x-init="init()">
+    <section class="podcasts-hero">
+        <div class="podcasts-hero-inner">
+            <h1>Events</h1>
+            <p>Upcoming live Ahoy shows.</p>
+        </div>
+    </section>
+
+    <section class="podcasts-section">
+        <div class="podcasts-section-header">
+            <h2>Upcoming</h2>
+        </div>
+
+        <div class="episode-list">
+            <template x-for="evt in upcoming" :key="evt.id || evt.title">
+                <article class="episode-row" @click="openPerformances()">
+                    <img class="episode-art"
+                        :src="evt.thumbnail || '/static/img/default-cover.jpg'"
+                        alt="">
+                    <div class="episode-meta">
+                        <div class="episode-title" x-text="evt.title || 'Live Show'"></div>
+                        <div class="episode-subtitle">
+                            <span x-text="formatDate(evt.date)"></span>
+                            <span class="episode-dot">•</span>
+                            <span x-text="evt.time || ''"></span>
+                            <span class="episode-dot" x-show="evt.venue">•</span>
+                            <span x-show="evt.venue" x-text="evt.venue"></span>
+                        </div>
+                        <div class="episode-desc" x-text="evt.description || ''"></div>
+                    </div>
+                    <div class="episode-actions">
+                        <a class="episode-open" href="/performances" @click.stop>
+                            Details
+                        </a>
+                    </div>
+                </article>
+            </template>
+        </div>
+
+        <div x-show="!loading && upcoming.length === 0" class="empty-state"
+            style="margin-top:14px;">
+            <i class="fas fa-calendar-times"></i>
+            <h4>No upcoming events</h4>
+            <p>Check back soon, or view <a href="/performances">performances</a>.</p>
+        </div>
+    </section>
+</div>
+
+<script>
+    function eventsPage() {
+        return {
+            loading: true,
+            upcoming: [],
+            async init() {
+                this.loading = true;
+                try {
+                    const r = await fetch('/api/performances');
+                    const data = await r.json();
+                    const list = Array.isArray(data.performances) ? data.performances : [];
+
+                    // Best-effort future filter; if dates are missing, include.
+                    const now = new Date();
+                    const upcoming = list.filter(e => {
+                        const ds = e.date;
+                        if (!ds) return true;
+                        const d = new Date(ds);
+                        return isNaN(d.getTime()) ? true : d >= now;
+                    });
+
+                    // Sort by date asc when possible
+                    upcoming.sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+                    this.upcoming = upcoming;
+                } catch (e) {
+                    console.warn('Failed to load performances:', e);
+                    this.upcoming = [];
+                } finally {
+                    this.loading = false;
+                }
+            },
+            openPerformances() {
+                window.location.href = '/performances';
+            },
+            formatDate(ds) {
+                if (!ds) return '';
+                const d = new Date(ds);
+                if (isNaN(d.getTime())) return String(ds);
+                return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+            }
+        };
+    }
+</script>
+{% endblock %}
+

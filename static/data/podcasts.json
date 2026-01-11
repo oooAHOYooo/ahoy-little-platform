@@ -1,0 +1,92 @@
+{
+  "shows": [
+    {
+      "slug": "rob",
+      "title": "Rob Meglio Show",
+      "description": "Conversations, deep dives, and independent creator energy.",
+      "artwork": "/static/img/default-cover.jpg",
+      "last_updated": "2026-01-05",
+      "episodes": [
+        {
+          "id": "rob-001",
+          "title": "Episode 1 — Welcome to the Rob Meglio Show",
+          "description": "A quick intro, what to expect, and why indie matters.",
+          "date": "2026-01-05",
+          "duration": "18:42",
+          "duration_seconds": 1122,
+          "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+          "artwork": "/static/img/default-cover.jpg"
+        },
+        {
+          "id": "rob-002",
+          "title": "Episode 2 — Building in Public",
+          "description": "Notes from the trenches: shipping, feedback, and momentum.",
+          "date": "2026-01-08",
+          "duration": "24:10",
+          "duration_seconds": 1450,
+          "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+          "artwork": "/static/img/default-cover.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "poets-and-friends",
+      "title": "Poets & Friends",
+      "description": "Readings, interviews, and voices from the community.",
+      "artwork": "/static/img/default-cover.jpg",
+      "last_updated": "2026-01-03",
+      "episodes": [
+        {
+          "id": "paf-001",
+          "title": "Episode 1 — Open Mic Night",
+          "description": "A mix of poems and short reflections from friends.",
+          "date": "2026-01-03",
+          "duration": "31:05",
+          "duration_seconds": 1865,
+          "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+          "artwork": "/static/img/default-cover.jpg"
+        },
+        {
+          "id": "paf-002",
+          "title": "Episode 2 — The Craft of a Line",
+          "description": "Talking rhythm, editing, and finding your voice.",
+          "date": "2026-01-09",
+          "duration": "22:33",
+          "duration_seconds": 1353,
+          "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+          "artwork": "/static/img/default-cover.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "tyler-broadcast",
+      "title": "Tyler’s New Broadcast",
+      "description": "Updates, ideas, and a weekly dispatch for creators.",
+      "artwork": "/static/img/default-cover.jpg",
+      "last_updated": "2026-01-07",
+      "episodes": [
+        {
+          "id": "tyler-001",
+          "title": "Episode 1 — Start Here",
+          "description": "A new series: what we’re making and why.",
+          "date": "2026-01-07",
+          "duration": "15:20",
+          "duration_seconds": 920,
+          "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+          "artwork": "/static/img/default-cover.jpg"
+        },
+        {
+          "id": "tyler-002",
+          "title": "Episode 2 — Consistency Beats Intensity",
+          "description": "A practical playbook for shipping every week.",
+          "date": "2026-01-10",
+          "duration": "19:47",
+          "duration_seconds": 1187,
+          "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+          "artwork": "/static/img/default-cover.jpg"
+        }
+      ]
+    }
+  ]
+}
+

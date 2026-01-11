@@ -73,82 +73,20 @@ endblock %}
         </div>
     </section>
 
-    <!-- Boost Jar Section (Component injected) -->
-    <section class="boost-jar-section" x-data="boostJar()" x-init="init()">
+    <!-- Boost (simplified) -->
+    <section class="boost-jar-section">
         <div class="boost-jar-container">
             <div class="boost-jar-header">
-                <h2>💝 Boost Jar</h2>
+                <h2>💝 Boost</h2>
                 <p class="boost-jar-subtitle">Support <span x-text="artist.name"></span> directly</p>
-                <p class="boost-jar-fee-note">Ahoy takes 7.5% platform fee</p>
             </div>
-            
-            <div class="boost-amount-buttons">
-                <button 
-                    @click="selectAmount(1)"
-                    :class="{ 'active': selectedAmount === 1 }"
-                    class="boost-btn">
-                    $1
-                </button>
-                <button 
-                    @click="selectAmount(3)"
-                    :class="{ 'active': selectedAmount === 3 }"
-                    class="boost-btn">
-                    $3
-                </button>
-                <button 
-                    @click="selectAmount(5)"
-                    :class="{ 'active': selectedAmount === 5 }"
-                    class="boost-btn">
-                    $5
-                </button>
-                <button 
-                    @click="selectAmount(10)"
-                    :class="{ 'active': selectedAmount === 10 }"
-                    class="boost-btn">
-                    $10
-                </button>
-                <button 
-                    @click="showCustomInput = true"
-                    :class="{ 'active': showCustomInput }"
-                    class="boost-btn custom">
-                    Custom
-                </button>
-            </div>
-
-            <div x-show="showCustomInput" x-transition class="custom-amount-input">
-                <label for="custom-amount">Enter amount ($)</label>
-                <input 
-                    type="number" 
-                    id="custom-amount"
-                    x-model="customAmount"
-                    min="0.50"
-                    step="0.01"
-                    placeholder="0.50"
-                    @input="selectedAmount = null; customAmount = $event.target.value">
-            </div>
-
-            <button 
-                @click="processBoost()"
-                :disabled="isProcessing || !canBoost"
-                class="boost-submit-btn">
-                <span x-show="!isProcessing">Send Boost</span>
-                <span x-show="isProcessing">Processing...</span>
+            <button type="button" class="boost-submit-btn"
+                @click="document.dispatchEvent(new CustomEvent('ahoy:boost:open', { detail: { recipientType: 'artist', recipientId: (artist.slug || artist.id || artist.name || ''), recipientName: artist.name, suggestedAmount: 1 } }))">
+                <span>Open Boost</span>
             </button>
-
-            <!-- Supporter Badge Display -->
-            <div x-show="isSupporter" class="supporter-badge" x-transition>
-                <div class="badge-icon">⭐</div>
-                <div class="badge-text">
-                    <strong>Supporter Badge</strong>
-                    <p>You've boosted over $10! Thank you for supporting artists.</p>
-                </div>
-            </div>
-
-            <!-- Success Animation -->
-            <div x-show="showSuccess" x-transition class="boost-success-animation">
-                <div class="success-icon">✨</div>
-                <p>Thank you for your support!</p>
-            </div>
+            <p class="boost-jar-fee-note" style="margin-top:10px;">
+                Fees are shown on checkout.
+            </p>
         </div>
     </section>
 
@@ -394,118 +332,7 @@ function artistDetail() {
     };
 }
 
-function boostJar() {
-    return {
-        artist: {{ artist|tojson }},
-        selectedAmount: null,
-        customAmount: '',
-        showCustomInput: false,
-        isProcessing: false,
-        isSupporter: false,
-        showSuccess: false,
-
-        get artistId() {
-            // Get artist ID from slug or generate from name
-            if (this.artist.slug) {
-                return this.artist.slug;
-            }
-            if (this.artist.name) {
-                return this.artist.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-            }
-            return this.artist.id || '';
-        },
-
-        async init() {
-            // Check if user is a supporter
-            await this.checkSupporterStatus();
-        },
-
-        async checkSupporterStatus() {
-            try {
-                const response = await fetch('/payments/user/total-boosts');
-                if (response.ok) {
-                    const data = await response.json();
-                    this.isSupporter = data.is_supporter || false;
-                }
-            } catch (e) {
-                console.error('Failed to check supporter status:', e);
-            }
-        },
-
-        selectAmount(amount) {
-            this.selectedAmount = amount;
-            this.showCustomInput = false;
-            this.customAmount = '';
-        },
-
-        get canBoost() {
-            return this.selectedAmount !== null || (this.customAmount && parseFloat(this.customAmount) >= 0.50);
-        },
-
-        get boostAmount() {
-            if (this.selectedAmount !== null) {
-                return this.selectedAmount;
-            }
-            if (this.customAmount) {
-                const amount = parseFloat(this.customAmount);
-                return amount >= 0.50 ? amount : null;
-            }
-            return null;
-        },
-
-        async processBoost() {
-            const amount = this.boostAmount;
-            if (!amount || this.isProcessing) return;
-
-            this.isProcessing = true;
-
-            try {
-                const response = await fetch('/payments/boost-session', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        artist_id: this.artistId,
-                        amount: amount
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.checkout_url) {
-                    // Open Stripe Checkout in new window
-                    const checkoutWindow = window.open(data.checkout_url, 'stripe-checkout', 'width=600,height=700');
-                    
-                    // Poll for window close (payment completion)
-                    const checkClosed = setInterval(() => {
-                        if (checkoutWindow.closed) {
-                            clearInterval(checkClosed);
-                            // Check if user is now a supporter
-                            this.checkSupporterStatus();
-                            // Show success animation
-                            this.showSuccess = true;
-                            setTimeout(() => {
-                                this.showSuccess = false;
-                            }, 3000);
-                            // Reset form
-                            this.selectedAmount = null;
-                            this.customAmount = '';
-                            this.showCustomInput = false;
-                        }
-                    }, 500);
-                } else {
-                    alert(data.error || 'Failed to create payment session');
-                }
-            } catch (e) {
-                console.error('Boost processing error:', e);
-                alert('An error occurred. Please try again.');
-            } finally {
-                this.isProcessing = false;
-            }
-        }
-    };
-}
+// Boost UI moved to the global Boost modal in templates/base.html.
 
 </script>
 

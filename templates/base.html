@@ -369,8 +369,8 @@
                         <i class="fas fa-search"></i>
                     </button>
                     <a href="/bookmarks" class="status-action-btn"
-                        title="Notifications">
-                        <i class="fas fa-bell"></i>
+                        title="Bookmarks">
+                        <i class="fas fa-bookmark"></i>
                         <span class="notification-badge"
                             x-show="hasNewBookmarks"
                             x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
@@ -440,6 +440,11 @@
                         <i class="fas fa-users" aria-hidden="true"></i>
                         <span>Artists</span>
                     </a>
+                    <a href="/podcasts"
+                        class="mobile-tab {% if request.path.startswith('/podcasts') %}active{% endif %}">
+                        <i class="fas fa-podcast" aria-hidden="true"></i>
+                        <span>Podcasts</span>
+                    </a>
                     <a href="/merch"
                         class="mobile-tab {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}">
                         <i class="fas fa-shopping-bag" aria-hidden="true"></i>
@@ -456,22 +461,8 @@
                         <span>Saved</span>
                     </a>
                 </nav>
-                <div
-                    x-show="open"
-                    x-transition
-                    class="mobile-menu-overlay"
-                    style="display:none;">
-                    <button @click="open = false" class="close-btn"
-                        aria-label="Close menu">✕</button>
-                    <a href="/music">Music</a>
-                    <a href="/shows">Shows</a>
-                    <a href="/live-tv">Live TV</a>
-                    <a href="/artists">Artists</a>
-                    <a href="/merch">Merch</a>
-                    <a href="/radio">Radio</a>
-                    <a href="/bookmarks">Saved</a>
-                    <a href="/settings">Settings</a>
-                </div>
+                <!-- Mobile hamburger overlay removed to avoid duplicate navigation.
+                         Mobile uses the bottom tab bar + the top utility bar. -->
                 <div x-show="searchOpen" class="mobile-search-panel"
                     style="display:none;">
                     <!-- existing search input -->
@@ -523,45 +514,7 @@
                         </button>
                     </div>
 
-                    <!-- Main Navigation (desktop) -->
-                    <div class="nav-features">
-                        <a href="{{ url_for('music') }}"
-                            class="feature-btn {% if request.endpoint == 'music' %}active{% endif %}"
-                            title="Music Library">
-                            <i class="fas fa-music"></i>
-                            <span>Music</span>
-                        </a>
-                        <a href="{{ url_for('shows') }}"
-                            class="feature-btn {% if request.endpoint == 'shows' %}active{% endif %}"
-                            title="Live Shows">
-                            <i class="fas fa-play-circle"></i>
-                            <span>Shows</span>
-                        </a>
-                        <a href="{{ url_for('live_tv_page') }}"
-                            class="feature-btn {% if request.endpoint == 'live_tv_page' %}active{% endif %}"
-                            title="Live TV">
-                            <i class="fas fa-tv"></i>
-                            <span>Live TV</span>
-                        </a>
-                        <a href="{{ url_for('artists') }}"
-                            class="feature-btn {% if request.endpoint == 'artists' %}active{% endif %}"
-                            title="Artists">
-                            <i class="fas fa-users"></i>
-                            <span>Artists</span>
-                        </a>
-                        <a href="/merch"
-                            class="feature-btn {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}"
-                            title="Merch Store">
-                            <i class="fas fa-shopping-bag"></i>
-                            <span>Merch</span>
-                        </a>
-                        <a href="/bookmarks"
-                            class="feature-btn {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
-                            title="Bookmarks">
-                            <i class="fas fa-bookmark"></i>
-                            <span>Bookmarks</span>
-                        </a>
-                    </div>
+                    <!-- Main Navigation moved to left sidebar (AppShell). -->
 
                     <!-- Desktop-only Search Bar -->
                     <div class="nav-search nav-search--pill desktop-only">
@@ -581,42 +534,18 @@
 
                     <!-- App Menu - Compact Right Side -->
                     <div class="nav-menu flex items-center gap-1">
-                        <!-- Notifications + Premium (Desktop) -->
-                        <button type="button"
+                        <!-- Bookmarks (Desktop) -->
+                        <a href="/bookmarks"
                             class="nav-pill-btn desktop-only"
-                            title="Notifications"
-                            @click="openNotifications()">
-                            <i class="fas fa-bell" aria-hidden="true"></i>
-                            <span>Notifications</span>
+                            title="Bookmarks"
+                            style="display:inline-flex; align-items:center; gap:8px;">
+                            <i class="fas fa-bookmark" aria-hidden="true"></i>
+                            <span>Bookmarks</span>
                             <span class="nav-pill-badge"
                                 x-show="hasNewBookmarks"
                                 x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
-                        </button>
-                        <button type="button"
-                            class="nav-premium-btn desktop-only"
-                            @click="goPremium()">
-                            Go Premium
-                        </button>
-
-                        <!-- Weather Widget (Desktop Only) -->
-                        <div
-                            class="nav-item hidden md:flex items-center gap-2 px-3 mr-2"
-                            x-show="weatherLoaded"
-                            title="New Haven, CT"
-                            style="cursor: default; opacity: 0.9;">
-                            <span class="weather-icon" x-text="weatherIcon"
-                                style="font-size: 1.1em;"></span>
-                            <span
-                                class="weather-temp text-sm font-medium text-gray-300"
-                                x-text="weatherTemp + '°'"></span>
-                        </div>
-
-                        <!-- Home (Desktop Only) -->
-                        <a href="{{ url_for('home') }}"
-                            class="nav-item hidden md:flex {% if request.endpoint == 'home' %}active{% endif %}"
-                            title="Home">
-                            <i class="fas fa-home"></i>
                         </a>
+                        <!-- Premium moved into account area/menu (keep top bar minimal). -->
 
                         <!-- Account Features Dropdown (Desktop Only - Logged In) -->
                         <div class="hidden-mobile account-menu-container"
@@ -643,7 +572,7 @@
                                 x-transition:leave-end="opacity-0 scale-95 translate-y-1"
                                 class="account-dropdown-menu">
 
-                                <!-- User Header with Stats -->
+                                <!-- User Header -->
                                 <div
                                     class="px-4 py-4 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 border-b border-neutral-700/50">
                                     <div class="mb-2">
@@ -651,64 +580,23 @@
                                             class="hdr-username text-sm font-semibold text-white truncate"
                                             x-text="userProfile.display_name || userProfile.username || 'Guest'"></p>
                                     </div>
-
-                                    <!-- Quick Stats -->
-                                    <div
-                                        class="account-stats grid grid-cols-3 gap-2 pt-2 border-t border-neutral-700/50">
-                                        <div class="text-center">
-                                            <div
-                                                class="text-base font-semibold text-pink-400"
-                                                x-text="totalBookmarkCount || 0"></div>
-                                            <div
-                                                class="text-[11px] text-neutral-400">Bookmarks</div>
-                                        </div>
-                                        <div class="text-center">
-                                            <div
-                                                class="text-base font-semibold text-yellow-400"
-                                                x-text="badges?.length || 0"></div>
-                                            <div
-                                                class="text-[11px] text-neutral-400">Badges</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Wallet Summary -->
-                                    <div
-                                        class="account-wallet flex items-center justify-between mt-2 p-2 rounded-md border border-neutral-700/40 bg-neutral-800/30">
-                                        <div
-                                            class="text-[11px] text-neutral-300">Wallet</div>
-                                        <div
-                                            class="text-sm font-semibold text-white"
-                                            x-text="'$' + ((walletBalanceCents || 0) / 100).toFixed(2)"></div>
-                                    </div>
-                                    <div
-                                        class="account-wallet-actions mt-1 flex gap-2">
-                                        <button
-                                            class="pill px-2 py-0.5 text-[11px] rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
-                                            @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(2000) : null">
-                                            Add $20
-                                        </button>
-                                        <button
-                                            class="pill px-2 py-0.5 text-[11px] rounded-md border border-purple-400/40 text-white/90 hover:bg-purple-500/20"
-                                            @click="$root.__x.$data.addFunds ? $root.__x.$data.addFunds(5000) : null">
-                                            Add $50
-                                        </button>
-                                    </div>
                                 </div>
 
                                 <!-- Main Menu Items -->
                                 <div class="account-menu-items">
 
-                                    <a href="/dashboard"
-                                        class="account-menu-item"
+                                    <!-- Profile first (prominent) -->
+                                    <a href="/account"
+                                        class="account-menu-item account-menu-item--primary"
                                         @click="accountMenuOpen = false">
                                         <i
-                                            class="fas fa-trophy account-menu-icon"></i>
+                                            class="fas fa-user-circle account-menu-icon"></i>
                                         <div class="account-menu-text">
                                             <div
-                                                class="account-menu-label">Dashboard</div>
+                                                class="account-menu-label">Profile</div>
                                             <div
-                                                class="account-menu-desc">Achievements
-                                                & progress</div>
+                                                class="account-menu-desc">Account
+                                                & security</div>
                                         </div>
                                     </a>
 
@@ -738,20 +626,6 @@
                                                 class="account-menu-label">Settings</div>
                                             <div
                                                 class="account-menu-desc">Preferences</div>
-                                        </div>
-                                    </a>
-
-                                    <a href="/account" class="account-menu-item"
-                                        @click="accountMenuOpen = false">
-                                        <i
-                                            class="fas fa-user-circle account-menu-icon"></i>
-                                        <div class="account-menu-text">
-                                            <div
-                                                class="account-menu-label">Account</div>
-                                            <div
-                                                class="account-menu-desc">Profile
-                                                &
-                                                security</div>
                                         </div>
                                     </a>
                                 </div>
@@ -946,7 +820,10 @@
         </div>
 
         <!-- Main Content -->
+        {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false)
+        %}
         <main class="main-content">
+            {% if show_dashboard_sidebars %}
             <div class="dashboard-sidebars">
                 <!-- Left Dashboard: Collection -->
                 <aside class="dashboard-sidebar dashboard-left desktop-only"
@@ -1295,6 +1172,14 @@
                             </template>
                         </div>
 
+                        <!-- Events -->
+                        <div class="section-title">Events</div>
+                        <div class="actions-mini actions-mini-vertical">
+                            <a class="action-mini" href="/events">
+                                Upcoming live Ahoy shows →
+                            </a>
+                        </div>
+
                         <!-- Quick Actions -->
                         <!-- <div class="section-title">Quick</div>
                         <div class="actions-mini actions-mini-vertical">
@@ -1310,6 +1195,90 @@
                     </div>
                 </aside>
             </div>
+            {% else %}
+            <div class="app-shell">
+                <aside class="app-sidebar" aria-label="Primary">
+                    <a class="app-sidebar-logo" href="{{ url_for('home') }}"
+                        aria-label="Ahoy Home">
+                        <img
+                            src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+                            alt="Ahoy Indie Media" />
+                    </a>
+
+                    <nav class="app-sidebar-nav"
+                        aria-label="Primary navigation">
+                        <a
+                            class="app-sidebar-item {% if request.path == '/' %}active{% endif %}"
+                            href="{{ url_for('home') }}">
+                            <i class="fas fa-compass" aria-hidden="true"></i>
+                            <span>Explore</span>
+                        </a>
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'music' %}active{% endif %}"
+                            href="{{ url_for('music') }}">
+                            <i class="fas fa-music" aria-hidden="true"></i>
+                            <span>Music</span>
+                        </a>
+                        <a
+                            class="app-sidebar-item {% if request.path.startswith('/podcasts') %}active{% endif %}"
+                            href="/podcasts">
+                            <i class="fas fa-podcast" aria-hidden="true"></i>
+                            <span>Podcasts</span>
+                        </a>
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'shows' %}active{% endif %}"
+                            href="{{ url_for('shows') }}">
+                            <i class="fas fa-play-circle"
+                                aria-hidden="true"></i>
+                            <span>Shows</span>
+                        </a>
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'artists' %}active{% endif %}"
+                            href="{{ url_for('artists') }}">
+                            <i class="fas fa-users" aria-hidden="true"></i>
+                            <span>Artists</span>
+                        </a>
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'radio_page' %}active{% endif %}"
+                            href="/radio">
+                            <i class="fas fa-broadcast-tower"
+                                aria-hidden="true"></i>
+                            <span>Radio</span>
+                        </a>
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
+                            href="/bookmarks">
+                            <i class="fas fa-bookmark" aria-hidden="true"></i>
+                            <span>Saved</span>
+                        </a>
+                    </nav>
+
+                    <div class="app-sidebar-spacer"></div>
+
+                    <nav class="app-sidebar-nav app-sidebar-nav--secondary"
+                        aria-label="Account">
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'account_page' %}active{% endif %}"
+                            href="/account">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'settings_page' %}active{% endif %}"
+                            href="/settings">
+                            <i class="fas fa-cog" aria-hidden="true"></i>
+                            <span>Settings</span>
+                        </a>
+                    </nav>
+                </aside>
+
+                <div class="app-main">
+                    <div class="content-area content-pad-bottom">
+                        {{ self.content() }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </main>
 
         <!-- Global Player - Glassy Now Playing -->
@@ -1638,6 +1607,67 @@
             </div>
         </div>
 
+        <!-- Boost Modal (simple sheet) -->
+        <div id="ahoy-boost-modal" class="ahoy-modal-overlay"
+            style="display:none;"
+            aria-hidden="true">
+            <div class="ahoy-modal" role="dialog" aria-modal="true"
+                aria-label="Boost">
+                <div class="ahoy-modal-header">
+                    <div class="ahoy-modal-title">Boost</div>
+                    <button type="button" class="ahoy-modal-close"
+                        aria-label="Close Boost" data-boost-close>
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                <div class="ahoy-modal-body">
+                    <div class="ahoy-boost-recipient">
+                        <div class="ahoy-boost-recipient-label">Sending to</div>
+                        <div class="ahoy-boost-recipient-name"
+                            id="ahoy-boost-recipient-name">—</div>
+                    </div>
+
+                    <div class="ahoy-boost-amounts">
+                        <button class="ahoy-boost-amt" type="button"
+                            data-boost-amt="1">$1</button>
+                        <button class="ahoy-boost-amt" type="button"
+                            data-boost-amt="3">$3</button>
+                        <button class="ahoy-boost-amt" type="button"
+                            data-boost-amt="5">$5</button>
+                        <button class="ahoy-boost-amt" type="button"
+                            data-boost-amt="custom">Custom</button>
+                    </div>
+
+                    <div class="ahoy-boost-custom" id="ahoy-boost-custom"
+                        style="display:none;">
+                        <label class="ahoy-boost-custom-label"
+                            for="ahoy-boost-custom-input">Custom amount</label>
+                        <div class="ahoy-boost-custom-row">
+                            <span class="ahoy-boost-custom-prefix">$</span>
+                            <input id="ahoy-boost-custom-input"
+                                class="ahoy-boost-custom-input" type="number"
+                                min="0.50" step="0.01" placeholder="0.50">
+                        </div>
+                    </div>
+
+                    <div class="ahoy-boost-copy">
+                        <div class="ahoy-boost-copy-strong">100% goes to the
+                            artist/show.</div>
+                        <div class="ahoy-boost-copy-small">Fees (Stripe + Ahoy)
+                            are shown on checkout.</div>
+                    </div>
+
+                    <div class="ahoy-boost-actions">
+                        <button type="button" class="ahoy-boost-confirm"
+                            data-boost-confirm>
+                            Confirm Boost
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Footer -->
         <footer class="app-footer">
             <div class="footer-content">
@@ -1829,7 +1859,7 @@
         </div>
 
         <!-- JavaScript -->
-        <script>window.LOGGED_IN = {{ LOGGED_IN | tojson }};</script>
+        <script>window.LOGGED_IN = JSON.parse('{{ LOGGED_IN|tojson|safe }}');</script>
         <script>
         // Hard env switch (default to 'development'). Override to 'production' to enable prod-only behaviors.
         window.APP_ENV = window.APP_ENV || 'development';
@@ -2067,6 +2097,100 @@
                 }
             };
         }
+        </script>
+
+        <script>
+            // Lightweight Boost modal controller (keeps existing /checkout wiring).
+            (function () {
+                const overlay = document.getElementById('ahoy-boost-modal');
+                if (!overlay) return;
+
+                const recipientNameEl = document.getElementById('ahoy-boost-recipient-name');
+                const customWrap = document.getElementById('ahoy-boost-custom');
+                const customInput = document.getElementById('ahoy-boost-custom-input');
+                const amtButtons = overlay.querySelectorAll('[data-boost-amt]');
+                const closeBtn = overlay.querySelector('[data-boost-close]');
+                const confirmBtn = overlay.querySelector('[data-boost-confirm]');
+
+                let state = {
+                    recipientType: 'artist',
+                    recipientId: '',
+                    recipientName: '',
+                    amount: 1
+                };
+
+                function setActiveAmountButton(value) {
+                    amtButtons.forEach(btn => {
+                        const v = btn.getAttribute('data-boost-amt');
+                        btn.classList.toggle('active', String(v) === String(value));
+                    });
+                }
+
+                function open(detail) {
+                    state.recipientType = detail?.recipientType || 'artist';
+                    state.recipientId = detail?.recipientId || '';
+                    state.recipientName = detail?.recipientName || 'Creator';
+                    state.amount = Number(detail?.suggestedAmount || 1);
+
+                    if (recipientNameEl) recipientNameEl.textContent = state.recipientName;
+                    if (customWrap) customWrap.style.display = 'none';
+                    if (customInput) customInput.value = '';
+                    setActiveAmountButton(String(state.amount));
+
+                    overlay.style.display = 'flex';
+                    overlay.setAttribute('aria-hidden', 'false');
+                }
+
+                function close() {
+                    overlay.style.display = 'none';
+                    overlay.setAttribute('aria-hidden', 'true');
+                }
+
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) close();
+                });
+                closeBtn && closeBtn.addEventListener('click', close);
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && overlay.style.display !== 'none') close();
+                });
+
+                amtButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const v = btn.getAttribute('data-boost-amt');
+                        if (v === 'custom') {
+                            setActiveAmountButton('custom');
+                            if (customWrap) customWrap.style.display = 'block';
+                            if (customInput) customInput.focus();
+                            return;
+                        }
+                        if (customWrap) customWrap.style.display = 'none';
+                        state.amount = Number(v || 1);
+                        setActiveAmountButton(v);
+                    });
+                });
+
+                confirmBtn && confirmBtn.addEventListener('click', () => {
+                    let amount = state.amount;
+                    if (customWrap && customWrap.style.display !== 'none') {
+                        const v = parseFloat(String(customInput?.value || ''));
+                        if (!isNaN(v)) amount = v;
+                    }
+                    if (!amount || isNaN(amount) || amount < 0.5) {
+                        try { document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Enter a valid boost amount (min $0.50).' })); } catch (_) { }
+                        return;
+                    }
+                    const params = new URLSearchParams({
+                        type: 'boost',
+                        // Keep param name as-is to preserve existing checkout route contract.
+                        artist_id: String(state.recipientId || state.recipientName || ''),
+                        amount: String(amount.toFixed(2))
+                    });
+                    window.location.href = `/checkout?${params.toString()}`;
+                });
+
+                document.addEventListener('ahoy:boost:open', (e) => open(e.detail || {}));
+                window.AhoyBoost = { open, close };
+            })();
         </script>
 
         <!-- Navbar JavaScript -->
@@ -2760,29 +2884,20 @@
                 async openBoost() {
                     try {
                         const track = this.currentTrack || (window.mediaPlayer && window.mediaPlayer.currentTrack) || {};
-                        const artistName = (track.artist || track.host || '').trim();
-                        const defaultAmount = 1.00;
-                        // Resolve artist id from API cache (best-effort)
-                        let artistId = '';
-                        try {
-                            if (!window.__ahoyArtistsCache) {
-                                const res = await fetch('/api/artists');
-                                const data = await res.json().catch(() => ({}));
-                                window.__ahoyArtistsCache = (data.artists || []);
+                        const recipientName = (track.artist || track.host || track.creator || '').trim();
+                        const recipientId = String(track.artist_id || track.artistId || track.artist || '').trim();
+                        document.dispatchEvent(new CustomEvent('ahoy:boost:open', {
+                            detail: {
+                                recipientType: (track.type === 'show' ? 'show' : 'artist'),
+                                recipientId,
+                                recipientName,
+                                suggestedAmount: 1
                             }
-                            const norm = (s) => String(s || '').trim().toLowerCase();
-                            const match = (window.__ahoyArtistsCache || []).find(a => norm(a.name) === norm(artistName));
-                            artistId = match ? (match.id || match.name || '') : '';
-                        } catch (_) {}
-                        // Use CSRF-protected universal checkout page
-                        const params = new URLSearchParams({
-                            type: 'boost',
-                            artist_id: String(artistId || ''),
-                            amount: String(defaultAmount)
-                        });
-                        window.location.href = `/checkout?${params.toString()}`;
+                        }));
                     } catch (e) {
                         console.warn('Boost open failed:', e);
+                        // Fallback to legacy checkout routing
+                        try { window.location.href = `/checkout?type=boost&amount=1`; } catch (_) {}
                     }
                 },
                 toggleShuffle() {
