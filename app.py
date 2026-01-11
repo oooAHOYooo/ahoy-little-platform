@@ -2610,17 +2610,23 @@ if __name__ == "__main__":
             print("💡 Set explicit PORT env var if you prefer a fixed port, e.g. PORT=5050 python app.py")
             chosen = 0
 
-    # 3) Run with gunicorn if available for parity; else Flask dev server
-    # Skip gunicorn on Windows (it requires fcntl which is Unix-only)
+    # 3) Local run strategy:
+    # - Default to Flask dev server (more stable locally, esp. on macOS where fork() + Objective-C can crash).
+    # - Allow opting into gunicorn via AHOY_USE_GUNICORN=1 for parity testing.
     is_windows = platform.system() == "Windows"
-    gunicorn_bin = shutil.which("gunicorn") if not is_windows else None
-    if gunicorn_bin:
+    is_macos = platform.system() == "Darwin"
+    want_gunicorn = str(os.getenv("AHOY_USE_GUNICORN", "")).lower() in ("1", "true", "yes", "on")
+
+    gunicorn_bin = shutil.which("gunicorn") if (not is_windows) else None
+    if gunicorn_bin and want_gunicorn and (not is_macos):
         print(f"🚀 Starting gunicorn on port {chosen}…")
-        # Use the same interface as Render's script but single worker for local
         os.execv(gunicorn_bin, ["gunicorn", "app:app", "--workers", "2", "--threads", "4", "--timeout", "120", "-b", f"0.0.0.0:{chosen}"])
     else:
+        if gunicorn_bin and is_macos and not want_gunicorn:
+            print("🧯 macOS detected: skipping gunicorn by default to avoid fork()/objc crashes.")
+            print("   Set AHOY_USE_GUNICORN=1 if you want to run gunicorn locally anyway.")
         if is_windows:
-            print(f"🚀 Starting Flask dev server on http://127.0.0.1:{chosen} (Windows detected, skipping gunicorn)")
+            print(f"🚀 Starting Flask dev server on http://127.0.0.1:{chosen} (Windows detected)")
         else:
             print(f"🚀 Starting Flask dev server on http://127.0.0.1:{chosen}")
         app.run(port=chosen, use_reloader=False)
