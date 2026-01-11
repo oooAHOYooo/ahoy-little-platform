@@ -2092,11 +2092,16 @@
                         this.hasNewBookmarks = false;
                     });
                     
-                    // Periodic refresh
+                    // Event-driven breadcrumb refresh (avoid frequent polling)
+                    window.addEventListener('popstate', () => this.refreshBreadcrumb(), { passive: true });
+                    window.addEventListener('hashchange', () => this.refreshBreadcrumb(), { passive: true });
+                    document.addEventListener('ahoy:breadcrumb:update', () => this.refreshBreadcrumb());
+
+                    // Slow periodic refresh (just in case something external changes state)
                     setInterval(() => {
                         this.loadBookmarkCount();
                         this.refreshBreadcrumb();
-                    }, 5000);
+                    }, 30000);
                 },
 
                 async loadBookmarkCount() {
@@ -2490,13 +2495,21 @@
                     try {
                         const path = (window.location && window.location.pathname) || '';
                         if (!path.startsWith('/artists')) return;
-                        setInterval(() => {
-                            const next = ahoyBuildBreadcrumb();
-                            // Only update if actually changed (avoid thrash)
-                            const cur = JSON.stringify(this.breadcrumbs || []);
-                            const nxt = JSON.stringify(next || []);
-                            if (cur !== nxt) this.breadcrumbs = next;
-                        }, 600);
+                        const refreshSoon = () => {
+                            // Update after UI handlers have applied active classes/state
+                            setTimeout(() => this.refreshBreadcrumbs(), 0);
+                        };
+
+                        // Event-driven updates (avoid polling)
+                        const tabs = document.querySelector('.filter-tabs');
+                        const tabsMobile = document.querySelector('.filter-tabs-mobile');
+                        if (tabs) tabs.addEventListener('click', refreshSoon, { passive: true });
+                        if (tabsMobile) tabsMobile.addEventListener('click', refreshSoon, { passive: true });
+
+                        // Also refresh on navigation changes within SPA-ish flows
+                        window.addEventListener('popstate', () => this.refreshBreadcrumbs(), { passive: true });
+                        window.addEventListener('hashchange', () => this.refreshBreadcrumbs(), { passive: true });
+                        document.addEventListener('ahoy:breadcrumb:update', () => this.refreshBreadcrumbs());
                     } catch (_) { }
                 },
 
@@ -2534,7 +2547,8 @@
                             mp.on('durationchange', update);
                         }
                     } catch (_) { }
-                    setInterval(update, 1500);
+                    // Low-frequency fallback (keeps CPU down; events handle most updates)
+                    setInterval(update, 5000);
                     document.addEventListener('play-track', update);
                     update();
                 },
