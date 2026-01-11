@@ -1817,7 +1817,7 @@
         </div>
 
         <!-- JavaScript -->
-        <script>window.LOGGED_IN = {{ LOGGED_IN | tojson }};</script>
+        <script>window.LOGGED_IN = JSON.parse('{{ LOGGED_IN|tojson|safe }}');</script>
         <script>
         // Hard env switch (default to 'development'). Override to 'production' to enable prod-only behaviors.
         window.APP_ENV = window.APP_ENV || 'development';
