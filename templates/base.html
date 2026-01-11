@@ -573,9 +573,13 @@
                             @click.outside="accountMenuOpen = false">
                             <button
                                 @click="accountMenuOpen = !accountMenuOpen; console.log('Account menu clicked, new state:', accountMenuOpen)"
-                                class="ds-iconbtn nav-item account-menu-btn"
+                                class="ds-iconbtn ds-iconbtn--account nav-item account-menu-btn"
                                 title="Account">
-                                <i class="fas fa-user" aria-hidden="true"></i>
+                                <i class="fas fa-user"
+                                    style="font-size:18px;color:#bdbdbd;"></i>
+                                <i class="fas fa-chevron-down"
+                                    style="font-size:12px;color:#bdbdbd;transition:transform .2s;"
+                                    :class="{'rotate-180': accountMenuOpen}"></i>
                             </button>
 
                             <!-- Unified Account Features Dropdown -->

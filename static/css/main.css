@@ -1596,6 +1596,14 @@ top:4px;
 right:4px;
 }
 
+.ds-iconbtn--account .fa-chevron-down{
+position:absolute;
+right:6px;
+bottom:6px;
+font-size:10px;
+opacity:0.8;
+}
+
 .ds-statusbar__divider{
 width:1px;
 height:22px;
