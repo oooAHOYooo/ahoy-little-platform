@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Podcasts - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="podcasts-page" x-data="podcastsHub()" x-init="init()">
+    <section class="podcasts-hero">
+        <div class="podcasts-hero-inner">
+            <h1>Podcasts</h1>
+            <p>Fresh episodes and shows from independent creators.</p>
+        </div>
+    </section>
+
+    <section class="podcasts-section">
+        <div class="podcasts-section-header">
+            <h2>New Episodes</h2>
+        </div>
+
+        <div class="episode-list">
+            <template x-for="ep in episodes" :key="ep.key">
+                <article class="episode-row" @click="openShow(ep.showSlug)">
+                    <img class="episode-art" :src="ep.artwork" alt="">
+                    <div class="episode-meta">
+                        <div class="episode-title" x-text="ep.title"></div>
+                        <div class="episode-subtitle">
+                            <span class="episode-show" x-text="ep.showTitle"></span>
+                            <span class="episode-dot">•</span>
+                            <span class="episode-time" x-text="ep.duration"></span>
+                            <span class="episode-dot" x-show="ep.date">•</span>
+                            <span class="episode-date" x-show="ep.date" x-text="ep.date"></span>
+                        </div>
+                        <div class="episode-desc" x-text="ep.description"></div>
+                    </div>
+
+                    <div class="episode-actions">
+                        <button type="button" class="episode-btn"
+                            @click.stop="play(ep)" title="Play">
+                            <i class="fas fa-play" aria-hidden="true"></i>
+                            <span class="sr-only">Play</span>
+                        </button>
+                        <button type="button" class="episode-btn bm-btn"
+                            @click.stop="toggleBookmark(ep)" title="Bookmark">
+                            <i class="fas fa-bookmark" aria-hidden="true"></i>
+                            <span class="sr-only">Bookmark</span>
+                        </button>
+                        <a class="episode-open" :href="`/podcasts/${ep.showSlug}`"
+                            @click.stop>
+                            Open
+                        </a>
+                    </div>
+                </article>
+            </template>
+        </div>
+    </section>
+
+    <section class="podcasts-section">
+        <div class="podcasts-section-header">
+            <h2>Shows</h2>
+        </div>
+        <div class="podcast-shows">
+            <template x-for="show in shows" :key="show.slug">
+                <a class="podcast-show-card" :href="`/podcasts/${show.slug}`">
+                    <img :src="show.artwork" alt="" class="podcast-show-art">
+                    <div class="podcast-show-title" x-text="show.title"></div>
+                    <div class="podcast-show-desc" x-text="show.description"></div>
+                    <div class="podcast-show-updated"
+                        x-text="show.last_updated ? `Updated ${show.last_updated}` : ''"></div>
+                </a>
+            </template>
+        </div>
+    </section>
+</div>
+
+<script>
+    function podcastsHub() {
+        const raw = {{ podcasts|tojson|safe }};
+        return {
+            shows: raw?.shows || [],
+            episodes: [],
+            init() {
+                // Flatten episodes into a single vertical list (single-row UI).
+                const eps = [];
+                for (const s of (this.shows || [])) {
+                    for (const e of (s.episodes || [])) {
+                        eps.push({
+                            key: `${s.slug}:${e.id}`,
+                            showSlug: s.slug,
+                            showTitle: s.title,
+                            id: e.id,
+                            title: e.title,
+                            description: e.description || '',
+                            date: e.date || '',
+                            duration: e.duration || '',
+                            duration_seconds: e.duration_seconds || 0,
+                            artwork: e.artwork || s.artwork || '/static/img/default-cover.jpg',
+                            audio_url: e.audio_url,
+                            // Player expects these keys for the bottom bar UI.
+                            type: 'track',
+                            artist: s.title,
+                            cover_art: e.artwork || s.artwork || '/static/img/default-cover.jpg'
+                        });
+                    }
+                }
+                // Sort newest-first when dates are present (fallback to insertion order).
+                eps.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+                this.episodes = eps;
+            },
+            play(ep) {
+                document.dispatchEvent(new CustomEvent('play-track', { detail: ep }));
+            },
+            openShow(slug) {
+                window.location.href = `/podcasts/${slug}`;
+            },
+            toggleBookmark(ep) {
+                if (!window.AhoyBookmarks) return;
+                window.AhoyBookmarks.toggle({
+                    type: 'podcast-episode',
+                    id: ep.key,
+                    title: ep.title,
+                    artwork: ep.artwork
+                });
+                try {
+                    document.dispatchEvent(new CustomEvent('bookmarks:changed', { detail: { item: ep } }));
+                } catch (_) { }
+            }
+        };
+    }
+</script>
+{% endblock %}
+

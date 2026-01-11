@@ -778,6 +778,25 @@ def artists():
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
+@app.route('/podcasts')
+def podcasts_page():
+    """Podcasts hub page"""
+    data = load_json_data('podcasts.json', {'shows': []})
+    return render_template('podcasts.html', podcasts=data)
+
+@app.route('/podcasts/<show_slug>')
+def podcast_show_page(show_slug):
+    """Podcast show detail page"""
+    data = load_json_data('podcasts.json', {'shows': []})
+    show = None
+    for s in data.get('shows', []):
+        if (s.get('slug') or '') == show_slug:
+            show = s
+            break
+    if not show:
+        return render_template('404.html'), 404
+    return render_template('podcast_show.html', show=show)
+
 @app.route('/performances')
 def performances():
     """Performances page"""

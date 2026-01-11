@@ -548,17 +548,17 @@
 
                     <!-- App Menu - Compact Right Side -->
                     <div class="nav-menu flex items-center gap-1">
-                        <!-- Notifications (Desktop) -->
-                        <button type="button"
+                        <!-- Bookmarks (Desktop) -->
+                        <a href="/bookmarks"
                             class="nav-pill-btn desktop-only"
-                            title="Notifications"
-                            @click="openNotifications()">
-                            <i class="fas fa-bell" aria-hidden="true"></i>
-                            <span>Notifications</span>
+                            title="Bookmarks"
+                            style="display:inline-flex; align-items:center; gap:8px;">
+                            <i class="fas fa-bookmark" aria-hidden="true"></i>
+                            <span>Bookmarks</span>
                             <span class="nav-pill-badge"
                                 x-show="hasNewBookmarks"
                                 x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
-                        </button>
+                        </a>
                         <!-- Premium moved into account area/menu (keep top bar minimal). -->
 
                         <!-- Account Features Dropdown (Desktop Only - Logged In) -->
@@ -847,7 +847,8 @@
         </div>
 
         <!-- Main Content -->
-        {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false) %}
+        {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false)
+        %}
         <main class="main-content">
             {% if show_dashboard_sidebars %}
             <div class="dashboard-sidebars">
@@ -1223,39 +1224,48 @@
                             alt="Ahoy Indie Media" />
                     </a>
 
-                    <nav class="app-sidebar-nav" aria-label="Primary navigation">
-                        <a class="app-sidebar-item {% if request.path == '/' %}active{% endif %}"
+                    <nav class="app-sidebar-nav"
+                        aria-label="Primary navigation">
+                        <a
+                            class="app-sidebar-item {% if request.path == '/' %}active{% endif %}"
                             href="{{ url_for('home') }}">
                             <i class="fas fa-compass" aria-hidden="true"></i>
                             <span>Explore</span>
                         </a>
-                        <a class="app-sidebar-item {% if request.endpoint == 'music' %}active{% endif %}"
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'music' %}active{% endif %}"
                             href="{{ url_for('music') }}">
                             <i class="fas fa-music" aria-hidden="true"></i>
                             <span>Music</span>
                         </a>
-                        <a class="app-sidebar-item {% if request.path.startswith('/podcasts') %}active{% endif %}"
+                        <a
+                            class="app-sidebar-item {% if request.path.startswith('/podcasts') %}active{% endif %}"
                             href="/podcasts">
                             <i class="fas fa-podcast" aria-hidden="true"></i>
                             <span>Podcasts</span>
                         </a>
-                        <a class="app-sidebar-item {% if request.endpoint == 'shows' %}active{% endif %}"
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'shows' %}active{% endif %}"
                             href="{{ url_for('shows') }}">
-                            <i class="fas fa-play-circle" aria-hidden="true"></i>
+                            <i class="fas fa-play-circle"
+                                aria-hidden="true"></i>
                             <span>Shows</span>
                         </a>
-                        <a class="app-sidebar-item {% if request.endpoint == 'artists' %}active{% endif %}"
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'artists' %}active{% endif %}"
                             href="{{ url_for('artists') }}">
                             <i class="fas fa-users" aria-hidden="true"></i>
                             <span>Artists</span>
                         </a>
-                        <a class="app-sidebar-item {% if request.endpoint == 'radio_page' %}active{% endif %}"
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'radio_page' %}active{% endif %}"
                             href="/radio">
                             <i class="fas fa-broadcast-tower"
                                 aria-hidden="true"></i>
                             <span>Radio</span>
                         </a>
-                        <a class="app-sidebar-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
                             href="/bookmarks">
                             <i class="fas fa-bookmark" aria-hidden="true"></i>
                             <span>Saved</span>
@@ -1266,12 +1276,14 @@
 
                     <nav class="app-sidebar-nav app-sidebar-nav--secondary"
                         aria-label="Account">
-                        <a class="app-sidebar-item {% if request.endpoint == 'account_page' %}active{% endif %}"
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'account_page' %}active{% endif %}"
                             href="/account">
                             <i class="fas fa-user" aria-hidden="true"></i>
                             <span>Profile</span>
                         </a>
-                        <a class="app-sidebar-item {% if request.endpoint == 'settings_page' %}active{% endif %}"
+                        <a
+                            class="app-sidebar-item {% if request.endpoint == 'settings_page' %}active{% endif %}"
                             href="/settings">
                             <i class="fas fa-cog" aria-hidden="true"></i>
                             <span>Settings</span>
