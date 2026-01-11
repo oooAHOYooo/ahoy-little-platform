@@ -461,7 +461,7 @@
                         <span>Saved</span>
                     </a>
                 </nav>
-                    <!-- Mobile hamburger overlay removed to avoid duplicate navigation.
+                <!-- Mobile hamburger overlay removed to avoid duplicate navigation.
                          Mobile uses the bottom tab bar + the top utility bar. -->
                 <div x-show="searchOpen" class="mobile-search-panel"
                     style="display:none;">
@@ -585,17 +585,14 @@
                                 <!-- Main Menu Items -->
                                 <div class="account-menu-items">
 
-                                    <a href="/dashboard"
-                                        class="account-menu-item"
+                                    <!-- Profile first (prominent) -->
+                                    <a href="/account"
+                                        class="account-menu-item account-menu-item--primary"
                                         @click="accountMenuOpen = false">
-                                        <i
-                                            class="fas fa-trophy account-menu-icon"></i>
+                                        <i class="fas fa-user-circle account-menu-icon"></i>
                                         <div class="account-menu-text">
-                                            <div
-                                                class="account-menu-label">Dashboard</div>
-                                            <div
-                                                class="account-menu-desc">Achievements
-                                                & progress</div>
+                                            <div class="account-menu-label">Profile</div>
+                                            <div class="account-menu-desc">Account & security</div>
                                         </div>
                                     </a>
 
@@ -625,20 +622,6 @@
                                                 class="account-menu-label">Settings</div>
                                             <div
                                                 class="account-menu-desc">Preferences</div>
-                                        </div>
-                                    </a>
-
-                                    <a href="/account" class="account-menu-item"
-                                        @click="accountMenuOpen = false">
-                                        <i
-                                            class="fas fa-user-circle account-menu-icon"></i>
-                                        <div class="account-menu-text">
-                                            <div
-                                                class="account-menu-label">Account</div>
-                                            <div
-                                                class="account-menu-desc">Profile
-                                                &
-                                                security</div>
                                         </div>
                                     </a>
                                 </div>
@@ -1613,7 +1596,8 @@
         </div>
 
         <!-- Boost Modal (simple sheet) -->
-        <div id="ahoy-boost-modal" class="ahoy-modal-overlay" style="display:none;"
+        <div id="ahoy-boost-modal" class="ahoy-modal-overlay"
+            style="display:none;"
             aria-hidden="true">
             <div class="ahoy-modal" role="dialog" aria-modal="true"
                 aria-label="Boost">

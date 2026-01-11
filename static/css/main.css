@@ -2084,6 +2084,17 @@ a:hover {
     opacity: 1;
 }
 
+.account-menu-item--primary {
+    background: rgba(255, 255, 255, 0.06);
+    border-left-color: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.account-menu-item--primary:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-left-color: var(--accent-color);
+}
+
 .account-menu-item-signout {
     color: rgba(239, 68, 68, 0.9);
 }
