@@ -26,12 +26,6 @@ class NowPlayingController {
                 await this.waitForThree();
             }
 
-            // Initialize audio analyser
-            const audioInit = await window.audioAnalyser.initialize();
-            if (!audioInit) {
-                console.warn('Audio analyser initialization failed');
-            }
-
             // Setup visualizer container
             const visualizerContainer = document.getElementById('now-playing-visualizer');
             if (visualizerContainer) {
@@ -41,7 +35,8 @@ class NowPlayingController {
                 });
                 
                 if (this.visualizer.init()) {
-                    this.visualizer.start();
+                    // Do not start the render loop until playback begins.
+                    // This saves CPU/GPU on mobile when nothing is playing.
                 }
             }
 
@@ -101,8 +96,8 @@ class NowPlayingController {
             }
         }, 500);
 
-        // Stop checking after 10 seconds
-        setTimeout(() => clearInterval(checkAudio), 10000);
+        // Stop checking after 5 seconds (keep it light)
+        setTimeout(() => clearInterval(checkAudio), 5000);
 
         // Initialize audio context on first user interaction (browser security requirement)
         const initOnInteraction = async () => {
@@ -134,7 +129,7 @@ class NowPlayingController {
             if (window.audioAnalyser.isInitialized) {
                 const connected = window.audioAnalyser.connect(this.audioElement);
                 if (connected) {
-                    this.startUpdateLoop();
+                    // Update loop + visualizer render start on playback events.
                     window.audioAnalyser.resume();
                 }
             }
@@ -148,7 +143,6 @@ class NowPlayingController {
                     // Try to connect, but don't break playback if it fails
                     const connected = window.audioAnalyser.connect(this.audioElement);
                     if (connected) {
-                        this.startUpdateLoop();
                         window.audioAnalyser.resume();
                     }
                 }
@@ -157,7 +151,6 @@ class NowPlayingController {
             // Try to connect, but don't break playback if it fails
             const connected = window.audioAnalyser.connect(this.audioElement);
             if (connected) {
-                this.startUpdateLoop();
                 window.audioAnalyser.resume();
             }
         }
@@ -174,6 +167,17 @@ class NowPlayingController {
                 if (track) {
                     this.onTrackChange(track);
                 }
+                // Start loops only while playing (CPU/GPU win on mobile).
+                try { this.visualizer && this.visualizer.start(); } catch (_) {}
+                try { this.startUpdateLoop(); } catch (_) {}
+            });
+            window.mediaPlayer.on('pause', () => {
+                try { this.stopUpdateLoop(); } catch (_) {}
+                try { this.visualizer && this.visualizer.stop(); } catch (_) {}
+            });
+            window.mediaPlayer.on('ended', () => {
+                try { this.stopUpdateLoop(); } catch (_) {}
+                try { this.visualizer && this.visualizer.stop(); } catch (_) {}
             });
         }
 
@@ -193,18 +197,6 @@ class NowPlayingController {
                 }, 100);
             }
         });
-
-        // Poll for track changes (fallback)
-        setInterval(() => {
-            if (window.mediaPlayer && window.mediaPlayer.currentTrack) {
-                const currentTrack = window.mediaPlayer.currentTrack;
-                // Only update if track actually changed
-                if (!this.lastTrackId || this.lastTrackId !== currentTrack.id) {
-                    this.lastTrackId = currentTrack.id;
-                    this.onTrackChange(currentTrack);
-                }
-            }
-        }, 1000);
     }
 
     /**
@@ -334,12 +326,21 @@ class NowPlayingController {
 // Export singleton instance
 window.nowPlayingController = new NowPlayingController();
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        window.nowPlayingController.init();
-    });
-} else {
-    window.nowPlayingController.init();
-}
+// Lazy initialize to keep mobile load fast:
+// - Initialize when the user starts playback (best signal we actually need the visualizer/analyser).
+// - Also initialize on first interaction as a fallback.
+(function lazyInitNowPlaying() {
+    let started = false;
+    const start = () => {
+        if (started) return;
+        started = true;
+        try { window.nowPlayingController.init(); } catch (_) {}
+        document.removeEventListener('play-track', start);
+        document.removeEventListener('click', start, true);
+        document.removeEventListener('touchstart', start, true);
+    };
+    document.addEventListener('play-track', start, { once: true });
+    document.addEventListener('click', start, { once: true, capture: true });
+    document.addEventListener('touchstart', start, { once: true, capture: true });
+})();
 
