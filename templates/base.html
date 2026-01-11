@@ -348,6 +348,7 @@
 
     <body x-data="appData()"
         class="overflow-x-hidden">
+        {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false) %}
         <!-- Mobile Status Bar (fixed top, compact) -->
         <div class="mobile-status-bar mobile-only" x-data="statusBar()"
             x-init="init()">
@@ -476,7 +477,8 @@
             <nav class="navbar desktop-nav" x-data="navbar()" x-init="init()">
                 <div class="nav-container max-w-7xl mx-auto px-4">
 
-                    <!-- Logo -->
+                    <!-- Logo (avoid duplicate logo when AppShell sidebar is present) -->
+                    {% if show_dashboard_sidebars %}
                     <div class="nav-logo">
                         <a href="{{ url_for('home') }}">
                             <img
@@ -484,6 +486,7 @@
                                 alt="Ahoy Indie Media">
                         </a>
                     </div>
+                    {% endif %}
                     <!-- Mobile Title (text instead of logo) - Hidden, logo shows instead -->
                     <div class="nav-title-mobile mobile-only"
                         style="display: none;">Ahoy Indie
@@ -820,8 +823,6 @@
         </div>
 
         <!-- Main Content -->
-        {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false)
-        %}
         <main class="main-content">
             {% if show_dashboard_sidebars %}
             <div class="dashboard-sidebars">
@@ -1327,7 +1328,11 @@
                                 class="category-pill">
                                 <i class="fas fa-play-circle"></i> Video
                             </span>
-                            <span x-show="currentTrack?.type !== 'show'"
+                            <span x-show="currentTrack?.type === 'podcast'"
+                                class="category-pill">
+                                <i class="fas fa-podcast"></i> Podcasts
+                            </span>
+                            <span x-show="currentTrack?.type !== 'show' && currentTrack?.type !== 'podcast'"
                                 class="category-pill">
                                 <i class="fas fa-music"></i> Music
                             </span>
@@ -1433,7 +1438,11 @@
                                 class="media-type">
                                 <i class="fas fa-play-circle"></i> Video
                             </span>
-                            <span x-show="currentTrack?.type !== 'show'"
+                            <span x-show="currentTrack?.type === 'podcast'"
+                                class="media-type">
+                                <i class="fas fa-podcast"></i> Podcasts
+                            </span>
+                            <span x-show="currentTrack?.type !== 'show' && currentTrack?.type !== 'podcast'"
                                 class="media-type">
                                 <i class="fas fa-music"></i> Music
                             </span>

@@ -99,7 +99,7 @@
                             artwork: e.artwork || show?.artwork || '/static/img/default-cover.jpg',
                             audio_url: e.audio_url,
                             // Player expects these keys for the bottom bar UI.
-                            type: 'track',
+                            type: 'podcast',
                             artist: show?.title || showSlug,
                             cover_art: e.artwork || show?.artwork || '/static/img/default-cover.jpg'
                         });
@@ -121,7 +121,7 @@
                                 artwork: e.artwork || s.artwork || '/static/img/default-cover.jpg',
                                 audio_url: e.audio_url,
                                 // Player expects these keys for the bottom bar UI.
-                                type: 'track',
+                                type: 'podcast',
                                 artist: s.title,
                                 cover_art: e.artwork || s.artwork || '/static/img/default-cover.jpg'
                             });
