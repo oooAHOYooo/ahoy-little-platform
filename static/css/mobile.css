@@ -9,7 +9,8 @@
 @media (max-width: 767px) {
     .mobile-auth-bar {
         position: fixed;
-        top: 0;
+        /* Below the custom status bar (+ iOS notch inset) */
+        top: calc(32px + env(safe-area-inset-top));
         left: 0;
         right: 0;
         z-index: 10004;
@@ -135,15 +136,15 @@
         font-size: 1rem;
     }
 
-    /* Add top padding to body to account for fixed auth bar */
+    /* Add top padding to body to account for fixed status bar + auth bar (+ iOS notch) */
     body.mobile-auth-active {
-        padding-top: 48px;
+        padding-top: calc(32px + 48px + env(safe-area-inset-top));
     }
 
     /* Adjust sticky headers to account for auth bar */
     .search-page-header,
     .unified-header.artists-subheader {
-        top: 48px !important;
+        top: calc(32px + 48px + env(safe-area-inset-top)) !important;
     }
 
     /* Ensure secondary nav accounts for auth bar */
@@ -623,8 +624,104 @@
     }
 
     .content-pad-bottom {
-        padding-bottom: 88px;
-        /* space for player on mobile */
+        /* BEFORE/AFTER (mobile layout quick check)
+           - Before: mixed gutters/padding resets + content hidden behind bottom nav
+           - After: single gutter via `.app-content` + bottom padding accounts for nav + safe-area */
+        padding-bottom: calc(var(--bottombar-h, 70px) + env(safe-area-inset-bottom) + var(--section-gap, 20px));
+    }
+}
+
+/* ==========================================================
+   Mobile layout system (≤768px)
+   - Consistent gutters + max width
+   - Section/card rhythm
+   - Fix bottom-nav overlap
+   Structure map (templates/classes)
+   - templates/base.html: `.content-area.app-content.content-pad-bottom`, `.mobile-auth-bar` (`.auth-login-btn`, `.auth-signup-btn`), `.mobile-bottom-nav`
+   - templates/home.html: `.home-page`, `.live-dashboard`, `.dashboard-grid`, `.dashboard-main`, `.dashboard-sidebar`, `.discovery-grid`, `.grid-container`, `.grid-item`
+   ========================================================== */
+@media (max-width: 768px) {
+    /* Override older mobile padding rules (base.css) with safe-area aware gutter */
+    .content-area.app-content {
+        padding-left: max(var(--gutter, 16px), env(safe-area-inset-left)) !important;
+        padding-right: max(var(--gutter, 16px), env(safe-area-inset-right)) !important;
+        max-width: var(--content-max, 680px);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Normalize vertical rhythm (base.css sets generic section margins) */
+    .app-content > section {
+        margin-top: var(--section-gap, 20px) !important;
+        margin-bottom: 0 !important;
+    }
+    .app-content > section:first-child {
+        margin-top: var(--spacing-md, 16px) !important;
+    }
+
+    /* Homepage: remove fixed heights that feel "off" on mobile */
+    .home-page .dashboard-grid {
+        height: auto !important;
+        min-height: 0 !important;
+    }
+
+    .home-page .live-dashboard {
+        margin-bottom: var(--section-gap, 20px) !important;
+    }
+
+    /* Homepage: discovery widgets should stack naturally */
+    .discovery-grid .grid-container {
+        grid-template-columns: 1fr !important;
+        gap: var(--card-gap, 12px) !important;
+    }
+    .grid-item {
+        height: auto !important;
+        border-radius: var(--card-radius, 16px) !important;
+    }
+    .item-header {
+        padding: var(--card-pad, 14px) !important;
+    }
+    .playing-list {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: var(--card-gap, 12px) !important;
+        padding: var(--card-pad, 14px) !important;
+        height: auto !important;
+    }
+}
+
+/* ==========================================================
+   De-emphasize auth CTAs on small mobile (≤480px)
+   - Keep accessible (44px targets), but make "Watch Now" + content primary
+   ========================================================== */
+@media (max-width: 480px) {
+    .auth-login-btn.auth-cta,
+    .auth-signup-btn.auth-cta {
+        min-height: 44px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        letter-spacing: 0;
+        box-shadow: none !important;
+    }
+
+    /* Sign In: tertiary/ghost */
+    .auth-login-btn.auth-cta {
+        background: transparent !important;
+        border: 1px solid rgba(255, 255, 255, 0.10) !important;
+        color: rgba(255, 255, 255, 0.82) !important;
+        padding: 0.5rem 0.9rem !important;
+    }
+    .auth-login-btn.auth-cta i {
+        color: rgba(255, 255, 255, 0.70) !important;
+    }
+
+    /* Sign Up: still visible, but no longer "primary purple" */
+    .auth-signup-btn.auth-cta {
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        color: rgba(255, 255, 255, 0.90) !important;
+        font-weight: 600 !important;
+        padding: 0.5rem 0.95rem !important;
     }
 }
 
@@ -652,8 +749,7 @@
 @media (max-width: 767px) {
     .live-tv-sidebar {
         position: fixed !important;
-        top: 48px;
-        /* below status bar */
+        top: calc(32px + 48px + env(safe-area-inset-top));
         left: 0;
         bottom: 0;
         width: 86vw;
@@ -1064,8 +1160,8 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 32px;
-        max-height: 32px;
+        height: calc(32px + env(safe-area-inset-top));
+        max-height: none;
         background: linear-gradient(180deg, rgba(10, 10, 10, 0.98) 0%, rgba(10, 10, 10, 0.92) 100%);
         backdrop-filter: saturate(180%) blur(10px) contrast(1.05);
         -webkit-backdrop-filter: saturate(180%) blur(10px) contrast(1.05);
@@ -1073,7 +1169,7 @@
         z-index: 10025;
         display: flex;
         align-items: center;
-        padding: 0 12px;
+        padding: env(safe-area-inset-top) 12px 0;
         box-sizing: border-box;
     }
 
@@ -1218,10 +1314,10 @@
         text-align: center;
     }
 
-    /* Adjust body padding for auth bar and bottom nav */
+    /* Keep a single source of truth for mobile top spacing (handled earlier). */
     body.mobile-auth-active {
-        padding-top: 48px;
-        padding-bottom: calc(141px + env(safe-area-inset-bottom));
+        padding-top: calc(32px + 48px + env(safe-area-inset-top));
+        padding-bottom: 0;
     }
 }
 
@@ -1545,7 +1641,7 @@
 @media (max-width: 767px) {
     .app-header {
         position: sticky;
-        top: 32px;
+        top: calc(32px + env(safe-area-inset-top));
         background: linear-gradient(180deg, rgba(17, 17, 17, 0.85) 0%, rgba(17, 17, 17, 0.45) 100%);
         backdrop-filter: saturate(180%) blur(16px) contrast(1.03);
         -webkit-backdrop-filter: saturate(180%) blur(16px) contrast(1.03);

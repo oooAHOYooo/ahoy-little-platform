@@ -974,7 +974,10 @@ def performances():
 @app.route('/merch')
 def merch():
     """Merch store page"""
-    response = make_response(render_template('merch.html'))
+    from storage import read_json
+    products = read_json('data/products.json', {})
+    merch_catalog = read_json('data/merch.json', {"items": []})
+    response = make_response(render_template('merch.html', products=products, merch=merch_catalog))
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 

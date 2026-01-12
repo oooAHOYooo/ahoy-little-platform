@@ -400,11 +400,12 @@
                 </div>
                 {% else %}
                 <div class="auth-bar-guest">
-                    <a href="/auth" class="auth-login-btn" aria-label="Sign In">
+                    <a href="/auth" class="auth-login-btn auth-cta"
+                        aria-label="Sign In">
                         <i class="fas fa-sign-in-alt"></i>
                         <span>Sign In</span>
                     </a>
-                    <a href="/auth" class="auth-signup-btn"
+                    <a href="/auth" class="auth-signup-btn auth-cta"
                         aria-label="Create Account">
                         <span>Sign Up</span>
                     </a>
@@ -1103,7 +1104,7 @@
                 </aside>
 
                 <!-- Center Content -->
-                <div class="content-area content-pad-bottom">
+                <div class="content-area content-pad-bottom app-content">
                     {% block content %}{% endblock %}
                 </div>
 
@@ -1311,7 +1312,7 @@
                 </aside>
 
                 <div class="app-main">
-                    <div class="content-area content-pad-bottom">
+                    <div class="content-area content-pad-bottom app-content">
                         {{ self.content() }}
                     </div>
                 </div>

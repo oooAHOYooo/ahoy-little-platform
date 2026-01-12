@@ -810,6 +810,34 @@ body {
     --glass-bg: rgba(0, 0, 0, 0.4);
     --glass-blur: blur(12px);
     --glass-border: rgba(255, 255, 255, 0.1);
+
+    /* ========================================
+       Layout tokens (mobile-first, app-native)
+       - Single consistent gutter + readable max width
+       - Section/card rhythm
+       ======================================== */
+    --gutter: 20px;
+    --content-max: 1200px;
+    --section-gap: 22px;
+    --card-radius: 18px;
+    --card-pad: 16px;
+    --card-gap: 12px;
+
+    /* Fixed UI heights (used for safe-area / overlap avoidance) */
+    --topbar-h: var(--ds-topbar-height, 48px);
+    --mobile-authbar-h: 48px;
+    --bottombar-h: 70px;
+}
+
+@media (max-width: 768px) {
+    :root {
+        --gutter: 16px;
+        --content-max: 680px;
+        --section-gap: 20px;
+        --card-radius: 16px;
+        --card-pad: 14px;
+        --card-gap: 12px;
+    }
 }
 
 /* ========== Mobile-only top nav refactor helpers ========== */
@@ -952,6 +980,55 @@ a:hover {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 var(--spacing-lg);
+}
+
+/* ========================================
+   App-native mobile layout primitives
+   - Use `.app-content` on the main page wrapper (applied in `base.html`)
+   - Prefer `.section`, `.card`, `.grid` inside content
+   ======================================== */
+.app-content {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .app-content {
+        max-width: var(--content-max);
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: max(var(--gutter), env(safe-area-inset-left));
+        padding-right: max(var(--gutter), env(safe-area-inset-right));
+    }
+
+    /* Normalize vertical rhythm */
+    .app-content > section {
+        margin-top: var(--section-gap);
+        margin-bottom: 0;
+    }
+    .app-content > section:first-child {
+        margin-top: var(--spacing-md);
+    }
+
+    /* Cards */
+    .card {
+        border-radius: var(--card-radius);
+    }
+
+    /* Simple responsive grid helper (2-col on small phones by default) */
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--card-gap);
+    }
+}
+
+/* Optional debug harness for container alignment */
+body.debug-layout .app-content,
+body.debug-layout .section,
+body.debug-layout .card {
+    outline: 1px solid rgba(255, 255, 255, 0.08);
+    outline-offset: -1px;
 }
 
 /* ==========================================================================
