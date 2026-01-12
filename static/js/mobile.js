@@ -33,6 +33,8 @@
                     <a href="/shows" class="mobile-link">Shows</a>
                     <a href="/artists" class="mobile-link">Artists</a>
                     <a href="/radio" class="mobile-link">Radio</a>
+                    <a href="/events" class="mobile-link">Events</a>
+                    <a href="/merch" class="mobile-link">Merch</a>
                     <a href="/bookmarks" class="mobile-link">Bookmarks</a>
                 </nav>
             `;

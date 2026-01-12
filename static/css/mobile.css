@@ -615,12 +615,13 @@
         position: fixed;
         left: 0;
         right: 0;
-        bottom: 0;
+        /* Sit above the fixed bottom nav (avoid overlap) */
+        bottom: calc(var(--bottombar-h, 70px) + env(safe-area-inset-bottom));
         z-index: 10005;
         background: #0a0a0a;
         color: #e5e7eb;
         border-top: 1px solid #374151;
-        padding-bottom: calc(8px + env(safe-area-inset-bottom));
+        padding-bottom: 8px;
     }
 
     .content-pad-bottom {
@@ -628,6 +629,12 @@
            - Before: mixed gutters/padding resets + content hidden behind bottom nav
            - After: single gutter via `.app-content` + bottom padding accounts for nav + safe-area */
         padding-bottom: calc(var(--bottombar-h, 70px) + env(safe-area-inset-bottom) + var(--section-gap, 20px));
+    }
+
+    /* When the global player is visible, add enough space so the last content isn't hidden. */
+    body.has-player .content-pad-bottom {
+        /* `--player-h` is an approximation; the player sits above the bottom nav. */
+        padding-bottom: calc(var(--bottombar-h, 70px) + var(--player-h, 76px) + env(safe-area-inset-bottom) + var(--section-gap, 20px));
     }
 }
 
@@ -641,6 +648,16 @@
    - templates/home.html: `.home-page`, `.live-dashboard`, `.dashboard-grid`, `.dashboard-main`, `.dashboard-sidebar`, `.discovery-grid`, `.grid-container`, `.grid-item`
    ========================================================== */
 @media (max-width: 768px) {
+    :root {
+        --player-h: 76px;
+    }
+
+    html {
+        /* Ensure in-page jumps don't land under the stacked top bars */
+        scroll-padding-top: calc(32px + 48px + env(safe-area-inset-top) + 12px);
+        scroll-padding-bottom: calc(var(--bottombar-h, 70px) + env(safe-area-inset-bottom) + 12px);
+    }
+
     /* Override older mobile padding rules (base.css) with safe-area aware gutter */
     .content-area.app-content {
         padding-left: max(var(--gutter, 16px), env(safe-area-inset-left)) !important;
@@ -657,6 +674,81 @@
     }
     .app-content > section:first-child {
         margin-top: var(--spacing-md, 16px) !important;
+    }
+
+    /* Music / Shows pages: remove nested horizontal padding so gutters are consistent */
+    .music-container,
+    .shows-container {
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .music-container {
+        display: flex;
+        flex-direction: column;
+        gap: var(--section-gap, 20px);
+    }
+
+    .shows-page .shows-container {
+        display: flex;
+        flex-direction: column;
+        gap: var(--section-gap, 20px);
+    }
+
+    .music-container .header-content,
+    .shows-page .header-content {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* Unified hero: keep it app-native (no extra internal gutters) */
+    .music-container .unified-hero,
+    .shows-page .unified-hero {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        border-radius: var(--card-radius, 16px);
+        overflow: hidden;
+    }
+
+    .unified-hero .hero-content {
+        padding: var(--card-pad, 14px) !important;
+        max-width: 40rem;
+    }
+
+    .unified-hero::before,
+    .unified-hero::after {
+        width: 40px;
+    }
+
+    .unified-hero .hero-controls {
+        padding: 0 var(--card-pad, 14px);
+    }
+
+    /* Music: grid/list should align to `.app-content` gutter */
+    .music-container .music-grid {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        gap: var(--card-gap, 12px) !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .music-container .music-list {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+
+    /* Shows: grid should align to `.app-content` gutter */
+    .shows-page .shows-grid {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        gap: var(--card-gap, 12px) !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .shows-page .shows-list {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
     }
 
     /* Homepage: remove fixed heights that feel "off" on mobile */
@@ -695,6 +787,23 @@
    - Keep accessible (44px targets), but make "Watch Now" + content primary
    ========================================================== */
 @media (max-width: 480px) {
+    /* Home hero/dashboard: tighten oversized internal padding/typography from inline `<style>` */
+    .home-page .dash-overlay {
+        padding: var(--card-pad, 14px) !important;
+    }
+    .home-page .dash-content h2 {
+        font-size: 1.45rem !important;
+    }
+    .home-page .dash-content p {
+        font-size: 0.95rem !important;
+        margin-bottom: 0.9rem !important;
+    }
+    .home-page .dash-play-btn {
+        padding: 0.7rem 1.1rem !important;
+        font-size: 0.9rem !important;
+        box-shadow: none !important;
+    }
+
     .auth-login-btn.auth-cta,
     .auth-signup-btn.auth-cta {
         min-height: 44px;
@@ -1431,6 +1540,14 @@
         will-change: transform, color;
     }
 
+    /* Smush 6 tabs comfortably on small phones */
+    @media (max-width: 420px) {
+        .mobile-secondary-nav .mobile-tab {
+            max-width: 60px;
+            padding: 6px 8px 4px;
+        }
+    }
+
     .mobile-secondary-nav .mobile-tab i {
         font-size: 18px;
         line-height: 1;
@@ -1547,7 +1664,7 @@
         gap: 4px;
         padding: 8px 12px 4px;
         flex: 1;
-        max-width: 80px;
+        max-width: 72px;
         color: #9ca3af;
         text-decoration: none;
         border: none;
@@ -1556,6 +1673,20 @@
         line-height: 1.2;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         will-change: transform, color;
+    }
+
+    /* Smush 6 tabs comfortably on small phones */
+    @media (max-width: 420px) {
+        .mobile-bottom-nav .mobile-tab {
+            max-width: 62px;
+            padding: 8px 8px 4px;
+        }
+        .mobile-bottom-nav .mobile-tab i {
+            font-size: 20px;
+        }
+        .mobile-bottom-nav .mobile-tab span {
+            font-size: 10px;
+        }
     }
 
     .mobile-bottom-nav .mobile-tab i {
