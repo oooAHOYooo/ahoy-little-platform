@@ -71,12 +71,12 @@ def main():
     try:
         alembic_bin = shutil.which("alembic")
         if alembic_bin:
-            print("⚙️  Applying migrations (alembic upgrade head)…")
+            print("⚙️  Applying migrations (alembic upgrade heads)…")
             env = os.environ.copy()
             project_root = Path(__file__).parent
             env["PYTHONPATH"] = str(project_root)
             env.setdefault("DATABASE_URL", "sqlite:///local.db")
-            subprocess.run([alembic_bin, "upgrade", "head"], check=True, env=env, cwd=project_root)
+            subprocess.run([alembic_bin, "upgrade", "heads"], check=True, env=env, cwd=project_root)
         else:
             print("⚠️  Alembic not found in PATH; skipping automatic migrations.")
     except Exception as e:

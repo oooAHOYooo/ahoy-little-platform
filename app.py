@@ -29,7 +29,7 @@ from blueprints.api.auth import bp as api_auth_bp
 from blueprints.activity import bp as activity_bp
 # Removed: blueprints/playlists.py and blueprints/bookmarks.py (shadowed by API blueprints)
 # Removed: blueprints/collections.py (feature removed)
-from blueprints.api.gamify import bp as gamify_api_bp
+# Removed: gamify blueprint (feature removed)
 from blueprints.payments import bp as payments_bp
 from routes.boost_stripe import bp as boost_stripe_bp
 from routes.boost_stripe import boost_api_bp
@@ -170,7 +170,7 @@ def create_app():
     # Removed: playlists_bp and bookmarks_bp - shadowed by API blueprints, never reached
     # Use blueprints/api/playlists.py and blueprints/api/bookmarks.py instead
     # Removed: collections_bp (feature removed)
-    app.register_blueprint(gamify_api_bp)
+    # Removed: gamify_api_bp (feature removed)
     app.register_blueprint(payments_bp)
     app.register_blueprint(boost_stripe_bp)
     app.register_blueprint(boost_api_bp)
@@ -181,12 +181,7 @@ def create_app():
         initialize_search_index()
 
     # Register Click CLI commands
-    try:
-        from commands.gamify import gamify_cli
-        app.cli.add_command(gamify_cli, name="gamify")
-    except Exception as e:
-        # CLI should not break app startup
-        print(f"⚠️  CLI registration skipped: {e}")
+    # Removed: gamify CLI commands (feature removed)
 
     # Health check endpoint
     @app.get("/healthz")
@@ -2585,14 +2580,14 @@ if __name__ == "__main__":
     try:
         alembic_bin = shutil.which("alembic")
         if alembic_bin:
-            print("⚙️  Applying migrations (alembic upgrade head)…")
+            print("⚙️  Applying migrations (alembic upgrade heads)…")
             env = os.environ.copy()
             # Ensure PYTHONPATH includes project root so alembic/env.py can import models
             project_root = os.path.dirname(os.path.abspath(__file__))
             env["PYTHONPATH"] = f"{project_root}:{env.get('PYTHONPATH','')}" if env.get('PYTHONPATH') else project_root
             # Provide a sane default DATABASE_URL for local runs
             env.setdefault("DATABASE_URL", "sqlite:///local.db")
-            subprocess.run([alembic_bin, "upgrade", "head"], check=True, env=env)
+            subprocess.run([alembic_bin, "upgrade", "heads"], check=True, env=env)
         else:
             print("⚠️  Alembic not found in PATH; skipping automatic migrations.")
     except Exception as e:

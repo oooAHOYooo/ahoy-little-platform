@@ -1064,10 +1064,6 @@
                                             :class="badge.icon || 'fas fa-medal'"></i>
                                     </div>
                                 </template>
-                                <button @click="showCodeEntry = !showCodeEntry"
-                                    class="btn-code-mini" title="Enter code">
-                                    Code
-                                </button>
                             </div>
                         </div>
 
@@ -1093,22 +1089,6 @@
                                 <i
                                     :class="isTinyPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
                             </button>
-                        </div>
-
-                        <!-- Code Entry Modal -->
-                        <div x-show="showCodeEntry" class="modal-overlay"
-                            @click="showCodeEntry = false">
-                            <div class="modal-mini" @click.stop>
-                                <h4>Enter Show Code</h4>
-                                <p class="text-small">Got a code from a
-                                    show?</p>
-                                <input type="text" x-model="codeEntry"
-                                    placeholder="Enter code..."
-                                    class="input-field"
-                                    maxlength="20">
-                                <button @click="redeemCode()"
-                                    class="btn-mini">Redeem</button>
-                            </div>
                         </div>
                     </div>
                 </aside>
@@ -3265,8 +3245,6 @@
             return {
                 badges: [],
                 collections: [],
-                showCodeEntry: false,
-                codeEntry: '',
                 // XP / reinforcement
                 showXpReward: false,
                 xpGain: 0,
@@ -3487,25 +3465,7 @@
                 clearSearch() {
                     this.searchQuery = '';
                 },
-                async redeemCode() {
-                    if (!this.codeEntry) return;
-                    try {
-                        const response = await fetch('/api/gamify/redeem-code', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ code: this.codeEntry.toUpperCase() })
-                        });
-                        const data = await response.json();
-                        if (data.success) {
-                            this.codeEntry = '';
-                            this.showCodeEntry = false;
-                            if (window.ahoyApp?.showNotification) {
-                                window.ahoyApp.showNotification('Badge earned!', 'success');
-                            }
-                            await this.init();
-                        }
-                    } catch (e) { console.error('Code redemption failed'); }
-                }
+                // Removed: redeemCode function (gamify feature removed)
             };
         }
 

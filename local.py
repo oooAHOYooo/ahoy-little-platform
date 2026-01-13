@@ -55,14 +55,14 @@ if __name__ == "__main__":
     try:
         alembic_bin = shutil.which("alembic")
         if alembic_bin:
-            print("⚙️  Applying migrations (alembic upgrade head)…")
+            print("⚙️  Applying migrations (alembic upgrade heads)…")
             env = os.environ.copy()
             # Ensure PYTHONPATH includes project root so alembic/env.py can import models
             project_root = os.path.dirname(os.path.abspath(__file__))
             env["PYTHONPATH"] = f"{project_root}:{env.get('PYTHONPATH','')}" if env.get('PYTHONPATH') else project_root
             # Provide a sane default DATABASE_URL for local runs
             env.setdefault("DATABASE_URL", "sqlite:///local.db")
-            subprocess.run([alembic_bin, "upgrade", "head"], check=True, env=env)
+            subprocess.run([alembic_bin, "upgrade", "heads"], check=True, env=env)
         else:
             print("⚠️  Alembic not found in PATH; skipping automatic migrations.")
     except Exception as e:

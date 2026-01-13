@@ -3,7 +3,7 @@
 {% block title %}My Account - Ahoy Indie Media{% endblock %}
 
 {% block content %}
-<div class="account-page" x-data="accountPage()" x-init="init()" @keydown.escape.window="openAchievementId = null">
+<div class="account-page" x-data="accountPage()" x-init="init()">
     <!-- Account Header -->
     <div class="account-header">
         <div class="account-hero">
@@ -132,12 +132,7 @@
                                 <div class="stat-lg" x-text="xp"></div>
                             </div>
                         </div>
-                        <div class="card glass hover-raise">
-                            <div class="card-header"><i class="fas fa-award"></i> Badges</div>
-                            <div class="card-body">
-                                <div class="stat-lg" x-text="(achievements || []).filter(a => a.unlocked).length"></div>
-                            </div>
-                        </div>
+                        <!-- Removed: Badges stat (gamify feature removed) -->
                     </div>
                     <template x-if="!isGuest && recentActivity.length">
                         <div class="overview-card">
@@ -247,25 +242,7 @@
                             complete quests to earn XP.</p>
                     </div>
 
-                    <div class="overview-card" @click.away="openAchievementId = null">
-                        <h3>Achievements</h3>
-                        <div class="achievements-grid">
-                            <template x-for="a in achievements" :key="a.id">
-                                <div class="achievement"
-                                    :class="{ unlocked: a.unlocked }"
-                                    :title="a.description"
-                                    @click="openAchievementId = (openAchievementId === a.id ? null : a.id)">
-                                    <div class="badge">
-                                        <i :class="a.icon"></i>
-                                    </div>
-                                    <div class="label" x-text="a.title"></div>
-                                    <div class="desc" x-show="openAchievementId === a.id" x-transition>
-                                        <p x-text="a.description"></p>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
+                    <!-- Removed: Achievements section (gamify feature removed) -->
 
                     <div class="overview-card" x-data="{}">
                         <h3>My Bookmarks</h3>
@@ -671,9 +648,8 @@ function accountPage() {
         level: 1,
         nextLevelXp: 100,
         dailyQuests: [],
-        achievements: [],
+        // Removed: achievements array (gamify feature removed)
         bookmarks: {},
-        openAchievementId: null,
         profileForm: {
             display_name: '',
             bio: '',
@@ -693,7 +669,7 @@ function accountPage() {
             this.loadActivityTimeline();
             this.loadHabitState();
             this.seedQuests();
-            this.seedAchievements();
+            // Removed: seedAchievements call (gamify feature removed)
             this._wireGlobalEvents();
             this.loadBookmarks();
         },
@@ -863,9 +839,7 @@ function accountPage() {
             if (diffDays === 1) this.streakDays += 1; else if (diffDays > 1) this.streakDays = 1;
             this.lastActiveDate = todayKey;
             this.grantXp(5); // daily login bonus
-            this.unlockAchievement('streak_1');
-            if (this.streakDays >= 3) this.unlockAchievement('streak_3');
-            if (this.streakDays >= 7) this.unlockAchievement('streak_7');
+            // Removed: unlockAchievement calls (gamify feature removed)
             this.saveHabitState();
         },
         grantXp(amount) {
@@ -915,36 +889,7 @@ function accountPage() {
             this.showNotification(`+${q.xp || 10} XP`, 'success');
         },
 
-        // Achievements
-        seedAchievements() {
-            const stored = JSON.parse(localStorage.getItem('ahoy.account.achievements') || '[]');
-            this.achievements = stored.length ? stored : [
-                // Level 1 basics
-                { id: 'play_first', title: 'First Spin', description: 'Play your first track', icon: 'fas fa-play', unlocked: false },
-                { id: 'save_first', title: 'First Save', description: 'Bookmark your first item', icon: 'fas fa-bookmark', unlocked: false },
-                { id: 'queue_first', title: 'In The Queue', description: 'Add your first item to the queue', icon: 'fas fa-list', unlocked: false },
-                { id: 'playlist_first', title: 'Boarded', description: 'Create your first playlist/board', icon: 'fas fa-layer-group', unlocked: false },
-                // Listening time tiers
-                { id: 'listen_10', title: '10 Minutes', description: 'Listen for 10 minutes total', icon: 'fas fa-headphones', unlocked: false },
-                { id: 'listen_20', title: '20 Minutes', description: 'Listen for 20 minutes total', icon: 'fas fa-headphones', unlocked: false },
-                { id: 'listen_60', title: 'Hour In', description: 'Listen for 60 minutes total', icon: 'fas fa-headphones', unlocked: false },
-                // Streaks
-                { id: 'streak_1', title: 'Day One', description: 'Log activity for 1 day in a row', icon: 'fas fa-fire', unlocked: this.streakDays >= 1 },
-                { id: 'streak_3', title: 'Getting Warm', description: '3-day streak', icon: 'fas fa-fire-alt', unlocked: this.streakDays >= 3 },
-                { id: 'streak_7', title: 'On A Roll', description: '7-day streak', icon: 'fas fa-burn', unlocked: this.streakDays >= 7 },
-                // Collection
-                { id: 'saver_10', title: 'Collector', description: 'Save 10 items', icon: 'fas fa-bookmark', unlocked: (this.userStats.total_saves || 0) >= 10 }
-            ];
-            localStorage.setItem('ahoy.account.achievements', JSON.stringify(this.achievements));
-        },
-        unlockAchievement(id) {
-            const a = (this.achievements || []).find(x => x.id === id);
-            if (a && !a.unlocked) {
-                a.unlocked = true;
-                localStorage.setItem('ahoy.account.achievements', JSON.stringify(this.achievements));
-                this.showNotification(`Achievement unlocked: ${a.title}`, 'success');
-            }
-        },
+        // Removed: Achievements functions (gamify feature removed)
 
         // Bookmarks (overview widget)
         loadBookmarks() {
@@ -1144,25 +1089,7 @@ function accountPage() {
         _wireGlobalEventsOnce: false,
         _wireGlobalEvents() {
             if (this._wireGlobalEventsOnce) return; this._wireGlobalEventsOnce = true;
-            // Bookmark actions
-            document.addEventListener('bookmarks:changed', (e) => {
-                try { this.unlockAchievement('save_first'); } catch(_) {}
-                try {
-                    const total = (window.AhoyBookmarks && window.AhoyBookmarks.count && window.AhoyBookmarks.count()) || (this.userStats.total_saves || 0);
-                    if (total >= 10) this.unlockAchievement('saver_10');
-                } catch(_) {}
-            });
-            // Queue/playlist actions
-            document.addEventListener('playlist:created', () => { this.unlockAchievement('playlist_first'); });
-            // Player play
-            document.addEventListener('play-track', () => { this.unlockAchievement('play_first'); });
-            // Listening time updates
-            window.addEventListener('listening:update', (e) => {
-                const sec = (e && e.detail && e.detail.totalSeconds) || 0;
-                if (sec >= 10*60) this.unlockAchievement('listen_10');
-                if (sec >= 20*60) this.unlockAchievement('listen_20');
-                if (sec >= 60*60) this.unlockAchievement('listen_60');
-            });
+            // Removed: Achievement unlocking event listeners (gamify feature removed)
         }
     };
 }

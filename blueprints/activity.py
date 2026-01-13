@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 import os, time
 from storage import read_json, write_json
 from extensions import limiter
-from services.gamify import on_event
+# Removed: gamify service (feature removed)
 from services.user_resolver import resolve_db_user_id
 
 bp = Blueprint("activity", __name__, url_prefix="/api/activity")
@@ -67,13 +67,7 @@ def bookmark_toggle():
         status = "bookmarked"
 
     write_json(DATA_PATH, store)
-    # Gamify hook: save
-    try:
-        uid = resolve_db_user_id()
-        if uid:
-            on_event(uid, 'save', {"kind": kind, "id": item_id})
-    except Exception:
-        pass
+    # Removed: gamify hook (feature removed)
     return jsonify({"ok": True, "status": status, "id": item_id, "kind": kind, "persisted": True})
 
 @bp.post("/played")
@@ -93,11 +87,5 @@ def mark_played():
     bucket["history"] = bucket["history"][-500:]
 
     write_json(DATA_PATH, store)
-    # Gamify hook: play
-    try:
-        uid = resolve_db_user_id()
-        if uid:
-            on_event(uid, 'play', {"kind": kind, "id": item_id})
-    except Exception:
-        pass
+    # Removed: gamify hook (feature removed)
     return jsonify({"ok": True})

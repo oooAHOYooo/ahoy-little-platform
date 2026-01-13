@@ -110,6 +110,11 @@ def init_request_logging(app):
     @app.after_request
     def after_request(response):
         try:
+            # Skip logging static files in development to reduce noise
+            flask_env = os.getenv("FLASK_ENV", "development")
+            if flask_env != "production" and request.path.startswith("/static/"):
+                return response
+            
             # Calculate duration
             duration_ms = None
             if hasattr(g, 'request_start_time'):

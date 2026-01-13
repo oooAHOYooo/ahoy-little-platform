@@ -183,34 +183,7 @@ class RadioPrefs(Base):
     last_station_key = Column(String(255), nullable=True)
 
 
-class Achievement(Base):
-    __tablename__ = 'achievements'
-
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    key = Column(String(100), nullable=False, unique=True, index=True)
-    title = Column(String(255), nullable=False)
-    description = Column(String(2000), nullable=True)
-    icon = Column(String(255), nullable=True)
-    tier = Column(String(20), nullable=False)  # bronze|silver|gold|platinum
-    kind = Column(String(20), nullable=False)  # play|save|queue|playlist|streak|listen_time
-    threshold_int = Column(Integer, nullable=True)
-    active = Column(Boolean, nullable=False, default=True, server_default='true', index=True)
-    sort = Column(Integer, nullable=False, default=0, server_default='0')
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-
-
-class UserAchievement(Base):
-    __tablename__ = 'user_achievements'
-
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
-    achievement_id = Column(String(36), ForeignKey('achievements.id', ondelete='CASCADE'), nullable=False, index=True)
-    unlocked_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-
-    __table_args__ = (
-        UniqueConstraint('user_id', 'achievement_id', name='uq_user_achievement_once'),
-        Index('ix_user_achievements_user_id_unlocked_at', 'user_id', 'unlocked_at'),
-    )
+# Removed: Achievement and UserAchievement models (gamify feature removed)
 
 
 # Quest system models removed - see omit/futures_quest_system.py for archived code
