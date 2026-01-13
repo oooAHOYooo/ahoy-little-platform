@@ -793,6 +793,8 @@ def podcasts_page():
             return 'My Friend'
         if lower.startswith('found cassettes'):
             return 'Found Cassettes'
+        if lower.startswith("tyler's show"):
+            return "Tyler's Show"
         # Fallback: take leading segment before " - " and strip episode numbering
         head = re.split(r'\s*[-–—]\s*', t, maxsplit=1)[0].strip()
         head = re.sub(r'\s*#\s*\d+.*$', '', head).strip()
@@ -805,6 +807,7 @@ def podcasts_page():
         'Poets & Friends': 'poets-and-friends',
         "Tyler’s New Broadcast": 'tyler-broadcast',
         "Tyler's New Broadcast": 'tyler-broadcast',
+        "Tyler's Show": 'tylers-show',
     }
 
     def build_podcasts_payload():
@@ -899,6 +902,8 @@ def podcast_show_page(show_slug):
             return 'My Friend'
         if lower.startswith('found cassettes'):
             return 'Found Cassettes'
+        if lower.startswith("tyler's show"):
+            return "Tyler's Show"
         head = re.split(r'\s*[-–—]\s*', t, maxsplit=1)[0].strip()
         head = re.sub(r'\s*#\s*\d+.*$', '', head).strip()
         return head or 'Podcast'
@@ -909,6 +914,7 @@ def podcast_show_page(show_slug):
         'Poets & Friends': 'poets-and-friends',
         "Tyler’s New Broadcast": 'tyler-broadcast',
         "Tyler's New Broadcast": 'tyler-broadcast',
+        "Tyler's Show": 'tylers-show',
     }
 
     episodes = []
@@ -937,10 +943,19 @@ def podcast_show_page(show_slug):
         if show_slug not in known_slugs:
             return render_template('404.html'), 404
 
+    # Get description from first episode or use a default
+    description = ''
+    if show_eps:
+        # Try to get description from show metadata or first episode
+        description = show_eps[0].get('description', '') or ''
+        # If episode description is too specific, use a generic one
+        if description and len(description) < 50:
+            description = f"Episodes and conversations from {show_eps[0].get('show_title', show_slug.replace('-', ' ').title())}."
+    
     show = {
         'slug': show_slug,
         'title': (show_eps[0].get('show_title') if show_eps else show_slug.replace('-', ' ').title()),
-        'description': '',
+        'description': description or f"Episodes and conversations from {show_eps[0].get('show_title', show_slug.replace('-', ' ').title()) if show_eps else show_slug.replace('-', ' ').title()}.",
         'artwork': (show_eps[0].get('artwork') if show_eps else '/static/img/default-cover.jpg'),
         'last_updated': (show_eps[0].get('date') if show_eps else ''),
         'episodes': [
@@ -2160,6 +2175,11 @@ def admin_page():
 def feedback_page():
     """Feedback form page"""
     return render_template('feedback.html')
+
+@app.route('/contact')
+def contact_page():
+    """Contact form page"""
+    return render_template('contact.html')
 
 @app.route('/api/admin/users', methods=['GET'])
 @admin_required

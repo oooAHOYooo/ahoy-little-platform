@@ -9,8 +9,7 @@
         <div class="dashboard-grid">
             <!-- Left: Main Feature (Live TV) -->
             <div class="dashboard-main"
-                x-show="tvCurrent"
-                @click="playShow(tvCurrent)">
+                @click="tvCurrent && tvCurrent.id !== 'placeholder' && tvCurrent.id !== 'error' ? playShow(tvCurrent) : null">
                 <div class="dash-preview">
                     <img
                         :src="tvCurrent?.thumbnail || '/static/img/default-cover.jpg'"
@@ -18,15 +17,35 @@
                     <div class="dash-overlay">
                         <div class="dash-badges">
                             <span class="live-badge">LIVE TV</span>
-                            <span class="channel-badge">Channel 01 — Misc</span>
+                            <span class="channel-badge" x-text="tvCurrentChannel?.name || 'Channel 01 — Misc'"></span>
+                        </div>
+                        <!-- Channel Navigation -->
+                        <div class="channel-nav" x-show="tvChannels.length > 1">
+                            <button class="channel-nav-btn" 
+                                    @click.stop="switchTVChannel('prev')"
+                                    aria-label="Previous channel">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="channel-nav-btn" 
+                                    @click.stop="switchTVChannel('next')"
+                                    aria-label="Next channel">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
                         <div class="dash-content">
                             <h2 x-text="tvCurrent?.title || 'Loading...'"></h2>
                             <p
                                 x-text="tvCurrent?.artist || tvCurrent?.host || ''"></p>
-                            <button class="dash-play-btn">
-                                <i class="fas fa-play"></i> Watch Now
-                            </button>
+                            <div class="dash-actions">
+                                <button class="dash-play-btn" 
+                                        x-show="tvCurrent && tvCurrent.id !== 'placeholder' && tvCurrent.id !== 'error'"
+                                        @click.stop="playShow(tvCurrent)">
+                                    <i class="fas fa-play"></i> Watch Now
+                                </button>
+                                <a href="/live-tv" class="dash-guide-btn" @click.stop>
+                                    <i class="fas fa-tv"></i> View All Channels
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -155,6 +174,38 @@
         z-index: 2;
     }
     
+    .channel-nav {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        display: flex;
+        gap: 0.5rem;
+        z-index: 2;
+    }
+    
+    .channel-nav-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.875rem;
+    }
+    
+    .channel-nav-btn:hover {
+        background: rgba(0, 0, 0, 0.8);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: scale(1.1);
+    }
+    
     .live-badge {
         background: #ff0000;
         color: white;
@@ -205,6 +256,13 @@
         font-weight: 500;
     }
     
+    .dash-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
     .dash-play-btn {
         background: white;
         color: black;
@@ -219,12 +277,37 @@
         cursor: pointer;
         transition: all 0.2s;
         box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+        text-decoration: none;
     }
     
     .dash-play-btn:hover {
         background: #f0f0f0;
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+    }
+    
+    .dash-guide-btn {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.85rem 1.75rem;
+        border-radius: 99px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    
+    .dash-guide-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
     }
     
     /* --- SIDEBAR (RIGHT) --- */
@@ -450,6 +533,15 @@
         }
         .dash-overlay {
             padding: 1.5rem;
+        }
+        .dash-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .dash-play-btn,
+        .dash-guide-btn {
+            width: 100%;
+            justify-content: center;
         }
     }
     </style>
@@ -797,6 +889,9 @@ function homePage() {
         radioShuffle: true,
         tvCurrent: null,
         tvNext: null,
+        tvChannels: [],
+        tvCurrentChannel: null,
+        tvChannelIndex: 0,
         
         // Initialize
         async init() {
@@ -933,19 +1028,100 @@ function homePage() {
                 const response = await fetch('/api/live-tv/channels');
                 const data = await response.json();
                 const channels = data.channels || [];
-                // Default to Channel 1 (Misc)
+                this.tvChannels = channels;
+                
+                // Map channel IDs to display names
+                const channelNames = {
+                    'misc': 'Channel 01 — Misc',
+                    'films': 'Channel 02 — Short Films',
+                    'music-videos': 'Channel 03 — Music Videos',
+                    'live-shows': 'Channel 04 — Live Shows'
+                };
+                
+                // Default to Channel 1 (Misc) or first available channel
                 if (channels.length > 0) {
-                    const ch = channels[0]; 
+                    // Find Misc channel first, or use first channel
+                    let ch = channels.find(c => c.id === 'misc') || channels[0];
+                    this.tvChannelIndex = channels.findIndex(c => c.id === ch.id);
+                    
+                    this.tvCurrentChannel = {
+                        ...ch,
+                        name: channelNames[ch.id] || `Channel ${String(this.tvChannelIndex + 1).padStart(2, '0')} — ${ch.name || 'Unknown'}`
+                    };
+                    
                     if (ch.items && ch.items.length > 0) {
-                        // Simple daily rotation simulation:
-                        // Use day of year + hour to offset start index slightly if desired
-                        // For now, just show first item as Now Playing to be consistent
-                        this.tvCurrent = ch.items[0];
-                        this.tvNext = ch.items.length > 1 ? ch.items[1] : ch.items[0];
+                        // Get current item based on time (simple rotation)
+                        // Use hour of day to determine which item to show
+                        const hour = new Date().getHours();
+                        const itemIndex = hour % ch.items.length;
+                        this.tvCurrent = ch.items[itemIndex];
+                        this.tvNext = ch.items.length > itemIndex + 1 ? ch.items[itemIndex + 1] : ch.items[0];
+                    } else {
+                        // If no items, still show the channel but with placeholder
+                        this.tvCurrent = {
+                            id: 'placeholder',
+                            title: 'No content available',
+                            thumbnail: '/static/img/default-cover.jpg',
+                            host: ch.name
+                        };
                     }
+                } else {
+                    // Fallback if no channels
+                    this.tvCurrent = {
+                        id: 'placeholder',
+                        title: 'Loading Live TV...',
+                        thumbnail: '/static/img/default-cover.jpg',
+                        host: 'Ahoy TV'
+                    };
+                    this.tvCurrentChannel = {
+                        id: 'misc',
+                        name: 'Channel 01 — Misc'
+                    };
                 }
             } catch (error) {
                 console.error('Error loading TV status:', error);
+                // Fallback on error
+                this.tvCurrent = {
+                    id: 'error',
+                    title: 'Live TV',
+                    thumbnail: '/static/img/default-cover.jpg',
+                    host: 'Ahoy TV'
+                };
+                this.tvCurrentChannel = {
+                    id: 'misc',
+                    name: 'Channel 01 — Misc'
+                };
+            }
+        },
+        
+        // Switch TV Channel
+        switchTVChannel(direction) {
+            if (this.tvChannels.length === 0) return;
+            
+            if (direction === 'next') {
+                this.tvChannelIndex = (this.tvChannelIndex + 1) % this.tvChannels.length;
+            } else if (direction === 'prev') {
+                this.tvChannelIndex = (this.tvChannelIndex - 1 + this.tvChannels.length) % this.tvChannels.length;
+            }
+            
+            const ch = this.tvChannels[this.tvChannelIndex];
+            const channelNames = {
+                'misc': 'Channel 01 — Misc',
+                'films': 'Channel 02 — Short Films',
+                'music-videos': 'Channel 03 — Music Videos',
+                'live-shows': 'Channel 04 — Live Shows'
+            };
+            
+            this.tvCurrentChannel = {
+                ...ch,
+                name: channelNames[ch.id] || `Channel ${String(this.tvChannelIndex + 1).padStart(2, '0')} — ${ch.name || 'Unknown'}`
+            };
+            
+            if (ch.items && ch.items.length > 0) {
+                const hour = new Date().getHours();
+                const itemIndex = hour % ch.items.length;
+                this.tvCurrent = ch.items[itemIndex];
+                this.tvNext = ch.items.length > itemIndex + 1 ? ch.items[itemIndex + 1] : ch.items[0];
             }
         },
 

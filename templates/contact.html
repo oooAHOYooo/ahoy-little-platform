@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+
+{% block title %}Contact - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="contact-page" x-data="contactForm()">
+    <div class="page-header">
+        <h1>Get in Touch</h1>
+        <p>Have a question, suggestion, or want to reach out? We'd love to hear from you.</p>
+    </div>
+
+    <div class="contact-container">
+        <div class="contact-form-wrapper">
+            <form 
+                id="contactForm"
+                action="https://formspree.io/f/YOUR_FORM_ID" 
+                method="POST"
+                @submit.prevent="submitForm"
+                class="contact-form">
+                
+                <!-- Name Field -->
+                <div class="form-group">
+                    <label for="name">Name <span class="required">*</span></label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        x-model="formData.name"
+                        required
+                        placeholder="Your name"
+                        class="form-input"
+                        aria-required="true">
+                </div>
+
+                <!-- Email Field -->
+                <div class="form-group">
+                    <label for="email">Email <span class="required">*</span></label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        x-model="formData.email"
+                        required
+                        placeholder="your@email.com"
+                        class="form-input"
+                        aria-required="true">
+                </div>
+
+                <!-- Subject Field -->
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <select 
+                        id="subject" 
+                        name="subject" 
+                        x-model="formData.subject"
+                        class="form-input">
+                        <option value="">Select a topic...</option>
+                        <option value="general">General Inquiry</option>
+                        <option value="tylers-show">Tyler's Show</option>
+                        <option value="podcast">Podcast Question</option>
+                        <option value="collaboration">Collaboration</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <!-- Message Field -->
+                <div class="form-group">
+                    <label for="message">Message <span class="required">*</span></label>
+                    <textarea 
+                        id="message" 
+                        name="message" 
+                        x-model="formData.message"
+                        required
+                        rows="6"
+                        placeholder="Tell us what's on your mind..."
+                        class="form-input form-textarea"
+                        aria-required="true"></textarea>
+                </div>
+
+                <!-- Honeypot field for spam protection -->
+                <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button 
+                        type="submit" 
+                        :disabled="isSubmitting"
+                        class="btn btn-primary btn-large">
+                        <i class="fas fa-paper-plane" x-show="!isSubmitting"></i>
+                        <i class="fas fa-spinner fa-spin" x-show="isSubmitting"></i>
+                        <span x-text="isSubmitting ? 'Sending...' : 'Send Message'"></span>
+                    </button>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div x-show="showSuccess" class="form-message form-message-success" x-cloak>
+                    <i class="fas fa-check-circle"></i>
+                    <p>Thank you! Your message has been sent successfully. We'll get back to you soon.</p>
+                </div>
+
+                <div x-show="showError" class="form-message form-message-error" x-cloak>
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p x-text="errorMessage"></p>
+                </div>
+            </form>
+        </div>
+
+        <div class="contact-info">
+            <div class="info-card">
+                <h3>Other Ways to Reach Us</h3>
+                <div class="info-item">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <strong>Email</strong>
+                        <p>For general inquiries, reach out through the form or email us directly.</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-podcast"></i>
+                    <div>
+                        <strong>Tyler's Show</strong>
+                        <p>Interested in being a guest or have a topic suggestion? Select "Tyler's Show" in the subject dropdown.</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <strong>Response Time</strong>
+                        <p>We typically respond within 2-3 business days.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.contact-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 1rem 0;
+    color: white;
+}
+
+.page-header p {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
+.contact-container {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.contact-form-wrapper {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.required {
+    color: #ff6b6b;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-actions {
+    margin-top: 0.5rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    background: white;
+    color: black;
+    border: none;
+    border-radius: 99px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+    background: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-large {
+    padding: 1rem 2.5rem;
+    font-size: 1.125rem;
+}
+
+.form-message {
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.form-message i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.form-message-success {
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: #81c784;
+}
+
+.form-message-error {
+    background: rgba(244, 67, 54, 0.1);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    color: #ef5350;
+}
+
+.form-message p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.contact-info {
+    position: sticky;
+    top: 2rem;
+}
+
+.info-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.info-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 1.5rem 0;
+    color: white;
+}
+
+.info-item {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-item:last-child {
+    margin-bottom: 0;
+}
+
+.info-item i {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+.info-item strong {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.25rem;
+}
+
+.info-item p {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .contact-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .contact-info {
+        position: static;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+    }
+}
+</style>
+
+<script>
+function contactForm() {
+    return {
+        formData: {
+            name: '',
+            email: '',
+            subject: '',
+            message: ''
+        },
+        isSubmitting: false,
+        showSuccess: false,
+        showError: false,
+        errorMessage: '',
+
+        async submitForm() {
+            // Reset messages
+            this.showSuccess = false;
+            this.showError = false;
+            this.errorMessage = '';
+
+            // Validate
+            if (!this.formData.name.trim() || !this.formData.email.trim() || !this.formData.message.trim()) {
+                this.showError = true;
+                this.errorMessage = 'Please fill in all required fields.';
+                return;
+            }
+
+            this.isSubmitting = true;
+
+            try {
+                const form = document.getElementById('contactForm');
+                const formData = new FormData(form);
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    this.showSuccess = true;
+                    // Reset form
+                    this.formData = {
+                        name: '',
+                        email: '',
+                        subject: '',
+                        message: ''
+                    };
+                    form.reset();
+                    
+                    // Scroll to success message
+                    setTimeout(() => {
+                        const successMsg = document.querySelector('.form-message-success');
+                        if (successMsg) {
+                            successMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    }, 100);
+                } else {
+                    const data = await response.json();
+                    this.showError = true;
+                    this.errorMessage = data.error || 'Something went wrong. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                this.showError = true;
+                this.errorMessage = 'Network error. Please check your connection and try again.';
+            } finally {
+                this.isSubmitting = false;
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

@@ -5,9 +5,10 @@
     display: none;
 }
 
-/* Mobile Auth Bar - Top Navigation */
+/* Mobile Auth Bar - Top Navigation - Hidden per user request */
 @media (max-width: 767px) {
     .mobile-auth-bar {
+        display: none !important;
         position: fixed;
         /* Below the custom status bar (+ iOS notch inset) */
         top: calc(32px + env(safe-area-inset-top));
@@ -19,7 +20,6 @@
         -webkit-backdrop-filter: blur(20px) saturate(180%);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         padding: 0.625rem 1rem;
-        display: flex;
         align-items: center;
         justify-content: flex-end;
         min-height: 48px;

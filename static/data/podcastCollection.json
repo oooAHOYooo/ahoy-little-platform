@@ -1,6 +1,15 @@
 {
   "podcasts": [
     {
+      "id": 36,
+      "title": "Tyler's Show #1 - First Episode",
+      "description": "The inaugural episode of Tyler's Show, originally recorded on January 29, 2026.",
+      "date": "2026-01-29",
+      "active": true,
+      "mp3url": "https://storage.googleapis.com/ahoy-podcast-collection/Tylers-Show-Ep1.mp3",
+      "thumbnail": "/static/img/default-cover.jpg"
+    },
+    {
       "id": 35,
       "title": "The Rob Show #43 - John Bock and John Churchhill",
       "description": "John Bock & John Churchhill, two local musicians, join Rob for an engaging conversation in this episode of The Rob Show",

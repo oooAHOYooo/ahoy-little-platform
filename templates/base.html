@@ -382,8 +382,8 @@
 
         <!-- Header -->
         <header class="app-header" style="padding-top:8px; padding-bottom:8px;">
-            <!-- Mobile Auth Bar (Top) - Beautiful & Accessible -->
-            <div class="mobile-auth-bar mobile-only"
+            <!-- Mobile Auth Bar (Top) - Hidden per user request -->
+            <div class="mobile-auth-bar mobile-only" style="display: none !important;"
                 x-data="{ menuOpen: false }"
                 x-init="document.body.classList.add('mobile-auth-active')">
                 {% if LOGGED_IN %}
