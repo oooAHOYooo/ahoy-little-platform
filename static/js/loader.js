@@ -8,22 +8,9 @@
     
     const loader = document.getElementById('app-loader');
     const progressBar = document.getElementById('progress-bar');
+    // MVP loader is logo + bar only (no status text/percent)
     const progressText = document.getElementById('progress-text');
     const progressPercent = document.getElementById('progress-percent');
-    
-    // Create status details element if it doesn't exist
-    let statusDetails = document.getElementById('status-details');
-    if (!statusDetails) {
-        statusDetails = document.createElement('div');
-        statusDetails.id = 'status-details';
-        statusDetails.className = 'status-details';
-        // Keep layout tidy: progress bar -> status text -> details -> percent
-        if (progressPercent && typeof progressPercent.insertAdjacentElement === 'function') {
-            progressPercent.insertAdjacentElement('beforebegin', statusDetails);
-        } else if (progressText && progressText.parentElement) {
-            progressText.parentElement.appendChild(statusDetails);
-        }
-    }
     
     if (!loader) return;
     
@@ -67,13 +54,7 @@
     
     function setProgress(value, text, details) {
         targetProgress = Math.min(100, Math.max(0, value));
-        if (text) {
-            // No icons/emojis — keep it crisp, clean, and monospace-friendly
-            progressText.textContent = text;
-        }
-        if (details && statusDetails) {
-            statusDetails.textContent = details;
-        }
+        // Text/details are intentionally ignored in the MVP loader.
         if (!animationFrame) {
             animationFrame = requestAnimationFrame(animateProgress);
         }
@@ -81,8 +62,8 @@
     
     function updateProgress(value) {
         const rounded = Math.round(value);
-        progressBar.style.width = rounded + '%';
-        progressPercent.textContent = rounded + '%';
+        if (progressBar) progressBar.style.width = rounded + '%';
+        if (progressPercent) progressPercent.textContent = rounded + '%';
     }
     
     // Track CSS loading
