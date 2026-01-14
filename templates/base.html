@@ -5,17 +5,22 @@
         <meta charset="UTF-8">
         <meta name="viewport"
             content="width=device-width, initial-scale=1.0, user-scalable=no">
-        
+
         <!-- Performance: DNS prefetch and preconnect for external resources -->
         <link rel="dns-prefetch" href="https://fonts.googleapis.com">
         <link rel="dns-prefetch" href="https://fonts.gstatic.com">
         <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
         <link rel="dns-prefetch" href="https://js.stripe.com">
-        
+
         <!-- Preload critical resources -->
-        <link rel="preload" href="{{ url_for('static', filename='css/loader.css') }}" as="style">
-        <link rel="preload" href="{{ url_for('static', filename='js/loader.js') }}" as="script">
-        <link rel="preload" href="{{ url_for('static', filename='img/ahoy_logo.png') }}" as="image">
+        <link rel="preload"
+            href="{{ url_for('static', filename='css/loader.css') }}"
+            as="style">
+        <link rel="preload"
+            href="{{ url_for('static', filename='js/loader.js') }}" as="script">
+        <link rel="preload"
+            href="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+            as="image">
         <meta name="description"
             content="{% block description %}Discover and save indie music, videos, and media. Create playlists, save favorites, and explore new artists on Ahoy Indie Media.{% endblock %}">
         <meta name="keywords"
@@ -118,12 +123,9 @@
         <script defer
             src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
 
-        <!-- Stripe publishable key and JS -->
+        <!-- Stripe publishable key (online checkout uses Stripe-hosted Checkout) -->
         <meta name="stripe-publishable-key"
             content="{{ STRIPE_PUBLISHABLE_KEY }}">
-        <script defer src="https://js.stripe.com/v3/"></script>
-        <script defer
-            src="{{ url_for('static', filename='js/stripeBoost.js') }}"></script>
 
         <!-- App data component - must load before Alpine.js -->
         <script>
@@ -364,36 +366,29 @@
         class="overflow-x-hidden">
         {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false)
         %}
-        
+
         <!-- Full Page Loading Screen with Progress -->
         <div id="app-loader">
             <div class="loader-content">
-                <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}" 
-                     alt="Ahoy Logo" 
-                     class="loader-logo"
-                     onerror="this.style.display='none'">
+                <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+                    alt="Ahoy Logo"
+                    class="loader-logo"
+                    onerror="this.style.display='none'">
                 <h1 class="loader-title">Ahoy Indie Media</h1>
-                <p class="loader-subtitle">Loading your music discovery experience...</p>
-                
+                <p class="loader-subtitle">Loading your music discovery
+                    experience...</p>
+
                 <div class="progress-container">
                     <div class="progress-bar-wrapper">
                         <div class="progress-bar" id="progress-bar"></div>
                     </div>
-                    <div class="progress-text" id="progress-text">
-                        <span class="status-icon">⚙️</span>
-                        <span>Initializing...</span>
-                    </div>
+                    <div class="progress-text" id="progress-text"
+                        aria-live="polite">BOOT ▸ INITIALIZING</div>
                     <div class="progress-percent" id="progress-percent">0%</div>
-                </div>
-                
-                <div class="loading-dots">
-                    <div class="loading-dot"></div>
-                    <div class="loading-dot"></div>
-                    <div class="loading-dot"></div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Mobile Status Bar (fixed top, compact) -->
         <div class="mobile-status-bar mobile-only" x-data="statusBar()"
             x-init="init()">
@@ -424,7 +419,8 @@
         <!-- Header -->
         <header class="app-header" style="padding-top:8px; padding-bottom:8px;">
             <!-- Mobile Auth Bar (Top) - Hidden per user request -->
-            <div class="mobile-auth-bar mobile-only" style="display: none !important;"
+            <div class="mobile-auth-bar mobile-only"
+                style="display: none !important;"
                 x-data="{ menuOpen: false }"
                 x-init="document.body.classList.add('mobile-auth-active')">
                 {% if LOGGED_IN %}
@@ -1851,7 +1847,8 @@
                 <div class="compact-footer-quicklinks">
                     <a href="{{ url_for('music') }}" class="quicklink">Music</a>
                     <span class="quicklink-sep">•</span>
-                    <a href="{{ url_for('shows') }}" class="quicklink">Videos</a>
+                    <a href="{{ url_for('shows') }}"
+                        class="quicklink">Videos</a>
                     <span class="quicklink-sep">•</span>
                     <a href="{{ url_for('artists') }}"
                         class="quicklink">Artists</a>
@@ -1948,8 +1945,9 @@
         </div>
 
         <!-- Loading Progress Tracker -->
-        <script defer src="{{ url_for('static', filename='js/loader.js') }}"></script>
-        
+        <script defer
+            src="{{ url_for('static', filename='js/loader.js') }}"></script>
+
         <!-- JavaScript -->
         <script>window.LOGGED_IN = JSON.parse('{{ LOGGED_IN|tojson|safe }}');</script>
         <script>
@@ -1960,28 +1958,88 @@
             src="{{ url_for('static', filename='js/guest-bootstrap.js') }}"></script>
         <script defer
             src="{{ url_for('static', filename='js/bookmarks.js') }}"></script>
-        <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
-        <script defer src="{{ url_for('static', filename='js/player.js') }}"></script>
+        <script defer
+            src="{{ url_for('static', filename='js/app.js') }}"></script>
+        <!-- Player: kept global (drives the bottom now-playing bar everywhere) -->
+        <script defer
+            src="{{ url_for('static', filename='js/player.js') }}"></script>
 
-        <!-- Now Playing Component Modules - Defer non-critical scripts -->
-        <script defer
-            src="{{ url_for('static', filename='js/colorExtractor.js') }}"></script>
-        <script defer
-            src="{{ url_for('static', filename='js/audioAnalyser.js') }}"></script>
-        <script defer
-            src="{{ url_for('static', filename='js/nowPlaying.js') }}"></script>
-        <script defer
-            src="{{ url_for('static', filename='js/playlist-manager.js') }}"></script>
-        <script defer
-            src="{{ url_for('static', filename='js/collections-manager.js') }}"></script>
-        <script type="module"
-            src="{{ url_for('static', filename='js/playlist-ui.js') }}"></script>
-        <script type="module"
-            src="{{ url_for('static', filename='js/collections-quickassign.js') }}"></script>
-        <script type="module"
-            src="{{ url_for('static', filename='js/player-queue.js') }}"></script>
-        <script type="module"
-            src="{{ url_for('static', filename='js/reinforce.js') }}"></script>
+        <!-- Now Playing (lazy loaded): avoids parsing heavy scripts on pages where it’s unused -->
+        <script type="module">
+        (function () {
+          const hasNowPlayingUI = !!document.querySelector('.now-playing-glass');
+          if (!hasNowPlayingUI) return;
+
+          const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 200));
+          idle(async () => {
+            try {
+              // Color extraction powers the glass gradient + album glow
+              await import('/static/js/colorExtractor.js');
+              // No visualizer → no audioAnalyser needed (keeps mobile lighter)
+              await import('/static/js/nowPlaying.js');
+            } catch (e) {
+              // Non-fatal
+              console.warn('NowPlaying lazy load failed', e);
+            }
+          });
+        })();
+        </script>
+        <!-- Page-specific scripts: lazy-load to keep mobile startup snappy -->
+        <script type="module">
+        (function () {
+          const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 250));
+          const loadScriptOnce = (() => {
+            const cache = new Map();
+            return (src) => {
+              if (cache.has(src)) return cache.get(src);
+              const p = new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = src;
+                s.defer = true;
+                s.onload = () => resolve(true);
+                s.onerror = () => reject(new Error(`Failed to load ${src}`));
+                document.head.appendChild(s);
+              });
+              cache.set(src, p);
+              return p;
+            };
+          })();
+
+          // Collections manager + quick-assign: only used on Bookmarks page
+          // Load ASAP on that page so the UI feels instant.
+          if (document.querySelector('.bookmarks-container') || document.querySelector('[data-quick-assign],[data-quick-last]')) {
+            (async () => {
+              try {
+                await loadScriptOnce('/static/js/collections-manager.js');
+                await import('/static/js/collections-quickassign.js');
+              } catch (e) {
+                console.warn('Collections scripts lazy load failed', e);
+              }
+            })();
+          }
+
+          // Playlist creation from collections: only if the page renders the trigger buttons
+          if (document.querySelector('[data-make-playlist]')) {
+            (async () => {
+              try { await import('/static/js/playlist-ui.js'); } catch (e) { console.warn('playlist-ui lazy load failed', e); }
+            })();
+          }
+
+          // Player queue wiring: load only when something tries to enqueue/replace a playlist
+          let queueLoaded = false;
+          document.addEventListener('playlist:created', async (e) => {
+            if (queueLoaded) return;
+            queueLoaded = true;
+            try {
+              await import('/static/js/player-queue.js');
+              // Re-emit for the newly-loaded listener.
+              document.dispatchEvent(new CustomEvent('playlist:created', { detail: e.detail }));
+            } catch (err) {
+              console.warn('player-queue lazy load failed', err);
+            }
+          }, { capture: true, once: true });
+        })();
+        </script>
 
         <script type="module">
         import { showToast } from "{{ url_for('static', filename='js/toast.js') }}";

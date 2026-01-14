@@ -5,7 +5,11 @@
     <div class="bg-[#0a0a0a]/70 backdrop-blur-xl border border-white/10 rounded-2xl p-8 text-white space-y-5 text-center">
         <div class="text-4xl">🎉</div>
         <h1 class="text-2xl font-bold">Thank you!</h1>
+        {% if status and status != 'paid' %}
+        <p>Your payment is processing. If you don’t see it finalize in a moment, refresh this page.</p>
+        {% else %}
         <p>Your purchase was completed successfully.</p>
+        {% endif %}
         {% if pid %}
         <p class="text-white/70 text-sm">Reference: #{{ pid }}</p>
         {% endif %}

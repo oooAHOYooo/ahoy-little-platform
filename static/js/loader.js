@@ -17,7 +17,12 @@
         statusDetails = document.createElement('div');
         statusDetails.id = 'status-details';
         statusDetails.className = 'status-details';
-        progressText.parentElement.appendChild(statusDetails);
+        // Keep layout tidy: progress bar -> status text -> details -> percent
+        if (progressPercent && typeof progressPercent.insertAdjacentElement === 'function') {
+            progressPercent.insertAdjacentElement('beforebegin', statusDetails);
+        } else if (progressText && progressText.parentElement) {
+            progressText.parentElement.appendChild(statusDetails);
+        }
     }
     
     if (!loader) return;
@@ -60,15 +65,11 @@
         }
     }
     
-    function setProgress(value, text, details, icon) {
+    function setProgress(value, text, details) {
         targetProgress = Math.min(100, Math.max(0, value));
         if (text) {
-            // Update text with icon
-            if (icon) {
-                progressText.innerHTML = `<span class="status-icon">${icon}</span><span>${text}</span>`;
-            } else {
-                progressText.innerHTML = `<span class="status-icon">⏳</span><span>${text}</span>`;
-            }
+            // No icons/emojis — keep it crisp, clean, and monospace-friendly
+            progressText.textContent = text;
         }
         if (details && statusDetails) {
             statusDetails.textContent = details;
@@ -218,15 +219,14 @@
         
         const total = milestones.DOM_READY + cssProgress + jsProgress + apiProgress + imageProgress;
         const status = getProgressText();
-        setProgress(total, status.text, status.details, status.icon);
+        setProgress(total, status.text, status.details);
     }
     
     function getProgressText() {
         if (progress < milestones.DOM_READY) {
             return {
-                text: 'Initializing...',
-                icon: '⚙️',
-                details: 'Setting up application...'
+                text: 'BOOT ▸ INITIALIZING',
+                details: 'preparing runtime…'
             };
         }
         if (progress < milestones.CSS_LOADED) {
@@ -234,9 +234,8 @@
                 ? Math.round((resourceTracker.cssFiles / resourceTracker.totalCss) * 100)
                 : 0;
             return {
-                text: 'Loading styles...',
-                icon: '🎨',
-                details: `${resourceTracker.cssFiles}/${resourceTracker.totalCss} stylesheets loaded`
+                text: 'UI ▸ STYLES',
+                details: `css ${resourceTracker.cssFiles}/${resourceTracker.totalCss} (${cssProgress}%)`
             };
         }
         if (progress < milestones.JS_LOADED) {
@@ -244,16 +243,14 @@
                 ? Math.round((resourceTracker.jsFiles / resourceTracker.totalJs) * 100)
                 : 0;
             return {
-                text: 'Loading scripts...',
-                icon: '📜',
-                details: `${resourceTracker.jsFiles}/${resourceTracker.totalJs} scripts loaded`
+                text: 'CORE ▸ SCRIPTS',
+                details: `js ${resourceTracker.jsFiles}/${resourceTracker.totalJs} (${jsProgress}%)`
             };
         }
         if (progress < milestones.API_CALLS) {
             return {
-                text: 'Fetching data...',
-                icon: '📡',
-                details: `${resourceTracker.apiCalls} API call${resourceTracker.apiCalls !== 1 ? 's' : ''} completed`
+                text: 'DATA ▸ FETCH',
+                details: `api ${resourceTracker.apiCalls}/${resourceTracker.totalApi || resourceTracker.apiCalls || 0}`
             };
         }
         if (progress < milestones.IMAGES_LOADED) {
@@ -261,31 +258,29 @@
                 ? Math.round((resourceTracker.images / resourceTracker.totalImages) * 100)
                 : 0;
             return {
-                text: 'Loading images...',
-                icon: '🖼️',
-                details: `${resourceTracker.images}/${resourceTracker.totalImages} images loaded`
+                text: 'MEDIA ▸ IMAGES',
+                details: `img ${resourceTracker.images}/${resourceTracker.totalImages} (${imgProgress}%)`
             };
         }
         return {
-            text: 'Almost ready...',
-            icon: '✨',
-            details: 'Finalizing...'
+            text: 'READY ▸ FINALIZING',
+            details: 'cleaning up…'
         };
     }
     
     // Start tracking
     function init() {
-        setProgress(0, 'Initializing...', 'Preparing your experience...', '⚙️');
+        setProgress(0, 'BOOT ▸ INITIALIZING', 'preparing your experience…');
         
         // DOM ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
-                setProgress(milestones.DOM_READY, 'DOM ready...', 'Document structure loaded', '✅');
+                setProgress(milestones.DOM_READY, 'BOOT ▸ DOM READY', 'document parsed');
                 trackCSS();
                 trackJS();
             });
         } else {
-            setProgress(milestones.DOM_READY, 'DOM ready...', 'Document structure loaded', '✅');
+            setProgress(milestones.DOM_READY, 'BOOT ▸ DOM READY', 'document parsed');
             trackCSS();
             trackJS();
         }
@@ -295,9 +290,9 @@
         
         // Window load
         window.addEventListener('load', () => {
-            setProgress(95, 'Finalizing...', 'Almost there!', '✨');
+            setProgress(95, 'READY ▸ FINALIZING', 'almost there…');
             setTimeout(() => {
-                setProgress(100, 'Ready!', 'Welcome to Ahoy!', '🎉');
+                setProgress(100, 'READY ▸ WELCOME', 'welcome to ahoy');
                 setTimeout(hideLoader, 300);
             }, 200);
         });
@@ -305,7 +300,7 @@
         // Safety net: hide loader after max time
         setTimeout(() => {
             if (progress < 100) {
-                setProgress(100, 'Ready!', 'Welcome to Ahoy!', '🎉');
+                setProgress(100, 'READY ▸ WELCOME', 'welcome to ahoy');
                 setTimeout(hideLoader, 300);
             }
         }, 8000); // Max 8 seconds

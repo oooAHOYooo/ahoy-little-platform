@@ -259,6 +259,14 @@ def stripe_webhook():
     # Handle the event
     if event["type"] == "checkout.session.completed":
         session_data = event["data"]["object"]
+        # Idempotency guard (stripe_checkout_session_id is unique)
+        try:
+            with get_session() as db_session:
+                existing = db_session.query(Tip).filter(Tip.stripe_checkout_session_id == session_data.get("id")).first()
+                if existing:
+                    return jsonify({"status": "received"}), 200
+        except Exception:
+            pass
         metadata = session_data.get("metadata", {})
 
         artist_id = metadata.get("artist_id")

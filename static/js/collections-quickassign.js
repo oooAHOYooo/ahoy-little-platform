@@ -33,22 +33,22 @@ async function openQuickAssign(btn) {
   const owner    = btn.getAttribute("data-owner");
   const itemId   = btn.getAttribute("data-id");
   const itemType = btn.getAttribute("data-type"); // 'track' | 'show' | 'episode'
-  
-  console.log("🔍 Quick assign clicked:", { owner, itemId, itemType, btn });
+  const __dev = (typeof window !== 'undefined' && window.APP_ENV !== 'production');
+  if (__dev) console.log("🔍 Quick assign clicked:", { owner, itemId, itemType });
   
   if (!owner || !itemId || !itemType) {
     console.warn("❌ Missing required data:", { owner, itemId, itemType });
     return;
   }
 
-  console.log("📁 Creating collection popup with z-index 9999");
+  if (__dev) console.log("📁 Creating collection popup");
 
   let cols = [];
   try {
     cols = await CollectionsAPI.list(owner);
-    console.log("📁 Loaded collections:", cols);
+    if (__dev) console.log("📁 Loaded collections:", cols);
   } catch (error) {
-    console.error("❌ Error loading collections:", error);
+    if (__dev) console.error("❌ Error loading collections:", error);
     cols = [];
   }
   const last = Last.get(owner);

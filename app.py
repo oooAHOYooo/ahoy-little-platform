@@ -680,8 +680,134 @@ def checkout_process():
         purchase_id = p.id
         s.commit()
 
-    # Placeholder: mark paid_test and redirect to success
-    return redirect(url_for('checkout_success', pid=purchase_id))
+    # Create a Stripe Checkout Session and redirect user to Stripe-hosted checkout
+    try:
+        import stripe
+        from decimal import Decimal
+        from blueprints.payments import calculate_boost_fees
+
+        # Configure Stripe from config/env (prefer config)
+        api_key = app.config.get("STRIPE_SECRET_KEY") or os.getenv("STRIPE_SECRET_KEY") or os.getenv("STRIPE_SECRET_KEY_TEST")
+        stripe.api_key = api_key
+        if not stripe.api_key:
+            raise RuntimeError("Stripe not configured (missing STRIPE_SECRET_KEY)")
+
+        # Compute authoritative totals for boost/tip (ignore client-provided totals)
+        metadata = {
+            "purchase_id": str(purchase_id),
+            "type": str(kind),
+            "user_id": str(user_id or ""),
+            "artist_id": str(artist_id or ""),
+            "item_id": str(item_id or ""),
+            "qty": str(qty),
+            "amount": str(amount),
+            "total": str(total),
+        }
+
+        line_items = []
+        if kind in ["boost", "tip"]:
+            boost_amount_decimal = Decimal(str(amount or 0)).quantize(Decimal("0.01"))
+            stripe_fee, platform_fee, total_charge, artist_payout, platform_revenue = calculate_boost_fees(boost_amount_decimal)
+
+            # Update Purchase.total to total_charge (authoritative)
+            total = float(total_charge)
+            with get_session() as s:
+                p = s.query(Purchase).filter(Purchase.id == int(purchase_id)).first()
+                if p:
+                    p.total = total
+                    s.commit()
+
+            metadata.update({
+                "boost_amount": str(boost_amount_decimal),
+                "stripe_fee": str(stripe_fee),
+                "platform_fee": str(platform_fee),
+                "total_paid": str(total_charge),
+                "artist_payout": str(artist_payout),
+                "platform_revenue": str(platform_revenue),
+            })
+
+            line_items = [
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": "Boost Amount",
+                            "description": "100% goes directly to the artist",
+                        },
+                        "unit_amount": int(boost_amount_decimal * 100),
+                    },
+                    "quantity": 1,
+                },
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": "Stripe Processing Fee",
+                            "description": "2.9% + $0.30",
+                        },
+                        "unit_amount": int(Decimal(str(stripe_fee)) * 100),
+                    },
+                    "quantity": 1,
+                },
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": "Ahoy Indie Media Platform Fee",
+                            "description": "7.5% platform fee",
+                        },
+                        "unit_amount": int(Decimal(str(platform_fee)) * 100),
+                    },
+                    "quantity": 1,
+                },
+            ]
+        else:
+            # One-time purchases (merch/theme/subscription MVP): treat as a simple one-time payment.
+            unit_amount_cents = int(max(0, float(amount or 0)) * 100)
+            if unit_amount_cents <= 0:
+                raise ValueError("Invalid amount")
+            safe_title = (request.form.get("title") or "Ahoy Purchase").strip()[:120]
+            line_items = [
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {"name": safe_title},
+                        "unit_amount": unit_amount_cents,
+                    },
+                    "quantity": int(max(1, qty)),
+                }
+            ]
+
+        success_url = url_for("checkout_success", pid=purchase_id, _external=True)
+        cancel_url = url_for("checkout_page", type=kind, artist_id=artist_id or "", amount=amount, item_id=item_id or "", qty=qty, title=request.form.get("title") or "", _external=True)
+
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=line_items,
+            mode="payment",
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata=metadata,
+        )
+
+        # Persist Stripe session id
+        with get_session() as s:
+            p = s.query(Purchase).filter(Purchase.id == int(purchase_id)).first()
+            if p:
+                p.stripe_id = checkout_session.id
+                s.commit()
+
+        return redirect(checkout_session.url)
+    except Exception as e:
+        # Fall back to success page with an error; keep purchase recorded for diagnostics
+        return render_template("checkout.html",
+                               error=f"Checkout setup failed. {str(e)}",
+                               csrf_token=generate_csrf_token(),
+                               kind=kind,
+                               artist_id=artist_id or "",
+                               amount=amount,
+                               item_id=item_id or "",
+                               qty=qty), 500
 
 # Exempt checkout_process from Flask-WTF CSRF after route is registered
 _csrf_ext = app.extensions.get('csrf')
@@ -694,6 +820,7 @@ def checkout_success():
     pid = request.args.get('pid')
     artist_id = None
     amount = None
+    status = None
     try:
         if pid:
             from db import get_session
@@ -703,10 +830,26 @@ def checkout_success():
                 if p:
                     artist_id = p.artist_id
                     amount = p.amount
+                    status = p.status
+                    # Best-effort verification: if we have a Stripe session id, check if paid and update.
+                    if p.stripe_id and p.status != "paid":
+                        try:
+                            import stripe
+                            api_key = app.config.get("STRIPE_SECRET_KEY") or os.getenv("STRIPE_SECRET_KEY") or os.getenv("STRIPE_SECRET_KEY_TEST")
+                            stripe.api_key = api_key
+                            if stripe.api_key:
+                                sess = stripe.checkout.Session.retrieve(p.stripe_id)
+                                if getattr(sess, "payment_status", None) == "paid":
+                                    p.status = "paid"
+                                    status = "paid"
+                                    s.commit()
+                        except Exception:
+                            pass
     except Exception:
         artist_id = None
         amount = None
-    return render_template('success.html', pid=pid, artist_id=artist_id, amount=amount)
+        status = None
+    return render_template('success.html', pid=pid, artist_id=artist_id, amount=amount, status=status)
 
 
 # Debug routes removed - debug functionality available via /debug endpoint

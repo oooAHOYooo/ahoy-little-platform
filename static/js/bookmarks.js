@@ -268,8 +268,10 @@
 
   state.items = loadLocal();
 
-  // ✅ Integrate with Alpine.js
-  document.addEventListener("alpine:init", () => {
+  // ✅ Integrate with Alpine.js (support both "before Alpine loads" and "after")
+  function registerAlpineData() {
+    // Guard: Alpine might not be present (or may load later)
+    if (typeof Alpine === "undefined") return;
     // Global bookmark handler for use in bookmark buttons throughout the site
     Alpine.data("globalBookmarkHandler", () => ({
       nests: {},
@@ -507,10 +509,16 @@
         }
       }
     }));
-  });
+  }
+
+  document.addEventListener("alpine:init", registerAlpineData);
+  // If Alpine is already present (script order), register immediately
+  try { registerAlpineData(); } catch (_) {}
 
   // Initial fetch (logged-in sync)
   document.addEventListener("DOMContentLoaded", () => {
+    // Avoid hitting the server for guests (big win on mobile)
+    if (!window.LOGGED_IN) return;
     fetchServer().catch(() => {});
   });
 })();

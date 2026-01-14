@@ -1,6 +1,8 @@
 /**
  * Now Playing Component - Main controller for the glassy Now Playing bar
- * Integrates color extraction, audio analysis, and visualizer
+ * Integrates color extraction for the glassy theme.
+ *
+ * NOTE: Visualizer is removed. Keep this controller light and avoid WebAudio init.
  */
 
 class NowPlayingController {
@@ -24,96 +26,12 @@ class NowPlayingController {
             // Visualizer removed (Three.js). Keep container empty.
             this.visualizer = null;
 
-            // Setup audio element connection
-            this.setupAudioConnection();
-
             // Listen for track changes
             this.setupTrackListeners();
 
             this.isInitialized = true;
         } catch (error) {
             console.error('Error initializing NowPlayingController:', error);
-        }
-    }
-
-    /**
-     * Setup audio element connection
-     */
-    setupAudioConnection() {
-        // Find audio element from mediaPlayer
-        if (window.mediaPlayer && window.mediaPlayer.audioElement) {
-            this.audioElement = window.mediaPlayer.audioElement;
-            this.connectAudio();
-        }
-
-        // Listen for audio element creation
-        const checkAudio = setInterval(() => {
-            if (window.mediaPlayer && window.mediaPlayer.audioElement && !this.audioElement) {
-                this.audioElement = window.mediaPlayer.audioElement;
-                this.connectAudio();
-                clearInterval(checkAudio);
-            }
-        }, 500);
-
-        // Stop checking after 5 seconds (keep it light)
-        setTimeout(() => clearInterval(checkAudio), 5000);
-
-        // Initialize audio context on first user interaction (browser security requirement)
-        const initOnInteraction = async () => {
-            if (window.audioAnalyser && !window.audioAnalyser.isInitialized) {
-                const initialized = await window.audioAnalyser.initialize();
-                if (initialized && this.audioElement) {
-                    this.connectAudio();
-                }
-            }
-            // Remove listeners after first interaction
-            document.removeEventListener('click', initOnInteraction);
-            document.removeEventListener('touchstart', initOnInteraction);
-        };
-
-        document.addEventListener('click', initOnInteraction, { once: true });
-        document.addEventListener('touchstart', initOnInteraction, { once: true });
-    }
-
-    /**
-     * Connect audio element to analyser
-     */
-    connectAudio() {
-        if (!this.audioElement) return;
-        // Visualizer removed: no analyser loop needed.
-        if (!this.visualizer) return;
-
-        // Don't connect if audio is already playing - wait for next track change
-        // This prevents breaking existing audio connections
-        if (this.audioElement.src && !this.audioElement.paused) {
-            // Audio is already playing, try to connect but don't break if it fails
-            if (window.audioAnalyser.isInitialized) {
-                const connected = window.audioAnalyser.connect(this.audioElement);
-                if (connected) {
-                    // Update loop + visualizer render start on playback events.
-                    window.audioAnalyser.resume();
-                }
-            }
-            return;
-        }
-
-        // Ensure audio context is initialized
-        if (!window.audioAnalyser.isInitialized) {
-            window.audioAnalyser.initialize().then((initialized) => {
-                if (initialized) {
-                    // Try to connect, but don't break playback if it fails
-                    const connected = window.audioAnalyser.connect(this.audioElement);
-                    if (connected) {
-                        window.audioAnalyser.resume();
-                    }
-                }
-            });
-        } else {
-            // Try to connect, but don't break playback if it fails
-            const connected = window.audioAnalyser.connect(this.audioElement);
-            if (connected) {
-                window.audioAnalyser.resume();
-            }
         }
     }
 
@@ -157,7 +75,11 @@ class NowPlayingController {
 
         // Extract colors from album art
         const coverArt = track.cover_art || track.cover || '/static/img/default-cover.jpg';
-        this.currentColors = await window.colorExtractor.extractColors(coverArt);
+        if (window.colorExtractor && typeof window.colorExtractor.extractColors === 'function') {
+            this.currentColors = await window.colorExtractor.extractColors(coverArt);
+        } else {
+            this.currentColors = { dominant: '#6366f1', secondary: '#8b5cf6', accent: '#ec4899' };
+        }
 
         // Update CSS variables for glass effect
         this.updateGlassColors(this.currentColors);
@@ -165,8 +87,7 @@ class NowPlayingController {
         // Update album artwork glow
         this.updateAlbumGlow(this.currentColors.dominant);
 
-        // Don't try to reconnect audio here - let player.js handle it after playback starts
-        // This prevents breaking the audio connection
+        // Visualizer removed: no audio analysis work needed here.
     }
 
     /**
@@ -216,13 +137,6 @@ class NowPlayingController {
         }
 
         const update = () => {
-            if (window.audioAnalyser && window.audioAnalyser.isInitialized) {
-                const frequencyData = window.audioAnalyser.getFrequencyData();
-                if (frequencyData && this.visualizer) {
-                    this.visualizer.update(frequencyData);
-                }
-            }
-
             this.animationFrame = requestAnimationFrame(update);
         };
 
@@ -262,10 +176,6 @@ class NowPlayingController {
             this.visualizer = null;
         }
 
-        if (window.audioAnalyser) {
-            window.audioAnalyser.disconnect();
-        }
-
         this.isInitialized = false;
     }
 }
@@ -274,7 +184,7 @@ class NowPlayingController {
 window.nowPlayingController = new NowPlayingController();
 
 // Lazy initialize to keep mobile load fast:
-// - Initialize when the user starts playback (best signal we actually need the visualizer/analyser).
+// - Initialize when the user starts playback (best signal we actually need the glass theme).
 // - Also initialize on first interaction as a fallback.
 (function lazyInitNowPlaying() {
     let started = false;

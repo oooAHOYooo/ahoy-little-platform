@@ -7,7 +7,7 @@
     <div class="max-w-6xl mx-auto">
         <h1 class="text-4xl font-bold mb-2 text-white">Merch Store</h1>
         <p class="text-white/70 mb-8">
-            Support Ahoy and unlock extras. (Note: checkout is currently a lightweight “purchase intent” flow; Stripe payments for non-boost items are still WIP.)
+            Support Ahoy and unlock extras. Checkout uses Stripe (online) — Square can stay for in-person merch later.
         </p>
         
         {% set subs = (products.subscriptions if products and products.subscriptions is defined else []) %}
