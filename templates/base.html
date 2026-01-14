@@ -243,7 +243,6 @@
         window.compactFooter = function() {
           return {
             currentTime: '',
-            temperature: '--',
             tickerOffset: 0,
             tickerSpeed: 0.5,
             announcements: [
@@ -259,11 +258,6 @@
               this.updateTime();
               setInterval(() => this.updateTime(), 1000);
               
-              // Fetch weather for New Haven, CT
-              this.fetchWeather();
-              // Refresh weather every 10 minutes
-              setInterval(() => this.fetchWeather(), 600000);
-              
               // Start ticker animation
               this.startTicker();
             },
@@ -275,22 +269,6 @@
                 minute: '2-digit',
                 hour12: true
               });
-            },
-            
-            async fetchWeather() {
-              try {
-                // New Haven, CT coordinates
-                const lat = 41.3083;
-                const lon = -72.9279;
-                const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
-                if (response.ok) {
-                  const data = await response.json();
-                  this.temperature = data.temperature || '--';
-                }
-              } catch (err) {
-                // Silently fail
-                console.error('Weather fetch failed:', err);
-              }
             },
             
             startTicker() {
@@ -1810,11 +1788,6 @@
             <div class="compact-footer-content">
                 <div class="compact-footer-time-weather">
                     <span class="compact-time" x-text="currentTime"></span>
-                    <span class="compact-separator">•</span>
-                    <span class="compact-weather">
-                        <span x-text="temperature"></span>°F
-                    </span>
-                    <span class="compact-location">New Haven, CT</span>
                 </div>
                 <div class="compact-footer-ticker">
                     <div class="ticker-wrapper">
@@ -2484,11 +2457,7 @@
                 breadcrumbs: [],
                 nowPillText: '',
 
-                // Weather state (kept, but not displayed in StatusBar)
-                weatherLoaded: false,
-                weatherIcon: '☀️',
-                weatherTemp: '--',
-                weatherCondition: '',
+                // Weather removed for MVP (was slow + unneeded)
 
                 // Mobile menu state
                 leftMenuOpen: false,
@@ -2691,30 +2660,6 @@
                         }
                     } catch (err) {
                         console.log('Fullscreen toggle error:', err);
-                    }
-                },
-
-                // Weather functionality
-                async loadWeather() {
-                    // Hardcoded New Haven CT coordinates
-                    const lat = 41.3083;
-                    const lon = -72.9279;
-                    this.fetchWeather(lat, lon);
-                },
-
-                async fetchWeather(lat, lon) {
-                    try {
-                        let url = `/api/weather?lat=${lat}&lon=${lon}`;
-                        const response = await fetch(url);
-                        if (response.ok) {
-                            const data = await response.json();
-                            this.weatherIcon = data.icon || '☀️';
-                            this.weatherTemp = data.temperature || '--';
-                            this.weatherCondition = data.condition || '';
-                            this.weatherLoaded = true;
-                        }
-                    } catch (err) {
-                        // Silently fail
                     }
                 },
 
