@@ -371,7 +371,8 @@ function createUnifiedHero(config = {}) {
         getPageTitle() {
             const titles = {
                 music: 'Music Library',
-                shows: 'Shows & Videos',
+                shows: 'Videos',
+                videos: 'Videos',
                 artists: 'Artists',
                 saves: 'My Saves',
                 account: 'My Account'
@@ -382,9 +383,10 @@ function createUnifiedHero(config = {}) {
         getPageDescription() {
             const descriptions = {
                 music: 'Discover tracks, albums, and artists',
-                shows: 'Discover live performances, music videos, and exclusive content',
+                shows: 'Music videos, skate parts, short films, episodes, and more',
+                videos: 'Music videos, skate parts, short films, episodes, and more',
                 artists: 'Discover indie musicians, show hosts, athletes, filmmakers, and more',
-                saves: 'Your saved tracks, shows, playlists, and more',
+                saves: 'Your saved tracks, videos, playlists, and more',
                 account: 'Manage your profile and preferences'
             };
             return descriptions[this.pageType] || 'Discover content';

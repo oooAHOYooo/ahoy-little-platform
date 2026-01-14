@@ -5,10 +5,21 @@
         <meta charset="UTF-8">
         <meta name="viewport"
             content="width=device-width, initial-scale=1.0, user-scalable=no">
+        
+        <!-- Performance: DNS prefetch and preconnect for external resources -->
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+        <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+        <link rel="dns-prefetch" href="https://js.stripe.com">
+        
+        <!-- Preload critical resources -->
+        <link rel="preload" href="{{ url_for('static', filename='css/loader.css') }}" as="style">
+        <link rel="preload" href="{{ url_for('static', filename='js/loader.js') }}" as="script">
+        <link rel="preload" href="{{ url_for('static', filename='img/ahoy_logo.png') }}" as="image">
         <meta name="description"
-            content="{% block description %}Discover and save indie music, shows, and media. Create playlists, save favorites, and explore new artists on Ahoy Indie Media.{% endblock %}">
+            content="{% block description %}Discover and save indie music, videos, and media. Create playlists, save favorites, and explore new artists on Ahoy Indie Media.{% endblock %}">
         <meta name="keywords"
-            content="indie music, indie shows, music discovery, save music, music playlists, indie artists, music platform">
+            content="indie music, indie videos, music discovery, save music, music playlists, indie artists, music platform">
         <meta name="author" content="Ahoy Indie Media">
         <meta name="robots" content="index, follow">
 
@@ -25,9 +36,9 @@
         <meta property="og:type" content="website">
         <meta property="og:url" content="{{ request.url }}">
         <meta property="og:title"
-            content="{% block og_title %}Ahoy Indie Media - Discover Indie Music & Shows{% endblock %}">
+            content="{% block og_title %}Ahoy Indie Media - Discover Indie Music & Videos{% endblock %}">
         <meta property="og:description"
-            content="{% block og_description %}Discover and save indie music, shows, and media. Create playlists, save favorites, and explore new artists.{% endblock %}">
+            content="{% block og_description %}Discover and save indie music, videos, and media. Create playlists, save favorites, and explore new artists.{% endblock %}">
         <meta property="og:image"
             content="{{ url_for('static', filename='img/ahoy_logo.png', _external=True) }}">
         <meta property="og:image:width" content="1200">
@@ -38,9 +49,9 @@
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:url" content="{{ request.url }}">
         <meta name="twitter:title"
-            content="{% block twitter_title %}Ahoy Indie Media - Discover Indie Music & Shows{% endblock %}">
+            content="{% block twitter_title %}Ahoy Indie Media - Discover Indie Music & Videos{% endblock %}">
         <meta name="twitter:description"
-            content="{% block twitter_description %}Discover and save indie music, shows, and media. Create playlists, save favorites, and explore new artists.{% endblock %}">
+            content="{% block twitter_description %}Discover and save indie music, videos, and media. Create playlists, save favorites, and explore new artists.{% endblock %}">
         <meta name="twitter:image"
             content="{{ url_for('static', filename='img/ahoy_logo.png', _external=True) }}">
         <meta name="twitter:image:alt" content="Ahoy Indie Media Logo">
@@ -64,7 +75,9 @@
 
         <title>{% block title %}Ahoy Indie Media{% endblock %}</title>
 
-        <!-- CSS -->
+        <!-- CSS - Load loader first for instant display -->
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/loader.css') }}">
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/main.css') }}">
         <link rel="stylesheet"
@@ -75,27 +88,40 @@
             href="{{ url_for('static', filename='css/mobile.css') }}">
         {% block extra_css %}{% endblock %}
 
-        <!-- Google Fonts - Inter -->
+        <!-- Google Fonts - Inter (optimized loading) -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-            rel="stylesheet">
+            rel="stylesheet"
+            media="print" onload="this.media='all'">
+        <noscript>
+            <link
+                href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+                rel="stylesheet">
+        </noscript>
 
-        <!-- Font Awesome -->
+        <!-- Font Awesome (non-render-blocking) -->
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
         <link rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            media="print" onload="this.media='all'">
+        <noscript>
+            <link rel="stylesheet"
+                href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        </noscript>
 
-        <!-- NProgress - Loading Progress Bar -->
+        <!-- NProgress - Loading Progress Bar (deferred, we have our own loader now) -->
         <link rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
-        <script
+            href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css"
+            media="print" onload="this.media='all'">
+        <script defer
             src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
 
         <!-- Stripe publishable key and JS -->
         <meta name="stripe-publishable-key"
             content="{{ STRIPE_PUBLISHABLE_KEY }}">
-        <script src="https://js.stripe.com/v3/"></script>
+        <script defer src="https://js.stripe.com/v3/"></script>
         <script defer
             src="{{ url_for('static', filename='js/stripeBoost.js') }}"></script>
 
@@ -220,10 +246,10 @@
             tickerSpeed: 0.5,
             announcements: [
               'Welcome to Ahoy Indie Media',
-              'Discover new indie music and shows',
+              'Discover new indie music and videos',
               'Create playlists and save your favorites',
               'Follow your favorite artists',
-              'Explore live shows and events'
+              'Explore videos and events'
             ],
             
             init() {
@@ -310,17 +336,7 @@
 
         <!-- Three.js visualizer removed (perf). -->
 
-        <!-- Debug Alpine.js loading -->
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Hide loading indicator
-            const loadingIndicator = document.getElementById('loading-indicator');
-            if (loadingIndicator) {
-                loadingIndicator.style.display = 'none';
-                loadingIndicator.remove();
-            }
-        });
-    </script>
+        <!-- Loading is now handled by loader.js -->
         <script>
         // Global cast receiver: accept ahoy:play messages from /cast sender
         window.addEventListener('message', (e) => {
@@ -348,6 +364,36 @@
         class="overflow-x-hidden">
         {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false)
         %}
+        
+        <!-- Full Page Loading Screen with Progress -->
+        <div id="app-loader">
+            <div class="loader-content">
+                <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}" 
+                     alt="Ahoy Logo" 
+                     class="loader-logo"
+                     onerror="this.style.display='none'">
+                <h1 class="loader-title">Ahoy Indie Media</h1>
+                <p class="loader-subtitle">Loading your music discovery experience...</p>
+                
+                <div class="progress-container">
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">
+                        <span class="status-icon">⚙️</span>
+                        <span>Initializing...</span>
+                    </div>
+                    <div class="progress-percent" id="progress-percent">0%</div>
+                </div>
+                
+                <div class="loading-dots">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Mobile Status Bar (fixed top, compact) -->
         <div class="mobile-status-bar mobile-only" x-data="statusBar()"
             x-init="init()">
@@ -373,11 +419,6 @@
                     </a>
                 </div>
             </div>
-        </div>
-        <!-- Loading indicator -->
-        <div id="loading-indicator"
-            style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 9999; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
-            <div>Loading Ahoy Indie Media...</div>
         </div>
 
         <!-- Header -->
@@ -424,8 +465,8 @@
                     </a>
                     <a href="{{ url_for('shows') }}"
                         class="mobile-tab {% if request.endpoint == 'shows' %}active{% endif %}">
-                        <i class="fas fa-play-circle" aria-hidden="true"></i>
-                        <span>Shows</span>
+                        <i class="fas fa-video" aria-hidden="true"></i>
+                        <span>Videos</span>
                     </a>
                     <a href="{{ url_for('live_tv_page') }}"
                         class="mobile-tab {% if request.endpoint == 'live_tv_page' %}active{% endif %}">
@@ -713,8 +754,8 @@
             </a>
             <a href="{{ url_for('shows') }}"
                 class="mobile-tab {% if request.endpoint == 'shows' %}active{% endif %}">
-                <i class="fas fa-play-circle"></i>
-                <span>Shows</span>
+                <i class="fas fa-video"></i>
+                <span>Videos</span>
             </a>
             <a href="{{ url_for('artists') }}"
                 class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
@@ -802,7 +843,7 @@
                         x-model="searchQuery"
                         @keyup.enter="performSearch()"
                         @input="handleInput()"
-                        placeholder="Search music, shows, artists..."
+                        placeholder="Search music, videos, artists..."
                         class="mobile-search-input"
                         autofocus>
                     <button @click="clearSearch()" class="mobile-search-clear"
@@ -873,7 +914,7 @@
                                 <i
                                     class="fas fa-search sidebar-search-icon"></i>
                                 <input type="text"
-                                    placeholder="Search music, shows, artists..."
+                                    placeholder="Search music, videos, artists..."
                                     x-model="searchQuery"
                                     @keyup.enter="performSearch()"
                                     class="sidebar-search-input">
@@ -1191,7 +1232,7 @@
                         <div class="section-title">Events</div>
                         <div class="actions-mini actions-mini-vertical">
                             <a class="action-mini" href="/events">
-                                Upcoming live Ahoy shows →
+                                Upcoming live Ahoy videos →
                             </a>
                         </div>
 
@@ -1201,7 +1242,7 @@
                             <div class="action-mini"
                                 @click="goTo('/music')">Music</div>
                             <div class="action-mini"
-                                @click="goTo('/shows')">Shows</div>
+                                @click="goTo('/shows')">Videos</div>
                             <div class="action-mini"
                                 @click="goTo('/live-tv')">Live TV</div>
                             <div class="action-mini"
@@ -1241,11 +1282,17 @@
                             <span>Podcasts</span>
                         </a>
                         <a
+                            class="app-sidebar-item {% if request.endpoint == 'live_tv_page' %}active{% endif %}"
+                            href="/live-tv">
+                            <i class="fas fa-tv" aria-hidden="true"></i>
+                            <span>Live TV</span>
+                        </a>
+                        <a
                             class="app-sidebar-item {% if request.endpoint == 'shows' %}active{% endif %}"
                             href="{{ url_for('shows') }}">
-                            <i class="fas fa-play-circle"
+                            <i class="fas fa-video"
                                 aria-hidden="true"></i>
-                            <span>Shows</span>
+                            <span>Videos</span>
                         </a>
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'artists' %}active{% endif %}"
@@ -1726,14 +1773,16 @@
                 <div class="footer-column">
                     <h4 class="footer-column-title">App Navigation</h4>
                     <ul>
+                        <li><a href="{{ url_for('home') }}">Explore</a></li>
                         <li><a href="{{ url_for('music') }}">Music</a></li>
-                        <li><a href="{{ url_for('shows') }}">Shows</a></li>
+                        <li><a href="/podcasts">Podcasts</a></li>
+                        <li><a href="/live-tv">Live TV</a></li>
+                        <li><a href="{{ url_for('shows') }}">Videos</a></li>
                         <li><a href="{{ url_for('artists') }}">Artists</a></li>
-                        <li><a href="{{ url_for('cast_page') }}">Cast</a></li>
-                        <li><a href="/downloads">Downloads</a></li>
-                        <li><a href="/bookmarks">My Bookmarks</a></li>
-                        <li><a href="/settings">Settings</a></li>
-                        <li><a href="/feedback">Feedback</a></li>
+                        <li><a href="/radio">Radio</a></li>
+                        <li><a href="/events">Events</a></li>
+                        <li><a href="/merch">Merch</a></li>
+                        <li><a href="/bookmarks">Saved</a></li>
                     </ul>
                 </div>
 
@@ -1802,7 +1851,7 @@
                 <div class="compact-footer-quicklinks">
                     <a href="{{ url_for('music') }}" class="quicklink">Music</a>
                     <span class="quicklink-sep">•</span>
-                    <a href="{{ url_for('shows') }}" class="quicklink">Shows</a>
+                    <a href="{{ url_for('shows') }}" class="quicklink">Videos</a>
                     <span class="quicklink-sep">•</span>
                     <a href="{{ url_for('artists') }}"
                         class="quicklink">Artists</a>
@@ -1898,29 +1947,32 @@
             </div>
         </div>
 
+        <!-- Loading Progress Tracker -->
+        <script defer src="{{ url_for('static', filename='js/loader.js') }}"></script>
+        
         <!-- JavaScript -->
         <script>window.LOGGED_IN = JSON.parse('{{ LOGGED_IN|tojson|safe }}');</script>
         <script>
         // Hard env switch (default to 'development'). Override to 'production' to enable prod-only behaviors.
         window.APP_ENV = window.APP_ENV || 'development';
     </script>
-        <script
+        <script defer
             src="{{ url_for('static', filename='js/guest-bootstrap.js') }}"></script>
-        <script
+        <script defer
             src="{{ url_for('static', filename='js/bookmarks.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/player.js') }}"></script>
+        <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
+        <script defer src="{{ url_for('static', filename='js/player.js') }}"></script>
 
-        <!-- Now Playing Component Modules -->
-        <script
+        <!-- Now Playing Component Modules - Defer non-critical scripts -->
+        <script defer
             src="{{ url_for('static', filename='js/colorExtractor.js') }}"></script>
-        <script
+        <script defer
             src="{{ url_for('static', filename='js/audioAnalyser.js') }}"></script>
-        <script
+        <script defer
             src="{{ url_for('static', filename='js/nowPlaying.js') }}"></script>
-        <script
+        <script defer
             src="{{ url_for('static', filename='js/playlist-manager.js') }}"></script>
-        <script
+        <script defer
             src="{{ url_for('static', filename='js/collections-manager.js') }}"></script>
         <script type="module"
             src="{{ url_for('static', filename='js/playlist-ui.js') }}"></script>
@@ -2002,7 +2054,7 @@
                 return crumbs;
             }
             if (normalized === '/shows') {
-                add('Shows', '/shows');
+                add('Videos', '/shows');
                 add('Browse', null);
                 return crumbs;
             }

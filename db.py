@@ -74,11 +74,15 @@ EFFECTIVE_DATABASE_URL = _ensure_ssl_for_remote(RAW_DATABASE_URL)
 logger = logging.getLogger(__name__)
 logger.info("Using database", extra={"dsn": current_db_dsn_summary()})
 
-# Create SQLAlchemy engine with pool_pre_ping for resiliency
+# Create SQLAlchemy engine with optimized connection pooling
 engine = create_engine(
     EFFECTIVE_DATABASE_URL,
-    pool_pre_ping=True,
+    pool_pre_ping=True,  # Verify connections before using
     echo=False,
+    pool_size=5,  # Number of connections to maintain
+    max_overflow=10,  # Max connections beyond pool_size
+    pool_recycle=3600,  # Recycle connections after 1 hour
+    pool_timeout=30,  # Timeout for getting connection from pool
 )
 
 # Thread-safe scoped session factory

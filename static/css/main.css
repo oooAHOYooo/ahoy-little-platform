@@ -1043,17 +1043,38 @@ body.debug-layout .card {
 }
 
 .app-sidebar {
-    width: 232px;
-    flex: 0 0 232px;
+    width: 182px;
+    flex: 0 0 182px;
     border-right: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(12, 12, 14, 0.6);
     backdrop-filter: blur(18px) saturate(130%);
     -webkit-backdrop-filter: blur(18px) saturate(130%);
-    padding: 16px 12px;
+    padding: 0 12px 16px 12px;
     position: sticky;
-    top: 44px; /* below fixed navbar */
-    height: calc(100vh - 44px);
+    top: var(--ds-topbar-height, 44px);
+    height: calc(100vh - var(--ds-topbar-height, 44px));
     overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    margin-top: 0;
+}
+
+.app-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.app-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.app-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+}
+
+.app-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
 }
 
 .app-sidebar-logo {
@@ -1061,7 +1082,8 @@ body.debug-layout .card {
     align-items: center;
     justify-content: flex-start;
     gap: 10px;
-    padding: 6px 8px 14px 8px;
+    padding: 16px 8px 14px 8px;
+    margin-top: 0;
 }
 
 .app-sidebar-logo img {
@@ -1581,15 +1603,20 @@ body.debug-layout .card {
 }
 
 .main-content {
-    padding-top: var(--ds-topbar-height);
+    padding-top: 0;
+    margin-top: 0;
 }
 
 .app-shell {
     min-height: calc(100vh - var(--ds-topbar-height));
+    margin-top: 0;
+    padding-top: 0;
 }
 .app-sidebar {
     top: var(--ds-topbar-height);
     height: calc(100vh - var(--ds-topbar-height));
+    margin-top: 0;
+    padding-top: 0;
 }
 
 /* ===== Design System: Status Bar ===== */

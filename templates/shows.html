@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Shows & Videos - Ahoy Indie Media{% endblock %}
+{% block title %}Videos - Ahoy Indie Media{% endblock %}
 
 {% block content %}
 <div class="shows-page" x-data="showsPage()" x-init="init()">
     <div class="shows-container">
         <!-- Unified Rotating Hero -->
         <section class="unified-hero tv-hero"
-            x-data="createUnifiedHero({ pageType: 'shows', rotationSpeed: 14000 })"
+            x-data="createUnifiedHero({ pageType: 'videos', rotationSpeed: 14000 })"
             x-init="init()"
             @touchstart="handleTouchStart" @touchmove="handleTouchMove"
             @touchend="handleTouchEnd">
@@ -66,11 +66,8 @@
                         </div>
                     </div>
                     <div class="title-text">
-                        <h1><i class="fas fa-play-circle"></i> Shows &
-                            Videos</h1>
-                        <p>Discover live performances, music videos, and
-                            exclusive
-                            content</p>
+                        <h1><i class="fas fa-video"></i> Videos</h1>
+                        <p>Music videos, skate parts, short films, episodes, and more</p>
                     </div>
                 </div>
 
@@ -180,6 +177,8 @@
                             <img
                                 :src="show.thumbnail || '/static/img/default-cover.jpg'"
                                 :alt="show.title"
+                                loading="lazy"
+                                decoding="async"
                                 class="image-placeholder">
                             <div class="show-overlay">
                                 <button @click.stop="playShow(show)"
@@ -226,7 +225,10 @@
                             <div class="col-thumbnail">
                                 <img
                                     :src="show.thumbnail || '/static/img/default-cover.jpg'"
-                                    :alt="show.title" class="image-placeholder">
+                                    :alt="show.title"
+                                    loading="lazy"
+                                    decoding="async"
+                                    class="image-placeholder">
                                 <div class="play-overlay">
                                     <i class="fas fa-play"></i>
                                 </div>
@@ -266,7 +268,9 @@
                         @click="playShow(show)">
                         <img class="show-thumb"
                             :src="show.thumbnail || '/static/img/default-cover.jpg'"
-                            :alt="show.title" />
+                            :alt="show.title"
+                            loading="lazy"
+                            decoding="async" />
                         <div class="show-text">
                             <div class="show-title" x-text="show.title"></div>
                             <div class="show-meta"
@@ -290,7 +294,7 @@
         <!-- Loading State -->
         <section x-show="isLoading" class="loading-section">
             <div class="spinner"></div>
-            <p>Loading shows...</p>
+            <p>Loading videos...</p>
         </section>
 
         <!-- Empty State -->
@@ -298,7 +302,7 @@
             class="empty-section">
             <div class="empty-content">
                 <i class="fas fa-play-circle"></i>
-                <h3>No shows found</h3>
+                <h3>No videos found</h3>
                 <p>Try adjusting your search or filters</p>
                 <button @click="clearFilters()" class="btn btn-primary">Clear
                     Filters</button>

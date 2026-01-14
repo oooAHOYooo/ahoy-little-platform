@@ -3,15 +3,23 @@
  * Provides offline caching for UI shell and static assets
  */
 
-const CACHE_NAME = 'ahoy-indie-media-v1';
+const CACHE_NAME = 'ahoy-indie-media-v2';
 const STATIC_CACHE_URLS = [
     '/',
-    '/static/css/style.css',
+    '/static/css/loader.css',
+    '/static/css/main.css',
+    '/static/css/base.css',
+    '/static/css/global.css',
+    '/static/css/mobile.css',
+    '/static/js/loader.js',
     '/static/js/app.js',
-    '/static/js/media-session.js',
+    '/static/js/player.js',
+    '/static/js/bookmarks.js',
+    '/static/js/guest-bootstrap.js',
     '/static/images/icon-192.png',
     '/static/images/icon-512.png',
-    '/static/images/default-cover.jpg'
+    '/static/img/default-cover.jpg',
+    '/static/img/ahoy_logo.png'
 ];
 
 // Install event - cache static assets
@@ -72,8 +80,44 @@ self.addEventListener('fetch', (event) => {
         return;
     }
     
-    // Skip API calls (always fetch fresh)
+    // Cache a small set of "static" API endpoints with stale-while-revalidate
+    // (improves speed without losing features, because we still revalidate)
+    const cacheableApi = new Set([
+        '/api/music',
+        '/api/shows',
+        '/api/artists',
+        '/api/live-tv/channels'
+    ]);
+
     if (url.pathname.startsWith('/api/')) {
+        if (!cacheableApi.has(url.pathname)) {
+            // Other API calls: always fetch fresh
+            return;
+        }
+
+        event.respondWith((async () => {
+            const cache = await caches.open(CACHE_NAME);
+            const cached = await cache.match(request);
+
+            const networkFetch = fetch(request)
+                .then((response) => {
+                    if (response && response.status === 200) {
+                        cache.put(request, response.clone());
+                    }
+                    return response;
+                })
+                .catch(() => null);
+
+            // Serve cached immediately if present, update in background
+            if (cached) {
+                networkFetch.catch(() => {});
+                return cached;
+            }
+
+            // Otherwise wait for network
+            const net = await networkFetch;
+            return net || cached;
+        })());
         return;
     }
     

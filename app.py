@@ -7,7 +7,7 @@ from flask_login import current_user, login_required
 import os
 import json
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import random
 import hashlib
 from functools import wraps
@@ -721,13 +721,58 @@ except ImportError:
 # Cache configuration
 CACHE_TIMEOUT = 300  # 5 minutes
 
+# In-memory cache for JSON data files (prevents repeated disk I/O)
+_json_data_cache = {}
+_json_file_mtimes = {}
+
 # Removed: USERS_FILE, ACTIVITY_FILE, load_users(), save_users() - using database now
 
-def load_json_data(filename, default=None):
-    """Load JSON data from file with fallback"""
+def load_json_data(filename, default=None, cache_duration=300):
+    """Load JSON data from file with in-memory caching and file modification time checking"""
+    import os
+    from time import time
+    
+    filepath = f'static/data/{filename}'
+    cache_key = filepath
+    
+    # Check if file exists
+    if not os.path.exists(filepath):
+        return default or {}
+    
+    # Get file modification time
     try:
-        with open(f'static/data/{filename}', 'r') as f:
-            return json.load(f)
+        current_mtime = os.path.getmtime(filepath)
+    except OSError:
+        current_mtime = 0
+    
+    # Check cache validity
+    if cache_key in _json_data_cache:
+        cached_data, cached_time, cached_mtime = _json_data_cache[cache_key]
+        # Cache is valid if:
+        # 1. Not expired (within cache_duration seconds)
+        # 2. File hasn't been modified
+        if (time() - cached_time < cache_duration and 
+            cached_mtime == current_mtime):
+            return cached_data
+    
+    # Load from disk
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Update cache
+        _json_data_cache[cache_key] = (data, time(), current_mtime)
+        
+        # Clean up old cache entries (older than 1 hour)
+        cleanup_time = time() - 3600
+        keys_to_remove = [
+            k for k, (_, t, _) in _json_data_cache.items() 
+            if t < cleanup_time
+        ]
+        for k in keys_to_remove:
+            _json_data_cache.pop(k, None)
+        
+        return data
     except FileNotFoundError:
         return default or {}
     except json.JSONDecodeError as e:
@@ -740,6 +785,42 @@ def load_json_data(filename, default=None):
         import logging
         logging.error(f'Error loading {filename}: {e}')
         return default or {}
+
+
+def _etag_for_static_json(filename: str) -> str | None:
+    """Create a weak ETag for static/data JSON files based on mtime + size.
+
+    This enables 304 Not Modified responses, reducing payload + parse time.
+    """
+    try:
+        p = Path("static") / "data" / filename
+        st = p.stat()
+        return f'W/"{int(st.st_mtime)}-{int(st.st_size)}"'
+    except Exception:
+        return None
+
+
+def _cached_json_response(filename: str, default: dict, max_age_seconds: int = 300):
+    """Return a JSON response with Cache-Control + ETag (conditional GET)."""
+    etag = _etag_for_static_json(filename)
+    cache_control = f"public, max-age={int(max_age_seconds)}"
+
+    # Conditional GET
+    inm = request.headers.get("If-None-Match")
+    if etag and inm == etag:
+        resp = make_response("", 304)
+        resp.headers["ETag"] = etag
+        resp.headers["Cache-Control"] = cache_control
+        resp.headers["Vary"] = "Accept-Encoding"
+        return resp
+
+    data = load_json_data(filename, default, cache_duration=max_age_seconds)
+    resp = jsonify(data)
+    resp.headers["Cache-Control"] = cache_control
+    resp.headers["Vary"] = "Accept-Encoding"
+    if etag:
+        resp.headers["ETag"] = etag
+    return resp
 
 # Replaced auth_required with Flask-Login's @login_required
 # Use: from flask_login import login_required
@@ -1076,8 +1157,9 @@ def playlists_index():
 @limiter.exempt
 def api_now_playing():
     """Get curated now playing feed with 30s previews - randomized on each request"""
-    music_data = load_json_data('music.json', {'tracks': []})
-    shows_data = load_json_data('shows.json', {'shows': []})
+    # Use cached data (cache_duration=60 for more frequent updates)
+    music_data = load_json_data('music.json', {'tracks': []}, cache_duration=60)
+    shows_data = load_json_data('shows.json', {'shows': []}, cache_duration=60)
     
     # Combine and curate content for discovery feed
     feed_items = []
@@ -1130,7 +1212,10 @@ def api_now_playing():
     # Limit to 12 items for better performance
     feed_items = feed_items[:12]
     
-    return jsonify({'feed': feed_items})
+    response = jsonify({'feed': feed_items})
+    # Cache for 1 minute (content is randomized per request, but structure is stable)
+    response.headers['Cache-Control'] = 'public, max-age=60'
+    return response
 
     # Minimal listening hooks (optional endpoints for client player)
     @app.post('/api/listening/start')
@@ -1168,9 +1253,16 @@ def api_products():
     products = read_json('data/products.json', {})
     return jsonify(products)
 
+# Weather API cache to prevent duplicate requests and timeouts
+_weather_cache = {
+    'data': None,
+    'timestamp': None,
+    'cache_duration': timedelta(minutes=10)  # Cache for 10 minutes
+}
+
 @app.route('/api/weather')
 def api_weather():
-    """Get weather information for New Haven, CT"""
+    """Get weather information for New Haven, CT with caching"""
     import requests
     from datetime import datetime
     
@@ -1178,12 +1270,23 @@ def api_weather():
     lat = request.args.get('lat', '41.3083')
     lon = request.args.get('lon', '-72.9279')
     
+    # Check cache first
+    now = datetime.now()
+    if (_weather_cache['data'] is not None and 
+        _weather_cache['timestamp'] is not None and
+        now - _weather_cache['timestamp'] < _weather_cache['cache_duration']):
+        # Return cached data
+        cached = _weather_cache['data'].copy()
+        cached['cached'] = True
+        return jsonify(cached)
+    
     try:
         # Use wttr.in API for free weather data (no API key required)
         # Format: ?format=j1 returns JSON
+        # Reduced timeout to fail faster and prevent blocking
         url = f"https://wttr.in/New+Haven,CT?format=j1"
         
-        response = requests.get(url, timeout=5, headers={
+        response = requests.get(url, timeout=3, headers={
             'User-Agent': 'Mozilla/5.0 (compatible; AhoyWeather/1.0)'
         })
         
@@ -1268,16 +1371,30 @@ def api_weather():
                 print(f"Temperature parsing error: {e}, raw value: {temp_f}")
                 temp_int = '--'
             
-            return jsonify({
+            result = {
                 'temperature': temp_int,
                 'condition': condition.lower().replace(' ', '_'),
                 'description': condition,
                 'icon': icon,
                 'location': 'New Haven, CT',
-                'timestamp': datetime.now().isoformat()
-            })
+                'timestamp': datetime.now().isoformat(),
+                'cached': False
+            }
+            
+            # Update cache
+            _weather_cache['data'] = result.copy()
+            _weather_cache['timestamp'] = now
+            
+            return jsonify(result)
     except Exception as e:
-        # Fallback to a default if API fails
+        # Fallback to cached data if available, otherwise return default
+        if _weather_cache['data'] is not None:
+            cached = _weather_cache['data'].copy()
+            cached['cached'] = True
+            cached['error'] = 'Using cached data due to API error'
+            return jsonify(cached)
+        
+        # Fallback to a default if API fails and no cache
         print(f"Weather API error: {e}")
         return jsonify({
             'temperature': '--',
@@ -1285,7 +1402,8 @@ def api_weather():
             'description': 'Weather unavailable',
             'icon': '☀️',
             'location': 'New Haven, CT',
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime.now().isoformat(),
+            'cached': False
         })
 
 @app.route('/api/agenda')
@@ -1371,8 +1489,7 @@ def api_homepage_layout():
 @limiter.exempt
 def api_music():
     """Get all music data"""
-    music_data = load_json_data('music.json', {'tracks': []})
-    return jsonify(music_data)
+    return _cached_json_response("music.json", {"tracks": []}, max_age_seconds=300)
 
 @app.route('/radio')
 def radio_page():
@@ -1388,14 +1505,14 @@ def merch_page():
 @limiter.exempt
 def api_shows():
     """Get all shows/video content"""
-    shows_data = load_json_data('shows.json', {'shows': []})
-    return jsonify(shows_data)
+    return _cached_json_response("shows.json", {"shows": []}, max_age_seconds=300)
 
 @app.route('/api/live-tv/channels')
 @limiter.exempt
 def api_live_tv_channels():
     """Return four Live TV channels built from available media content."""
     shows_data = load_json_data('shows.json', {'shows': []})
+    # Note: Response caching added below after processing
 
     def normalize_show(item):
         # Map show to a unified structure
@@ -1425,7 +1542,7 @@ def api_live_tv_channels():
     
     # Daily-seeded shuffle so the mix changes every day but stays stable within the day
     def daily_shuffle(items, salt=''):
-        today = datetime.utcnow().strftime('%Y-%m-%d')
+        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
         seed_src = f'{today}:{salt}'
         seed = int(hashlib.sha1(seed_src.encode('utf-8')).hexdigest()[:8], 16)
         rnd = random.Random(seed)
@@ -1456,7 +1573,10 @@ def api_live_tv_channels():
         },
     ]
 
-    return jsonify({'channels': channels})
+    response = jsonify({'channels': channels})
+    # Cache for 5 minutes (content changes daily but structure is stable)
+    response.headers['Cache-Control'] = 'public, max-age=300'
+    return response
 
 @app.route('/api/show/<show_id>')
 def api_show(show_id):
@@ -1473,16 +1593,30 @@ def api_show(show_id):
 @limiter.exempt
 def api_artists():
     """Get artists directory"""
-    artists_data = load_json_data('artists.json', {'artists': []})
-    return jsonify(artists_data)
+    return _cached_json_response("artists.json", {"artists": []}, max_age_seconds=300)
 
 @app.route('/api/artists/featured')
 @limiter.exempt
 def api_featured_artists():
     """Get featured artists"""
+    # Same backing file as /api/artists, so allow client caching too
+    etag = _etag_for_static_json("artists.json")
+    inm = request.headers.get("If-None-Match")
+    if etag and inm == etag:
+        resp = make_response("", 304)
+        resp.headers["ETag"] = etag
+        resp.headers["Cache-Control"] = "public, max-age=300"
+        resp.headers["Vary"] = "Accept-Encoding"
+        return resp
+
     artists_data = load_json_data('artists.json', {'artists': []})
     featured = [a for a in artists_data.get('artists', []) if a.get('featured', False)]
-    return jsonify({'artists': featured})
+    resp = jsonify({'artists': featured})
+    resp.headers["Cache-Control"] = "public, max-age=300"
+    resp.headers["Vary"] = "Accept-Encoding"
+    if etag:
+        resp.headers["ETag"] = etag
+    return resp
 
 @app.route('/artists/<artist_id>/follow', methods=['POST'])
 def follow_artist(artist_id):

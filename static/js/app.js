@@ -62,8 +62,62 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 // ============================================================================
 
-// unified API helper
+// Request deduplication cache - prevents duplicate simultaneous requests
+const _requestCache = new Map();
+const _pendingRequests = new Map();
+
+// Global fetch wrapper for request deduplication (only for GET requests)
+// This prevents multiple components from making the same API call simultaneously
+const _originalFetch = window.fetch;
+window.fetch = function(url, options = {}) {
+  const method = (options.method || 'GET').toUpperCase();
+  const isGet = method === 'GET';
+  const cacheKey = isGet && typeof url === 'string' ? url : null;
+  
+  // Only deduplicate GET requests to API endpoints
+  if (!isGet || !cacheKey || !cacheKey.startsWith('/api/')) {
+    return _originalFetch(url, options);
+  }
+  
+  // If we have a pending request, return the same promise
+  if (_pendingRequests.has(cacheKey)) {
+    return _pendingRequests.get(cacheKey).then(res => res.clone());
+  }
+  
+  // Create the request
+  const requestPromise = _originalFetch(url, options)
+    .finally(() => {
+      // Remove from pending requests after a short delay
+      setTimeout(() => {
+        _pendingRequests.delete(cacheKey);
+      }, 50);
+    });
+  
+  // Store pending request
+  _pendingRequests.set(cacheKey, requestPromise);
+  
+  return requestPromise.then(res => res.clone());
+};
+
+// Unified API helper with request deduplication
 async function api(url, method="GET", payload=null) {
+  // Only deduplicate GET requests (safe to cache/share)
+  const cacheKey = method === "GET" ? url : null;
+  
+  // If this is a GET request and we have a pending request, wait for it
+  if (cacheKey && _pendingRequests.has(cacheKey)) {
+    return _pendingRequests.get(cacheKey);
+  }
+  
+  // If this is a GET request and we have cached data (within 5 seconds), return it
+  if (cacheKey && _requestCache.has(cacheKey)) {
+    const cached = _requestCache.get(cacheKey);
+    const age = Date.now() - cached.timestamp;
+    if (age < 5000) { // 5 second cache window
+      return Promise.resolve(cached.data);
+    }
+  }
+  
   const opts = { 
     method, 
     headers: { "Content-Type": "application/json" }, 
@@ -71,9 +125,39 @@ async function api(url, method="GET", payload=null) {
     redirect: "follow" // Follow redirects automatically
   };
   if (payload) opts.body = JSON.stringify(payload);
-  const res = await fetch(url, opts);
-  if (!res.ok) throw new Error(`API ${method} ${url} -> ${res.status}`);
-  try { return await res.json(); } catch { return {}; }
+  
+  // Create the request promise
+  const requestPromise = fetch(url, opts)
+    .then(res => {
+      if (!res.ok) throw new Error(`API ${method} ${url} -> ${res.status}`);
+      try { return res.json(); } catch { return {}; }
+    })
+    .then(data => {
+      // Cache successful GET responses
+      if (cacheKey) {
+        _requestCache.set(cacheKey, { data, timestamp: Date.now() });
+        // Clean up old cache entries (older than 30 seconds)
+        for (const [key, value] of _requestCache.entries()) {
+          if (Date.now() - value.timestamp > 30000) {
+            _requestCache.delete(key);
+          }
+        }
+      }
+      return data;
+    })
+    .finally(() => {
+      // Remove from pending requests
+      if (cacheKey) {
+        _pendingRequests.delete(cacheKey);
+      }
+    });
+  
+  // Store pending request for GET requests
+  if (cacheKey) {
+    _pendingRequests.set(cacheKey, requestPromise);
+  }
+  
+  return requestPromise;
 }
 
 // Bookmark-only delegation (legacy support for non-Alpine.js buttons)
@@ -160,21 +244,13 @@ window.__ahoyToast = function(msg) {
   setTimeout(()=>{ el.style.display="none"; }, 2200);
 };
 
-// Boot watchdog: clears the loading screen even if a request fails
+// Boot watchdog: works with new loader system
 (function boot() {
-  function clearLoader() {
-    const loader = document.getElementById("app-loader") || document.getElementById("loading-indicator");
-    if (loader) loader.style.display = "none";
-  }
   window.addEventListener("DOMContentLoaded", async () => {
     // try to hydrate bookmarks; even on failure, clear loader so UI is usable
     try { await window.hydrateBookmarksState(); } catch (e) { console.warn(e); }
-    // If your app does additional bootstrapping, call it here in try/catch too.
-    clearLoader();
+    // Loader is now handled by loader.js with progress tracking
   });
-
-  // Safety net: if DOMContentLoaded didn't fire, force-clear loader after 5s
-  setTimeout(clearLoader, 5000);
 })();
 
 // ========================================
@@ -250,6 +326,7 @@ window.navbar = function() {
     searchQuery: '',
     leftMenuOpen: false,
     rightMenuOpen: false,
+    bookmarkPoller: null,
     
     // Initialize
     init() {
@@ -301,9 +378,30 @@ window.navbar = function() {
       });
       
       // Periodic refresh to ensure count stays updated
-      setInterval(() => {
-        this.loadBookmarkCount();
-      }, 2000);
+      // Optimization: only poll while tab is visible (reduces background CPU)
+      const startPoll = () => {
+        if (this.bookmarkPoller) return;
+        this.bookmarkPoller = setInterval(() => {
+          this.loadBookmarkCount();
+        }, 2000);
+      };
+      const stopPoll = () => {
+        if (!this.bookmarkPoller) return;
+        clearInterval(this.bookmarkPoller);
+        this.bookmarkPoller = null;
+      };
+
+      // Start polling immediately if visible
+      if (document.visibilityState === 'visible') startPoll();
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          this.loadBookmarkCount(); // quick resync on return
+          startPoll();
+        } else {
+          stopPoll();
+        }
+      });
     },
     
     // Search functionality
