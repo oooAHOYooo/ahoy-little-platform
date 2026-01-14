@@ -121,6 +121,15 @@
             async init() {
                 this.loading = true;
                 try {
+                    const isRemoteUrl = (u) => typeof u === 'string' && /^https?:\/\//i.test(u);
+                    const pickFirstRemote = (arr) => {
+                        if (!Array.isArray(arr)) return null;
+                        for (const u of arr) {
+                            if (isRemoteUrl(u)) return u;
+                        }
+                        return null;
+                    };
+
                     const events = Array.isArray(rawEvents?.events) ? rawEvents.events : [];
                     const videos = Array.isArray(rawVideos?.videos) ? rawVideos.videos : [];
                     const videoByEventId = new Map();
@@ -132,9 +141,14 @@
                     // Normalize + attach video info
                     const normalized = events.map(e => {
                         const vid = videoByEventId.get(String(e.id || ''));
+                        const remotePhoto = pickFirstRemote(e?.photos);
+                        const remoteImage = isRemoteUrl(e?.image) ? e.image : null;
+                        const remoteThumb = isRemoteUrl(vid?.thumbnail) ? vid.thumbnail : null;
                         return {
                             ...e,
-                            image: e.image || e.thumbnail,
+                            // Prefer cloud/dynamic URLs (ignore /static/*). Falls back to default cover in the template.
+                            image: remotePhoto || remoteImage || remoteThumb || null,
+                            photos: Array.isArray(e?.photos) ? e.photos.filter(isRemoteUrl) : [],
                             videoUrl: vid?.url || null,
                             videoStatus: vid?.status === 'available' ? 'Recording available'
                                 : vid?.status === 'coming_soon' ? 'Recording coming soon'
