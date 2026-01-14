@@ -53,7 +53,7 @@ This document summarizes all performance optimizations implemented to improve ap
 
 **Solution**: Added `defer` attribute to non-critical scripts:
 - `colorExtractor.js`
-- `audioAnalyser.js`
+- (Removed for MVP) `audioAnalyser.js`
 - `nowPlaying.js`
 - `playlist-manager.js`
 - `collections-manager.js`

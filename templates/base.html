@@ -1364,10 +1364,6 @@
             x-transition:leave-start="transform translate-y-0 opacity-100"
             x-transition:leave-end="transform translate-y-full opacity-0">
 
-            <!-- Three.js Visualizer Background -->
-            <div id="now-playing-visualizer"
-                class="now-playing-visualizer"></div>
-
             <!-- Glassy Now Playing Bar -->
             <div class="now-playing-glass now-playing-sticky">
                 <div class="now-playing-container">
@@ -1455,14 +1451,6 @@
                             :class="{'active': currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)}"
                             title="Bookmark">
                             <i class="fas fa-bookmark"></i>
-                        </button>
-                        <button @click="toggleFullscreenVisualizer()"
-                            class="now-playing-btn now-playing-fullscreen-btn"
-                            :class="{'active': isFullscreenVisualizer}"
-                            :title="isFullscreenVisualizer ? 'Exit Fullscreen' : 'Fullscreen Visualizer'"
-                            x-show="currentTrack && currentTrack.type !== 'show'">
-                            <i
-                                :class="isFullscreenVisualizer ? 'fas fa-compress' : 'fas fa-expand'"></i>
                         </button>
                     </div>
 
@@ -2848,7 +2836,6 @@
                 isSaved: false,
                 isShuffled: false,
                 isRepeated: false,
-                isFullscreenVisualizer: false,
 
                 init() {
                     // Wrap entire initialization in try-catch to prevent blocking page execution
@@ -2881,7 +2868,7 @@
                                     try {
                                         this.isPlaying = true;
                                         this.currentTrack = mp.currentTrack;
-                                        // Trigger track change for visualizer
+                                        // Keep Now Playing UI in sync (glassy theme only; no visualizer)
                                         if (window.nowPlayingController && mp.currentTrack) {
                                             window.nowPlayingController.onTrackChange(mp.currentTrack);
                                         }
@@ -2957,7 +2944,7 @@
                                 mp.on('playlistchange', () => {
                                     try {
                                         this.currentTrack = mp.currentTrack;
-                                        // Trigger track change for visualizer
+                                        // Keep Now Playing UI in sync (glassy theme only; no visualizer)
                                         if (window.nowPlayingController && mp.currentTrack) {
                                             window.nowPlayingController.onTrackChange(mp.currentTrack);
                                         }
@@ -2996,12 +2983,7 @@
                         console.warn('Error initializing bookmark state or clock:', e);
                     }
 
-                    // Listen for fullscreen changes (simplified to avoid Illegal invocation errors)
-                    // Just set to false initially - fullscreen detection is not critical for functionality
-                    this.isFullscreenVisualizer = false;
-                    
-                    // Optionally add listeners only if needed, but don't access problematic properties
-                    // The fullscreen state is not critical for the player to function
+                    // Visualizer removed: no fullscreen/visualizer state needed.
                 },
 
                 playTrack(track) {
@@ -3267,39 +3249,6 @@
                     }
                 },
 
-                toggleFullscreenVisualizer() {
-                    if (!this.currentTrack || this.currentTrack.type === 'show') return;
-
-                    const visualizerContainer = document.getElementById('now-playing-visualizer');
-                    if (!visualizerContainer) return;
-
-                    if (!this.isFullscreenVisualizer) {
-                        // Enter fullscreen
-                        if (visualizerContainer.requestFullscreen) {
-                            visualizerContainer.requestFullscreen();
-                        } else if (visualizerContainer.webkitRequestFullscreen) {
-                            visualizerContainer.webkitRequestFullscreen();
-                        } else if (visualizerContainer.mozRequestFullScreen) {
-                            visualizerContainer.mozRequestFullScreen();
-                        } else if (visualizerContainer.msRequestFullscreen) {
-                            visualizerContainer.msRequestFullscreen();
-                        }
-                        this.isFullscreenVisualizer = true;
-                    } else {
-                        // Exit fullscreen
-                        if (document.exitFullscreen) {
-                            document.exitFullscreen();
-                        } else if (document.webkitExitFullscreen) {
-                            document.webkitExitFullscreen();
-                        } else if (document.mozCancelFullScreen) {
-                            document.mozCancelFullScreen();
-                        } else if (document.msExitFullscreen) {
-                            document.msExitFullscreen();
-                        }
-                        this.isFullscreenVisualizer = false;
-                    }
-                }
-                ,
                 // Analog clock drawing for current time and progress ring
                 startClock() {
                     const draw = () => {

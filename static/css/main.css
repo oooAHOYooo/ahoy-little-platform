@@ -22606,7 +22606,7 @@ img.loading {
    GLASSY NOW PLAYING COMPONENT
    ============================================================ */
 
-/* Wrapper for Now Playing with visualizer */
+/* Wrapper for Now Playing */
 .now-playing-wrapper {
     position: fixed;
     bottom: 0;
@@ -22616,78 +22616,6 @@ img.loading {
     height: 130px;
     z-index: 1000;
     pointer-events: none;
-}
-
-/* Three.js Visualizer Container */
-.now-playing-visualizer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-    background: #000;
-    transition: all 0.3s ease;
-}
-
-.now-playing-visualizer canvas {
-    width: 100% !important;
-    height: 100% !important;
-}
-
-/* Fullscreen visualizer */
-.now-playing-visualizer:fullscreen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.now-playing-visualizer:-webkit-full-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.now-playing-visualizer:-moz-full-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.now-playing-visualizer:-ms-fullscreen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 /* Glassy Now Playing Bar */

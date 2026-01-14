@@ -288,7 +288,7 @@ class MediaPlayer {
             if (typeof error?.name === 'string' && error.name.toLowerCase().includes('notallowed')) {
                 const retryOnGesture = () => {
                     // Attempt to unlock AudioContext too
-                    try { window.audioAnalyser?.resume?.(); } catch (_) {}
+                    // Visualizer removed for MVP: no WebAudio analyser to resume.
                     mediaElement.play().then(() => {
                         this.isPlaying = true;
                         this.emit('play');
