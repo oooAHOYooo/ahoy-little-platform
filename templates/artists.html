@@ -51,6 +51,107 @@
                 </template>
             </div>
         </section>
+
+        <!-- Mobile: Artists layout matches Podcasts (episode rows) -->
+        <section class="podcasts-hero mobile-only">
+            <div class="podcasts-hero-inner">
+                <h1><i class="fas fa-users" aria-hidden="true"></i> Artists</h1>
+                <p>Discover indie musicians, show hosts, athletes, filmmakers, and more.</p>
+            </div>
+        </section>
+
+        <section class="podcasts-section mobile-only">
+            <div class="podcasts-section-header">
+                <h2>All Artists</h2>
+                <button type="button" class="episode-btn"
+                    @click="viewRandomArtist()" title="Discover Random Artist">
+                    <i class="fas fa-random" aria-hidden="true"></i>
+                    <span class="sr-only">Discover Random Artist</span>
+                </button>
+            </div>
+
+            <div class="artists-mobile-controls">
+                <div class="search-bar">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <input type="text"
+                        x-model="searchQuery"
+                        @input="filterArtists()"
+                        placeholder="Search artists..."
+                        class="search-input">
+                    <button @click="clearSearch()" class="search-clear"
+                        x-show="searchQuery" aria-label="Clear search">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                <div class="filter-tabs-mobile">
+                    <button @click="setType('all')"
+                        :class="{'active': selectedType === 'all'}"
+                        class="filter-tab-mobile">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        <span>All</span>
+                    </button>
+                    <button @click="setType('musician')"
+                        :class="{'active': selectedType === 'musician'}"
+                        class="filter-tab-mobile">
+                        <i class="fas fa-music" aria-hidden="true"></i>
+                        <span>Musicians</span>
+                    </button>
+                    <button @click="setType('host')"
+                        :class="{'active': selectedType === 'host'}"
+                        class="filter-tab-mobile">
+                        <i class="fas fa-microphone" aria-hidden="true"></i>
+                        <span>Hosts</span>
+                    </button>
+                    <button @click="setType('producer')"
+                        :class="{'active': selectedType === 'producer'}"
+                        class="filter-tab-mobile">
+                        <i class="fas fa-sliders-h" aria-hidden="true"></i>
+                        <span>Producers</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="episode-list">
+                <template x-for="artist in filteredArtists" :key="artist.id || artist.slug || artist.name">
+                    <article class="episode-row" @click="viewArtist(artist)">
+                        <img class="episode-art"
+                            :src="artist.image || '/static/img/default-avatar.png'"
+                            :alt="artist.name"
+                            loading="lazy"
+                            decoding="async">
+                        <div class="episode-meta">
+                            <div class="episode-title" x-text="artist.name"></div>
+                            <div class="episode-subtitle">
+                                <span class="episode-show"
+                                    x-text="(artist.genres && artist.genres.length ? artist.genres.join(', ') : '') || (artist.type || '')"></span>
+                                <span class="episode-dot" x-show="artist.type && artist.genres && artist.genres.length">•</span>
+                                <span class="episode-time"
+                                    x-show="artist.type" x-text="String(artist.type || '').replace(/_/g,' ')"></span>
+                            </div>
+                            <div class="episode-desc" x-text="artist.description || ''"></div>
+                        </div>
+                        <div class="episode-actions">
+                            <button type="button" class="episode-btn"
+                                @click.stop="viewArtist(artist)" title="Open">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span class="sr-only">Open</span>
+                            </button>
+                            <button type="button" class="episode-btn bm-btn"
+                                @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image })"
+                                :title="isBookmarked('artist', artist.id || artist.slug) ? 'Remove bookmark' : 'Bookmark'">
+                                <i x-show="isBookmarked('artist', artist.id || artist.slug)"
+                                    class="fas fa-bookmark" aria-hidden="true"></i>
+                                <i x-show="!isBookmarked('artist', artist.id || artist.slug)"
+                                    class="far fa-bookmark" aria-hidden="true"></i>
+                                <span class="sr-only"
+                                    x-text="isBookmarked('artist', artist.id || artist.slug) ? 'Remove bookmark' : 'Bookmark'"></span>
+                            </button>
+                        </div>
+                    </article>
+                </template>
+            </div>
+        </section>
         <!-- Unified Header Section -->
         <section class="unified-header artists-subheader">
             <div class="header-content">
@@ -283,35 +384,6 @@
                 </div>
             </div>
         </section>
-        <!-- Mobile: Compact Artist List (mobile-only) -->
-        <section class="artists-compact-section">
-            <div class="artists-list">
-                <template x-for="artist in filteredArtists"
-                    :key="artist.id || artist.slug">
-                    <div class="artist-item" role="button"
-                        @click="viewArtist(artist)">
-                        <img class="artist-avatar"
-                            :src="artist.image || '/static/img/default-avatar.png'"
-                            :alt="artist.name" />
-                        <div class="artist-text">
-                            <div class="artist-name" x-text="artist.name"></div>
-                            <div class="artist-meta"
-                                x-text="artist.genres?.join(', ') || (artist.type || '')"></div>
-                        </div>
-                        <div class="artist-actions">
-                            <span class="artist-bookmark"
-                                role="button"
-                                tabindex="0"
-                                :aria-pressed="isBookmarked('artist', artist.id || artist.slug)"
-                                @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image })">
-                                <i
-                                    :class="isBookmarked('artist', artist.id || artist.slug) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
-                            </span>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </section>
 
         <!-- Loading State -->
         <section x-show="isLoading" class="loading-section">
@@ -529,95 +601,38 @@ function artistsPage() {
 <style>
 /* Defaults */
 .mobile-only { display: none; }
-.artists-compact-section { display: none; }
+.artists-mobile-controls { display: none; }
 
-/* Mobile artist list pattern and sticky controls */
+/* Mobile artists uses Podcasts layout (episode rows) */
 @media (max-width: 768px) {
     /* Toggle mobile/desktop helpers */
     .mobile-only { display: block; }
     .desktop-only { display: none !important; }
 
-    /* Optionally hide large hero on mobile so list takes over quickly */
+    /* Hide large rotating hero + desktop header on mobile */
     .unified-hero.tv-hero { display: none; }
+    .unified-header.artists-subheader { display: none !important; }
 
-    /* Sticky subheader with search + filters - Mobile optimized */
-    .unified-header.artists-subheader {
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
-        background: rgba(17, 17, 17, 0.95);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-    .unified-header.artists-subheader .header-content {
-        padding: 0.75rem 1rem;
-    }
-    .unified-header.artists-subheader .title-text h1 {
-        margin: 0 0 0.25rem 0;
-        font-size: 1.25rem;
-        line-height: 1.2;
-        font-weight: 700;
-        color: #fff;
-    }
-    .unified-header.artists-subheader .title-text p {
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        margin: 0;
-        line-height: 1.3;
-        font-size: 0.875rem;
-        opacity: 0.7;
-        color: #d1d5db;
-    }
-    
-    /* Mobile search bar styling */
-    .unified-header.artists-subheader .header-search.mobile-only {
-        margin: 0.75rem 0;
-    }
-    
-    .unified-header.artists-subheader .header-search .search-bar {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 0.625rem 1rem;
-    }
-    
-    .unified-header.artists-subheader .header-search .search-input {
-        font-size: 0.875rem;
-        color: #fff;
-    }
-    
-    .unified-header.artists-subheader .header-search .search-input::placeholder {
-        color: #6b7280;
-    }
-    /* Desktop filter tabs */
-    .header-filters .filter-tabs.desktop-only {
-        display: flex;
-        gap: 0.5rem;
-    }
+    /* Match Podcasts padding */
+    .artists-page { padding: 18px 18px calc(40px + env(safe-area-inset-bottom)) 18px; }
+    .artists-container { padding: 0; }
 
-    /* Mobile: Horizontal scrollable filter tabs - tucked away cleanly */
-    .header-filters .filter-tabs-mobile {
+    /* Keep the mobile controls compact, above the episode rows */
+    .artists-mobile-controls { display: block; margin: 10px 2px 12px 2px; }
+    .artists-mobile-controls .search-bar { margin-bottom: 10px; }
+
+    /* Mobile: Horizontal scrollable filter tabs */
+    .filter-tabs-mobile {
         display: flex;
         gap: 0.5rem;
         overflow-x: auto;
         padding: 0.5rem 0;
-        margin: 0 -1rem;
-        padding-left: 1rem;
-        padding-right: 1rem;
         -webkit-overflow-scrolling: touch;
         scroll-snap-type: x proximity;
         scrollbar-width: none;
     }
-
-    .header-filters .filter-tabs-mobile::-webkit-scrollbar {
-        display: none;
-    }
-
-    .header-filters .filter-tab-mobile {
+    .filter-tabs-mobile::-webkit-scrollbar { display: none; }
+    .filter-tab-mobile {
         scroll-snap-align: start;
         flex: 0 0 auto;
         padding: 0.5rem 1rem;
@@ -634,100 +649,17 @@ function artistsPage() {
         transition: all 0.2s ease;
         cursor: pointer;
     }
-
-    .header-filters .filter-tab-mobile:active {
-        transform: scale(0.95);
-    }
-
-    .header-filters .filter-tab-mobile.active {
+    .filter-tab-mobile:active { transform: scale(0.98); }
+    .filter-tab-mobile.active {
         background: #a855f7;
         border-color: #a855f7;
         color: #fff;
         box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
     }
-
-    .header-filters .filter-tab-mobile i {
-        font-size: 0.75rem;
-    }
+    .filter-tab-mobile i { font-size: 0.75rem; }
 
     /* Hide desktop/grid/table implementations on mobile */
-    .artists-grid-section .section-header,
-    .artists-grid-section .view-controls,
-    .artists-grid-section .artists-grid,
-    .artists-grid-section .list-header,
-    .artists-grid-section .list-items {
-        display: none !important;
-    }
-
-    /* NEW: Compact mobile list */
-    .artists-compact-section { display: block; }
-    .artists-compact-section .artists-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        padding: 0.75rem 1rem calc(140px + env(safe-area-inset-bottom)); /* extra bottom padding for nav bars */
-    }
-    .artists-compact-section .artist-item {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        padding: 0.75rem 1rem;
-        background: rgba(255, 255, 255, 0.03);
-        border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        text-align: left;
-        gap: 0.75rem;
-        min-height: 64px; /* consistent row height */
-        transition: all 0.2s ease;
-    }
-    
-    .artists-compact-section .artist-item:active {
-        transform: scale(0.98);
-        background: rgba(255, 255, 255, 0.05);
-    }
-    .artists-compact-section .artist-avatar {
-        width: 44px;
-        height: 44px;
-        border-radius: 999px;
-        object-fit: cover;
-        flex-shrink: 0;
-        background: #111;
-    }
-    .artists-compact-section .artist-text {
-        flex: 1 1 auto;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-    }
-    .artists-compact-section .artist-name {
-        font-size: 0.95rem;
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        line-height: 1.2;
-    }
-    .artists-compact-section .artist-meta {
-        font-size: 0.8rem;
-        opacity: 0.7;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        line-height: 1.2;
-    }
-    .artists-compact-section .artist-actions {
-        margin-left: 0.5rem;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-    }
-    .artists-compact-section .artist-bookmark i {
-        font-size: 1.1rem;
-        color: inherit;
-    }
-    .artists-compact-section .artist-bookmark[aria-pressed="true"] i {
-        color: var(--accent-color);
-    }
+    .artists-grid-section { display: none !important; }
 }
 </style>
 {% endblock %}
