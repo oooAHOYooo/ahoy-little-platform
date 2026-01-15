@@ -95,6 +95,32 @@
                 </div>
             </div>
         </div>
+
+        <!-- Live TV Channel Strip (shows what's playing on each channel) -->
+        <div class="tv-channel-strip" x-show="tvChannels.length > 1">
+            <div class="tv-channel-strip-header">
+                <div class="tv-channel-strip-title">Live TV Channels</div>
+                <div class="tv-channel-strip-subtitle">Tap a channel to switch</div>
+            </div>
+            <div class="tv-channel-strip-list">
+                <template x-for="(ch, idx) in tvChannels" :key="ch.id">
+                    <button type="button"
+                        class="tv-channel-strip-item"
+                        :class="{'active': tvCurrentChannel && tvCurrentChannel.id === ch.id}"
+                        @click.stop="selectTVChannel(idx)">
+                        <div class="tv-channel-strip-meta">
+                            <span class="tv-channel-strip-name" x-text="getTVChannelName(ch, idx)"></span>
+                            <span class="tv-channel-strip-live">LIVE</span>
+                        </div>
+                        <div class="tv-channel-strip-now"
+                            x-text="(tvNowByChannel[ch.id] || {}).title || 'No content available'"></div>
+                        <div class="tv-channel-strip-next"
+                            x-show="!!tvNextByChannel[ch.id]"
+                            x-text="tvNextByChannel[ch.id] ? ('Up next: ' + (tvNextByChannel[ch.id].title || '')) : ''"></div>
+                    </button>
+                </template>
+            </div>
+        </div>
     </section>
 
     <style>
@@ -110,6 +136,121 @@
         /* Fixed height ensures alignment */
         height: 420px;
         min-height: 420px;
+    }
+
+    /* Live TV Channel Strip */
+    .tv-channel-strip {
+        margin-top: 1rem;
+        background: rgba(20, 20, 20, 0.55);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 1rem;
+    }
+
+    .tv-channel-strip-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .tv-channel-strip-title {
+        font-size: 0.85rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .tv-channel-strip-subtitle {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.45);
+        white-space: nowrap;
+    }
+
+    .tv-channel-strip-list {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .tv-channel-strip-item {
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        color: #fff;
+        border-radius: 16px;
+        padding: 0.9rem;
+        text-align: left;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        min-width: 0;
+    }
+
+    .tv-channel-strip-item:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .tv-channel-strip-item.active {
+        background: rgba(99, 102, 241, 0.14);
+        border-color: rgba(99, 102, 241, 0.35);
+    }
+
+    .tv-channel-strip-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        min-width: 0;
+    }
+
+    .tv-channel-strip-name {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: rgba(255, 255,  255, 0.75);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+    }
+
+    .tv-channel-strip-live {
+        flex-shrink: 0;
+        font-size: 0.7rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        padding: 0.18rem 0.45rem;
+        border-radius: 999px;
+        background: rgba(255, 0, 0, 0.18);
+        border: 1px solid rgba(255, 0, 0, 0.35);
+        color: rgba(255, 255, 255, 0.9);
+        text-transform: uppercase;
+    }
+
+    .tv-channel-strip-now {
+        font-size: 0.95rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 0.4rem;
+    }
+
+    .tv-channel-strip-next {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.55);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     /* --- MAIN CARD (LEFT) --- */
@@ -522,7 +663,7 @@
         }
         .dashboard-main {
             aspect-ratio: 4/3;
-            min-height: 300px;
+            min-height: 360px;
         }
         .dashboard-sidebar {
             padding: 1rem;
@@ -534,6 +675,30 @@
         .dash-overlay {
             padding: 1.5rem;
         }
+        /* Prevent top badges colliding with channel chevrons */
+        .dash-badges {
+            top: 1rem;
+            left: 1rem;
+            max-width: calc(100% - 5.25rem); /* reserve space for nav buttons */
+            flex-wrap: nowrap;
+            overflow: hidden;
+        }
+        .channel-badge {
+            display: inline-block;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .channel-nav {
+            top: 1rem;
+            right: 1rem;
+        }
+        .channel-nav-btn {
+            width: 32px;
+            height: 32px;
+            font-size: 0.8rem;
+        }
         .dash-actions {
             flex-direction: column;
             align-items: stretch;
@@ -543,6 +708,50 @@
             width: 100%;
             justify-content: center;
         }
+
+        .tv-channel-strip {
+            padding: 0.9rem;
+        }
+        .tv-channel-strip-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
+        .tv-channel-strip-subtitle {
+            white-space: normal;
+        }
+        .tv-channel-strip-list {
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            gap: 0.75rem;
+            padding-bottom: 0.25rem;
+            scroll-snap-type: x mandatory;
+        }
+        .tv-channel-strip-item {
+            flex: 0 0 82%;
+            max-width: 360px;
+            scroll-snap-align: start;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-main {
+            min-height: 380px;
+        }
+        .dash-overlay {
+            padding: 1.25rem;
+        }
+        .dash-content h2 {
+            font-size: 1.45rem;
+        }
+        .dash-content p {
+            font-size: 0.95rem;
+            margin-bottom: 1.1rem;
+        }
+        .dash-actions {
+            gap: 0.6rem;
+        }
     }
     </style>
 
@@ -550,7 +759,7 @@
     <section class="whats-new-section" x-data="whatsNew()" x-init="loadUpdates()">
         <div class="whats-new-container">
             <div class="whats-new-header">
-                <h2><i class="fas fa-bullhorn"></i> What's New at Ahoy</h2>
+                <h2>What's New at Ahoy</h2>
             </div>
             <div x-show="isLoading" class="whats-new-loading">
                 <span>Loading updates...</span>
@@ -558,13 +767,10 @@
             <div x-show="!isLoading && updates.length > 0" class="whats-new-updates">
                 <template x-for="update in updates" :key="update.id">
                     <div class="whats-new-item" :class="'type-' + (update.type || 'update')">
-                        <div class="whats-new-icon">
-                            <i :class="update.icon || 'fas fa-info-circle'"></i>
-                        </div>
                         <div class="whats-new-content">
                             <h3 x-text="update.title"></h3>
                             <p x-text="update.description"></p>
-                            <span class="whats-new-date" x-text="formatDate(update.date)"></span>
+                            <span class="whats-new-date" x-text="formatDate(update.date, update.type)"></span>
                         </div>
                     </div>
                 </template>
@@ -602,13 +808,6 @@
         font-weight: 700;
         margin: 0;
         color: #fff;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .whats-new-header h2 i {
-        color: var(--accent-color, #6366f1);
     }
 
     .whats-new-loading,
@@ -640,29 +839,12 @@
         transform: translateX(4px);
     }
 
-    .whats-new-item.type-feature {
-        border-left: 3px solid #6366f1;
-    }
-
-    .whats-new-item.type-improvement {
-        border-left: 3px solid #10b981;
-    }
-
-    .whats-new-item.type-content {
-        border-left: 3px solid #f59e0b;
-    }
-
-    .whats-new-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        background: rgba(99, 102, 241, 0.15);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        color: #6366f1;
-        font-size: 1.25rem;
+    /* No accent colors / no type stripes */
+    .whats-new-item.type-feature,
+    .whats-new-item.type-improvement,
+    .whats-new-item.type-content,
+    .whats-new-item.type-event {
+        border-left: 0;
     }
 
     .whats-new-content {
@@ -707,12 +889,6 @@
             gap: 0.75rem;
         }
 
-        .whats-new-icon {
-            width: 40px;
-            height: 40px;
-            font-size: 1rem;
-        }
-
         .whats-new-content h3 {
             font-size: 1rem;
         }
@@ -723,251 +899,7 @@
     }
     </style>
 
-    <!-- Compact Discovery Grid -->
-    <section class="discovery-grid">
-        <div class="grid-container">
-
-            <!-- Live TV Now (Thumbnail Gallery) -->
-            <div class="grid-item live-tv-now">
-                <div class="item-header">
-                    <h3><i class="fas fa-tv"></i> Live TV Now</h3>
-                    <a href="/live-tv" class="view-all-btn">Channel Guide</a>
-                </div>
-                <div class="playing-list">
-                    <template x-for="(show, index) in featuredShows.slice(0, 1)"
-                        :key="show.id">
-                        <div class="playing-item"
-                            x-show="show.thumbnail"
-                            style="min-height: 180px; border-radius: 12px; overflow: hidden; position: relative; cursor: pointer;"
-                            :style="`background-image: url(${show.thumbnail}); background-size: cover; background-position: center;`"
-                            @click="playShow(show, index)">
-
-                            <div class="hero-overlay"
-                                style="background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);">
-                                <div class="hero-content"
-                                    style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem;">
-                                    <div class="hero-badge"
-                                        style="background: #ff0000; color: white; display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-bottom: 0.5rem;">LIVE</div>
-                                    <h3 x-text="show.title"
-                                        style="margin: 0; font-size: 1.1rem; color: white;"></h3>
-                                    <p x-text="show.host"
-                                        style="margin: 0; font-size: 0.9rem; color: rgba(255,255,255,0.8);"></p>
-                                </div>
-                                <div class="play-indicator"
-                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.5); border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.8);">
-                                    <i class="fas fa-play"
-                                        style="color: white; font-size: 1.2rem; margin-left: 4px;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                    <div x-show="!featuredShows || featuredShows.length === 0"
-                        style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.5);">
-                        No live shows currently airing.
-                    </div>
-                </div>
-            </div>
-
-            <!-- Now Playing Compact (Radio Feed) -->
-            <div class="grid-item now-playing-compact">
-                <div class="item-header">
-                    <h3>Radio Feed</h3>
-                    <a href="/radio" class="view-all-btn">Full Radio</a>
-                </div>
-                <!-- Radio Feed fills entire container -->
-                <a href="/radio" class="radio-feed-single"
-                    :style="`--radio-bg-image: url(${(radioCurrent || radioUpNext[0])?.cover_art || '/static/img/default-cover.jpg'});`">
-                    <!-- Track Info -->
-                    <div class="radio-feed-content">
-                        <div class="radio-feed-title"
-                            x-text="(radioCurrent || radioUpNext[0])?.title || 'No track playing'"></div>
-                        <div class="radio-feed-artist"
-                            x-text="(radioCurrent || radioUpNext[0])?.artist || ''"></div>
-                    </div>
-
-                    <!-- Placeholder if no tracks -->
-                    <div x-show="!radioCurrent && radioUpNext.length === 0"
-                        class="radio-feed-loading">
-                        <span>Loading radio feed...</span>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Live Shows Compact -->
-            <div class="grid-item shows-compact">
-                <div class="item-header">
-                    <h3><i class="fas fa-play-circle"></i> Live Now</h3>
-                    <a href="/shows" class="view-all-btn">All</a>
-                </div>
-                <div class="playing-list">
-                    <template x-for="(show, index) in featuredShows.slice(0, 4)"
-                        :key="show.id">
-                        <div class="playing-item"
-                            x-show="show.thumbnail"
-                            :class="{'playing': currentShowIndex === index}"
-                            :style="`background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${show.thumbnail}); background-size: cover; background-position: center;`"
-                            @click="playShow(show, index)">
-                            <div class="item-details">
-                                <h4 x-text="show.title"></h4>
-                                <p x-text="show.host"></p>
-                            </div>
-                            <div class="play-indicator"
-                                x-show="currentShowIndex === index">
-                                <i class="fas fa-play"></i>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-
-            <!-- Recently Added (Latest Updates) -->
-            <div class="grid-item recently-added" x-data="recentlyAdded()"
-                x-init="init()">
-                <div class="item-header">
-                    <h3><i class="fas fa-bolt"></i> Recently Added</h3>
-                    <span class="view-all-btn" x-show="latestDateText"
-                        x-text="latestDateText"></span>
-                </div>
-                <div x-show="isLoading" class="playing-list">
-                    <div class="playing-item"
-                        style="opacity:.6;display:flex;align-items:center;justify-content:center;">
-                        <span>Loading latest…</span>
-                    </div>
-                </div>
-                <div class="playing-list recently-added-grid">
-                    <template x-for="item in latestItems" :key="item.id">
-                        <div class="playing-item"
-                            x-show="item.cover_art || item.thumbnail"
-                            :style="`background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${item.cover_art || item.thumbnail}); background-size: cover; background-position: center;`"
-                            @click="play(item)">
-                            <div class="item-details">
-                                <h4 x-text="item.title"></h4>
-                                <p
-                                    x-text="item.artist || (item.host || '')"></p>
-                            </div>
-                            <div class="play-indicator">
-                                <i class="fas fa-play"></i>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Loading State -->
-    <section x-show="isLoading" class="loading-section">
-        <div class="spinner"></div>
-        <p>Loading awesome content...</p>
-    </section>
-
-    <!-- Mobile Widget Stack (at bottom of homepage) -->
-    <section class="mobile-widget-stack mobile-only" style="margin-top:12px;">
-        <!-- Boost -->
-        <div class="widget boost-widget" style="padding:12px;">
-            <div class="body-mobile"
-                style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-                <div class="label-mobile">Boost an Artist</div>
-                <button class="mobile-hamburger" title="Boost"
-                    @click="document.dispatchEvent(new CustomEvent('boost:open'))">
-                    <i class="fas fa-bolt"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Radio Now -->
-        <div class="widget radio-widget" style="padding:12px;">
-            <div class="label-mobile" style="margin-bottom:6px;">Radio Now</div>
-            <div style="display:flex;align-items:center;gap:10px;">
-                <div style="flex:1;min-width:0;">
-                    <div class="body-mobile"
-                        x-text="(radioCurrent || radioUpNext[0])?.title || 'No track playing'"></div>
-                    <div style="opacity:.7;font-size:.8rem;"
-                        x-text="(radioCurrent || radioUpNext[0])?.artist || ''"></div>
-                </div>
-                <button class="mobile-hamburger" @click="toggleRadio()"
-                    :title="radioIsPlaying ? 'Pause' : 'Play'">
-                    <i
-                        :class="radioIsPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Live Now (Shows) -->
-        <div class="widget live-now-widget" style="padding:12px;">
-            <div class="label-mobile" style="margin-bottom:6px;">Live Now</div>
-            <template x-if="featuredShows && featuredShows.length">
-                <div
-                    style="display:flex;gap:10px;align-items:center;cursor:pointer;"
-                    @click="playShow(featuredShows[0], 0)">
-                    <div
-                        style="width:56px;height:56px;border-radius:8px;background-size:cover;background-position:center;"
-                        :style="`background-image:url(${featuredShows[0]?.thumbnail || '/static/img/default-cover.jpg'})`"></div>
-                    <div style="flex:1;min-width:0;">
-                        <div class="body-mobile"
-                            x-text="featuredShows[0]?.title || 'Show'"></div>
-                        <div style="opacity:.7;font-size:.8rem;"
-                            x-text="featuredShows[0]?.host || ''"></div>
-                    </div>
-                    <i class="fas fa-play"></i>
-                </div>
-            </template>
-            <div x-show="!featuredShows || featuredShows.length===0"
-                style="opacity:.6;">Loading…</div>
-        </div>
-
-        <!-- Recently Added -->
-        <div class="widget recently-added-widget" x-data="recentlyAdded()"
-            x-init="init()" style="padding:10px;">
-            <div class="label-mobile" style="margin-bottom:6px;">Recently
-                Added</div>
-            <div style="display:flex;gap:6px;overflow:auto;">
-                <template x-for="item in latestItems.slice(0, 8)"
-                    :key="item.id">
-                    <div
-                        style="min-width:96px;border-radius:10px;overflow:hidden;background:#111;border:1px solid #222;cursor:pointer;"
-                        @click="play(item)">
-                        <div
-                            style="width:100%;height:56px;background-size:cover;background-position:center;"
-                            :style="`background-image:url(${item.cover_art || item.thumbnail || '/static/img/default-cover.jpg'})`"></div>
-                        <div style="padding:6px;">
-                            <div
-                                style="font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-                                x-text="item.title"></div>
-                            <div
-                                style="opacity:.7;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-                                x-text="item.artist || ''"></div>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </div>
-
-        <!-- Bookmarks -->
-        <div class="widget bookmark-widget" x-data="homeBookmarksWidget()"
-            x-init="loadBookmarks()" style="padding:12px;">
-            <div class="label-mobile" style="margin-bottom:6px;">Your
-                Bookmarks</div>
-            <div style="display:flex;gap:8px;overflow:auto;">
-                <template x-for="b in bookmarksList().slice(0, 8)" :key="b.key">
-                    <button @click="playBookmark(b)"
-                        style="display:flex;gap:8px;align-items:center;min-width:160px;border-radius:10px;background:#111;border:1px solid #222;padding:8px 10px;color:inherit;text-align:left;">
-                        <div
-                            style="width:40px;height:40px;border-radius:8px;background-size:cover;background-position:center;"
-                            :style="`background-image:url(${b.cover_art || b.thumbnail || '/static/img/default-cover.jpg'})`"></div>
-                        <div style="flex:1;min-width:0;">
-                            <div
-                                style="font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-                                x-text="b.title"></div>
-                            <div
-                                style="opacity:.7;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-                                x-text="b.artist || ''"></div>
-                        </div>
-                    </button>
-                </template>
-            </div>
-        </div>
-    </section>
+    <!-- Homepage intentionally ends at "What's New at Ahoy" -->
 
     <!-- Create Account Modal -->
     <div x-show="showCreateAccountModal" class="modal-overlay"
@@ -1069,6 +1001,15 @@ function homePage() {
         tvChannels: [],
         tvCurrentChannel: null,
         tvChannelIndex: 0,
+        tvNowByChannel: {},
+        tvNextByChannel: {},
+        tvScheduleInterval: null,
+        tvChannelNames: {
+            'misc': 'Channel 01 — Misc',
+            'films': 'Channel 02 — Short Films',
+            'music-videos': 'Channel 03 — Music Videos',
+            'live-shows': 'Channel 04 — Live Shows'
+        },
         
         // Initialize
         async init() {
@@ -1212,42 +1153,14 @@ function homePage() {
                 const data = await response.json();
                 const channels = data.channels || [];
                 this.tvChannels = channels;
-                
-                // Map channel IDs to display names
-                const channelNames = {
-                    'misc': 'Channel 01 — Misc',
-                    'films': 'Channel 02 — Short Films',
-                    'music-videos': 'Channel 03 — Music Videos',
-                    'live-shows': 'Channel 04 — Live Shows'
-                };
-                
+
                 // Default to Channel 1 (Misc) or first available channel
                 if (channels.length > 0) {
                     // Find Misc channel first, or use first channel
                     let ch = channels.find(c => c.id === 'misc') || channels[0];
                     this.tvChannelIndex = channels.findIndex(c => c.id === ch.id);
-                    
-                    this.tvCurrentChannel = {
-                        ...ch,
-                        name: channelNames[ch.id] || `Channel ${String(this.tvChannelIndex + 1).padStart(2, '0')} — ${ch.name || 'Unknown'}`
-                    };
-                    
-                    if (ch.items && ch.items.length > 0) {
-                        // Get current item based on time (simple rotation)
-                        // Use hour of day to determine which item to show
-                        const hour = new Date().getHours();
-                        const itemIndex = hour % ch.items.length;
-                        this.tvCurrent = ch.items[itemIndex];
-                        this.tvNext = ch.items.length > itemIndex + 1 ? ch.items[itemIndex + 1] : ch.items[0];
-                    } else {
-                        // If no items, still show the channel but with placeholder
-                        this.tvCurrent = {
-                            id: 'placeholder',
-                            title: 'No content available',
-                            thumbnail: '/static/img/default-cover.jpg',
-                            host: ch.name
-                        };
-                    }
+                    this.computeTVSchedule();
+                    this.selectTVChannel(this.tvChannelIndex);
                 } else {
                     // Fallback if no channels
                     this.tvCurrent = {
@@ -1260,6 +1173,13 @@ function homePage() {
                         id: 'misc',
                         name: 'Channel 01 — Misc'
                     };
+                }
+
+                // Refresh schedule periodically (keeps "now playing" accurate as time changes)
+                if (!this.tvScheduleInterval) {
+                    this.tvScheduleInterval = setInterval(() => {
+                        this.computeTVSchedule();
+                    }, 60 * 1000);
                 }
             } catch (error) {
                 console.error('Error loading TV status:', error);
@@ -1276,36 +1196,71 @@ function homePage() {
                 };
             }
         },
+
+        getTVChannelName(ch, idx) {
+            return this.tvChannelNames[ch.id] ||
+                `Channel ${String(idx + 1).padStart(2, '0')} — ${ch.name || 'Unknown'}`;
+        },
+
+        computeTVSchedule() {
+            const hour = new Date().getHours();
+            const nowBy = {};
+            const nextBy = {};
+
+            for (let i = 0; i < this.tvChannels.length; i++) {
+                const ch = this.tvChannels[i];
+                if (ch && ch.items && ch.items.length > 0) {
+                    const itemIndex = hour % ch.items.length;
+                    nowBy[ch.id] = ch.items[itemIndex];
+                    nextBy[ch.id] = (itemIndex + 1 < ch.items.length) ? ch.items[itemIndex + 1] : ch.items[0];
+                }
+            }
+
+            this.tvNowByChannel = nowBy;
+            this.tvNextByChannel = nextBy;
+
+            // Keep main card in sync for currently selected channel
+            if (this.tvCurrentChannel && this.tvCurrentChannel.id) {
+                const id = this.tvCurrentChannel.id;
+                if (nowBy[id]) this.tvCurrent = nowBy[id];
+                if (nextBy[id]) this.tvNext = nextBy[id];
+            }
+        },
+
+        selectTVChannel(index) {
+            if (this.tvChannels.length === 0) return;
+
+            this.tvChannelIndex = (index + this.tvChannels.length) % this.tvChannels.length;
+            const ch = this.tvChannels[this.tvChannelIndex];
+
+            this.tvCurrentChannel = {
+                ...ch,
+                name: this.getTVChannelName(ch, this.tvChannelIndex)
+            };
+
+            // Prefer computed schedule; fallback to first item / placeholder
+            if (this.tvNowByChannel[ch.id]) {
+                this.tvCurrent = this.tvNowByChannel[ch.id];
+                this.tvNext = this.tvNextByChannel[ch.id] || null;
+            } else if (ch.items && ch.items.length > 0) {
+                this.tvCurrent = ch.items[0];
+                this.tvNext = ch.items.length > 1 ? ch.items[1] : null;
+            } else {
+                this.tvCurrent = {
+                    id: 'placeholder',
+                    title: 'No content available',
+                    thumbnail: '/static/img/default-cover.jpg',
+                    host: ch.name
+                };
+                this.tvNext = null;
+            }
+        },
         
         // Switch TV Channel
         switchTVChannel(direction) {
             if (this.tvChannels.length === 0) return;
-            
-            if (direction === 'next') {
-                this.tvChannelIndex = (this.tvChannelIndex + 1) % this.tvChannels.length;
-            } else if (direction === 'prev') {
-                this.tvChannelIndex = (this.tvChannelIndex - 1 + this.tvChannels.length) % this.tvChannels.length;
-            }
-            
-            const ch = this.tvChannels[this.tvChannelIndex];
-            const channelNames = {
-                'misc': 'Channel 01 — Misc',
-                'films': 'Channel 02 — Short Films',
-                'music-videos': 'Channel 03 — Music Videos',
-                'live-shows': 'Channel 04 — Live Shows'
-            };
-            
-            this.tvCurrentChannel = {
-                ...ch,
-                name: channelNames[ch.id] || `Channel ${String(this.tvChannelIndex + 1).padStart(2, '0')} — ${ch.name || 'Unknown'}`
-            };
-            
-            if (ch.items && ch.items.length > 0) {
-                const hour = new Date().getHours();
-                const itemIndex = hour % ch.items.length;
-                this.tvCurrent = ch.items[itemIndex];
-                this.tvNext = ch.items.length > itemIndex + 1 ? ch.items[itemIndex + 1] : ch.items[0];
-            }
+            const delta = direction === 'next' ? 1 : -1;
+            this.selectTVChannel(this.tvChannelIndex + delta);
         },
 
         // Hero navigation
@@ -2032,14 +1987,24 @@ function whatsNew() {
             }
         },
         
-        formatDate(dateString) {
+        formatDate(dateString, updateType) {
             if (!dateString) return '';
             try {
                 const date = new Date(dateString);
-                return date.toLocaleDateString(undefined, { 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric' 
+                const normalizedType = String(updateType || '').toLowerCase();
+
+                // For events, show only month + year (e.g. "JAN 2026" via CSS uppercase)
+                if (normalizedType === 'event' || normalizedType === 'events') {
+                    return date.toLocaleDateString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                    });
+                }
+
+                return date.toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
                 });
             } catch (e) {
                 return dateString;

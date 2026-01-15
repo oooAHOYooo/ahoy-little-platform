@@ -1,22 +1,79 @@
+################################################################################
+# Ahoy Indie Media — repo ignores
+################################################################################
+
+# Node / JS
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
 .venv/
 venv/
-.env
-*.env
-production.env
-cookies.txt
-data/users.json
-data/user_activity.json
-data/playlists.json
+ENV/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.egg-info/
 dist/
-dist-electron/
 build/
+
+# Flask / runtime data
+instance/
 flask_session/
-node_modules/
+
+# Env files (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+production.env
+*.env
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Electron / desktop builds
+dist-electron/
+out/
+release/
+*.map
+
+# Packaged app bundles / installers (build outputs)
+downloads/
+*.dmg
+*.exe
+*.msi
+*.AppImage
+*.app/
+
+# Android / Gradle
+android/.gradle/
+android/**/build/
+
+# Local artifacts / one-off files
+cookies.txt
+*.spec
+
+# Local/dev convenience scripts (keep if you want these tracked)
 start.py
 start.bat
 start_browser.sh
-templates/dashboard.html
-static/css/dashboard.css
-*.spec
+
+# Local data snapshots (ignore by default)
+data/*.json
