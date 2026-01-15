@@ -128,10 +128,11 @@
 {% block content %}
 {% set merch_items = (merch.get('items', []) if merch and merch.get is defined else []) %}
 
+<script type="application/json" id="merch-items-json">{{ merch_items|tojson }}</script>
+
 <div class="merch-shell"
   x-data="merchStore()"
-  x-init="init()"
-  data-items='{{ merch_items|tojson|e }}'>
+  x-init="init()">
   <div class="merch-hero">
     <h1>Merch</h1>
     <p>Support Ahoy with limited drops and essentials. Fast checkout, easy quantities.</p>
@@ -204,8 +205,9 @@ function merchStore() {
     items: [],
     init() {
       try {
-        const raw = this.$el?.dataset?.items || '[]';
-        const parsed = JSON.parse(raw);
+        const node = document.getElementById('merch-items-json');
+        const raw = (node && node.textContent) ? node.textContent : '[]';
+        const parsed = JSON.parse(raw || '[]');
         this.items = Array.isArray(parsed) ? parsed : [];
       } catch (_) {
         this.items = [];
