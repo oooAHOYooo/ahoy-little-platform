@@ -1,887 +1,130 @@
 {% extends "base.html" %}
 
-{% block title %}Admin - User Management{% endblock %}
+{% block title %}Admin - Orders & Stats{% endblock %}
 
 {% block content %}
-<div class="admin-layout" x-data="adminPage()" x-init="loadUsers()">
-    <!-- Sidebar -->
-    <aside class="admin-sidebar">
-        <div class="sidebar-title">Ahoy Admin</div>
-        <nav class="sidebar-nav">
-            <a href="#artist-mgmt" class="nav-item"><i class="fas fa-users"></i> Artist Management</a>
-            <a href="#boost-reporting" class="nav-item"><i class="fas fa-bolt"></i> Boost Reporting</a>
-            <a href="#content-uploads" class="nav-item"><i class="fas fa-upload"></i> Content Uploads</a>
-            <a href="#stripe-logs" class="nav-item"><i class="fas fa-credit-card"></i> Stripe Logs / Payments</a>
-            <a href="#system-status" class="nav-item"><i class="fas fa-server"></i> System Status</a>
-            <a href="#search" class="nav-item"><i class="fas fa-search"></i> Search</a>
-        </nav>
-    </aside>
+<div class="admin-ro" x-data="adminDashboard()" x-init="init()">
+  <div class="admin-ro-header">
+    <div>
+      <h1>Admin</h1>
+      <p class="muted">Read-only dashboard (orders + stats).</p>
+    </div>
+    <div class="admin-ro-actions">
+      <button class="btn btn-secondary" @click="refresh()">Refresh</button>
+    </div>
+  </div>
 
-    <!-- Main -->
-    <div class="admin-main">
-        <!-- Topbar -->
-        <div class="admin-topbar">
-            <div class="status">
-                <span class="status-dot ok"></span> All systems operational
-            </div>
-            <div class="topbar-actions">
-                <button class="btn btn-secondary" onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">
-                    <i class="fas fa-moon"></i> Theme
-                </button>
-            </div>
+  <div class="admin-ro-grid">
+    <div class="card glass">
+      <div class="card-header">Merch Orders</div>
+      <div class="card-body">
+        <div class="stat-lg" x-text="stats.orders.total || 0">0</div>
+        <div class="muted text-sm">
+          Pending <strong x-text="stats.orders.pending || 0">0</strong> •
+          Paid <strong x-text="stats.orders.paid || 0">0</strong> •
+          Fulfilled <strong x-text="stats.orders.fulfilled || 0">0</strong>
         </div>
+      </div>
+    </div>
+    <div class="card glass">
+      <div class="card-header">Users</div>
+      <div class="card-body">
+        <div class="stat-lg" x-text="stats.users.total || 0">0</div>
+        <div class="muted text-sm">Active (30d) <strong x-text="stats.users.active_30d || 0">0</strong></div>
+      </div>
+    </div>
+  </div>
 
-        <!-- Overview Cards -->
-        <div class="admin-stats card-grid">
-            <div class="card glass hover-raise">
-                <div class="card-header"><i class="fas fa-user"></i> Total Users</div>
-                <div class="card-body">
-                    <div class="stat-lg" x-text="totalUsers">0</div>
-                </div>
-            </div>
-            <div class="card glass hover-raise">
-                <div class="card-header"><i class="fas fa-signal"></i> Active Users</div>
-                <div class="card-body">
-                    <div class="stat-lg" x-text="activeUsers">0</div>
-                </div>
-            </div>
-            <div class="card glass hover-raise">
-                <div class="card-header"><i class="fas fa-bookmark"></i> Total Saves</div>
-                <div class="card-body">
-                    <div class="stat-lg" x-text="totalSaves">0</div>
-                </div>
-            </div>
-            <div class="card glass hover-raise">
-                <div class="card-header"><i class="fas fa-bolt"></i> Boost Analytics</div>
-                <div class="card-body muted">Coming soon</div>
-            </div>
-        </div>
-
-        <div class="admin-content">
-        <div class="users-section">
-            <div class="section-header">
-                <h2 id="artist-mgmt">Users</h2>
-                <div class="search-box">
-                    <input type="text" x-model="searchQuery"
-                        placeholder="Search users..."
-                        @input="filterUsers()" class="search-input">
-                </div>
-            </div>
-
-            <div class="users-table glass card">
-                <div class="table-header">
-                    <div class="col-username">Username</div>
-                    <div class="col-email">Email</div>
-                    <div class="col-created">Created</div>
-                    <div class="col-last-login">Last Login</div>
-                    <div class="col-activity">Activity</div>
-                    <div class="col-actions">Actions</div>
-                </div>
-
-                <div class="table-body">
-                    <template x-for="user in filteredUsers"
-                        :key="user.username">
-                        <div class="table-row">
-                            <div class="col-username">
-                                <strong x-text="user.username"></strong>
-                                <div class="display-name"
-                                    x-text="user.display_name"></div>
-                            </div>
-                            <div class="col-email" x-text="user.email"></div>
-                            <div class="col-created"
-                                x-text="formatDate(user.created_at)"></div>
-                            <div class="col-last-login"
-                                x-text="formatDate(user.last_login)"></div>
-                            <div class="col-activity">
-                                <div class="activity-stats">
-                                    <span>Saves: <strong
-                                            x-text="user.activity.total_saves || 0"></strong></span>
-                                    <span>Plays: <strong
-                                            x-text="user.activity.total_plays || 0"></strong></span>
-                                </div>
-                            </div>
-                            <div class="col-actions">
-                                <button @click="resetPassword(user.username)"
-                                    class="btn btn-sm btn-warning">Reset
-                                    Password</button>
-                                <button @click="deleteUser(user.username)"
-                                    class="btn btn-sm btn-danger"
-                                    :disabled="user.username === 'admin'">Delete</button>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </div>
-
-        <!-- Feedback Section -->
-        <div class="feedback-section">
-            <div class="section-header">
-                <h2 id="search">User Feedback</h2>
-                <button @click="loadFeedback()"
-                    class="btn btn-sm btn-primary">Refresh</button>
-            </div>
-
-            <div class="feedback-stats card-grid">
-                <div class="card glass"><div class="card-header">Total Feedback</div><div class="card-body"><div class="stat-lg" x-text="feedbackStats.total">0</div></div></div>
-                <div class="card glass"><div class="card-header">New</div><div class="card-body"><div class="stat-lg" x-text="feedbackStats.new">0</div></div></div>
-                <div class="card glass"><div class="card-header">Avg Rating</div><div class="card-body"><div class="stat-lg" x-text="feedbackStats.avgRating">0</div></div></div>
-            </div>
-
-            <div class="feedback-list">
-                <template x-for="feedback in feedbackList" :key="feedback.id">
-                    <div class="feedback-item glass card"
-                        :class="'status-' + feedback.status">
-                        <div class="feedback-header">
-                            <div class="feedback-meta">
-                                <strong
-                                    x-text="feedback.subject || 'No Subject'"></strong>
-                                <span class="feedback-type"
-                                    x-text="feedback.feedback_type"></span>
-                                <span class="feedback-rating">
-                                    <template x-for="i in 5" :key="i">
-                                        <i class="fas fa-star"
-                                            :class="{'active': i <= feedback.rating}"></i>
-                                    </template>
-                                </span>
-                            </div>
-                            <div class="feedback-actions">
-                                <select
-                                    @change="updateFeedbackStatus(feedback.id, $event.target.value)"
-                                    :value="feedback.status"
-                                    class="status-select">
-                                    <option value="new">New</option>
-                                    <option value="reviewed">Reviewed</option>
-                                    <option value="in_progress">In
-                                        Progress</option>
-                                    <option value="resolved">Resolved</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="feedback-content">
-                            <p x-text="feedback.message"></p>
-                            <div x-show="feedback.suggestions"
-                                class="feedback-details">
-                                <strong>Suggestions:</strong>
-                                <p x-text="feedback.suggestions"></p>
-                            </div>
-                            <div x-show="feedback.bugs"
-                                class="feedback-details">
-                                <strong>Bug Report:</strong>
-                                <p x-text="feedback.bugs"></p>
-                            </div>
-                            <div x-show="feedback.feature_requests"
-                                class="feedback-details">
-                                <strong>Feature Request:</strong>
-                                <p x-text="feedback.feature_requests"></p>
-                            </div>
-                        </div>
-                        <div class="feedback-footer">
-                            <div class="feedback-info">
-                                <span x-text="feedback.username"></span>
-                                <span
-                                    x-text="formatDate(feedback.timestamp)"></span>
-                                <span x-show="feedback.contact_email"
-                                    x-text="feedback.contact_email"></span>
-                            </div>
-                            <div class="feedback-ratings">
-                                <span>UI: <strong
-                                        x-text="feedback.ui_rating"></strong></span>
-                                <span>Perf: <strong
-                                        x-text="feedback.performance_rating"></strong></span>
-                                <span>Content: <strong
-                                        x-text="feedback.content_rating"></strong></span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </div>
-        </div>
-
-        <!-- Pro Admin Panels -->
-        <div class="card-grid" style="margin-top: 16px;">
-            <div id="boost-reporting" class="card glass hover-raise">
-                <div class="card-header"><i class="fas fa-bolt"></i> Boost Reporting</div>
-                <div class="card-body muted">Charts and metrics coming soon.</div>
-            </div>
-            <div id="content-uploads" class="card glass hover-raise">
-                <div class="card-header"><i class="fas fa-upload"></i> Content Uploads</div>
-                <div class="card-body muted">Upload queue and status will appear here.</div>
-            </div>
-            <div id="stripe-logs" class="card glass hover-raise">
-                <div class="card-header"><i class="fas fa-credit-card"></i> Stripe Logs / Payments</div>
-                <div class="card-body muted">Recent payment events placeholder.</div>
-            </div>
-            <div id="system-status" class="card glass hover-raise">
-                <div class="card-header"><i class="fas fa-server"></i> System Status</div>
-                <div class="card-body muted">All services healthy.</div>
-            </div>
-            <div class="card glass hover-raise">
-                <div class="card-header"><i class="fas fa-chart-area"></i> Boost Analytics</div>
-                <div class="card-body muted">Coming soon</div>
-            </div>
-            <div class="card glass hover-raise">
-                <div class="card-header"><i class="fas fa-hand-holding-heart"></i> Recent Support Activity</div>
-                <div class="card-body muted">Latest boosts and contributions will appear here.</div>
-            </div>
-            <div class="card glass hover-raise">
-                <div class="card-header"><i class="fas fa-tachometer-alt"></i> Creator Output Velocity</div>
-                <div class="card-body muted">Content cadence metrics placeholder.</div>
-            </div>
-        </div>
+  <div class="admin-ro-section">
+    <div class="admin-ro-section-head">
+      <h2>Recent Orders</h2>
+      <div class="muted text-sm" x-show="orders.length">Showing <span x-text="orders.length"></span></div>
     </div>
 
-    <!-- Reset Password Modal -->
-    <div x-show="showResetModal" class="modal-overlay"
-        @click="closeResetModal()">
-        <div class="modal-content" @click.stop>
-            <div class="modal-header">
-                <h3>Reset Password</h3>
-                <button @click="closeResetModal()"
-                    class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Reset password for user: <strong
-                        x-text="selectedUser?.username"></strong></p>
-                <div class="form-group">
-                    <label for="newPassword">New Password:</label>
-                    <input type="password" id="newPassword"
-                        x-model="newPassword"
-                        class="form-input" placeholder="Enter new password">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button @click="closeResetModal()"
-                    class="btn btn-secondary">Cancel</button>
-                <button @click="confirmResetPassword()"
-                    class="btn btn-primary">Reset Password</button>
-            </div>
-        </div>
+    <div class="admin-ro-table-wrap glass">
+      <table class="admin-ro-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>When</th>
+            <th>Status</th>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Stripe</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="o in orders" :key="o.id">
+            <tr>
+              <td x-text="o.id"></td>
+              <td class="muted" x-text="formatDate(o.created_at)"></td>
+              <td><span class="pill" :class="'st-' + (o.status || 'pending')" x-text="(o.status || 'pending')"></span></td>
+              <td x-text="o.item_id || ''"></td>
+              <td x-text="o.qty || 1"></td>
+              <td x-text="formatMoney(o.total)"></td>
+              <td class="muted" x-text="o.stripe_id || ''"></td>
+            </tr>
+          </template>
+          <tr x-show="!orders.length">
+            <td colspan="7" class="muted" style="padding:14px;">No orders yet.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-
-    <!-- Delete User Modal -->
-    <div x-show="showDeleteModal" class="modal-overlay"
-        @click="closeDeleteModal()">
-        <div class="modal-content" @click.stop>
-            <div class="modal-header">
-                <h3>Delete User</h3>
-                <button @click="closeDeleteModal()"
-                    class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete user: <strong
-                        x-text="selectedUser?.username"></strong>?</p>
-                <p class="warning-text">This action cannot be undone!</p>
-            </div>
-            <div class="modal-footer">
-                <button @click="closeDeleteModal()"
-                    class="btn btn-secondary">Cancel</button>
-                <button @click="confirmDeleteUser()"
-                    class="btn btn-danger">Delete User</button>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>
 
 <script>
-function adminPage() {
-    return {
-        users: [],
-        filteredUsers: [],
-        searchQuery: '',
-        totalUsers: 0,
-        activeUsers: 0,
-        totalSaves: 0,
-        showResetModal: false,
-        showDeleteModal: false,
-        selectedUser: null,
-        newPassword: '',
-        feedbackList: [],
-        feedbackStats: {
-            total: 0,
-            new: 0,
-            avgRating: 0
-        },
-
-        async loadUsers() {
-            try {
-                const response = await fetch('/api/admin/users');
-                if (response.ok) {
-                    const data = await response.json();
-                    this.users = data.users;
-                    this.filteredUsers = data.users;
-                    this.calculateStats();
-                } else {
-                    console.error('Failed to load users');
-                }
-            } catch (error) {
-                console.error('Error loading users:', error);
-            }
-        },
-
-        calculateStats() {
-            this.totalUsers = this.users.length;
-            this.activeUsers = this.users.filter(user => {
-                const lastLogin = new Date(user.last_login);
-                const thirtyDaysAgo = new Date();
-                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                return lastLogin > thirtyDaysAgo;
-            }).length;
-            this.totalSaves = this.users.reduce((sum, user) => sum + (user.activity.total_saves || 0), 0);
-        },
-
-        filterUsers() {
-            if (!this.searchQuery) {
-                this.filteredUsers = this.users;
-                return;
-            }
-            
-            const query = this.searchQuery.toLowerCase();
-            this.filteredUsers = this.users.filter(user => 
-                user.username.toLowerCase().includes(query) ||
-                user.email.toLowerCase().includes(query) ||
-                user.display_name.toLowerCase().includes(query)
-            );
-        },
-
-        formatDate(dateString) {
-            if (!dateString) return 'Never';
-            return new Date(dateString).toLocaleDateString();
-        },
-
-        resetPassword(username) {
-            this.selectedUser = this.users.find(u => u.username === username);
-            this.newPassword = '';
-            this.showResetModal = true;
-        },
-
-        closeResetModal() {
-            this.showResetModal = false;
-            this.selectedUser = null;
-            this.newPassword = '';
-        },
-
-        async confirmResetPassword() {
-            if (!this.newPassword) {
-                alert('Please enter a new password');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/admin/users/${this.selectedUser.username}/reset-password`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ password: this.newPassword })
-                });
-
-                if (response.ok) {
-                    alert('Password reset successfully');
-                    this.closeResetModal();
-                } else {
-                    const error = await response.json();
-                    alert('Error: ' + error.error);
-                }
-            } catch (error) {
-                console.error('Error resetting password:', error);
-                alert('Failed to reset password');
-            }
-        },
-
-        deleteUser(username) {
-            this.selectedUser = this.users.find(u => u.username === username);
-            this.showDeleteModal = true;
-        },
-
-        closeDeleteModal() {
-            this.showDeleteModal = false;
-            this.selectedUser = null;
-        },
-
-        async confirmDeleteUser() {
-            try {
-                const response = await fetch(`/api/admin/users/${this.selectedUser.username}`, {
-                    method: 'DELETE'
-                });
-
-                if (response.ok) {
-                    alert('User deleted successfully');
-                    this.loadUsers(); // Reload users
-                    this.closeDeleteModal();
-                } else {
-                    const error = await response.json();
-                    alert('Error: ' + error.error);
-                }
-            } catch (error) {
-                console.error('Error deleting user:', error);
-                alert('Failed to delete user');
-            }
-        },
-
-        async loadFeedback() {
-            try {
-                const response = await fetch('/api/feedback');
-                if (response.ok) {
-                    const data = await response.json();
-                    this.feedbackList = data.feedback;
-                    this.calculateFeedbackStats();
-                } else {
-                    console.error('Failed to load feedback');
-                }
-            } catch (error) {
-                console.error('Error loading feedback:', error);
-            }
-        },
-
-        calculateFeedbackStats() {
-            this.feedbackStats.total = this.feedbackList.length;
-            this.feedbackStats.new = this.feedbackList.filter(f => f.status === 'new').length;
-            
-            const ratings = this.feedbackList.filter(f => f.rating > 0).map(f => f.rating);
-            if (ratings.length > 0) {
-                this.feedbackStats.avgRating = (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1);
-            } else {
-                this.feedbackStats.avgRating = 0;
-            }
-        },
-
-        async updateFeedbackStatus(feedbackId, newStatus) {
-            try {
-                const response = await fetch(`/api/feedback/${feedbackId}/status`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ status: newStatus })
-                });
-
-                if (response.ok) {
-                    // Update local feedback list
-                    const feedback = this.feedbackList.find(f => f.id === feedbackId);
-                    if (feedback) {
-                        feedback.status = newStatus;
-                        this.calculateFeedbackStats();
-                    }
-                } else {
-                    const error = await response.json();
-                    alert('Error: ' + error.error);
-                }
-            } catch (error) {
-                console.error('Error updating feedback status:', error);
-                alert('Failed to update feedback status');
-            }
-        }
+function adminDashboard() {
+  return {
+    stats: { users: {}, orders: {} },
+    orders: [],
+    async init() {
+      await this.refresh();
+    },
+    async refresh() {
+      try {
+        const [s, o] = await Promise.all([
+          fetch('/api/admin/stats'),
+          fetch('/api/admin/orders?limit=200')
+        ]);
+        if (s.ok) this.stats = await s.json();
+        if (o.ok) this.orders = (await o.json()).orders || [];
+      } catch (e) {
+        console.error('Failed to load admin data', e);
+      }
+    },
+    formatDate(iso) {
+      if (!iso) return '';
+      try { return new Date(iso).toLocaleString(); } catch (_) { return iso; }
+    },
+    formatMoney(v) {
+      const n = Number(v || 0);
+      if (!isFinite(n)) return '—';
+      return '$' + n.toFixed(2);
     }
+  };
 }
 </script>
 
 <style>
-.admin-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: var(--spacing-xl);
-}
-
-.admin-header {
-    text-align: center;
-    margin-bottom: var(--spacing-xl);
-}
-
-.admin-header h1 {
-    color: var(--primary-color);
-    margin-bottom: var(--spacing-sm);
-}
-
-.admin-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-xl);
-}
-
-.stat-card {
-    background: var(--background-light);
-    padding: var(--spacing-lg);
-    border-radius: var(--border-radius);
-    text-align: center;
-    border: 1px solid var(--border-color);
-}
-
-.stat-card h3 {
-    margin: 0 0 var(--spacing-sm) 0;
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-}
-
-.stat-number {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--primary-color);
-}
-
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-lg);
-}
-
-.search-box {
-    position: relative;
-}
-
-.search-input {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-sm);
-    width: 250px;
-}
-
-.users-table {
-    background: var(--background-light);
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-}
-
-.table-header {
-    display: grid;
-    grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
-    background: var(--background-dark);
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.table-body {
-    max-height: 600px;
-    overflow-y: auto;
-}
-
-.table-row {
-    display: grid;
-    grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
-    border-bottom: 1px solid var(--border-color);
-    align-items: center;
-}
-
-.table-row:hover {
-    background: var(--background-hover);
-}
-
-.col-username .display-name {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    margin-top: 2px;
-}
-
-.activity-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    font-size: var(--font-size-xs);
-}
-
-.activity-stats span {
-    color: var(--text-secondary);
-}
-
-.btn {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border: none;
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-xs);
-    cursor: pointer;
-    margin-right: var(--spacing-xs);
-}
-
-.btn-sm {
-    padding: 4px 8px;
-    font-size: 11px;
-}
-
-.btn-warning {
-    background: #f59e0b;
-    color: white;
-}
-
-.btn-danger {
-    background: #ef4444;
-    color: white;
-}
-
-.btn-secondary {
-    background: var(--text-secondary);
-    color: white;
-}
-
-.btn-primary {
-    background: var(--primary-color);
-    color: white;
-}
-
-.btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background: var(--background-light);
-    border-radius: var(--border-radius);
-    max-width: 500px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.modal-header h3 {
-    margin: 0;
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--text-secondary);
-}
-
-.modal-body {
-    padding: var(--spacing-lg);
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-lg);
-    border-top: 1px solid var(--border-color);
-}
-
-.form-group {
-    margin-bottom: var(--spacing-md);
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: var(--spacing-xs);
-    font-weight: 500;
-}
-
-.form-input {
-    width: 100%;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-sm);
-}
-
-.warning-text {
-    color: #ef4444;
-    font-weight: 500;
-    margin-top: var(--spacing-sm);
-}
-
-/* Feedback Management Styles */
-.feedback-section {
-    margin-top: var(--spacing-xl);
-}
-
-.feedback-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
-}
-
-.feedback-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.feedback-item {
-    background: var(--background-light);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    transition: all 0.2s ease;
-}
-
-.feedback-item.status-new {
-    border-left: 4px solid #3b82f6;
-}
-
-.feedback-item.status-reviewed {
-    border-left: 4px solid #f59e0b;
-}
-
-.feedback-item.status-in_progress {
-    border-left: 4px solid #10b981;
-}
-
-.feedback-item.status-resolved {
-    border-left: 4px solid #6b7280;
-}
-
-.feedback-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--spacing-md);
-}
-
-.feedback-meta {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-}
-
-.feedback-meta strong {
-    font-size: var(--font-size-md);
-    color: var(--text-primary);
-}
-
-.feedback-type {
-    background: var(--primary-color);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: var(--font-size-xs);
-    text-transform: capitalize;
-    width: fit-content;
-}
-
-.feedback-rating {
-    display: flex;
-    gap: 2px;
-}
-
-.feedback-rating i {
-    color: var(--border-color);
-    font-size: var(--font-size-sm);
-}
-
-.feedback-rating i.active {
-    color: #fbbf24;
-}
-
-.feedback-actions {
-    display: flex;
-    align-items: center;
-}
-
-.status-select {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-xs);
-    background: var(--background-light);
-}
-
-.feedback-content {
-    margin-bottom: var(--spacing-md);
-}
-
-.feedback-content p {
-    margin: 0 0 var(--spacing-sm) 0;
-    line-height: 1.6;
-}
-
-.feedback-details {
-    margin-top: var(--spacing-md);
-    padding: var(--spacing-sm);
-    background: var(--background-hover);
-    border-radius: var(--border-radius);
-}
-
-.feedback-details strong {
-    display: block;
-    margin-bottom: var(--spacing-xs);
-    color: var(--primary-color);
-}
-
-.feedback-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: var(--spacing-sm);
-    border-top: 1px solid var(--border-color);
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-}
-
-.feedback-info {
-    display: flex;
-    gap: var(--spacing-md);
-}
-
-.feedback-ratings {
-    display: flex;
-    gap: var(--spacing-sm);
-}
-
-.feedback-ratings span {
-    background: var(--background-hover);
-    padding: 2px 6px;
-    border-radius: 4px;
-}
-
-@media (max-width: 768px) {
-    .table-header,
-    .table-row {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-xs);
-    }
-    
-    .table-header > div,
-    .table-row > div {
-        padding: var(--spacing-xs) 0;
-    }
-    
-    .col-actions {
-        display: flex;
-        gap: var(--spacing-xs);
-    }
-    
-    .feedback-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-sm);
-    }
-    
-    .feedback-footer {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-sm);
-    }
-}
+  .admin-ro { max-width: 1100px; margin: 0 auto; padding: 18px 18px 40px; }
+  .admin-ro-header { display:flex; align-items:flex-end; justify-content:space-between; gap: 12px; margin-bottom: 14px; }
+  .admin-ro-header h1 { margin: 0; }
+  .admin-ro-header .muted { margin: 4px 0 0; color: rgba(255,255,255,0.65); }
+  .admin-ro-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+  @media (max-width: 768px){ .admin-ro-grid{ grid-template-columns: 1fr; } }
+  .admin-ro-section { margin-top: 18px; }
+  .admin-ro-section-head { display:flex; align-items:baseline; justify-content:space-between; gap: 12px; margin: 8px 2px; }
+  .admin-ro-table-wrap { border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; }
+  .admin-ro-table { width:100%; border-collapse: collapse; }
+  .admin-ro-table th, .admin-ro-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align:left; font-size: 12px; }
+  .admin-ro-table th { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,0.65); }
+  .admin-ro-table tr:last-child td { border-bottom: 0; }
+  .pill { display:inline-flex; align-items:center; padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); text-transform: uppercase; letter-spacing:.10em; font-size:10px; }
+  .pill.st-paid { border-color: rgba(16,185,129,0.35); background: rgba(16,185,129,0.10); }
+  .pill.st-pending { border-color: rgba(245,158,11,0.30); background: rgba(245,158,11,0.10); }
+  .pill.st-fulfilled { border-color: rgba(59,130,246,0.28); background: rgba(59,130,246,0.10); }
 </style>
 {% endblock %}

@@ -2,156 +2,250 @@
 
 {% block title %}Merch Store - Ahoy Indie Media{% endblock %}
 
+{% block extra_css %}
+<style>
+  .merch-shell { max-width: 1100px; margin: 0 auto; }
+  .merch-hero {
+    border-radius: 18px;
+    padding: 18px 16px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 14px;
+  }
+  .merch-hero h1 { margin: 0 0 6px 0; font-size: 28px; }
+  .merch-hero p { margin: 0; color: rgba(255,255,255,0.7); }
+  .merch-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin: 12px 2px 14px;
+  }
+  .merch-search {
+    flex: 1 1 260px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+  }
+  .merch-search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: rgba(255,255,255,0.92);
+  }
+  .merch-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.85);
+  }
+  .merch-pill select {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    outline: 0;
+  }
+  .merch-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  @media (max-width: 980px) { .merch-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px) { .merch-grid { grid-template-columns: 1fr; } }
+
+  .merch-card {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    overflow: hidden;
+    transition: transform .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .merch-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.14); background: rgba(255,255,255,0.045); }
+  .merch-media { aspect-ratio: 4/3; background: rgba(0,0,0,0.35); }
+  .merch-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .merch-body { padding: 12px; }
+  .merch-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .merch-title { font-weight: 800; font-size: 14px; color: rgba(255,255,255,0.92); margin: 0; }
+  .merch-price { text-align: right; }
+  .merch-price .usd { font-weight: 900; }
+  .merch-price .sub { font-size: 11px; color: rgba(255,255,255,0.55); }
+  .merch-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .merch-chip {
+    font-size: 11px;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    padding: 5px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.8);
+  }
+  .merch-actions { display: flex; gap: 10px; align-items: center; margin-top: 12px; }
+  .qty {
+    width: 78px;
+    padding: 10px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.25);
+    color: rgba(255,255,255,0.92);
+  }
+  .merch-cta {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.92);
+    text-decoration: none;
+    font-weight: 800;
+  }
+  .merch-cta:hover { background: rgba(255,255,255,0.1); }
+  .merch-empty {
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    padding: 16px;
+    color: rgba(255,255,255,0.75);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-6xl mx-auto">
-        <h1 class="text-4xl font-bold mb-2 text-white">Merch Store</h1>
-        <p class="text-white/70 mb-8">
-            Support Ahoy and unlock extras. Checkout uses Stripe (online) — Square can stay for in-person merch later.
-        </p>
-        
-        {% set subs = (products.subscriptions if products and products.subscriptions is defined else []) %}
-        {% set themes = (products.themes if products and products.themes is defined else []) %}
-        {% set merch_items = (merch.items if merch and merch.items is defined else []) %}
+{% set merch_items = (merch.get('items', []) if merch and merch.get is defined else []) %}
 
-        <section class="mb-10">
-            <div class="flex items-end justify-between gap-4 mb-4">
-                <h2 class="text-2xl font-semibold text-white">Membership</h2>
-                <a class="text-sm text-white/70 hover:text-white underline underline-offset-4" href="/account">Manage</a>
-            </div>
+<div class="merch-shell"
+  x-data="merchStore()"
+  x-init="init()"
+  data-items='{{ merch_items|tojson|e }}'>
+  <div class="merch-hero">
+    <h1>Merch</h1>
+    <p>Support Ahoy with limited drops and essentials. Fast checkout, easy quantities.</p>
+  </div>
 
-            {% if subs and subs|length %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for p in subs %}
-                <div class="bg-gray-900/70 rounded-2xl p-6 border border-white/10 text-white shadow-xl">
-                    <div class="flex items-start justify-between gap-4">
-                        <div>
-                            <h3 class="text-xl font-semibold">{{ p.name or 'Subscription' }}</h3>
-                            <p class="text-white/60 text-sm mt-1">Billed: {{ p.billing or 'one-time' }}</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-2xl font-bold">${{ '%.2f'|format(p.price_usd|float) if p.price_usd is not none else '—' }}</div>
-                            <div class="text-xs text-white/60">USD</div>
-                        </div>
-                    </div>
-
-                    {% if p.features %}
-                    <ul class="mt-4 space-y-2 text-sm text-white/80">
-                        {% for f in p.features[:6] %}
-                        <li class="flex gap-2">
-                            <span class="text-white/50">•</span>
-                            <span>{{ f }}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
-
-                    <div class="mt-6">
-                        <a
-                            class="inline-flex items-center justify-center w-full rounded-xl px-4 py-3 bg-white/10 hover:bg-white/15 border border-white/15 transition"
-                            href="/checkout?type=subscription&item_id={{ p.id | urlencode }}&qty=1&amount={{ p.price_usd }}&title={{ (p.name or 'Subscription') | urlencode }}">
-                            Continue to checkout
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="bg-gray-900/50 border border-white/10 rounded-2xl p-6 text-white/70">
-                No membership products available yet.
-            </div>
-            {% endif %}
-        </section>
-
-        <section class="mb-10">
-            <div class="flex items-end justify-between gap-4 mb-4">
-                <h2 class="text-2xl font-semibold text-white">Merch</h2>
-                <span class="text-xs text-white/50">
-                    {% if merch and merch.generated_at %}Updated {{ merch.generated_at }}{% endif %}
-                </span>
-            </div>
-
-            {% if merch_items and merch_items|length %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for m in merch_items %}
-                <div class="bg-gray-900/70 rounded-2xl border border-white/10 text-white shadow-xl overflow-hidden">
-                    <div class="aspect-[4/3] bg-black/40">
-                        <img
-                            src="{{ m.image_url }}"
-                            alt="{{ m.name or m.id }}"
-                            class="w-full h-full object-cover" />
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-start justify-between gap-3">
-                            <h3 class="text-lg font-semibold">{{ m.name or m.id }}</h3>
-                            <div class="text-right">
-                                <div class="text-lg font-bold">${{ '%.2f'|format(m.price_usd|float) if m.price_usd is not none else '—' }}</div>
-                                <div class="text-xs text-white/60">USD</div>
-                            </div>
-                        </div>
-                        <div class="mt-5">
-                            <a
-                                class="inline-flex items-center justify-center w-full rounded-xl px-4 py-3 bg-white/10 hover:bg-white/15 border border-white/15 transition"
-                                href="/checkout?type=merch&item_id={{ (m.id or '') | urlencode }}&qty=1&amount={{ m.price_usd }}&title={{ (m.name or m.id or 'Merch') | urlencode }}">
-                                Continue to checkout
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="bg-gray-900/50 border border-white/10 rounded-2xl p-6 text-white/70">
-                No merch items found yet. Add images to <code class="text-white/80">static/merch/images/</code> and run
-                <code class="text-white/80">python manifest.py merch</code> to generate <code class="text-white/80">data/merch.json</code>.
-            </div>
-            {% endif %}
-        </section>
-
-        <section>
-            <div class="flex items-end justify-between gap-4 mb-4">
-                <h2 class="text-2xl font-semibold text-white">Themes</h2>
-                <button
-                    class="text-sm text-white/70 hover:text-white underline underline-offset-4"
-                    onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">
-                    Quick picker
-                </button>
-            </div>
-
-            {% if themes and themes|length %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for t in themes %}
-                <div class="bg-gray-900/70 rounded-2xl p-6 border border-white/10 text-white shadow-xl">
-                    <h3 class="text-xl font-semibold">{{ t.name or 'Theme' }}</h3>
-                    {% if t.description %}
-                    <p class="text-white/70 mt-2 text-sm">{{ t.description }}</p>
-                    {% endif %}
-
-                    <div class="mt-4 flex items-center justify-between">
-                        <div class="text-lg font-semibold">
-                            ${{ '%.2f'|format(t.price_usd|float) if t.price_usd is not none else '—' }}
-                            <span class="text-xs text-white/60 font-normal">USD</span>
-                        </div>
-                        <span class="text-xs text-white/50">{{ t.id or '' }}</span>
-                    </div>
-
-                    <div class="mt-6">
-                        <a
-                            class="inline-flex items-center justify-center w-full rounded-xl px-4 py-3 bg-white/10 hover:bg-white/15 border border-white/15 transition"
-                            href="/checkout?type=theme&item_id={{ t.id | urlencode }}&qty=1&amount={{ t.price_usd }}&title={{ (t.name or 'Theme') | urlencode }}">
-                            Continue to checkout
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="bg-gray-900/50 border border-white/10 rounded-2xl p-6 text-white/70">
-                No themes available yet.
-            </div>
-            {% endif %}
-        </section>
+  <div class="merch-controls">
+    <div class="merch-search" role="search">
+      <i class="fas fa-search" aria-hidden="true"></i>
+      <input type="search" placeholder="Search merch…" x-model="q" aria-label="Search merch">
     </div>
+    <div class="merch-pill">
+      <span style="opacity:.7;font-size:12px;letter-spacing:.08em;text-transform:uppercase;">Sort</span>
+      <select x-model="sort" aria-label="Sort merch">
+        <option value="featured">Featured</option>
+        <option value="low">Price: Low</option>
+        <option value="high">Price: High</option>
+        <option value="az">Name: A–Z</option>
+      </select>
+    </div>
+  </div>
+
+  {% if merch_items and merch_items|length %}
+  <div class="merch-grid">
+    <template x-for="i in filtered()" :key="i.id">
+      <div class="merch-card">
+        <div class="merch-media">
+          <img :src="i.image_url" :alt="i.name || i.id" loading="lazy" decoding="async">
+        </div>
+        <div class="merch-body">
+          <div class="merch-top">
+            <h3 class="merch-title" x-text="i.name || i.id"></h3>
+            <div class="merch-price">
+              <div class="usd" x-text="(i.price_usd != null ? ('$' + (+i.price_usd).toFixed(2)) : '—')"></div>
+              <div class="sub">USD</div>
+            </div>
+          </div>
+
+          <div class="merch-chips">
+            <template x-for="c in chipsFor(i)" :key="c">
+              <span class="merch-chip" x-text="c"></span>
+            </template>
+          </div>
+
+          <div class="merch-actions">
+            <input class="qty" type="number" min="1" value="1"
+              :id="'qty_' + (i.id || '')"
+              aria-label="Quantity">
+            <a class="merch-cta" href="#" @click.prevent="checkout(i)">
+              <span>Checkout</span>
+              <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+  {% else %}
+  <div class="merch-empty">
+    No merch items found yet. Add images to <code>static/merch/images/</code> and run
+    <code>python manifest.py merch</code> to generate <code>data/merch.json</code>.
+  </div>
+  {% endif %}
 </div>
+
+<script>
+function merchStore() {
+  return {
+    q: '',
+    sort: 'featured',
+    items: [],
+    init() {
+      try {
+        const raw = this.$el?.dataset?.items || '[]';
+        const parsed = JSON.parse(raw);
+        this.items = Array.isArray(parsed) ? parsed : [];
+      } catch (_) {
+        this.items = [];
+      }
+    },
+    norm(s) { return String(s || '').toLowerCase(); },
+    isMerch(i) {
+      const k = this.norm(i && (i.kind || i.type || i.category));
+      return !['theme','themes','subscription','subscriptions','membership','memberships'].includes(k);
+    },
+    filtered() {
+      let out = Array.isArray(this.items) ? [...this.items] : [];
+      out = out.filter(i => this.isMerch(i));
+      const q = this.norm(this.q);
+      if (q) out = out.filter(i => this.norm(i.name || i.id).includes(q));
+      if (this.sort === 'low') out.sort((a,b)=>(+a.price_usd||0)-(+b.price_usd||0));
+      else if (this.sort === 'high') out.sort((a,b)=>(+b.price_usd||0)-(+a.price_usd||0));
+      else if (this.sort === 'az') out.sort((a,b)=>String(a.name||a.id||'').localeCompare(String(b.name||b.id||'')));
+      return out;
+    },
+    chipsFor(i) {
+      const name = this.norm(i.name || i.id);
+      const price = +i.price_usd || 0;
+      const chips = [];
+      if (name.includes('limited') || name.includes('drop')) chips.push('Limited Drop');
+      if (name.includes('bundle')) chips.push('Bundle');
+      if (price >= 50) chips.push('Collector');
+      else chips.push('Supporter');
+      return chips.slice(0, 2);
+    },
+    checkout(i) {
+      const id = encodeURIComponent(i.id || '');
+      const title = encodeURIComponent(i.name || i.id || 'Merch');
+      const amount = encodeURIComponent(i.price_usd ?? '');
+      const qtyEl = document.getElementById('qty_' + (i.id || ''));
+      const qty = encodeURIComponent((qtyEl && qtyEl.value) ? qtyEl.value : '1');
+      window.location.href = `/checkout?type=merch&item_id=${id}&qty=${qty}&amount=${amount}&title=${title}`;
+    },
+  };
+}
+</script>
 {% endblock %}
 

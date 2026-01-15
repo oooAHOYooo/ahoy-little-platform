@@ -6,8 +6,31 @@ import stripe
 from db import get_session
 from models import Tip
 from datetime import datetime
+from urllib import request as urlrequest
+from urllib.error import URLError, HTTPError
 
 bp = Blueprint("stripe_webhooks", __name__, url_prefix="/webhooks")
+
+def _notify_admin(event_type: str, payload: dict) -> None:
+    """
+    Best-effort admin notification.
+    Set ADMIN_NOTIFY_WEBHOOK to a Slack/Discord webhook URL to receive purchase alerts.
+    """
+    webhook = os.getenv("ADMIN_NOTIFY_WEBHOOK")
+    if not webhook:
+        return
+    try:
+        body = json.dumps({"event": event_type, **payload}).encode("utf-8")
+        req = urlrequest.Request(
+            webhook,
+            data=body,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        urlrequest.urlopen(req, timeout=5)  # nosec - user-provided webhook URL
+    except (URLError, HTTPError, Exception):
+        # Never fail the webhook handler because notifications failed.
+        return
 
 
 def _configure_stripe_from_config():
@@ -63,6 +86,17 @@ def handle_stripe_webhook():
                         if not p.stripe_id:
                             p.stripe_id = session_data.get("id")
                         db_session.commit()
+                        # Notify admins for non-tip purchases (merch, tickets, etc.)
+                        if str(p.type or "").strip() == "merch":
+                            _notify_admin("purchase.paid", {
+                                "purchase_id": p.id,
+                                "type": p.type,
+                                "item_id": p.item_id,
+                                "qty": p.qty,
+                                "amount": p.amount,
+                                "total": p.total,
+                                "stripe_session": session_data.get("id"),
+                            })
             except Exception:
                 # Non-fatal for webhook: still allow boost record to proceed if applicable
                 pass

@@ -54,10 +54,12 @@ def initialize_search_index():
         }
         
         search_index.reindex(data_sources)
-        print(f"✅ Search index initialized with {search_index.total_docs} documents")
+        # Avoid Unicode symbols here (Windows console can be cp1252).
+        print(f"Search index initialized with {search_index.total_docs} documents")
         
     except Exception as e:
-        print(f"❌ Error initializing search index: {e}")
+        # Avoid Unicode symbols here (Windows console can be cp1252).
+        print(f"Error initializing search index: {e}")
 
 def startup_logging(app):
     """Log startup configuration for operational visibility"""
@@ -107,6 +109,67 @@ def startup_logging(app):
                security_headers_enabled=security_headers_enabled,
                request_id=None)
 
+
+def _admin_session_required(fn):
+    """Admin guard for browser/session-based admin routes (Flask-Login)."""
+    from functools import wraps
+    from flask import request as _request, jsonify as _jsonify, redirect as _redirect, url_for as _url_for, flash as _flash
+
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        wants_html = 'text/html' in (_request.headers.get('Accept') or '')
+        if not getattr(current_user, "is_authenticated", False):
+            if wants_html:
+                _flash("Please log in as admin", "warning")
+                return _redirect(_url_for('auth_page'))
+            return _jsonify({"error": "forbidden"}), 403
+        if not getattr(current_user, "is_admin", False):
+            if wants_html:
+                _flash("Admin access required", "danger")
+                return _redirect(_url_for('home'))
+            return _jsonify({"error": "forbidden"}), 403
+        return fn(*args, **kwargs)
+
+    return wrapper
+
+
+def _bootstrap_admin_user_from_env():
+    """
+    Create/update an admin user from env without committing secrets.
+
+    Set:
+      - AHOY_ADMIN_EMAIL
+      - AHOY_ADMIN_PASSWORD
+    """
+    email = (os.getenv("AHOY_ADMIN_EMAIL") or "").strip().lower()
+    password = os.getenv("AHOY_ADMIN_PASSWORD") or ""
+    if not email or not password:
+        return
+    try:
+        from db import get_session
+        from models import User
+        from utils.security import hash_password
+
+        with get_session() as s:
+            u = s.query(User).filter(User.email == email).first()
+            if not u:
+                u = User(
+                    email=email,
+                    password_hash=hash_password(password),
+                    is_admin=True,
+                    display_name=email.split("@")[0],
+                )
+                s.add(u)
+            else:
+                u.password_hash = hash_password(password)
+                u.is_admin = True
+                if not u.display_name:
+                    u.display_name = email.split("@")[0]
+            s.commit()
+    except Exception:
+        # Never crash app startup if bootstrap fails.
+        return
+
 def create_app():
     app = Flask(__name__)
 
@@ -132,7 +195,7 @@ def create_app():
     if FlaskSession is not None:
         FlaskSession(app)
     else:
-        print("⚠️  Flask-Session not available; using client-side cookies only. Activate venv or install Flask-Session.")
+        print("WARN: Flask noted Flask-Session not available; using client-side cookies only. Activate venv or install Flask-Session.")
     bcrypt.init_app(app)
     login_manager.init_app(app)
     limiter.init_app(app)
@@ -180,6 +243,7 @@ def create_app():
     # Initialize search index
     with app.app_context():
         initialize_search_index()
+        _bootstrap_admin_user_from_env()
 
     # Register Click CLI commands
     # Removed: gamify CLI commands (feature removed)
@@ -262,9 +326,9 @@ def create_app():
     try:
         from flask_compress import Compress
         Compress(app)
-        print("✅ Compression enabled")
+        print("Compression enabled")
     except ImportError:
-        print("⚠️  Flask-Compress not available, compression disabled")
+        print("WARN: Flask-Compress not available, compression disabled")
 
     # Downloads routes
     DOWNLOADS_DIR = Path("downloads")
@@ -571,6 +635,41 @@ def checkout_page():
     except Exception:
         total = None
 
+    # For merch, ignore client-provided amount/title and look up from merch catalog.
+    if kind == "merch" and item_id:
+        try:
+            from storage import read_json
+            merch_catalog = read_json("data/merch.json", {"items": []}) or {}
+            items = merch_catalog.get("items") if isinstance(merch_catalog, dict) else []
+            found = None
+            if isinstance(items, list):
+                for it in items:
+                    if isinstance(it, dict) and str(it.get("id") or "") == str(item_id):
+                        found = it
+                        break
+            if found:
+                # Respect item availability flags if present.
+                if found.get("available") is False:
+                    return render_template('checkout.html',
+                                           error="This item is not available.",
+                                           kind=kind,
+                                           item_id=item_id,
+                                           qty=qty,
+                                           csrf_token=generate_csrf_token()), 400
+                unit = Decimal(str(found.get("price_usd") or "0")).quantize(Decimal("0.01"))
+                if unit <= 0:
+                    return render_template('checkout.html',
+                                           error="Invalid item price.",
+                                           kind=kind,
+                                           item_id=item_id,
+                                           qty=qty,
+                                           csrf_token=generate_csrf_token()), 400
+                amount = str(unit)  # unit price
+                title = str(found.get("name") or "Merch")[:120]
+                total = (unit * Decimal(str(max(1, qty)))).quantize(Decimal("0.01"))
+        except Exception:
+            pass
+
     return render_template(
         'checkout.html',
         kind=kind,
@@ -653,6 +752,47 @@ def checkout_process():
         total = float(form.get('total') or form.get('computed_total') or amount)
     except Exception:
         total = amount
+
+    # Harden merch checkout: price/title must come from server-side merch catalog.
+    if kind == "merch":
+        try:
+            from storage import read_json
+            merch_catalog = read_json("data/merch.json", {"items": []}) or {}
+            items = merch_catalog.get("items") if isinstance(merch_catalog, dict) else []
+            found = None
+            if isinstance(items, list) and item_id:
+                for it in items:
+                    if isinstance(it, dict) and str(it.get("id") or "") == str(item_id):
+                        found = it
+                        break
+            if not found:
+                return render_template("checkout.html",
+                                       error="Invalid merch item.",
+                                       csrf_token=generate_csrf_token(),
+                                       kind=kind,
+                                       item_id=item_id or "",
+                                       qty=max(1, qty)), 400
+            if found.get("available") is False:
+                return render_template("checkout.html",
+                                       error="This item is not available.",
+                                       csrf_token=generate_csrf_token(),
+                                       kind=kind,
+                                       item_id=item_id or "",
+                                       qty=max(1, qty)), 400
+
+            qty = int(max(1, qty))
+            unit = float(found.get("price_usd") or 0)
+            if unit <= 0:
+                return render_template("checkout.html",
+                                       error="Invalid item price.",
+                                       csrf_token=generate_csrf_token(),
+                                       kind=kind,
+                                       item_id=item_id or "",
+                                       qty=qty), 400
+            amount = float(unit)              # unit price (authoritative)
+            total = float(unit * qty)         # total (authoritative)
+        except Exception:
+            pass
 
     user_id = None
     try:
@@ -767,7 +907,20 @@ def checkout_process():
             unit_amount_cents = int(max(0, float(amount or 0)) * 100)
             if unit_amount_cents <= 0:
                 raise ValueError("Invalid amount")
+            # For merch, always derive title from the merch catalog item when possible.
             safe_title = (request.form.get("title") or "Ahoy Purchase").strip()[:120]
+            if kind == "merch" and item_id:
+                try:
+                    from storage import read_json
+                    merch_catalog = read_json("data/merch.json", {"items": []}) or {}
+                    items = merch_catalog.get("items") if isinstance(merch_catalog, dict) else []
+                    if isinstance(items, list):
+                        for it in items:
+                            if isinstance(it, dict) and str(it.get("id") or "") == str(item_id):
+                                safe_title = str(it.get("name") or safe_title).strip()[:120]
+                                break
+                except Exception:
+                    pass
             line_items = [
                 {
                     "price_data": {
@@ -866,9 +1019,9 @@ try:
     ]
     app.config['COMPRESS_LEVEL'] = 6  # Good balance of speed vs compression
     app.config['COMPRESS_MIN_SIZE'] = 500  # Only compress files > 500 bytes
-    print("✅ Compression enabled")
+    print("Compression enabled")
 except ImportError:
-    print("⚠️  Flask-Compress not available, compression disabled")
+    print("WARN: Flask-Compress not available, compression disabled")
 
 # Cache configuration
 CACHE_TIMEOUT = 600  # 10 minutes (increased for better performance)
@@ -1218,9 +1371,8 @@ def performances():
 def merch():
     """Merch store page"""
     from storage import read_json
-    products = read_json('data/products.json', {})
     merch_catalog = read_json('data/merch.json', {"items": []})
-    response = make_response(render_template('merch.html', products=products, merch=merch_catalog))
+    response = make_response(render_template('merch.html', merch=merch_catalog))
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
@@ -2268,7 +2420,46 @@ def auth_page():
 @app.route('/account')
 def account_page():
     """User account/profile page"""
-    return render_template('account.html')
+    from flask_login import current_user
+    from db import get_session
+    from models import Bookmark, Playlist, PlayHistory, Purchase
+    from sqlalchemy import func
+
+    if not current_user.is_authenticated:
+        return render_template('account.html', stats={}, recent_orders=[])
+
+    with get_session() as s:
+        user_id = current_user.id
+        stats = {
+            "bookmarks": int(s.query(func.count(Bookmark.id)).filter(Bookmark.user_id == user_id).scalar() or 0),
+            "playlists": int(s.query(func.count(Playlist.id)).filter(Playlist.user_id == user_id).scalar() or 0),
+            "plays": int(s.query(func.count(PlayHistory.id)).filter(PlayHistory.user_id == user_id).scalar() or 0),
+            "merch_orders": int(
+                s.query(func.count(Purchase.id)).filter(Purchase.user_id == user_id, Purchase.type == "merch").scalar()
+                or 0
+            ),
+        }
+        recent = (
+            s.query(Purchase)
+            .filter(Purchase.user_id == user_id, Purchase.type == "merch")
+            .order_by(Purchase.created_at.desc())
+            .limit(10)
+            .all()
+        )
+        recent_orders = [
+            {
+                "id": p.id,
+                "created_at": p.created_at.isoformat() if p.created_at else None,
+                "status": p.status,
+                "item_id": p.item_id,
+                "qty": p.qty,
+                "total": p.total,
+                "stripe_id": p.stripe_id,
+            }
+            for p in recent
+        ]
+
+    return render_template('account.html', stats=stats, recent_orders=recent_orders)
 
 @app.route('/dashboard')
 def dashboard_page():
@@ -2304,10 +2495,10 @@ def cast_page():
     return render_template('cast.html')
 
 @app.route('/admin')
-@admin_required
+@login_required
+@_admin_session_required
 def admin_page():
-    """Admin page for user management"""
-    
+    """Admin page (read-only stats)"""
     return render_template('admin.html')
 
 @app.route('/feedback')
@@ -2320,67 +2511,97 @@ def contact_page():
     """Contact form page"""
     return render_template('contact.html')
 
-@app.route('/api/admin/users', methods=['GET'])
-@admin_required
-def admin_get_users():
-    """Get all users for admin management - uses database"""
+@app.route('/api/admin/stats', methods=['GET'])
+@login_required
+@_admin_session_required
+def admin_stats():
+    """Read-only admin stats (users + merch orders)."""
     from db import get_session
-    from models import User
-    with get_session() as db_session:
-        users = db_session.query(User).all()
-        user_list = []
-        for user in users:
-            user_list.append({
-                'id': user.id,
-                'email': user.email,
-                'display_name': user.display_name,
-                'created_at': user.created_at.isoformat() if user.created_at else '',
-                'last_active_at': user.last_active_at.isoformat() if user.last_active_at else '',
-                'is_admin': user.is_admin,
-                'disabled': user.disabled
-            })
-        return jsonify({'users': user_list})
+    from models import User, Purchase
+    from sqlalchemy import func
+    from datetime import datetime, timedelta, timezone
+
+    now = datetime.now(timezone.utc)
+    active_since = now - timedelta(days=30)
+
+    with get_session() as s:
+        total_users = int(s.query(func.count(User.id)).scalar() or 0)
+        active_users = int(
+            s.query(func.count(User.id))
+            .filter(User.last_active_at.isnot(None))
+            .filter(User.last_active_at >= active_since)
+            .scalar()
+            or 0
+        )
+
+        total_orders = int(s.query(func.count(Purchase.id)).filter(Purchase.type == "merch").scalar() or 0)
+        pending_orders = int(
+            s.query(func.count(Purchase.id)).filter(Purchase.type == "merch", Purchase.status == "pending").scalar() or 0
+        )
+        paid_orders = int(
+            s.query(func.count(Purchase.id)).filter(Purchase.type == "merch", Purchase.status == "paid").scalar() or 0
+        )
+        fulfilled_orders = int(
+            s.query(func.count(Purchase.id)).filter(Purchase.type == "merch", Purchase.status == "fulfilled").scalar() or 0
+        )
+
+    return jsonify({
+        "users": {"total": total_users, "active_30d": active_users},
+        "orders": {
+            "total": total_orders,
+            "pending": pending_orders,
+            "paid": paid_orders,
+            "fulfilled": fulfilled_orders,
+        },
+    })
+
+
+@app.route('/api/admin/orders', methods=['GET'])
+@login_required
+@_admin_session_required
+def admin_orders():
+    """Read-only list of merch orders."""
+    from db import get_session
+    from models import Purchase
+
+    limit = 200
+    try:
+        limit = int(request.args.get("limit") or "200")
+        limit = max(1, min(500, limit))
+    except Exception:
+        limit = 200
+
+    with get_session() as s:
+        rows = (
+            s.query(Purchase)
+            .filter(Purchase.type == "merch")
+            .order_by(Purchase.created_at.desc())
+            .limit(limit)
+            .all()
+        )
+        orders = [{
+            "id": p.id,
+            "created_at": p.created_at.isoformat() if p.created_at else None,
+            "status": p.status,
+            "item_id": p.item_id,
+            "qty": p.qty,
+            "amount": p.amount,
+            "total": p.total,
+            "stripe_id": p.stripe_id,
+        } for p in rows]
+    return jsonify({"orders": orders})
 
 @app.route('/api/admin/users/<int:user_id>', methods=['DELETE'])
-@admin_required
+@login_required
+@_admin_session_required
 def admin_delete_user(user_id):
-    """Delete a user - uses database"""
-    from db import get_session
-    from models import User
-    with get_session() as db_session:
-        user = db_session.get(User, user_id)
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-        
-        # Don't allow admin to delete themselves
-        if user.id == current_user.id:
-            return jsonify({'error': 'Cannot delete yourself'}), 400
-        
-        db_session.delete(user)
-        db_session.commit()
-        return jsonify({'success': True, 'message': f'User {user.email} deleted'})
+    return jsonify({"error": "read_only_admin"}), 403
 
 @app.route('/api/admin/users/<int:user_id>/reset-password', methods=['POST'])
-@admin_required
+@login_required
+@_admin_session_required
 def admin_reset_password(user_id):
-    """Reset user password - uses database"""
-    from db import get_session
-    from models import User
-    from extensions import bcrypt
-    
-    data = request.json
-    new_password = data.get('password')
-    if not new_password:
-        return jsonify({'error': 'Password required'}), 400
-    
-    with get_session() as db_session:
-        user = db_session.get(User, user_id)
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-        
-        user.password_hash = bcrypt.generate_password_hash(new_password).decode('utf-8')
-        db_session.commit()
-        return jsonify({'success': True, 'message': f'Password reset for {user.email}'})
+    return jsonify({"error": "read_only_admin"}), 403
 
 @app.route('/api/feedback', methods=['POST'])
 def submit_feedback():
@@ -2739,7 +2960,7 @@ if __name__ == "__main__":
     try:
         alembic_bin = shutil.which("alembic")
         if alembic_bin:
-            print("⚙️  Applying migrations (alembic upgrade heads)…")
+            print("Applying migrations (alembic upgrade heads)...")
             env = os.environ.copy()
             # Ensure PYTHONPATH includes project root so alembic/env.py can import models
             project_root = os.path.dirname(os.path.abspath(__file__))
@@ -2748,9 +2969,9 @@ if __name__ == "__main__":
             env.setdefault("DATABASE_URL", "sqlite:///local.db")
             subprocess.run([alembic_bin, "upgrade", "heads"], check=True, env=env)
         else:
-            print("⚠️  Alembic not found in PATH; skipping automatic migrations.")
+            print("WARN: Alembic not found in PATH; skipping automatic migrations.")
     except Exception as e:
-        print(f"⚠️  Migrations step skipped: {e}")
+        print(f"WARN: Migrations step skipped: {e}")
 
     # 2) Pick a free port automatically if requested is busy
     requested = int(os.getenv("PORT", "5000"))
@@ -2758,11 +2979,11 @@ if __name__ == "__main__":
     if not _is_port_free(requested):
         alt = find_available_port(5001, 5020)
         if alt:
-            print(f"⚠️  Port {requested} busy — starting on {alt}")
+            print(f"WARN: Port {requested} busy — starting on {alt}")
             chosen = alt
         else:
             # Fallback: let OS pick an ephemeral port
-            print(f"❌ Port {requested} busy and no alternates free in 5001-5020.")
+            print(f"ERROR: Port {requested} busy and no alternates free in 5001-5020.")
             print("🔁 Falling back to PORT=0 (OS-assigned ephemeral port).")
             print("💡 Set explicit PORT env var if you prefer a fixed port, e.g. PORT=5050 python app.py")
             chosen = 0
@@ -2776,14 +2997,14 @@ if __name__ == "__main__":
 
     gunicorn_bin = shutil.which("gunicorn") if (not is_windows) else None
     if gunicorn_bin and want_gunicorn and (not is_macos):
-        print(f"🚀 Starting gunicorn on port {chosen}…")
+        print(f"Starting gunicorn on port {chosen}...")
         os.execv(gunicorn_bin, ["gunicorn", "app:app", "--workers", "2", "--threads", "4", "--timeout", "120", "-b", f"0.0.0.0:{chosen}"])
     else:
         if gunicorn_bin and is_macos and not want_gunicorn:
             print("🧯 macOS detected: skipping gunicorn by default to avoid fork()/objc crashes.")
             print("   Set AHOY_USE_GUNICORN=1 if you want to run gunicorn locally anyway.")
         if is_windows:
-            print(f"🚀 Starting Flask dev server on http://127.0.0.1:{chosen} (Windows detected)")
+            print(f"Starting Flask dev server on http://127.0.0.1:{chosen} (Windows detected)")
         else:
-            print(f"🚀 Starting Flask dev server on http://127.0.0.1:{chosen}")
+            print(f"Starting Flask dev server on http://127.0.0.1:{chosen}")
         app.run(port=chosen, use_reloader=False)

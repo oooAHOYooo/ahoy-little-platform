@@ -4790,6 +4790,18 @@ opacity:0.15;
    Shows & Videos: Mobile spacing/gaps
    ======================================== */
 @media (max-width: 768px) {
+    /* Make Videos page match Podcasts mobile layout:
+       use the podcasts hero + episode rows and hide the heavy hero/grid UI. */
+    .shows-page .unified-hero,
+    .shows-page .unified-header,
+    .shows-page .shows-grid-section {
+        display: none !important;
+    }
+
+    .shows-page .shows-container {
+        padding: 18px 18px 40px 18px;
+    }
+
     .shows-page .unified-hero {
         margin-bottom: var(--spacing-md);
     }

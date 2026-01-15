@@ -3,1096 +3,134 @@
 {% block title %}My Account - Ahoy Indie Media{% endblock %}
 
 {% block content %}
-<div class="account-page" x-data="accountPage()" x-init="init()">
-    <!-- Account Header -->
-    <div class="account-header">
-        <div class="account-hero">
-            <div class="account-avatar">
-                <template x-if="!isGuest">
-                    <img
-                        :src="userProfile.avatar_url || '/static/img/default-avatar.png'"
-                        :alt="userProfile.display_name || 'User'">
-                </template>
-                <template x-if="isGuest">
-                    <span class="user-label">Guest</span>
-                </template>
-                <template x-if="!isGuest">
-                    <div class="avatar-edit-overlay">
-                        <i class="fas fa-camera"></i>
-                    </div>
-                </template>
-                <template x-if="!isGuest">
-                    <button @click="editAvatar()" class="avatar-edit-btn"
-                        title="Change Avatar">
-                        <i class="fas fa-camera"></i>
-                    </button>
-                </template>
-            </div>
-            <div class="account-info">
-                <h1 x-text="userProfile.display_name || 'User'"></h1>
-                <p class="account-username"
-                    x-text="'@' + (userProfile.username || 'username')"></p>
-                <p class="account-email"
-                    x-text="userProfile.email || 'No email'"></p>
-                <div class="account-actions">
-                    <button type="button" class="btn btn-secondary"
-                        onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">
-                        <i class="fas fa-palette"></i> Theme Picker
-                    </button>
-                </div>
-                <div class="account-stats">
-                    <div class="stat-item">
-                        <span class="stat-number"
-                            x-text="userStats.total_saves || 0"></span>
-                        <span class="stat-label">Saves</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number"
-                            x-text="userStats.total_plays || 0"></span>
-                        <span class="stat-label">Plays</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number"
-                            x-text="userStats.playlists || 0"></span>
-                        <span class="stat-label">Boards</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" x-text="streakDays"></span>
-                        <span class="stat-label">Day Streak</span>
-                    </div>
-                </div>
-            </div>
+<div class="acct">
+  {% if current_user.is_authenticated %}
+    <div class="acct-head">
+      <div class="acct-avatar">
+        <img src="{{ current_user.avatar_url or '/static/img/default-avatar.png' }}" alt="">
+      </div>
+      <div class="acct-meta">
+        <h1 class="acct-name">{{ current_user.display_name or current_user.username or 'Account' }}</h1>
+        <div class="acct-sub">
+          <span class="muted">@{{ current_user.username }}</span>
+          {% if current_user.email %}<span class="dot">•</span><span class="muted">{{ current_user.email }}</span>{% endif %}
         </div>
+        <div class="acct-actions">
+          <a class="btn btn-secondary" href="/bookmarks">Saved</a>
+          <a class="btn btn-secondary" href="/playlists">Playlists</a>
+          <button type="button" class="btn btn-secondary"
+            onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">Theme</button>
+        </div>
+      </div>
     </div>
 
-    <!-- Account Content -->
-    <div class="account-content">
-        <!-- Navigation Tabs -->
-        <div class="account-tabs">
-            <button @click="activeTab = 'overview'"
-                :class="{'active': activeTab === 'overview'}"
-                class="account-tab">
-                <i class="fas fa-chart-line"></i>
-                Overview
-            </button>
-            <button @click="activeTab = 'activity'"
-                :class="{'active': activeTab === 'activity'}"
-                class="account-tab">
-                <i class="fas fa-history"></i>
-                Activity
-            </button>
-            <button @click="activeTab = 'saves'"
-                :class="{'active': activeTab === 'saves'}"
-                class="account-tab">
-                <i class="fas fa-bookmark"></i>
-                My Saves
-            </button>
-            <button @click="activeTab = 'playlists'"
-                :class="{'active': activeTab === 'playlists'}"
-                class="account-tab">
-                <i class="fas fa-list"></i>
-                Playlists
-            </button>
-            <button @click="activeTab = 'settings'"
-                :class="{'active': activeTab === 'settings'}"
-                class="account-tab">
-                <i class="fas fa-cog"></i>
-                Settings
-            </button>
+    <div class="acct-grid">
+      <div class="card glass">
+        <div class="card-header">Your Stats</div>
+        <div class="card-body">
+          <div class="acct-stats">
+            <div class="acct-stat">
+              <div class="n">{{ stats.bookmarks or 0 }}</div>
+              <div class="l">Saved</div>
+            </div>
+            <div class="acct-stat">
+              <div class="n">{{ stats.playlists or 0 }}</div>
+              <div class="l">Playlists</div>
+            </div>
+            <div class="acct-stat">
+              <div class="n">{{ stats.plays or 0 }}</div>
+              <div class="l">Plays</div>
+            </div>
+            <div class="acct-stat">
+              <div class="n">{{ stats.merch_orders or 0 }}</div>
+              <div class="l">Merch Orders</div>
+            </div>
+          </div>
+          <p class="muted text-sm" style="margin:10px 0 0;">
+            This page is intentionally lightweight and read-only for speed.
+          </p>
         </div>
+      </div>
 
-        <!-- Tab Content -->
-        <div class="account-tab-content">
-            <!-- Overview Tab -->
-            <div x-show="activeTab === 'overview'" class="tab-panel">
-                <div class="overview-grid">
-                    <!-- Quick Stats -->
-                    <div class="overview-quick-stats card-grid">
-                        <div class="card glass hover-raise">
-                            <div class="card-header"><i class="fas fa-bookmark"></i> Saves</div>
-                            <div class="card-body">
-                                <div class="stat-lg" x-text="userStats.total_saves || 0"></div>
-                            </div>
-                        </div>
-                        <div class="card glass hover-raise">
-                            <div class="card-header"><i class="fas fa-play"></i> Plays</div>
-                            <div class="card-body">
-                                <div class="stat-lg" x-text="userStats.total_plays || 0"></div>
-                            </div>
-                        </div>
-                        <div class="card glass hover-raise">
-                            <div class="card-header"><i class="fas fa-bolt"></i> Boosts</div>
-                            <div class="card-body">
-                                <div class="stat-lg">—</div>
-                            </div>
-                        </div>
-                        <div class="card glass hover-raise">
-                            <div class="card-header"><i class="fas fa-trophy"></i> XP</div>
-                            <div class="card-body">
-                                <div class="stat-lg" x-text="xp"></div>
-                            </div>
-                        </div>
-                        <!-- Removed: Badges stat (gamify feature removed) -->
+      <div class="card glass">
+        <div class="card-header">Recent Merch Orders</div>
+        <div class="card-body">
+          {% if recent_orders and recent_orders|length %}
+            <div class="acct-orders">
+              {% for o in recent_orders %}
+                <div class="acct-order">
+                  <div>
+                    <div class="row1">
+                      <strong>#{{ o.id }}</strong>
+                      <span class="pill st-{{ (o.status or 'pending')|e }}">{{ (o.status or 'pending') }}</span>
                     </div>
-                    <template x-if="!isGuest && recentActivity.length">
-                        <div class="overview-card">
-                            <h3>Recent Activity</h3>
-                            <div class="activity-list">
-                                <template x-for="item in recentActivity"
-                                    :key="item.id">
-                                    <div class="activity-item">
-                                        <div class="activity-icon">
-                                            <i
-                                                :class="getActivityIcon(item.type)"></i>
-                                        </div>
-                                        <div class="activity-details">
-                                            <p x-text="item.description"></p>
-                                            <span class="activity-time"
-                                                x-text="formatTimeAgo(item.timestamp)"></span>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-                    </template>
-
-                    <div class="overview-card" x-show="topContent.length">
-                        <h3>Top Content</h3>
-                        <div class="top-content">
-                            <template x-for="item in topContent" :key="item.id">
-                                <div class="content-item">
-                                    <img
-                                        :src="item.cover_art || item.thumbnail || '/static/img/default-cover.jpg'"
-                                        :alt="item.title" class="content-thumb">
-                                    <div class="content-info">
-                                        <h4 x-text="item.title"></h4>
-                                        <p
-                                            x-text="item.artist || item.creator"></p>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
+                    <div class="muted text-sm">
+                      {{ o.item_id }}{% if o.qty %} • Qty {{ o.qty }}{% endif %}
+                      {% if o.created_at %} • {{ o.created_at }}{% endif %}
                     </div>
-
-                    <div class="overview-card" x-show="!isGuest">
-                        <h3>Account Details</h3>
-                        <div class="account-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Member Since:</span>
-                                <span
-                                    x-text="formatDate(userProfile.created_at)"></span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Last Login:</span>
-                                <span
-                                    x-text="formatDate(userProfile.last_login)"></span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Account Type:</span>
-                                <span class="account-type"
-                                    x-text="userProfile.subscription?.type || 'Free'"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="overview-card quests-card">
-                        <h3>Today’s Quests</h3>
-                        <div class="quest-progress">
-                            <div class="progress-bar">
-                                <div class="progress-fill"
-                                    :style="`width: ${dailyProgressPct}%`"></div>
-                            </div>
-                            <span class="progress-text"
-                                x-text="`${completedQuests}/${dailyQuests.length} completed`"></span>
-                        </div>
-                        <div class="quests-list">
-                            <template x-for="q in dailyQuests" :key="q.id">
-                                <div class="quest-item" :class="{done: q.done}">
-                                    <div class="quest-info">
-                                        <h4 x-text="q.title"></h4>
-                                        <p x-text="q.description"></p>
-                                    </div>
-                                    <div class="quest-actions">
-                                        <button class="btn btn-primary"
-                                            @click="toggleQuest(q)"
-                                            :disabled="q.done">
-                                            <span x-show="!q.done">Complete</span>
-                                            <span x-show="q.done"><i class="fas fa-check"></i></span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <div class="overview-card xp-card">
-                        <h3>Level & XP</h3>
-                        <div class="xp-header">
-                            <div class="xp-level">Level <span
-                                    x-text="level"></span></div>
-                            <div class="xp-points"
-                                x-text="`${xp}/${nextLevelXp} XP`"></div>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill"
-                                :style="`width: ${xpPct}%`"></div>
-                        </div>
-                        <p class="text-xs"
-                            style="margin-top:8px;opacity:.8">Play, save, and
-                            complete quests to earn XP.</p>
-                    </div>
-
-                    <!-- Removed: Achievements section (gamify feature removed) -->
-
-                    <div class="overview-card" x-data="{}">
-                        <h3>My Bookmarks</h3>
-                        <div class="bookmarks-content">
-                            <!-- Collapsible empty (mobile) -->
-                            <details class="mobile-only" x-show="bookmarksList().length === 0">
-                                <summary class="text-xs" style="text-transform:uppercase;letter-spacing:.08em;">My Bookmarks (0)</summary>
-                                <p class="text-sm" style="color:#9ca3af;margin:10px 0;">Nothing here yet. Explore artists to get started.</p>
-                            </details>
-                            <div class="bookmarks-empty hidden-mobile" x-show="bookmarksList().length === 0">
-                                <div class="empty-state">
-                                    <i class="fas fa-bookmark"></i>
-                                    <h4>No Bookmarks Yet</h4>
-                                    <p class="muted">Save tracks or shows to see them here.</p>
-                                    <a href="/bookmarks" class="btn btn-primary">Go to Bookmarks</a>
-                                </div>
-                            </div>
-                            <!-- Mobile horizontal scroll -->
-                            <div class="mobile-only h-scroll" x-show="bookmarksList().length > 0">
-                                <template x-for="bookmark in bookmarksList()" :key="bookmark.key">
-                                    <div class="h-card" @click="$dispatch('play-track', bookmark)"
-                                        style="position:relative;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);min-height:100px;">
-                                        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.0),rgba(0,0,0,.5));z-index:1;"></div>
-                                        <div style="position:absolute;bottom:8px;left:8px;right:8px;z-index:2;">
-                                            <div style="font-size:1rem;font-weight:600;" x-text="bookmark.title"></div>
-                                            <div class="text-xs" style="opacity:.8;" x-text="(bookmark.type || 'track')"></div>
-                                        </div>
-                                        <img :src="bookmark.artwork || '/static/img/default-cover.jpg'" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
-                                    </div>
-                                </template>
-                            </div>
-                            <!-- Desktop preview preserved -->
-                            <div class="bookmarks-preview playing-list hidden-mobile" x-show="bookmarksList().length > 0">
-                                <template x-for="bookmark in bookmarksList().slice(0, 4)" :key="bookmark.key">
-                                    <div class="playing-item" @click="$dispatch('play-track', bookmark)">
-                                        <div class="item-details">
-                                            <h4 x-text="bookmark.title"></h4>
-                                            <p x-text="(bookmark.type || 'track')"></p>
-                                        </div>
-                                        <div class="play-indicator"><i class="fas fa-play"></i></div>
-                                        <img class="thumb-bg" :src="bookmark.artwork || '/static/img/default-cover.jpg'" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:brightness(0.7);">
-                                    </div>
-                                </template>
-                            </div>
-                            <a href="/bookmarks" class="bookmark-view-all" x-show="bookmarksList().length > 4">
-                                View All Bookmarks
-                            </a>
-                        </div>
-                    </div>
+                  </div>
+                  <div class="right">
+                    <div class="total">{{ '$%.2f'|format((o.total or 0)|float) }}</div>
+                    <div class="muted text-xs">{{ o.stripe_id or '' }}</div>
+                  </div>
                 </div>
+              {% endfor %}
             </div>
-
-            <!-- Activity Tab -->
-            <div x-show="activeTab === 'activity'" class="tab-panel">
-                <template x-if="!isGuest && activityTimeline.length">
-                    <div class="activity-timeline">
-                        <h3>Activity Timeline</h3>
-                        <div class="timeline">
-                            <template x-for="item in activityTimeline"
-                                :key="item.id">
-                                <div class="timeline-item">
-                                    <div class="timeline-marker">
-                                        <i
-                                            :class="getActivityIcon(item.type)"></i>
-                                    </div>
-                                    <div class="timeline-content">
-                                        <h4 x-text="item.title"></h4>
-                                        <p x-text="item.description"></p>
-                                        <span class="timeline-time"
-                                            x-text="formatDateTime(item.timestamp)"></span>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </template>
+            <div class="muted text-xs" style="margin-top:10px;">
+              Status comes from payment + fulfillment tracking (pending → paid → fulfilled).
             </div>
-
-            <!-- Saves Tab -->
-            <div x-show="activeTab === 'saves'" class="tab-panel">
-                <div class="saves-content">
-                    <h3>My Saved Content</h3>
-                    <div class="saves-stats">
-                        <div class="save-stat">
-                            <span class="stat-number"
-                                x-text="userStats.saved_tracks || 0"></span>
-                            <span class="stat-label">Tracks</span>
-                        </div>
-                        <div class="save-stat">
-                            <span class="stat-number"
-                                x-text="userStats.saved_shows || 0"></span>
-                            <span class="stat-label">Shows</span>
-                        </div>
-                        <div class="save-stat">
-                            <span class="stat-number"
-                                x-text="userStats.saved_artists || 0"></span>
-                            <span class="stat-label">Artists</span>
-                        </div>
-                    </div>
-                    <div class="saves-actions">
-                        <a href="/my-saves" class="btn btn-primary">
-                            <i class="fas fa-external-link-alt"></i>
-                            View All Saves
-                        </a>
-                    </div>
-                </div>
+          {% else %}
+            <div class="muted">No merch orders yet.</div>
+            <div style="margin-top:10px;">
+              <a class="btn btn-primary" href="/merch">Shop Merch</a>
             </div>
-
-            <!-- Playlists Tab -->
-            <div x-show="activeTab === 'playlists'" class="tab-panel">
-                <div class="playlists-content">
-                    <div class="playlists-header">
-                        <h3>My Playlists & Boards</h3>
-                        <button @click="createPlaylist()"
-                            class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            Create New
-                        </button>
-                    </div>
-                    <div class="playlists-grid">
-                        <template x-for="playlist in userPlaylists"
-                            :key="playlist.id">
-                            <div class="playlist-card">
-                                <div class="playlist-cover">
-                                    <img
-                                        :src="playlist.cover_art || '/static/img/default-playlist-cover.jpg'"
-                                        :alt="playlist.name">
-                                    <div class="playlist-overlay">
-                                        <button @click="playPlaylist(playlist)"
-                                            class="play-btn">
-                                            <i class="fas fa-play"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="playlist-info">
-                                    <h4 x-text="playlist.name"></h4>
-                                    <p
-                                        x-text="playlist.total_items + ' items'"></p>
-                                    <span class="playlist-date"
-                                        x-text="formatDate(playlist.created_at)"></span>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Settings Tab -->
-            <div x-show="activeTab === 'settings'" class="tab-panel">
-                <div class="settings-content">
-                    <h3>Account Settings</h3>
-                    <form @submit.prevent="updateProfile()"
-                        class="settings-form">
-                        <div class="form-section">
-                            <h4>Profile Information</h4>
-                            <div class="form-group">
-                                <label for="display_name">Display Name</label>
-                        <input type="text" id="display_name"
-                                    x-model="profileForm.display_name"
-                                    placeholder="Enter your display name"
-                                    class="w-full rounded-lg bg-[#111] border border-[#1e1e1e] text-gray-200 px-3 py-2 focus:outline-none focus:border-lime-400 unified-input">
-                            </div>
-                            <div class="form-group">
-                                <label for="bio">Bio</label>
-                        <textarea id="bio" x-model="profileForm.bio"
-                                    placeholder="Tell us about yourself"
-                                    rows="3"
-                                    class="w-full rounded-lg bg-[#111] border border-[#1e1e1e] text-gray-200 px-3 py-2 focus:outline-none focus:border-lime-400 unified-input"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="location">Location</label>
-                        <input type="text" id="location"
-                                    x-model="profileForm.location"
-                                    placeholder="Where are you from?"
-                                    class="w-full rounded-lg bg-[#111] border border-[#1e1e1e] text-gray-200 px-3 py-2 focus:outline-none focus:border-lime-400 unified-input">
-                            </div>
-                            <div class="form-group">
-                                <label for="website">Website</label>
-                        <input type="url" id="website"
-                                    x-model="profileForm.website"
-                                    placeholder="https://yourwebsite.com"
-                                    class="w-full rounded-lg bg-[#111] border border-[#1e1e1e] text-gray-200 px-3 py-2 focus:outline-none focus:border-lime-400 unified-input">
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <h4>Preferences</h4>
-                            <div class="form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox"
-                                        x-model="profileForm.autoplay">
-                                    <span class="checkmark"></span>
-                                    Autoplay content
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox"
-                                        x-model="profileForm.notifications">
-                                    <span class="checkmark"></span>
-                                    Email notifications
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <label for="privacy">Privacy Level</label>
-                        <select id="privacy"
-                                    x-model="profileForm.privacy"
-                                    class="w-full rounded-lg bg-[#111] border border-[#1e1e1e] text-gray-200 px-3 py-2 focus:outline-none focus:border-lime-400 unified-select">
-                                    <option value="public">Public</option>
-                                    <option value="friends">Friends
-                                        Only</option>
-                                    <option value="private">Private</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary"
-                                :disabled="isUpdating">
-                                <span x-show="!isUpdating">Save Changes</span>
-                                <span x-show="isUpdating">Saving...</span>
-                            </button>
-                            <button type="button" @click="resetForm()"
-                                class="btn btn-secondary">
-                                Reset
-                            </button>
-                        </div>
-                    </form>
-                    <div class="form-section">
-                        <h4>Appearance</h4>
-                        <button type="button" class="btn btn-secondary"
-                            onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">
-                            <i class="fas fa-palette"></i> Theme Picker
-                        </button>
-                    </div>
-                </div>
-            </div>
+          {% endif %}
         </div>
+      </div>
     </div>
-
-    <!-- Avatar Customizer Modal -->
-    <div x-show="showAvatarCustomizer"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-        class="modal-overlay"
-        @click="showAvatarCustomizer = false">
-        <div class="modal-content avatar-modal" @click.stop>
-            <div class="modal-header">
-                <h3>Choose Your Lego Color</h3>
-                <button @click="showAvatarCustomizer = false"
-                    class="modal-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="avatar-preview">
-                    <div class="avatar-preview-large">
-                        <div class="avatar-anchor-preview"
-                            :class="selectedAvatar">
-                            <i class="fas fa-anchor"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="avatar-options">
-                    <h4>Pick Your Anchor Color</h4>
-                    <div class="avatar-grid">
-                        <div class="avatar-option"
-                            :class="{'selected': selectedAvatar === 'red'}"
-                            @click="selectedAvatar = 'red'">
-                            <div class="avatar-anchor red">
-                                <i class="fas fa-anchor"></i>
-                            </div>
-                            <span class="color-name">Red</span>
-                        </div>
-                        <div class="avatar-option"
-                            :class="{'selected': selectedAvatar === 'orange'}"
-                            @click="selectedAvatar = 'orange'">
-                            <div class="avatar-anchor orange">
-                                <i class="fas fa-anchor"></i>
-                            </div>
-                            <span class="color-name">Orange</span>
-                        </div>
-                        <div class="avatar-option"
-                            :class="{'selected': selectedAvatar === 'yellow'}"
-                            @click="selectedAvatar = 'yellow'">
-                            <div class="avatar-anchor yellow">
-                                <i class="fas fa-anchor"></i>
-                            </div>
-                            <span class="color-name">Yellow</span>
-                        </div>
-                        <div class="avatar-option"
-                            :class="{'selected': selectedAvatar === 'green'}"
-                            @click="selectedAvatar = 'green'">
-                            <div class="avatar-anchor green">
-                                <i class="fas fa-anchor"></i>
-                            </div>
-                            <span class="color-name">Green</span>
-                        </div>
-                        <div class="avatar-option"
-                            :class="{'selected': selectedAvatar === 'teal'}"
-                            @click="selectedAvatar = 'teal'">
-                            <div class="avatar-anchor teal">
-                                <i class="fas fa-anchor"></i>
-                            </div>
-                            <span class="color-name">Teal</span>
-                        </div>
-                        <div class="avatar-option"
-                            :class="{'selected': selectedAvatar === 'cyan'}"
-                            @click="selectedAvatar = 'cyan'">
-                            <div class="avatar-anchor cyan">
-                                <i class="fas fa-anchor"></i>
-                            </div>
-                            <span class="color-name">Cyan</span>
-                        </div>
-                        <div class="avatar-option"
-                            :class="{'selected': selectedAvatar === 'blue'}"
-                            @click="selectedAvatar = 'blue'">
-                            <div class="avatar-anchor blue">
-                                <i class="fas fa-anchor"></i>
-                            </div>
-                            <span class="color-name">Blue</span>
-                        </div>
-                        <div class="avatar-option"
-                            :class="{'selected': selectedAvatar === 'indigo'}"
-                            @click="selectedAvatar = 'indigo'">
-                            <div class="avatar-anchor indigo">
-                                <i class="fas fa-anchor"></i>
-                            </div>
-                            <span class="color-name">Indigo</span>
-                        </div>
-                        <div class="avatar-option"
-                            :class="{'selected': selectedAvatar === 'purple'}"
-                            @click="selectedAvatar = 'purple'">
-                            <div class="avatar-anchor purple">
-                                <i class="fas fa-anchor"></i>
-                            </div>
-                            <span class="color-name">Purple</span>
-                        </div>
-                        <div class="avatar-option"
-                            :class="{'selected': selectedAvatar === 'pink'}"
-                            @click="selectedAvatar = 'pink'">
-                            <div class="avatar-anchor pink">
-                                <i class="fas fa-anchor"></i>
-                            </div>
-                            <span class="color-name">Pink</span>
-                        </div>
-                        <div class="avatar-option"
-                            :class="{'selected': selectedAvatar === 'lime'}"
-                            @click="selectedAvatar = 'lime'">
-                            <div class="avatar-anchor lime">
-                                <i class="fas fa-anchor"></i>
-                            </div>
-                            <span class="color-name">Lime</span>
-                        </div>
-                        <div class="avatar-option"
-                            :class="{'selected': selectedAvatar === 'rose'}"
-                            @click="selectedAvatar = 'rose'">
-                            <div class="avatar-anchor rose">
-                                <i class="fas fa-anchor"></i>
-                            </div>
-                            <span class="color-name">Rose</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button @click="saveAvatar()" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Avatar
-                    </button>
-                    <button @click="showAvatarCustomizer = false"
-                        class="btn btn-secondary">
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
+  {% else %}
+    <div class="acct-guest glass">
+      <h1>Account</h1>
+      <p class="muted">Sign in to view your profile, saves, and merch orders.</p>
+      <div style="margin-top:12px;">
+        <a class="btn btn-primary" href="/auth">Sign in</a>
+      </div>
     </div>
+  {% endif %}
 </div>
 
-<script>
-function accountPage() {
-    return {
-        userProfile: {},
-        userStats: {},
-        userBoards: [],
-        isGuest: false,
-        addFundsModal: false,
-        showAvatarCustomizer: false,
-        selectedAvatar: 'red',
-        recentActivity: [],
-        topContent: [],
-        activityTimeline: [],
-        activeTab: 'overview',
-        isUpdating: false,
-        themePicker: false,
-        // Habit systems
-        streakDays: 0,
-        lastActiveDate: null,
-        xp: 0,
-        level: 1,
-        nextLevelXp: 100,
-        dailyQuests: [],
-        // Removed: achievements array (gamify feature removed)
-        bookmarks: {},
-        profileForm: {
-            display_name: '',
-            bio: '',
-            location: '',
-            website: '',
-            autoplay: true,
-            notifications: true,
-            privacy: 'public'
-        },
-        
-        async init() {
-            await this.loadUserData();
-            this.loadUserStats();
-            this.loadUserPlaylists();
-            this.loadRecentActivity();
-            this.loadTopContent();
-            this.loadActivityTimeline();
-            this.loadHabitState();
-            this.seedQuests();
-            // Removed: seedAchievements call (gamify feature removed)
-            this._wireGlobalEvents();
-            this.loadBookmarks();
-        },
-        
-        async loadUserData() {
-            try {
-                const response = await fetch('/api/user/profile');
-                if (response.ok) {
-                    this.userProfile = await response.json();
-                    this.selectedAvatar = this.userProfile.avatar_url || 'red';
-                    this.populateForm();
-                    this.isGuest = false;
-                    return;
-                }
-                if (response.status === 401) {
-                    this.setGuestMode();
-                    return;
-                }
-                // Unknown error: fall back to guest mode
-                this.setGuestMode();
-            } catch (error) {
-                console.error('Failed to load user data:', error);
-                this.setGuestMode();
-            }
-        },
+<style>
+  .acct { max-width: 1100px; margin: 0 auto; padding: 18px 18px 40px; }
+  .acct-head { display:flex; gap: 14px; align-items:center; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
+  .acct-avatar { width: 56px; height: 56px; border-radius: 16px; overflow:hidden; border: 1px solid rgba(255,255,255,0.10); background: rgba(0,0,0,0.35); flex: 0 0 auto; }
+  .acct-avatar img { width:100%; height:100%; object-fit: cover; display:block; }
+  .acct-name { margin: 0; font-size: 20px; }
+  .acct-sub { display:flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .acct-sub .dot { opacity: .5; }
+  .acct-actions { margin-top: 10px; display:flex; gap: 10px; flex-wrap: wrap; }
 
-        setGuestMode() {
-            this.isGuest = true;
-            this.userProfile = {
-                display_name: 'Guest',
-                username: 'guest',
-                email: '',
-                avatar_url: '/static/img/default-avatar.png',
-                created_at: new Date().toISOString(),
-                last_login: null,
-                subscription: { type: 'Free' }
-            };
-            this.selectedAvatar = 'red';
-            this.populateForm();
-        },
-        
-        async loadUserStats() {
-            try {
-                const response = await fetch('/api/user/stats');
-                if (response.ok) {
-                    this.userStats = await response.json();
-                    return;
-                }
-                if (response.status === 401) {
-                    await this.loadGuestStats();
-                    return;
-                }
-            } catch (error) {
-                console.error('Failed to load user stats:', error);
-            }
-        },
+  .acct-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  @media (max-width: 900px) { .acct-grid { grid-template-columns: 1fr; } }
 
-        async loadGuestStats() {
-            try {
-                const [tracksRes, showsRes, artistsRes] = await Promise.all([
-                    fetch('/api/saves/track'),
-                    fetch('/api/saves/show'),
-                    fetch('/api/saves/artist')
-                ]);
-                const [tracks, shows, artists] = await Promise.all([
-                    tracksRes.ok ? tracksRes.json() : { content: [] },
-                    showsRes.ok ? showsRes.json() : { content: [] },
-                    artistsRes.ok ? artistsRes.json() : { content: [] }
-                ]);
-                const savedTracks = (tracks.content || []).length;
-                const savedShows = (shows.content || []).length;
-                const savedArtists = (artists.content || []).length;
-                this.userStats = {
-                    saved_tracks: savedTracks,
-                    saved_shows: savedShows,
-                    saved_artists: savedArtists,
-                    total_saves: savedTracks + savedShows + savedArtists,
-                    total_plays: 0,
-                    playlists: 0
-                };
-            } catch (e) {
-                this.userStats = { saved_tracks: 0, saved_shows: 0, saved_artists: 0, total_saves: 0, total_plays: 0, playlists: 0 };
-            }
-        },
-        
-        async loadUserPlaylists() {
-            try {
-                // Unified API supports both guests and logged-in users
-                const response = await fetch('/api/playlists');
-                if (response.ok) {
-                    const data = await response.json();
-                    this.userPlaylists = data.playlists || [];
-                    // backfill playlists count in stats if missing
-                    if (!this.userStats.playlists && Array.isArray(this.userPlaylists)) {
-                        this.userStats.playlists = this.userPlaylists.length;
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to load playlists:', error);
-            }
-        },
-        
-        async loadRecentActivity() {
-            try {
-                const r = await fetch('/api/user/history');
-                if (r.ok) {
-                    const items = await r.json();
-                    this.recentActivity = (items || []).map((it, idx) => ({
-                        id: it.id || idx,
-                        type: it.type || 'play',
-                        description: it.title || it.description || 'Recent activity',
-                        timestamp: it.played_at ? new Date(it.played_at) : new Date()
-                    }));
-                    this.activityTimeline = this.recentActivity;
-                } else if (r.status === 401) {
-                    this.recentActivity = [];
-                    this.activityTimeline = [];
-                }
-            } catch (e) {
-                this.recentActivity = [];
-                this.activityTimeline = [];
-            }
-        },
-        
-        loadTopContent() {
-            // Load real user data - no mock data
-            this.topContent = [];
-        },
-        
-        loadActivityTimeline() {
-            // Load real user activity - no mock data
-            this.activityTimeline = [];
-        },
-        
-        // Habit state
-        loadHabitState() {
-            try {
-                const data = JSON.parse(localStorage.getItem('ahoy.account.habits') || '{}');
-                this.streakDays = data.streakDays || 0;
-                this.lastActiveDate = data.lastActiveDate || null;
-                this.xp = data.xp || 0;
-                this.level = data.level || 1;
-                this.nextLevelXp = data.nextLevelXp || 100;
-                this.touchDailyActivity();
-            } catch (_) {
-                this.streakDays = 1; this.lastActiveDate = new Date().toISOString().slice(0,10);
-            }
-        },
-        saveHabitState() {
-            localStorage.setItem('ahoy.account.habits', JSON.stringify({
-                streakDays: this.streakDays,
-                lastActiveDate: this.lastActiveDate,
-                xp: this.xp,
-                level: this.level,
-                nextLevelXp: this.nextLevelXp
-            }));
-        },
-        touchDailyActivity() {
-            const today = new Date();
-            const todayKey = today.toISOString().slice(0,10);
-            if (!this.lastActiveDate) {
-                this.lastActiveDate = todayKey; this.streakDays = 1; this.saveHabitState(); return;
-            }
-            if (this.lastActiveDate === todayKey) return; // already counted today
-            const last = new Date(this.lastActiveDate);
-            const diffDays = Math.round((today - last) / (1000*60*60*24));
-            if (diffDays === 1) this.streakDays += 1; else if (diffDays > 1) this.streakDays = 1;
-            this.lastActiveDate = todayKey;
-            this.grantXp(5); // daily login bonus
-            // Removed: unlockAchievement calls (gamify feature removed)
-            this.saveHabitState();
-        },
-        grantXp(amount) {
-            this.xp += amount;
-            while (this.xp >= this.nextLevelXp) {
-                this.xp -= this.nextLevelXp;
-                this.level += 1;
-                this.nextLevelXp = Math.round(this.nextLevelXp * 1.25);
-                this.showNotification(`Level up! You are now level ${this.level}.`, 'success');
-            }
-            this.saveHabitState();
-        },
-        get xpPct() {
-            return Math.max(0, Math.min(100, Math.round((this.xp / this.nextLevelXp) * 100)));
-        },
+  .acct-stats { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 560px) { .acct-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .acct-stat { border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); padding: 10px 10px; }
+  .acct-stat .n { font-weight: 900; font-size: 20px; }
+  .acct-stat .l { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin-top: 2px; }
 
-        // Quests
-        seedQuests() {
-            const todayKey = new Date().toISOString().slice(0,10);
-            const stored = JSON.parse(localStorage.getItem('ahoy.account.quests') || '{}');
-            if (stored.date === todayKey && Array.isArray(stored.items)) {
-                this.dailyQuests = stored.items;
-                return;
-            }
-            this.dailyQuests = [
-                { id: 'play_1', title: 'Spin It', description: 'Play 1 track', done: false, xp: 10 },
-                { id: 'save_1', title: 'Mark It', description: 'Bookmark 1 item', done: false, xp: 10 },
-                { id: 'queue_1', title: 'Queue It', description: 'Add something to your queue', done: false, xp: 10 }
-            ];
-            localStorage.setItem('ahoy.account.quests', JSON.stringify({ date: todayKey, items: this.dailyQuests }));
-        },
-        get completedQuests() {
-            return (this.dailyQuests || []).filter(q => q.done).length;
-        },
-        get dailyProgressPct() {
-            const total = (this.dailyQuests || []).length || 1;
-            return Math.round((this.completedQuests / total) * 100);
-        },
-        toggleQuest(q) {
-            if (q.done) return;
-            q.done = true;
-            this.grantXp(q.xp || 10);
-            localStorage.setItem('ahoy.account.quests', JSON.stringify({
-                date: new Date().toISOString().slice(0,10),
-                items: this.dailyQuests
-            }));
-            this.showNotification(`+${q.xp || 10} XP`, 'success');
-        },
+  .acct-orders { display:flex; flex-direction: column; gap: 10px; }
+  .acct-order { display:flex; justify-content:space-between; gap: 12px; padding: 10px 10px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); }
+  .acct-order .row1 { display:flex; align-items:center; gap: 8px; }
+  .acct-order .right { text-align:right; }
+  .acct-order .total { font-weight: 900; }
 
-        // Removed: Achievements functions (gamify feature removed)
+  .pill { display:inline-flex; align-items:center; padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); text-transform: uppercase; letter-spacing:.10em; font-size:10px; }
+  .pill.st-paid { border-color: rgba(16,185,129,0.35); background: rgba(16,185,129,0.10); }
+  .pill.st-pending { border-color: rgba(245,158,11,0.30); background: rgba(245,158,11,0.10); }
+  .pill.st-fulfilled { border-color: rgba(59,130,246,0.28); background: rgba(59,130,246,0.10); }
 
-        // Bookmarks (overview widget)
-        loadBookmarks() {
-            try { this.refreshBookmarks(); } catch(_) {}
-            document.addEventListener('bookmarks:changed', () => {
-                try { this.refreshBookmarks(); } catch(_) {}
-            });
-        },
-        refreshBookmarks() {
-            this.bookmarks = {};
-            try {
-                if (window.AhoyBookmarks && typeof window.AhoyBookmarks.all === 'function') {
-                    const items = window.AhoyBookmarks.all();
-                    (items || []).forEach((item) => {
-                        const key = item.key || `${item.type}:${item.id}`;
-                        this.bookmarks[key] = item;
-                    });
-                    return;
-                }
-                // Fallback to localStorage (guest or offline)
-                const raw = localStorage.getItem('ahoy.bookmarks.v1');
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    const list = Array.isArray(parsed?.items) ? parsed.items : [];
-                    list.forEach((item) => {
-                        const key = item.key || `${item.type}:${item.id}`;
-                        this.bookmarks[key] = item;
-                    });
-                }
-            } catch (e) {
-                console.error('Failed to refresh bookmarks', e);
-            }
-        },
-        bookmarksList() {
-            return Object.values(this.bookmarks || {});
-        },
-
-        populateForm() {
-            this.profileForm = {
-                display_name: this.userProfile.display_name || '',
-                bio: this.userProfile.bio || '',
-                location: this.userProfile.location || '',
-                website: this.userProfile.website || '',
-                autoplay: this.userProfile.preferences?.autoplay || true,
-                notifications: this.userProfile.preferences?.notifications || true,
-                privacy: this.userProfile.preferences?.privacy || 'public'
-            };
-        },
-        
-        async updateProfile() {
-            this.isUpdating = true;
-            try {
-                const response = await fetch('/api/user/profile', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(this.profileForm)
-                });
-                
-                if (response.ok) {
-                    this.showNotification('Profile updated successfully!', 'success');
-                    await this.loadUserData();
-                } else {
-                    this.showNotification('Failed to update profile', 'error');
-                }
-            } catch (error) {
-                this.showNotification('Failed to update profile', 'error');
-            } finally {
-                this.isUpdating = false;
-            }
-        },
-        
-        resetForm() {
-            this.populateForm();
-        },
-
-        editAvatar() {
-            this.showAvatarCustomizer = true;
-        },
-
-        async saveAvatar() {
-            try {
-                const response = await fetch('/api/user/profile', {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ avatar_url: this.selectedAvatar })
-                });
-
-                if (response.ok) {
-                    this.userProfile.avatar_url = this.selectedAvatar;
-                    this.showAvatarCustomizer = false;
-                    this.showNotification('Avatar updated!', 'success');
-                } else {
-                    this.showNotification('Failed to save avatar', 'error');
-                }
-            } catch (error) {
-                console.error('Error saving avatar:', error);
-                this.showNotification('Failed to save avatar', 'error');
-            }
-        },
-        
-        getActivityIcon(type) {
-            const icons = {
-                'play': 'fas fa-play',
-                'save': 'fas fa-bookmark',
-                'create': 'fas fa-plus',
-                'like': 'fas fa-heart'
-            };
-            return icons[type] || 'fas fa-circle';
-        },
-        
-        formatDate(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        },
-        
-        formatDateTime(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        },
-        
-        formatTimeAgo(date) {
-            if (!date) return '';
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / (1000 * 60));
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            
-            if (minutes < 60) return `${minutes}m ago`;
-            if (hours < 24) return `${hours}h ago`;
-            return `${days}d ago`;
-        },
-        
-        editAvatar() {
-            this.showNotification('Avatar editing coming soon!', 'info');
-        },
-        
-        createPlaylist() {
-            this.showNotification('Playlist creation coming soon!', 'info');
-        },
-        
-        playPlaylist(playlist) {
-            this.showNotification(`Playing ${playlist.name}`, 'info');
-        },
-        
-        showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `notification notification-${type}`;
-            notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 12px 20px;
-                border-radius: 8px;
-                color: white;
-                font-weight: 500;
-                z-index: 10000;
-                animation: slideIn 0.3s ease;
-            `;
-            
-            const colors = {
-                success: '#10b981',
-                error: '#ef4444',
-                info: '#3b82f6',
-                warning: '#f59e0b'
-            };
-            notification.style.backgroundColor = colors[type] || colors.info;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 300);
-            }, 3000);
-        }
-        ,
-        // Wire achievements to global app events
-        _wireGlobalEventsOnce: false,
-        _wireGlobalEvents() {
-            if (this._wireGlobalEventsOnce) return; this._wireGlobalEventsOnce = true;
-            // Removed: Achievement unlocking event listeners (gamify feature removed)
-        }
-    };
-}
-</script>
- 
+  .acct-guest { padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
+  .acct-guest h1 { margin: 0; }
+  .acct-guest p { margin: 8px 0 0; }
+</style>
 {% endblock %}
