@@ -23,6 +23,21 @@ def attach_security_headers(app):
         response.headers['X-Frame-Options'] = 'DENY'
         response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
         
+        # Add Expires headers for static assets (fixes Pingdom F0 grade)
+        if response.content_type:
+            if response.content_type.startswith('text/css'):
+                response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+                response.headers['Expires'] = 'Thu, 31 Dec 2026 23:59:59 GMT'
+            elif response.content_type.startswith('application/javascript') or response.content_type.startswith('text/javascript'):
+                response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+                response.headers['Expires'] = 'Thu, 31 Dec 2026 23:59:59 GMT'
+            elif response.content_type.startswith('image/'):
+                response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+                response.headers['Expires'] = 'Thu, 31 Dec 2026 23:59:59 GMT'
+            elif response.content_type.startswith('font/'):
+                response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+                response.headers['Expires'] = 'Thu, 31 Dec 2026 23:59:59 GMT'
+        
         # Production-only headers
         if os.getenv('FLASK_ENV') == 'production':
             response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'

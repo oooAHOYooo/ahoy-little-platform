@@ -857,7 +857,15 @@ def checkout_success():
 
 try:
     from flask_compress import Compress
-    Compress(app)
+    compress = Compress()
+    compress.init_app(app)
+    # Configure compression to work with all content types
+    app.config['COMPRESS_MIMETYPES'] = [
+        'text/html', 'text/css', 'text/xml', 'application/json',
+        'application/javascript', 'text/javascript', 'image/svg+xml'
+    ]
+    app.config['COMPRESS_LEVEL'] = 6  # Good balance of speed vs compression
+    app.config['COMPRESS_MIN_SIZE'] = 500  # Only compress files > 500 bytes
     print("✅ Compression enabled")
 except ImportError:
     print("⚠️  Flask-Compress not available, compression disabled")

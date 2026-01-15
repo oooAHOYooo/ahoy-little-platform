@@ -888,35 +888,17 @@ html {
 
 body {
     font-family: var(--font-family);
-    background-image: url('https://media2.giphy.com/media/v1.Y2lkPTZjMDliOTUyOWk4dmRjZDRtaDFkYXVhYWR5bjlxOXlwM2YwajcxeWg3YjMxaG15dyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/X4fPTLm2TCtkNiJnhE/giphy-downsized-large.gif');
+    /* Giphy backgrounds removed - were causing 21MB page size. Use solid color or small static image instead. */
+    background: linear-gradient(135deg, #0a0a0b 0%, #14141a 50%, #0a0a0b 100%);
     background-size: cover;
     background-position: center center;
-    animation: rotateBackground 10s infinite;
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
     padding-bottom: 24px; /* Space for compact fixed footer */
 }
 
-@keyframes rotateBackground {
-
-    0%,
-    100% {
-        background-image: url('https://media2.giphy.com/media/v1.Y2lkPTZjMDliOTUyOWk4dmRjZDRtaDFkYXVhYWR5bjlxOXlwM2YwajcxeWg3YjMxaG15dyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/X4fPTLm2TCtkNiJnhE/giphy-downsized-large.gif');
-    }
-
-    25% {
-        background-image: url('https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaHR4emR2d3ZkamprdXlrMTZsZWExN3VhdXh1dXNoZXJ3b3Zvem4xcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/w6WE0AKTT6XE3kKmv8/giphy.gif');
-    }
-
-    50% {
-        background-image: url('https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGhubDcwbmNpMGdvMmlmM3B5Z3J6NnZ3a3NkdmRreWNjYTVkeDgwbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Byour3OgR0nWnRR6Tc/giphy.gif');
-    }
-
-    75% {
-        background-image: url('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExdmQ1bWJqd2FnOXJzN2VwOHkybDRsMWx0M3pkam8zaGc2OGNtMXg3NyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Wy3Q0fuNIJmYn62Lcv/giphy.gif');
-    }
-}
+/* Removed rotateBackground animation - Giphy GIFs were 21MB total */
 
 /* Typography */
 h1,
