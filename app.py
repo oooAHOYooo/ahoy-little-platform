@@ -1371,9 +1371,11 @@ def performances():
 def merch():
     """Merch store page"""
     from storage import read_json
+    from utils.observability import get_release
     merch_catalog = read_json('data/merch.json', {"items": []})
-    response = make_response(render_template('merch.html', merch=merch_catalog))
-    response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
+    response = make_response(render_template('merch.html', merch=merch_catalog, release=get_release()))
+    # Merch changes frequently; avoid serving stale HTML that can "stick" in app/webview caches.
+    response.headers['Cache-Control'] = 'no-store'
     return response
 
 @app.route('/player')

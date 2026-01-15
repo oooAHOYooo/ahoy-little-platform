@@ -14,6 +14,7 @@
   }
   .merch-hero h1 { margin: 0 0 6px 0; font-size: 28px; }
   .merch-hero p { margin: 0; color: rgba(255,255,255,0.7); }
+  .merch-build { margin-top: 10px; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,0.45); }
   .merch-controls {
     display: flex;
     gap: 10px;
@@ -136,6 +137,7 @@
   <div class="merch-hero">
     <h1>Merch</h1>
     <p>Support Ahoy with limited drops and essentials. Fast checkout, easy quantities.</p>
+  {% if release %}<p class="merch-build">BUILD {{ release }}</p>{% endif %}
   </div>
 
   <div class="merch-controls">
