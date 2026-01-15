@@ -11,16 +11,21 @@
         <link rel="dns-prefetch" href="https://fonts.gstatic.com">
         <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
         <link rel="dns-prefetch" href="https://js.stripe.com">
+        <link rel="preconnect" href="https://unpkg.com" crossorigin>
 
         <!-- Preload critical resources -->
         <link rel="preload"
             href="{{ url_for('static', filename='css/loader.css') }}"
             as="style">
         <link rel="preload"
+            href="{{ url_for('static', filename='css/combined.css') }}"
+            as="style">
+        <link rel="preload"
             href="{{ url_for('static', filename='js/loader.js') }}" as="script">
         <link rel="preload"
             href="{{ url_for('static', filename='img/ahoy_logo.png') }}"
-            as="image">
+            as="image"
+            fetchpriority="high">
         <meta name="description"
             content="{% block description %}Discover and save indie music, videos, and media. Create playlists, save favorites, and explore new artists on Ahoy Indie Media.{% endblock %}">
         <meta name="keywords"
@@ -85,21 +90,21 @@
             href="{{ url_for('static', filename='css/loader.css') }}">
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/main.css') }}">
+        <!-- Combined: global.css + base.css (reduces HTTP requests) -->
         <link rel="stylesheet"
-            href="{{ url_for('static', filename='css/base.css') }}">
-        <link rel="stylesheet"
-            href="{{ url_for('static', filename='css/global.css') }}">
+            href="{{ url_for('static', filename='css/combined.css') }}">
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/mobile.css') }}">
         {% block extra_css %}{% endblock %}
 
-        <!-- Google Fonts - Inter (optimized loading) -->
+        <!-- Google Fonts - Inter (optimized loading with font-display: swap) -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
             rel="stylesheet"
-            media="print" onload="this.media='all'">
+            media="print" onload="this.media='all'"
+            crossorigin="anonymous">
         <noscript>
             <link
                 href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
@@ -254,9 +259,32 @@
             ],
             
             init() {
-              // Update time immediately and every second
+              // Update time immediately and every second (pause when tab hidden)
               this.updateTime();
-              setInterval(() => this.updateTime(), 1000);
+              let timePoller = null;
+              const startTimeUpdate = () => {
+                if (timePoller) return;
+                timePoller = setInterval(() => {
+                  if (document.visibilityState === 'visible') {
+                    this.updateTime();
+                  }
+                }, 1000);
+              };
+              const stopTimeUpdate = () => {
+                if (timePoller) {
+                  clearInterval(timePoller);
+                  timePoller = null;
+                }
+              };
+              if (document.visibilityState === 'visible') startTimeUpdate();
+              document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                  this.updateTime(); // Update immediately on return
+                  startTimeUpdate();
+                } else {
+                  stopTimeUpdate();
+                }
+              });
               
               // Start ticker animation
               this.startTicker();
@@ -491,6 +519,14 @@
                         </a>
                     </div>
                     {% endif %}
+                    <!-- Logo for mobile (always visible on mobile) -->
+                    <div class="nav-logo mobile-only" {% if not show_dashboard_sidebars %}style="display: flex;"{% endif %}>
+                        <a href="{{ url_for('home') }}">
+                            <img
+                                src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+                                alt="Ahoy Indie Media">
+                        </a>
+                    </div>
                     <!-- Mobile Title (text instead of logo) - Hidden, logo shows instead -->
                     <div class="nav-title-mobile mobile-only"
                         style="display: none;">Ahoy Indie
@@ -706,57 +742,13 @@
             </nav>
         </header>
         <!-- Mobile Explore replaced by overlay -->
-        <!-- Mobile Secondary Navigation - Content Discovery (above primary nav) -->
+        <!-- Mobile Secondary Navigation - Secondary Features (above primary nav) -->
         <nav class="mobile-secondary-nav mobile-only" role="navigation"
-            aria-label="Content Discovery">
-            <a href="{{ url_for('live_tv_page') }}"
-                class="mobile-tab {% if request.endpoint == 'live_tv_page' %}active{% endif %}">
-                <i class="fas fa-tv"></i>
-                <span>Live TV</span>
-            </a>
-            <a href="{{ url_for('music') }}"
-                class="mobile-tab {% if request.endpoint == 'music' %}active{% endif %}">
-                <i class="fas fa-music"></i>
-                <span>Music</span>
-            </a>
-            <a href="{{ url_for('shows') }}"
-                class="mobile-tab {% if request.endpoint == 'shows' %}active{% endif %}">
-                <i class="fas fa-video"></i>
-                <span>Videos</span>
-            </a>
-            <a href="{{ url_for('artists') }}"
-                class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
-                <i class="fas fa-users"></i>
-                <span>Artists</span>
-            </a>
-            <a href="/search"
-                class="mobile-tab {% if request.endpoint == 'search' or request.endpoint == 'search_page' %}active{% endif %}">
-                <i class="fas fa-search"></i>
-                <span>Search</span>
-            </a>
-            <a href="/events"
-                class="mobile-tab {% if request.endpoint == 'events_page' or request.path.startswith('/events') %}active{% endif %}">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Events</span>
-            </a>
-        </nav>
-        <!-- Mobile Bottom Navigation - Primary Actions (Single Row with Prominent Active States) -->
-        <nav class="mobile-bottom-nav mobile-only" role="navigation"
-            aria-label="Primary Navigation">
+            aria-label="Secondary Navigation">
             <a href="/"
                 class="mobile-tab {% if request.endpoint == 'home' %}active{% endif %}">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
-            </a>
-            <a href="/radio"
-                class="mobile-tab {% if request.endpoint == 'radio_page' %}active{% endif %}">
-                <i class="fas fa-broadcast-tower"></i>
-                <span>Radio</span>
-            </a>
-            <a href="/events"
-                class="mobile-tab {% if request.endpoint == 'events_page' or request.path.startswith('/events') %}active{% endif %}">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Events</span>
             </a>
             <a href="/merch"
                 class="mobile-tab {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}">
@@ -772,6 +764,50 @@
                 class="mobile-tab {% if request.endpoint == 'account' or request.endpoint == 'account_page' %}active{% endif %}">
                 <i class="fas fa-user-circle"></i>
                 <span>Profile</span>
+            </a>
+            <a href="/podcasts"
+                class="mobile-tab {% if request.endpoint == 'podcasts_page' or request.path.startswith('/podcasts') %}active{% endif %}">
+                <i class="fas fa-podcast"></i>
+                <span>Podcasts</span>
+            </a>
+            <a href="/search"
+                class="mobile-tab {% if request.endpoint == 'search' or request.endpoint == 'search_page' %}active{% endif %}">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+            </a>
+        </nav>
+        <!-- Mobile Bottom Navigation - Media Features (Primary Row) -->
+        <nav class="mobile-bottom-nav mobile-only" role="navigation"
+            aria-label="Media Navigation">
+            <a href="/radio"
+                class="mobile-tab {% if request.endpoint == 'radio_page' %}active{% endif %}">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>Radio</span>
+            </a>
+            <a href="{{ url_for('live_tv_page') }}"
+                class="mobile-tab {% if request.endpoint == 'live_tv_page' %}active{% endif %}">
+                <i class="fas fa-tv"></i>
+                <span>Live TV</span>
+            </a>
+            <a href="{{ url_for('shows') }}"
+                class="mobile-tab {% if request.endpoint == 'shows' %}active{% endif %}">
+                <i class="fas fa-video"></i>
+                <span>Videos</span>
+            </a>
+            <a href="{{ url_for('artists') }}"
+                class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
+                <i class="fas fa-users"></i>
+                <span>Artists</span>
+            </a>
+            <a href="{{ url_for('music') }}"
+                class="mobile-tab {% if request.endpoint == 'music' %}active{% endif %}">
+                <i class="fas fa-music"></i>
+                <span>Music</span>
+            </a>
+            <a href="/events"
+                class="mobile-tab {% if request.endpoint == 'events_page' or request.path.startswith('/events') %}active{% endif %}">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Events</span>
             </a>
         </nav>
         <div class="desktop-only">
@@ -1296,6 +1332,8 @@
                         </a>
                     </nav>
 
+                    <div class="app-sidebar-divider"></div>
+
                     <div class="app-sidebar-spacer"></div>
 
                     <nav class="app-sidebar-nav app-sidebar-nav--secondary"
@@ -1718,7 +1756,9 @@
                     <div class="footer-logo">
                         <img
                             src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
-                            alt="Ahoy Indie Media">
+                            alt="Ahoy Indie Media"
+                            loading="lazy"
+                            decoding="async">
                     </div>
                     <p class="footer-tagline">Your gateway to independent music
                         discovery and organization</p>
@@ -1771,7 +1811,7 @@
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2025 Ahoy Indie Media. All rights reserved.</p>
+                <p class="footer-copyright">&copy; 2026 Ahoy Indie Media. All rights reserved.</p>
             </div>
         </footer>
 
@@ -1927,8 +1967,11 @@
           const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 200));
           idle(async () => {
             try {
-              // Color extraction powers the glass gradient + album glow
-              await import('/static/js/colorExtractor.js');
+              // Color extraction powers the glass gradient + album glow (optional enhancement)
+              // Load with lower priority - if it fails, nowPlaying.js has fallback colors
+              import('/static/js/colorExtractor.js').catch(() => {
+                // Silently fail - color extraction is a nice-to-have, not required
+              });
               // No visualizer → no audioAnalyser needed (keeps mobile lighter)
               await import('/static/js/nowPlaying.js');
             } catch (e) {
@@ -2606,7 +2649,31 @@
                         }
                     } catch (_) { }
                     // Low-frequency fallback (keeps CPU down; events handle most updates)
-                    setInterval(update, 5000);
+                    // Pause when tab is hidden to save resources
+                    let updatePoller = null;
+                    const startUpdatePoll = () => {
+                        if (updatePoller) return;
+                        updatePoller = setInterval(() => {
+                            if (document.visibilityState === 'visible') {
+                                update();
+                            }
+                        }, 5000);
+                    };
+                    const stopUpdatePoll = () => {
+                        if (updatePoller) {
+                            clearInterval(updatePoller);
+                            updatePoller = null;
+                        }
+                    };
+                    if (document.visibilityState === 'visible') startUpdatePoll();
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') {
+                            update(); // Update immediately on return
+                            startUpdatePoll();
+                        } else {
+                            stopUpdatePoll();
+                        }
+                    });
                     document.addEventListener('play-track', update);
                     update();
                 },
@@ -3297,7 +3364,7 @@
                             const data = await response.json();
                             this.badges = data.badges || [];
                         }
-                    } catch (e) { console.log('Badges not available'); }
+                    } catch (e) { /* Badges not available - non-critical */ }
 
                     // Initialize toast watcher
                     this.initToast();
@@ -3316,19 +3383,43 @@
                     if (window.mediaPlayer && window.mediaPlayer.on) {
                         window.mediaPlayer.on('play', () => this.syncMediaPlayer());
                         window.mediaPlayer.on('pause', () => this.syncMediaPlayer());
+                        window.mediaPlayer.on('trackchange', () => this.syncMediaPlayer());
                     }
-                    // Poll for updates (catches track changes and other state changes)
-                    setInterval(() => this.syncMediaPlayer(), 1000);
+                    // Poll for updates (reduced frequency: 3 seconds instead of 1, and pause when tab hidden)
+                    let mediaPlayerPoller = null;
+                    const startPolling = () => {
+                        if (mediaPlayerPoller) return;
+                        mediaPlayerPoller = setInterval(() => {
+                            if (document.visibilityState === 'visible') {
+                                this.syncMediaPlayer();
+                            }
+                        }, 3000); // Reduced from 1000ms to 3000ms
+                    };
+                    const stopPolling = () => {
+                        if (mediaPlayerPoller) {
+                            clearInterval(mediaPlayerPoller);
+                            mediaPlayerPoller = null;
+                        }
+                    };
+                    if (document.visibilityState === 'visible') startPolling();
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') {
+                            this.syncMediaPlayer(); // Quick sync on return
+                            startPolling();
+                        } else {
+                            stopPolling();
+                        }
+                    });
                 },
                 async loadArtists() {
                     try {
-                        const response = await fetch('/api/artists');
-                        if (response.ok) {
-                            const data = await response.json();
-                            this.artists = data.artists || [];
-                        }
+                        // Use shared data store to prevent duplicate calls
+                        const data = window.__ahoyDataStore ? 
+                            await window.__ahoyDataStore.getArtists() :
+                            await (await fetch('/api/artists')).json();
+                        this.artists = data.artists || [];
                     } catch (e) {
-                        console.log('Artists not available for boost');
+                        /* Artists not available for boost - non-critical */
                         this.artists = [];
                     }
                 },
@@ -3486,7 +3577,31 @@
                         }
                     };
                     updateClock();
-                    setInterval(updateClock, 1000);
+                    // Optimize clock updates - pause when tab hidden, reduce frequency slightly
+                    let clockPoller = null;
+                    const startClock = () => {
+                        if (clockPoller) return;
+                        clockPoller = setInterval(() => {
+                            if (document.visibilityState === 'visible') {
+                                updateClock();
+                            }
+                        }, 2000); // Reduced from 1000ms to 2000ms (still smooth for clock)
+                    };
+                    const stopClock = () => {
+                        if (clockPoller) {
+                            clearInterval(clockPoller);
+                            clockPoller = null;
+                        }
+                    };
+                    if (document.visibilityState === 'visible') startClock();
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') {
+                            updateClock(); // Update immediately on return
+                            startClock();
+                        } else {
+                            stopClock();
+                        }
+                    });
 
                     // Check if media player has a current track (radio or player)
                     // Prioritize actively playing radio/player content
@@ -3497,13 +3612,11 @@
                     } else {
                         // Load random media for "Now Playing"
                         try {
-                            const [musicRes, showsRes] = await Promise.all([
-                                fetch('/api/music'),
-                                fetch('/api/shows')
+                            // Use shared data store to prevent duplicate calls
+                            const [musicData, showsData] = await Promise.all([
+                                window.__ahoyDataStore ? window.__ahoyDataStore.getMusic() : (await fetch('/api/music')).json(),
+                                window.__ahoyDataStore ? window.__ahoyDataStore.getShows() : (await fetch('/api/shows')).json()
                             ]);
-
-                            const musicData = await musicRes.json();
-                            const showsData = await showsRes.json();
 
                             const allItems = [
                                 ...(musicData.tracks || []).map(t => ({

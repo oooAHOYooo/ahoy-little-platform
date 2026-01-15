@@ -73,11 +73,16 @@ class NowPlayingController {
     async onTrackChange(track) {
         if (!track) return;
 
-        // Extract colors from album art
+        // Extract colors from album art (optional - has fallback)
         const coverArt = track.cover_art || track.cover || '/static/img/default-cover.jpg';
-        if (window.colorExtractor && typeof window.colorExtractor.extractColors === 'function') {
-            this.currentColors = await window.colorExtractor.extractColors(coverArt);
-        } else {
+        try {
+            if (window.colorExtractor && typeof window.colorExtractor.extractColors === 'function') {
+                this.currentColors = await window.colorExtractor.extractColors(coverArt);
+            } else {
+                this.currentColors = { dominant: '#6366f1', secondary: '#8b5cf6', accent: '#ec4899' };
+            }
+        } catch (e) {
+            // Fallback if color extraction fails (non-critical)
             this.currentColors = { dominant: '#6366f1', secondary: '#8b5cf6', accent: '#ec4899' };
         }
 

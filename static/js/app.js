@@ -86,11 +86,20 @@ window.fetch = function(url, options = {}) {
   
   // Create the request
   const requestPromise = _originalFetch(url, options)
+    .then(res => {
+      // Cache successful responses for longer (30 seconds for static data)
+      if (res.ok && cacheKey) {
+        res.clone().json().then(data => {
+          _requestCache.set(cacheKey, { data, timestamp: Date.now() });
+        }).catch(() => {}); // Ignore JSON parse errors
+      }
+      return res;
+    })
     .finally(() => {
-      // Remove from pending requests after a short delay
+      // Remove from pending requests after a longer delay to catch rapid duplicate calls
       setTimeout(() => {
         _pendingRequests.delete(cacheKey);
-      }, 50);
+      }, 200);
     });
   
   // Store pending request
@@ -109,11 +118,15 @@ async function api(url, method="GET", payload=null) {
     return _pendingRequests.get(cacheKey);
   }
   
-  // If this is a GET request and we have cached data (within 5 seconds), return it
+  // If this is a GET request and we have cached data (within 30 seconds for static data), return it
   if (cacheKey && _requestCache.has(cacheKey)) {
     const cached = _requestCache.get(cacheKey);
     const age = Date.now() - cached.timestamp;
-    if (age < 5000) { // 5 second cache window
+    // Longer cache for static data endpoints (30s), shorter for dynamic (5s)
+    const cacheWindow = (cacheKey.includes('/api/artists') || 
+                        cacheKey.includes('/api/shows') || 
+                        cacheKey.includes('/api/music')) ? 30000 : 5000;
+    if (age < cacheWindow) {
       return Promise.resolve(cached.data);
     }
   }
@@ -136,9 +149,9 @@ async function api(url, method="GET", payload=null) {
       // Cache successful GET responses
       if (cacheKey) {
         _requestCache.set(cacheKey, { data, timestamp: Date.now() });
-        // Clean up old cache entries (older than 30 seconds)
+        // Clean up old cache entries (older than 5 minutes)
         for (const [key, value] of _requestCache.entries()) {
-          if (Date.now() - value.timestamp > 30000) {
+          if (Date.now() - value.timestamp > 300000) {
             _requestCache.delete(key);
           }
         }
@@ -434,3 +447,122 @@ window.navbar = function() {
 
 // Note: appData() is now defined inline in base.html before Alpine.js loads
 // This ensures it's available when Alpine initializes
+
+// ========================================
+// 📦 SHARED DATA STORE
+// ========================================
+// Global data store to prevent duplicate API calls across components
+window.__ahoyDataStore = {
+  _cache: new Map(),
+  _pending: new Map(),
+  _cacheTime: 30000, // 30 seconds cache for shared data
+  
+  async getArtists() {
+    const key = 'artists';
+    if (this._cache.has(key)) {
+      const cached = this._cache.get(key);
+      if (Date.now() - cached.timestamp < this._cacheTime) {
+        return cached.data;
+      }
+    }
+    
+    if (this._pending.has(key)) {
+      return this._pending.get(key);
+    }
+    
+    const promise = api('/api/artists').then(data => {
+      this._cache.set(key, { data, timestamp: Date.now() });
+      this._pending.delete(key);
+      return data;
+    }).catch(err => {
+      this._pending.delete(key);
+      throw err;
+    });
+    
+    this._pending.set(key, promise);
+    return promise;
+  },
+  
+  async getShows() {
+    const key = 'shows';
+    if (this._cache.has(key)) {
+      const cached = this._cache.get(key);
+      if (Date.now() - cached.timestamp < this._cacheTime) {
+        return cached.data;
+      }
+    }
+    
+    if (this._pending.has(key)) {
+      return this._pending.get(key);
+    }
+    
+    const promise = api('/api/shows').then(data => {
+      this._cache.set(key, { data, timestamp: Date.now() });
+      this._pending.delete(key);
+      return data;
+    }).catch(err => {
+      this._pending.delete(key);
+      throw err;
+    });
+    
+    this._pending.set(key, promise);
+    return promise;
+  },
+  
+  async getMusic() {
+    const key = 'music';
+    if (this._cache.has(key)) {
+      const cached = this._cache.get(key);
+      if (Date.now() - cached.timestamp < this._cacheTime) {
+        return cached.data;
+      }
+    }
+    
+    if (this._pending.has(key)) {
+      return this._pending.get(key);
+    }
+    
+    const promise = api('/api/music').then(data => {
+      this._cache.set(key, { data, timestamp: Date.now() });
+      this._pending.delete(key);
+      return data;
+    }).catch(err => {
+      this._pending.delete(key);
+      throw err;
+    });
+    
+    this._pending.set(key, promise);
+    return promise;
+  },
+  
+  async getNowPlaying() {
+    const key = 'now-playing';
+    if (this._cache.has(key)) {
+      const cached = this._cache.get(key);
+      if (Date.now() - cached.timestamp < 10000) { // 10s cache for dynamic content
+        return cached.data;
+      }
+    }
+    
+    if (this._pending.has(key)) {
+      return this._pending.get(key);
+    }
+    
+    const promise = api('/api/now-playing').then(data => {
+      this._cache.set(key, { data, timestamp: Date.now() });
+      this._pending.delete(key);
+      return data;
+    }).catch(err => {
+      this._pending.delete(key);
+      throw err;
+    });
+    
+    this._pending.set(key, promise);
+    return promise;
+  },
+  
+  clear() {
+    this._cache.clear();
+    this._pending.clear();
+  }
+};

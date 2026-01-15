@@ -1130,6 +1130,13 @@ body.debug-layout .card {
     flex: 1 1 auto;
 }
 
+.app-sidebar-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 16px;
+    flex-shrink: 0;
+}
+
 .app-main {
     flex: 1 1 auto;
     min-width: 0;
@@ -3369,6 +3376,15 @@ opacity:0.15;
     color: #666;
     font-size: 0.85rem;
     margin: 0;
+}
+
+.footer-copyright {
+    font-family: 'Courier New', 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    color: #888;
+    text-align: center;
+    font-weight: 400;
 }
 
 /* Compact Fixed Footer */

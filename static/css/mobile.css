@@ -1660,12 +1660,12 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
         gap: 4px;
         padding: 8px 12px 4px;
         flex: 1;
         max-width: 72px;
-        color: #9ca3af;
+        color: rgba(255, 255, 255, 0.6);
         text-decoration: none;
         border: none;
         background: transparent;
@@ -1695,6 +1695,7 @@
         position: relative;
         z-index: 2;
         transition: color 0.3s ease;
+        color: inherit;
     }
 
     .mobile-bottom-nav .mobile-tab span {
@@ -1707,64 +1708,43 @@
         position: relative;
         z-index: 2;
         transition: color 0.3s ease;
+        color: inherit;
     }
 
     .mobile-bottom-nav .mobile-tab:active {
         transform: scale(0.95);
     }
 
-    /* Prominent circular active state that extends above */
+    /* Prominent circular active state - purple circle with white icon */
     .mobile-bottom-nav .mobile-tab.active {
-        color: #a855f7;
+        color: #ffffff;
     }
 
     .mobile-bottom-nav .mobile-tab.active::before {
         content: "";
         position: absolute;
-        top: -18px;
+        top: 50%;
         left: 50%;
-        transform: translateX(-50%);
-        width: 60px;
-        height: 60px;
+        transform: translate(-50%, -50%);
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
-        background: #a855f7;
-        box-shadow: 0 4px 16px rgba(168, 85, 247, 0.5);
-        z-index: 1;
+        background: #6366f1;
+        z-index: 0;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .mobile-bottom-nav .mobile-tab.active i {
         color: #ffffff;
-        transform: translateY(-10px);
-    }
-
-    .mobile-bottom-nav .mobile-tab.active span {
-        color: #a855f7;
-        transform: translateY(-10px);
-        font-weight: 600;
-    }
-
-    /* Small dot indicator below active tab text */
-    .mobile-bottom-nav .mobile-tab.active span::after {
-        content: "";
-        position: absolute;
-        bottom: -14px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 4px;
-        height: 4px;
-        border-radius: 50%;
-        background: #a855f7;
+        position: relative;
         z-index: 2;
     }
 
-    .mobile-bottom-nav .mobile-tab.active::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        border-radius: 14px;
-        background: radial-gradient(120% 100% at 50% -10%, rgba(163, 230, 53, 0.28) 0%, rgba(163, 230, 53, 0.00) 55%);
-        pointer-events: none;
+    .mobile-bottom-nav .mobile-tab.active span {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        position: relative;
+        z-index: 2;
     }
 }
 

@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 import random
 import hashlib
 from functools import wraps
+from typing import Optional
 # Removed: user_manager.py (consolidated to database-based auth)
 from dotenv import load_dotenv
 load_dotenv()
@@ -862,7 +863,7 @@ except ImportError:
     print("⚠️  Flask-Compress not available, compression disabled")
 
 # Cache configuration
-CACHE_TIMEOUT = 300  # 5 minutes
+CACHE_TIMEOUT = 600  # 10 minutes (increased for better performance)
 
 # In-memory cache for JSON data files (prevents repeated disk I/O)
 _json_data_cache = {}
@@ -870,7 +871,7 @@ _json_file_mtimes = {}
 
 # Removed: USERS_FILE, ACTIVITY_FILE, load_users(), save_users() - using database now
 
-def load_json_data(filename, default=None, cache_duration=300):
+def load_json_data(filename, default=None, cache_duration=600):
     """Load JSON data from file with in-memory caching and file modification time checking"""
     import os
     from time import time
@@ -930,7 +931,7 @@ def load_json_data(filename, default=None, cache_duration=300):
         return default or {}
 
 
-def _etag_for_static_json(filename: str) -> str | None:
+def _etag_for_static_json(filename: str) -> Optional[str]:
     """Create a weak ETag for static/data JSON files based on mtime + size.
 
     This enables 304 Not Modified responses, reducing payload + parse time.
@@ -1300,9 +1301,9 @@ def playlists_index():
 @limiter.exempt
 def api_now_playing():
     """Get curated now playing feed with 30s previews - randomized on each request"""
-    # Use cached data (cache_duration=60 for more frequent updates)
-    music_data = load_json_data('music.json', {'tracks': []}, cache_duration=60)
-    shows_data = load_json_data('shows.json', {'shows': []}, cache_duration=60)
+    # Use cached data (cache_duration=600 to match other endpoints - data is already cached)
+    music_data = load_json_data('music.json', {'tracks': []}, cache_duration=600)
+    shows_data = load_json_data('shows.json', {'shows': []}, cache_duration=600)
     
     # Combine and curate content for discovery feed
     feed_items = []
@@ -1479,7 +1480,7 @@ def api_homepage_layout():
 @limiter.exempt
 def api_music():
     """Get all music data"""
-    return _cached_json_response("music.json", {"tracks": []}, max_age_seconds=300)
+    return _cached_json_response("music.json", {"tracks": []}, max_age_seconds=600)
 
 @app.route('/radio')
 def radio_page():
@@ -1495,7 +1496,7 @@ def merch_page():
 @limiter.exempt
 def api_shows():
     """Get all shows/video content"""
-    return _cached_json_response("shows.json", {"shows": []}, max_age_seconds=300)
+    return _cached_json_response("shows.json", {"shows": []}, max_age_seconds=600)
 
 @app.route('/api/live-tv/channels')
 @limiter.exempt
@@ -1583,7 +1584,7 @@ def api_show(show_id):
 @limiter.exempt
 def api_artists():
     """Get artists directory"""
-    return _cached_json_response("artists.json", {"artists": []}, max_age_seconds=300)
+    return _cached_json_response("artists.json", {"artists": []}, max_age_seconds=600)
 
 @app.route('/api/artists/featured')
 @limiter.exempt
@@ -1607,6 +1608,12 @@ def api_featured_artists():
     if etag:
         resp.headers["ETag"] = etag
     return resp
+
+@app.route('/api/whats-new')
+@limiter.exempt
+def api_whats_new():
+    """Get 'What's New at Ahoy' updates"""
+    return _cached_json_response("whats_new.json", {"updates": []}, max_age_seconds=600)
 
 @app.route('/artists/<artist_id>/follow', methods=['POST'])
 def follow_artist(artist_id):

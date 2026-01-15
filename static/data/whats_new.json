@@ -1,0 +1,44 @@
+{
+  "updates": [
+    {
+      "id": "update-1",
+      "title": "Poet and Friends Show #7",
+      "description": "Join us for another Poet and Friends show on January 29th, 2026 at 7pm at Koffee. Don't miss this special event!",
+      "date": "2026-01-29",
+      "type": "event",
+      "icon": "fas fa-microphone"
+    },
+    {
+      "id": "update-2",
+      "title": "New Radio Station Launch",
+      "description": "We've launched a brand new radio station featuring indie artists from around the world. Tune in 24/7!",
+      "date": "2026-01-15",
+      "type": "feature",
+      "icon": "fas fa-broadcast-tower"
+    },
+    {
+      "id": "update-3",
+      "title": "Live TV Channels Expanded",
+      "description": "Four new live TV channels are now available, including short films, music videos, and live shows.",
+      "date": "2026-01-10",
+      "type": "feature",
+      "icon": "fas fa-tv"
+    },
+    {
+      "id": "update-4",
+      "title": "Mobile App Improvements",
+      "description": "Enhanced mobile experience with better navigation and faster loading times.",
+      "date": "2026-01-05",
+      "type": "improvement",
+      "icon": "fas fa-mobile-alt"
+    },
+    {
+      "id": "update-5",
+      "title": "New Artist Spotlight",
+      "description": "Check out our featured artist of the month and discover amazing new music.",
+      "date": "2026-01-01",
+      "type": "content",
+      "icon": "fas fa-star"
+    }
+  ]
+}
