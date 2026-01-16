@@ -1,6 +1,6 @@
 """0011_create_user_artist_positions
 
-Revision ID: 0011_create_user_artist_positions
+Revision ID: 0011_user_artist_positions
 Revises: 0010_create_user_artist_follows
 Create Date: 2025-11-03
 
@@ -11,7 +11,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '0011_create_user_artist_positions'
+# NOTE: Alembic's default alembic_version.version_num is VARCHAR(32). Keep IDs <= 32 chars.
+revision = '0011_user_artist_positions'
 down_revision = '0010_create_user_artist_follows'
 branch_labels = None
 depends_on = None

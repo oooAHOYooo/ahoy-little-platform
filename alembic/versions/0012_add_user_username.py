@@ -1,7 +1,7 @@
 """0012_add_user_username
 
 Revision ID: 0012_add_user_username
-Revises: 0011_create_user_artist_positions
+Revises: 0011_user_artist_positions
 Create Date: 2026-01-16
 
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "0012_add_user_username"
-down_revision = "0011_create_user_artist_positions"
+down_revision = "0011_user_artist_positions"
 branch_labels = None
 depends_on = None
 
