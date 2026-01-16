@@ -22,6 +22,10 @@ def _require_database_url() -> str:
         # SQLAlchemy expects "postgresql://" (optionally with a driver).
         if value.startswith("postgres://"):
             return "postgresql+psycopg://" + value[len("postgres://"):]
+        # If no explicit driver is set, SQLAlchemy may default to psycopg2.
+        # We ship psycopg (v3), so prefer it automatically.
+        if value.startswith("postgresql://"):
+            return "postgresql+psycopg://" + value[len("postgresql://"):]
         return value
     value = os.getenv("LOCAL_DATABASE_URL")
     if value:
