@@ -755,25 +755,15 @@
                 <i class="fas fa-shopping-bag"></i>
                 <span>Merch</span>
             </a>
-            <a href="/bookmarks"
-                class="mobile-tab {% if request.endpoint == 'bookmarks_page' %}active{% endif %}">
-                <i class="fas fa-bookmark"></i>
-                <span>Saved</span>
+            <a href="/events"
+                class="mobile-tab {% if request.endpoint == 'events_page' or request.path.startswith('/events') %}active{% endif %}">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Events</span>
             </a>
             <a href="/account"
                 class="mobile-tab {% if request.endpoint == 'account' or request.endpoint == 'account_page' %}active{% endif %}">
                 <i class="fas fa-user-circle"></i>
                 <span>Profile</span>
-            </a>
-            <a href="/podcasts"
-                class="mobile-tab {% if request.endpoint == 'podcasts_page' or request.path.startswith('/podcasts') %}active{% endif %}">
-                <i class="fas fa-podcast"></i>
-                <span>Podcasts</span>
-            </a>
-            <a href="/search"
-                class="mobile-tab {% if request.endpoint == 'search' or request.endpoint == 'search_page' %}active{% endif %}">
-                <i class="fas fa-search"></i>
-                <span>Search</span>
             </a>
         </nav>
         <!-- Mobile Bottom Navigation - Media Features (Primary Row) -->
@@ -804,10 +794,10 @@
                 <i class="fas fa-music"></i>
                 <span>Music</span>
             </a>
-            <a href="/events"
-                class="mobile-tab {% if request.endpoint == 'events_page' or request.path.startswith('/events') %}active{% endif %}">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Events</span>
+            <a href="/podcasts"
+                class="mobile-tab {% if request.endpoint == 'podcasts_page' or request.path.startswith('/podcasts') %}active{% endif %}">
+                <i class="fas fa-podcast"></i>
+                <span>Podcasts</span>
             </a>
         </nav>
         <div class="desktop-only">

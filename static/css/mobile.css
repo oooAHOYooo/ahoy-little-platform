@@ -250,6 +250,33 @@
         top: 10px;
     }
 
+    /* Now playing chips: responsive + clean */
+    .tv-container .video-header {
+        max-width: calc(100% - 20px);
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .tv-container .now-playing-label,
+    .tv-container #channelNameLabel {
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        line-height: 1.1;
+        background: rgba(0, 0, 0, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .tv-container #channelNameLabel {
+        max-width: min(72vw, 360px);
+    }
+
     /* Remote controls: thumb-friendly, wraps into rows */
     .channel-remote.remote-below {
         padding: 8px 0;
@@ -1685,7 +1712,8 @@
         position: fixed !important;
         left: 0 !important;
         right: 0 !important;
-        bottom: calc(70px + env(safe-area-inset-bottom)) !important;
+        /* Sit directly on top of the bottom nav (flush, no gap) */
+        bottom: calc(var(--bottombar-h, 70px) + env(safe-area-inset-bottom)) !important;
         display: flex !important;
         justify-content: space-around !important;
         align-items: flex-start !important;
@@ -1699,7 +1727,8 @@
         background: rgba(17, 17, 17, 0.90);
         backdrop-filter: saturate(180%) blur(18px);
         -webkit-backdrop-filter: saturate(180%) blur(18px);
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-top: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.25);
         will-change: transform, filter;
         min-height: 60px;
@@ -1758,46 +1787,30 @@
     }
 
     .mobile-secondary-nav .mobile-tab.active {
-        color: #a855f7;
+        /* Mobile active state: prefer color-fill over big shapes */
+        color: #a78bfa; /* purple-400 */
+        background: transparent;
+        border: none;
     }
 
     .mobile-secondary-nav .mobile-tab.active::before {
-        content: "";
-        position: absolute;
-        top: -16px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: #a855f7;
-        box-shadow: 0 3px 12px rgba(168, 85, 247, 0.4);
-        z-index: 1;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Clean active indicator (no big circle) */
+        content: none;
     }
 
     .mobile-secondary-nav .mobile-tab.active i {
-        color: #ffffff;
-        transform: translateY(-8px);
+        color: #a78bfa;
+        transform: none;
     }
 
     .mobile-secondary-nav .mobile-tab.active span {
-        color: #a855f7;
-        transform: translateY(-8px);
+        color: #a78bfa;
+        transform: none;
         font-weight: 600;
     }
 
     .mobile-secondary-nav .mobile-tab.active span::after {
-        content: "";
-        position: absolute;
-        bottom: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 3px;
-        height: 3px;
-        border-radius: 50%;
-        background: #a855f7;
-        z-index: 2;
+        content: none;
     }
 
     /* Force mobile bottom nav to be visible - highest specificity */
@@ -1812,6 +1825,7 @@
         justify-content: space-around !important;
         align-items: flex-start !important;
         gap: 4px !important;
+        /* Keep compact and aligned to the secondary row above */
         padding: 8px 4px calc(8px + env(safe-area-inset-bottom)) !important;
         visibility: visible !important;
         opacity: 1 !important;
@@ -1821,7 +1835,7 @@
         background: rgba(17, 17, 17, 0.95);
         backdrop-filter: saturate(180%) blur(20px);
         -webkit-backdrop-filter: saturate(180%) blur(20px);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 0;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
         will-change: transform, filter;
         z-index: 10003;
@@ -1829,15 +1843,8 @@
     }
 
     .mobile-bottom-nav::before {
-        content: "";
-        position: absolute;
-        left: 20%;
-        right: 20%;
-        top: -8px;
-        height: 8px;
-        border-radius: 0 0 12px 12px;
-        background: radial-gradient(80% 100% at 50% 0%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 60%);
-        pointer-events: none;
+        /* Remove decorative ridge so the two nav rows sit flush */
+        content: none;
     }
 
     .mobile-bottom-nav .mobile-tab {
@@ -1902,32 +1909,27 @@
 
     /* Prominent circular active state - purple circle with white icon */
     .mobile-bottom-nav .mobile-tab.active {
-        color: #ffffff;
+        color: #a78bfa; /* purple-400 */
     }
 
     .mobile-bottom-nav .mobile-tab.active::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: #6366f1;
-        z-index: 0;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Clean active pill (no circle) */
+        content: none;
+    }
+
+    .mobile-bottom-nav .mobile-tab.active::after {
+        content: none;
     }
 
     .mobile-bottom-nav .mobile-tab.active i {
-        color: #ffffff;
+        color: #a78bfa;
         position: relative;
         z-index: 2;
     }
 
     .mobile-bottom-nav .mobile-tab.active span {
-        color: rgba(255, 255, 255, 0.9);
-        font-weight: 500;
+        color: #a78bfa;
+        font-weight: 600;
         position: relative;
         z-index: 2;
     }
