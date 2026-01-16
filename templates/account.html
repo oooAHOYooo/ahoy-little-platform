@@ -243,6 +243,22 @@
   .acct-auth-foot { margin-top: 2px; font-size: 13px; color: rgba(255,255,255,0.70); }
   .acct-auth-foot a { color: rgba(167,139,250,0.95); font-weight: 900; }
   .acct-auth-legal a { color: rgba(255,255,255,0.85); text-decoration: underline; }
+
+  /* Ensure the primary CTA is always readable even if theme vars set --primary-color too light */
+  .acct-guest .btn.btn-primary {
+    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    color: #ffffff;
+    border: 1px solid rgba(236,72,153,0.45);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+  }
+  .acct-guest .btn.btn-primary:hover:not(:disabled) {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+  .acct-guest .btn.btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(236,72,153,0.22), 0 10px 24px rgba(0,0,0,0.35);
+  }
 </style>
 
 <script>
