@@ -53,22 +53,17 @@
         </section>
 
         <!-- Mobile: Artists layout matches Podcasts (episode rows) -->
-        <section class="podcasts-hero mobile-only">
-            <div class="podcasts-hero-inner">
-                <h1><i class="fas fa-users" aria-hidden="true"></i> Artists</h1>
-                <p>Discover indie musicians, show hosts, athletes, filmmakers, and more.</p>
-            </div>
-        </section>
+        {% from "macros/subpage_header.html" import subpage_hero, subpage_section_header %}
+        {{ subpage_hero(title="Artists", subtitle="Discover indie musicians, show hosts, athletes, filmmakers, and more.", icon_class="fas fa-users") }}
 
         <section class="podcasts-section mobile-only">
-            <div class="podcasts-section-header">
-                <h2>All Artists</h2>
-                <button type="button" class="episode-btn"
-                    @click="viewRandomArtist()" title="Discover Random Artist">
-                    <i class="fas fa-random" aria-hidden="true"></i>
-                    <span class="sr-only">Discover Random Artist</span>
-                </button>
-            </div>
+            {% call subpage_section_header("All Artists") %}
+            <button type="button" class="episode-btn"
+                @click="viewRandomArtist()" title="Discover Random Artist">
+                <i class="fas fa-random" aria-hidden="true"></i>
+                <span class="sr-only">Discover Random Artist</span>
+            </button>
+            {% endcall %}
 
             <div class="artists-mobile-controls">
                 <div class="search-bar">

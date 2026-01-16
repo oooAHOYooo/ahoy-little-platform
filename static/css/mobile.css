@@ -214,6 +214,107 @@
     }
 }
 
+/* ==========================================================================
+   Live TV — mobile-first layout (≤768px)
+   Goals:
+   - No two-column gaps
+   - Swipeable channel strip instead of giant tiles
+   - Tap-friendly remote buttons
+   - “Playing now” stacks cleanly
+   ========================================================================== */
+@media (max-width: 768px) {
+    .tv-container {
+        min-height: auto !important;
+    }
+
+    .video-spotlight {
+        padding-bottom: 0 !important;
+    }
+
+    .spotlight-grid {
+        grid-template-columns: 1fr !important;
+        max-width: none !important;
+        margin: 0 !important;
+        gap: 12px !important;
+        padding: 0 !important; /* gutters come from .content-area.app-content */
+    }
+
+    .panelstream-player.hero-player {
+        width: 100%;
+        max-height: 52vh;
+        border-radius: 14px;
+    }
+
+    .video-header {
+        left: 10px;
+        top: 10px;
+    }
+
+    /* Remote controls: thumb-friendly, wraps into rows */
+    .channel-remote.remote-below {
+        padding: 8px 0;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .remote-btn {
+        min-width: 88px;
+        padding: 10px 12px;
+        font-size: 14px;
+        border-radius: 10px;
+    }
+
+    /* Playing now card: stack into a compact vertical card */
+    #playing-now {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    #playing-now img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16/9;
+        border-radius: 10px;
+    }
+
+    /* Channel selector becomes a horizontal swipe strip */
+    #channel-selector {
+        display: flex !important;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 10px 2px 12px 2px !important;
+        margin: 0 !important;
+        background: transparent !important;
+        max-width: none !important;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+    }
+
+    #channel-selector::-webkit-scrollbar { display: none; }
+
+    #channel-selector .channel-button {
+        scroll-snap-align: start;
+        flex: 0 0 auto;
+        min-width: 220px;
+        padding: 14px 14px;
+        border-radius: 14px;
+        text-align: left;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    #channel-selector .channel-button-name {
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    #channel-selector .channel-button-next {
+        font-size: 12px;
+    }
+}
+
 /* MOBILE ONLY */
 @media (max-width: 767px) {
 
@@ -281,9 +382,10 @@
         font-size: 1.1rem;
     }
 
+    /* This legacy rule caused a large blank gap above subpage headers.
+       The current mobile header/nav system already manages spacing. */
     body {
-        padding-top: 60px;
-        /* Prevent content overlap */
+        padding-top: 0 !important;
     }
 }
 
@@ -432,6 +534,88 @@
     }
 
     .hidden-mobile {
+        display: none !important;
+    }
+}
+
+/* ==========================================================================
+   Universal mobile subpage headers (match Podcasts)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Music: hide large desktop hero/header, use Podcasts-style mobile header */
+    .music-container {
+        padding: 18px 18px calc(40px + env(safe-area-inset-bottom)) 18px;
+    }
+
+    .music-container .unified-hero.tv-hero,
+    .music-container .unified-header.music-subheader {
+        display: none !important;
+    }
+
+    .music-mobile-controls {
+        display: grid;
+        gap: 10px;
+        margin: 10px 2px 12px 2px;
+    }
+
+    .music-mobile-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .music-mobile-row select {
+        flex: 1 1 160px;
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.92);
+        outline: none;
+    }
+
+    /* Bookmarks: hide unified header, use Podcasts-style mobile header */
+    .bookmarks-container {
+        padding: 18px 18px calc(40px + env(safe-area-inset-bottom)) 18px;
+        min-height: auto;
+    }
+
+    .bookmarks-container .unified-header.bookmarks-subheader {
+        display: none !important;
+    }
+
+    .bookmarks-container .filter-section,
+    .bookmarks-container .bookmarks-grid-section {
+        padding: 0 !important;
+        margin: 12px 0 !important;
+    }
+
+    .bookmarks-container .bookmarks-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    /* Performances: use Podcasts-style mobile header; hide large hero on mobile */
+    .performances-page {
+        padding: 18px 18px calc(40px + env(safe-area-inset-bottom)) 18px;
+    }
+
+    .performances-mobile-controls {
+        display: grid;
+        gap: 10px;
+        margin: 10px 2px 12px 2px;
+    }
+
+    .performances-mobile-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .performances-page .performances-grid-section .section-header {
         display: none !important;
     }
 }
@@ -673,7 +857,8 @@
         margin-bottom: 0 !important;
     }
     .app-content > section:first-child {
-        margin-top: var(--spacing-md, 16px) !important;
+        /* Tiny breathing room under the top chrome without a big dead zone */
+        margin-top: 10px !important;
     }
 
     /* Music / Shows pages: remove nested horizontal padding so gutters are consistent */
@@ -1032,8 +1217,8 @@
     }
 
     .nav-container {
-        padding-left: 10px !important;
-        padding-right: 10px !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
     }
 
     /* Kill the first horizontal Explore bar */
@@ -1043,13 +1228,13 @@
 
     /* Compact header spacing on mobile */
     .app-header {
-        padding-top: 4px !important;
-        padding-bottom: 4px !important;
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
     }
 
     /* Tighten main content spacing */
     .main-content {
-        margin-top: 6px;
+        margin-top: 4px;
     }
 
     /* Mobile top bar layout: left hamburger • centered logo • right hamburger */
@@ -1097,7 +1282,7 @@
 
     .nav-logo img {
         display: inline-block !important;
-        height: 20px;
+        height: 18px;
         max-width: 120px;
         object-fit: contain;
     }

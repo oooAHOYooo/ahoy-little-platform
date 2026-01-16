@@ -3,9 +3,12 @@
 {% block title %}Downloads — Ahoy Indie Media{% endblock %}
 
 {% block content %}
+{% from "macros/subpage_header.html" import subpage_hero %}
+{{ subpage_hero(title="Downloads", subtitle="Get Ahoy Indie Media as a standalone desktop app.", icon_class="fas fa-download") }}
+
 <section class="container"
     style="max-width:960px;margin:2rem auto;padding:1rem;">
-    <h1>Downloads</h1>
+    <h1 class="desktop-only">Downloads</h1>
     <p class="text-gray">Get Ahoy Indie Media as a standalone desktop
         application. Choose the installer for your platform (recommended) or the
         standalone executable.</p>

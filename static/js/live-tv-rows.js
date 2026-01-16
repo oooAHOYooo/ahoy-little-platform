@@ -18,6 +18,17 @@
     nextTitle: null,
   };
 
+  function getCurrentSlotForRow(schedule, row) {
+    if (!Array.isArray(schedule)) return null;
+    const now = Date.now();
+    for (const s of schedule) {
+      if (!s) continue;
+      if (s.row !== row) continue;
+      if (now >= (s.startUTC || 0) && now < (s.endUTC || 0)) return s;
+    }
+    return null;
+  }
+
   function init() {
     state.videoEl = byId('livePlayer') || byId('tvPlayer');
     state.nowThumb = byId('playingNowThumb');
@@ -36,6 +47,11 @@
         wireGlobalKeys();
       })
       .catch(err => console.error('live-tv-rows load failed', err));
+
+    // If the schedule engine loads after us, refresh labels so we show "Now playing".
+    document.addEventListener('ltv:schedule:ready', () => {
+      try { renderRows(); } catch (_) {}
+    });
   }
 
   function buildTimeStrip() {
@@ -84,6 +100,9 @@
       const ch = findChannelForKey(rowDef.key, rowDef.titles) || state.channels[rowIdx] || null;
       if (!ch) return;
 
+      const schedule = window.CHANNEL_SCHEDULE;
+      const slot = getCurrentSlotForRow(schedule, rowIdx);
+
       // Create channel button
       const button = document.createElement('button');
       button.className = 'channel-button';
@@ -97,14 +116,18 @@
       name.textContent = getChannelLabel(rowDef.key, ch.name);
       button.appendChild(name);
 
-      // Next up (optional - show first item title if available)
-      if (ch.items && ch.items.length > 0) {
-        const firstItem = ch.items[0];
-        const next = document.createElement('div');
-        next.className = 'channel-button-next';
-        next.textContent = `Next: ${cleanTitle(firstItem.title)}`;
-        button.appendChild(next);
+      // Mobile-first: show what's playing now for this channel (no "Next" label).
+      const nowLine = document.createElement('div');
+      nowLine.className = 'channel-button-next';
+      if (slot && slot.title) {
+        nowLine.textContent = cleanTitle(slot.title);
+      } else if (ch.items && ch.items.length > 0) {
+        // Fallback: show the first item title if schedule isn't ready.
+        nowLine.textContent = cleanTitle(ch.items[0].title);
+      } else {
+        nowLine.textContent = '—';
       }
+      button.appendChild(nowLine);
 
       // Click handler
       button.addEventListener('click', () => {
@@ -112,25 +135,38 @@
         qsa('.channel-button').forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
         
-        // Load first item from this channel
-        if (ch.items && ch.items.length > 0) {
-          const firstItem = ch.items[0];
-          const src = firstItem.video_url || firstItem.mp4_link || firstItem.trailer_url;
-          if (src && state.videoEl) {
-            try { state.videoEl.pause(); } catch (_) {}
-            state.videoEl.src = src;
-            try { state.videoEl.load(); } catch (_) {}
-            state.videoEl.muted = false;
-            const p = state.videoEl.play();
-            if (p && typeof p.catch === 'function') p.catch(() => {});
-            
-            // Update preview
-            if (state.nowThumb) state.nowThumb.src = firstItem.thumbnail || '/static/img/default-cover.jpg';
-            if (state.nowTitle) state.nowTitle.textContent = cleanTitle(firstItem.title);
-            if (state.nextTitle && ch.items.length > 1) {
-              state.nextTitle.textContent = cleanTitle(ch.items[1].title);
+        // Play what's on NOW for this channel if available (schedule-driven).
+        const scheduleNow = getCurrentSlotForRow(window.CHANNEL_SCHEDULE, rowIdx);
+        const playSrc =
+          scheduleNow?.src ||
+          ch.items?.[0]?.video_url ||
+          ch.items?.[0]?.mp4_link ||
+          ch.items?.[0]?.trailer_url;
+
+        if (playSrc && state.videoEl) {
+          try { state.videoEl.pause(); } catch (_) {}
+          state.videoEl.src = playSrc;
+          try { state.videoEl.load(); } catch (_) {}
+          state.videoEl.muted = false;
+          const p = state.videoEl.play();
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+
+          // Update preview
+          const thumb = scheduleNow?.thumb || ch.items?.[0]?.thumbnail || '/static/img/default-cover.jpg';
+          const title = scheduleNow?.title || ch.items?.[0]?.title || '—';
+          if (state.nowThumb) state.nowThumb.src = thumb;
+          if (state.nowTitle) state.nowTitle.textContent = cleanTitle(title);
+
+          // Update "Up next" line if the schedule engine can find it.
+          try {
+            if (state.nextTitle && Array.isArray(window.CHANNEL_SCHEDULE)) {
+              const now = Date.now();
+              const next = window.CHANNEL_SCHEDULE
+                .filter(s => s && s.row === rowIdx && (s.startUTC || 0) > now)
+                .sort((a, b) => (a.startUTC || 0) - (b.startUTC || 0))[0];
+              state.nextTitle.textContent = next?.title ? cleanTitle(next.title) : '—';
             }
-          }
+          } catch (_) {}
         }
       });
 

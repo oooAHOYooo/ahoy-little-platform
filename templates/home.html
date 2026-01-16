@@ -4,6 +4,9 @@
 
 {% block content %}
 <div class="home-page" x-data="homePage()" x-init="init()">
+    {% from "macros/subpage_header.html" import subpage_hero %}
+    {{ subpage_hero(title="Home", subtitle="Explore", icon_class="fas fa-home") }}
+
     <!-- Live Dashboard (TV & Radio) -->
     <section class="live-dashboard">
         <div class="dashboard-grid">

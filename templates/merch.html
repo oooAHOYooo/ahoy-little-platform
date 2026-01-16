@@ -134,7 +134,10 @@
 <div class="merch-shell"
   x-data="merchStore()"
   x-init="init()">
-  <div class="merch-hero">
+  {% from "macros/subpage_header.html" import subpage_hero %}
+  {{ subpage_hero(title="Merch", subtitle="Support Ahoy with limited drops and essentials.", icon_class="fas fa-shopping-bag") }}
+
+  <div class="merch-hero desktop-only">
     <h1>Merch</h1>
     <p>Support Ahoy with limited drops and essentials. Fast checkout, easy quantities.</p>
   {% if release %}<p class="merch-build">BUILD {{ release }}</p>{% endif %}

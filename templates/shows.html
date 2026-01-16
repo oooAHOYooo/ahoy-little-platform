@@ -261,17 +261,11 @@
             </div>
         </section>
         <!-- Mobile: Videos layout matches Podcasts (episode rows) -->
-        <section class="podcasts-hero mobile-only">
-            <div class="podcasts-hero-inner">
-                <h1>Videos</h1>
-                <p>Music videos, skate parts, short films, episodes, and more.</p>
-            </div>
-        </section>
+        {% from "macros/subpage_header.html" import subpage_hero, subpage_section_header %}
+        {{ subpage_hero(title="Videos", subtitle="Music videos, skate parts, short films, episodes, and more.", icon_class="fas fa-video") }}
 
         <section class="podcasts-section mobile-only">
-            <div class="podcasts-section-header">
-                <h2>All Videos</h2>
-            </div>
+            {{ subpage_section_header("All Videos") }}
             <div class="episode-list">
                 <template x-for="show in filteredShows" :key="show.id">
                     <article class="episode-row" @click="playShow(show)">

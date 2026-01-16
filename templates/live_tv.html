@@ -2,12 +2,11 @@
 
 {% block title %}Live TV - Ahoy Indie Media{% endblock %}
 
-{% block head %}
+{% block extra_head %}
 <style>
 /* Minimal Live TV layout */
 .live-tv-container { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 12px; }
 .live-tv-sidebar { background: #0f0f0f; border-radius: 8px; padding: 8px; }
-.desktop-only { display: none !important; }
 .channel-list { list-style: none; margin: 0; padding: 0; }
 .channel-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 6px; cursor: pointer; }
 .channel-item[aria-selected="true"] { background: #222; outline: 2px solid #444; }
@@ -62,8 +61,7 @@
 
 /* Mobile-specific Live TV improvements */
 @media (max-width: 768px) {
-  /* Focused mobile experience: hide large selector in favor of drawer */
-  #channel-selector { display: none; }
+  /* Mobile-first: keep channel selector visible, but it will be restyled as a horizontal strip in mobile.css */
   .live-tv-container { padding-bottom: 80px; } /* respect bottom player bar */
 
   /* Full-width video player on mobile */
@@ -299,6 +297,9 @@
 
 {% block content %}
 <div class="tv-container">
+	{% from "macros/subpage_header.html" import subpage_hero %}
+	{{ subpage_hero(title="Live TV", subtitle="Channel surf and watch live programming.", icon_class="fas fa-tv") }}
+
 	<div class="video-spotlight">
 		<div class="spotlight-grid">
 			<div class="spotlight-left">

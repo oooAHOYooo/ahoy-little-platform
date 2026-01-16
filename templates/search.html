@@ -4,12 +4,12 @@
 
 {% block content %}
 <div class="search-results-page" x-data="searchResults()" x-init="init()">
+    {% from "macros/subpage_header.html" import subpage_hero %}
+    {{ subpage_hero(title="Search", subtitle="Find music, videos, artists, and more.", icon_class="fas fa-search", scope_class="") }}
+
     <!-- Mobile-Optimized Header -->
     <div class="search-page-header">
         <div class="search-header-content">
-            <h1 class="search-page-title mobile-only">
-                <i class="fas fa-search"></i> Search
-            </h1>
             <div class="search-input-wrapper">
                 <div class="search-input-container">
                     <i class="fas fa-search search-icon"></i>

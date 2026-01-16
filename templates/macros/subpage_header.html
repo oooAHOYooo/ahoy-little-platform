@@ -1,0 +1,43 @@
+{# Gold-standard subpage header (modeled after Podcasts).
+
+Usage (hero):
+  {% from "macros/subpage_header.html" import subpage_hero %}
+  {{ subpage_hero(title="Events", subtitle="Upcoming live Ahoy shows…", icon_class="fas fa-calendar") }}
+
+Usage (section header + right-side actions):
+  {% from "macros/subpage_header.html" import subpage_section_header %}
+  <section class="podcasts-section mobile-only">
+    {% call subpage_section_header("Browse") %}
+      <button type="button" class="episode-btn" @click="playRandomTrack()" title="Play Random">
+        <i class="fas fa-random" aria-hidden="true"></i><span class="sr-only">Play Random</span>
+      </button>
+    {% endcall %}
+    <!-- controls/list go here -->
+  </section>
+#}
+
+{% macro subpage_hero(title, subtitle='', icon_class='', scope_class='mobile-only') -%}
+<section class="podcasts-hero {{ scope_class }}">
+    <div class="podcasts-hero-inner">
+        <h1>
+            {% if icon_class %}
+            <i class="{{ icon_class }}" aria-hidden="true"></i>
+            {% endif %}
+            {{ title }}
+        </h1>
+        {% if subtitle %}
+        <p>{{ subtitle }}</p>
+        {% endif %}
+    </div>
+</section>
+{%- endmacro %}
+
+{% macro subpage_section_header(title) -%}
+<div class="podcasts-section-header">
+    <h2>{{ title }}</h2>
+    {% if caller is defined %}
+      {{ caller() }}
+    {% endif %}
+</div>
+{%- endmacro %}
+

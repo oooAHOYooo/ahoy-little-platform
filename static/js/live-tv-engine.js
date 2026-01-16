@@ -183,6 +183,9 @@
     engine.schedule = schedule;
     log('schedule built', schedule.length, 'items');
     window.CHANNEL_SCHEDULE = schedule; // expose for debugging
+    try {
+      document.dispatchEvent(new CustomEvent('ltv:schedule:ready', { detail: { schedule } }));
+    } catch (_) {}
   }
 
   function getCurrentSlot(schedule, rowFilter) {

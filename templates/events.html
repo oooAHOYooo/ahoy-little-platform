@@ -4,12 +4,8 @@
 
 {% block content %}
 <div class="events-page" x-data="eventsPage()" x-init="init()">
-    <section class="podcasts-hero">
-        <div class="podcasts-hero-inner">
-            <h1>Events</h1>
-            <p>Upcoming live Ahoy shows, plus past events and recordings.</p>
-        </div>
-    </section>
+    {% from "macros/subpage_header.html" import subpage_hero %}
+    {{ subpage_hero(title="Events", subtitle="Upcoming live Ahoy shows, plus past events and recordings.", icon_class="fas fa-calendar", scope_class="") }}
 
     <!-- Featured / Upcoming widget -->
     <section class="podcasts-section">

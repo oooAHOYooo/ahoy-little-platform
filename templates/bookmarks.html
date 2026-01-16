@@ -6,6 +6,16 @@
 {% block content %}
 <div class="bookmarks-container" x-data="bookmarksPageHandler()"
     x-init="init()">
+    {% from "macros/subpage_header.html" import subpage_hero, subpage_section_header %}
+    {{ subpage_hero(title="My Bookmarks", subtitle="Your collection of saved tracks, shows, and artists.", icon_class="fas fa-bookmark") }}
+
+    <section class="podcasts-section mobile-only">
+        {% call subpage_section_header("Saved") %}
+        <span class="tab-count" x-show="list().length > 0"
+            x-text="list().length"></span>
+        {% endcall %}
+    </section>
+
     <!-- Unified Header Section -->
     <section class="unified-header bookmarks-subheader">
         <div class="header-content">

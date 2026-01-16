@@ -4,6 +4,68 @@
 
 {% block content %}
 <div class="music-container" x-data="musicLibrary()" x-init="loadMusic()">
+    {% from "macros/subpage_header.html" import subpage_hero, subpage_section_header %}
+    {{ subpage_hero(title="Music Library", subtitle="Explore", icon_class="fas fa-music") }}
+
+    <!-- Mobile: match Podcasts header + compact controls before the list -->
+    <section class="podcasts-section mobile-only">
+        {% call subpage_section_header("Browse") %}
+        <button type="button" class="episode-btn"
+            @click="playRandomTrack()" title="Play Random">
+            <i class="fas fa-random" aria-hidden="true"></i>
+            <span class="sr-only">Play Random</span>
+        </button>
+        {% endcall %}
+
+        <div class="music-mobile-controls">
+            <div class="search-bar">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="text"
+                    x-model="searchQuery"
+                    @input="filterMusic()"
+                    placeholder="Search music..."
+                    class="search-input"
+                    aria-label="Search music">
+                <button @click="clearSearch()" class="search-clear"
+                    x-show="searchQuery" aria-label="Clear search">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="music-mobile-row">
+                <select x-model="selectedArtist" @change="filterMusic()"
+                    aria-label="Filter by artist">
+                    <option value>All Artists</option>
+                    <template x-for="artist in artists" :key="artist">
+                        <option :value="artist" x-text="artist"></option>
+                    </template>
+                </select>
+
+                <select x-model="sortBy" @change="sortMusic()"
+                    aria-label="Sort music">
+                    <option value="title">Sort: Title</option>
+                    <option value="artist">Sort: Artist</option>
+                    <option value="added_date">Sort: Date Added</option>
+                </select>
+            </div>
+
+            <div class="music-mobile-row">
+                <div class="view-options" aria-label="View options">
+                    <button @click="viewMode = 'grid'"
+                        :class="{'active': viewMode === 'grid'}"
+                        class="view-btn" type="button" aria-label="Grid view">
+                        <i class="fas fa-th" aria-hidden="true"></i>
+                    </button>
+                    <button @click="viewMode = 'list'"
+                        :class="{'active': viewMode === 'list'}"
+                        class="view-btn" type="button" aria-label="List view">
+                        <i class="fas fa-list" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Unified Rotating Hero -->
     <section class="unified-hero tv-hero" x-data="createUnifiedHero({ pageType: 'music', rotationSpeed: 14000 })" x-init="init()"
         @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd">

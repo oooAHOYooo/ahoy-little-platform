@@ -4,7 +4,10 @@
 
 {% block content %}
 <div class="page-container cast-page" x-data="castPage()" x-init="init()">
-  <section class="header-simple">
+  {% from "macros/subpage_header.html" import subpage_hero %}
+  {{ subpage_hero(title="Cast", subtitle="Cast Ahoy to your TV with quick, no-fuss options.", icon_class="fas fa-tv") }}
+
+  <section class="header-simple desktop-only">
     <h1><i class="fas fa-tv"></i> Cast Ahoy to your TV</h1>
     <p>Fast, no-fuss casting. Start playing, then tap a button below. No new
       accounts required for the recommended options.</p>

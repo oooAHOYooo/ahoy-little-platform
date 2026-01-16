@@ -4,6 +4,9 @@
 
 {% block content %}
 <div class="acct">
+  {% from "macros/subpage_header.html" import subpage_hero %}
+  {{ subpage_hero(title="Profile", subtitle="Your account, saves, and playlists.", icon_class="fas fa-user-circle") }}
+
   {% if current_user.is_authenticated %}
     <div class="acct-head">
       <div class="acct-avatar">
@@ -90,7 +93,7 @@
     </div>
   {% else %}
     <div class="acct-guest glass">
-      <h1>Account</h1>
+      <h2>Account</h2>
       <p class="muted">Sign in to view your profile, saves, and merch orders.</p>
       <div style="margin-top:12px;">
         <a class="btn btn-primary" href="/auth">Sign in</a>

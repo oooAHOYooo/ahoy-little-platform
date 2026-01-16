@@ -1,0 +1,21 @@
+{# Reusable Podcasts-style hero for mobile subpages.
+   Usage:
+     {% set mobile_title = "Music Library" %}
+     {% set mobile_subtitle = "Discover tracks, albums, and artists." %}
+     {% set mobile_icon_class = "fas fa-music" %} {# optional #}
+     {% include "_mobile_podcasts_hero.html" %}
+#}
+<section class="podcasts-hero mobile-only">
+    <div class="podcasts-hero-inner">
+        <h1>
+            {% if mobile_icon_class %}
+            <i class="{{ mobile_icon_class }}" aria-hidden="true"></i>
+            {% endif %}
+            {{ mobile_title }}
+        </h1>
+        {% if mobile_subtitle %}
+        <p>{{ mobile_subtitle }}</p>
+        {% endif %}
+    </div>
+</section>
+
