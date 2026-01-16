@@ -107,6 +107,7 @@
 
       <!-- Login -->
       <form x-show="mode==='login'" x-cloak @submit.prevent="login()" class="acct-auth-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label class="acct-auth-label">
           Email or username
           <input class="acct-auth-input" type="text" inputmode="email" autocomplete="username"
@@ -135,6 +136,7 @@
 
       <!-- Register -->
       <form x-show="mode==='register'" x-cloak @submit.prevent="register()" class="acct-auth-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label class="acct-auth-label">
           Email
           <input class="acct-auth-input" type="email" autocomplete="email"
@@ -358,9 +360,10 @@ function profileAuth() {
       this.error = '';
       this.loading = true;
       try {
+        const csrf = document.querySelector("form.acct-auth-form input[name='csrf_token']")?.value || '';
         const r = await fetch('/api/auth/login', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...(csrf ? { 'X-CSRFToken': csrf } : {}) },
           credentials: 'include',
           body: JSON.stringify({ identifier: this.loginIdentifier, password: this.loginPassword })
         });
@@ -382,9 +385,10 @@ function profileAuth() {
       this.error = '';
       this.loading = true;
       try {
+        const csrf = document.querySelector("form.acct-auth-form input[name='csrf_token']")?.value || '';
         const r = await fetch('/api/auth/register', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...(csrf ? { 'X-CSRFToken': csrf } : {}) },
           credentials: 'include',
           body: JSON.stringify({ email: this.regEmail, username: this.regUsername, password: this.regPassword })
         });
