@@ -217,6 +217,11 @@
     .podcasts-hero h1 i {
         display: none !important;
     }
+
+    /* Add a bit more margin between title and subheader on mobile */
+    .podcasts-hero p {
+        margin-top: 4px !important;
+    }
 }
 
 /* ==========================================================================
@@ -866,10 +871,11 @@
 @media (max-width: 768px) {
     :root {
         --player-h: 76px;
-        /* Deterministic sizing for the 2-row mobile footer nav */
+        /* Deterministic sizing for the 2-row mobile footer nav + logo */
         --bottom-nav-h: calc(60px + env(safe-area-inset-bottom));
         --secondary-nav-h: 48px;
-        --footer-stack-h: calc(var(--bottom-nav-h) + var(--secondary-nav-h));
+        --footer-logo-h: 32px; /* 20px logo + 12px padding */
+        --footer-stack-h: calc(var(--bottom-nav-h) + var(--secondary-nav-h) + var(--footer-logo-h));
 
         /* Used by existing spacing helpers; keep it in sync with the footer stack. */
         --bottombar-h: var(--footer-stack-h);
@@ -1740,6 +1746,27 @@
 
 /* Mobile fixed bottom navigation (Spotify-like) */
 @media (max-width: 767px) {
+
+    /* Mobile footer logo (centered above nav rows) */
+    .mobile-footer-logo {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: calc(var(--bottom-nav-h, 60px) + var(--secondary-nav-h, 48px) + env(safe-area-inset-bottom));
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 6px 0;
+        z-index: 10001;
+        background: transparent;
+        height: var(--footer-logo-h, 32px);
+    }
+
+    .mobile-footer-logo-img {
+        height: 20px;
+        width: auto;
+        opacity: 0.5;
+    }
 
     /* Secondary navigation row (above primary nav) */
     .mobile-secondary-nav {
