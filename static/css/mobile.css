@@ -212,6 +212,11 @@
         visibility: visible !important;
         opacity: 1 !important;
     }
+
+    /* Mobile subpage hero: title-only (hide FA icons) */
+    .podcasts-hero h1 i {
+        display: none !important;
+    }
 }
 
 /* ==========================================================================
@@ -861,6 +866,10 @@
 @media (max-width: 768px) {
     :root {
         --player-h: 76px;
+        /* Total stacked height of the two-row mobile footer nav (secondary + bottom). */
+        --mobile-footer-h: 96px;
+        /* Used by existing spacing helpers; keep it in sync with the footer stack. */
+        --bottombar-h: var(--mobile-footer-h);
     }
 
     html {
@@ -1738,7 +1747,7 @@
         justify-content: space-around !important;
         align-items: flex-start !important;
         gap: 4px !important;
-        padding: 6px 4px !important;
+        padding: 4px 4px !important;
         visibility: visible !important;
         opacity: 1 !important;
         z-index: 10002 !important;
@@ -1751,7 +1760,7 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.25);
         will-change: transform, filter;
-        min-height: 60px;
+        min-height: 48px;
     }
 
     .mobile-secondary-nav .mobile-tab {
@@ -1760,8 +1769,8 @@
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-        gap: 3px;
-        padding: 6px 10px 4px;
+        gap: 2px;
+        padding: 4px 8px 3px;
         flex: 1;
         max-width: 70px;
         color: #9ca3af;
@@ -1769,7 +1778,7 @@
         border: none;
         background: transparent;
         font-size: 9px;
-        line-height: 1.2;
+        line-height: 1.05;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         will-change: transform, color;
     }
@@ -1783,7 +1792,7 @@
     }
 
     .mobile-secondary-nav .mobile-tab i {
-        font-size: 18px;
+        font-size: 17px;
         line-height: 1;
         position: relative;
         z-index: 2;
@@ -1795,7 +1804,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 100%;
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 500;
         position: relative;
         z-index: 2;
@@ -1846,7 +1855,7 @@
         align-items: flex-start !important;
         gap: 4px !important;
         /* Keep compact and aligned to the secondary row above */
-        padding: 8px 4px calc(8px + env(safe-area-inset-bottom)) !important;
+        padding: 6px 4px calc(6px + env(safe-area-inset-bottom)) !important;
         visibility: visible !important;
         opacity: 1 !important;
         z-index: 10003 !important;
@@ -1859,7 +1868,7 @@
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
         will-change: transform, filter;
         z-index: 10003;
-        min-height: 70px;
+        min-height: 60px;
     }
 
     .mobile-bottom-nav::before {
@@ -1873,16 +1882,16 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 4px;
-        padding: 8px 12px 4px;
+        gap: 2px;
+        padding: 6px 10px 3px;
         flex: 1;
         max-width: 72px;
         color: rgba(255, 255, 255, 0.6);
         text-decoration: none;
         border: none;
         background: transparent;
-        font-size: 10px;
-        line-height: 1.2;
+        font-size: 9px;
+        line-height: 1.05;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         will-change: transform, color;
     }
@@ -1902,7 +1911,7 @@
     }
 
     .mobile-bottom-nav .mobile-tab i {
-        font-size: 22px;
+        font-size: 20px;
         line-height: 1;
         position: relative;
         z-index: 2;
@@ -1915,7 +1924,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 100%;
-        font-size: 11px;
+        font-size: 9px;
         font-weight: 500;
         position: relative;
         z-index: 2;
