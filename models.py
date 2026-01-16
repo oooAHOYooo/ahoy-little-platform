@@ -16,12 +16,13 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, relationship
 import uuid
+from flask_login import UserMixin
 
 
 Base = declarative_base()
 
 
-class User(Base):
+class User(UserMixin, Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
@@ -40,6 +41,11 @@ class User(Base):
     playlists = relationship('Playlist', back_populates='user', cascade='all, delete-orphan')
     bookmarks = relationship('Bookmark', back_populates='user', cascade='all, delete-orphan')
     play_history = relationship('PlayHistory', back_populates='user', cascade='all, delete-orphan')
+
+    @property
+    def is_active(self) -> bool:
+        # Flask-Login uses this to decide if a user account can authenticate.
+        return not bool(self.disabled)
 
     def __repr__(self) -> str:
         return f"<User id={self.id} email={self.email} admin={self.is_admin}>"
