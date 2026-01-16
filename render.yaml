@@ -5,24 +5,57 @@ services:
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: ./scripts/migrate_and_start.sh
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: ahoy-postgres
-          property: connectionString
-      - key: AHOY_ENV
-        value: production
-      - key: FLASK_ENV
-        value: production
-      - key: BASE_URL
-        value: https://ahoy-indie-media.onrender.com
-      - key: RENDER
-        value: true
-      - key: PYTHONUNBUFFERED
-        value: 1
-      - key: SECRET_KEY
-        generateValue: true
     healthCheckPath: /ops/selftest
     autoDeploy: true
     branch: main
     rootDir: .
+    envVars:
+      - key: AHOY_ENV
+        value: production
+      # Set this to your custom domain after provisioning (or keep the onrender.com origin).
+      - key: BASE_URL
+        value: https://ahoy-indie-media.onrender.com
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ahoy-postgres
+          property: connectionString
+      # Key Value (Redis/Valkey). If Blueprint auto-wiring fails, set REDIS_URL manually in the dashboard.
+      - key: REDIS_URL
+        fromService:
+          name: ahoy-kv
+          type: redis
+          property: connectionString
+      # Email (set one provider path)
+      - key: RESEND_API_KEY
+        sync: false
+      - key: SUPPORT_EMAIL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      # Optional
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: SESSION_COOKIE_SAMESITE
+        value: "Lax"
+
+  # Render "Key Value" (Redis/Valkey)
+  - type: redis
+    name: ahoy-kv
+    plan: free
+    ipAllowList: []
+
+databases:
+  - name: ahoy-postgres
+    plan: free

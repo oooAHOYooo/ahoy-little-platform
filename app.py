@@ -194,6 +194,13 @@ def create_app():
     # Initialize server-side sessions (filesystem by default per config)
     if FlaskSession is not None:
         FlaskSession(app)
+        st = (app.config.get("SESSION_TYPE") or "").lower()
+        if st == "redis":
+            app.logger.info("Redis sessions enabled")
+        elif st == "filesystem":
+            app.logger.info("Filesystem sessions enabled")
+        elif st:
+            app.logger.info("%s sessions enabled", st)
     else:
         print("WARN: Flask noted Flask-Session not available; using client-side cookies only. Activate venv or install Flask-Session.")
     bcrypt.init_app(app)

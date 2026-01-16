@@ -456,6 +456,28 @@ The platform uses a simple file-based user system with:
    - Start Command: `./scripts/migrate_and_start.sh`
    - Health Check Path: `/ops/selftest`
 
+### Render Deploy Checklist
+
+**Required env vars (production):**
+- `AHOY_ENV=production`
+- `BASE_URL=https://your-public-domain-or-onrender-origin`
+- `SECRET_KEY` (Render can generate)
+- `DATABASE_URL` (from Render Postgres)
+- `REDIS_URL` (from Render **Key Value** / Redis / Valkey)
+
+**Email (password reset) — choose one:**
+- Resend: `RESEND_API_KEY` + `SUPPORT_EMAIL`
+- SMTP: `SMTP_HOST` + `SMTP_PORT` + `SMTP_USER` + `SMTP_PASS` + `SUPPORT_EMAIL`
+
+**Notes:**
+- If `REDIS_URL` is set, the app uses Redis-backed server-side sessions (recommended for multi-instance).
+- If your Blueprint doesn’t auto-wire `REDIS_URL`, set it manually in Render → Web Service → Environment.
+
+**Smoke tests after deploy:**
+- Create an account on `/account`, log out/in, refresh — session should persist.
+- Create a bookmark/playlist, refresh — should still be present.
+- Password reset: `/auth/forgot` sends an email, and `/auth/reset?token=...` works.
+
 ### Production Setup
 
 ### Stripe Payments (AHOY_ENV)

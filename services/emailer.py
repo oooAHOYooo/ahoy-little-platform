@@ -1,13 +1,20 @@
 import os
 import smtplib
+import logging
 from email.message import EmailMessage
 from typing import Optional, Dict, Any
 
 import requests
 
+log = logging.getLogger(__name__)
+
 
 def _from_email() -> str:
-    return os.getenv("SUPPORT_EMAIL") or os.getenv("FROM_EMAIL") or "support@localhost"
+    sender = (os.getenv("SUPPORT_EMAIL") or "").strip()
+    if sender:
+        return sender
+    log.warning("SUPPORT_EMAIL is not set; using a placeholder sender address")
+    return "support@localhost"
 
 
 def _base_url_fallback() -> Optional[str]:
@@ -16,7 +23,9 @@ def _base_url_fallback() -> Optional[str]:
 
 
 def can_send_email() -> bool:
-    return bool(os.getenv("RESEND_API_KEY") or (os.getenv("SMTP_HOST") and os.getenv("SMTP_USER")))
+    if os.getenv("RESEND_API_KEY"):
+        return True
+    return bool(os.getenv("SMTP_HOST") and os.getenv("SMTP_USER") and (os.getenv("SMTP_PASS") or os.getenv("SMTP_PASSWORD")))
 
 
 def send_email(to_email: str, subject: str, text: str, html: Optional[str] = None) -> Dict[str, Any]:
@@ -58,6 +67,9 @@ def send_email(to_email: str, subject: str, text: str, html: Optional[str] = Non
     smtp_tls = (os.getenv("SMTP_TLS", "true").lower() != "false")
 
     if not (smtp_host and smtp_user and smtp_pass):
+        log.error(
+            "Email sending is disabled: missing RESEND_API_KEY or incomplete SMTP config (need SMTP_HOST, SMTP_USER, SMTP_PASS)."
+        )
         return {"ok": False, "provider": "smtp", "detail": "smtp_not_configured"}
 
     msg = EmailMessage()
