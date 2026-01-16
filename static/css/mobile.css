@@ -832,7 +832,7 @@
         left: 0;
         right: 0;
         /* Sit above the fixed bottom nav (avoid overlap) */
-        bottom: calc(var(--bottombar-h, 70px) + env(safe-area-inset-bottom));
+        bottom: var(--footer-stack-h, calc(108px + env(safe-area-inset-bottom)));
         z-index: 10005;
         background: #0a0a0a;
         color: #e5e7eb;
@@ -844,13 +844,13 @@
         /* BEFORE/AFTER (mobile layout quick check)
            - Before: mixed gutters/padding resets + content hidden behind bottom nav
            - After: single gutter via `.app-content` + bottom padding accounts for nav + safe-area */
-        padding-bottom: calc(var(--bottombar-h, 70px) + env(safe-area-inset-bottom) + var(--section-gap, 20px));
+        padding-bottom: calc(var(--footer-stack-h, calc(108px + env(safe-area-inset-bottom))) + var(--section-gap, 20px));
     }
 
     /* When the global player is visible, add enough space so the last content isn't hidden. */
     body.has-player .content-pad-bottom {
         /* `--player-h` is an approximation; the player sits above the bottom nav. */
-        padding-bottom: calc(var(--bottombar-h, 70px) + var(--player-h, 76px) + env(safe-area-inset-bottom) + var(--section-gap, 20px));
+        padding-bottom: calc(var(--footer-stack-h, calc(108px + env(safe-area-inset-bottom))) + var(--player-h, 76px) + var(--section-gap, 20px));
     }
 }
 
@@ -866,22 +866,27 @@
 @media (max-width: 768px) {
     :root {
         --player-h: 76px;
-        /* Total stacked height of the two-row mobile footer nav (secondary + bottom). */
-        --mobile-footer-h: 96px;
+        /* Deterministic sizing for the 2-row mobile footer nav */
+        --bottom-nav-h: calc(60px + env(safe-area-inset-bottom));
+        --secondary-nav-h: 48px;
+        --footer-stack-h: calc(var(--bottom-nav-h) + var(--secondary-nav-h));
+
         /* Used by existing spacing helpers; keep it in sync with the footer stack. */
-        --bottombar-h: var(--mobile-footer-h);
+        --bottombar-h: var(--footer-stack-h);
     }
 
     html {
         /* Ensure in-page jumps don't land under the stacked top bars */
         scroll-padding-top: calc(32px + 48px + env(safe-area-inset-top) + 12px);
-        scroll-padding-bottom: calc(var(--bottombar-h, 70px) + env(safe-area-inset-bottom) + 12px);
+        scroll-padding-bottom: calc(var(--footer-stack-h, calc(108px + env(safe-area-inset-bottom))) + 12px);
     }
 
     /* Override older mobile padding rules (base.css) with safe-area aware gutter */
     .content-area.app-content {
         padding-left: max(var(--gutter, 16px), env(safe-area-inset-left)) !important;
         padding-right: max(var(--gutter, 16px), env(safe-area-inset-right)) !important;
+        /* Ensure hero headers don't visually sit under the sticky app header */
+        padding-top: 8px !important;
         max-width: var(--content-max, 680px);
         margin-left: auto;
         margin-right: auto;
@@ -1742,7 +1747,8 @@
         left: 0 !important;
         right: 0 !important;
         /* Sit directly on top of the bottom nav (flush, no gap) */
-        bottom: calc(var(--bottombar-h, 70px) + env(safe-area-inset-bottom)) !important;
+        /* Sit flush on top of the bottom nav (which includes safe-area in its height) */
+        bottom: var(--bottom-nav-h, calc(60px + env(safe-area-inset-bottom))) !important;
         display: flex !important;
         justify-content: space-around !important;
         align-items: flex-start !important;
@@ -1760,7 +1766,7 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.25);
         will-change: transform, filter;
-        min-height: 48px;
+        height: var(--secondary-nav-h, 48px);
     }
 
     .mobile-secondary-nav .mobile-tab {
@@ -1855,7 +1861,7 @@
         align-items: flex-start !important;
         gap: 4px !important;
         /* Keep compact and aligned to the secondary row above */
-        padding: 6px 4px calc(6px + env(safe-area-inset-bottom)) !important;
+        padding: 6px 4px env(safe-area-inset-bottom) !important;
         visibility: visible !important;
         opacity: 1 !important;
         z-index: 10003 !important;
@@ -1868,7 +1874,7 @@
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
         will-change: transform, filter;
         z-index: 10003;
-        min-height: 60px;
+        height: var(--bottom-nav-h, calc(60px + env(safe-area-inset-bottom))) !important;
     }
 
     .mobile-bottom-nav::before {
