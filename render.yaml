@@ -1,6 +1,9 @@
 services:
   - type: web
-    name: ahoy-indie-media
+    # NOTE: This must use migrate_and_start.sh so Alembic creates tables like "users"
+    # before Gunicorn boots. If you created the service manually, copy this startCommand
+    # into Render → Web Service → Settings.
+    name: ahoy-little-platform
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
@@ -14,7 +17,7 @@ services:
         value: production
       # Set this to your custom domain after provisioning (or keep the onrender.com origin).
       - key: BASE_URL
-        value: https://ahoy-indie-media.onrender.com
+        value: https://app.ahoy.ooo
       - key: SECRET_KEY
         generateValue: true
       - key: PYTHONUNBUFFERED
@@ -26,7 +29,7 @@ services:
       # Key Value (Redis/Valkey). If Blueprint auto-wiring fails, set REDIS_URL manually in the dashboard.
       - key: REDIS_URL
         fromService:
-          name: ahoy-kv
+          name: ahoy-redis
           type: redis
           property: connectionString
       # Email (set one provider path)
@@ -52,7 +55,7 @@ services:
 
   # Render "Key Value" (Redis/Valkey)
   - type: redis
-    name: ahoy-kv
+    name: ahoy-redis
     plan: free
     ipAllowList: []
 
