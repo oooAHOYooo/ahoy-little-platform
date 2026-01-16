@@ -3,7 +3,7 @@
  * Provides offline caching for UI shell and static assets
  */
 
-const CACHE_NAME = 'ahoy-indie-media-v3';
+const CACHE_NAME = 'ahoy-indie-media-v4';
 const STATIC_CACHE_URLS = [
     '/',
     '/static/css/loader.css',

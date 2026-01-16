@@ -964,13 +964,33 @@
     }
 
     /* Homepage: remove fixed heights that feel "off" on mobile */
+    .home-page {
+        /* Home content is wrapped in a div, so global `app-content > section` rhythm won't apply.
+           Use a consistent vertical stack to prevent header/preview overlaps. */
+        display: flex;
+        flex-direction: column;
+        gap: var(--section-gap, 20px);
+    }
+
+    .home-page .podcasts-hero {
+        margin-bottom: 0 !important;
+    }
+
+    .home-page .live-dashboard {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
     .home-page .dashboard-grid {
         height: auto !important;
         min-height: 0 !important;
     }
 
-    .home-page .live-dashboard {
-        margin-bottom: var(--section-gap, 20px) !important;
+    /* Avoid any accidental negative overlap inside the main card */
+    .home-page .dashboard-main,
+    .home-page .dash-preview,
+    .home-page .dash-bg {
+        min-height: 0 !important;
     }
 
     /* Homepage: discovery widgets should stack naturally */
