@@ -10,8 +10,12 @@ services:
         fromDatabase:
           name: ahoy-postgres
           property: connectionString
+      - key: AHOY_ENV
+        value: production
       - key: FLASK_ENV
         value: production
+      - key: BASE_URL
+        value: https://ahoy-indie-media.onrender.com
       - key: RENDER
         value: true
       - key: PYTHONUNBUFFERED

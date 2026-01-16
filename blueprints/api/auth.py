@@ -203,12 +203,15 @@ def password_reset_request():
                 return ok_resp, 200
 
             token = _reset_token_for_user(user)
-            base_url = (request.headers.get("X-Forwarded-Proto") and request.headers.get("X-Forwarded-Host"))
-            if base_url:
-                # If both are present (Render proxy), construct absolute base.
-                base = f"{request.headers.get('X-Forwarded-Proto')}://{request.headers.get('X-Forwarded-Host')}"
-            else:
-                base = request.url_root.rstrip("/")
+            # Prefer an explicit BASE_URL in production (prevents host-header shenanigans).
+            import os
+            base = (os.getenv("BASE_URL") or "").rstrip("/")
+            if not base:
+                # Render/Gunicorn behind proxy: these headers are set by the platform.
+                if request.headers.get("X-Forwarded-Proto") and request.headers.get("X-Forwarded-Host"):
+                    base = f"{request.headers.get('X-Forwarded-Proto')}://{request.headers.get('X-Forwarded-Host')}"
+                else:
+                    base = request.url_root.rstrip("/")
             reset_link = f"{base}/auth/reset?token={token}"
 
             subject = "Reset your Ahoy password"
