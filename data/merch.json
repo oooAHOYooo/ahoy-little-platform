@@ -2,22 +2,6 @@
   "generated_at": "2026-01-12T17:33:29.603346+00:00",
   "items": [
     {
-      "id": "ahoy_cabaret_poster_a3",
-      "name": "Ahoy Cabaret Poster A3",
-      "image_url": "/static/merch/images/ahoy_cabaret_poster_a3.jpg",
-      "price_usd": 15.0,
-      "kind": "merch",
-      "available": true
-    },
-    {
-      "id": "ahoy_logo_tshirt_black",
-      "name": "Ahoy Logo Tshirt Black",
-      "image_url": "/static/merch/images/ahoy_logo_tshirt_black.png",
-      "price_usd": 25.0,
-      "kind": "merch",
-      "available": true
-    },
-    {
       "id": "sample_merch2",
       "name": "Sample Merch2",
       "image_url": "/static/merch/images/sample-merch2.jpg",

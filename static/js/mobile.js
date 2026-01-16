@@ -41,21 +41,40 @@
             mobileMenu.dataset.built = '1';
         }
         if (accountMenu && !accountMenu.dataset.built) {
+            const isLoggedIn = !!window.LOGGED_IN;
+            const name = (window.userProfile && (window.userProfile.display_name || window.userProfile.username)) || (isLoggedIn ? 'Account' : 'Guest');
+
             accountMenu.innerHTML = `
                 <div style="display:grid; gap:10px;">
-                    <a href="/portfolio" class="mobile-link">Portfolio</a>
-                    <a href="/dashboard" class="mobile-link">Dashboard</a>
-                    <a href="/bookmarks" class="mobile-link">Bookmarks</a>
-                    <a href="/settings" class="mobile-link">Settings</a>
-                    <a href="/account" class="mobile-link">Account</a>
-                    <button data-action="logout" class="mobile-link">Sign Out</button>
+                    <div style="padding:10px 12px; border:1px solid rgba(255,255,255,.12); border-radius:12px; background: rgba(255,255,255,.04); font-weight:900;">
+                        ${isLoggedIn ? `Hey, ${name} ✨` : `Hey there, ${name} 👋`}
+                    </div>
+
+                    ${isLoggedIn ? `
+                        <a href="/account" class="mobile-link">My Profile</a>
+                        <a href="/bookmarks" class="mobile-link">Bookmarks</a>
+                        <a href="/settings" class="mobile-link">Settings</a>
+                        <button data-action="logout" class="mobile-link">Sign Out</button>
+                    ` : `
+                        <a href="/account" class="mobile-link" style="border-color: rgba(147,51,234,.55); background: rgba(147,51,234,.20); font-weight: 900;">
+                            Sign in / Create username 🚀
+                        </a>
+                        <a href="/bookmarks" class="mobile-link">Bookmarks</a>
+                        <a href="/settings" class="mobile-link">Settings</a>
+                    `}
                 </div>
             `;
-            accountMenu.addEventListener('click', (e) => {
-                if (e.target && e.target.matches('[data-action="logout"]')) {
-                    window.location.href = '/logout';
-                }
+
+            accountMenu.addEventListener('click', async (e) => {
+                const btn = e.target && e.target.closest && e.target.closest('[data-action="logout"]');
+                if (!btn) return;
+                e.preventDefault();
+                try {
+                    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+                } catch (_) { /* ignore */ }
+                window.location.reload();
             });
+
             accountMenu.dataset.built = '1';
         }
     }

@@ -5,7 +5,7 @@ window.AHOY_AUTH = {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       credentials: 'include', // Session cookies
-      body: JSON.stringify({ email: emailOrUsername, password }) // Backend accepts email or username
+      body: JSON.stringify({ identifier: emailOrUsername, password }) // Email OR username
     });
     if (!r.ok) throw new Error((await r.json()).message || 'Login failed');
     return r.json();

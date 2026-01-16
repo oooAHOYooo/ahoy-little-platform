@@ -176,13 +176,14 @@
                   headers: { 'Content-Type': 'application/json' },
                   credentials: 'include',
                   body: JSON.stringify({
-                    email: this.loginForm.username, // Backend accepts email or username
+                    identifier: this.loginForm.username, // Email OR username
                     password: this.loginForm.password
                   })
                 });
                 
                 if (response.ok) {
                   const data = await response.json();
+                  try { localStorage.setItem('ahoyLastIdentifier', this.loginForm.username); } catch (_) {}
                   window.__ahoyToast && window.__ahoyToast('Login successful!');
                   this.showLogin = false;
                   this.loginForm = { username: '', password: '' };
@@ -223,6 +224,7 @@
                 
                 if (response.ok) {
                   const data = await response.json();
+                  try { localStorage.setItem('ahoyLastIdentifier', this.registerForm.username); } catch (_) {}
                   window.__ahoyToast && window.__ahoyToast('Registration successful!');
                   this.showRegister = false;
                   this.registerForm = { username: '', email: '', password: '' };
@@ -1617,15 +1619,15 @@
         <div x-show="showLogin" x-cloak class="modal-overlay"
             @click.away="showLogin = false">
             <div class="modal">
-                <h3>Login to Ahoy Indie Media</h3>
+                <h3>Welcome back to Ahoy ✨</h3>
                 <form @submit.prevent="login()">
                     <input type="text" x-model="loginForm.username"
-                        placeholder="Username" required>
+                        placeholder="Email or username" required>
                     <input type="password" x-model="loginForm.password"
                         placeholder="Password" required>
                     <button type="submit" class="btn btn-primary"
                         :disabled="isLoading">
-                        <span x-show="!isLoading">Login</span>
+                        <span x-show="!isLoading">Let’s go 🎧</span>
                         <span x-show="isLoading">Logging in...</span>
                     </button>
                 </form>
@@ -1642,7 +1644,7 @@
         <div x-show="showRegister" x-cloak class="modal-overlay"
             @click.away="showRegister = false">
             <div class="modal">
-                <h3>Join Ahoy Indie Media</h3>
+                <h3>Claim your username 🚀</h3>
                 <form @submit.prevent="register()">
                     <input type="text" x-model="registerForm.username"
                         placeholder="Username" required>
@@ -1652,7 +1654,7 @@
                         placeholder="Password" required>
                     <button type="submit" class="btn btn-primary"
                         :disabled="isLoading">
-                        <span x-show="!isLoading">Sign Up</span>
+                        <span x-show="!isLoading">Claim it 🎉</span>
                         <span x-show="isLoading">Creating account...</span>
                     </button>
                 </form>

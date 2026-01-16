@@ -2016,7 +2016,14 @@ def manage_playlist_items(playlist_id):
 @login_required
 def user_profile():
     """Get user profile"""
-    return jsonify(session.get('user_data', {}).get('profile', {}))
+    # Source-of-truth is the DB user row (session['user_data'] may be absent).
+    return jsonify({
+        "id": current_user.id,
+        "email": getattr(current_user, "email", None),
+        "username": getattr(current_user, "username", None),
+        "display_name": getattr(current_user, "display_name", None),
+        "avatar_url": getattr(current_user, "avatar_url", None),
+    })
 
 @app.route('/api/user/profile', methods=['PUT'])
 @login_required
@@ -2044,6 +2051,7 @@ def update_user_profile():
             'user': {
                 'id': user.id,
                 'email': user.email,
+                'username': getattr(user, "username", None),
                 'display_name': user.display_name,
                 'avatar_url': user.avatar_url
             }
@@ -2418,6 +2426,16 @@ def search_page():
 def auth_page():
     """Authentication page"""
     return render_template('auth.html')
+
+@app.route('/auth/forgot')
+def forgot_password_page():
+    """Forgot password page (requests reset link)."""
+    return render_template('forgot_password.html')
+
+@app.route('/auth/reset')
+def reset_password_page():
+    """Reset password page (consumes token)."""
+    return render_template('reset_password.html')
 
 @app.route('/account')
 def account_page():

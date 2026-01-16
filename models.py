@@ -26,6 +26,8 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
+    # Public handle used across the UI. Lowercase, URL-safe-ish. Added via Alembic migration 0012.
+    username = Column(String(64), unique=True, nullable=True, index=True)
     password_hash = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     is_admin = Column(Boolean, nullable=False, default=False, server_default='false', index=True)

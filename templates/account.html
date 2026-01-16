@@ -92,12 +92,99 @@
       </div>
     </div>
   {% else %}
-    <div class="acct-guest glass">
+    <div class="acct-guest glass" x-data="profileAuth()" x-init="init()">
       <h2>Account</h2>
-      <p class="muted">Sign in to view your profile, saves, and merch orders.</p>
-      <div style="margin-top:12px;">
-        <a class="btn btn-primary" href="/auth">Sign in</a>
+      <p class="muted">Claim a username and unlock saves, playlists, and merch goodies.</p>
+
+      <div class="acct-auth-tabs" role="tablist" aria-label="Account access">
+        <button type="button" class="acct-auth-tab" :class="{active: mode==='login'}"
+          @click="mode='login'">I’m back ✨</button>
+        <button type="button" class="acct-auth-tab" :class="{active: mode==='register'}"
+          @click="mode='register'">Claim a username 🚀</button>
       </div>
+
+      <div class="acct-auth-error" x-show="error" x-text="error" role="status"></div>
+
+      <!-- Login -->
+      <form x-show="mode==='login'" x-cloak @submit.prevent="login()" class="acct-auth-form">
+        <label class="acct-auth-label">
+          Email or username
+          <input class="acct-auth-input" type="text" inputmode="email" autocomplete="username"
+            x-model.trim="loginIdentifier" placeholder="you@example.com or yourname" required>
+        </label>
+        <label class="acct-auth-label">
+          Password
+          <div class="acct-auth-password">
+            <input class="acct-auth-input" :type="showLoginPw ? 'text' : 'password'"
+              autocomplete="current-password" x-model="loginPassword" required>
+            <button type="button" class="acct-auth-eye" @click="showLoginPw=!showLoginPw"
+              :aria-label="showLoginPw ? 'Hide password' : 'Show password'">
+              <i :class="showLoginPw ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+        </label>
+        <button class="btn btn-primary" type="submit" :disabled="loading">
+          <span x-show="!loading">Let’s go 🎧</span>
+          <span x-show="loading">Signing in…</span>
+        </button>
+        <div class="acct-auth-foot">
+          New here?
+          <a href="#" @click.prevent="mode='register'; error=''">Claim your username</a>
+        </div>
+      </form>
+
+      <!-- Register -->
+      <form x-show="mode==='register'" x-cloak @submit.prevent="register()" class="acct-auth-form">
+        <label class="acct-auth-label">
+          Email
+          <input class="acct-auth-input" type="email" autocomplete="email"
+            x-model.trim="regEmail" @input="autofillUsername()" placeholder="you@example.com" required>
+        </label>
+
+        <label class="acct-auth-label">
+          Username
+          <div class="acct-auth-username">
+            <span class="acct-auth-at">@</span>
+            <input class="acct-auth-input" type="text" autocomplete="username"
+              x-model.trim="regUsername" @input="onUsernameInput()" @blur="checkUsername()"
+              placeholder="yourname" required>
+            <button type="button" class="acct-auth-chip" @click="randomizeUsername()"
+              aria-label="Try another username">Shuffle</button>
+          </div>
+          <div class="acct-auth-help" x-show="usernameStatus" x-text="usernameStatus"></div>
+        </label>
+
+        <div class="acct-auth-suggestions" x-show="suggestions.length">
+          <template x-for="s in suggestions" :key="s">
+            <button type="button" class="acct-auth-suggestion" @click="pickSuggestion(s)" x-text="'@' + s"></button>
+          </template>
+        </div>
+
+        <label class="acct-auth-label">
+          Password
+          <div class="acct-auth-password">
+            <input class="acct-auth-input" :type="showRegPw ? 'text' : 'password'"
+              autocomplete="new-password" x-model="regPassword" minlength="8" required>
+            <button type="button" class="acct-auth-eye" @click="showRegPw=!showRegPw"
+              :aria-label="showRegPw ? 'Hide password' : 'Show password'">
+              <i :class="showRegPw ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+          <div class="acct-auth-help">At least 8 characters.</div>
+        </label>
+
+        <button class="btn btn-primary" type="submit" :disabled="loading || !canRegister">
+          <span x-show="!loading">Claim it 🎉</span>
+          <span x-show="loading">Creating…</span>
+        </button>
+        <div class="acct-auth-foot">
+          Already claimed one?
+          <a href="#" @click.prevent="mode='login'; error=''">Sign in</a>
+        </div>
+        <div class="acct-auth-legal muted text-xs">
+          By continuing you agree to the <a href="/terms" target="_blank">Terms</a> and <a href="/privacy" target="_blank">Privacy</a>.
+        </div>
+      </form>
     </div>
   {% endif %}
 </div>
@@ -135,5 +222,172 @@
   .acct-guest { padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
   .acct-guest h1 { margin: 0; }
   .acct-guest p { margin: 8px 0 0; }
+
+  .acct-auth-tabs { display:flex; gap:8px; margin-top: 12px; }
+  .acct-auth-tab { flex:1; height:42px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.04); color:#e5e7eb; font-weight: 700; }
+  .acct-auth-tab.active { border-color: rgba(147,51,234,0.55); background: rgba(147,51,234,0.18); }
+  .acct-auth-form { margin-top: 12px; display:flex; flex-direction:column; gap: 10px; }
+  .acct-auth-label { display:flex; flex-direction:column; gap: 6px; font-weight: 700; color: rgba(255,255,255,0.92); }
+  .acct-auth-input { width:100%; padding: 12px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14); background: rgba(0,0,0,0.35); color:#fff; outline:none; }
+  .acct-auth-input:focus { border-color: rgba(147,51,234,0.55); box-shadow: 0 0 0 3px rgba(147,51,234,0.18); }
+  .acct-auth-password { position: relative; }
+  .acct-auth-eye { position:absolute; right:8px; top:50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.04); color:#e5e7eb; }
+  .acct-auth-username { position: relative; display:flex; align-items:center; gap: 8px; }
+  .acct-auth-at { position:absolute; left: 12px; color: rgba(255,255,255,0.55); font-weight: 900; }
+  .acct-auth-username .acct-auth-input { padding-left: 26px; }
+  .acct-auth-chip { flex:0 0 auto; height: 42px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.04); color:#e5e7eb; font-weight: 800; }
+  .acct-auth-help { font-weight: 600; color: rgba(255,255,255,0.65); font-size: 12px; }
+  .acct-auth-error { margin-top: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(239,68,68,0.35); background: rgba(239,68,68,0.10); color: rgba(255,255,255,0.92); }
+  .acct-auth-suggestions { display:flex; gap:8px; flex-wrap: wrap; margin-top: -4px; }
+  .acct-auth-suggestion { border-radius: 999px; padding: 8px 10px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.03); color:#e5e7eb; font-weight: 800; }
+  .acct-auth-foot { margin-top: 2px; font-size: 13px; color: rgba(255,255,255,0.70); }
+  .acct-auth-foot a { color: rgba(167,139,250,0.95); font-weight: 900; }
+  .acct-auth-legal a { color: rgba(255,255,255,0.85); text-decoration: underline; }
 </style>
+
+<script>
+function profileAuth() {
+  const normalizeUsername = (raw) => {
+    const allowed = 'abcdefghijklmnopqrstuvwxyz0123456789_';
+    let s = String(raw || '').trim().toLowerCase();
+    s = s.replace(/[ .-]+/g, '_');
+    s = Array.from(s).filter(ch => allowed.includes(ch)).join('');
+    s = s.replace(/__+/g, '_').replace(/^_+|_+$/g, '');
+    return s.slice(0, 24);
+  };
+  const deriveFromEmail = (email) => normalizeUsername(String(email || '').split('@')[0] || '');
+  const mkSuggestions = (base) => {
+    const b = normalizeUsername(base) || 'user';
+    const s1 = b;
+    const s2 = (b.slice(0, Math.max(0, 24 - 2)) + '01').slice(0, 24);
+    const s3 = (b.slice(0, Math.max(0, 24 - 5)) + '_music').slice(0, 24);
+    return Array.from(new Set([s1, s2, s3])).filter(Boolean);
+  };
+
+  return {
+    mode: 'login',
+    loading: false,
+    error: '',
+
+    // login
+    loginIdentifier: '',
+    loginPassword: '',
+    showLoginPw: false,
+
+    // register
+    regEmail: '',
+    regUsername: '',
+    regPassword: '',
+    showRegPw: false,
+    usernameStatus: '',
+    suggestions: [],
+    usernameAvailable: null,
+
+    get canRegister() {
+      return !!(this.regEmail && this.regUsername && this.regPassword && this.regPassword.length >= 8 && this.usernameAvailable !== false);
+    },
+
+    init() {
+      try {
+        const last = localStorage.getItem('ahoyLastIdentifier');
+        if (last) this.loginIdentifier = last;
+      } catch (_) {}
+      this.suggestions = mkSuggestions('');
+    },
+
+    autofillUsername() {
+      if (this.regUsername) return;
+      const base = deriveFromEmail(this.regEmail);
+      this.regUsername = base || '';
+      this.onUsernameInput();
+    },
+
+    onUsernameInput() {
+      const u = normalizeUsername(this.regUsername);
+      if (u !== this.regUsername) this.regUsername = u;
+      this.usernameAvailable = null;
+      this.usernameStatus = u ? 'Checking availability…' : '';
+      this.suggestions = mkSuggestions(u || deriveFromEmail(this.regEmail));
+    },
+
+    pickSuggestion(s) {
+      this.regUsername = normalizeUsername(s);
+      this.onUsernameInput();
+      this.checkUsername();
+    },
+
+    randomizeUsername() {
+      const base = deriveFromEmail(this.regEmail) || 'user';
+      const n = String(Math.floor(Math.random() * 90) + 10);
+      this.pickSuggestion((base.slice(0, Math.max(0, 24 - n.length)) + n).slice(0, 24));
+    },
+
+    async checkUsername() {
+      const u = normalizeUsername(this.regUsername);
+      if (!u) return;
+      this.usernameStatus = 'Checking availability…';
+      try {
+        const r = await fetch(`/api/auth/username-available?username=${encodeURIComponent(u)}`, { credentials: 'include' });
+        const data = await r.json();
+        this.usernameAvailable = !!data.available;
+        this.suggestions = Array.isArray(data.suggestions) ? data.suggestions : this.suggestions;
+        this.usernameStatus = data.available ? `@${u} is available` : `@${u} is taken — try one of these`;
+      } catch (_) {
+        this.usernameAvailable = null;
+        this.usernameStatus = '';
+      }
+    },
+
+    async login() {
+      this.error = '';
+      this.loading = true;
+      try {
+        const r = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ identifier: this.loginIdentifier, password: this.loginPassword })
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          this.error = data.message || data.error || 'Sign in failed';
+          return;
+        }
+        try { localStorage.setItem('ahoyLastIdentifier', this.loginIdentifier); } catch (_) {}
+        window.location.reload();
+      } catch (_) {
+        this.error = 'Sign in failed. Please try again.';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async register() {
+      this.error = '';
+      this.loading = true;
+      try {
+        const r = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ email: this.regEmail, username: this.regUsername, password: this.regPassword })
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          this.error = data.message || data.error || 'Create account failed';
+          if (Array.isArray(data.suggestions)) this.suggestions = data.suggestions;
+          if (data.error === 'invalid_username') this.usernameAvailable = false;
+          return;
+        }
+        try { localStorage.setItem('ahoyLastIdentifier', this.regUsername); } catch (_) {}
+        window.location.reload();
+      } catch (_) {
+        this.error = 'Create account failed. Please try again.';
+      } finally {
+        this.loading = false;
+      }
+    }
+  };
+}
+</script>
 {% endblock %}

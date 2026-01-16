@@ -23,7 +23,7 @@
             <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
                 alt="Ahoy Indie Media"
                 class="auth-hero-logo">
-            <p class="auth-hero-subtitle">Your indie universe awaits.</p>
+            <p class="auth-hero-subtitle">Your indie universe awaits. Let’s make it yours.</p>
         </div>
     </div>
 
@@ -34,12 +34,12 @@
             <button @click="authMode = 'login'"
                 :class="{'active': authMode === 'login'}"
                 class="auth-tab-modern">
-                Sign In
+                I’m back ✨
             </button>
             <button @click="authMode = 'register'"
                 :class="{'active': authMode === 'register'}"
                 class="auth-tab-modern">
-                Create Account
+                Claim a username 🚀
             </button>
         </div>
 
@@ -61,7 +61,7 @@
                         :class="{'floating-input-focused': focusedField === 'username' || authForm.username}"
                         placeholder=" "
                         required>
-                    <label for="login-username" class="floating-label">Username</label>
+                    <label for="login-username" class="floating-label">Email or username</label>
                 </div>
 
                 <!-- Password Field -->
@@ -90,7 +90,7 @@
                         <span class="checkbox-custom"></span>
                         <span>Remember me</span>
                     </label>
-                    <a href="#" class="forgot-link">Forgot password?</a>
+                    <a href="/auth/forgot" class="forgot-link">Forgot password?</a>
                 </div>
 
                 <!-- Submit Button -->
@@ -99,7 +99,7 @@
                     :class="{'auth-submit-loading': isLoading, 'auth-submit-success': loginSuccess}"
                     :disabled="isLoading || loginSuccess"
                     style="animation-delay: 0.4s">
-                    <span x-show="!isLoading && !loginSuccess">Sign In</span>
+                    <span x-show="!isLoading && !loginSuccess">Let’s go 🎧</span>
                     <span x-show="isLoading" class="auth-submit-loading-text">
                         <span class="loading-dot"></span>
                         <span class="loading-dot"></span>
@@ -137,6 +137,7 @@
                     <input type="email" 
                         id="reg-email"
                         x-model="authForm.email"
+                        @input="maybeAutofillUsername()"
                         @focus="focusedField = 'email'"
                         @blur="focusedField = null"
                         class="floating-input"
@@ -199,7 +200,7 @@
                     :class="{'auth-submit-loading': isLoading}"
                     :disabled="isLoading || !isFormValid()"
                     style="animation-delay: 0.5s">
-                    <span x-show="!isLoading">Launch My Account! 🚀</span>
+                    <span x-show="!isLoading">Claim it 🎉</span>
                     <span x-show="isLoading" class="auth-submit-loading-text">
                         <span class="loading-dot"></span>
                         <span class="loading-dot"></span>
@@ -241,6 +242,19 @@ function authPage() {
         init() {
             // Check if user is already logged in
             this.checkAuthStatus();
+        },
+
+        maybeAutofillUsername() {
+            // If username is empty, derive a simple default from the email local-part.
+            if (this.authMode !== 'register') return;
+            if (this.authForm.username) return;
+            const email = String(this.authForm.email || '');
+            const base = email.split('@')[0] || '';
+            const allowed = 'abcdefghijklmnopqrstuvwxyz0123456789_';
+            let u = base.trim().toLowerCase().replace(/[ .-]+/g, '_');
+            u = Array.from(u).filter(ch => allowed.includes(ch)).join('');
+            u = u.replace(/__+/g, '_').replace(/^_+|_+$/g, '');
+            this.authForm.username = u.slice(0, 24);
         },
         
         // Removed: updateEmailEmoji (simplified for MVP)
@@ -284,7 +298,7 @@ function authPage() {
                     },
                     credentials: 'include',
                     body: JSON.stringify({
-                        email: this.authForm.email || this.authForm.username, // Support both email and username
+                        identifier: this.authForm.username, // email OR username
                         password: this.authForm.password
                     })
                 });

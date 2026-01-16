@@ -1,4 +1,6 @@
 import os
+import sys
+from pathlib import Path
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -16,6 +18,11 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # import target metadata
+# Ensure project root is importable (Windows + Alembic CLI)
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from models import Base  # noqa: E402
 target_metadata = Base.metadata
 
@@ -23,6 +30,10 @@ target_metadata = Base.metadata
 def get_url() -> str:
     url = os.getenv("DATABASE_URL")
     if not url:
+        # Local/dev fallback (keeps Alembic usable without env vars)
+        local_db = ROOT / "local.db"
+        if local_db.exists():
+            return f"sqlite:///{local_db.as_posix()}"
         raise RuntimeError(
             "DATABASE_URL is required for Alembic. Set it in your environment or .env file."
         )
