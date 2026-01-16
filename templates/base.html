@@ -522,7 +522,9 @@
                     </div>
                     {% endif %}
                     <!-- Logo for mobile (always visible on mobile) -->
-                    <div class="nav-logo mobile-only" {% if not show_dashboard_sidebars %}style="display: flex;"{% endif %}>
+                    <div class="nav-logo mobile-only" {% if not
+                        show_dashboard_sidebars %}style="display: flex;" {%
+                        endif %}>
                         <a href="{{ url_for('home') }}">
                             <img
                                 src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
@@ -746,7 +748,8 @@
         <!-- Mobile Explore replaced by overlay -->
         <!-- Mobile Footer Logo (centered above nav) -->
         <div class="mobile-footer-logo mobile-only">
-            <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}" alt="Ahoy" class="mobile-footer-logo-img">
+            <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+                alt="Ahoy" class="mobile-footer-logo-img">
         </div>
         <!-- Mobile Secondary Navigation - Secondary Features (above primary nav) -->
         <nav class="mobile-secondary-nav mobile-only" role="navigation"
@@ -1792,7 +1795,8 @@
             </div>
 
             <div class="footer-bottom">
-                <p class="footer-copyright">&copy; 2026 Ahoy Indie Media. All rights reserved.</p>
+                <p class="footer-copyright">&copy; 2026 Ahoy Indie Media. All
+                    rights reserved.</p>
             </div>
         </footer>
 
