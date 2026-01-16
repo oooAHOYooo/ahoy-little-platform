@@ -18,6 +18,10 @@ def _require_database_url() -> str:
     """
     value = os.getenv("DATABASE_URL")
     if value:
+        # Render and some providers use the legacy "postgres://" scheme.
+        # SQLAlchemy expects "postgresql://" (optionally with a driver).
+        if value.startswith("postgres://"):
+            return "postgresql+psycopg://" + value[len("postgres://"):]
         return value
     value = os.getenv("LOCAL_DATABASE_URL")
     if value:
