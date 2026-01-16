@@ -37,6 +37,12 @@ def get_url() -> str:
         raise RuntimeError(
             "DATABASE_URL is required for Alembic. Set it in your environment or .env file."
         )
+    # Some providers use legacy schemes that cause SQLAlchemy to default to psycopg2.
+    # This app ships psycopg (v3), so normalize to the psycopg3 driver.
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://"):]
     return url
 
 
