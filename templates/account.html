@@ -369,7 +369,7 @@ function profileAuth() {
         });
         const data = await r.json().catch(() => ({}));
         if (!r.ok) {
-          this.error = data.message || data.error || 'Sign in failed';
+          this.error = data.message || data.detail || data.error || 'Sign in failed';
           return;
         }
         try { localStorage.setItem('ahoyLastIdentifier', this.loginIdentifier); } catch (_) {}
@@ -394,7 +394,7 @@ function profileAuth() {
         });
         const data = await r.json().catch(() => ({}));
         if (!r.ok) {
-          this.error = data.message || data.error || 'Create account failed';
+          this.error = data.message || data.detail || data.error || 'Create account failed';
           if (Array.isArray(data.suggestions)) this.suggestions = data.suggestions;
           if (data.error === 'invalid_username') this.usernameAvailable = false;
           return;

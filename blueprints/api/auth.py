@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
@@ -173,6 +173,7 @@ def register():
         # Could be email or username uniqueness
         return jsonify({"error": "account_already_exists"}), 409
     except Exception as e:
+        current_app.logger.exception("Registration failed")
         return jsonify({"error": "registration_failed", "detail": str(e)}), 500
 
 
@@ -332,11 +333,20 @@ def username_available():
             "error": "invalid_username",
             "suggestions": _suggest_usernames(username),
         }), 200
-    with get_session() as db_session:
-        exists = db_session.query(User.id).filter(func.lower(User.username) == username.lower()).first()
+    try:
+        with get_session() as db_session:
+            exists = db_session.query(User.id).filter(func.lower(User.username) == username.lower()).first()
+            return jsonify({
+                "available": not bool(exists),
+                "username": username,
+                "suggestions": _suggest_usernames(username),
+            }), 200
+    except Exception:
+        current_app.logger.exception("Username availability check failed")
         return jsonify({
-            "available": not bool(exists),
+            "available": False,
             "username": username,
+            "error": "server_error",
             "suggestions": _suggest_usernames(username),
-        }), 200
+        }), 500
 

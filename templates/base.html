@@ -2772,7 +2772,8 @@
             };
 
             // Prevent duplicate image requests
-            const originalFetch = window.fetch;
+            // NOTE: bind() avoids "Illegal invocation" in some browsers when calling native fetch.
+            const originalFetch = (window.fetch && window.fetch.bind) ? window.fetch.bind(window) : window.fetch;
             window.fetch = function (url, options) {
                 if (typeof url === 'string' && url.includes('/static/img/')) {
                     if (loadedImages.has(url) || loadingImages.has(url)) {
@@ -2780,7 +2781,6 @@
                     }
                     loadingImages.add(url);
                 }
-                // Avoid illegal invocation by not rebinding native fetch
                 return originalFetch(url, options);
             };
 
@@ -3739,7 +3739,8 @@
         }
     </script>
         <script>
-        // Initialize NProgress with enhanced configuration
+        // Initialize NProgress with enhanced configuration (guarded: CDN may be blocked)
+        if (window.NProgress) {
         NProgress.configure({
             showSpinner: false,
             minimum: 0.08,
@@ -3808,7 +3809,8 @@
         });
 
         // Enhanced fetch interceptor with better request detection
-        const originalFetch = window.fetch;
+        // NOTE: bind() avoids "Illegal invocation" in some browsers when calling native fetch.
+        const originalFetch = (window.fetch && window.fetch.bind) ? window.fetch.bind(window) : window.fetch;
         window.fetch = async function(...args) {
             const url = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
             const options = args[1] || {};
@@ -3861,6 +3863,11 @@
                 }
             }
         });
+        } else {
+            // NProgress isn't available (blocked/slow CDN). Keep the site functional.
+            // eslint-disable-next-line no-console
+            console.debug('NProgress not available; skipping progress-bar hooks');
+        }
     </script>
     </body>
 
