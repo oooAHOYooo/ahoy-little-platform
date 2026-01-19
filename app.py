@@ -2459,7 +2459,6 @@ def account_page():
         user_id = current_user.id
         stats = {
             "bookmarks": int(s.query(func.count(Bookmark.id)).filter(Bookmark.user_id == user_id).scalar() or 0),
-            "playlists": int(s.query(func.count(Playlist.id)).filter(Playlist.user_id == user_id).scalar() or 0),
             "plays": int(s.query(func.count(PlayHistory.id)).filter(PlayHistory.user_id == user_id).scalar() or 0),
             "merch_orders": 0,
         }

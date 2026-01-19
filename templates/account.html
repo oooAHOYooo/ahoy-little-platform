@@ -5,7 +5,7 @@
 {% block content %}
 <div class="acct">
   {% from "macros/subpage_header.html" import subpage_hero %}
-  {{ subpage_hero(title="Profile", subtitle="Your account, saves, and playlists.", icon_class="fas fa-user-circle") }}
+  {{ subpage_hero(title="Profile", subtitle="Your account and saves.", icon_class="fas fa-user-circle") }}
 
   {% if current_user.is_authenticated %}
     <div class="acct-head">
@@ -19,10 +19,20 @@
           {% if current_user.email %}<span class="dot">•</span><span class="muted">{{ current_user.email }}</span>{% endif %}
         </div>
         <div class="acct-actions">
-          <a class="btn btn-secondary" href="/bookmarks">Saved</a>
-          <a class="btn btn-secondary" href="/playlists">Playlists</a>
-          <button type="button" class="btn btn-secondary"
-            onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">Theme</button>
+          <a class="acct-action-btn" href="/bookmarks">
+            <i class="fas fa-bookmark"></i>
+            <span>Saved</span>
+          </a>
+          <button type="button" class="acct-action-btn"
+            onclick="import('/static/js/themes.js').then(m=>m.openThemePicker())">
+            <i class="fas fa-palette"></i>
+            <span>Theme</span>
+          </button>
+          <button type="button" class="acct-action-btn acct-signout-btn"
+            onclick="if(confirm('Sign out?')){fetch('/api/auth/logout',{method:'POST',credentials:'include'}).then(()=>window.location.reload())}">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Sign Out</span>
+          </button>
         </div>
       </div>
     </div>
@@ -35,10 +45,6 @@
             <div class="acct-stat">
               <div class="n">{{ stats.bookmarks or 0 }}</div>
               <div class="l">Saved</div>
-            </div>
-            <div class="acct-stat">
-              <div class="n">{{ stats.playlists or 0 }}</div>
-              <div class="l">Playlists</div>
             </div>
             <div class="acct-stat">
               <div class="n">{{ stats.plays or 0 }}</div>
@@ -85,7 +91,10 @@
           {% else %}
             <div class="muted">No merch orders yet.</div>
             <div style="margin-top:10px;">
-              <a class="btn btn-primary" href="/merch">Shop Merch</a>
+              <a class="acct-action-btn acct-primary-btn" href="/merch">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Shop Merch</span>
+              </a>
             </div>
           {% endif %}
         </div>
@@ -94,11 +103,11 @@
   {% else %}
     <div class="acct-guest glass" x-data="profileAuth()" x-init="init()">
       <h2>Account</h2>
-      <p class="muted">Claim a username and unlock saves, playlists, and merch goodies.</p>
+      <p class="muted">Claim a username and unlock saves and merch goodies.</p>
 
       <div class="acct-auth-tabs" role="tablist" aria-label="Account access">
         <button type="button" class="acct-auth-tab" :class="{active: mode==='login'}"
-          @click="mode='login'">I’m back ✨</button>
+          @click="mode='login'">I'm back ✨</button>
         <button type="button" class="acct-auth-tab" :class="{active: mode==='register'}"
           @click="mode='register'">Claim a username 🚀</button>
       </div>
@@ -125,7 +134,7 @@
           </div>
         </label>
         <button class="btn btn-primary" type="submit" :disabled="loading">
-          <span x-show="!loading">Let’s go 🎧</span>
+          <span x-show="!loading">Let's go 🎧</span>
           <span x-show="loading">Signing in…</span>
         </button>
         <div class="acct-auth-foot">
@@ -196,25 +205,78 @@
   .acct-head { display:flex; gap: 14px; align-items:center; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
   .acct-avatar { width: 56px; height: 56px; border-radius: 16px; overflow:hidden; border: 1px solid rgba(255,255,255,0.10); background: rgba(0,0,0,0.35); flex: 0 0 auto; }
   .acct-avatar img { width:100%; height:100%; object-fit: cover; display:block; }
-  .acct-name { margin: 0; font-size: 20px; }
+  .acct-name { margin: 0; font-size: 20px; color: rgba(255,255,255,0.95); }
   .acct-sub { display:flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
   .acct-sub .dot { opacity: .5; }
   .acct-actions { margin-top: 10px; display:flex; gap: 10px; flex-wrap: wrap; }
 
+  /* Account action buttons - fixed visibility */
+  .acct-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.4);
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .acct-action-btn:hover {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .acct-action-btn i {
+    font-size: 14px;
+  }
+
+  .acct-primary-btn {
+    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    border-color: rgba(236, 72, 153, 0.5);
+    color: #ffffff;
+  }
+
+  .acct-primary-btn:hover {
+    background: linear-gradient(135deg, #8b5cf6 0%, #f472b6 100%);
+    border-color: rgba(236, 72, 153, 0.7);
+  }
+
+  .acct-signout-btn {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: rgba(239, 68, 68, 0.95);
+  }
+
+  .acct-signout-btn:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.6);
+    color: #ef4444;
+  }
+
   .acct-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
   @media (max-width: 900px) { .acct-grid { grid-template-columns: 1fr; } }
 
-  .acct-stats { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .acct-stats { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
   @media (max-width: 560px) { .acct-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .acct-stat { border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); padding: 10px 10px; }
-  .acct-stat .n { font-weight: 900; font-size: 20px; }
-  .acct-stat .l { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin-top: 2px; }
+  .acct-stat .n { font-weight: 900; font-size: 20px; color: rgba(255,255,255,0.95); }
+  .acct-stat .l { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin-top: 2px; color: rgba(255,255,255,0.8); }
 
   .acct-orders { display:flex; flex-direction: column; gap: 10px; }
   .acct-order { display:flex; justify-content:space-between; gap: 12px; padding: 10px 10px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); }
   .acct-order .row1 { display:flex; align-items:center; gap: 8px; }
   .acct-order .right { text-align:right; }
-  .acct-order .total { font-weight: 900; }
+  .acct-order .total { font-weight: 900; color: rgba(255,255,255,0.95); }
 
   .pill { display:inline-flex; align-items:center; padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); text-transform: uppercase; letter-spacing:.10em; font-size:10px; }
   .pill.st-paid { border-color: rgba(16,185,129,0.35); background: rgba(16,185,129,0.10); }
