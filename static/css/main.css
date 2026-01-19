@@ -2295,6 +2295,21 @@ opacity:0.15;
     position: relative;
 }
 
+/* Prevent duplicate account buttons - hide guest button when account menu container exists */
+.ds-statusbar__right > a[href="/account"].ds-iconbtn.hidden-mobile {
+    display: none !important;
+}
+
+.ds-statusbar__right > .account-menu-container ~ a[href="/account"] {
+    display: none !important;
+}
+
+/* Ensure only one account button shows - hide guest button when logged in */
+.account-menu-container ~ a[href="/account"].ds-iconbtn {
+    display: none !important;
+}
+}
+
 /* Account Menu Button */
 .account-menu-btn {
     width: auto !important;
