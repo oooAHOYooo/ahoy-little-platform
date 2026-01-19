@@ -1,6 +1,23 @@
 {
   "events": [
     {
+      "id": "2026-01-29T18:30:00",
+      "title": "Poets and Friends #7",
+      "date": "2026-01-29",
+      "time": "6:30 PM",
+      "venue": "Koffee?",
+      "venue_address": "104 Audubon Street, New Haven, CT 06511",
+      "event_type": "poetry",
+      "status": "upcoming",
+      "description": "Back again for another poetry event! The first of the year! Happy to announce that Koffee? has generously agreed to host us the last Thursday of every month! Come thru to your favorite local live poetry event - where poets and friends have 3-5 minutes to share their favorite work or original piece! Bring friends and tip your Baristas! For more events and details visit ahoy.ooo",
+      "photos": [],
+      "image": "https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/goT3YIfLz1xL1ITZbScUh?fit=clip&w=920&auto=format",
+      "rsvp_external_url": "https://partiful.com/e/NPOwjc11Ialvm8xxMqq0",
+      "rsvp_enabled": true,
+      "rsvp_limit": "100",
+      "rsvps": []
+    },
+    {
       "id": "2025-12-17T18:30:00",
       "title": "Poets and Friends #6: Christmas Holiday Edition",
       "date": "2025-12-17",
@@ -8,7 +25,7 @@
       "venue": "Koffee?",
       "venue_address": "104 Audubon Street, New Haven, CT 06511",
       "event_type": "poetry",
-      "status": "upcoming",
+      "status": "past",
       "description": "Poets & Friends #6 (Christmas Holiday Edition). Wednesday, Dec 17, 2025. Doors 6:00 PM. Readings 6:30–8:00 PM. Koffee? — 104 Audubon St, New Haven, CT. Festive vibes encouraged. Food available at Koffee?. Bring friends.",
       "photos": [],
       "image": "/static/event-imgs/posters/Poets6-poster.jpg",
@@ -25,7 +42,7 @@
       "venue": "Koffee?",
       "venue_address": "104 Audubon Street, New Haven, CT 06511",
       "event_type": "poetry",
-      "status": "upcoming",
+      "status": "past",
       "description": "Hey hey - we are going to have another Poets and Friends event - the Thursday before Thanksgiving! 11.20.25 Doors open at 6:00 PM, showtime 6:30 PM. Koffee? - 104 Audubon Street, New Haven, CT. Food available at Koffee?. Bring friends.",
       "photos": [],
       "image": "/static/event-imgs/posters/gobble-head.jpg",
@@ -42,7 +59,7 @@
       "venue": "Koffee?",
       "venue_address": "104 Audubon Street, New Haven, CT 06511",
       "event_type": "poetry",
-      "status": "upcoming",
+      "status": "past",
       "description": "Live poetry and music at our favorite local spot",
       "photos": [
         "/static/event-imgs/poets1/1.jpg",
@@ -103,7 +120,7 @@
       "venue": "Koffee?",
       "venue_address": "104 Audubon Street, New Haven, CT 06511",
       "event_type": "cabaret",
-      "status": "upcoming",
+      "status": "past",
       "description": "Third installment of our cabaret series - this time at Koffee?",
       "photos": [],
       "image": "/static/event-imgs/cabaret-1-2/10.jpg"
@@ -142,7 +159,7 @@
       "venue": "Koffee?",
       "venue_address": "104 Audubon Street, New Haven, CT 06511",
       "event_type": "poetry",
-      "status": "upcoming",
+      "status": "past",
       "description": "Live poetry + performance @ Koffee? featuring local poets. Doors open at 6pm, showtime 6:30pm SHARP. Hosted by Mickey Vampiro. Show runs 60-90 minutes. Merch available (maybe).",
       "photos": [
         "/static/event-imgs/poets1/1.jpg",
@@ -210,7 +227,7 @@
       "venue": "Spruce Coffeeshop",
       "venue_address": "952 State St, New Haven, CT",
       "event_type": "music",
-      "status": "upcoming",
+      "status": "past",
       "description": "Join us for a night of indie rock as Jake Custer debuts new songs from 'I Think We're Lost' live for the first time. Album debut event featuring Jake Custer performing tracks from his new album 'I Think We're Lost'. Doors open at 7:15 PM, showtime at 7:45 PM.",
       "photos": [],
       "image": "/static/event-imgs/posters/jc1107.jpg",

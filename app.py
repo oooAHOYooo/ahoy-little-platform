@@ -2461,30 +2461,43 @@ def account_page():
             "bookmarks": int(s.query(func.count(Bookmark.id)).filter(Bookmark.user_id == user_id).scalar() or 0),
             "playlists": int(s.query(func.count(Playlist.id)).filter(Playlist.user_id == user_id).scalar() or 0),
             "plays": int(s.query(func.count(PlayHistory.id)).filter(PlayHistory.user_id == user_id).scalar() or 0),
-            "merch_orders": int(
-                s.query(func.count(Purchase.id)).filter(Purchase.user_id == user_id, Purchase.type == "merch").scalar()
-                or 0
-            ),
+            "merch_orders": 0,
         }
-        recent = (
-            s.query(Purchase)
-            .filter(Purchase.user_id == user_id, Purchase.type == "merch")
-            .order_by(Purchase.created_at.desc())
-            .limit(10)
-            .all()
-        )
-        recent_orders = [
-            {
-                "id": p.id,
-                "created_at": p.created_at.isoformat() if p.created_at else None,
-                "status": p.status,
-                "item_id": p.item_id,
-                "qty": p.qty,
-                "total": p.total,
-                "stripe_id": p.stripe_id,
-            }
-            for p in recent
-        ]
+        recent_orders = []
+        
+        # Handle purchases table - it may not exist if migration hasn't run
+        try:
+            from sqlalchemy import inspect
+            insp = inspect(s.bind)
+            tables = insp.get_table_names()
+            if 'purchases' in tables:
+                stats["merch_orders"] = int(
+                    s.query(func.count(Purchase.id)).filter(Purchase.user_id == user_id, Purchase.type == "merch").scalar()
+                    or 0
+                )
+                recent = (
+                    s.query(Purchase)
+                    .filter(Purchase.user_id == user_id, Purchase.type == "merch")
+                    .order_by(Purchase.created_at.desc())
+                    .limit(10)
+                    .all()
+                )
+                recent_orders = [
+                    {
+                        "id": p.id,
+                        "created_at": p.created_at.isoformat() if p.created_at else None,
+                        "status": p.status,
+                        "item_id": p.item_id,
+                        "qty": p.qty,
+                        "total": p.total,
+                        "stripe_id": p.stripe_id,
+                    }
+                    for p in recent
+                ]
+        except Exception as e:
+            # If purchases table doesn't exist or query fails, just use defaults
+            current_app.logger.warning(f"Could not query purchases table: {e}")
+            pass
 
     return render_template('account.html', stats=stats, recent_orders=recent_orders)
 
