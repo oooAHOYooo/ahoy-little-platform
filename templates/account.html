@@ -9,14 +9,10 @@
 
   {% if current_user.is_authenticated %}
     <div class="acct-head">
-      <div class="acct-avatar">
-        <img src="{{ current_user.avatar_url or '/static/img/default-avatar.png' }}" alt="">
-      </div>
       <div class="acct-meta">
-        <h1 class="acct-name">{{ current_user.display_name or current_user.username or 'Account' }}</h1>
+        <h1 class="acct-name">{{ current_user.username or 'Account' }}</h1>
         <div class="acct-sub">
-          <span class="muted">@{{ current_user.username }}</span>
-          {% if current_user.email %}<span class="dot">•</span><span class="muted">{{ current_user.email }}</span>{% endif %}
+          {% if current_user.email %}<span class="acct-email">{{ current_user.email }}</span>{% endif %}
         </div>
         <div class="acct-actions">
           <a class="acct-action-btn" href="/bookmarks">
@@ -203,11 +199,9 @@
 <style>
   .acct { max-width: 1100px; margin: 0 auto; padding: 18px 18px 40px; }
   .acct-head { display:flex; gap: 14px; align-items:center; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
-  .acct-avatar { width: 56px; height: 56px; border-radius: 16px; overflow:hidden; border: 1px solid rgba(255,255,255,0.10); background: rgba(0,0,0,0.35); flex: 0 0 auto; }
-  .acct-avatar img { width:100%; height:100%; object-fit: cover; display:block; }
-  .acct-name { margin: 0; font-size: 20px; color: rgba(255,255,255,0.95); }
+  .acct-name { margin: 0; font-size: 20px; color: rgba(255,255,255,0.95); font-weight: 600; }
   .acct-sub { display:flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-  .acct-sub .dot { opacity: .5; }
+  .acct-email { color: rgba(255,255,255,0.75); font-size: 14px; }
   .acct-actions { margin-top: 10px; display:flex; gap: 10px; flex-wrap: wrap; }
 
   /* Account action buttons - fixed visibility */
