@@ -1155,9 +1155,15 @@ def shows():
 @app.route('/live-tv')
 def live_tv_page():
     """Live TV page with four channels and guide."""
-    response = make_response(render_template('live_tv.html'))
-    response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
-    return response
+    try:
+        response = make_response(render_template('live_tv.html'))
+        response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
+        return response
+    except Exception as e:
+        import logging
+        logging.error(f'Error rendering live_tv.html: {e}', exc_info=True)
+        # Return a simple error page
+        return f'<h1>Error loading Live TV</h1><p>An error occurred: {str(e)}</p>', 500
 
 @app.route('/artists')
 def artists():
@@ -1671,72 +1677,96 @@ def api_shows():
 @limiter.exempt
 def api_live_tv_channels():
     """Return four Live TV channels built from available media content."""
-    shows_data = load_json_data('shows.json', {'shows': []})
-    # Note: Response caching added below after processing
+    try:
+        shows_data = load_json_data('shows.json', {'shows': []})
+        # Note: Response caching added below after processing
 
-    def normalize_show(item):
-        # Map show to a unified structure
-        return {
-            'id': item.get('id'),
-            'title': item.get('title'),
-            'type': 'show',  # treated as video for player behavior
-            'video_url': item.get('video_url') or item.get('mp4_link') or item.get('trailer_url'),
-            'thumbnail': item.get('thumbnail'),
-            'duration_seconds': item.get('duration_seconds') or 0,
-            'description': item.get('description') or '',
-            'category': (item.get('category') or '').lower(),
-            'tags': item.get('tags') or [],
-        }
+        def normalize_show(item):
+            # Map show to a unified structure
+            # Ensure id is always present, generate one if missing
+            show_id = item.get('id')
+            if not show_id:
+                # Generate a temporary ID if missing
+                show_id = str(uuid.uuid4())
+            
+            return {
+                'id': show_id,
+                'title': item.get('title') or 'Untitled',
+                'type': 'show',  # treated as video for player behavior
+                'video_url': item.get('video_url') or item.get('mp4_link') or item.get('trailer_url'),
+                'thumbnail': item.get('thumbnail'),
+                'duration_seconds': item.get('duration_seconds') or 0,
+                'description': item.get('description') or '',
+                'category': (item.get('category') or '').lower(),
+                'tags': item.get('tags') or [],
+            }
 
-    shows = [normalize_show(s) for s in shows_data.get('shows', []) if s.get('video_url') or s.get('mp4_link') or s.get('trailer_url')]
+        shows = [normalize_show(s) for s in shows_data.get('shows', []) if s.get('video_url') or s.get('mp4_link') or s.get('trailer_url')]
 
-    # Channel categorization
-    music_videos = [s for s in shows if (s.get('category') == 'music video' or 'music-video' in s.get('tags', []) or 'musicvideos' in ' '.join(s.get('tags', [])))]
-    films = [s for s in shows if (s.get('category') == 'short film' or s.get('category') == 'film' or 'short-film' in s.get('tags', []))]
-    live_shows = [s for s in shows if (s.get('category') == 'broadcast' or 'live' in ' '.join(s.get('tags', [])) or 'episode' in s.get('category', ''))]
+        # Channel categorization
+        music_videos = [s for s in shows if (s.get('category') == 'music video' or 'music-video' in s.get('tags', []) or 'musicvideos' in ' '.join(s.get('tags', [])))]
+        films = [s for s in shows if (s.get('category') == 'short film' or s.get('category') == 'film' or 'short-film' in s.get('tags', []))]
+        live_shows = [s for s in shows if (s.get('category') == 'broadcast' or 'live' in ' '.join(s.get('tags', [])) or 'episode' in s.get('category', ''))]
 
-    # Misc: everything not already in the other channels (video only)
-    included_ids = {s['id'] for s in music_videos + films + live_shows}
-    misc_videos = [s for s in shows if s['id'] not in included_ids]
-    misc = misc_videos
-    
-    # Daily-seeded shuffle so the mix changes every day but stays stable within the day
-    def daily_shuffle(items, salt=''):
-        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
-        seed_src = f'{today}:{salt}'
-        seed = int(hashlib.sha1(seed_src.encode('utf-8')).hexdigest()[:8], 16)
-        rnd = random.Random(seed)
-        items_copy = [i for i in items]
-        rnd.shuffle(items_copy)
-        return items_copy
+        # Misc: everything not already in the other channels (video only)
+        # Use .get() to safely access id, filter out None values
+        included_ids = {s.get('id') for s in music_videos + films + live_shows if s.get('id')}
+        misc_videos = [s for s in shows if s.get('id') and s.get('id') not in included_ids]
+        misc = misc_videos
+        
+        # Daily-seeded shuffle so the mix changes every day but stays stable within the day
+        def daily_shuffle(items, salt=''):
+            today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+            seed_src = f'{today}:{salt}'
+            seed = int(hashlib.sha1(seed_src.encode('utf-8')).hexdigest()[:8], 16)
+            rnd = random.Random(seed)
+            items_copy = [i for i in items]
+            rnd.shuffle(items_copy)
+            return items_copy
 
-    channels = [
-        {
-            'id': 'misc',
-            'name': 'Misc',
-            'items': daily_shuffle(misc, 'misc'),
-        },
-        {
-            'id': 'music-videos',
-            'name': 'Music Videos',
-            'items': daily_shuffle(music_videos, 'music'),
-        },
-        {
-            'id': 'films',
-            'name': 'Films',
-            'items': daily_shuffle(films, 'films'),
-        },
-        {
-            'id': 'live-shows',
-            'name': 'Live Shows',
-            'items': daily_shuffle(live_shows, 'live'),
-        },
-    ]
+        channels = [
+            {
+                'id': 'misc',
+                'name': 'Misc',
+                'items': daily_shuffle(misc, 'misc'),
+            },
+            {
+                'id': 'music-videos',
+                'name': 'Music Videos',
+                'items': daily_shuffle(music_videos, 'music'),
+            },
+            {
+                'id': 'films',
+                'name': 'Films',
+                'items': daily_shuffle(films, 'films'),
+            },
+            {
+                'id': 'live-shows',
+                'name': 'Live Shows',
+                'items': daily_shuffle(live_shows, 'live'),
+            },
+        ]
 
-    response = jsonify({'channels': channels})
-    # Cache for 5 minutes (content changes daily but structure is stable)
-    response.headers['Cache-Control'] = 'public, max-age=300'
-    return response
+        response = jsonify({'channels': channels})
+        # Cache for 5 minutes (content changes daily but structure is stable)
+        response.headers['Cache-Control'] = 'public, max-age=300'
+        return response
+    except Exception as e:
+        # Log the error for debugging
+        import logging
+        logging.error(f'Error in api_live_tv_channels: {e}', exc_info=True)
+        # Return empty channels instead of crashing
+        response = jsonify({
+            'channels': [
+                {'id': 'misc', 'name': 'Misc', 'items': []},
+                {'id': 'music-videos', 'name': 'Music Videos', 'items': []},
+                {'id': 'films', 'name': 'Films', 'items': []},
+                {'id': 'live-shows', 'name': 'Live Shows', 'items': []},
+            ],
+            'error': 'Failed to load channels'
+        })
+        response.headers['Cache-Control'] = 'no-cache'
+        return response, 500
 
 @app.route('/api/show/<show_id>')
 def api_show(show_id):
