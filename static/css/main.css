@@ -2304,12 +2304,6 @@ opacity:0.15;
     display: none !important;
 }
 
-/* Ensure only one account button shows - hide guest button when logged in */
-.account-menu-container ~ a[href="/account"].ds-iconbtn {
-    display: none !important;
-}
-}
-
 /* Account Menu Button */
 .account-menu-btn {
     width: auto !important;
