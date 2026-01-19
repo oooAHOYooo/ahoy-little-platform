@@ -305,6 +305,11 @@ function authPage() {
                 
                 if (response.ok) {
                     const data = await response.json();
+                    try { 
+                        if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+                            localStorage.setItem('ahoyLastIdentifier', this.authForm.username);
+                        }
+                    } catch (_) {}
                     this.loginSuccess = true;
                     // Animate success, then redirect
                     setTimeout(() => {
@@ -320,8 +325,14 @@ function authPage() {
                         }
                     }, 1500);
                 } else {
-                    const error = await response.json();
-                    this.showNotification(error.message || error.error || 'Login failed', 'error');
+                    let errorMessage = 'Login failed';
+                    try {
+                        const error = await response.json();
+                        errorMessage = error.message || error.error || errorMessage;
+                    } catch (_) {
+                        errorMessage = response.statusText || errorMessage;
+                    }
+                    this.showNotification(errorMessage, 'error');
                     this.isLoading = false;
                 }
             } catch (error) {

@@ -307,8 +307,10 @@ function profileAuth() {
 
     init() {
       try {
-        const last = localStorage.getItem('ahoyLastIdentifier');
-        if (last) this.loginIdentifier = last;
+        if (typeof localStorage !== 'undefined' && localStorage.getItem) {
+          const last = localStorage.getItem('ahoyLastIdentifier');
+          if (last) this.loginIdentifier = last;
+        }
       } catch (_) {}
       this.suggestions = mkSuggestions('');
     },
@@ -345,7 +347,17 @@ function profileAuth() {
       if (!u) return;
       this.usernameStatus = 'Checking availability…';
       try {
-        const r = await fetch(`/api/auth/username-available?username=${encodeURIComponent(u)}`, { credentials: 'include' });
+        const r = await fetch(`/api/auth/username-available?username=${encodeURIComponent(u)}`, { 
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (!r.ok) {
+          // If server error, don't block registration
+          this.usernameAvailable = null;
+          this.usernameStatus = '';
+          return;
+        }
         const data = await r.json();
         this.usernameAvailable = !!data.available;
         this.suggestions = Array.isArray(data.suggestions) ? data.suggestions : this.suggestions;
@@ -367,12 +379,21 @@ function profileAuth() {
           credentials: 'include',
           body: JSON.stringify({ identifier: this.loginIdentifier, password: this.loginPassword })
         });
-        const data = await r.json().catch(() => ({}));
+        let data = {};
+        try {
+          data = await r.json();
+        } catch (_) {
+          // Response is not JSON, use status text
+        }
         if (!r.ok) {
           this.error = data.message || data.detail || data.error || 'Sign in failed';
           return;
         }
-        try { localStorage.setItem('ahoyLastIdentifier', this.loginIdentifier); } catch (_) {}
+        try { 
+          if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+            localStorage.setItem('ahoyLastIdentifier', this.loginIdentifier);
+          }
+        } catch (_) {}
         window.location.reload();
       } catch (_) {
         this.error = 'Sign in failed. Please try again.';
@@ -392,14 +413,23 @@ function profileAuth() {
           credentials: 'include',
           body: JSON.stringify({ email: this.regEmail, username: this.regUsername, password: this.regPassword })
         });
-        const data = await r.json().catch(() => ({}));
+        let data = {};
+        try {
+          data = await r.json();
+        } catch (_) {
+          // Response is not JSON, use status text
+        }
         if (!r.ok) {
           this.error = data.message || data.detail || data.error || 'Create account failed';
           if (Array.isArray(data.suggestions)) this.suggestions = data.suggestions;
           if (data.error === 'invalid_username') this.usernameAvailable = false;
           return;
         }
-        try { localStorage.setItem('ahoyLastIdentifier', this.regUsername); } catch (_) {}
+        try { 
+          if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+            localStorage.setItem('ahoyLastIdentifier', this.regUsername);
+          }
+        } catch (_) {}
         window.location.reload();
       } catch (_) {
         this.error = 'Create account failed. Please try again.';

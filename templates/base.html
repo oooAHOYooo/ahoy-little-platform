@@ -183,8 +183,14 @@
                 
                 if (response.ok) {
                   const data = await response.json();
-                  try { localStorage.setItem('ahoyLastIdentifier', this.loginForm.username); } catch (_) {}
-                  window.__ahoyToast && window.__ahoyToast('Login successful!');
+                  try { 
+                    if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+                      localStorage.setItem('ahoyLastIdentifier', this.loginForm.username);
+                    }
+                  } catch (_) {}
+                  if (window.__ahoyToast) {
+                    window.__ahoyToast('Login successful!');
+                  }
                   this.showLogin = false;
                   this.loginForm = { username: '', password: '' };
                   // Reload page to update UI
@@ -192,8 +198,17 @@
                     window.location.reload();
                   }, 500);
                 } else {
-                  const error = await response.json();
-                  window.__ahoyToast && window.__ahoyToast(error.message || error.error || 'Login failed');
+                  let errorMessage = 'Login failed';
+                  try {
+                    const error = await response.json();
+                    errorMessage = error.message || error.error || errorMessage;
+                  } catch (_) {
+                    // If response is not JSON, use status text
+                    errorMessage = response.statusText || errorMessage;
+                  }
+                  if (window.__ahoyToast) {
+                    window.__ahoyToast(errorMessage);
+                  }
                 }
               } catch (error) {
                 console.error('Login error:', error);
@@ -224,8 +239,14 @@
                 
                 if (response.ok) {
                   const data = await response.json();
-                  try { localStorage.setItem('ahoyLastIdentifier', this.registerForm.username); } catch (_) {}
-                  window.__ahoyToast && window.__ahoyToast('Registration successful!');
+                  try { 
+                    if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+                      localStorage.setItem('ahoyLastIdentifier', this.registerForm.username);
+                    }
+                  } catch (_) {}
+                  if (window.__ahoyToast) {
+                    window.__ahoyToast('Registration successful!');
+                  }
                   this.showRegister = false;
                   this.registerForm = { username: '', email: '', password: '' };
                   // Reload page to update UI
@@ -233,12 +254,22 @@
                     window.location.reload();
                   }, 500);
                 } else {
-                  const error = await response.json();
-                  window.__ahoyToast && window.__ahoyToast(error.message || error.error || 'Registration failed');
+                  let errorMessage = 'Registration failed';
+                  try {
+                    const error = await response.json();
+                    errorMessage = error.message || error.error || errorMessage;
+                  } catch (_) {
+                    errorMessage = response.statusText || errorMessage;
+                  }
+                  if (window.__ahoyToast) {
+                    window.__ahoyToast(errorMessage);
+                  }
                 }
               } catch (error) {
                 console.error('Registration error:', error);
-                window.__ahoyToast && window.__ahoyToast('Registration failed. Please try again.');
+                if (window.__ahoyToast) {
+                  window.__ahoyToast('Registration failed. Please try again.');
+                }
               } finally {
                 this.isLoading = false;
               }

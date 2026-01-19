@@ -263,39 +263,43 @@ def password_reset_confirm():
 @limiter.limit(rate_limit_auth)
 def login():
     """Login with Flask sessions"""
-    data = request.get_json(silent=True) or {}
-    identifier = (data.get("identifier") or data.get("email") or data.get("username") or "").strip()
-    password = data.get("password") or ""
+    try:
+        data = request.get_json(silent=True) or {}
+        identifier = (data.get("identifier") or data.get("email") or data.get("username") or "").strip()
+        password = data.get("password") or ""
 
-    if not identifier or not password:
-        return jsonify({"error": "identifier_and_password_required"}), 400
+        if not identifier or not password:
+            return jsonify({"error": "identifier_and_password_required"}), 400
 
-    with get_session() as db_session:
-        ident_l = identifier.strip().lower()
-        if "@" in ident_l:
-            user = db_session.query(User).filter(User.email == ident_l).first()
-        else:
-            uname = _normalize_username(ident_l)
-            # Prefer username match; if user hasn't been backfilled yet, fall back to email-local-part match.
-            user = db_session.query(User).filter(func.lower(User.username) == uname).first()
-            if not user:
-                user = db_session.query(User).filter(User.email.like(f"{uname}@%")).first()
-        if not user or not verify_password(password, user.password_hash):
-            return jsonify({"error": "invalid_credentials"}), 401
+        with get_session() as db_session:
+            ident_l = identifier.strip().lower()
+            if "@" in ident_l:
+                user = db_session.query(User).filter(User.email == ident_l).first()
+            else:
+                uname = _normalize_username(ident_l)
+                # Prefer username match; if user hasn't been backfilled yet, fall back to email-local-part match.
+                user = db_session.query(User).filter(func.lower(User.username) == uname).first()
+                if not user:
+                    user = db_session.query(User).filter(User.email.like(f"{uname}@%")).first()
+            if not user or not verify_password(password, user.password_hash):
+                return jsonify({"error": "invalid_credentials"}), 401
 
-        # Log user in with Flask-Login
-        login_user(user, remember=True)
+            # Log user in with Flask-Login
+            login_user(user, remember=True)
 
-        return jsonify({
-            "success": True,
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "display_name": user.display_name,
-                "avatar_url": user.avatar_url
-            }
-        })
+            return jsonify({
+                "success": True,
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "display_name": user.display_name,
+                    "avatar_url": user.avatar_url
+                }
+            })
+    except Exception as e:
+        current_app.logger.exception("Login failed")
+        return jsonify({"error": "login_failed", "message": "An error occurred during login. Please try again."}), 500
 
 
 @bp.post("/logout")
@@ -325,28 +329,39 @@ def me():
 @limiter.limit(rate_limit_auth)
 def username_available():
     """Lightweight username availability check for the UI."""
-    username = _normalize_username(request.args.get("username", ""))
-    if not _username_is_valid(username):
-        return jsonify({
-            "available": False,
-            "username": username,
-            "error": "invalid_username",
-            "suggestions": _suggest_usernames(username),
-        }), 200
     try:
-        with get_session() as db_session:
-            exists = db_session.query(User.id).filter(func.lower(User.username) == username.lower()).first()
+        username = _normalize_username(request.args.get("username", ""))
+        if not _username_is_valid(username):
             return jsonify({
-                "available": not bool(exists),
+                "available": False,
                 "username": username,
+                "error": "invalid_username",
                 "suggestions": _suggest_usernames(username),
             }), 200
-    except Exception:
-        current_app.logger.exception("Username availability check failed")
+        try:
+            with get_session() as db_session:
+                exists = db_session.query(User.id).filter(func.lower(User.username) == username.lower()).first()
+                return jsonify({
+                    "available": not bool(exists),
+                    "username": username,
+                    "suggestions": _suggest_usernames(username),
+                }), 200
+        except Exception as e:
+            current_app.logger.exception("Username availability check failed")
+            # Return 200 with error flag instead of 500 to avoid breaking the UI
+            return jsonify({
+                "available": False,
+                "username": username,
+                "error": "server_error",
+                "suggestions": _suggest_usernames(username),
+            }), 200
+    except Exception as e:
+        current_app.logger.exception("Username availability endpoint error")
+        # Return 200 with error flag instead of 500 to avoid breaking the UI
         return jsonify({
             "available": False,
-            "username": username,
+            "username": request.args.get("username", ""),
             "error": "server_error",
-            "suggestions": _suggest_usernames(username),
-        }), 500
+            "suggestions": [],
+        }), 200
 
