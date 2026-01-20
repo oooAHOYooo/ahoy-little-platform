@@ -16,6 +16,50 @@
 
   <div class="admin-ro-grid">
     <div class="card glass">
+      <div class="card-header">Users</div>
+      <div class="card-body">
+        <div class="stat-lg" x-text="stats.users.total || 0">0</div>
+        <div class="muted text-sm">
+          Active (30d) <strong x-text="stats.users.active_30d || 0">0</strong> •
+          New (7d) <strong x-text="stats.users.new_7d || 0">0</strong> •
+          New (24h) <strong x-text="stats.users.new_24h || 0">0</strong>
+        </div>
+      </div>
+    </div>
+    <div class="card glass">
+      <div class="card-header">Plays</div>
+      <div class="card-body">
+        <div class="stat-lg" x-text="stats.plays.total || 0">0</div>
+        <div class="muted text-sm">
+          Last 7d <strong x-text="stats.plays.last_7d || 0">0</strong> •
+          Last 24h <strong x-text="stats.plays.last_24h || 0">0</strong> •
+          Unique tracks <strong x-text="stats.plays.unique_tracks || 0">0</strong>
+        </div>
+      </div>
+    </div>
+    <div class="card glass">
+      <div class="card-header">Listening Time</div>
+      <div class="card-body">
+        <div class="stat-lg" x-text="(stats.listening.total_hours || 0) + 'h'">0h</div>
+        <div class="muted text-sm">
+          Sessions <strong x-text="stats.listening.total_sessions || 0">0</strong> •
+          Radio <strong x-text="stats.listening.radio_sessions || 0">0</strong> •
+          Manual <strong x-text="stats.listening.manual_sessions || 0">0</strong>
+        </div>
+      </div>
+    </div>
+    <div class="card glass">
+      <div class="card-header">Engagement</div>
+      <div class="card-body">
+        <div class="stat-lg" x-text="(stats.engagement.bookmarks || 0) + ' bookmarks'">0 bookmarks</div>
+        <div class="muted text-sm">
+          Follows <strong x-text="stats.engagement.follows || 0">0</strong> •
+          Tips <strong x-text="stats.engagement.tips || 0">0</strong> •
+          Amount <strong x-text="'$' + (stats.engagement.tip_amount || 0)">$0</strong>
+        </div>
+      </div>
+    </div>
+    <div class="card glass">
       <div class="card-header">Merch Orders</div>
       <div class="card-body">
         <div class="stat-lg" x-text="stats.orders.total || 0">0</div>
@@ -26,12 +70,143 @@
         </div>
       </div>
     </div>
-    <div class="card glass">
-      <div class="card-header">Users</div>
-      <div class="card-body">
-        <div class="stat-lg" x-text="stats.users.total || 0">0</div>
-        <div class="muted text-sm">Active (30d) <strong x-text="stats.users.active_30d || 0">0</strong></div>
+  </div>
+
+  <!-- Analytics Section -->
+  <div class="admin-ro-section" x-show="analytics">
+    <div class="admin-ro-section-head">
+      <h2>Analytics</h2>
+      <div class="muted text-sm">Last 7 days</div>
+    </div>
+
+    <div class="admin-ro-analytics-grid">
+      <div class="card glass">
+        <div class="card-header">Daily Plays</div>
+        <div class="card-body">
+          <div class="daily-plays-chart">
+            <template x-for="day in analytics.daily_plays || []" :key="day.date">
+              <div class="chart-bar-wrap">
+                <div class="chart-bar" :style="`height: ${Math.max(5, (day.count / Math.max(1, Math.max(...(analytics.daily_plays || []).map(d => d.count)))) * 100)}%`" :title="day.count + ' plays'"></div>
+                <div class="chart-label" x-text="new Date(day.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})"></div>
+              </div>
+            </template>
+          </div>
+        </div>
       </div>
+
+      <div class="card glass">
+        <div class="card-header">Listening by Source</div>
+        <div class="card-body">
+          <div class="source-stats">
+            <div class="source-item">
+              <div class="source-label">Radio</div>
+              <div class="source-value" x-text="(analytics.listening_by_source?.radio_hours || 0) + 'h'">0h</div>
+            </div>
+            <div class="source-item">
+              <div class="source-label">Manual</div>
+              <div class="source-value" x-text="(analytics.listening_by_source?.manual_hours || 0) + 'h'">0h</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-ro-section" style="margin-top: 24px;">
+      <div class="admin-ro-section-head">
+        <h3>Top Users by Plays</h3>
+      </div>
+      <div class="admin-ro-table-wrap glass">
+        <table class="admin-ro-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Plays</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="user in analytics.top_users || []" :key="user.id">
+              <tr>
+                <td x-text="user.username || '—'"></td>
+                <td class="muted" x-text="user.email"></td>
+                <td><strong x-text="user.play_count"></strong></td>
+              </tr>
+            </template>
+            <tr x-show="!analytics.top_users || !analytics.top_users.length">
+              <td colspan="3" class="muted" style="padding:14px;">No data yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="admin-ro-section" style="margin-top: 24px;">
+      <div class="admin-ro-section-head">
+        <h3>Most Played Tracks</h3>
+      </div>
+      <div class="admin-ro-table-wrap glass">
+        <table class="admin-ro-table">
+          <thead>
+            <tr>
+              <th>Track ID</th>
+              <th>Play Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="track in analytics.top_tracks || []" :key="track.media_id">
+              <tr>
+                <td class="muted" x-text="track.media_id"></td>
+                <td><strong x-text="track.play_count"></strong></td>
+              </tr>
+            </template>
+            <tr x-show="!analytics.top_tracks || !analytics.top_tracks.length">
+              <td colspan="2" class="muted" style="padding:14px;">No data yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Users Section -->
+  <div class="admin-ro-section" style="margin-top: 24px;">
+    <div class="admin-ro-section-head">
+      <h2>All Users</h2>
+      <div class="muted text-sm" x-show="users.length">Showing <span x-text="users.length"></span> users</div>
+    </div>
+    <div class="admin-ro-table-wrap glass">
+      <table class="admin-ro-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Username</th>
+            <th>Created</th>
+            <th>Last Active</th>
+            <th>Plays</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="user in users" :key="user.id">
+            <tr>
+              <td x-text="user.id"></td>
+              <td x-text="user.email"></td>
+              <td class="muted" x-text="user.username || '—'"></td>
+              <td class="muted" x-text="formatDate(user.created_at)"></td>
+              <td class="muted" x-text="user.last_active_at ? formatDate(user.last_active_at) : 'Never'"></td>
+              <td><strong x-text="user.play_count || 0"></strong></td>
+              <td>
+                <span class="pill" :class="user.is_admin ? 'st-paid' : ''" x-show="user.is_admin">Admin</span>
+                <span class="pill" :class="user.disabled ? 'st-pending' : 'st-fulfilled'" x-text="user.disabled ? 'Disabled' : 'Active'"></span>
+              </td>
+            </tr>
+          </template>
+          <tr x-show="!users.length">
+            <td colspan="7" class="muted" style="padding:14px;">No users yet.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
@@ -78,18 +253,24 @@
 <script>
 function adminDashboard() {
   return {
-    stats: { users: {}, orders: {} },
+    stats: { users: {}, orders: {}, plays: {}, listening: {}, engagement: {} },
+    analytics: null,
+    users: [],
     orders: [],
     async init() {
       await this.refresh();
     },
     async refresh() {
       try {
-        const [s, o] = await Promise.all([
+        const [s, a, u, o] = await Promise.all([
           fetch('/api/admin/stats'),
+          fetch('/api/admin/analytics'),
+          fetch('/api/admin/users?limit=100'),
           fetch('/api/admin/orders?limit=200')
         ]);
         if (s.ok) this.stats = await s.json();
+        if (a.ok) this.analytics = await a.json();
+        if (u.ok) this.users = (await u.json()).users || [];
         if (o.ok) this.orders = (await o.json()).orders || [];
       } catch (e) {
         console.error('Failed to load admin data', e);
@@ -113,8 +294,17 @@ function adminDashboard() {
   .admin-ro-header { display:flex; align-items:flex-end; justify-content:space-between; gap: 12px; margin-bottom: 14px; }
   .admin-ro-header h1 { margin: 0; }
   .admin-ro-header .muted { margin: 4px 0 0; color: rgba(255,255,255,0.65); }
-  .admin-ro-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+  .admin-ro-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 12px; }
   @media (max-width: 768px){ .admin-ro-grid{ grid-template-columns: 1fr; } }
+  .admin-ro-analytics-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-top: 12px; }
+  .daily-plays-chart { display:flex; align-items:flex-end; gap: 8px; height: 120px; padding: 8px 0; }
+  .chart-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; height:100%; }
+  .chart-bar { width:100%; background: linear-gradient(180deg, rgba(82,136,255,0.85) 0%, rgba(82,136,255,0.55) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.3s; }
+  .chart-label { margin-top: 6px; font-size: 10px; color: rgba(255,255,255,0.55); text-align:center; }
+  .source-stats { display:flex; gap: 24px; }
+  .source-item { flex:1; }
+  .source-label { font-size: 12px; color: rgba(255,255,255,0.65); margin-bottom: 4px; }
+  .source-value { font-size: 24px; font-weight: 900; color: rgba(255,255,255,0.95); }
   .admin-ro-section { margin-top: 18px; }
   .admin-ro-section-head { display:flex; align-items:baseline; justify-content:space-between; gap: 12px; margin: 8px 2px; }
   .admin-ro-table-wrap { border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; }

@@ -2787,16 +2787,22 @@ def contact_page():
 @login_required
 @_admin_session_required
 def admin_stats():
-    """Read-only admin stats (users + merch orders)."""
+    """Read-only admin stats (users + merch orders + analytics)."""
     from db import get_session
-    from models import User, Purchase
+    from models import (
+        User, Purchase, PlayHistory, ListeningSession, ListeningTotal,
+        Bookmark, UserArtistFollow, Tip
+    )
     from sqlalchemy import func
     from datetime import datetime, timedelta, timezone
 
     now = datetime.now(timezone.utc)
     active_since = now - timedelta(days=30)
+    week_ago = now - timedelta(days=7)
+    day_ago = now - timedelta(days=1)
 
     with get_session() as s:
+        # User stats
         total_users = int(s.query(func.count(User.id)).scalar() or 0)
         active_users = int(
             s.query(func.count(User.id))
@@ -2805,7 +2811,18 @@ def admin_stats():
             .scalar()
             or 0
         )
+        new_users_7d = int(
+            s.query(func.count(User.id))
+            .filter(User.created_at >= week_ago)
+            .scalar() or 0
+        )
+        new_users_24h = int(
+            s.query(func.count(User.id))
+            .filter(User.created_at >= day_ago)
+            .scalar() or 0
+        )
 
+        # Order stats
         total_orders = int(s.query(func.count(Purchase.id)).filter(Purchase.type == "merch").scalar() or 0)
         pending_orders = int(
             s.query(func.count(Purchase.id)).filter(Purchase.type == "merch", Purchase.status == "pending").scalar() or 0
@@ -2817,15 +2834,288 @@ def admin_stats():
             s.query(func.count(Purchase.id)).filter(Purchase.type == "merch", Purchase.status == "fulfilled").scalar() or 0
         )
 
+        # Play statistics
+        total_plays = int(s.query(func.count(PlayHistory.id)).scalar() or 0)
+        plays_7d = int(
+            s.query(func.count(PlayHistory.id))
+            .filter(PlayHistory.played_at >= week_ago)
+            .scalar() or 0
+        )
+        plays_24h = int(
+            s.query(func.count(PlayHistory.id))
+            .filter(PlayHistory.played_at >= day_ago)
+            .scalar() or 0
+        )
+        unique_tracks_played = int(
+            s.query(func.count(func.distinct(PlayHistory.media_id)))
+            .filter(PlayHistory.media_type == "track")
+            .scalar() or 0
+        )
+
+        # Listening time statistics
+        total_listening_seconds = int(
+            s.query(func.sum(ListeningTotal.total_seconds)).scalar() or 0
+        )
+        total_listening_hours = round(total_listening_seconds / 3600, 1)
+        
+        # Listening sessions
+        total_sessions = int(s.query(func.count(ListeningSession.id)).scalar() or 0)
+        sessions_7d = int(
+            s.query(func.count(ListeningSession.id))
+            .filter(ListeningSession.started_at >= week_ago)
+            .scalar() or 0
+        )
+        radio_sessions = int(
+            s.query(func.count(ListeningSession.id))
+            .filter(ListeningSession.source == "radio")
+            .scalar() or 0
+        )
+        manual_sessions = int(
+            s.query(func.count(ListeningSession.id))
+            .filter(ListeningSession.source == "manual")
+            .scalar() or 0
+        )
+
+        # Engagement stats
+        total_bookmarks = int(s.query(func.count(Bookmark.id)).scalar() or 0)
+        total_follows = int(s.query(func.count(UserArtistFollow.id)).scalar() or 0)
+        total_tips = int(s.query(func.count(Tip.id)).scalar() or 0)
+        total_tip_amount = float(
+            s.query(func.sum(Tip.amount)).scalar() or 0
+        )
+
     return jsonify({
-        "users": {"total": total_users, "active_30d": active_users},
+        "users": {
+            "total": total_users,
+            "active_30d": active_users,
+            "new_7d": new_users_7d,
+            "new_24h": new_users_24h,
+        },
         "orders": {
             "total": total_orders,
             "pending": pending_orders,
             "paid": paid_orders,
             "fulfilled": fulfilled_orders,
         },
+        "plays": {
+            "total": total_plays,
+            "last_7d": plays_7d,
+            "last_24h": plays_24h,
+            "unique_tracks": unique_tracks_played,
+        },
+        "listening": {
+            "total_hours": total_listening_hours,
+            "total_seconds": total_listening_seconds,
+            "total_sessions": total_sessions,
+            "sessions_7d": sessions_7d,
+            "radio_sessions": radio_sessions,
+            "manual_sessions": manual_sessions,
+        },
+        "engagement": {
+            "bookmarks": total_bookmarks,
+            "follows": total_follows,
+            "tips": total_tips,
+            "tip_amount": round(total_tip_amount, 2),
+        },
     })
+
+
+@app.route('/api/admin/analytics', methods=['GET'])
+@login_required
+@_admin_session_required
+def admin_analytics():
+    """Detailed analytics for admin dashboard."""
+    from db import get_session
+    from models import (
+        User, PlayHistory, ListeningSession, Bookmark,
+        UserArtistFollow, Tip
+    )
+    from sqlalchemy import func
+    from datetime import datetime, timedelta, timezone
+
+    now = datetime.now(timezone.utc)
+    week_ago = now - timedelta(days=7)
+    month_ago = now - timedelta(days=30)
+
+    with get_session() as s:
+        # Most active users (by play count)
+        top_users_by_plays = s.query(
+            User.id,
+            User.username,
+            User.email,
+            func.count(PlayHistory.id).label('play_count')
+        ).join(
+            PlayHistory, User.id == PlayHistory.user_id
+        ).group_by(
+            User.id, User.username, User.email
+        ).order_by(
+            func.count(PlayHistory.id).desc()
+        ).limit(10).all()
+
+        # Most played tracks
+        top_tracks = s.query(
+            PlayHistory.media_id,
+            func.count(PlayHistory.id).label('play_count')
+        ).filter(
+            PlayHistory.media_type == "track"
+        ).group_by(
+            PlayHistory.media_id
+        ).order_by(
+            func.count(PlayHistory.id).desc()
+        ).limit(20).all()
+
+        # Plays over time (last 7 days)
+        daily_plays = []
+        for i in range(7):
+            day_start = (now - timedelta(days=6-i)).replace(hour=0, minute=0, second=0, microsecond=0)
+            day_end = day_start + timedelta(days=1)
+            count = int(
+                s.query(func.count(PlayHistory.id))
+                .filter(PlayHistory.played_at >= day_start)
+                .filter(PlayHistory.played_at < day_end)
+                .scalar() or 0
+            )
+            daily_plays.append({
+                "date": day_start.isoformat(),
+                "count": count
+            })
+
+        # Listening time by source
+        radio_time = int(
+            s.query(func.sum(ListeningSession.seconds))
+            .filter(ListeningSession.source == "radio")
+            .scalar() or 0
+        )
+        manual_time = int(
+            s.query(func.sum(ListeningSession.seconds))
+            .filter(ListeningSession.source == "manual")
+            .scalar() or 0
+        )
+
+        # User engagement breakdown
+        users_with_plays = int(
+            s.query(func.count(func.distinct(PlayHistory.user_id))).scalar() or 0
+        )
+        users_with_bookmarks = int(
+            s.query(func.count(func.distinct(Bookmark.user_id))).scalar() or 0
+        )
+        users_with_follows = int(
+            s.query(func.count(func.distinct(UserArtistFollow.user_id))).scalar() or 0
+        )
+        users_with_tips = int(
+            s.query(func.count(func.distinct(Tip.user_id))).scalar() or 0
+        )
+
+        # Recent activity (last 24h)
+        recent_plays_24h = int(
+            s.query(func.count(PlayHistory.id))
+            .filter(PlayHistory.played_at >= (now - timedelta(days=1)))
+            .scalar() or 0
+        )
+        recent_bookmarks_24h = int(
+            s.query(func.count(Bookmark.id))
+            .filter(Bookmark.created_at >= (now - timedelta(days=1)))
+            .scalar() or 0
+        )
+        recent_follows_24h = int(
+            s.query(func.count(UserArtistFollow.id))
+            .filter(UserArtistFollow.created_at >= (now - timedelta(days=1)))
+            .scalar() or 0
+        )
+
+    return jsonify({
+        "top_users": [
+            {
+                "id": u.id,
+                "username": u.username or u.email,
+                "email": u.email,
+                "play_count": u.play_count
+            }
+            for u in top_users_by_plays
+        ],
+        "top_tracks": [
+            {
+                "media_id": t.media_id,
+                "play_count": t.play_count
+            }
+            for t in top_tracks
+        ],
+        "daily_plays": daily_plays,
+        "listening_by_source": {
+            "radio_hours": round(radio_time / 3600, 1),
+            "manual_hours": round(manual_time / 3600, 1),
+            "radio_seconds": radio_time,
+            "manual_seconds": manual_time,
+        },
+        "user_engagement": {
+            "users_with_plays": users_with_plays,
+            "users_with_bookmarks": users_with_bookmarks,
+            "users_with_follows": users_with_follows,
+            "users_with_tips": users_with_tips,
+        },
+        "recent_24h": {
+            "plays": recent_plays_24h,
+            "bookmarks": recent_bookmarks_24h,
+            "follows": recent_follows_24h,
+        },
+    })
+
+
+@app.route('/api/admin/users', methods=['GET'])
+@login_required
+@_admin_session_required
+def admin_users():
+    """Get list of users for admin dashboard."""
+    from db import get_session
+    from models import User
+    from sqlalchemy import func
+
+    limit = 100
+    try:
+        limit = int(request.args.get("limit") or "100")
+        limit = max(1, min(500, limit))
+    except Exception:
+        limit = 100
+
+    with get_session() as s:
+        rows = (
+            s.query(User)
+            .order_by(User.created_at.desc())
+            .limit(limit)
+            .all()
+        )
+        users = [{
+            "id": u.id,
+            "email": u.email,
+            "username": u.username,
+            "display_name": u.display_name,
+            "created_at": u.created_at.isoformat() if u.created_at else None,
+            "last_active_at": u.last_active_at.isoformat() if u.last_active_at else None,
+            "is_admin": u.is_admin,
+            "disabled": u.disabled,
+        } for u in rows]
+
+        # Get play counts for each user
+        play_counts = {}
+        if users:
+            user_ids = [u["id"] for u in users]
+            from models import PlayHistory
+            counts = (
+                s.query(
+                    PlayHistory.user_id,
+                    func.count(PlayHistory.id).label('count')
+                )
+                .filter(PlayHistory.user_id.in_(user_ids))
+                .group_by(PlayHistory.user_id)
+                .all()
+            )
+            play_counts = {user_id: count for user_id, count in counts}
+
+        # Add play counts to users
+        for user in users:
+            user["play_count"] = play_counts.get(user["id"], 0)
+
+    return jsonify({"users": users})
 
 
 @app.route('/api/admin/orders', methods=['GET'])

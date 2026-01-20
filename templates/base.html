@@ -1804,6 +1804,9 @@
             <div class="footer-bottom">
                 <p class="footer-copyright">&copy; 2026 Ahoy Indie Media. All
                     rights reserved.</p>
+                {% if current_user.is_authenticated and current_user.email == 'alex@ahoy.ooo' %}
+                <a href="/admin" class="footer-admin-link" title="Admin Dashboard">⚙</a>
+                {% endif %}
             </div>
         </footer>
 
