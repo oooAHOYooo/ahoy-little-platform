@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+
+{% block title %}What's New - {{ month_name }} {{ year }} - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="whats-new-month-page" x-data="whatsNewMonth()">
+    <div class="whats-new-month-container">
+        <!-- Header -->
+        <div class="whats-new-month-header">
+            <div class="header-nav">
+                <a href="/whats-new" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Archive
+                </a>
+            </div>
+            <h1>What's New at Ahoy</h1>
+            <p class="month-title">{{ month_name }} {{ year }}</p>
+        </div>
+
+        <!-- Section Navigation Tabs -->
+        <div class="section-tabs">
+            <a href="#music" class="section-tab" :class="{ 'active': activeSection === 'music' }" @click.prevent="activeSection = 'music'">
+                <i class="fas fa-music"></i> Music
+            </a>
+            <a href="#videos" class="section-tab" :class="{ 'active': activeSection === 'videos' }" @click.prevent="activeSection = 'videos'">
+                <i class="fas fa-video"></i> Videos
+            </a>
+            <a href="#artists" class="section-tab" :class="{ 'active': activeSection === 'artists' }" @click.prevent="activeSection = 'artists'">
+                <i class="fas fa-users"></i> Artists
+            </a>
+            <a href="#platform" class="section-tab" :class="{ 'active': activeSection === 'platform' }" @click.prevent="activeSection = 'platform'">
+                <i class="fas fa-cog"></i> Platform
+            </a>
+            <a href="#merch" class="section-tab" :class="{ 'active': activeSection === 'merch' }" @click.prevent="activeSection = 'merch'">
+                <i class="fas fa-shopping-bag"></i> Merch
+            </a>
+            <a href="#events" class="section-tab" :class="{ 'active': activeSection === 'events' }" @click.prevent="activeSection = 'events'">
+                <i class="fas fa-calendar-alt"></i> Events
+            </a>
+        </div>
+
+        <!-- Sections -->
+        <div class="sections-container">
+            <!-- Music Section -->
+            <section id="music" class="update-section" x-show="activeSection === 'music'">
+                <div class="section-header">
+                    <h2><i class="fas fa-music"></i> {{ sections.music.title }}</h2>
+                    <a href="/whats-new/{{ year }}/{{ month }}/music" class="view-all-link" x-show="sections.music.items.length > 0">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="section-items">
+                    {% if sections.music.items %}
+                        {% for item in sections.music.items[:3] %}
+                        <div class="update-item">
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.description }}</p>
+                            {% if item.date %}
+                            <span class="update-date">{{ item.date }}</span>
+                            {% endif %}
+                            {% if item.link %}
+                            <a href="{{ item.link }}" class="update-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% if sections.music.items|length > 3 %}
+                        <a href="/whats-new/{{ year }}/{{ month }}/music" class="view-more-link">
+                            View {{ sections.music.items|length - 3 }} more update{{ 's' if sections.music.items|length - 3 != 1 else '' }}
+                        </a>
+                        {% endif %}
+                    {% else %}
+                        <div class="section-empty">
+                            <p>No music updates this month.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Videos Section -->
+            <section id="videos" class="update-section" x-show="activeSection === 'videos'">
+                <div class="section-header">
+                    <h2><i class="fas fa-video"></i> {{ sections.videos.title }}</h2>
+                    <a href="/whats-new/{{ year }}/{{ month }}/videos" class="view-all-link" x-show="sections.videos.items.length > 0">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="section-items">
+                    {% if sections.videos.items %}
+                        {% for item in sections.videos.items[:3] %}
+                        <div class="update-item">
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.description }}</p>
+                            {% if item.date %}
+                            <span class="update-date">{{ item.date }}</span>
+                            {% endif %}
+                            {% if item.link %}
+                            <a href="{{ item.link }}" class="update-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% if sections.videos.items|length > 3 %}
+                        <a href="/whats-new/{{ year }}/{{ month }}/videos" class="view-more-link">
+                            View {{ sections.videos.items|length - 3 }} more update{{ 's' if sections.videos.items|length - 3 != 1 else '' }}
+                        </a>
+                        {% endif %}
+                    {% else %}
+                        <div class="section-empty">
+                            <p>No video updates this month.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Artists Section -->
+            <section id="artists" class="update-section" x-show="activeSection === 'artists'">
+                <div class="section-header">
+                    <h2><i class="fas fa-users"></i> {{ sections.artists.title }}</h2>
+                    <a href="/whats-new/{{ year }}/{{ month }}/artists" class="view-all-link" x-show="sections.artists.items.length > 0">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="section-items">
+                    {% if sections.artists.items %}
+                        {% for item in sections.artists.items[:3] %}
+                        <div class="update-item">
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.description }}</p>
+                            {% if item.date %}
+                            <span class="update-date">{{ item.date }}</span>
+                            {% endif %}
+                            {% if item.link %}
+                            <a href="{{ item.link }}" class="update-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% if sections.artists.items|length > 3 %}
+                        <a href="/whats-new/{{ year }}/{{ month }}/artists" class="view-more-link">
+                            View {{ sections.artists.items|length - 3 }} more update{{ 's' if sections.artists.items|length - 3 != 1 else '' }}
+                        </a>
+                        {% endif %}
+                    {% else %}
+                        <div class="section-empty">
+                            <p>No artist updates this month.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Platform Section -->
+            <section id="platform" class="update-section" x-show="activeSection === 'platform'">
+                <div class="section-header">
+                    <h2><i class="fas fa-cog"></i> {{ sections.platform.title }}</h2>
+                    <a href="/whats-new/{{ year }}/{{ month }}/platform" class="view-all-link" x-show="sections.platform.items.length > 0">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="section-items">
+                    {% if sections.platform.items %}
+                        {% for item in sections.platform.items[:3] %}
+                        <div class="update-item">
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.description }}</p>
+                            {% if item.features %}
+                            <ul class="features-list">
+                                {% for feature in item.features %}
+                                <li>{{ feature }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                            {% if item.date %}
+                            <span class="update-date">{{ item.date }}</span>
+                            {% endif %}
+                            {% if item.link %}
+                            <a href="{{ item.link }}" class="update-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% if sections.platform.items|length > 3 %}
+                        <a href="/whats-new/{{ year }}/{{ month }}/platform" class="view-more-link">
+                            View {{ sections.platform.items|length - 3 }} more update{{ 's' if sections.platform.items|length - 3 != 1 else '' }}
+                        </a>
+                        {% endif %}
+                    {% else %}
+                        <div class="section-empty">
+                            <p>No platform updates this month.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Merch Section -->
+            <section id="merch" class="update-section" x-show="activeSection === 'merch'">
+                <div class="section-header">
+                    <h2><i class="fas fa-shopping-bag"></i> {{ sections.merch.title }}</h2>
+                    <a href="/whats-new/{{ year }}/{{ month }}/merch" class="view-all-link" x-show="sections.merch.items.length > 0">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="section-items">
+                    {% if sections.merch.items %}
+                        {% for item in sections.merch.items[:3] %}
+                        <div class="update-item">
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.description }}</p>
+                            {% if item.date %}
+                            <span class="update-date">{{ item.date }}</span>
+                            {% endif %}
+                            {% if item.link %}
+                            <a href="{{ item.link }}" class="update-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% if sections.merch.items|length > 3 %}
+                        <a href="/whats-new/{{ year }}/{{ month }}/merch" class="view-more-link">
+                            View {{ sections.merch.items|length - 3 }} more update{{ 's' if sections.merch.items|length - 3 != 1 else '' }}
+                        </a>
+                        {% endif %}
+                    {% else %}
+                        <div class="section-empty">
+                            <p>No merch updates this month.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Events Section -->
+            <section id="events" class="update-section" x-show="activeSection === 'events'">
+                <div class="section-header">
+                    <h2><i class="fas fa-calendar-alt"></i> {{ sections.events.title }}</h2>
+                    <a href="/whats-new/{{ year }}/{{ month }}/events" class="view-all-link" x-show="sections.events.items.length > 0">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="section-items">
+                    {% if sections.events.items %}
+                        {% for item in sections.events.items[:3] %}
+                        <div class="update-item">
+                            <h3>{{ item.title }}</h3>
+                            <p>{{ item.description }}</p>
+                            {% if item.date %}
+                            <span class="update-date">{{ item.date }}</span>
+                            {% endif %}
+                            {% if item.link %}
+                            <a href="{{ item.link }}" class="update-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% if sections.events.items|length > 3 %}
+                        <a href="/whats-new/{{ year }}/{{ month }}/events" class="view-more-link">
+                            View {{ sections.events.items|length - 3 }} more update{{ 's' if sections.events.items|length - 3 != 1 else '' }}
+                        </a>
+                        {% endif %}
+                    {% else %}
+                        <div class="section-empty">
+                            <p>No events this month.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<style>
+.whats-new-month-page {
+    min-height: 60vh;
+    padding: 2rem 1rem;
+}
+
+.whats-new-month-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.whats-new-month-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.header-nav {
+    text-align: left;
+    margin-bottom: 1rem;
+}
+
+.back-link {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+.whats-new-month-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.5rem 0;
+}
+
+.month-title {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+}
+
+.section-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 1rem;
+}
+
+.section-tab {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.section-tab:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 1);
+}
+
+.section-tab.active {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.5);
+    color: #fff;
+}
+
+.update-section {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.view-all-link {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+}
+
+.view-all-link:hover {
+    color: #fff;
+}
+
+.section-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.update-item {
+    background: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(20px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1.5rem;
+    transition: all 0.2s;
+}
+
+.update-item:hover {
+    background: rgba(30, 30, 30, 0.8);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.update-item h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.75rem 0;
+}
+
+.update-item p {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 1rem 0;
+    line-height: 1.6;
+}
+
+.update-date {
+    display: block;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 1rem;
+}
+
+.update-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(99, 102, 241, 1);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: gap 0.2s;
+}
+
+.update-link:hover {
+    gap: 0.75rem;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+}
+
+.features-list li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.features-list li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: rgba(99, 102, 241, 1);
+    font-weight: bold;
+}
+
+.view-more-link {
+    text-align: center;
+    padding: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.view-more-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+.section-empty {
+    text-align: center;
+    padding: 3rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .whats-new-month-header h1 {
+        font-size: 2rem;
+    }
+    
+    .section-tabs {
+        gap: 0.25rem;
+    }
+    
+    .section-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+</style>
+
+<script>
+function whatsNewMonth() {
+    return {
+        activeSection: 'music',
+        init() {
+            // Set active section from hash if present
+            const hash = window.location.hash.substring(1);
+            const validSections = ['music', 'videos', 'artists', 'platform', 'merch', 'events'];
+            if (hash && validSections.includes(hash)) {
+                this.activeSection = hash;
+            }
+        }
+    };
+}
+</script>
+{% endblock %}

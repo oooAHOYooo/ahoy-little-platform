@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}What's New Archive - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="whats-new-archive-page" x-data="whatsNewArchive()">
+    <div class="whats-new-archive-container">
+        <div class="whats-new-archive-header">
+            <h1>What's New at Ahoy</h1>
+            <p class="subtitle">Browse updates by month</p>
+        </div>
+
+        <div x-show="isLoading" class="whats-new-loading">
+            <span>Loading archive...</span>
+        </div>
+
+        <div x-show="!isLoading && months.length === 0" class="whats-new-empty">
+            <p>No updates available yet. Check back soon!</p>
+        </div>
+
+        <div x-show="!isLoading && months.length > 0" class="months-grid">
+            <template x-for="month in months" :key="`${month.year}-${month.month}`">
+                <a :href="`/whats-new/${month.year}/${month.month}`" class="month-card">
+                    <div class="month-card-header">
+                        <h3 x-text="month.month_name"></h3>
+                        <span class="month-year" x-text="month.year"></span>
+                    </div>
+                    <div class="month-card-content">
+                        <span class="month-items-count" x-text="`${month.total_items} update${month.total_items !== 1 ? 's' : ''}`"></span>
+                    </div>
+                    <div class="month-card-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+            </template>
+        </div>
+    </div>
+</div>
+
+<style>
+.whats-new-archive-page {
+    min-height: 60vh;
+    padding: 2rem 1rem;
+}
+
+.whats-new-archive-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.whats-new-archive-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.whats-new-archive-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.5rem 0;
+}
+
+.whats-new-archive-header .subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+}
+
+.months-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.month-card {
+    display: flex;
+    flex-direction: column;
+    background: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.month-card:hover {
+    background: rgba(30, 30, 30, 0.8);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.month-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.month-card-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+.month-year {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+}
+
+.month-card-content {
+    flex: 1;
+}
+
+.month-items-count {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.month-card-arrow {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    color: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.month-card:hover .month-card-arrow {
+    color: rgba(255, 255, 255, 0.8);
+    transform: translateX(4px);
+}
+
+.whats-new-loading,
+.whats-new-empty {
+    text-align: center;
+    padding: 3rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+    .whats-new-archive-header h1 {
+        font-size: 2rem;
+    }
+    
+    .months-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+</style>
+
+<script>
+function whatsNewArchive() {
+    return {
+        months: {{ months|tojson }},
+        isLoading: false
+    };
+}
+</script>
+{% endblock %}

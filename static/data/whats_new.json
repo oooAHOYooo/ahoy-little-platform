@@ -1,5 +1,109 @@
 {
-  "updates": [
+  "_help": {
+    "structure": "Organize updates by year > month > section. Each section can have multiple items.",
+    "sections": ["music", "videos", "artists", "platform", "merch", "events"],
+    "item_types": ["content", "feature", "technical"],
+    "quick_add_tips": [
+      "New music track/album? → Add to 'music' section with type 'content'",
+      "New video/show? → Add to 'videos' section with type 'content'",
+      "New artist added? → Add to 'artists' section with type 'content'",
+      "App update? → Add to 'platform' section with type 'technical'",
+      "New feature? → Add to 'platform' section with type 'feature'",
+      "New merch product? → Add to 'merch' section with type 'content'",
+      "Upcoming event? → Add to 'events' section with type 'content'",
+      "Empty sections are fine - they won't show on the page"
+    ],
+    "minimal_update_examples": [
+      "Just added 3 new tracks → 'music': [{'type': 'content', 'title': 'New Music Added', 'description': 'Three new tracks from indie artists', 'link': '/music'}]",
+      "Fixed a bug → 'platform': [{'type': 'technical', 'title': 'Bug Fixes', 'description': 'Various bug fixes and improvements', 'link': '/'}]",
+      "New merch item → 'merch': [{'type': 'content', 'title': 'New Product', 'description': 'Check out our latest merch', 'link': '/merch'}]"
+    ]
+  },
+  "updates": {
+    "2026": {
+      "jan": {
+        "music": {
+          "title": "Music Updates",
+          "items": []
+        },
+        "videos": {
+          "title": "Video Updates",
+          "items": []
+        },
+        "artists": {
+          "title": "Artist Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "New Artist Spotlight",
+              "description": "Check out our featured artist of the month and discover amazing new music.",
+              "date": "2026-01-01",
+              "link": "/artists"
+            }
+          ]
+        },
+        "platform": {
+          "title": "Platform Updates",
+          "items": [
+            {
+              "type": "technical",
+              "title": "Mobile App Improvements",
+              "description": "Enhanced mobile experience with better navigation and faster loading times.",
+              "date": "2026-01-05",
+              "features": [
+                "Faster loading times",
+                "Improved navigation",
+                "Better user experience"
+              ],
+              "link": "/downloads"
+            },
+            {
+              "type": "feature",
+              "title": "Live TV Channels Expanded",
+              "description": "Four new live TV channels are now available, including short films, music videos, and live shows.",
+              "date": "2026-01-10",
+              "features": [
+                "Four new channels",
+                "Short films",
+                "Music videos",
+                "Live shows"
+              ],
+              "link": "/live-tv"
+            },
+            {
+              "type": "feature",
+              "title": "New Radio Station Launch",
+              "description": "We've launched a brand new radio station featuring indie artists from around the world. Tune in 24/7!",
+              "date": "2026-01-15",
+              "features": [
+                "24/7 streaming",
+                "Global indie artists",
+                "Continuous music"
+              ],
+              "link": "/radio"
+            }
+          ]
+        },
+        "merch": {
+          "title": "Merch Updates",
+          "items": []
+        },
+        "events": {
+          "title": "Events Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "Poet and Friends Show #7",
+              "description": "Join us for another Poet and Friends show on January 29th, 2026 at 7pm at Koffee. Don't miss this special event!",
+              "date": "2026-01-29",
+              "link": "/events"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "_legacy": [
     {
       "id": "update-1",
       "title": "Poet and Friends Show #7",

@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section_title }} - {{ month_name }} {{ year }} - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="whats-new-section-page" x-data="whatsNewSection()">
+    <div class="whats-new-section-container">
+        <!-- Header -->
+        <div class="whats-new-section-header">
+            <div class="header-nav">
+                <a href="/whats-new/{{ year }}/{{ month }}" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Back to {{ month_name }} {{ year }}
+                </a>
+            </div>
+            <h1>{{ section_title }}</h1>
+            <p class="section-subtitle">{{ month_name }} {{ year }}</p>
+        </div>
+
+        <!-- Items -->
+        <div class="section-items-detail">
+            {% if items %}
+                {% for item in items %}
+                <div class="update-item-detail">
+                    <div class="update-item-header">
+                        <h2>{{ item.title }}</h2>
+                        {% if item.date %}
+                        <span class="update-date">{{ item.date }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="update-item-content">
+                        <p>{{ item.description }}</p>
+                        
+                        {% if item.features %}
+                        <div class="features-section">
+                            <h3>Features:</h3>
+                            <ul class="features-list">
+                                {% for feature in item.features %}
+                                <li>{{ feature }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        
+                        {% if item.link %}
+                        <div class="update-item-actions">
+                            <a href="{{ item.link }}" class="cta-button">
+                                {% if item.type == 'content' %}
+                                    View Content
+                                {% elif item.type == 'feature' %}
+                                    Try It Now
+                                {% elif item.type == 'technical' %}
+                                    Learn More
+                                {% else %}
+                                    Learn More
+                                {% endif %}
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="section-empty">
+                    <p>No updates in this section for {{ month_name }} {{ year }}.</p>
+                    <a href="/whats-new/{{ year }}/{{ month }}" class="back-to-month-link">
+                        <i class="fas fa-arrow-left"></i> Back to {{ month_name }} Overview
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.whats-new-section-page {
+    min-height: 60vh;
+    padding: 2rem 1rem;
+}
+
+.whats-new-section-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.whats-new-section-header {
+    margin-bottom: 3rem;
+}
+
+.header-nav {
+    margin-bottom: 1.5rem;
+}
+
+.back-link {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+.whats-new-section-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.5rem 0;
+}
+
+.section-subtitle {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+}
+
+.section-items-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.update-item-detail {
+    background: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 2rem;
+    transition: all 0.3s;
+}
+
+.update-item-detail:hover {
+    background: rgba(30, 30, 30, 0.8);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.update-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.update-item-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    flex: 1;
+}
+
+.update-date {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+    margin-left: 1rem;
+}
+
+.update-item-content p {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.7;
+    margin: 0 0 1.5rem 0;
+}
+
+.features-section {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.features-section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 1rem 0;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.features-list li {
+    padding: 0.75rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.features-list li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: rgba(99, 102, 241, 1);
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.update-item-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.75rem;
+    background: rgba(99, 102, 241, 1);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.cta-button:hover {
+    background: rgba(99, 102, 241, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.cta-button i {
+    transition: transform 0.2s;
+}
+
+.cta-button:hover i {
+    transform: translateX(4px);
+}
+
+.section-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.section-empty p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.back-to-month-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(99, 102, 241, 1);
+    text-decoration: none;
+    font-weight: 500;
+    transition: gap 0.2s;
+}
+
+.back-to-month-link:hover {
+    gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .whats-new-section-header h1 {
+        font-size: 2rem;
+    }
+    
+    .update-item-detail {
+        padding: 1.5rem;
+    }
+    
+    .update-item-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .update-date {
+        margin-left: 0;
+    }
+}
+</style>
+
+<script>
+function whatsNewSection() {
+    return {
+        // Section detail page doesn't need much JS
+    };
+}
+</script>
+{% endblock %}

@@ -763,23 +763,30 @@
         <div class="whats-new-container">
             <div class="whats-new-header">
                 <h2>What's New at Ahoy</h2>
+                <a href="/whats-new" class="view-all-link" x-show="!isLoading && updates.length > 0">
+                    View Archive <i class="fas fa-arrow-right"></i>
+                </a>
             </div>
             <div x-show="isLoading" class="whats-new-loading">
                 <span>Loading updates...</span>
             </div>
             <div x-show="!isLoading && updates.length > 0" class="whats-new-updates">
-                <template x-for="update in updates" :key="update.id">
-                    <div class="whats-new-item" :class="'type-' + (update.type || 'update')">
+                <template x-for="update in updates" :key="update.id || update.title">
+                    <a :href="getUpdateUrl(update)" class="whats-new-item clickable" :class="'type-' + (update.type || 'update')">
                         <div class="whats-new-content">
                             <h3 x-text="update.title"></h3>
                             <p x-text="update.description"></p>
                             <span class="whats-new-date" x-text="formatDate(update.date, update.type)"></span>
                         </div>
-                    </div>
+                        <div class="whats-new-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </a>
                 </template>
             </div>
             <div x-show="!isLoading && updates.length === 0" class="whats-new-empty">
                 <p>No updates available at this time.</p>
+                <a href="/whats-new" class="view-archive-link">View Archive</a>
             </div>
         </div>
     </section>
@@ -804,6 +811,9 @@
         margin-bottom: 1.5rem;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         padding-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .whats-new-header h2 {
@@ -813,11 +823,39 @@
         color: #fff;
     }
 
+    .view-all-link {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: color 0.2s, gap 0.2s;
+    }
+
+    .view-all-link:hover {
+        color: #fff;
+        gap: 0.75rem;
+    }
+
     .whats-new-loading,
     .whats-new-empty {
         text-align: center;
         padding: 2rem;
         color: rgba(255, 255, 255, 0.5);
+    }
+
+    .view-archive-link {
+        display: inline-block;
+        margin-top: 1rem;
+        color: rgba(99, 102, 241, 1);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+    .view-archive-link:hover {
+        color: rgba(99, 102, 241, 0.8);
     }
 
     .whats-new-updates {
@@ -834,11 +872,31 @@
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 16px;
         transition: all 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+    }
+
+    .whats-new-item.clickable {
+        cursor: pointer;
     }
 
     .whats-new-item:hover {
         background: rgba(255, 255, 255, 0.08);
         border-color: rgba(255, 255, 255, 0.1);
+        transform: translateX(4px);
+    }
+
+    .whats-new-arrow {
+        display: flex;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.4);
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+
+    .whats-new-item:hover .whats-new-arrow {
+        color: rgba(255, 255, 255, 0.8);
         transform: translateX(4px);
     }
 
@@ -1996,6 +2054,19 @@ function whatsNew() {
             } catch (e) {
                 return dateString;
             }
+        },
+        
+        getUpdateUrl(update) {
+            // If update has year, month, and section, link to section detail page
+            if (update.year && update.month && update.section) {
+                return `/whats-new/${update.year}/${update.month}/${update.section}`;
+            }
+            // Fallback: if update has a direct link, use it
+            if (update.link) {
+                return update.link;
+            }
+            // Final fallback: link to archive
+            return '/whats-new';
         }
     };
 }
