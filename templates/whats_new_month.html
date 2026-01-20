@@ -517,6 +517,16 @@ function whatsNewMonth() {
             const validSections = ['music', 'videos', 'artists', 'platform', 'merch', 'events'];
             if (hash && validSections.includes(hash)) {
                 this.activeSection = hash;
+                // Scroll to section after DOM updates
+                setTimeout(() => {
+                    const element = document.getElementById(hash);
+                    if (element) {
+                        // Scroll with offset for header
+                        const yOffset = -80;
+                        const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                    }
+                }, 200);
             }
         }
     };

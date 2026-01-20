@@ -763,8 +763,8 @@
         <div class="whats-new-container">
             <div class="whats-new-header">
                 <h2>What's New at Ahoy</h2>
-                <a href="/whats-new" class="view-all-link" x-show="!isLoading && updates.length > 0">
-                    View Archive <i class="fas fa-arrow-right"></i>
+                <a :href="getViewAllUrl()" class="view-all-link" x-show="!isLoading && updates.length > 0">
+                    View All <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
             <div x-show="isLoading" class="whats-new-loading">
@@ -2057,15 +2057,28 @@ function whatsNew() {
         },
         
         getUpdateUrl(update) {
-            // If update has year, month, and section, link to section detail page
+            // If update has year, month, and section, link to monthly page with section anchor
+            // This scrolls to the section on the monthly overview page
             if (update.year && update.month && update.section) {
-                return `/whats-new/${update.year}/${update.month}/${update.section}`;
+                return `/whats-new/${update.year}/${update.month}#${update.section}`;
             }
             // Fallback: if update has a direct link, use it
             if (update.link) {
                 return update.link;
             }
             // Final fallback: link to archive
+            return '/whats-new';
+        },
+        
+        getViewAllUrl() {
+            // If we have updates, link to the most recent month
+            if (this.updates.length > 0) {
+                const latest = this.updates[0];
+                if (latest.year && latest.month) {
+                    return `/whats-new/${latest.year}/${latest.month}`;
+                }
+            }
+            // Otherwise link to archive
             return '/whats-new';
         }
     };
