@@ -322,21 +322,50 @@
     if (btnUp) btnUp.addEventListener('click', () => setRow(engine.selectedRow + 1 >= totalRows ? 0 : engine.selectedRow + 1));
     if (btnDown) btnDown.addEventListener('click', () => setRow(engine.selectedRow - 1 < 0 ? totalRows - 1 : engine.selectedRow - 1));
 
-    if (btnPlayPause) btnPlayPause.addEventListener('click', () => {
-      if (!engine.video) return;
-      try {
-        if (engine.video.paused) {
-          const p = engine.video.play();
-          if (p && typeof p.catch === 'function') p.catch(() => {});
-        } else {
-          engine.video.pause();
+    if (btnPlayPause) {
+      const updatePlayPauseIcon = () => {
+        const icon = btnPlayPause.querySelector('i');
+        if (icon && engine.video) {
+          icon.className = engine.video.paused ? 'fas fa-play' : 'fas fa-pause';
         }
-      } catch (_) {}
-    });
-    if (btnMute) btnMute.addEventListener('click', () => {
-      if (!engine.video) return;
-      engine.video.muted = !engine.video.muted;
-    });
+      };
+      btnPlayPause.addEventListener('click', () => {
+        if (!engine.video) return;
+        try {
+          if (engine.video.paused) {
+            const p = engine.video.play();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+          } else {
+            engine.video.pause();
+          }
+          updatePlayPauseIcon();
+        } catch (_) {}
+      });
+      // Update icon when video is ready
+      if (engine.video) {
+        engine.video.addEventListener('play', updatePlayPauseIcon);
+        engine.video.addEventListener('pause', updatePlayPauseIcon);
+        updatePlayPauseIcon();
+      }
+    }
+    if (btnMute) {
+      const updateMuteIcon = () => {
+        const icon = btnMute.querySelector('i');
+        if (icon && engine.video) {
+          icon.className = engine.video.muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+        }
+      };
+      btnMute.addEventListener('click', () => {
+        if (!engine.video) return;
+        engine.video.muted = !engine.video.muted;
+        updateMuteIcon();
+      });
+      // Update icon when video is ready
+      if (engine.video) {
+        engine.video.addEventListener('volumechange', updateMuteIcon);
+        updateMuteIcon();
+      }
+    }
     if (btnFullscreen) btnFullscreen.addEventListener('click', () => {
       const target = engine.video || document.documentElement;
       try {

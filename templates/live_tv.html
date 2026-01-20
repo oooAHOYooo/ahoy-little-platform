@@ -91,21 +91,50 @@
     max-height: 50vh;
   }
 
-  /* Compact controls */
+  /* Compact controls - 2 clean rows with 16x16 icons */
   .channel-remote {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    padding: 8px;
-    justify-content: center;
+    padding: 12px;
+    max-width: 100%;
   }
 
   .remote-btn {
-    flex: 1 1 auto;
-    min-width: 60px;
-    padding: 10px 12px;
-    font-size: 14px;
-    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 48px;
+  }
+
+  .remote-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .remote-btn:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .remote-btn i {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .remote-btn:not(:has(i)) {
+    font-size: 12px;
   }
 
   /* Playing now bar - stack vertically on mobile */
@@ -319,14 +348,24 @@
 				</div>
 				<!-- Controls below the video -->
 				<div class="channel-remote remote-below" aria-label="Channel Controls">
-					<button id="btnPlayPause" class="remote-btn" title="Play/Pause">⏯</button>
-					<button id="btnMute" class="remote-btn" title="Mute">🔇</button>
-					<button id="btnFullscreen" class="remote-btn" title="Fullscreen">⛶</button>
-					<button id="btnGoGuide" class="remote-btn"
-						title="Go to Guide">Guide</button>
-					<button id="btnChUp" class="remote-btn" title="Channel Up">CH ▲</button>
-					<button id="btnChDown" class="remote-btn" title="Channel Down">CH
-						▼</button>
+					<button id="btnPlayPause" class="remote-btn" title="Play/Pause">
+						<i class="fas fa-play"></i>
+					</button>
+					<button id="btnMute" class="remote-btn" title="Mute">
+						<i class="fas fa-volume-up"></i>
+					</button>
+					<button id="btnFullscreen" class="remote-btn" title="Fullscreen">
+						<i class="fas fa-expand"></i>
+					</button>
+					<button id="btnGoGuide" class="remote-btn" title="Go to Guide">
+						<i class="fas fa-list"></i>
+					</button>
+					<button id="btnChUp" class="remote-btn" title="Channel Up">
+						<i class="fas fa-chevron-up"></i>
+					</button>
+					<button id="btnChDown" class="remote-btn" title="Channel Down">
+						<i class="fas fa-chevron-down"></i>
+					</button>
 				</div>
 
 				<!-- PLAYING NOW THIN BAR WITH PROGRESS -->
