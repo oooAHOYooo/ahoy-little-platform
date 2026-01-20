@@ -19,22 +19,40 @@
         <!-- Section Navigation Tabs -->
         <div class="section-tabs">
             <a href="#music" class="section-tab" :class="{ 'active': activeSection === 'music' }" @click.prevent="activeSection = 'music'">
-                <i class="fas fa-music"></i> Music
+                Music
+                {% if sections['music']['items']|length > 0 %}
+                <span class="tab-badge">{{ sections['music']['items']|length }}</span>
+                {% endif %}
             </a>
             <a href="#videos" class="section-tab" :class="{ 'active': activeSection === 'videos' }" @click.prevent="activeSection = 'videos'">
-                <i class="fas fa-video"></i> Videos
+                Videos
+                {% if sections['videos']['items']|length > 0 %}
+                <span class="tab-badge">{{ sections['videos']['items']|length }}</span>
+                {% endif %}
             </a>
             <a href="#artists" class="section-tab" :class="{ 'active': activeSection === 'artists' }" @click.prevent="activeSection = 'artists'">
-                <i class="fas fa-users"></i> Artists
+                Artists
+                {% if sections['artists']['items']|length > 0 %}
+                <span class="tab-badge">{{ sections['artists']['items']|length }}</span>
+                {% endif %}
             </a>
             <a href="#platform" class="section-tab" :class="{ 'active': activeSection === 'platform' }" @click.prevent="activeSection = 'platform'">
-                <i class="fas fa-cog"></i> Platform
+                Platform
+                {% if sections['platform']['items']|length > 0 %}
+                <span class="tab-badge">{{ sections['platform']['items']|length }}</span>
+                {% endif %}
             </a>
             <a href="#merch" class="section-tab" :class="{ 'active': activeSection === 'merch' }" @click.prevent="activeSection = 'merch'">
-                <i class="fas fa-shopping-bag"></i> Merch
+                Merch
+                {% if sections['merch']['items']|length > 0 %}
+                <span class="tab-badge">{{ sections['merch']['items']|length }}</span>
+                {% endif %}
             </a>
             <a href="#events" class="section-tab" :class="{ 'active': activeSection === 'events' }" @click.prevent="activeSection = 'events'">
-                <i class="fas fa-calendar-alt"></i> Events
+                Events
+                {% if sections['events']['items']|length > 0 %}
+                <span class="tab-badge">{{ sections['events']['items']|length }}</span>
+                {% endif %}
             </a>
         </div>
 
@@ -43,14 +61,14 @@
             <!-- Music Section -->
             <section id="music" class="update-section" x-show="activeSection === 'music'">
                 <div class="section-header">
-                    <h2><i class="fas fa-music"></i> {{ sections.music.title }}</h2>
-                    <a href="/whats-new/{{ year }}/{{ month }}/music" class="view-all-link" x-show="sections.music.items.length > 0">
+                    <h2>{{ sections['music']['title'] }}</h2>
+                    <a href="/whats-new/{{ year }}/{{ month }}/music" class="view-all-link" x-show="(sections['music']['items'] || []).length > 0">
                         View All <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 <div class="section-items">
-                    {% if sections.music.items %}
-                        {% for item in sections.music.items[:3] %}
+                    {% if sections['music']['items'] %}
+                        {% for item in sections['music']['items'][:3] %}
                         <div class="update-item">
                             <h3>{{ item.title }}</h3>
                             <p>{{ item.description }}</p>
@@ -62,9 +80,9 @@
                             {% endif %}
                         </div>
                         {% endfor %}
-                        {% if sections.music.items|length > 3 %}
+                        {% if sections['music']['items']|length > 3 %}
                         <a href="/whats-new/{{ year }}/{{ month }}/music" class="view-more-link">
-                            View {{ sections.music.items|length - 3 }} more update{{ 's' if sections.music.items|length - 3 != 1 else '' }}
+                            View {{ sections['music']['items']|length - 3 }} more update{{ 's' if sections['music']['items']|length - 3 != 1 else '' }}
                         </a>
                         {% endif %}
                     {% else %}
@@ -78,14 +96,14 @@
             <!-- Videos Section -->
             <section id="videos" class="update-section" x-show="activeSection === 'videos'">
                 <div class="section-header">
-                    <h2><i class="fas fa-video"></i> {{ sections.videos.title }}</h2>
-                    <a href="/whats-new/{{ year }}/{{ month }}/videos" class="view-all-link" x-show="sections.videos.items.length > 0">
+                    <h2>{{ sections['videos']['title'] }}</h2>
+                    <a href="/whats-new/{{ year }}/{{ month }}/videos" class="view-all-link" x-show="(sections['videos']['items'] || []).length > 0">
                         View All <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 <div class="section-items">
-                    {% if sections.videos.items %}
-                        {% for item in sections.videos.items[:3] %}
+                    {% if sections['videos']['items'] %}
+                        {% for item in sections['videos']['items'][:3] %}
                         <div class="update-item">
                             <h3>{{ item.title }}</h3>
                             <p>{{ item.description }}</p>
@@ -97,9 +115,9 @@
                             {% endif %}
                         </div>
                         {% endfor %}
-                        {% if sections.videos.items|length > 3 %}
+                        {% if sections['videos']['items']|length > 3 %}
                         <a href="/whats-new/{{ year }}/{{ month }}/videos" class="view-more-link">
-                            View {{ sections.videos.items|length - 3 }} more update{{ 's' if sections.videos.items|length - 3 != 1 else '' }}
+                            View {{ sections['videos']['items']|length - 3 }} more update{{ 's' if sections['videos']['items']|length - 3 != 1 else '' }}
                         </a>
                         {% endif %}
                     {% else %}
@@ -113,14 +131,14 @@
             <!-- Artists Section -->
             <section id="artists" class="update-section" x-show="activeSection === 'artists'">
                 <div class="section-header">
-                    <h2><i class="fas fa-users"></i> {{ sections.artists.title }}</h2>
-                    <a href="/whats-new/{{ year }}/{{ month }}/artists" class="view-all-link" x-show="sections.artists.items.length > 0">
+                    <h2>{{ sections['artists']['title'] }}</h2>
+                    <a href="/whats-new/{{ year }}/{{ month }}/artists" class="view-all-link" x-show="(sections['artists']['items'] || []).length > 0">
                         View All <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 <div class="section-items">
-                    {% if sections.artists.items %}
-                        {% for item in sections.artists.items[:3] %}
+                    {% if sections['artists']['items'] %}
+                        {% for item in sections['artists']['items'][:3] %}
                         <div class="update-item">
                             <h3>{{ item.title }}</h3>
                             <p>{{ item.description }}</p>
@@ -132,9 +150,9 @@
                             {% endif %}
                         </div>
                         {% endfor %}
-                        {% if sections.artists.items|length > 3 %}
+                        {% if sections['artists']['items']|length > 3 %}
                         <a href="/whats-new/{{ year }}/{{ month }}/artists" class="view-more-link">
-                            View {{ sections.artists.items|length - 3 }} more update{{ 's' if sections.artists.items|length - 3 != 1 else '' }}
+                            View {{ sections['artists']['items']|length - 3 }} more update{{ 's' if sections['artists']['items']|length - 3 != 1 else '' }}
                         </a>
                         {% endif %}
                     {% else %}
@@ -148,14 +166,14 @@
             <!-- Platform Section -->
             <section id="platform" class="update-section" x-show="activeSection === 'platform'">
                 <div class="section-header">
-                    <h2><i class="fas fa-cog"></i> {{ sections.platform.title }}</h2>
-                    <a href="/whats-new/{{ year }}/{{ month }}/platform" class="view-all-link" x-show="sections.platform.items.length > 0">
+                    <h2>{{ sections['platform']['title'] }}</h2>
+                    <a href="/whats-new/{{ year }}/{{ month }}/platform" class="view-all-link" x-show="(sections['platform']['items'] || []).length > 0">
                         View All <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 <div class="section-items">
-                    {% if sections.platform.items %}
-                        {% for item in sections.platform.items[:3] %}
+                    {% if sections['platform']['items'] %}
+                        {% for item in sections['platform']['items'][:3] %}
                         <div class="update-item">
                             <h3>{{ item.title }}</h3>
                             <p>{{ item.description }}</p>
@@ -174,9 +192,9 @@
                             {% endif %}
                         </div>
                         {% endfor %}
-                        {% if sections.platform.items|length > 3 %}
+                        {% if sections['platform']['items']|length > 3 %}
                         <a href="/whats-new/{{ year }}/{{ month }}/platform" class="view-more-link">
-                            View {{ sections.platform.items|length - 3 }} more update{{ 's' if sections.platform.items|length - 3 != 1 else '' }}
+                            View {{ sections['platform']['items']|length - 3 }} more update{{ 's' if sections['platform']['items']|length - 3 != 1 else '' }}
                         </a>
                         {% endif %}
                     {% else %}
@@ -190,14 +208,14 @@
             <!-- Merch Section -->
             <section id="merch" class="update-section" x-show="activeSection === 'merch'">
                 <div class="section-header">
-                    <h2><i class="fas fa-shopping-bag"></i> {{ sections.merch.title }}</h2>
-                    <a href="/whats-new/{{ year }}/{{ month }}/merch" class="view-all-link" x-show="sections.merch.items.length > 0">
+                    <h2>{{ sections['merch']['title'] }}</h2>
+                    <a href="/whats-new/{{ year }}/{{ month }}/merch" class="view-all-link" x-show="(sections['merch']['items'] || []).length > 0">
                         View All <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 <div class="section-items">
-                    {% if sections.merch.items %}
-                        {% for item in sections.merch.items[:3] %}
+                    {% if sections['merch']['items'] %}
+                        {% for item in sections['merch']['items'][:3] %}
                         <div class="update-item">
                             <h3>{{ item.title }}</h3>
                             <p>{{ item.description }}</p>
@@ -209,9 +227,9 @@
                             {% endif %}
                         </div>
                         {% endfor %}
-                        {% if sections.merch.items|length > 3 %}
+                        {% if sections['merch']['items']|length > 3 %}
                         <a href="/whats-new/{{ year }}/{{ month }}/merch" class="view-more-link">
-                            View {{ sections.merch.items|length - 3 }} more update{{ 's' if sections.merch.items|length - 3 != 1 else '' }}
+                            View {{ sections['merch']['items']|length - 3 }} more update{{ 's' if sections['merch']['items']|length - 3 != 1 else '' }}
                         </a>
                         {% endif %}
                     {% else %}
@@ -225,14 +243,14 @@
             <!-- Events Section -->
             <section id="events" class="update-section" x-show="activeSection === 'events'">
                 <div class="section-header">
-                    <h2><i class="fas fa-calendar-alt"></i> {{ sections.events.title }}</h2>
-                    <a href="/whats-new/{{ year }}/{{ month }}/events" class="view-all-link" x-show="sections.events.items.length > 0">
+                    <h2>{{ sections['events']['title'] }}</h2>
+                    <a href="/whats-new/{{ year }}/{{ month }}/events" class="view-all-link" x-show="(sections['events']['items'] || []).length > 0">
                         View All <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 <div class="section-items">
-                    {% if sections.events.items %}
-                        {% for item in sections.events.items[:3] %}
+                    {% if sections['events']['items'] %}
+                        {% for item in sections['events']['items'][:3] %}
                         <div class="update-item">
                             <h3>{{ item.title }}</h3>
                             <p>{{ item.description }}</p>
@@ -244,9 +262,9 @@
                             {% endif %}
                         </div>
                         {% endfor %}
-                        {% if sections.events.items|length > 3 %}
+                        {% if sections['events']['items']|length > 3 %}
                         <a href="/whats-new/{{ year }}/{{ month }}/events" class="view-more-link">
-                            View {{ sections.events.items|length - 3 }} more update{{ 's' if sections.events.items|length - 3 != 1 else '' }}
+                            View {{ sections['events']['items']|length - 3 }} more update{{ 's' if sections['events']['items']|length - 3 != 1 else '' }}
                         </a>
                         {% endif %}
                     {% else %}
@@ -315,6 +333,7 @@
     flex-wrap: wrap;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     padding-bottom: 1rem;
+    justify-content: center;
 }
 
 .section-tab {
@@ -342,6 +361,26 @@
     background: rgba(99, 102, 241, 0.2);
     border-color: rgba(99, 102, 241, 0.5);
     color: #fff;
+}
+
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: rgba(99, 102, 241, 0.8);
+    color: #fff;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    margin-left: 0.5rem;
+}
+
+.section-tab.active .tab-badge {
+    background: rgba(99, 102, 241, 1);
 }
 
 .update-section {

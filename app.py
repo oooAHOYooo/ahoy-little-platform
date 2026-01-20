@@ -1912,15 +1912,27 @@ def whats_new_archive():
 def whats_new_month(year, month):
     """Monthly overview page with all 6 sections"""
     try:
+        import logging
+        # Ensure year is a string (Flask passes it as string, but be explicit)
+        year_str = str(year)
         month_lower = month.lower()
+        
         data = load_json_data("whats_new.json", {"updates": {}})
         updates = data.get("updates", {})
         
         if not isinstance(updates, dict):
+            logging.warning(f'whats_new_month: updates is not a dict, got {type(updates)}')
             return render_template('404.html'), 404
         
-        year_data = updates.get(year, {})
+        # Check if year exists in updates
+        if year_str not in updates:
+            available_years = list(updates.keys())
+            logging.warning(f'whats_new_month: year {year_str} not found. Available years: {available_years}')
+            return render_template('404.html'), 404
+        
+        year_data = updates.get(year_str, {})
         if not isinstance(year_data, dict):
+            logging.warning(f'whats_new_month: year_data for {year_str} is not a dict, got {type(year_data)}')
             return render_template('404.html'), 404
         
         month_data = year_data.get(month_lower, {})
@@ -1933,6 +1945,8 @@ def whats_new_month(year, month):
                     break
         
         if not month_data or not isinstance(month_data, dict):
+            available_months = list(year_data.keys())
+            logging.warning(f'whats_new_month: month {month_lower} not found for year {year_str}. Available months: {available_months}')
             return render_template('404.html'), 404
         
         # Get all sections (with empty arrays if section doesn't exist)
@@ -1948,7 +1962,7 @@ def whats_new_month(year, month):
         month_name = _get_month_name(month_lower)
         
         return render_template('whats_new_month.html', 
-                             year=year, 
+                             year=year_str, 
                              month=month_lower, 
                              month_name=month_name,
                              sections=sections)
@@ -1961,21 +1975,33 @@ def whats_new_month(year, month):
 def whats_new_section(year, month, section):
     """Individual section detail page"""
     try:
+        import logging
+        # Ensure year is a string (Flask passes it as string, but be explicit)
+        year_str = str(year)
         month_lower = month.lower()
         section_lower = section.lower()
         
         valid_sections = ["music", "videos", "artists", "platform", "merch", "events"]
         if section_lower not in valid_sections:
+            logging.warning(f'whats_new_section: invalid section {section_lower}')
             return render_template('404.html'), 404
         
         data = load_json_data("whats_new.json", {"updates": {}})
         updates = data.get("updates", {})
         
         if not isinstance(updates, dict):
+            logging.warning(f'whats_new_section: updates is not a dict, got {type(updates)}')
             return render_template('404.html'), 404
         
-        year_data = updates.get(year, {})
+        # Check if year exists in updates
+        if year_str not in updates:
+            available_years = list(updates.keys())
+            logging.warning(f'whats_new_section: year {year_str} not found. Available years: {available_years}')
+            return render_template('404.html'), 404
+        
+        year_data = updates.get(year_str, {})
         if not isinstance(year_data, dict):
+            logging.warning(f'whats_new_section: year_data for {year_str} is not a dict, got {type(year_data)}')
             return render_template('404.html'), 404
         
         month_data = year_data.get(month_lower, {})
@@ -1988,6 +2014,8 @@ def whats_new_section(year, month, section):
                     break
         
         if not month_data or not isinstance(month_data, dict):
+            available_months = list(year_data.keys())
+            logging.warning(f'whats_new_section: month {month_lower} not found for year {year_str}. Available months: {available_months}')
             return render_template('404.html'), 404
         
         section_data = month_data.get(section_lower, {})
@@ -1997,7 +2025,7 @@ def whats_new_section(year, month, section):
         month_name = _get_month_name(month_lower)
         
         return render_template('whats_new_section.html',
-                             year=year,
+                             year=year_str,
                              month=month_lower,
                              month_name=month_name,
                              section=section_lower,
