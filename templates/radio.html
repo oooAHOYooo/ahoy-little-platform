@@ -338,7 +338,7 @@
         <div class="radio-hero-inner">
             <div class="radio-hero-grid">
                 <div class="radio-hero-art">
-                    <img :src="current?.cover_art || '/static/img/default-cover.jpg'" alt="Station artwork">
+                    <img :src="current?.cover_art || 'https://ahoy.ooo/images/Ahoy-Indie-Media-DEFAULT-COVER-A-8.jpg'" alt="Station artwork">
                 </div>
 
                 <div class="radio-hero-copy">
@@ -350,23 +350,11 @@
                     <h1 class="radio-hero-title desktop-only" x-text="stationName"></h1>
                     <p class="radio-hero-subtitle desktop-only" x-text="stationTagline"></p>
 
-                    <div class="radio-hero-meta">
-                        <span class="meta-item">
-                            <i class="fas fa-microphone"></i>
-                            <span x-text="djName"></span>
-                        </span>
-                    </div>
 
                     <div class="radio-hero-actions">
                         <button class="radio-cta" @click="toggle()">
                             <i class="fas" :class="isPlaying ? 'fa-pause' : 'fa-play'"></i>
                             <span x-text="isPlaying ? 'Pause' : 'Listen Now'"></span>
-                        </button>
-                        <button class="radio-icon-btn" title="Favorite" @click="toggleFavoriteCurrent()">
-                            <i class="fas fa-heart"></i>
-                        </button>
-                        <button class="radio-icon-btn" title="Share" @click="shareCurrent()">
-                            <i class="fas fa-share-alt"></i>
                         </button>
                     </div>
                 </div>
@@ -378,7 +366,7 @@
         <h2 class="radio-section-title">Currently Playing</h2>
         <div class="radio-track-card">
             <div class="radio-track-main">
-                <img class="radio-track-cover" :src="current?.cover_art || '/static/img/default-cover.jpg'" alt="cover">
+                <img class="radio-track-cover" :src="current?.cover_art || 'https://ahoy.ooo/images/Ahoy-Indie-Media-DEFAULT-COVER-A-8.jpg'" alt="cover">
                 <div class="radio-track-info">
                     <h3 class="radio-track-title" x-text="current?.title || '—'"></h3>
                     <div class="radio-track-artist" x-text="current?.artist || '—'"></div>
@@ -416,7 +404,7 @@
         <div class="playing-list">
             <template x-for="item in justPlayed.slice(0, 8)" :key="item.id">
                 <div class="playing-item"
-                    :style="`background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${item.cover_art || '/static/img/default-cover.jpg'}); background-size: cover; background-position: center;`"
+                    :style="`background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${item.cover_art || 'https://ahoy.ooo/images/Ahoy-Indie-Media-DEFAULT-COVER-A-8.jpg'}); background-size: cover; background-position: center;`"
                     @click="playNow(item)">
                     <div class="item-details">
                         <h4 x-text="item.title"></h4>
@@ -435,7 +423,6 @@
         return {
             stationName: 'Indie Rock Station',
             stationTagline: 'The best independent and alternative rock music, curated by music lovers.',
-            djName: 'DJ Ahoy',
             isPlaying: false,
             shuffle: true,
             tracks: [],
