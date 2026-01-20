@@ -6,142 +6,75 @@
 {% from "macros/subpage_header.html" import subpage_hero %}
 {{ subpage_hero(title="Downloads", subtitle="Get Ahoy Indie Media as a standalone desktop app.", icon_class="fas fa-download") }}
 
-<section class="container"
-    style="max-width:960px;margin:2rem auto;padding:1rem;">
-    <h1 class="desktop-only">Downloads</h1>
-    <p class="text-gray">Get Ahoy Indie Media as a standalone desktop
-        application. Choose the installer for your platform (recommended) or the
-        standalone executable.</p>
+<section class="downloads-page-container" style="max-width:960px;margin:2rem auto;padding:1rem;">
+    <div class="downloads-intro" style="margin-bottom:2rem;">
+        <p style="color:rgba(255,255,255,0.7);font-size:1rem;line-height:1.6;">Get Ahoy Indie Media as a standalone desktop application. Desktop apps are coming soon as part of our <a href="/whats-new/2026/jan/platform" style="color:rgba(99,102,241,1);text-decoration:none;">mobile improvements initiative</a>.</p>
+    </div>
 
-    {% if release_assets %}
     <div class="downloads-section" style="margin-top:2rem;">
-        <h2>Latest Release: {{ release_tag }}</h2>
-        <div class="download-grid"
-            style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-top:1rem;">
-            {% for asset in release_assets %}
-            <div class="download-item"
-                style="border:1px solid #e5e7eb;border-radius:8px;padding:1.5rem;text-align:center;{% if asset.type == 'installer' %}border:2px solid #007bff;{% endif %}">
-                {% if asset.type == 'installer' %}
-                <div
-                    style="position:absolute;top:8px;right:8px;background:#007bff;color:white;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:600;">RECOMMENDED</div>
-                {% endif %}
-                <div class="platform-icon"
-                    style="font-size:3rem;margin-bottom:0.5rem;">{{ asset.icon
-                    }}</div>
-                <div class="platform-name"
-                    style="font-weight:600;margin-bottom:0.5rem;font-size:1.1rem;">{{
-                    asset.platform }}</div>
-                <div class="file-type"
-                    style="font-size:0.85rem;color:#6b7280;margin-bottom:0.5rem;">{{
-                    asset.description }}</div>
-                <div class="file-name"
-                    style="font-size:0.85rem;color:#9ca3af;margin-bottom:0.5rem;word-break:break-all;">{{
-                    asset.name }}</div>
-                <div class="file-size"
-                    style="font-size:0.8rem;color:#6b7280;margin-bottom:1rem;">{{
-                    asset.size_label }}</div>
-                <a href="{{ asset.download_url }}" class="download-btn"
-                    style="display:inline-block;background:#007bff;color:white;padding:0.6rem 1.2rem;border-radius:6px;text-decoration:none;font-size:0.9rem;font-weight:500;transition:background 0.2s;">Download</a>
+        <h2 style="color:#fff;font-size:1.5rem;font-weight:700;margin-bottom:1.5rem;">Desktop Applications</h2>
+        <div class="download-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:1rem;">
+            <!-- Windows -->
+            <div class="download-item" style="background:rgba(20,20,20,0.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;text-align:center;position:relative;transition:all 0.2s;">
+                <div class="platform-name" style="font-weight:600;margin-bottom:0.5rem;font-size:1.25rem;color:#fff;">Windows</div>
+                <div class="file-type" style="font-size:0.9rem;color:rgba(255,255,255,0.6);margin-bottom:1.5rem;">Setup Installer</div>
+                <div class="coming-soon-badge" style="display:inline-block;background:rgba(99,102,241,0.2);color:rgba(99,102,241,1);padding:0.5rem 1.25rem;border-radius:8px;font-size:0.9rem;font-weight:500;border:1px solid rgba(99,102,241,0.3);">Coming Soon</div>
             </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% elif files %}
-    <div class="downloads-section" style="margin-top:2rem;">
-        <h2>{{ release_tag }}</h2>
-        <p style="color:#6b7280;font-size:0.9rem;margin-bottom:1rem;">These are
-            locally built files. For official releases, check GitHub.</p>
-        <div class="download-grid"
-            style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-top:1rem;">
-            {% for file in files %}
-            <div class="download-item"
-                style="border:1px solid #e5e7eb;border-radius:8px;padding:1.5rem;text-align:center;position:relative;{% if file.type == 'installer' %}border:2px solid #007bff;{% endif %}">
-                {% if file.type == 'installer' %}
-                <div
-                    style="position:absolute;top:8px;right:8px;background:#007bff;color:white;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:600;">RECOMMENDED</div>
-                {% endif %}
-                <div class="platform-icon"
-                    style="font-size:3rem;margin-bottom:0.5rem;">{{ file.icon
-                    }}</div>
-                <div class="platform-name"
-                    style="font-weight:600;margin-bottom:0.5rem;font-size:1.1rem;">{{
-                    file.platform }}</div>
-                <div class="file-type"
-                    style="font-size:0.85rem;color:#6b7280;margin-bottom:0.5rem;">{{
-                    file.description }}</div>
-                <div class="file-name"
-                    style="font-size:0.85rem;color:#9ca3af;margin-bottom:0.5rem;word-break:break-all;">{{
-                    file.name }}</div>
-                <div class="file-size"
-                    style="font-size:0.8rem;color:#6b7280;margin-bottom:1rem;">{{
-                    file.size_label }}</div>
-                <a href="{{ file.url }}" class="download-btn"
-                    style="display:inline-block;background:#007bff00;color:#007bff;padding:0.6rem 1.2rem;border-radius:6px;text-decoration:none;font-size:0.9rem;font-weight:500;transition:background 0.2s;">Download</a>
+
+            <!-- macOS -->
+            <div class="download-item" style="background:rgba(20,20,20,0.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;text-align:center;position:relative;transition:all 0.2s;">
+                <div class="platform-name" style="font-weight:600;margin-bottom:0.5rem;font-size:1.25rem;color:#fff;">macOS</div>
+                <div class="file-type" style="font-size:0.9rem;color:rgba(255,255,255,0.6);margin-bottom:1.5rem;">DMG Installer</div>
+                <div class="coming-soon-badge" style="display:inline-block;background:rgba(99,102,241,0.2);color:rgba(99,102,241,1);padding:0.5rem 1.25rem;border-radius:8px;font-size:0.9rem;font-weight:500;border:1px solid rgba(99,102,241,0.3);">Coming Soon</div>
             </div>
-            {% endfor %}
+
+            <!-- Linux -->
+            <div class="download-item" style="background:rgba(20,20,20,0.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;text-align:center;position:relative;transition:all 0.2s;">
+                <div class="platform-name" style="font-weight:600;margin-bottom:0.5rem;font-size:1.25rem;color:#fff;">Linux</div>
+                <div class="file-type" style="font-size:0.9rem;color:rgba(255,255,255,0.6);margin-bottom:1.5rem;">AppImage / DEB / RPM</div>
+                <div class="coming-soon-badge" style="display:inline-block;background:rgba(99,102,241,0.2);color:rgba(99,102,241,1);padding:0.5rem 1.25rem;border-radius:8px;font-size:0.9rem;font-weight:500;border:1px solid rgba(99,102,241,0.3);">Coming Soon</div>
+            </div>
         </div>
     </div>
-    {% else %}
-    <div
-        style="margin-top:2rem;padding:2rem;background:#f9fafb;border-radius:8px;text-align:center;">
-        <p style="color:#6b7280;margin-bottom:1rem;">No builds are available
-            yet.</p>
-        <p style="color:#9ca3af;font-size:0.9rem;">Build locally using the
-            instructions below, or check back after the next release.</p>
-    </div>
-    {% endif %}
 
-    <div
-        style="margin-top:3rem;padding:1.5rem;background:#f9fafb;border-radius:8px;">
-        <h2 style="margin-top:0;">🛠️ Build Locally</h2>
-        <p style="color:#6b7280;margin-bottom:1rem;">Build your own desktop
-            installers using our automated build scripts:</p>
-
-        <div style="margin-bottom:1rem;">
-            <h3 style="font-size:1rem;margin-bottom:0.5rem;">macOS (DMG
-                Installer)</h3>
-            <pre
-                style="background:#0b1021;color:#e5e7eb;padding:12px;border-radius:8px;overflow:auto;font-size:0.85rem;margin:0;">cd packaging
-./build-all.sh</pre>
-        </div>
-
-        <div style="margin-bottom:1rem;">
-            <h3 style="font-size:1rem;margin-bottom:0.5rem;">Windows (Setup.exe
-                Installer)</h3>
-            <pre
-                style="background:#0b1021;color:#e5e7eb;padding:12px;border-radius:8px;overflow:auto;font-size:0.85rem;margin:0;">cd packaging
-./windows-build.sh</pre>
-            <p style="color:#6b7280;font-size:0.85rem;margin-top:0.5rem;">Note:
-                Windows installer requires <a
-                    href="https://nsis.sourceforge.io/" target="_blank"
-                    style="color:#007bff;">NSIS</a> to be installed.</p>
-        </div>
-
-        <p style="color:#6b7280;font-size:0.9rem;margin-top:1rem;">See <a
-                href="/packaging/DESKTOP_BUILD_GUIDE.md"
-                style="color:#007bff;">packaging/DESKTOP_BUILD_GUIDE.md</a> for
-            complete documentation.</p>
+    <div class="mobile-improvements-link" style="margin-top:3rem;padding:2rem;background:rgba(20,20,20,0.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:16px;border:1px solid rgba(255,255,255,0.1);">
+        <h2 style="margin-top:0;color:#fff;font-size:1.5rem;font-weight:700;margin-bottom:1rem;">📱 Mobile App Improvements</h2>
+        <p style="color:rgba(255,255,255,0.7);margin-bottom:1.5rem;line-height:1.6;">As part of our ongoing mobile improvements initiative, we're working on bringing you native desktop applications. These will provide a better experience with offline capabilities, improved performance, and platform-specific features.</p>
+        <a href="/whats-new/2026/jan/platform" style="display:inline-flex;align-items:center;gap:0.5rem;color:rgba(99,102,241,1);text-decoration:none;font-weight:500;transition:gap 0.2s;">
+            Learn More About Mobile Improvements <i class="fas fa-arrow-right"></i>
+        </a>
     </div>
 
-    <div
-        style="margin-top:2rem;padding:1rem;background:#fff3cd;border-left:4px solid #ffc107;border-radius:4px;">
-        <h3 style="margin-top:0;font-size:1rem;">📦 What's New?</h3>
-        <p style="margin-bottom:0.5rem;font-size:0.9rem;">The desktop app is now
-            the <strong>primary distribution method</strong>. Key
-            improvements:</p>
-        <ul
-            style="margin:0.5rem 0;padding-left:1.5rem;font-size:0.9rem;color:#6b7280;">
-            <li><strong>macOS:</strong> DMG installer with drag-and-drop
-                installation</li>
-            <li><strong>Windows:</strong> Professional NSIS installer with Start
-                Menu shortcuts</li>
-            <li><strong>Standalone:</strong> No Python installation
-                required</li>
-            <li><strong>Local Database:</strong> Uses SQLite stored in user
-                directory</li>
-            <li><strong>Auto Port Detection:</strong> Automatically finds free
-                ports</li>
+    <div class="whats-new-info" style="margin-top:2rem;padding:1.5rem;background:rgba(20,20,20,0.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:12px;border:1px solid rgba(255,255,255,0.1);border-left:4px solid rgba(99,102,241,0.5);">
+        <h3 style="margin-top:0;font-size:1.1rem;color:#fff;margin-bottom:0.75rem;">📦 What's Coming?</h3>
+        <p style="margin-bottom:0.75rem;font-size:0.95rem;color:rgba(255,255,255,0.7);">The desktop app will be the <strong style="color:#fff;">primary distribution method</strong>. Key improvements coming:</p>
+        <ul style="margin:0.5rem 0;padding-left:1.5rem;font-size:0.9rem;color:rgba(255,255,255,0.7);line-height:1.8;">
+            <li><strong style="color:#fff;">macOS:</strong> DMG installer with drag-and-drop installation</li>
+            <li><strong style="color:#fff;">Windows:</strong> Professional NSIS installer with Start Menu shortcuts</li>
+            <li><strong style="color:#fff;">Standalone:</strong> No Python installation required</li>
+            <li><strong style="color:#fff;">Local Database:</strong> Uses SQLite stored in user directory</li>
+            <li><strong style="color:#fff;">Auto Port Detection:</strong> Automatically finds free ports</li>
         </ul>
     </div>
 </section>
+
+<style>
+.download-item:hover {
+    background:rgba(30,30,30,0.8) !important;
+    border-color:rgba(255,255,255,0.15) !important;
+    transform:translateY(-2px);
+    box-shadow:0 4px 16px rgba(0,0,0,0.3);
+}
+
+.mobile-improvements-link a:hover {
+    gap:0.75rem;
+    color:rgba(99,102,241,0.8);
+}
+
+@media (max-width: 768px) {
+    .download-grid {
+        grid-template-columns:1fr !important;
+    }
+}
+</style>
 {% endblock %}

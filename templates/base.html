@@ -626,25 +626,6 @@
 
                     <!-- Utilities (Right) -->
                     <div class="ds-statusbar__right">
-                        <!-- Search Trigger -->
-                        <button type="button"
-                            class="ds-iconbtn nav-item hidden-mobile"
-                            title="Search" aria-label="Search"
-                            @click="openSearch()">
-                            <i class="fas fa-search" aria-hidden="true"></i>
-                        </button>
-
-                        <!-- Bookmarks shortcut -->
-                        <a href="/bookmarks"
-                            class="ds-iconbtn nav-item hidden-mobile"
-                            title="Bookmarks"
-                            aria-label="Bookmarks">
-                            <i class="fas fa-bookmark" aria-hidden="true"></i>
-                            <span class="nav-pill-badge"
-                                x-show="hasNewBookmarks"
-                                x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
-                        </a>
-
                         <!-- Account Features Dropdown (Desktop Only - Logged In) -->
                         <div class="hidden-mobile account-menu-container"
                             x-show="isLoggedIn" x-cloak
@@ -654,9 +635,9 @@
                                 class="ds-iconbtn ds-iconbtn--account nav-item account-menu-btn"
                                 title="Account">
                                 <i class="fas fa-user"
-                                    style="font-size:18px;color:#bdbdbd;"></i>
+                                    style="font-size:16px;color:#bdbdbd;"></i>
                                 <i class="fas fa-chevron-down"
-                                    style="font-size:12px;color:#bdbdbd;transition:transform .2s;"
+                                    style="font-size:10px;color:#bdbdbd;transition:transform .2s;"
                                     :class="{'rotate-180': accountMenuOpen}"></i>
                             </button>
 
@@ -751,14 +732,14 @@
                         <a href="/account" x-show="!isLoggedIn" x-cloak style="display: none;"
                             class="ds-iconbtn nav-item hidden-mobile"
                             title="Profile" aria-label="Profile">
-                            <i class="fas fa-user" aria-hidden="true"></i>
+                            <i class="fas fa-user" aria-hidden="true" style="font-size:16px;"></i>
                         </a>
 
                         <!-- Fullscreen Toggle (Desktop Only) -->
                         <button @click="toggleFullscreen()"
                             class="ds-iconbtn nav-item hidden-mobile"
                             title="Fullscreen">
-                            <i class="fas fa-expand"></i>
+                            <i class="fas fa-expand" style="font-size:16px;"></i>
                         </button>
                     </div>
 
@@ -1298,65 +1279,75 @@
                         aria-label="Primary navigation">
                         <a
                             class="app-sidebar-item {% if request.path == '/' %}active{% endif %}"
-                            href="{{ url_for('home') }}">
+                            href="{{ url_for('home') }}"
+                            data-icon="compass">
                             <i class="fas fa-compass" aria-hidden="true"></i>
                             <span>Explore</span>
                         </a>
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'music' %}active{% endif %}"
-                            href="{{ url_for('music') }}">
+                            href="{{ url_for('music') }}"
+                            data-icon="music">
                             <i class="fas fa-music" aria-hidden="true"></i>
                             <span>Music</span>
                         </a>
                         <a
                             class="app-sidebar-item {% if request.path.startswith('/podcasts') %}active{% endif %}"
-                            href="/podcasts">
+                            href="/podcasts"
+                            data-icon="podcast">
                             <i class="fas fa-podcast" aria-hidden="true"></i>
                             <span>Podcasts</span>
                         </a>
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'live_tv_page' %}active{% endif %}"
-                            href="/live-tv">
+                            href="/live-tv"
+                            data-icon="tv">
                             <i class="fas fa-tv" aria-hidden="true"></i>
                             <span>Live TV</span>
                         </a>
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'shows' %}active{% endif %}"
-                            href="{{ url_for('shows') }}">
+                            href="{{ url_for('shows') }}"
+                            data-icon="video">
                             <i class="fas fa-video"
                                 aria-hidden="true"></i>
                             <span>Videos</span>
                         </a>
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'artists' %}active{% endif %}"
-                            href="{{ url_for('artists') }}">
+                            href="{{ url_for('artists') }}"
+                            data-icon="users">
                             <i class="fas fa-users" aria-hidden="true"></i>
                             <span>Artists</span>
                         </a>
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'radio_page' %}active{% endif %}"
-                            href="/radio">
+                            href="/radio"
+                            data-icon="broadcast-tower">
                             <i class="fas fa-broadcast-tower"
                                 aria-hidden="true"></i>
                             <span>Radio</span>
                         </a>
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'events_page' or request.path.startswith('/events') %}active{% endif %}"
-                            href="/events">
+                            href="/events"
+                            data-icon="calendar-alt">
                             <i class="fas fa-calendar-alt"
                                 aria-hidden="true"></i>
                             <span>Events</span>
                         </a>
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' or request.path.startswith('/merch') %}active{% endif %}"
-                            href="/merch">
+                            href="/merch"
+                            data-icon="shopping-bag">
                             <i class="fas fa-shopping-bag"
                                 aria-hidden="true"></i>
                             <span>Merch</span>
                         </a>
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
-                            href="/bookmarks">
+                            href="/bookmarks"
+                            data-icon="bookmark">
                             <i class="fas fa-bookmark" aria-hidden="true"></i>
                             <span>Saved</span>
                         </a>
@@ -1370,13 +1361,15 @@
                         aria-label="Account">
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'account_page' %}active{% endif %}"
-                            href="/account">
+                            href="/account"
+                            data-icon="user">
                             <i class="fas fa-user" aria-hidden="true"></i>
                             <span>Profile</span>
                         </a>
                         <a
                             class="app-sidebar-item {% if request.endpoint == 'settings_page' %}active{% endif %}"
-                            href="/settings">
+                            href="/settings"
+                            data-icon="cog">
                             <i class="fas fa-cog" aria-hidden="true"></i>
                             <span>Settings</span>
                         </a>
@@ -1477,19 +1470,11 @@
                             title="Boost">
                             <i class="fas fa-bolt"></i>
                         </button>
-                        <button @click="
-                            currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.toggle({ 
-                                type: (currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), 
-                                id: currentTrack.id, 
-                                title: currentTrack.title, 
-                                artwork: currentTrack.cover_art || currentTrack.thumbnail 
-                            });
-                            isSaved = currentTrack ? !!(window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), currentTrack.id)) : false;
-                            $nextTick(()=>{ document.dispatchEvent(new CustomEvent('bookmarks:changed', { detail: { items: window.AhoyBookmarks?.all?.() || {}, action: isSaved ? 'add' : 'remove', item: currentTrack } })); });
-                        " class="now-playing-btn"
-                            :class="{'active': currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)}"
+                        <button @click="toggleBookmarkCurrent()" class="now-playing-btn"
+                            :class="{'active': isSaved}"
                             title="Bookmark">
-                            <i class="fas fa-bookmark"></i>
+                            <i :class="isSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"
+                                :style="isSaved ? 'color: var(--accent-color);' : ''"></i>
                         </button>
                     </div>
 
@@ -1608,26 +1593,17 @@
                         :class="{'liked': isLiked}" title="Like">
                         <i class="fas fa-heart"></i>
                     </button>
-                    <button @click="
-                        currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.toggle({ 
-                            type: (currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), 
-                            id: currentTrack.id, 
-                            title: currentTrack.title, 
-                            artwork: currentTrack.cover_art || currentTrack.thumbnail 
-                        });
-                        isSaved = currentTrack ? !!(window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), currentTrack.id)) : false;
-                        $nextTick(()=>{ document.dispatchEvent(new CustomEvent('bookmarks:changed', { detail: { items: window.AhoyBookmarks?.all?.() || {}, action: isSaved ? 'add' : 'remove', item: currentTrack } })); });
-                    " class="action-btn bm-btn"
-                        :class="{'saved': currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)}"
-                        :aria-pressed="currentTrack && window.AhoyBookmarks ? window.AhoyBookmarks.isBookmarked((currentTrack.type === 'show' ? 'show' : (currentTrack.type || 'track')), currentTrack.id) : false"
+                    <button @click="toggleBookmarkCurrent()" class="action-btn bm-btn"
+                        :class="{'saved': isSaved}"
+                        :aria-pressed="isSaved"
                         title="Bookmark">
                         <span aria-hidden="true">
                             <i
-                                x-show="currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id)"
+                                x-show="isSaved"
                                 class="fas fa-bookmark"
                                 style="color: var(--accent-color);"></i>
                             <i
-                                x-show="!(currentTrack && window.AhoyBookmarks && window.AhoyBookmarks.isBookmarked((currentTrack?.type === 'show' ? 'show' : (currentTrack?.type || 'track')), currentTrack?.id))"
+                                x-show="!isSaved"
                                 class="far fa-bookmark"></i>
                         </span>
                         <span class="sr-only">Bookmark</span>
@@ -2889,6 +2865,8 @@
                                     try {
                                         this.isPlaying = true;
                                         this.currentTrack = mp.currentTrack;
+                                        // Update saved state when track changes
+                                        this.updateSavedState();
                                         // Keep Now Playing UI in sync (glassy theme only; no visualizer)
                                         if (window.nowPlayingController && mp.currentTrack) {
                                             window.nowPlayingController.onTrackChange(mp.currentTrack);
@@ -2965,6 +2943,8 @@
                                 mp.on('playlistchange', () => {
                                     try {
                                         this.currentTrack = mp.currentTrack;
+                                        // Update saved state when track changes
+                                        this.updateSavedState();
                                         // Keep Now Playing UI in sync (glassy theme only; no visualizer)
                                         if (window.nowPlayingController && mp.currentTrack) {
                                             window.nowPlayingController.onTrackChange(mp.currentTrack);
@@ -2996,6 +2976,19 @@
                         console.warn('Error setting up play-track listener:', e);
                     }
 
+                    // Listen for bookmark changes to update saved state
+                    try {
+                        document.addEventListener('bookmarks:changed', () => {
+                            try {
+                                this.updateSavedState();
+                            } catch (err) {
+                                console.warn('Error updating saved state from bookmark change:', err);
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('Error setting up bookmarks:changed listener:', e);
+                    }
+
                     // Initialize bookmark state and start clock animation
                     try {
                         this.updateSavedState();
@@ -3010,6 +3003,8 @@
                 playTrack(track) {
                     try {
                         this.currentTrack = track;
+                        // Update saved state when track changes
+                        this.updateSavedState();
                         if (window.mediaPlayer && typeof window.mediaPlayer === 'object' && typeof window.mediaPlayer.play === 'function') {
                             window.mediaPlayer.play(track);
                             return;
@@ -3903,6 +3898,55 @@
             // eslint-disable-next-line no-console
             console.debug('NProgress not available; skipping progress-bar hooks');
         }
+    </script>
+
+    <!-- Extended Hover Effects for Sidebar Icons -->
+    <script>
+        (function() {
+            // Extended hover detection for sidebar items (1.5 seconds)
+            const EXTENDED_HOVER_DELAY = 1500; // 1.5 seconds
+            let hoverTimers = new Map();
+            
+            function initExtendedHover() {
+                const sidebarItems = document.querySelectorAll('.app-sidebar-item[data-icon]');
+                
+                sidebarItems.forEach(item => {
+                    let hoverTimer = null;
+                    
+                    item.addEventListener('mouseenter', function() {
+                        // Clear any existing timer
+                        if (hoverTimer) {
+                            clearTimeout(hoverTimer);
+                        }
+                        
+                        // Set timer for extended hover
+                        hoverTimer = setTimeout(() => {
+                            item.classList.add('hover-extended');
+                            hoverTimers.set(item, hoverTimer);
+                        }, EXTENDED_HOVER_DELAY);
+                    });
+                    
+                    item.addEventListener('mouseleave', function() {
+                        // Clear timer if still pending
+                        if (hoverTimer) {
+                            clearTimeout(hoverTimer);
+                            hoverTimer = null;
+                        }
+                        
+                        // Remove extended hover class
+                        item.classList.remove('hover-extended');
+                        hoverTimers.delete(item);
+                    });
+                });
+            }
+            
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initExtendedHover);
+            } else {
+                initExtendedHover();
+            }
+        })();
     </script>
     </body>
 

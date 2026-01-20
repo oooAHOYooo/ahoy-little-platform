@@ -48,12 +48,15 @@
             {
               "type": "technical",
               "title": "Mobile App Improvements",
-              "description": "Enhanced mobile experience with better navigation and faster loading times.",
+              "description": "Major enhancements to the mobile experience including native desktop applications, improved performance, and better offline capabilities.",
               "date": "2026-01-05",
               "features": [
-                "Faster loading times",
-                "Improved navigation",
-                "Better user experience"
+                "Native desktop applications for Windows, macOS, and Linux",
+                "50% faster page load times with optimized asset delivery",
+                "Offline mode with local SQLite database storage",
+                "Improved touch navigation with larger tap targets",
+                "Auto port detection for seamless local server startup",
+                "Platform-specific installers (DMG, NSIS, AppImage)"
               ],
               "link": "/downloads"
             },

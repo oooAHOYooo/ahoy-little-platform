@@ -408,9 +408,11 @@
     }
     
     .dash-play-btn {
-        background: white;
-        color: black;
-        border: none;
+        background: rgba(20, 20, 20, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 0.85rem 1.75rem;
         border-radius: 99px;
         font-weight: 700;
@@ -607,8 +609,9 @@
     }
     
     .dash-action-btn:hover {
-        background: white;
-        color: black;
+        background: rgba(30, 30, 30, 0.8);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.2);
         transform: scale(1.1);
     }
     
@@ -2036,20 +2039,10 @@ function whatsNew() {
             if (!dateString) return '';
             try {
                 const date = new Date(dateString);
-                const normalizedType = String(updateType || '').toLowerCase();
-
-                // For events, show only month + year (e.g. "JAN 2026" via CSS uppercase)
-                if (normalizedType === 'event' || normalizedType === 'events') {
-                    return date.toLocaleDateString(undefined, {
-                        year: 'numeric',
-                        month: 'short',
-                    });
-                }
-
+                // Always show month + year format (e.g. "Jan 2026")
                 return date.toLocaleDateString(undefined, {
                     year: 'numeric',
                     month: 'short',
-                    day: 'numeric',
                 });
             } catch (e) {
                 return dateString;
@@ -2070,14 +2063,7 @@ function whatsNew() {
         },
         
         getViewAllUrl() {
-            // If we have updates, link to the most recent month
-            if (this.updates.length > 0) {
-                const latest = this.updates[0];
-                if (latest.year && latest.month) {
-                    return `/whats-new/${latest.year}/${latest.month}`;
-                }
-            }
-            // Otherwise link to archive
+            // Always link to archive page - safer and more reliable
             return '/whats-new';
         }
     };

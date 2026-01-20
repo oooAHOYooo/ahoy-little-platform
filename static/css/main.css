@@ -1102,6 +1102,153 @@ body.debug-layout .card {
     color: rgba(255, 255, 255, 0.92);
 }
 
+/* Extended hover effects - fun animations after 1.5 seconds */
+.app-sidebar-item {
+    position: relative;
+    overflow: visible;
+}
+
+.app-sidebar-item i {
+    transition: transform 0.3s ease, filter 0.3s ease, color 0.3s ease;
+}
+
+/* Extended hover - rotation and color shifts */
+.app-sidebar-item:hover-extended i {
+    animation: iconWiggle 0.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 12px currentColor);
+    color: #ffd700;
+}
+
+/* Different animations for different icons */
+.app-sidebar-item:hover-extended[data-icon="compass"] i {
+    animation: iconSpin 1s linear infinite;
+    color: #4ade80;
+}
+
+.app-sidebar-item:hover-extended[data-icon="music"] i {
+    animation: iconBounce 0.6s ease-in-out infinite;
+    color: #f472b6;
+}
+
+.app-sidebar-item:hover-extended[data-icon="podcast"] i {
+    animation: iconPulse 1s ease-in-out infinite;
+    color: #60a5fa;
+}
+
+.app-sidebar-item:hover-extended[data-icon="tv"] i {
+    animation: iconShake 0.4s ease-in-out infinite;
+    color: #a78bfa;
+}
+
+.app-sidebar-item:hover-extended[data-icon="video"] i {
+    animation: iconFlip 0.8s ease-in-out infinite;
+    color: #fb7185;
+}
+
+.app-sidebar-item:hover-extended[data-icon="users"] i {
+    animation: iconWiggle 0.5s ease-in-out infinite;
+    color: #34d399;
+}
+
+.app-sidebar-item:hover-extended[data-icon="broadcast-tower"] i {
+    animation: iconPulse 0.7s ease-in-out infinite;
+    color: #fbbf24;
+    filter: drop-shadow(0 0 10px #fbbf24) drop-shadow(0 0 20px #fbbf24);
+}
+
+.app-sidebar-item:hover-extended[data-icon="calendar-alt"] i {
+    animation: iconBounce 0.5s ease-in-out infinite;
+    color: #818cf8;
+}
+
+.app-sidebar-item:hover-extended[data-icon="shopping-bag"] i {
+    animation: iconShake 0.3s ease-in-out infinite;
+    color: #f87171;
+}
+
+.app-sidebar-item:hover-extended[data-icon="bookmark"] i {
+    animation: iconWiggle 0.4s ease-in-out infinite;
+    color: #fcd34d;
+}
+
+.app-sidebar-item:hover-extended[data-icon="user"] i {
+    animation: iconPulse 0.9s ease-in-out infinite;
+    color: #93c5fd;
+}
+
+.app-sidebar-item:hover-extended[data-icon="cog"] i {
+    animation: iconSpin 2s linear infinite;
+    color: #cbd5e1;
+}
+
+/* Sparkle effect on extended hover */
+.app-sidebar-item:hover-extended::before {
+    content: '✨';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    animation: sparkleFloat 1.5s ease-in-out infinite;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.app-sidebar-item:hover-extended::after {
+    content: '✨';
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    animation: sparkleFloat 1.5s ease-in-out infinite 0.5s;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* Keyframe animations */
+@keyframes iconWiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+}
+
+@keyframes iconSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes iconBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+@keyframes iconShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+@keyframes iconFlip {
+    0% { transform: rotateY(0deg); }
+    50% { transform: rotateY(180deg); }
+    100% { transform: rotateY(360deg); }
+}
+
+@keyframes sparkleFloat {
+    0%, 100% { 
+        transform: translateY(-50%) translateX(0) scale(1);
+        opacity: 0.8;
+    }
+    50% { 
+        transform: translateY(-60%) translateX(5px) scale(1.2);
+        opacity: 1;
+    }
+}
+
 .app-sidebar-item.active {
     background: rgba(255, 255, 255, 0.09);
     color: rgba(255, 255, 255, 0.95);
@@ -1666,15 +1813,15 @@ position: relative;
 
 /* Normalize Font Awesome / icon font baseline */
 .ds-iconbtn i{
-font-size:18px;
+font-size:16px;
 line-height:1;
 display:block;
 }
 
 .ds-iconbtn svg,
 .ds-iconbtn img{
-width:18px;
-height:18px;
+width:16px;
+height:16px;
 display:block;
 }
 
@@ -1691,9 +1838,9 @@ right:4px;
 
 .ds-iconbtn--account .fa-chevron-down{
 position:absolute;
-right:6px;
-bottom:6px;
-font-size:10px;
+right:4px;
+bottom:4px;
+font-size:9px;
 opacity:0.8;
 }
 
