@@ -293,6 +293,9 @@
   }
 }
 </style>
+<script src="{{ url_for('static', filename='js/live-tv.js') }}"></script>
+<script src="{{ url_for('static', filename='js/live-tv-rows.js') }}"></script>
+<script src="{{ url_for('static', filename='js/live-tv-engine.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -418,12 +421,6 @@
 	</section>
 	<!-- Mobile overlay for channel drawer -->
 	<div id="ltvOverlay" class="ltv-overlay"
-		onclick="(function(){try{const sb=document.querySelector('.live-tv-sidebar'); const ov=document.getElementById('ltvOverlay'); if(sb&&ov){sb.classList.remove('open'); ov.classList.remove('show');}}catch(_){}})()"></div>
+		onclick="(function(){try{const sb=document.querySelector('.live-tv-sidebar'); const ov=document.getElementById('ltvOverlay'); if(sb&&ov){sb.classList.remove('open'); ov.classList.remove('show');}}catch(_){}})()">	</div>
 </div>
-{% endblock %}
-
-{% block extra_head %}
-<script src="{{ url_for('static', filename='js/live-tv.js') }}"></script>
-<script src="{{ url_for('static', filename='js/live-tv-rows.js') }}"></script>
-<script src="{{ url_for('static', filename='js/live-tv-engine.js') }}"></script>
 {% endblock %}

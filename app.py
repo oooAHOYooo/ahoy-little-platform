@@ -1689,6 +1689,13 @@ def api_live_tv_channels():
                 # Generate a temporary ID if missing
                 show_id = str(uuid.uuid4())
             
+            # Ensure tags is a list of strings
+            tags = item.get('tags') or []
+            if not isinstance(tags, list):
+                tags = []
+            # Filter out non-string tags and convert to strings
+            tags = [str(t) for t in tags if t is not None]
+            
             return {
                 'id': show_id,
                 'title': item.get('title') or 'Untitled',
@@ -1698,15 +1705,21 @@ def api_live_tv_channels():
                 'duration_seconds': item.get('duration_seconds') or 0,
                 'description': item.get('description') or '',
                 'category': (item.get('category') or '').lower(),
-                'tags': item.get('tags') or [],
+                'tags': tags,
             }
 
         shows = [normalize_show(s) for s in shows_data.get('shows', []) if s.get('video_url') or s.get('mp4_link') or s.get('trailer_url')]
 
         # Channel categorization
-        music_videos = [s for s in shows if (s.get('category') == 'music video' or 'music-video' in s.get('tags', []) or 'musicvideos' in ' '.join(s.get('tags', [])))]
+        # Helper to safely join tags
+        def safe_join_tags(tags):
+            if not tags or not isinstance(tags, list):
+                return ''
+            return ' '.join(str(t) for t in tags if t is not None)
+        
+        music_videos = [s for s in shows if (s.get('category') == 'music video' or 'music-video' in s.get('tags', []) or 'musicvideos' in safe_join_tags(s.get('tags', [])))]
         films = [s for s in shows if (s.get('category') == 'short film' or s.get('category') == 'film' or 'short-film' in s.get('tags', []))]
-        live_shows = [s for s in shows if (s.get('category') == 'broadcast' or 'live' in ' '.join(s.get('tags', [])) or 'episode' in s.get('category', ''))]
+        live_shows = [s for s in shows if (s.get('category') == 'broadcast' or 'live' in safe_join_tags(s.get('tags', [])) or 'episode' in s.get('category', ''))]
 
         # Misc: everything not already in the other channels (video only)
         # Use .get() to safely access id, filter out None values
@@ -1755,7 +1768,7 @@ def api_live_tv_channels():
         # Log the error for debugging
         import logging
         logging.error(f'Error in api_live_tv_channels: {e}', exc_info=True)
-        # Return empty channels instead of crashing
+        # Return empty channels instead of crashing (return 200 to avoid showing as internal server error)
         response = jsonify({
             'channels': [
                 {'id': 'misc', 'name': 'Misc', 'items': []},
@@ -1766,7 +1779,7 @@ def api_live_tv_channels():
             'error': 'Failed to load channels'
         })
         response.headers['Cache-Control'] = 'no-cache'
-        return response, 500
+        return response
 
 @app.route('/api/show/<show_id>')
 def api_show(show_id):
@@ -1812,130 +1825,188 @@ def api_featured_artists():
 @limiter.exempt
 def api_whats_new():
     """Get 'What's New at Ahoy' updates - returns 4 most recent for home page"""
-    data = load_json_data("whats_new.json", {"updates": {}})
-    
-    # Extract all items from monthly structure and flatten for backward compatibility
-    all_items = []
-    updates = data.get("updates", {})
-    
-    for year, months in updates.items():
-        for month, sections in months.items():
-            for section_name, section_data in sections.items():
-                if isinstance(section_data, dict) and "items" in section_data:
-                    for item in section_data.get("items", []):
-                        item_copy = item.copy()
-                        item_copy["year"] = year
-                        item_copy["month"] = month
-                        item_copy["section"] = section_name
-                        all_items.append(item_copy)
-    
-    # Sort by date (newest first)
-    all_items.sort(key=lambda x: x.get("date", ""), reverse=True)
-    
-    # Return 4 most recent for home page
-    return jsonify({"updates": all_items[:4]})
+    try:
+        data = load_json_data("whats_new.json", {"updates": {}})
+        
+        # Ensure we have the updates structure (not the whole file)
+        if not isinstance(data, dict) or "updates" not in data:
+            # If data is malformed, return empty
+            return jsonify({"updates": []})
+        
+        # Extract all items from monthly structure and flatten for backward compatibility
+        all_items = []
+        updates = data.get("updates", {})
+        
+        # Handle case where updates might be a list (backward compatibility)
+        if isinstance(updates, list):
+            all_items = updates
+        elif isinstance(updates, dict):
+            for year, months in updates.items():
+                if not isinstance(months, dict):
+                    continue
+                for month, sections in months.items():
+                    if not isinstance(sections, dict):
+                        continue
+                    for section_name, section_data in sections.items():
+                        if isinstance(section_data, dict) and "items" in section_data:
+                            for item in section_data.get("items", []):
+                                if isinstance(item, dict):
+                                    item_copy = item.copy()
+                                    item_copy["year"] = year
+                                    item_copy["month"] = month
+                                    item_copy["section"] = section_name
+                                    all_items.append(item_copy)
+        
+        # Sort by date (newest first)
+        all_items.sort(key=lambda x: x.get("date", ""), reverse=True)
+        
+        # Return 4 most recent for home page
+        response = jsonify({"updates": all_items[:4]})
+        response.headers['Cache-Control'] = 'public, max-age=300'
+        return response
+    except Exception as e:
+        import logging
+        logging.error(f'Error in api_whats_new: {e}', exc_info=True)
+        # Return empty updates on error
+        return jsonify({"updates": []})
 
 @app.route('/whats-new')
 def whats_new_archive():
     """Archive page listing all available months"""
-    data = load_json_data("whats_new.json", {"updates": {}})
-    updates = data.get("updates", {})
-    
-    # Build list of available months
-    months_list = []
-    for year, months in sorted(updates.items(), reverse=True):
-        for month, sections in sorted(months.items(), reverse=True):
-            # Count total items across all sections
-            total_items = 0
-            for section_data in sections.values():
-                if isinstance(section_data, dict) and "items" in section_data:
-                    total_items += len(section_data.get("items", []))
-            
-            if total_items > 0:  # Only show months with content
-                months_list.append({
-                    "year": year,
-                    "month": month,
-                    "month_name": _get_month_name(month),
-                    "total_items": total_items
-                })
-    
-    return render_template('whats_new_archive.html', months=months_list)
+    try:
+        data = load_json_data("whats_new.json", {"updates": {}})
+        updates = data.get("updates", {})
+        
+        if not isinstance(updates, dict):
+            updates = {}
+        
+        # Build list of available months
+        months_list = []
+        for year, months in sorted(updates.items(), reverse=True):
+            if not isinstance(months, dict):
+                continue
+            for month, sections in sorted(months.items(), reverse=True):
+                if not isinstance(sections, dict):
+                    continue
+                # Count total items across all sections
+                total_items = 0
+                for section_data in sections.values():
+                    if isinstance(section_data, dict) and "items" in section_data:
+                        total_items += len(section_data.get("items", []))
+                
+                if total_items > 0:  # Only show months with content
+                    months_list.append({
+                        "year": year,
+                        "month": month,
+                        "month_name": _get_month_name(month),
+                        "total_items": total_items
+                    })
+        
+        return render_template('whats_new_archive.html', months=months_list)
+    except Exception as e:
+        import logging
+        logging.error(f'Error in whats_new_archive: {e}', exc_info=True)
+        return render_template('whats_new_archive.html', months=[]), 500
 
 @app.route('/whats-new/<year>/<month>')
 def whats_new_month(year, month):
     """Monthly overview page with all 6 sections"""
-    month_lower = month.lower()
-    data = load_json_data("whats_new.json", {"updates": {}})
-    updates = data.get("updates", {})
-    
-    month_data = updates.get(year, {}).get(month_lower, {})
-    
-    if not month_data:
-        # Try to find month with different case
+    try:
+        month_lower = month.lower()
+        data = load_json_data("whats_new.json", {"updates": {}})
+        updates = data.get("updates", {})
+        
+        if not isinstance(updates, dict):
+            return render_template('404.html'), 404
+        
         year_data = updates.get(year, {})
-        for m, sections in year_data.items():
-            if m.lower() == month_lower:
-                month_data = sections
-                break
-    
-    if not month_data:
-        return render_template('404.html'), 404
-    
-    # Get all sections (with empty arrays if section doesn't exist)
-    sections = {
-        "music": month_data.get("music", {"title": "Music Updates", "items": []}),
-        "videos": month_data.get("videos", {"title": "Video Updates", "items": []}),
-        "artists": month_data.get("artists", {"title": "Artist Updates", "items": []}),
-        "platform": month_data.get("platform", {"title": "Platform Updates", "items": []}),
-        "merch": month_data.get("merch", {"title": "Merch Updates", "items": []}),
-        "events": month_data.get("events", {"title": "Events Updates", "items": []})
-    }
-    
-    month_name = _get_month_name(month_lower)
-    
-    return render_template('whats_new_month.html', 
-                         year=year, 
-                         month=month_lower, 
-                         month_name=month_name,
-                         sections=sections)
+        if not isinstance(year_data, dict):
+            return render_template('404.html'), 404
+        
+        month_data = year_data.get(month_lower, {})
+        
+        if not month_data:
+            # Try to find month with different case
+            for m, sections in year_data.items():
+                if isinstance(sections, dict) and m.lower() == month_lower:
+                    month_data = sections
+                    break
+        
+        if not month_data or not isinstance(month_data, dict):
+            return render_template('404.html'), 404
+        
+        # Get all sections (with empty arrays if section doesn't exist)
+        sections = {
+            "music": month_data.get("music", {"title": "Music Updates", "items": []}) if isinstance(month_data.get("music"), dict) else {"title": "Music Updates", "items": []},
+            "videos": month_data.get("videos", {"title": "Video Updates", "items": []}) if isinstance(month_data.get("videos"), dict) else {"title": "Video Updates", "items": []},
+            "artists": month_data.get("artists", {"title": "Artist Updates", "items": []}) if isinstance(month_data.get("artists"), dict) else {"title": "Artist Updates", "items": []},
+            "platform": month_data.get("platform", {"title": "Platform Updates", "items": []}) if isinstance(month_data.get("platform"), dict) else {"title": "Platform Updates", "items": []},
+            "merch": month_data.get("merch", {"title": "Merch Updates", "items": []}) if isinstance(month_data.get("merch"), dict) else {"title": "Merch Updates", "items": []},
+            "events": month_data.get("events", {"title": "Events Updates", "items": []}) if isinstance(month_data.get("events"), dict) else {"title": "Events Updates", "items": []}
+        }
+        
+        month_name = _get_month_name(month_lower)
+        
+        return render_template('whats_new_month.html', 
+                             year=year, 
+                             month=month_lower, 
+                             month_name=month_name,
+                             sections=sections)
+    except Exception as e:
+        import logging
+        logging.error(f'Error in whats_new_month: {e}', exc_info=True)
+        return render_template('404.html'), 500
 
 @app.route('/whats-new/<year>/<month>/<section>')
 def whats_new_section(year, month, section):
     """Individual section detail page"""
-    month_lower = month.lower()
-    section_lower = section.lower()
-    
-    valid_sections = ["music", "videos", "artists", "platform", "merch", "events"]
-    if section_lower not in valid_sections:
-        return render_template('404.html'), 404
-    
-    data = load_json_data("whats_new.json", {"updates": {}})
-    updates = data.get("updates", {})
-    
-    month_data = updates.get(year, {}).get(month_lower, {})
-    
-    if not month_data:
-        # Try to find month with different case
+    try:
+        month_lower = month.lower()
+        section_lower = section.lower()
+        
+        valid_sections = ["music", "videos", "artists", "platform", "merch", "events"]
+        if section_lower not in valid_sections:
+            return render_template('404.html'), 404
+        
+        data = load_json_data("whats_new.json", {"updates": {}})
+        updates = data.get("updates", {})
+        
+        if not isinstance(updates, dict):
+            return render_template('404.html'), 404
+        
         year_data = updates.get(year, {})
-        for m, sections in year_data.items():
-            if m.lower() == month_lower:
-                month_data = sections
-                break
-    
-    if not month_data:
-        return render_template('404.html'), 404
-    
-    section_data = month_data.get(section_lower, {"title": f"{section.capitalize()} Updates", "items": []})
-    
-    month_name = _get_month_name(month_lower)
-    
-    return render_template('whats_new_section.html',
-                         year=year,
-                         month=month_lower,
-                         month_name=month_name,
-                         section=section_lower,
-                         section_title=section_data.get("title", f"{section.capitalize()} Updates"),
-                         items=section_data.get("items", []))
+        if not isinstance(year_data, dict):
+            return render_template('404.html'), 404
+        
+        month_data = year_data.get(month_lower, {})
+        
+        if not month_data or not isinstance(month_data, dict):
+            # Try to find month with different case
+            for m, sections in year_data.items():
+                if isinstance(sections, dict) and m.lower() == month_lower:
+                    month_data = sections
+                    break
+        
+        if not month_data or not isinstance(month_data, dict):
+            return render_template('404.html'), 404
+        
+        section_data = month_data.get(section_lower, {})
+        if not isinstance(section_data, dict):
+            section_data = {"title": f"{section.capitalize()} Updates", "items": []}
+        
+        month_name = _get_month_name(month_lower)
+        
+        return render_template('whats_new_section.html',
+                             year=year,
+                             month=month_lower,
+                             month_name=month_name,
+                             section=section_lower,
+                             section_title=section_data.get("title", f"{section.capitalize()} Updates"),
+                             items=section_data.get("items", []))
+    except Exception as e:
+        import logging
+        logging.error(f'Error in whats_new_section: {e}', exc_info=True)
+        return render_template('404.html'), 500
 
 def _get_month_name(month_abbr):
     """Convert month abbreviation to full name"""
