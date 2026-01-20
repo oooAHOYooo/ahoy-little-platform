@@ -11807,7 +11807,10 @@ img.loading {
 /* Shows Grid */
 .shows-grid-section {
     padding: var(--spacing-2xl) 0;
-    background: var(--background-light);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.5) 100%);
+    backdrop-filter: saturate(140%) blur(20px);
+    -webkit-backdrop-filter: saturate(140%) blur(20px);
+    border-radius: 0;
 }
 
 .shows-grid {
@@ -12085,7 +12088,10 @@ img.loading {
 /* Artists Grid */
 .artists-grid-section {
     padding: var(--spacing-2xl) 0;
-    background: var(--background-light);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.5) 100%);
+    backdrop-filter: saturate(140%) blur(20px);
+    -webkit-backdrop-filter: saturate(140%) blur(20px);
+    border-radius: 0;
 }
 
 .artists-grid {
@@ -12972,6 +12978,16 @@ img.loading {
     padding: var(--spacing-lg) 0;
     max-width: 1400px;
     margin: 0 auto;
+}
+
+/* Music grid area - darker glass background */
+.music-container .music-grid {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.5) 100%);
+    backdrop-filter: saturate(140%) blur(20px);
+    -webkit-backdrop-filter: saturate(140%) blur(20px);
+    border-radius: 16px;
+    padding: var(--spacing-xl);
+    margin: var(--spacing-xl) 0;
 }
 
 .page-header {
@@ -17147,6 +17163,11 @@ img.loading {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: var(--spacing-lg);
     padding: var(--spacing-lg);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.5) 100%);
+    backdrop-filter: saturate(140%) blur(20px);
+    -webkit-backdrop-filter: saturate(140%) blur(20px);
+    border-radius: 16px;
+    margin: var(--spacing-xl) 0;
 }
 
 .track-card {

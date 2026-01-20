@@ -117,14 +117,6 @@
                             decoding="async">
                         <div class="episode-meta">
                             <div class="episode-title" x-text="artist.name"></div>
-                            <div class="episode-subtitle">
-                                <span class="episode-show"
-                                    x-text="(artist.genres && artist.genres.length ? artist.genres.join(', ') : '') || (artist.type || '')"></span>
-                                <span class="episode-dot" x-show="artist.type && artist.genres && artist.genres.length">•</span>
-                                <span class="episode-time"
-                                    x-show="artist.type" x-text="String(artist.type || '').replace(/_/g,' ')"></span>
-                            </div>
-                            <div class="episode-desc" x-text="artist.description || ''"></div>
                         </div>
                         <div class="episode-actions">
                             <button type="button" class="episode-btn"
@@ -152,7 +144,7 @@
             <div class="header-content">
                 <div class="header-title">
                     <div class="title-text">
-                        <h1><i class="fas fa-users"></i> Artists</h1>
+                        <h1>Artists</h1>
                         <p>Discover indie musicians, show hosts, athletes,
                             filmmakers, and more.</p>
                     </div>
@@ -320,8 +312,6 @@
                         </div>
                         <div class="artist-info">
                             <h4 x-text="artist.name"></h4>
-                            <p class="artist-genre"
-                                x-text="artist.genres?.join(', ') || 'Various'"></p>
                         </div>
                     </div>
                 </template>
@@ -350,8 +340,6 @@
                             </div>
                             <div class="col-name">
                                 <h4 x-text="artist.name"></h4>
-                                <p
-                                    x-text="artist.description?.substring(0, 50) + '...'"></p>
                             </div>
                             <span class="col-type" x-text="artist.type"></span>
                             <span class="col-genre"
