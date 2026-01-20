@@ -2057,10 +2057,9 @@ function whatsNew() {
         },
         
         getUpdateUrl(update) {
-            // If update has year, month, and section, link to monthly page with section anchor
-            // This scrolls to the section on the monthly overview page
+            // If update has year, month, and section, link to section detail page
             if (update.year && update.month && update.section) {
-                return `/whats-new/${update.year}/${update.month}#${update.section}`;
+                return `/whats-new/${update.year}/${update.month}/${update.section}`;
             }
             // Fallback: if update has a direct link, use it
             if (update.link) {
