@@ -23148,59 +23148,12 @@ img.loading {
     font-weight: 500;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .now-playing-wrapper {
-        height: 100px;
-    }
-
-    .now-playing-container {
-        padding: 12px 16px;
-        gap: 12px;
-    }
-
-    .now-playing-album-art {
-        width: 48px;
-        height: 48px;
-    }
-
-    .now-playing-title {
-        font-size: 14px;
-    }
-
-    .now-playing-artist {
-        font-size: 12px;
-    }
-
-    .now-playing-controls {
-        gap: 4px;
-    }
-
-    .now-playing-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 14px;
-    }
-
-    .now-playing-play-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-    }
-
-    /* Hide some controls on mobile */
-    .now-playing-controls .now-playing-btn:nth-child(n+5) {
-        display: none;
-    }
-
-    .now-playing-progress {
-        padding: 0 16px 8px;
-    }
-
-    .now-playing-time {
-        font-size: 10px;
-    }
+/* Responsive Design - Desktop only (mobile styles in mobile.css) */
+@media (min-width: 769px) {
+    /* Desktop styles remain unchanged */
 }
+
+/* Mobile styles are now in mobile.css to avoid conflicts */
 
 @media (max-width: 480px) {
     .now-playing-wrapper {

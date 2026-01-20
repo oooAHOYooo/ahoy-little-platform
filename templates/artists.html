@@ -631,6 +631,71 @@ function artistsPage() {
 
     /* Hide desktop/grid/table implementations on mobile */
     .artists-grid-section { display: none !important; }
+
+    /* Make episode rows flush and responsive for artists */
+    .artists-page .episode-row {
+        grid-template-columns: 48px 1fr auto !important;
+        gap: 10px !important;
+        padding: 10px 12px !important;
+        margin: 0 0 8px 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        align-items: center !important;
+        max-width: 100% !important;
+    }
+
+    /* Ensure episode meta takes available space and doesn't overflow */
+    .artists-page .episode-meta {
+        min-width: 0 !important;
+        flex: 1 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+
+    /* Make title flush and prevent overflow */
+    .artists-page .episode-title {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 100% !important;
+        margin-bottom: 0 !important;
+        line-height: 1.3 !important;
+    }
+
+    /* Hide descriptions on mobile for artists */
+    .artists-page .episode-desc {
+        display: none !important;
+    }
+
+    /* Hide subtitle if present on mobile for artists */
+    .artists-page .episode-subtitle {
+        display: none !important;
+    }
+
+    /* Ensure actions are properly aligned and don't shrink */
+    .artists-page .episode-actions {
+        flex-shrink: 0 !important;
+        gap: 6px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* Make episode art consistent and prevent shrinking */
+    .artists-page .episode-art {
+        flex-shrink: 0 !important;
+        width: 48px !important;
+        height: 48px !important;
+        object-fit: cover !important;
+    }
+
+    /* Ensure episode list container is flush */
+    .artists-page .episode-list {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
 }
 </style>
 {% endblock %}
