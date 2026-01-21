@@ -75,9 +75,12 @@
                     <p class="text-xs text-white/60 mt-2">You have sufficient balance to complete this purchase.</p>
                     {% else %}
                     <p class="text-white/70 text-sm mb-2">Insufficient wallet balance for this purchase.</p>
-                    <a href="/payments/wallet/fund" class="inline-block px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition">
-                        Fund Wallet
-                    </a>
+                    <div class="flex gap-2 mt-3">
+                        <button onclick="window.open('/account', '_blank')" class="inline-block px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition">
+                            <i class="fas fa-wallet"></i> Fund Wallet
+                        </button>
+                        <p class="text-xs text-white/60 self-center">or continue with Stripe below</p>
+                    </div>
                     {% endif %}
                 </div>
                 {% endif %}
