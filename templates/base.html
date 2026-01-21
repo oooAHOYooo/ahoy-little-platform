@@ -85,7 +85,9 @@
 
         <title>{% block title %}Ahoy Indie Media{% endblock %}</title>
 
-        <!-- CSS - Load loader first for instant display -->
+        <!-- CSS - Load design tokens first, then loader for instant display -->
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/design-tokens.css') }}">
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/loader.css') }}">
         <link rel="stylesheet"
@@ -408,15 +410,26 @@
 
         <!-- Full Page Loading Screen with Progress -->
         <div id="app-loader">
+            <!-- Floating Ambient Light Orbs -->
+            <div class="orb blue"></div>
+            <div class="orb purple"></div>
+            <div class="orb blue-alt"></div>
+            
+            <!-- Glass Panel Container -->
             <div class="loader-content">
-                <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
-                    alt="Ahoy Logo"
-                    class="loader-logo"
-                    onerror="this.style.display='none'">
+                <div class="logo-glass">
+                    <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+                        alt="Ahoy Logo"
+                        class="loader-logo"
+                        onerror="this.style.display='none'">
+                </div>
                 <div class="progress-container">
                     <div class="progress-bar-wrapper">
                         <div class="progress-bar" id="progress-bar"></div>
                     </div>
+                    <div class="status-text" id="progress-text"></div>
+                    <div class="status-details" id="progress-details"></div>
+                    <div class="progress-percent" id="progress-percent">0%</div>
                 </div>
             </div>
         </div>

@@ -52,7 +52,7 @@
         </div>
       </div>
 
-      <section class="wallet-card" aria-labelledby="wallet-title" x-data="walletWidget({{ wallet_balance }})">
+      <section class="wallet-card" aria-labelledby="wallet-title" x-data="walletWidget({{ wallet_balance|default(0) }})" x-cloak>
         <div class="wallet-card-header">
           <h2 id="wallet-title" class="wallet-title">Wallet</h2>
           <p class="wallet-helper">Use wallet for boosts + merch</p>
@@ -416,61 +416,568 @@
     box-shadow: 0 0 0 3px rgba(236,72,153,0.22), 0 10px 24px rgba(0,0,0,0.35);
   }
 
-  .account-wallet {
-    padding: 8px 0;
+  /* ========================================
+     Wallet Widget - Dark Liquid Glass
+     ======================================== */
+  
+  .wallet-card {
+    background: linear-gradient(135deg, 
+      rgba(0, 0, 0, 0.5) 0%, 
+      rgba(15, 15, 20, 0.6) 50%,
+      rgba(0, 0, 0, 0.5) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--border-radius-xl, 20px);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+      0 1px 0 rgba(255, 255, 255, 0.1) inset;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .wallet-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(147, 51, 234, 0.4) 50%, 
+      transparent 100%);
+    pointer-events: none;
+  }
+
+  .wallet-card:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+      0 1px 0 rgba(255, 255, 255, 0.15) inset;
+  }
+
+  .wallet-card-header {
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .wallet-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.98);
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+
+  .wallet-helper {
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.65);
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .wallet-card-body {
+    padding: 24px;
+  }
+
+  /* Banner States */
+  .wallet-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: var(--border-radius-md, 12px);
+    margin-bottom: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    animation: wallet-slide-down 0.3s ease-out;
+  }
+
+  @keyframes wallet-slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .wallet-banner-success {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: rgba(16, 185, 129, 0.95);
+  }
+
+  .wallet-banner-error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: rgba(239, 68, 68, 0.95);
+  }
+
+  .wallet-banner i {
+    font-size: 1rem;
+  }
+
+  /* Balance Block */
+  .wallet-balance-block {
+    margin-bottom: 24px;
+  }
+
+  .wallet-balance-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .wallet-balance-amount {
+    font-size: 2.75rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.98);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .wallet-balance-empty {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .wallet-balance-loading {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .wallet-balance-loading i {
+    font-size: 1.5rem;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes wallet-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Empty State */
+  .wallet-empty {
+    text-align: center;
+    padding: 20px 0;
+    margin-bottom: 20px;
+  }
+
+  .wallet-empty-text {
+    font-size: 0.9375rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 16px;
+    font-weight: 500;
+  }
+
+  /* Quick Pick Buttons */
+  .wallet-quick-picks {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .wallet-quick-pick {
+    flex: 1;
+    min-width: 70px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--border-radius-md, 12px);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wallet-quick-pick:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .wallet-quick-pick:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .wallet-quick-pick:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.3);
+    border-color: rgba(147, 51, 234, 0.5);
+  }
+
+  .wallet-quick-pick:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wallet-quick-pick {
+      transition: none;
+    }
+    .wallet-quick-pick:hover:not(:disabled) {
+      transform: none;
+    }
+  }
+
+  /* Primary Button */
+  .wallet-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 24px;
+    border-radius: var(--border-radius-md, 12px);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    border: none;
+    font-family: inherit;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .wallet-btn-primary {
+    background: linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #6d28d9 100%);
+    color: #ffffff;
+    box-shadow: 
+      0 4px 14px rgba(147, 51, 234, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .wallet-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #a855f7 0%, #8b5cf6 50%, #7c3aed 100%);
+    box-shadow: 
+      0 6px 20px rgba(147, 51, 234, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    transform: translateY(-1px);
+  }
+
+  .wallet-btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 
+      0 2px 8px rgba(147, 51, 234, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  }
+
+  .wallet-btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 
+      0 0 0 3px rgba(147, 51, 234, 0.4),
+      0 4px 14px rgba(147, 51, 234, 0.4);
+  }
+
+  .wallet-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .wallet-btn-empty {
+    max-width: 240px;
+    margin: 0 auto;
+  }
+
+  /* Ghost Button (History) */
+  .wallet-btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.85);
+    width: auto;
+    padding: 10px 20px;
+  }
+
+  .wallet-btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  .wallet-btn-ghost:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+  }
+
+  /* Actions Container */
+  .wallet-actions {
+    margin-bottom: 16px;
+  }
+
+  .wallet-secondary {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  /* Trust Text */
+  .wallet-trust-text {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-align: center;
+    margin: 0;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .wallet-trust-text i {
+    font-size: 0.6875rem;
+    opacity: 0.7;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .wallet-card-header {
+      padding: 16px 20px 10px;
+    }
+
+    .wallet-card-body {
+      padding: 20px;
+    }
+
+    .wallet-balance-amount {
+      font-size: 2.25rem;
+    }
+
+    .wallet-quick-picks {
+      gap: 6px;
+    }
+
+    .wallet-quick-pick {
+      min-width: 60px;
+      padding: 9px 12px;
+      font-size: 0.8125rem;
+    }
+
+    .wallet-btn {
+      padding: 12px 20px;
+      font-size: 0.875rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wallet-card,
+    .wallet-btn,
+    .wallet-quick-pick {
+      transition: none;
+    }
+    
+    .wallet-card:hover {
+      transform: none;
+    }
+    
+    .wallet-btn-primary:hover:not(:disabled) {
+      transform: none;
+    }
   }
 </style>
 
 <script>
-function fundWallet() {
-  const amount = prompt('Enter amount to fund (minimum $1.00):', '10.00');
-  if (!amount) return;
-  
-  const amountNum = parseFloat(amount);
-  if (isNaN(amountNum) || amountNum < 1.00) {
-    alert('Please enter a valid amount (minimum $1.00)');
-    return;
-  }
-  
-  if (amountNum > 1000.00) {
-    alert('Maximum funding amount is $1,000.00 per transaction');
-    return;
-  }
-  
-  fetch('/payments/wallet/fund', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ amount: amountNum })
-  })
-  .then(r => r.json())
-  .then(data => {
-    if (data.checkout_url) {
-      window.location.href = data.checkout_url;
-    } else {
-      alert(data.error || 'Failed to create funding session');
+// Wallet Widget Alpine.js Component
+function walletWidget(initialBalance) {
+  return {
+    balance: initialBalance || 0,
+    loading: false,
+    state: null, // 'success', 'error', or null
+    errorMessage: null,
+
+    init() {
+      // Refresh balance on mount
+      this.refreshBalance();
+      
+      // Check for reduced motion preference
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.style.setProperty('--wallet-animation-duration', '0ms');
+      }
+    },
+
+    formatBalance(amount) {
+      return '$' + (amount || 0).toFixed(2);
+    },
+
+    async refreshBalance() {
+      try {
+        const response = await fetch('/payments/wallet', { credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.balance !== undefined) {
+            const newBalance = parseFloat(data.balance);
+            // Animate balance update if it changed
+            if (Math.abs(newBalance - this.balance) > 0.01) {
+              this.animateBalanceUpdate(this.balance, newBalance);
+            } else {
+              this.balance = newBalance;
+            }
+          }
+        }
+      } catch (e) {
+        // Silently fail - wallet might not be available
+        console.debug('Wallet balance refresh failed:', e);
+      }
+    },
+
+    animateBalanceUpdate(oldBalance, newBalance) {
+      const prefersReducedMotion = window.matchMedia && 
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      
+      if (prefersReducedMotion) {
+        this.balance = newBalance;
+        return;
+      }
+
+      // Smooth number animation
+      const duration = 400;
+      const startTime = performance.now();
+      const difference = newBalance - oldBalance;
+
+      const animate = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function (ease-out)
+        const eased = 1 - Math.pow(1 - progress, 3);
+        this.balance = oldBalance + (difference * eased);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          this.balance = newBalance;
+        }
+      };
+
+      requestAnimationFrame(animate);
+    },
+
+    async fundWallet(quickAmount = null) {
+      if (this.loading) return;
+
+      let amount = quickAmount;
+      
+      // If no quick amount, prompt user
+      if (!amount) {
+        const input = prompt('Enter amount to fund (minimum $1.00):', '10.00');
+        if (!input) return;
+        amount = parseFloat(input);
+      }
+
+      // Validate amount
+      if (isNaN(amount) || amount < 1.00) {
+        this.showError('Please enter a valid amount (minimum $1.00)');
+        return;
+      }
+
+      if (amount > 1000.00) {
+        this.showError('Maximum funding amount is $1,000.00 per transaction');
+        return;
+      }
+
+      // Set loading state
+      this.loading = true;
+      this.state = null;
+      this.errorMessage = null;
+
+      try {
+        const response = await fetch('/payments/wallet/fund', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ amount: amount })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.checkout_url) {
+          // Show success state briefly before redirect
+          this.state = 'success';
+          setTimeout(() => {
+            window.location.href = data.checkout_url;
+          }, 500);
+        } else {
+          this.showError(data.error || 'Failed to create funding session');
+        }
+      } catch (err) {
+        this.showError('Network error: ' + err.message);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    showError(message) {
+      this.state = 'error';
+      this.errorMessage = message;
+      
+      // Auto-hide error after 5 seconds
+      setTimeout(() => {
+        if (this.state === 'error') {
+          this.state = null;
+          this.errorMessage = null;
+        }
+      }, 5000);
     }
-  })
-  .catch(err => {
-    alert('Error: ' + err.message);
-  });
+  };
 }
 
-// Refresh wallet balance on page load
-document.addEventListener('DOMContentLoaded', async function() {
-  try {
-    const response = await fetch('/payments/wallet', { credentials: 'include' });
-    if (response.ok) {
-      const data = await response.json();
-      const balanceEl = document.querySelector('.account-wallet .text-3xl');
-      if (balanceEl && data.balance !== undefined) {
-        balanceEl.textContent = '$' + data.balance.toFixed(2);
+// Legacy function for backwards compatibility (if needed elsewhere)
+function fundWallet(amount) {
+  const widget = Alpine.$data(document.querySelector('.wallet-card'));
+  if (widget && typeof widget.fundWallet === 'function') {
+    widget.fundWallet(amount);
+  } else {
+    // Fallback for non-Alpine contexts
+    const amountNum = amount || parseFloat(prompt('Enter amount to fund (minimum $1.00):', '10.00') || '0');
+    if (!amountNum || amountNum < 1.00) return;
+    
+    fetch('/payments/wallet/fund', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ amount: amountNum })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        alert(data.error || 'Failed to create funding session');
       }
-    }
-  } catch (e) {
-    // Silently fail - wallet might not be available
+    })
+    .catch(err => {
+      alert('Error: ' + err.message);
+    });
   }
-});
+}
 </script>
 
 <script>

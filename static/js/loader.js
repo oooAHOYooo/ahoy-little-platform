@@ -8,8 +8,8 @@
     
     const loader = document.getElementById('app-loader');
     const progressBar = document.getElementById('progress-bar');
-    // MVP loader is logo + bar only (no status text/percent)
     const progressText = document.getElementById('progress-text');
+    const progressDetails = document.getElementById('progress-details');
     const progressPercent = document.getElementById('progress-percent');
     
     if (!loader) return;
@@ -54,7 +54,9 @@
     
     function setProgress(value, text, details) {
         targetProgress = Math.min(100, Math.max(0, value));
-        // Text/details are intentionally ignored in the MVP loader.
+        // Update status text and details if elements exist
+        if (progressText && text) progressText.textContent = text;
+        if (progressDetails && details) progressDetails.textContent = details;
         if (!animationFrame) {
             animationFrame = requestAnimationFrame(animateProgress);
         }
