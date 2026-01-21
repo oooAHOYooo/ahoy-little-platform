@@ -120,12 +120,26 @@
                     <p class="text-xs text-white/60 mt-2">You have sufficient balance to complete this purchase.</p>
                     {% else %}
                     <p class="text-white/70 text-sm mb-2">Insufficient wallet balance for this purchase.</p>
-                    <a href="/payments/wallet/fund" class="inline-block px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition">
-                        Fund Wallet
-                    </a>
+                    <div class="flex gap-2 mt-3">
+                        <button onclick="window.open('/account', '_blank')" class="inline-block px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition">
+                            <i class="fas fa-wallet"></i> Fund Wallet
+                        </button>
+                        <p class="text-xs text-white/60 self-center">or continue with Stripe below</p>
+                    </div>
                     {% endif %}
                 </div>
                 {% endif %}
+                
+                <!-- Payment Method Selection Info -->
+                <div class="payment-method-info bg-white/5 rounded-lg p-3 border border-white/10 mt-4">
+                    <p class="text-xs text-white/70 mb-1">
+                        <i class="fas fa-info-circle"></i> Payment Options:
+                    </p>
+                    <ul class="text-xs text-white/60 space-y-1 ml-5 list-disc">
+                        <li><strong>Wallet:</strong> Instant payment, no card entry needed</li>
+                        <li><strong>Stripe:</strong> Secure card payment via Stripe Checkout</li>
+                    </ul>
+                </div>
                 {% endif %}
             </div>
 
@@ -151,8 +165,8 @@
                     onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 10px 30px rgba(0, 0, 0, 0.3)'; this.style.opacity='1';"
                     onclick="console.log('=== NATIVE SUBMIT BUTTON CLICKED ==='); if (window.createConfetti) { window.createConfetti(); } return true;">
                     <span style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                        <i class="fas fa-lock"></i>
-                        <span>Complete Checkout{% if total is not none and total > 0 %} — ${{ '%.2f'|format(total) }}{% else %} — ${{ '%.2f'|format(amount|float if amount else 0) }}{% endif %}</span>
+                        <i class="fas fa-lock" id="checkoutIcon"></i>
+                        <span id="checkoutButtonText">Complete Checkout{% if total is not none and total > 0 %} — ${{ '%.2f'|format(total) }}{% else %} — ${{ '%.2f'|format(amount|float if amount else 0) }}{% endif %}</span>
                     </span>
                 </button>
             </div>
@@ -200,6 +214,31 @@
         } else {
             console.error('Button not found!');
         }
+        
+        // Update button text based on wallet selection
+        const walletCheckbox = document.getElementById('useWalletCheckboxBoost') || document.getElementById('useWalletCheckboxMerch');
+        const checkoutBtn = document.getElementById('newCheckoutBtn');
+        const checkoutText = document.getElementById('checkoutButtonText');
+        const checkoutIcon = document.getElementById('checkoutIcon');
+        
+        function updateCheckoutButton() {
+            const useWallet = document.getElementById('useWalletHidden')?.value === 'true';
+            if (checkoutText && checkoutIcon) {
+                if (useWallet) {
+                    checkoutIcon.className = 'fas fa-wallet';
+                    checkoutText.textContent = 'Pay with Wallet — Instant';
+                } else {
+                    checkoutIcon.className = 'fas fa-lock';
+                    const total = {% if total is not none and total > 0 %}{{ '%.2f'|format(total) }}{% else %}{{ '%.2f'|format(amount|float if amount else 0) }}{% endif %};
+                    checkoutText.textContent = `Complete Checkout — $${total}`;
+                }
+            }
+        }
+        
+        if (walletCheckbox) {
+            walletCheckbox.addEventListener('change', updateCheckoutButton);
+        }
+        updateCheckoutButton(); // Initial update
     });
     window.addEventListener('beforeunload', () => {
         try { document.body.classList.remove('checkout-mode'); } catch (_) { }

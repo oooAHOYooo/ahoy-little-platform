@@ -520,6 +520,12 @@
     color: rgba(239, 68, 68, 0.95);
   }
 
+  .wallet-banner-info {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: rgba(59, 130, 246, 0.95);
+  }
+
   .wallet-banner i {
     font-size: 1rem;
   }
@@ -916,38 +922,78 @@ function walletWidget(initialBalance) {
           body: JSON.stringify({ amount: amount })
         });
 
-        const data = await response.json();
+        // Handle non-JSON responses
+        let data;
+        try {
+          data = await response.json();
+        } catch (e) {
+          // If response isn't JSON, it's likely an error
+          this.showError('Server error: Invalid response. Please try again.');
+          this.loading = false;
+          return;
+        }
 
         if (response.ok && data.checkout_url) {
-          // Show redirecting state - user will enter card details on Stripe's secure page
+          // Show redirecting state with clear message
           this.state = 'success';
           this.errorMessage = null;
-          // Update UI to show redirecting message
-          const originalText = document.querySelector('.wallet-btn-primary span')?.textContent;
-          if (document.querySelector('.wallet-btn-primary span')) {
-            document.querySelector('.wallet-btn-primary span').textContent = 'Redirecting to secure payment...';
+          
+          // Update button text to show redirecting
+          const btnSpans = document.querySelectorAll('.wallet-btn-primary span');
+          btnSpans.forEach(span => {
+            if (span) span.textContent = 'Redirecting to Stripe...';
+          });
+          
+          // Show redirecting banner
+          const redirectBanner = document.createElement('div');
+          redirectBanner.className = 'wallet-banner wallet-banner-info';
+          redirectBanner.innerHTML = '<i class="fas fa-arrow-right"></i> <span>Redirecting to Stripe secure checkout...</span>';
+          const cardBody = document.querySelector('.wallet-card-body');
+          if (cardBody) {
+            cardBody.insertBefore(redirectBanner, cardBody.firstChild);
           }
           
-          // Redirect to Stripe Checkout (PCI-compliant, secure card entry)
-          // User will enter card details on Stripe's hosted checkout page
+          // Immediately redirect to Stripe Checkout
+          // User will enter card details on Stripe's secure, PCI-compliant page
+          console.log('Redirecting to Stripe Checkout:', data.checkout_url);
+          window.location.href = data.checkout_url;
+          
+          // Fallback: if redirect doesn't happen in 2 seconds, show link
           setTimeout(() => {
-            window.location.href = data.checkout_url;
-          }, 800);
+            if (document.body.contains(redirectBanner)) {
+              const link = document.createElement('a');
+              link.href = data.checkout_url;
+              link.textContent = 'Click here if you are not redirected';
+              link.className = 'wallet-btn wallet-btn-primary';
+              link.style.marginTop = '10px';
+              link.style.display = 'block';
+              redirectBanner.appendChild(document.createElement('br'));
+              redirectBanner.appendChild(link);
+            }
+          }, 2000);
         } else {
           // Handle different error status codes
           let errorMsg = data.error || 'Failed to create funding session';
           if (response.status === 401) {
-            errorMsg = 'Please log in to fund your wallet';
+            // Not logged in - redirect to login with return URL
+            errorMsg = 'Please log in to fund your wallet. Redirecting to login...';
+            this.showError(errorMsg);
+            setTimeout(() => {
+              const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+              window.location.href = `/auth?return=${returnUrl}`;
+            }, 2000);
+            return;
           } else if (response.status === 400) {
             errorMsg = data.error || 'Invalid request. Please check the amount and try again.';
           } else if (response.status === 500) {
             errorMsg = 'Server error. Please try again later.';
           }
           this.showError(errorMsg);
+          this.loading = false;
         }
       } catch (err) {
+        console.error('Wallet funding error:', err);
         this.showError('Network error: ' + err.message);
-      } finally {
         this.loading = false;
       }
     },
