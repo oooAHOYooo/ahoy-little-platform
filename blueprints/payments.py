@@ -523,14 +523,53 @@ def get_artist_boosts(artist_id):
         with get_session() as db_session:
             tips = db_session.query(Tip).filter(Tip.artist_id == str(artist_id)).all()
             total_amount = sum(float(tip.amount) for tip in tips)
-            total_net = sum(float(tip.net_amount) for tip in tips)
+            total_net = sum(float(tip.net_amount) for tip in tips if tip.net_amount)
+            total_payout = sum(float(tip.artist_payout) for tip in tips if tip.artist_payout)
             boost_count = len(tips)
 
             return jsonify({
                 "artist_id": artist_id,
                 "total_boosts": round(total_amount, 2),
                 "total_net": round(total_net, 2),
+                "total_payout": round(total_payout, 2),  # Total artist should receive
                 "boost_count": boost_count,
+            }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@bp.route("/artist/<artist_id>/earnings", methods=["GET"])
+def get_artist_earnings(artist_id):
+    """
+    Get total earnings for an artist (their payout bucket).
+    This shows how much money is owed to the artist.
+    """
+    try:
+        with get_session() as db_session:
+            tips = db_session.query(Tip).filter(Tip.artist_id == str(artist_id)).all()
+            
+            total_payout = sum(float(tip.artist_payout) for tip in tips if tip.artist_payout)
+            total_boosts = sum(float(tip.amount) for tip in tips)
+            boost_count = len(tips)
+            
+            # Get recent tips
+            recent_tips = sorted(tips, key=lambda t: t.created_at or datetime.min, reverse=True)[:10]
+            
+            return jsonify({
+                "artist_id": artist_id,
+                "total_earnings": round(total_payout, 2),  # Total amount artist should receive
+                "total_boosted": round(total_boosts, 2),  # Total amount users boosted
+                "boost_count": boost_count,
+                "recent_tips": [
+                    {
+                        "id": tip.id,
+                        "amount": float(tip.amount),
+                        "artist_payout": float(tip.artist_payout) if tip.artist_payout else float(tip.amount),
+                        "user_id": tip.user_id,
+                        "created_at": tip.created_at.isoformat() if tip.created_at else None,
+                    }
+                    for tip in recent_tips
+                ],
             }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

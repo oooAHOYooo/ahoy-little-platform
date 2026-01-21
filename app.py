@@ -959,77 +959,258 @@ def checkout_process():
         if use_wallet:
             from flask_login import current_user
             if current_user.is_authenticated:
-                from blueprints.payments import deduct_wallet_balance
-                from decimal import Decimal
-                
-                # Calculate total charge
-                if kind in ["boost", "tip"]:
-                    boost_amount_decimal = Decimal(str(amount or 0)).quantize(Decimal("0.01"))
-                    _, _, total_charge, _, _ = calculate_boost_fees(boost_amount_decimal)
-                else:
-                    total_charge = Decimal(str(total))
-                
-                # Try to deduct from wallet
-                success, error, balance_after = deduct_wallet_balance(
-                    current_user.id,
-                    total_charge,
-                    f"{kind.title()} payment",
-                    str(purchase_id),
-                    kind
-                )
-                
-                if success:
-                    # Wallet payment successful - mark purchase as paid
-                    with get_session() as s:
-                        p = s.query(Purchase).filter(Purchase.id == int(purchase_id)).first()
-                        if p:
-                            p.status = "paid"
-                            p.stripe_id = f"wallet_{purchase_id}"
-                            s.commit()
+                try:
+                    from blueprints.payments import deduct_wallet_balance
+                    from decimal import Decimal
                     
-                    # For boosts, create Tip record
+                    # Calculate total charge
                     if kind in ["boost", "tip"]:
                         boost_amount_decimal = Decimal(str(amount or 0)).quantize(Decimal("0.01"))
-                        stripe_fee, platform_fee, total_charge, artist_payout, platform_revenue = calculate_boost_fees(boost_amount_decimal)
-                        
-                        with get_session() as s:
-                            from models import Tip
-                            tip = Tip(
-                                user_id=current_user.id,
-                                artist_id=str(artist_id) if artist_id else "",
-                                amount=boost_amount_decimal,
-                                platform_fee=platform_fee,
-                                stripe_fee=Decimal("0.00"),  # No Stripe fee for wallet payments
-                                total_paid=total_charge,
-                                artist_payout=artist_payout,
-                                platform_revenue=platform_revenue,
-                                stripe_checkout_session_id=f"wallet_{purchase_id}",
-                                created_at=datetime.utcnow(),
-                            )
-                            s.add(tip)
-                            
-                            # Update portfolio
-                            from blueprints.payments import update_user_artist_position
-                            update_user_artist_position(
-                                user_id=current_user.id,
-                                artist_id=str(artist_id),
-                                boost_amount=boost_amount_decimal,
-                                boost_datetime=datetime.utcnow(),
-                                db_session=s
-                            )
-                            s.commit()
+                        _, _, total_charge, _, _ = calculate_boost_fees(boost_amount_decimal)
+                    else:
+                        # For merch, use the total from the purchase record
+                        try:
+                            total_charge = Decimal(str(total)) if total else Decimal("0.00")
+                        except (ValueError, TypeError):
+                            # Fallback: get total from purchase record
+                            with get_session() as s:
+                                from models import Purchase
+                                p = s.query(Purchase).filter(Purchase.id == int(purchase_id)).first()
+                                if p and p.total:
+                                    total_charge = Decimal(str(p.total))
+                                elif amount:
+                                    total_charge = Decimal(str(amount))
+                                else:
+                                    current_app.logger.error(f"Wallet payment: Unable to determine total for purchase {purchase_id}, kind={kind}")
+                                    # Get wallet balance for error page
+                                    try:
+                                        from models import User
+                                        with get_session() as s2:
+                                            user = s2.query(User).filter(User.id == current_user.id).first()
+                                            wallet_balance = float(user.wallet_balance or 0) if user else 0.0
+                                    except:
+                                        wallet_balance = None
+                                    return render_template("checkout.html",
+                                                         error="Unable to determine purchase total. Please try again.",
+                                                         csrf_token=generate_csrf_token(),
+                                                         kind=kind,
+                                                         artist_id=artist_id or "",
+                                                         amount=amount,
+                                                         item_id=item_id or "",
+                                                         qty=qty,
+                                                         wallet_balance=wallet_balance), 400
                     
-                    return redirect(url_for("checkout_success", pid=purchase_id))
-                else:
-                    # Wallet payment failed - fall through to Stripe
+                    if total_charge <= 0:
+                        current_app.logger.error(f"Wallet payment: Invalid total_charge {total_charge} for purchase {purchase_id}")
+                        try:
+                            from models import User
+                            with get_session() as s2:
+                                user = s2.query(User).filter(User.id == current_user.id).first()
+                                wallet_balance = float(user.wallet_balance or 0) if user else 0.0
+                        except:
+                            wallet_balance = None
+                        return render_template("checkout.html",
+                                             error="Invalid purchase amount",
+                                             csrf_token=generate_csrf_token(),
+                                             kind=kind,
+                                             artist_id=artist_id or "",
+                                             amount=amount,
+                                             item_id=item_id or "",
+                                             qty=qty,
+                                             wallet_balance=wallet_balance), 400
+                    
+                    # Try to deduct from wallet
+                    success, error, balance_after = deduct_wallet_balance(
+                        current_user.id,
+                        total_charge,
+                        f"{kind.title()} payment",
+                        str(purchase_id),
+                        kind
+                    )
+                    
+                    if success:
+                        # Wallet payment successful - mark purchase as paid
+                        with get_session() as s:
+                            from models import Purchase
+                            p = s.query(Purchase).filter(Purchase.id == int(purchase_id)).first()
+                            if p:
+                                p.status = "paid"
+                                p.stripe_id = f"wallet_{purchase_id}"
+                                s.commit()
+                            else:
+                                current_app.logger.error(f"Wallet payment: Purchase {purchase_id} not found after wallet deduction")
+                                # Wallet was deducted but purchase not found - this is bad
+                                # Try to refund wallet (manual process needed)
+                                try:
+                                    from models import User, WalletTransaction
+                                    with get_session() as s2:
+                                        user = s2.query(User).filter(User.id == current_user.id).first()
+                                        if user:
+                                            user.wallet_balance += total_charge
+                                            refund_tx = WalletTransaction(
+                                                user_id=current_user.id,
+                                                type="refund",
+                                                amount=total_charge,
+                                                balance_before=float(balance_after),
+                                                balance_after=float(balance_after) + float(total_charge),
+                                                description=f"Refund: Purchase {purchase_id} not found",
+                                                reference_id=str(purchase_id),
+                                                reference_type="purchase",
+                                                created_at=datetime.utcnow(),
+                                            )
+                                            s2.add(refund_tx)
+                                            s2.commit()
+                                except Exception as refund_err:
+                                    current_app.logger.error(f"Failed to refund wallet: {refund_err}")
+                                
+                                try:
+                                    from models import User
+                                    with get_session() as s2:
+                                        user = s2.query(User).filter(User.id == current_user.id).first()
+                                        wallet_balance = float(user.wallet_balance or 0) if user else 0.0
+                                except:
+                                    wallet_balance = None
+                                return render_template("checkout.html",
+                                                     error="Purchase record not found. Wallet has been refunded. Please try again.",
+                                                     csrf_token=generate_csrf_token(),
+                                                     kind=kind,
+                                                     artist_id=artist_id or "",
+                                                     amount=amount,
+                                                     item_id=item_id or "",
+                                                     qty=qty,
+                                                     wallet_balance=wallet_balance), 500
+                    
+                    if success:
+                        # Wallet payment successful - mark purchase as paid
+                        with get_session() as s:
+                            from models import Purchase
+                            p = s.query(Purchase).filter(Purchase.id == int(purchase_id)).first()
+                            if p:
+                                p.status = "paid"
+                                p.stripe_id = f"wallet_{purchase_id}"
+                                s.commit()
+                            else:
+                                current_app.logger.error(f"Wallet payment: Purchase {purchase_id} not found after wallet deduction")
+                                # Wallet was deducted but purchase not found - try to refund
+                                try:
+                                    from models import User, WalletTransaction
+                                    with get_session() as s2:
+                                        user = s2.query(User).filter(User.id == current_user.id).first()
+                                        if user:
+                                            user.wallet_balance += total_charge
+                                            refund_tx = WalletTransaction(
+                                                user_id=current_user.id,
+                                                type="refund",
+                                                amount=total_charge,
+                                                balance_before=float(balance_after),
+                                                balance_after=float(balance_after) + float(total_charge),
+                                                description=f"Refund: Purchase {purchase_id} not found",
+                                                reference_id=str(purchase_id),
+                                                reference_type="purchase",
+                                                created_at=datetime.utcnow(),
+                                            )
+                                            s2.add(refund_tx)
+                                            s2.commit()
+                                except Exception as refund_err:
+                                    current_app.logger.error(f"Failed to refund wallet: {refund_err}")
+                                
+                                try:
+                                    from models import User
+                                    with get_session() as s2:
+                                        user = s2.query(User).filter(User.id == current_user.id).first()
+                                        wallet_balance = float(user.wallet_balance or 0) if user else 0.0
+                                except:
+                                    wallet_balance = None
+                                return render_template("checkout.html",
+                                                     error="Purchase record not found. Wallet has been refunded. Please try again.",
+                                                     csrf_token=generate_csrf_token(),
+                                                     kind=kind,
+                                                     artist_id=artist_id or "",
+                                                     amount=amount,
+                                                     item_id=item_id or "",
+                                                     qty=qty,
+                                                     wallet_balance=wallet_balance), 500
+                        
+                        # For boosts, create Tip record
+                        if kind in ["boost", "tip"]:
+                            if not artist_id:
+                                current_app.logger.warning(f"Wallet payment: Boost without artist_id for purchase {purchase_id}")
+                            else:
+                                boost_amount_decimal = Decimal(str(amount or 0)).quantize(Decimal("0.01"))
+                                stripe_fee, platform_fee, total_charge, artist_payout, platform_revenue = calculate_boost_fees(boost_amount_decimal)
+                                
+                                with get_session() as s:
+                                    from models import Tip
+                                    tip = Tip(
+                                        user_id=current_user.id,
+                                        artist_id=str(artist_id),
+                                        amount=boost_amount_decimal,
+                                        platform_fee=platform_fee,
+                                        stripe_fee=Decimal("0.00"),  # No Stripe fee for wallet payments
+                                        total_paid=total_charge,
+                                        artist_payout=artist_payout,
+                                        platform_revenue=platform_revenue,
+                                        stripe_checkout_session_id=f"wallet_{purchase_id}",
+                                        created_at=datetime.utcnow(),
+                                    )
+                                    s.add(tip)
+                                    
+                                    # Update portfolio (only if artist_id is provided)
+                                    from blueprints.payments import update_user_artist_position
+                                    try:
+                                        update_user_artist_position(
+                                            user_id=current_user.id,
+                                            artist_id=str(artist_id),
+                                            boost_amount=boost_amount_decimal,
+                                            boost_datetime=datetime.utcnow(),
+                                            db_session=s
+                                        )
+                                    except Exception as e:
+                                        # Log but don't fail the transaction
+                                        current_app.logger.warning(f"Failed to update portfolio: {e}")
+                                    s.commit()
+                        
+                        # For merch purchases with wallet, just mark as paid (no Tip record needed)
+                        # The purchase record is already updated above
+                        
+                        return redirect(url_for("checkout_success", pid=purchase_id))
+                    else:
+                        # Wallet payment failed - fall through to Stripe
+                        current_app.logger.warning(f"Wallet payment failed for user {current_user.id}: {error}")
+                        try:
+                            from models import User
+                            with get_session() as s2:
+                                user = s2.query(User).filter(User.id == current_user.id).first()
+                                wallet_balance = float(user.wallet_balance or 0) if user else 0.0
+                        except:
+                            wallet_balance = None
+                        return render_template("checkout.html",
+                                             error=error or "Insufficient wallet balance",
+                                             csrf_token=generate_csrf_token(),
+                                             kind=kind,
+                                             artist_id=artist_id or "",
+                                             amount=amount,
+                                             item_id=item_id or "",
+                                             qty=qty,
+                                             wallet_balance=wallet_balance), 400
+                except Exception as e:
+                    current_app.logger.error(f"Wallet payment error for user {current_user.id if current_user.is_authenticated else 'anonymous'}: {e}", exc_info=True)
+                    try:
+                        from models import User
+                        with get_session() as s2:
+                            user = s2.query(User).filter(User.id == current_user.id).first()
+                            wallet_balance = float(user.wallet_balance or 0) if user else 0.0
+                    except:
+                        wallet_balance = None
                     return render_template("checkout.html",
-                                         error=error or "Insufficient wallet balance",
+                                         error=f"Wallet payment error: {str(e)}",
                                          csrf_token=generate_csrf_token(),
                                          kind=kind,
                                          artist_id=artist_id or "",
                                          amount=amount,
                                          item_id=item_id or "",
-                                         qty=qty), 400
+                                         qty=qty,
+                                         wallet_balance=wallet_balance), 500
 
         success_url = url_for("checkout_success", pid=purchase_id, _external=True)
         cancel_url = url_for("checkout_page", type=kind, artist_id=artist_id or "", amount=amount, item_id=item_id or "", qty=qty, title=request.form.get("title") or "", _external=True)
@@ -2889,6 +3070,13 @@ def robots_txt():
 def cast_page():
     """Casting instructions and sender setup page"""
     return render_template('cast.html')
+
+@app.route('/admin/artist-earnings')
+@login_required
+@_admin_session_required
+def admin_artist_earnings():
+    """Admin page to view artist earnings (payout buckets)"""
+    return render_template('admin/artist_earnings.html')
 
 @app.route('/admin')
 @login_required

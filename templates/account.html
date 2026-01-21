@@ -353,6 +353,11 @@ function fundWallet() {
     return;
   }
   
+  if (amountNum > 1000.00) {
+    alert('Maximum funding amount is $1,000.00 per transaction');
+    return;
+  }
+  
   fetch('/payments/wallet/fund', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -371,6 +376,22 @@ function fundWallet() {
     alert('Error: ' + err.message);
   });
 }
+
+// Refresh wallet balance on page load
+document.addEventListener('DOMContentLoaded', async function() {
+  try {
+    const response = await fetch('/payments/wallet', { credentials: 'include' });
+    if (response.ok) {
+      const data = await response.json();
+      const balanceEl = document.querySelector('.account-wallet .text-3xl');
+      if (balanceEl && data.balance !== undefined) {
+        balanceEl.textContent = '$' + data.balance.toFixed(2);
+      }
+    }
+  } catch (e) {
+    // Silently fail - wallet might not be available
+  }
+});
 </script>
 
 <script>
