@@ -1,8 +1,8 @@
-"""add stripe_customer_id to users
+"""0016_add_stripe_customer_id
 
-Revision ID: 0016
-Revises: 0015
-Create Date: 2024-01-01 12:00:00.000000
+Revision ID: 0016_add_stripe_customer_id
+Revises: 0015_add_wallet_system
+Create Date: 2025-01-22
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0016'
-down_revision = '0015'
+revision = '0016_add_stripe_customer_id'
+down_revision = '0015_add_wallet_system'
 branch_labels = None
 depends_on = None
 
