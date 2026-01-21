@@ -1153,8 +1153,12 @@ _csrf_ext = app.extensions.get('csrf')
 if _csrf_ext is not None:
     _csrf_ext.exempt(checkout_process)
     # Exempt wallet funding endpoint (JSON API)
-    from blueprints.payments import fund_wallet
-    _csrf_ext.exempt(fund_wallet)
+    try:
+        from blueprints.payments import fund_wallet
+        _csrf_ext.exempt(fund_wallet)
+    except Exception as e:
+        # Log but don't fail - endpoint will still work, just with CSRF check
+        print(f"Warning: Could not exempt wallet funding from CSRF: {e}")
 
 
 @app.route('/success')
