@@ -150,7 +150,7 @@
           <!-- Trust Microcopy -->
           <p class="wallet-trust-text">
             <i class="fas fa-shield-alt"></i>
-            Fees shown at checkout • 100% to creators (before fees)
+            Secure payment via Stripe • Card details entered on Stripe's secure page • 100% to creators (before fees)
           </p>
         </div>
       </section>
@@ -919,11 +919,20 @@ function walletWidget(initialBalance) {
         const data = await response.json();
 
         if (response.ok && data.checkout_url) {
-          // Show success state briefly before redirect
+          // Show redirecting state - user will enter card details on Stripe's secure page
           this.state = 'success';
+          this.errorMessage = null;
+          // Update UI to show redirecting message
+          const originalText = document.querySelector('.wallet-btn-primary span')?.textContent;
+          if (document.querySelector('.wallet-btn-primary span')) {
+            document.querySelector('.wallet-btn-primary span').textContent = 'Redirecting to secure payment...';
+          }
+          
+          // Redirect to Stripe Checkout (PCI-compliant, secure card entry)
+          // User will enter card details on Stripe's hosted checkout page
           setTimeout(() => {
             window.location.href = data.checkout_url;
-          }, 500);
+          }, 800);
         } else {
           // Handle different error status codes
           let errorMsg = data.error || 'Failed to create funding session';
