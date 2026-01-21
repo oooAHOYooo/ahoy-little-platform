@@ -674,8 +674,23 @@ def checkout_page():
                 amount = str(unit)  # unit price
                 title = str(found.get("name") or "Merch")[:120]
                 total = (unit * Decimal(str(max(1, qty)))).quantize(Decimal("0.01"))
-        except Exception:
-            pass
+            else:
+                # Item not found in catalog
+                current_app.logger.warning(f"Merch item not found: {item_id}")
+                return render_template('checkout.html',
+                                       error=f"Merch item '{item_id}' not found in catalog.",
+                                       kind=kind,
+                                       item_id=item_id,
+                                       qty=qty,
+                                       csrf_token=generate_csrf_token()), 404
+        except Exception as e:
+            current_app.logger.error(f"Error loading merch catalog: {e}", exc_info=True)
+            return render_template('checkout.html',
+                                   error="Unable to load merch catalog. Please try again later.",
+                                   kind=kind,
+                                   item_id=item_id,
+                                   qty=qty,
+                                   csrf_token=generate_csrf_token()), 500
 
     # Get wallet balance if user is logged in
     wallet_balance = None

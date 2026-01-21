@@ -957,7 +957,8 @@ function walletWidget(initialBalance) {
           // Immediately redirect to Stripe Checkout
           // User will enter card details on Stripe's secure, PCI-compliant page
           console.log('Redirecting to Stripe Checkout:', data.checkout_url);
-          window.location.href = data.checkout_url;
+          // Use location.assign to avoid Illegal invocation errors
+          window.location.assign(data.checkout_url);
           
           // Fallback: if redirect doesn't happen in 2 seconds, show link
           setTimeout(() => {
@@ -1052,7 +1053,8 @@ function fundWallet(amount) {
   })
   .then(data => {
     if (data.checkout_url) {
-      window.location.href = data.checkout_url;
+      // Use location.assign to avoid Illegal invocation errors
+      window.location.assign(data.checkout_url);
     } else {
       alert(data.error || 'Failed to create funding session');
     }

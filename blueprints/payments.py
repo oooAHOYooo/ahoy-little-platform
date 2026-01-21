@@ -606,81 +606,97 @@ def get_wallet_balance():
 @bp.route("/wallet/fund", methods=["POST"])
 def fund_wallet():
     """Create a Stripe Checkout session to fund the wallet."""
-    if not stripe.api_key:
-        return jsonify({"error": "Stripe not configured"}), 500
-
-    user_id = resolve_db_user_id()
-    if not user_id:
-        return jsonify({"error": "Authentication required. Please log in to fund your wallet."}), 401
-
-    data = request.get_json(silent=True) or {}
-    amount = data.get("amount")
-
-    if not amount:
-        return jsonify({"error": "Amount required"}), 400
-    
-    # Log for debugging
-    import logging
-    logging.debug(f"Wallet funding request: user_id={user_id}, amount={amount}, data={data}")
-
     try:
-        amount_decimal = Decimal(str(amount))
-    except (ValueError, TypeError):
-        return jsonify({"error": "Invalid amount"}), 400
+        if not stripe.api_key:
+            import logging
+            logging.error("Stripe not configured: stripe.api_key is None or empty")
+            return jsonify({"error": "Stripe not configured"}), 500
 
-    if amount_decimal < 1.00:  # Minimum $1.00 to fund
-        return jsonify({"error": "Minimum funding amount is $1.00"}), 400
+        user_id = resolve_db_user_id()
+        if not user_id:
+            return jsonify({"error": "Authentication required. Please log in to fund your wallet."}), 401
 
-    if amount_decimal > 1000.00:  # Maximum $1000.00 per transaction
-        return jsonify({"error": "Maximum funding amount is $1000.00"}), 400
+        data = request.get_json(silent=True) or {}
+        amount = data.get("amount")
 
-    # Get user's Stripe customer ID if available (normalized signup process)
-    stripe_customer_id = None
-    try:
-        with get_session() as db_session:
-            user = db_session.query(User).filter(User.id == user_id).first()
-            if user and user.stripe_customer_id:
-                stripe_customer_id = user.stripe_customer_id
-    except Exception:
-        pass  # Non-fatal, continue without customer ID
+        if not amount:
+            return jsonify({"error": "Amount required"}), 400
+        
+        # Log for debugging
+        import logging
+        logging.debug(f"Wallet funding request: user_id={user_id}, amount={amount}, data={data}")
 
-    try:
-        checkout_params = {
-            "payment_method_types": ["card"],
-            "line_items": [{
-                "price_data": {
-                    "currency": "usd",
-                    "product_data": {
-                        "name": "Ahoy Wallet Funding",
-                        "description": f"Add ${amount_decimal:.2f} to your Ahoy wallet",
+        try:
+            amount_decimal = Decimal(str(amount))
+        except (ValueError, TypeError) as e:
+            logging.error(f"Invalid amount format: {amount}, error: {e}")
+            return jsonify({"error": "Invalid amount"}), 400
+
+        if amount_decimal < 1.00:  # Minimum $1.00 to fund
+            return jsonify({"error": "Minimum funding amount is $1.00"}), 400
+
+        if amount_decimal > 1000.00:  # Maximum $1000.00 per transaction
+            return jsonify({"error": "Maximum funding amount is $1000.00"}), 400
+
+        # Get user's Stripe customer ID if available (normalized signup process)
+        stripe_customer_id = None
+        try:
+            with get_session() as db_session:
+                user = db_session.query(User).filter(User.id == user_id).first()
+                if user and user.stripe_customer_id:
+                    stripe_customer_id = user.stripe_customer_id
+        except Exception as e:
+            import logging
+            logging.warning(f"Could not retrieve Stripe customer ID: {e}")
+            # Non-fatal, continue without customer ID
+
+        try:
+            checkout_params = {
+                "payment_method_types": ["card"],
+                "line_items": [{
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": "Ahoy Wallet Funding",
+                            "description": f"Add ${amount_decimal:.2f} to your Ahoy wallet",
+                        },
+                        "unit_amount": int(amount_decimal * 100),  # Convert to cents
                     },
-                    "unit_amount": int(amount_decimal * 100),  # Convert to cents
+                    "quantity": 1,
+                }],
+                "mode": "payment",
+                "success_url": request.host_url.rstrip("/") + "/payments/wallet/success?session_id={CHECKOUT_SESSION_ID}",
+                "cancel_url": request.host_url.rstrip("/") + "/payments/wallet/cancel",
+                "metadata": {
+                    "user_id": str(user_id),
+                    "type": "wallet_fund",
+                    "amount": str(amount_decimal),
                 },
-                "quantity": 1,
-            }],
-            "mode": "payment",
-            "success_url": request.host_url.rstrip("/") + "/payments/wallet/success?session_id={CHECKOUT_SESSION_ID}",
-            "cancel_url": request.host_url.rstrip("/") + "/payments/wallet/cancel",
-            "metadata": {
-                "user_id": str(user_id),
-                "type": "wallet_fund",
-                "amount": str(amount_decimal),
-            },
-        }
-        
-        # Use Stripe customer ID if available (normalized signup)
-        if stripe_customer_id:
-            checkout_params["customer"] = stripe_customer_id
-        
-        checkout_session = stripe.checkout.Session.create(**checkout_params)
+            }
+            
+            # Use Stripe customer ID if available (normalized signup)
+            if stripe_customer_id:
+                checkout_params["customer"] = stripe_customer_id
+            
+            checkout_session = stripe.checkout.Session.create(**checkout_params)
 
-        return jsonify({
-            "checkout_url": checkout_session.url,
-            "session_id": checkout_session.id,
-        }), 200
+            return jsonify({
+                "checkout_url": checkout_session.url,
+                "session_id": checkout_session.id,
+            }), 200
 
-    except stripe.error.StripeError as e:
-        return jsonify({"error": str(e)}), 400
+        except stripe.error.StripeError as e:
+            import logging
+            logging.error(f"Stripe error in fund_wallet: {e}", exc_info=True)
+            return jsonify({"error": f"Payment processing error: {str(e)}"}), 400
+        except Exception as e:
+            import logging
+            logging.error(f"Unexpected error in fund_wallet: {e}", exc_info=True)
+            return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
+    except Exception as e:
+        import logging
+        logging.error(f"Critical error in fund_wallet: {e}", exc_info=True)
+        return jsonify({"error": "Server error. Please try again later."}), 500
 
 
 def deduct_wallet_balance(user_id: int, amount: Decimal, description: str = "Payment", reference_id: str = None, reference_type: str = "payment"):
