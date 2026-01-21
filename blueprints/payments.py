@@ -609,13 +609,17 @@ def fund_wallet():
 
     user_id = resolve_db_user_id()
     if not user_id:
-        return jsonify({"error": "Authentication required"}), 401
+        return jsonify({"error": "Authentication required. Please log in to fund your wallet."}), 401
 
     data = request.get_json(silent=True) or {}
     amount = data.get("amount")
 
     if not amount:
         return jsonify({"error": "Amount required"}), 400
+    
+    # Log for debugging
+    import logging
+    logging.debug(f"Wallet funding request: user_id={user_id}, amount={amount}, data={data}")
 
     try:
         amount_decimal = Decimal(str(amount))

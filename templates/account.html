@@ -829,9 +829,7 @@ function walletWidget(initialBalance) {
 
     async refreshBalance() {
       try {
-        // Use bound fetch to avoid "Illegal invocation" error
-        const fetchCall = fetch.bind(window);
-        const response = await fetchCall('/payments/wallet', { credentials: 'include' });
+        const response = await fetch('/payments/wallet', { credentials: 'include' });
         if (response.ok) {
           const data = await response.json();
           if (data.balance !== undefined) {
@@ -911,9 +909,7 @@ function walletWidget(initialBalance) {
       this.errorMessage = null;
 
       try {
-        // Use bound fetch to avoid "Illegal invocation" error
-        const fetchCall = fetch.bind(window);
-        const response = await fetchCall('/payments/wallet/fund', {
+        const response = await fetch('/payments/wallet/fund', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -929,7 +925,16 @@ function walletWidget(initialBalance) {
             window.location.href = data.checkout_url;
           }, 500);
         } else {
-          this.showError(data.error || 'Failed to create funding session');
+          // Handle different error status codes
+          let errorMsg = data.error || 'Failed to create funding session';
+          if (response.status === 401) {
+            errorMsg = 'Please log in to fund your wallet';
+          } else if (response.status === 400) {
+            errorMsg = data.error || 'Invalid request. Please check the amount and try again.';
+          } else if (response.status === 500) {
+            errorMsg = 'Server error. Please try again later.';
+          }
+          this.showError(errorMsg);
         }
       } catch (err) {
         this.showError('Network error: ' + err.message);
@@ -954,8 +959,24 @@ function walletWidget(initialBalance) {
 }
 
 // Legacy function for backwards compatibility (if needed elsewhere)
-// This is a standalone fallback - Alpine component handles its own calls
 function fundWallet(amount) {
+  // Try to find Alpine component and call its method
+  const walletCard = document.querySelector('.wallet-card');
+  if (walletCard && window.Alpine) {
+    try {
+      // Access Alpine component data through the element's __x property
+      const alpineInstance = walletCard.__x;
+      if (alpineInstance && alpineInstance.$data && typeof alpineInstance.$data.fundWallet === 'function') {
+        alpineInstance.$data.fundWallet(amount);
+        return;
+      }
+    } catch (e) {
+      // If Alpine access fails, fall through to direct fetch
+      console.debug('Alpine component not accessible, using fallback:', e);
+    }
+  }
+  
+  // Fallback for non-Alpine contexts or if Alpine access fails
   const amountNum = amount || parseFloat(prompt('Enter amount to fund (minimum $1.00):', '10.00') || '0');
   if (!amountNum || amountNum < 1.00) {
     alert('Please enter a valid amount (minimum $1.00)');
@@ -967,9 +988,7 @@ function fundWallet(amount) {
     return;
   }
   
-  // Use bound fetch to avoid "Illegal invocation" error
-  const fetchCall = fetch.bind(window);
-  fetchCall('/payments/wallet/fund', {
+  fetch('/payments/wallet/fund', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
