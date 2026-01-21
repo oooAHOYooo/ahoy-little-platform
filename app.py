@@ -414,9 +414,9 @@ def create_app():
             debug_info["merch_catalog"]["error"] = str(e)
             debug_info["errors"].append(f"Error reading merch catalog: {e}")
         
-    debug_info["status"] = "ok" if len(debug_info["errors"]) == 0 else "errors"
-    
-    return jsonify(debug_info), 200 if debug_info["status"] == "ok" else 500
+        debug_info["status"] = "ok" if len(debug_info["errors"]) == 0 else "errors"
+        
+        return jsonify(debug_info), 200 if debug_info["status"] == "ok" else 500
 
     @app.route('/ops/status', methods=['GET'])
     def status_dashboard():
