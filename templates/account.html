@@ -961,8 +961,16 @@ function walletWidget(initialBalance) {
 // Legacy function for backwards compatibility (if needed elsewhere)
 function fundWallet(amount) {
   // Direct fetch approach - simpler and more reliable
-  const amountNum = amount || parseFloat(prompt('Enter amount to fund (minimum $1.00):', '10.00') || '0');
-  if (!amountNum || amountNum < 1.00) {
+  let amountNum;
+  if (amount) {
+    amountNum = parseFloat(amount);
+  } else {
+    const input = prompt('Enter amount to fund (minimum $1.00):', '10.00');
+    if (!input) return;
+    amountNum = parseFloat(input);
+  }
+  
+  if (!amountNum || isNaN(amountNum) || amountNum < 1.00) {
     alert('Please enter a valid amount (minimum $1.00)');
     return;
   }
@@ -978,7 +986,14 @@ function fundWallet(amount) {
     credentials: 'include',
     body: JSON.stringify({ amount: amountNum })
   })
-  .then(r => r.json())
+  .then(r => {
+    if (!r.ok) {
+      return r.json().then(data => {
+        throw new Error(data.error || `Server error: ${r.status}`);
+      });
+    }
+    return r.json();
+  })
   .then(data => {
     if (data.checkout_url) {
       window.location.href = data.checkout_url;

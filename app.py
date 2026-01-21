@@ -1148,10 +1148,13 @@ def checkout_process():
                                item_id=item_id or "",
                                qty=qty), 500
 
-# Exempt checkout_process from Flask-WTF CSRF after route is registered
+# Exempt checkout_process and wallet funding from Flask-WTF CSRF after route is registered
 _csrf_ext = app.extensions.get('csrf')
 if _csrf_ext is not None:
     _csrf_ext.exempt(checkout_process)
+    # Exempt wallet funding endpoint (JSON API)
+    from blueprints.payments import fund_wallet
+    _csrf_ext.exempt(fund_wallet)
 
 
 @app.route('/success')

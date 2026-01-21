@@ -12,6 +12,8 @@ import uuid
 
 bp = Blueprint("payments", __name__, url_prefix="/payments")
 
+# CSRF exemption will be set up in app.py after blueprint registration
+
 # Initialize Stripe
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
