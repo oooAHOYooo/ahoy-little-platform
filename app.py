@@ -293,10 +293,34 @@ def create_app():
         
         # Check Stripe configuration
         try:
-            stripe_key = app.config.get("STRIPE_SECRET_KEY") or os.getenv("STRIPE_SECRET_KEY") or os.getenv("STRIPE_SECRET_KEY_TEST")
+            # Check multiple sources for Stripe keys (config object, env vars, direct env)
+            stripe_key = (
+                app.config.get("STRIPE_SECRET_KEY") or 
+                os.getenv("STRIPE_SECRET_KEY") or 
+                os.getenv("STRIPE_SECRET_KEY_TEST") or
+                app.config.get("STRIPE_SECRET_KEY_TEST")
+            )
+            
+            webhook_secret = (
+                app.config.get("STRIPE_WEBHOOK_SECRET") or 
+                os.getenv("STRIPE_WEBHOOK_SECRET") or 
+                os.getenv("STRIPE_WEBHOOK_SECRET_TEST") or
+                app.config.get("STRIPE_WEBHOOK_SECRET_TEST")
+            )
+            
+            publishable_key = (
+                app.config.get("STRIPE_PUBLISHABLE_KEY") or 
+                os.getenv("STRIPE_PUBLISHABLE_KEY") or 
+                os.getenv("STRIPE_PUBLISHABLE_KEY_TEST") or
+                app.config.get("STRIPE_PUBLISHABLE_KEY_TEST")
+            )
+            
             debug_info["stripe"]["configured"] = bool(stripe_key)
             debug_info["stripe"]["key_prefix"] = stripe_key[:7] + "..." if stripe_key else None
-            debug_info["stripe"]["webhook_secret_set"] = bool(app.config.get("STRIPE_WEBHOOK_SECRET") or os.getenv("STRIPE_WEBHOOK_SECRET") or os.getenv("STRIPE_WEBHOOK_SECRET_TEST"))
+            debug_info["stripe"]["webhook_secret_set"] = bool(webhook_secret)
+            debug_info["stripe"]["webhook_secret_prefix"] = webhook_secret[:7] + "..." if webhook_secret else None
+            debug_info["stripe"]["publishable_key_set"] = bool(publishable_key)
+            debug_info["stripe"]["ahoy_env"] = os.getenv("AHOY_ENV", "not_set")
             
             # Test Stripe API connection
             if stripe_key:
@@ -312,7 +336,9 @@ def create_app():
                     debug_info["errors"].append(f"Stripe API error: {e}")
             else:
                 debug_info["stripe"]["api_connection"] = "not_configured"
-                debug_info["errors"].append("Stripe secret key not configured")
+                # Only add to errors if we're in production
+                if os.getenv("AHOY_ENV") == "production":
+                    debug_info["errors"].append("Stripe secret key not configured - check Render environment variables")
         except Exception as e:
             debug_info["stripe"]["error"] = str(e)
             debug_info["errors"].append(f"Stripe check error: {e}")
