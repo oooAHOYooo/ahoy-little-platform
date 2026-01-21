@@ -59,7 +59,10 @@
                 </div>
                 
                 {% if wallet_balance is not none %}
+                {% set boost_total = (total if total is not none else (amount|float if amount else 0)) %}
                 <div class="wallet-payment-option bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg p-4 border border-purple-500/20 mt-4">
+                    {% if wallet_balance >= boost_total %}
+                    <!-- Sufficient Balance: Offer Instant Payment -->
                     <div class="flex items-center justify-between mb-3">
                         <div>
                             <p class="text-white/80 text-sm">Wallet Balance</p>
@@ -67,19 +70,33 @@
                         </div>
                         <i class="fas fa-wallet text-purple-400 text-2xl"></i>
                     </div>
-                    {% if wallet_balance >= (total if total is not none else (amount|float if amount else 0)) %}
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" id="useWalletCheckboxBoost" class="w-5 h-5 rounded border-white/20 bg-white/10 text-purple-500 focus:ring-purple-500" onchange="document.getElementById('useWalletHidden').value = this.checked ? 'true' : 'false';">
-                        <span class="text-white/90">Pay with wallet balance</span>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded hover:bg-white/5 transition">
+                        <input type="checkbox" id="useWalletCheckboxBoost" class="w-5 h-5 rounded border-white/20 bg-white/10 text-purple-500 focus:ring-purple-500" onchange="document.getElementById('useWalletHidden').value = this.checked ? 'true' : 'false'; updateCheckoutButtonText();">
+                        <div class="flex-1">
+                            <span class="text-white/90 font-medium">Pay instantly from wallet</span>
+                            <p class="text-xs text-white/60 mt-1">No card entry needed • Instant checkout</p>
+                        </div>
                     </label>
-                    <p class="text-xs text-white/60 mt-2">You have sufficient balance to complete this purchase.</p>
+                    <p class="text-xs text-purple-300 mt-2">
+                        <i class="fas fa-bolt"></i> You'll save time - no redirect to payment page
+                    </p>
                     {% else %}
-                    <p class="text-white/70 text-sm mb-2">Insufficient wallet balance for this purchase.</p>
-                    <div class="flex gap-2 mt-3">
-                        <button onclick="window.open('/account', '_blank')" class="inline-block px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition">
-                            <i class="fas fa-wallet"></i> Fund Wallet
+                    <!-- Insufficient Balance -->
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <p class="text-white/80 text-sm">Wallet Balance</p>
+                            <p class="text-xl font-semibold text-purple-300">${{ '%.2f'|format(wallet_balance) }}</p>
+                            <p class="text-xs text-white/60">Need ${{ '%.2f'|format(boost_total - wallet_balance) }} more</p>
+                        </div>
+                        <i class="fas fa-wallet text-purple-400 text-2xl"></i>
+                    </div>
+                    <p class="text-white/70 text-sm mb-3">Add funds to wallet for instant checkout, or pay with card below.</p>
+                    <div class="flex gap-2">
+                        <button onclick="window.open('/account', '_blank')" class="flex-1 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition">
+                            <i class="fas fa-wallet"></i> Add ${{ '%.2f'|format(boost_total - wallet_balance) }} to Wallet
                         </button>
-                        <p class="text-xs text-white/60 self-center">or continue with Stripe below</p>
+                        <p class="text-xs text-white/60 self-center px-2">or</p>
+                        <p class="text-xs text-white/60 self-center">Pay with card below</p>
                     </div>
                     {% endif %}
                 </div>
@@ -150,14 +167,27 @@
                 {% endif %}
                 
                 <!-- Payment Method Selection Info -->
+                {% if wallet_balance is not none %}
                 <div class="payment-method-info bg-white/5 rounded-lg p-3 border border-white/10 mt-4">
-                    <p class="text-xs text-white/70 mb-1">
-                        <i class="fas fa-info-circle"></i> Payment Options:
+                    <p class="text-xs text-white/70 mb-2">
+                        <i class="fas fa-info-circle"></i> <strong>Two ways to pay:</strong>
                     </p>
-                    <ul class="text-xs text-white/60 space-y-1 ml-5 list-disc">
-                        <li><strong>Wallet:</strong> Instant payment, no card entry needed</li>
-                        <li><strong>Stripe:</strong> Secure card payment via Stripe Checkout</li>
-                    </ul>
+                    <div class="grid grid-cols-1 gap-2 text-xs">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-wallet text-purple-400 mt-0.5"></i>
+                            <div>
+                                <strong class="text-white/90">Wallet (Instant):</strong>
+                                <span class="text-white/60"> No card entry, instant checkout</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-credit-card text-blue-400 mt-0.5"></i>
+                            <div>
+                                <strong class="text-white/90">Card (Stripe):</strong>
+                                <span class="text-white/60"> Secure payment via Stripe Checkout</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 {% endif %}
             </div>
