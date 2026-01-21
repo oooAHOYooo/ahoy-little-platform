@@ -632,10 +632,20 @@ def fund_wallet():
     if amount_decimal > 1000.00:  # Maximum $1000.00 per transaction
         return jsonify({"error": "Maximum funding amount is $1000.00"}), 400
 
+    # Get user's Stripe customer ID if available (normalized signup process)
+    stripe_customer_id = None
     try:
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            line_items=[{
+        with get_session() as db_session:
+            user = db_session.query(User).filter(User.id == user_id).first()
+            if user and user.stripe_customer_id:
+                stripe_customer_id = user.stripe_customer_id
+    except Exception:
+        pass  # Non-fatal, continue without customer ID
+
+    try:
+        checkout_params = {
+            "payment_method_types": ["card"],
+            "line_items": [{
                 "price_data": {
                     "currency": "usd",
                     "product_data": {
@@ -646,15 +656,21 @@ def fund_wallet():
                 },
                 "quantity": 1,
             }],
-            mode="payment",
-            success_url=request.host_url.rstrip("/") + "/payments/wallet/success?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url=request.host_url.rstrip("/") + "/payments/wallet/cancel",
-            metadata={
+            "mode": "payment",
+            "success_url": request.host_url.rstrip("/") + "/payments/wallet/success?session_id={CHECKOUT_SESSION_ID}",
+            "cancel_url": request.host_url.rstrip("/") + "/payments/wallet/cancel",
+            "metadata": {
                 "user_id": str(user_id),
                 "type": "wallet_fund",
                 "amount": str(amount_decimal),
             },
-        )
+        }
+        
+        # Use Stripe customer ID if available (normalized signup)
+        if stripe_customer_id:
+            checkout_params["customer"] = stripe_customer_id
+        
+        checkout_session = stripe.checkout.Session.create(**checkout_params)
 
         return jsonify({
             "checkout_url": checkout_session.url,

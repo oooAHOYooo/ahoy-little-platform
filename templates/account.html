@@ -960,23 +960,7 @@ function walletWidget(initialBalance) {
 
 // Legacy function for backwards compatibility (if needed elsewhere)
 function fundWallet(amount) {
-  // Try to find Alpine component and call its method
-  const walletCard = document.querySelector('.wallet-card');
-  if (walletCard && window.Alpine) {
-    try {
-      // Access Alpine component data through the element's __x property
-      const alpineInstance = walletCard.__x;
-      if (alpineInstance && alpineInstance.$data && typeof alpineInstance.$data.fundWallet === 'function') {
-        alpineInstance.$data.fundWallet(amount);
-        return;
-      }
-    } catch (e) {
-      // If Alpine access fails, fall through to direct fetch
-      console.debug('Alpine component not accessible, using fallback:', e);
-    }
-  }
-  
-  // Fallback for non-Alpine contexts or if Alpine access fails
+  // Direct fetch approach - simpler and more reliable
   const amountNum = amount || parseFloat(prompt('Enter amount to fund (minimum $1.00):', '10.00') || '0');
   if (!amountNum || amountNum < 1.00) {
     alert('Please enter a valid amount (minimum $1.00)');

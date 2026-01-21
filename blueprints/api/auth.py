@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+import os
 
 from db import get_session
 from models import User
@@ -140,6 +141,31 @@ def register():
             )
             db_session.add(user)
             db_session.flush()  # get user.id
+
+            # Create Stripe Customer for normalized signup process
+            stripe_customer_id = None
+            try:
+                import stripe
+                stripe_api_key = current_app.config.get("STRIPE_SECRET_KEY") or os.getenv("STRIPE_SECRET_KEY") or os.getenv("STRIPE_SECRET_KEY_TEST")
+                if stripe_api_key:
+                    stripe.api_key = stripe_api_key
+                    stripe_customer = stripe.Customer.create(
+                        email=email,
+                        name=user.display_name or candidate,
+                        metadata={
+                            "user_id": str(user.id),
+                            "username": candidate,
+                            "platform": "ahoy"
+                        }
+                    )
+                    stripe_customer_id = stripe_customer.id
+                    user.stripe_customer_id = stripe_customer_id
+                    db_session.commit()
+                    current_app.logger.info(f"Created Stripe customer {stripe_customer_id} for user {user.id}")
+            except Exception as stripe_err:
+                # Non-fatal: log but don't fail registration
+                current_app.logger.warning(f"Failed to create Stripe customer for user {user.id}: {stripe_err}")
+                db_session.commit()  # Commit user even if Stripe fails
 
             # Log user in with Flask-Login
             login_user(user, remember=True)

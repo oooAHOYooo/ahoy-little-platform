@@ -38,6 +38,7 @@ class User(UserMixin, Base):
     last_active_at = Column(DateTime(timezone=True), nullable=True, index=True)
     disabled = Column(Boolean, nullable=False, default=False, server_default='false', index=True)
     wallet_balance = Column(Numeric(10, 2), nullable=False, default=0, server_default='0.00')
+    stripe_customer_id = Column(String(255), nullable=True, unique=True, index=True)  # Stripe Customer ID
 
     playlists = relationship('Playlist', back_populates='user', cascade='all, delete-orphan')
     bookmarks = relationship('Bookmark', back_populates='user', cascade='all, delete-orphan')
