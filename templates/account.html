@@ -829,7 +829,9 @@ function walletWidget(initialBalance) {
 
     async refreshBalance() {
       try {
-        const response = await fetch('/payments/wallet', { credentials: 'include' });
+        // Use bound fetch to avoid "Illegal invocation" error
+        const fetchCall = fetch.bind(window);
+        const response = await fetchCall('/payments/wallet', { credentials: 'include' });
         if (response.ok) {
           const data = await response.json();
           if (data.balance !== undefined) {
@@ -909,7 +911,9 @@ function walletWidget(initialBalance) {
       this.errorMessage = null;
 
       try {
-        const response = await fetch('/payments/wallet/fund', {
+        // Use bound fetch to avoid "Illegal invocation" error
+        const fetchCall = fetch.bind(window);
+        const response = await fetchCall('/payments/wallet/fund', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -950,33 +954,38 @@ function walletWidget(initialBalance) {
 }
 
 // Legacy function for backwards compatibility (if needed elsewhere)
+// This is a standalone fallback - Alpine component handles its own calls
 function fundWallet(amount) {
-  const widget = Alpine.$data(document.querySelector('.wallet-card'));
-  if (widget && typeof widget.fundWallet === 'function') {
-    widget.fundWallet(amount);
-  } else {
-    // Fallback for non-Alpine contexts
-    const amountNum = amount || parseFloat(prompt('Enter amount to fund (minimum $1.00):', '10.00') || '0');
-    if (!amountNum || amountNum < 1.00) return;
-    
-    fetch('/payments/wallet/fund', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ amount: amountNum })
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.checkout_url) {
-        window.location.href = data.checkout_url;
-      } else {
-        alert(data.error || 'Failed to create funding session');
-      }
-    })
-    .catch(err => {
-      alert('Error: ' + err.message);
-    });
+  const amountNum = amount || parseFloat(prompt('Enter amount to fund (minimum $1.00):', '10.00') || '0');
+  if (!amountNum || amountNum < 1.00) {
+    alert('Please enter a valid amount (minimum $1.00)');
+    return;
   }
+  
+  if (amountNum > 1000.00) {
+    alert('Maximum funding amount is $1,000.00 per transaction');
+    return;
+  }
+  
+  // Use bound fetch to avoid "Illegal invocation" error
+  const fetchCall = fetch.bind(window);
+  fetchCall('/payments/wallet/fund', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ amount: amountNum })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.checkout_url) {
+      window.location.href = data.checkout_url;
+    } else {
+      alert(data.error || 'Failed to create funding session');
+    }
+  })
+  .catch(err => {
+    alert('Error: ' + err.message);
+  });
 }
 </script>
 
