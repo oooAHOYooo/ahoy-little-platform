@@ -69,7 +69,7 @@
                     </div>
                     {% if wallet_balance >= (total if total is not none else (amount|float if amount else 0)) %}
                     <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" name="use_wallet" value="true" id="useWalletCheckbox" class="w-5 h-5 rounded border-white/20 bg-white/10 text-purple-500 focus:ring-purple-500">
+                        <input type="checkbox" id="useWalletCheckboxBoost" class="w-5 h-5 rounded border-white/20 bg-white/10 text-purple-500 focus:ring-purple-500" onchange="document.getElementById('useWalletHidden').value = this.checked ? 'true' : 'false';">
                         <span class="text-white/90">Pay with wallet balance</span>
                     </label>
                     <p class="text-xs text-white/60 mt-2">You have sufficient balance to complete this purchase.</p>
@@ -114,7 +114,7 @@
                     {% set total_amount = (total if total is not none else (amount|float if amount else 0)) %}
                     {% if wallet_balance >= total_amount %}
                     <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" name="use_wallet" value="true" id="useWalletCheckbox" class="w-5 h-5 rounded border-white/20 bg-white/10 text-purple-500 focus:ring-purple-500">
+                        <input type="checkbox" id="useWalletCheckboxMerch" class="w-5 h-5 rounded border-white/20 bg-white/10 text-purple-500 focus:ring-purple-500" onchange="document.getElementById('useWalletHidden').value = this.checked ? 'true' : 'false';">
                         <span class="text-white/90">Pay with wallet balance</span>
                     </label>
                     <p class="text-xs text-white/60 mt-2">You have sufficient balance to complete this purchase.</p>

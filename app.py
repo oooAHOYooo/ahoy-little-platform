@@ -2809,6 +2809,7 @@ def account_page():
         return render_template('account.html', stats={}, recent_orders=[])
 
     with get_session() as s:
+        from models import User
         user_id = current_user.id
         user = s.query(User).filter(User.id == user_id).first()
         wallet_balance = float(user.wallet_balance or 0) if user else 0.0
