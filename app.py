@@ -330,11 +330,17 @@ def create_app():
                 tables = inspector.get_table_names()
                 debug_info["database"]["wallet_transactions_table"] = 'wallet_transactions' in tables
                 
-                # Get counts
+                # Get counts (handle errors gracefully)
                 user_count = s.query(User).count()
                 wallet_tx_count = s.query(WalletTransaction).count() if 'wallet_transactions' in tables else 0
                 purchase_count = s.query(Purchase).count()
-                tip_count = s.query(Tip).count()
+                
+                # Tip count may fail if schema is outdated
+                try:
+                    tip_count = s.query(Tip).count()
+                except Exception as tip_error:
+                    tip_count = None
+                    debug_info["database"]["tip_count_error"] = str(tip_error)
                 
                 debug_info["database"]["counts"] = {
                     "users": user_count,
