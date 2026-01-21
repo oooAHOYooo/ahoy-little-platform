@@ -2,12 +2,12 @@
 {% block title %}Checkout - Ahoy Indie Media{% endblock %}
 {% block content %}
 <div id="checkoutContainer"
-    class="checkout-overlay fixed inset-0 z-[9998] flex items-center justify-center p-6 backdrop-blur-xl bg-black/60"
-    style="pointer-events: auto;">
+    class="checkout-overlay fixed inset-0 z-[9998] flex items-center justify-center p-6"
+    style="pointer-events: auto; background: radial-gradient(1200px circle at 50% 20%, rgba(120, 140, 255, 0.08), rgba(10, 12, 18, 0.95) 70%);">
 
     <div
-        class="checkout-card w-full max-w-xl bg-black/50 rounded-2xl border border-white/10 shadow-2xl p-8 text-white relative"
-        style="pointer-events: auto; z-index: 9999; position: relative;">
+        class="checkout-card w-full max-w-xl rounded-2xl text-white relative"
+        style="pointer-events: auto; z-index: 9999; position: relative; backdrop-filter: blur(var(--blur-strong, 24px)) saturate(160%); -webkit-backdrop-filter: blur(var(--blur-strong, 24px)) saturate(160%); background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%), var(--glass-bg, rgba(12, 14, 18, 0.55)); border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08)); box-shadow: var(--shadow-glass, 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05)); padding: 2rem;">
 
         <div class="checkout-steps flex items-center justify-center gap-3 mb-6">
             <div class="step active px-4 py-2 rounded-full bg-white/20 text-white text-sm">Review</div>
@@ -25,13 +25,13 @@
 
             <div class="grid grid-cols-1 gap-4">
                 {% if kind == 'boost' %}
-                <div class="bg-white/5 rounded-lg p-4 border border-white/10">
+                <div class="bg-white/5 rounded-lg p-4 border border-white/10 backdrop-filter: blur(12px) saturate(140%); -webkit-backdrop-filter: blur(12px) saturate(140%);">
                     <p class="text-white/60 text-sm">Boost for Artist</p>
                     <p class="text-lg font-semibold">{{ artist_id or
                         'Unknown Artist' }}</p>
                 </div>
 
-                <div class="breakdown bg-black/30 border border-white/10 rounded-xl p-4 mt-2 mb-2">
+                <div class="breakdown border border-white/10 rounded-xl p-4 mt-2 mb-2 backdrop-filter: blur(12px) saturate(140%); -webkit-backdrop-filter: blur(12px) saturate(140%); background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%), rgba(12, 14, 18, 0.4);">
                     <h3 class="font-semibold text-lg mb-3">Breakdown</h3>
                     <div class="flex justify-between py-1">
                         <span class="text-white/80">Boost Amount</span>
@@ -60,7 +60,7 @@
                 
                 {% if wallet_balance is not none %}
                 {% set boost_total = (total if total is not none else (amount|float if amount else 0)) %}
-                <div class="wallet-payment-option bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg p-4 border border-purple-500/20 mt-4">
+                <div class="wallet-payment-option rounded-lg p-4 border border-purple-500/20 mt-4 backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%); background: linear-gradient(135deg, rgba(147, 51, 234, 0.12) 0%, rgba(59, 130, 246, 0.12) 100%), rgba(12, 14, 18, 0.5); box-shadow: 0 0 20px rgba(147, 51, 234, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);">
                     {% if wallet_balance >= boost_total %}
                     <!-- Sufficient Balance: Offer Instant Payment -->
                     <div class="flex items-center justify-between mb-3">
@@ -102,7 +102,7 @@
                 </div>
                 {% endif %}
                 {% else %}
-                <div class="bg-white/5 rounded-lg p-4 border border-white/10">
+                <div class="bg-white/5 rounded-lg p-4 border border-white/10 backdrop-filter: blur(12px) saturate(140%); -webkit-backdrop-filter: blur(12px) saturate(140%);">
                     <p class="text-white/60 text-sm">Item</p>
                     <p class="text-lg font-semibold">{{ title or 'Item' }}</p>
                     <div class="flex justify-between text-sm mt-2">
@@ -124,7 +124,7 @@
                 
                 {% if wallet_balance is not none %}
                 {% set total_amount = (total if total is not none else (amount|float if amount else 0)) %}
-                <div class="wallet-payment-option bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg p-4 border border-purple-500/20 mt-4">
+                <div class="wallet-payment-option rounded-lg p-4 border border-purple-500/20 mt-4 backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%); background: linear-gradient(135deg, rgba(147, 51, 234, 0.12) 0%, rgba(59, 130, 246, 0.12) 100%), rgba(12, 14, 18, 0.5); box-shadow: 0 0 20px rgba(147, 51, 234, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);">
                     {% if wallet_balance >= total_amount %}
                     <!-- Sufficient Balance: Offer Instant Payment -->
                     <div class="flex items-center justify-between mb-3">
@@ -168,7 +168,7 @@
                 
                 <!-- Payment Method Selection Info -->
                 {% if wallet_balance is not none %}
-                <div class="payment-method-info bg-white/5 rounded-lg p-3 border border-white/10 mt-4">
+                <div class="payment-method-info rounded-lg p-3 border border-white/10 mt-4 backdrop-filter: blur(12px) saturate(140%); -webkit-backdrop-filter: blur(12px) saturate(140%); background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%), rgba(12, 14, 18, 0.4);">
                     <p class="text-xs text-white/70 mb-2">
                         <i class="fas fa-info-circle"></i> <strong>Two ways to pay:</strong>
                     </p>
@@ -224,6 +224,57 @@
 </div>
 
 <script>
+    // Console Error Logger - Persists across navigation
+    (function initErrorLogger() {
+        if (!window.checkoutErrorLog) {
+            window.checkoutErrorLog = [];
+        }
+        
+        // Override console.error to capture errors
+        const originalError = console.error;
+        console.error = function(...args) {
+            const errorEntry = {
+                timestamp: new Date().toISOString(),
+                message: args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '),
+                stack: new Error().stack,
+                url: window.location.href
+            };
+            window.checkoutErrorLog.push(errorEntry);
+            originalError.apply(console, args);
+        };
+        
+        // Capture unhandled errors
+        window.addEventListener('error', (event) => {
+            window.checkoutErrorLog.push({
+                timestamp: new Date().toISOString(),
+                message: event.message || 'Unhandled error',
+                filename: event.filename,
+                lineno: event.lineno,
+                colno: event.colno,
+                stack: event.error?.stack,
+                url: window.location.href
+            });
+        });
+        
+        // Capture unhandled promise rejections
+        window.addEventListener('unhandledrejection', (event) => {
+            window.checkoutErrorLog.push({
+                timestamp: new Date().toISOString(),
+                message: 'Unhandled Promise Rejection: ' + (event.reason?.message || String(event.reason)),
+                stack: event.reason?.stack,
+                url: window.location.href
+            });
+        });
+        
+        // Expose log getter
+        window.getCheckoutErrorLog = function() {
+            return JSON.stringify(window.checkoutErrorLog, null, 2);
+        };
+        
+        // Log to console that error logging is active
+        console.log('[Checkout] Error logging initialized. Use window.getCheckoutErrorLog() to retrieve log.');
+    })();
+    
     // Dim rest of page while checkout open
     // FORCE ENABLE THE BUTTON IMMEDIATELY - Run this ASAP
     (function forceEnableButton() {
