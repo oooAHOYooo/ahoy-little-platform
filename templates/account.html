@@ -52,29 +52,108 @@
         </div>
       </div>
 
-      <div class="card glass">
-        <div class="card-header">Wallet</div>
-        <div class="card-body">
-          <div class="account-wallet">
-            <div class="flex items-center justify-between mb-4">
-              <div>
-                <p class="text-white/60 text-sm mb-1">Balance</p>
-                <p class="text-3xl font-bold text-purple-300">${{ '%.2f'|format(wallet_balance) }}</p>
-              </div>
-              <i class="fas fa-wallet text-purple-400 text-4xl"></i>
-            </div>
-            <div class="account-wallet-actions flex gap-2">
-              <button onclick="fundWallet()" class="pill bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-                <i class="fas fa-plus"></i> Fund Wallet
-              </button>
-              <a href="/payments/wallet/transactions" class="pill border border-white/20 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-                <i class="fas fa-history"></i> History
-              </a>
-            </div>
-            <p class="text-xs text-white/50 mt-3">Use your wallet balance for boosts and merch purchases.</p>
-          </div>
+      <section class="wallet-card" aria-labelledby="wallet-title" x-data="walletWidget({{ wallet_balance }})">
+        <div class="wallet-card-header">
+          <h2 id="wallet-title" class="wallet-title">Wallet</h2>
+          <p class="wallet-helper">Use wallet for boosts + merch</p>
         </div>
-      </div>
+        
+        <div class="wallet-card-body">
+          <!-- Success/Error Banner -->
+          <div class="wallet-banner wallet-banner-success" x-show="state === 'success'" x-cloak x-transition>
+            <i class="fas fa-check-circle"></i>
+            <span>Balance updated successfully</span>
+          </div>
+          <div class="wallet-banner wallet-banner-error" x-show="state === 'error'" x-cloak x-transition>
+            <i class="fas fa-exclamation-circle"></i>
+            <span x-text="errorMessage || 'Something went wrong'"></span>
+          </div>
+
+          <!-- Balance Block -->
+          <div class="wallet-balance-block">
+            <label class="wallet-balance-label">Available balance</label>
+            <div class="wallet-balance-amount" 
+                 :class="{ 'wallet-balance-empty': balance === 0 }"
+                 x-text="formatBalance(balance)"
+                 x-show="!loading"
+                 x-transition:enter="wallet-fade-in"
+                 x-transition:enter.duration="300ms">
+            </div>
+            <div class="wallet-balance-loading" x-show="loading" x-cloak>
+              <i class="fas fa-spinner fa-spin"></i>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div class="wallet-empty" x-show="balance === 0 && !loading" x-cloak x-transition>
+            <p class="wallet-empty-text">Get started by adding funds to your wallet</p>
+            <button 
+              class="wallet-btn wallet-btn-primary wallet-btn-empty"
+              @click="fundWallet(5)"
+              :disabled="loading"
+              aria-label="Add $5 to wallet">
+              <i class="fas fa-plus"></i>
+              <span>Add $5 to get started</span>
+            </button>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="wallet-actions" x-show="balance > 0 || loading" x-cloak>
+            <!-- Quick Pick Amounts -->
+            <div class="wallet-quick-picks">
+              <button 
+                class="wallet-quick-pick"
+                @click="fundWallet(5)"
+                :disabled="loading"
+                aria-label="Add $5 to wallet">
+                +$5
+              </button>
+              <button 
+                class="wallet-quick-pick"
+                @click="fundWallet(10)"
+                :disabled="loading"
+                aria-label="Add $10 to wallet">
+                +$10
+              </button>
+              <button 
+                class="wallet-quick-pick"
+                @click="fundWallet(25)"
+                :disabled="loading"
+                aria-label="Add $25 to wallet">
+                +$25
+              </button>
+            </div>
+
+            <!-- Primary CTA -->
+            <button 
+              class="wallet-btn wallet-btn-primary"
+              @click="fundWallet()"
+              :disabled="loading"
+              aria-label="Fund wallet">
+              <i class="fas fa-plus" x-show="!loading"></i>
+              <i class="fas fa-spinner fa-spin" x-show="loading" x-cloak></i>
+              <span x-text="loading ? 'Processing...' : 'Add funds'"></span>
+            </button>
+          </div>
+
+          <!-- Secondary Action -->
+          <div class="wallet-secondary">
+            <a 
+              href="/payments/wallet/transactions" 
+              class="wallet-btn wallet-btn-ghost"
+              aria-label="View wallet transaction history">
+              <i class="fas fa-history"></i>
+              <span>View transactions</span>
+            </a>
+          </div>
+
+          <!-- Trust Microcopy -->
+          <p class="wallet-trust-text">
+            <i class="fas fa-shield-alt"></i>
+            Fees shown at checkout • 100% to creators (before fees)
+          </p>
+        </div>
+      </section>
 
       <div class="card glass">
         <div class="card-header">Recent Merch Orders</div>
