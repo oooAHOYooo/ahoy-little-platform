@@ -86,14 +86,15 @@
 
           <!-- Empty State -->
           <div class="wallet-empty" x-show="balance === 0 && !loading" x-cloak x-transition>
-            <p class="wallet-empty-text">Get started by adding funds to your wallet</p>
+            <p class="wallet-empty-text">Pre-fund your wallet for instant checkout</p>
+            <p class="text-xs text-white/50 mb-3">Optional: Add funds now to skip card entry on future purchases</p>
             <button 
               class="wallet-btn wallet-btn-primary wallet-btn-empty"
               @click="fundWallet(5)"
               :disabled="loading"
               aria-label="Add $5 to wallet">
               <i class="fas fa-plus"></i>
-              <span>Add $5 to get started</span>
+              <span>Add $5 (Optional)</span>
             </button>
           </div>
 
@@ -149,8 +150,8 @@
 
           <!-- Trust Microcopy -->
           <p class="wallet-trust-text">
-            <i class="fas fa-shield-alt"></i>
-            Secure payment via Stripe • Card details entered on Stripe's secure page • 100% to creators (before fees)
+            <i class="fas fa-info-circle"></i>
+            Wallet is optional • Use it for instant checkout, or pay with card directly • 100% to creators (before fees)
           </p>
         </div>
       </section>
