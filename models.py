@@ -37,6 +37,7 @@ class User(UserMixin, Base):
     preferences = Column(JSON, nullable=False, default=dict)
     last_active_at = Column(DateTime(timezone=True), nullable=True, index=True)
     disabled = Column(Boolean, nullable=False, default=False, server_default='false', index=True)
+    wallet_balance = Column(Numeric(10, 2), nullable=False, default=0, server_default='0.00')
 
     playlists = relationship('Playlist', back_populates='user', cascade='all, delete-orphan')
     bookmarks = relationship('Bookmark', back_populates='user', cascade='all, delete-orphan')
@@ -329,4 +330,29 @@ class ArtistTip(Base):
 
     def __repr__(self) -> str:
         return f"<ArtistTip id={self.id} user_id={self.user_id} artist_name={self.artist_name} amount={self.amount}>"
+
+
+class WalletTransaction(Base):
+    __tablename__ = 'wallet_transactions'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    type = Column(String(50), nullable=False)  # 'fund', 'spend', 'refund'
+    amount = Column(Numeric(10, 2), nullable=False)
+    balance_before = Column(Numeric(10, 2), nullable=False)
+    balance_after = Column(Numeric(10, 2), nullable=False)
+    description = Column(String(255), nullable=True)
+    reference_id = Column(String(255), nullable=True, index=True)  # Stripe session ID, purchase ID, etc.
+    reference_type = Column(String(50), nullable=True)  # 'stripe_checkout', 'purchase', 'boost', etc.
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    __table_args__ = (
+        Index('ix_wallet_transactions_user_id_created_at', 'user_id', 'created_at'),
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<WalletTransaction id={self.id} user_id={self.user_id} type={self.type} "
+            f"amount={self.amount} balance_after={self.balance_after}>"
+        )
 

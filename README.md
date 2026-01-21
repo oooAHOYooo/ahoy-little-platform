@@ -480,7 +480,43 @@ The platform uses a simple file-based user system with:
 
 ### Production Setup
 
-### Stripe Payments (AHOY_ENV)
+### Stripe Payments & Wallet System
+
+#### Payment Options
+
+Ahoy supports two payment methods:
+1. **Wallet System** (New): Users can pre-fund their wallet and use balance for purchases
+2. **Direct Stripe Payments**: Traditional card payments via Stripe Checkout
+
+#### Wallet Feature
+
+Users can fund their wallet via Stripe and use that balance for:
+- **Boosts/Tips**: Support artists with wallet balance
+- **Merch Purchases**: Buy physical items with wallet balance
+
+**Benefits:**
+- Convenience: Pre-fund once, use for multiple purchases
+- Cost Savings: No Stripe fees on wallet payments (fees paid once during funding)
+- Transaction History: Complete audit trail of all wallet activity
+- Flexibility: Choose wallet or Stripe for each purchase
+
+**Wallet API Endpoints:**
+- `GET /payments/wallet` - Get wallet balance
+- `POST /payments/wallet/fund` - Fund wallet via Stripe
+- `GET /payments/wallet/transactions` - View transaction history
+
+**Database:**
+- `users.wallet_balance` - User's wallet balance
+- `wallet_transactions` - Transaction history table
+
+**Migration Required:**
+```bash
+alembic upgrade head  # Adds wallet_balance and wallet_transactions table
+```
+
+For complete wallet documentation, see: `docs/features/WALLET_COMPLETE_GUIDE.md`
+
+#### Stripe Configuration (AHOY_ENV)
 
 Set `AHOY_ENV` to select Stripe keys:
 - If `AHOY_ENV=development` (or `sandbox`), the app uses test keys.

@@ -6,7 +6,7 @@ import stripe
 from decimal import Decimal
 from datetime import datetime
 from db import get_session
-from models import Tip, User, UserArtistPosition
+from models import Tip, User, UserArtistPosition, WalletTransaction
 from services.user_resolver import resolve_db_user_id
 import uuid
 
@@ -534,4 +534,316 @@ def get_artist_boosts(artist_id):
             }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# ==========================================
+# WALLET SYSTEM
+# ==========================================
+
+@bp.route("/wallet", methods=["GET"])
+def get_wallet_balance():
+    """Get current user's wallet balance."""
+    user_id = resolve_db_user_id()
+    if not user_id:
+        return jsonify({"balance": 0, "balance_cents": 0}), 200
+
+    try:
+        with get_session() as db_session:
+            user = db_session.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({"balance": 0, "balance_cents": 0}), 200
+            
+            balance = float(user.wallet_balance or 0)
+            return jsonify({
+                "balance": round(balance, 2),
+                "balance_cents": int(balance * 100),
+            }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@bp.route("/wallet/fund", methods=["POST"])
+def fund_wallet():
+    """Create a Stripe Checkout session to fund the wallet."""
+    if not stripe.api_key:
+        return jsonify({"error": "Stripe not configured"}), 500
+
+    user_id = resolve_db_user_id()
+    if not user_id:
+        return jsonify({"error": "Authentication required"}), 401
+
+    data = request.get_json(silent=True) or {}
+    amount = data.get("amount")
+
+    if not amount:
+        return jsonify({"error": "Amount required"}), 400
+
+    try:
+        amount_decimal = Decimal(str(amount))
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid amount"}), 400
+
+    if amount_decimal < 1.00:  # Minimum $1.00 to fund
+        return jsonify({"error": "Minimum funding amount is $1.00"}), 400
+
+    if amount_decimal > 1000.00:  # Maximum $1000.00 per transaction
+        return jsonify({"error": "Maximum funding amount is $1000.00"}), 400
+
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {
+                        "name": "Ahoy Wallet Funding",
+                        "description": f"Add ${amount_decimal:.2f} to your Ahoy wallet",
+                    },
+                    "unit_amount": int(amount_decimal * 100),  # Convert to cents
+                },
+                "quantity": 1,
+            }],
+            mode="payment",
+            success_url=request.host_url.rstrip("/") + "/payments/wallet/success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=request.host_url.rstrip("/") + "/payments/wallet/cancel",
+            metadata={
+                "user_id": str(user_id),
+                "type": "wallet_fund",
+                "amount": str(amount_decimal),
+            },
+        )
+
+        return jsonify({
+            "checkout_url": checkout_session.url,
+            "session_id": checkout_session.id,
+        }), 200
+
+    except stripe.error.StripeError as e:
+        return jsonify({"error": str(e)}), 400
+
+
+def deduct_wallet_balance(user_id: int, amount: Decimal, description: str = "Payment", reference_id: str = None, reference_type: str = "payment"):
+    """
+    Helper function to deduct from wallet balance.
+    Returns (success: bool, error: str or None, balance_after: Decimal or None)
+    """
+    try:
+        with get_session() as db_session:
+            user = db_session.query(User).filter(User.id == user_id).first()
+            if not user:
+                return False, "User not found", None
+
+            balance_before = Decimal(str(user.wallet_balance or 0))
+            
+            if balance_before < amount:
+                return False, "Insufficient wallet balance", None
+
+            # Deduct from wallet
+            balance_after = balance_before - amount
+            user.wallet_balance = balance_after
+
+            # Create transaction record
+            transaction = WalletTransaction(
+                user_id=user_id,
+                type="spend",
+                amount=amount,
+                balance_before=balance_before,
+                balance_after=balance_after,
+                description=description,
+                reference_id=reference_id,
+                reference_type=reference_type,
+                created_at=datetime.utcnow(),
+            )
+            db_session.add(transaction)
+            db_session.commit()
+
+            return True, None, balance_after
+
+    except Exception as e:
+        return False, str(e), None
+
+
+@bp.route("/wallet/use", methods=["POST"])
+def use_wallet():
+    """Use wallet balance for a payment. Returns success if sufficient balance."""
+    user_id = resolve_db_user_id()
+    if not user_id:
+        return jsonify({"error": "Authentication required"}), 401
+
+    data = request.get_json(silent=True) or {}
+    amount = data.get("amount")
+    description = data.get("description", "Payment")
+    reference_id = data.get("reference_id")
+    reference_type = data.get("reference_type", "payment")
+
+    if not amount:
+        return jsonify({"error": "Amount required"}), 400
+
+    try:
+        amount_decimal = Decimal(str(amount))
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid amount"}), 400
+
+    if amount_decimal <= 0:
+        return jsonify({"error": "Amount must be positive"}), 400
+
+    success, error, balance_after = deduct_wallet_balance(user_id, amount_decimal, description, reference_id, reference_type)
+    
+    if not success:
+        if error == "Insufficient wallet balance":
+            with get_session() as db_session:
+                user = db_session.query(User).filter(User.id == user_id).first()
+                balance = float(user.wallet_balance or 0) if user else 0
+            return jsonify({
+                "error": error,
+                "balance": balance,
+                "required": float(amount_decimal),
+            }), 400
+        return jsonify({"error": error or "Unknown error"}), 500
+
+    return jsonify({
+        "success": True,
+        "balance_after": float(balance_after),
+        "amount_used": float(amount_decimal),
+    }), 200
+
+
+@bp.route("/wallet/transactions", methods=["GET"])
+def get_wallet_transactions():
+    """Get wallet transaction history for current user."""
+    user_id = resolve_db_user_id()
+    if not user_id:
+        return jsonify({"transactions": []}), 200
+
+    try:
+        limit = int(request.args.get("limit", 50))
+        limit = min(limit, 100)  # Max 100
+
+        with get_session() as db_session:
+            transactions = (
+                db_session.query(WalletTransaction)
+                .filter(WalletTransaction.user_id == user_id)
+                .order_by(WalletTransaction.created_at.desc())
+                .limit(limit)
+                .all()
+            )
+
+            return jsonify({
+                "transactions": [
+                    {
+                        "id": t.id,
+                        "type": t.type,
+                        "amount": float(t.amount),
+                        "balance_before": float(t.balance_before),
+                        "balance_after": float(t.balance_after),
+                        "description": t.description,
+                        "reference_id": t.reference_id,
+                        "reference_type": t.reference_type,
+                        "created_at": t.created_at.isoformat() if t.created_at else None,
+                    }
+                    for t in transactions
+                ],
+            }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@bp.route("/wallet/success")
+def wallet_fund_success():
+    """Wallet funding success page - webhook will handle the actual funding."""
+    session_id = request.args.get("session_id")
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Wallet Funded - Ahoy Indie Media</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }}
+            .container {{
+                text-align: center;
+                padding: 2rem;
+            }}
+            .success-icon {{
+                font-size: 4rem;
+                margin-bottom: 1rem;
+            }}
+            h1 {{
+                margin: 0.5rem 0;
+            }}
+            p {{
+                opacity: 0.9;
+            }}
+            a {{
+                color: white;
+                text-decoration: underline;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="success-icon">💰</div>
+            <h1>Wallet Funded!</h1>
+            <p>Your wallet has been funded successfully.</p>
+            <p>The funds will appear in your wallet shortly.</p>
+            <p><a href="/account">View My Account</a> | <a href="/">Return to Ahoy</a></p>
+        </div>
+        <script>
+            // Close window if opened in popup
+            if (window.opener) {{
+                setTimeout(() => window.close(), 2000);
+            }}
+        </script>
+    </body>
+    </html>
+    """
+
+
+@bp.route("/wallet/cancel")
+def wallet_fund_cancel():
+    """Wallet funding cancellation page."""
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Funding Cancelled - Ahoy Indie Media</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+                background: #f3f4f6;
+            }}
+            .container {{
+                text-align: center;
+                padding: 2rem;
+            }}
+            a {{
+                color: #667eea;
+                text-decoration: underline;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Funding Cancelled</h1>
+            <p>Your wallet funding was cancelled.</p>
+            <p><a href="/account">Return to Account</a> | <a href="/">Return to Ahoy</a></p>
+        </div>
+    </body>
+    </html>
+    """
 

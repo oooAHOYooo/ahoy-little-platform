@@ -57,6 +57,30 @@
                             '%.2f'|format(total if total is not none else 0) }}</span>
                     </div>
                 </div>
+                
+                {% if wallet_balance is not none %}
+                <div class="wallet-payment-option bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg p-4 border border-purple-500/20 mt-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <p class="text-white/80 text-sm">Wallet Balance</p>
+                            <p class="text-xl font-semibold text-purple-300">${{ '%.2f'|format(wallet_balance) }}</p>
+                        </div>
+                        <i class="fas fa-wallet text-purple-400 text-2xl"></i>
+                    </div>
+                    {% if wallet_balance >= (total if total is not none else (amount|float if amount else 0)) %}
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="use_wallet" value="true" id="useWalletCheckbox" class="w-5 h-5 rounded border-white/20 bg-white/10 text-purple-500 focus:ring-purple-500">
+                        <span class="text-white/90">Pay with wallet balance</span>
+                    </label>
+                    <p class="text-xs text-white/60 mt-2">You have sufficient balance to complete this purchase.</p>
+                    {% else %}
+                    <p class="text-white/70 text-sm mb-2">Insufficient wallet balance for this purchase.</p>
+                    <a href="/payments/wallet/fund" class="inline-block px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition">
+                        Fund Wallet
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
                 {% else %}
                 <div class="bg-white/5 rounded-lg p-4 border border-white/10">
                     <p class="text-white/60 text-sm">Item</p>
@@ -77,6 +101,31 @@
                             '%.2f'|format(total if total is not none else (amount|float if amount else 0)) }}</span>
                     </div>
                 </div>
+                
+                {% if wallet_balance is not none %}
+                <div class="wallet-payment-option bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg p-4 border border-purple-500/20 mt-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <p class="text-white/80 text-sm">Wallet Balance</p>
+                            <p class="text-xl font-semibold text-purple-300">${{ '%.2f'|format(wallet_balance) }}</p>
+                        </div>
+                        <i class="fas fa-wallet text-purple-400 text-2xl"></i>
+                    </div>
+                    {% set total_amount = (total if total is not none else (amount|float if amount else 0)) %}
+                    {% if wallet_balance >= total_amount %}
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="use_wallet" value="true" id="useWalletCheckbox" class="w-5 h-5 rounded border-white/20 bg-white/10 text-purple-500 focus:ring-purple-500">
+                        <span class="text-white/90">Pay with wallet balance</span>
+                    </label>
+                    <p class="text-xs text-white/60 mt-2">You have sufficient balance to complete this purchase.</p>
+                    {% else %}
+                    <p class="text-white/70 text-sm mb-2">Insufficient wallet balance for this purchase.</p>
+                    <a href="/payments/wallet/fund" class="inline-block px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition">
+                        Fund Wallet
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
                 {% endif %}
             </div>
 
@@ -89,6 +138,7 @@
                 <input type="hidden" name="qty" value="{{ qty }}">
                 <input type="hidden" name="title" value="{{ title }}">
                 <input type="hidden" name="computed_total" value="{{ total if total is not none else amount }}">
+                <input type="hidden" name="use_wallet" id="useWalletHidden" value="false">
             </form>
             
             <!-- NEW WORKING BUTTON - Completely outside form, programmatically submits -->

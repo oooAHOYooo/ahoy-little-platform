@@ -677,6 +677,20 @@ def checkout_page():
         except Exception:
             pass
 
+    # Get wallet balance if user is logged in
+    wallet_balance = None
+    try:
+        from flask_login import current_user
+        if current_user.is_authenticated:
+            from db import get_session
+            from models import User
+            with get_session() as s:
+                user = s.query(User).filter(User.id == current_user.id).first()
+                if user:
+                    wallet_balance = float(user.wallet_balance or 0)
+    except Exception:
+        pass
+
     return render_template(
         'checkout.html',
         kind=kind,
@@ -688,6 +702,7 @@ def checkout_page():
         stripe_fee=float(stripe_fee) if stripe_fee is not None else None,
         platform_fee=float(platform_fee) if platform_fee is not None else None,
         total=float(total) if total is not None else None,
+        wallet_balance=wallet_balance,
         csrf_token=generate_csrf_token(),
     )
 
@@ -751,6 +766,7 @@ def checkout_process():
     artist_id = form.get('artist_id') or None
     item_id = form.get('item_id') or None
     qty = int(form.get('qty') or '1')
+    use_wallet = form.get('use_wallet') == 'true'
     try:
         amount = float(form.get('amount') or '0')
     except Exception:
@@ -938,6 +954,82 @@ def checkout_process():
                     "quantity": int(max(1, qty)),
                 }
             ]
+
+        # Handle wallet payment if requested
+        if use_wallet:
+            from flask_login import current_user
+            if current_user.is_authenticated:
+                from blueprints.payments import deduct_wallet_balance
+                from decimal import Decimal
+                
+                # Calculate total charge
+                if kind in ["boost", "tip"]:
+                    boost_amount_decimal = Decimal(str(amount or 0)).quantize(Decimal("0.01"))
+                    _, _, total_charge, _, _ = calculate_boost_fees(boost_amount_decimal)
+                else:
+                    total_charge = Decimal(str(total))
+                
+                # Try to deduct from wallet
+                success, error, balance_after = deduct_wallet_balance(
+                    current_user.id,
+                    total_charge,
+                    f"{kind.title()} payment",
+                    str(purchase_id),
+                    kind
+                )
+                
+                if success:
+                    # Wallet payment successful - mark purchase as paid
+                    with get_session() as s:
+                        p = s.query(Purchase).filter(Purchase.id == int(purchase_id)).first()
+                        if p:
+                            p.status = "paid"
+                            p.stripe_id = f"wallet_{purchase_id}"
+                            s.commit()
+                    
+                    # For boosts, create Tip record
+                    if kind in ["boost", "tip"]:
+                        boost_amount_decimal = Decimal(str(amount or 0)).quantize(Decimal("0.01"))
+                        stripe_fee, platform_fee, total_charge, artist_payout, platform_revenue = calculate_boost_fees(boost_amount_decimal)
+                        
+                        with get_session() as s:
+                            from models import Tip
+                            tip = Tip(
+                                user_id=current_user.id,
+                                artist_id=str(artist_id) if artist_id else "",
+                                amount=boost_amount_decimal,
+                                platform_fee=platform_fee,
+                                stripe_fee=Decimal("0.00"),  # No Stripe fee for wallet payments
+                                total_paid=total_charge,
+                                artist_payout=artist_payout,
+                                platform_revenue=platform_revenue,
+                                stripe_checkout_session_id=f"wallet_{purchase_id}",
+                                created_at=datetime.utcnow(),
+                            )
+                            s.add(tip)
+                            
+                            # Update portfolio
+                            from blueprints.payments import update_user_artist_position
+                            update_user_artist_position(
+                                user_id=current_user.id,
+                                artist_id=str(artist_id),
+                                boost_amount=boost_amount_decimal,
+                                boost_datetime=datetime.utcnow(),
+                                db_session=s
+                            )
+                            s.commit()
+                    
+                    return redirect(url_for("checkout_success", pid=purchase_id))
+                else:
+                    # Wallet payment failed - fall through to Stripe
+                    return render_template("checkout.html",
+                                         error=error or "Insufficient wallet balance",
+                                         csrf_token=generate_csrf_token(),
+                                         kind=kind,
+                                         artist_id=artist_id or "",
+                                         amount=amount,
+                                         item_id=item_id or "",
+                                         qty=qty), 400
 
         success_url = url_for("checkout_success", pid=purchase_id, _external=True)
         cancel_url = url_for("checkout_page", type=kind, artist_id=artist_id or "", amount=amount, item_id=item_id or "", qty=qty, title=request.form.get("title") or "", _external=True)
@@ -2718,6 +2810,9 @@ def account_page():
 
     with get_session() as s:
         user_id = current_user.id
+        user = s.query(User).filter(User.id == user_id).first()
+        wallet_balance = float(user.wallet_balance or 0) if user else 0.0
+        
         stats = {
             "bookmarks": int(s.query(func.count(Bookmark.id)).filter(Bookmark.user_id == user_id).scalar() or 0),
             "plays": int(s.query(func.count(PlayHistory.id)).filter(PlayHistory.user_id == user_id).scalar() or 0),
@@ -2759,7 +2854,7 @@ def account_page():
             current_app.logger.warning(f"Could not query purchases table: {e}")
             pass
 
-    return render_template('account.html', stats=stats, recent_orders=recent_orders)
+    return render_template('account.html', stats=stats, recent_orders=recent_orders, wallet_balance=wallet_balance)
 
 @app.route('/dashboard')
 def dashboard_page():

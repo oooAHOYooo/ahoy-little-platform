@@ -4,8 +4,9 @@ from decimal import Decimal
 from flask import Blueprint, request, jsonify, current_app
 import stripe
 from db import get_session
-from models import Tip
+from models import Tip, User, WalletTransaction
 from datetime import datetime
+from decimal import Decimal
 from urllib import request as urlrequest
 from urllib.error import URLError, HTTPError
 
@@ -69,6 +70,43 @@ def handle_stripe_webhook():
     if event["type"] == "checkout.session.completed":
         session_data = event["data"]["object"]
         metadata = session_data.get("metadata", {}) or {}
+
+        # Handle wallet funding
+        if metadata.get("type") == "wallet_fund":
+            user_id_str = metadata.get("user_id")
+            amount_str = metadata.get("amount")
+            
+            if user_id_str and amount_str:
+                try:
+                    user_id = int(user_id_str)
+                    amount = Decimal(str(amount_str))
+                    
+                    with get_session() as db_session:
+                        user = db_session.query(User).filter(User.id == user_id).first()
+                        if user:
+                            balance_before = Decimal(str(user.wallet_balance or 0))
+                            balance_after = balance_before + amount
+                            user.wallet_balance = balance_after
+                            
+                            # Create transaction record
+                            transaction = WalletTransaction(
+                                user_id=user_id,
+                                type="fund",
+                                amount=amount,
+                                balance_before=balance_before,
+                                balance_after=balance_after,
+                                description=f"Wallet funding via Stripe",
+                                reference_id=session_data.get("id"),
+                                reference_type="stripe_checkout",
+                                created_at=datetime.utcnow(),
+                            )
+                            db_session.add(transaction)
+                            db_session.commit()
+                except Exception as e:
+                    # Log error but don't fail webhook
+                    print(f"Error processing wallet funding: {e}")
+            
+            return jsonify({"status": "ok"}), 200
 
         purchase_id = metadata.get("purchase_id")
         purchase_type = (metadata.get("type") or "").strip()

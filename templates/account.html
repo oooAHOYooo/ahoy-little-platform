@@ -53,6 +53,30 @@
       </div>
 
       <div class="card glass">
+        <div class="card-header">Wallet</div>
+        <div class="card-body">
+          <div class="account-wallet">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <p class="text-white/60 text-sm mb-1">Balance</p>
+                <p class="text-3xl font-bold text-purple-300">${{ '%.2f'|format(wallet_balance) }}</p>
+              </div>
+              <i class="fas fa-wallet text-purple-400 text-4xl"></i>
+            </div>
+            <div class="account-wallet-actions flex gap-2">
+              <button onclick="fundWallet()" class="pill bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                <i class="fas fa-plus"></i> Fund Wallet
+              </button>
+              <a href="/payments/wallet/transactions" class="pill border border-white/20 hover:bg-white/10 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                <i class="fas fa-history"></i> History
+              </a>
+            </div>
+            <p class="text-xs text-white/50 mt-3">Use your wallet balance for boosts and merch purchases.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card glass">
         <div class="card-header">Recent Merch Orders</div>
         <div class="card-body">
           {% if recent_orders and recent_orders|length %}
@@ -312,7 +336,42 @@
     outline: none;
     box-shadow: 0 0 0 3px rgba(236,72,153,0.22), 0 10px 24px rgba(0,0,0,0.35);
   }
+
+  .account-wallet {
+    padding: 8px 0;
+  }
 </style>
+
+<script>
+function fundWallet() {
+  const amount = prompt('Enter amount to fund (minimum $1.00):', '10.00');
+  if (!amount) return;
+  
+  const amountNum = parseFloat(amount);
+  if (isNaN(amountNum) || amountNum < 1.00) {
+    alert('Please enter a valid amount (minimum $1.00)');
+    return;
+  }
+  
+  fetch('/payments/wallet/fund', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ amount: amountNum })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.checkout_url) {
+      window.location.href = data.checkout_url;
+    } else {
+      alert(data.error || 'Failed to create funding session');
+    }
+  })
+  .catch(err => {
+    alert('Error: ' + err.message);
+  });
+}
+</script>
 
 <script>
 function profileAuth() {
