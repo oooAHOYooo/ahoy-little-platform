@@ -418,6 +418,55 @@ def create_app():
     
     return jsonify(debug_info), 200 if debug_info["status"] == "ok" else 500
 
+    @app.route('/ops/status', methods=['GET'])
+    def status_dashboard():
+        """Browser-based status dashboard - checks server, webhooks, and provides next steps"""
+        return render_template('status_dashboard.html')
+    
+    @app.route('/ops/status/api', methods=['GET'])
+    def status_api():
+        """API endpoint for status checks - returns JSON with all status information"""
+        from datetime import datetime
+        from ahoy.version import __version__
+        from db import get_session
+        from sqlalchemy import text
+        
+        status = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "server": {
+                "running": True,  # If we're here, server is running
+                "version": __version__,
+                "ok": True
+            },
+            "database": {},
+            "webhook_listener": {},
+            "next_steps": []
+        }
+        
+        # Check database connectivity
+        try:
+            with get_session() as s:
+                s.execute(text("SELECT 1"))
+                status["database"]["connected"] = True
+        except Exception as e:
+            status["database"]["connected"] = False
+            status["database"]["error"] = str(e)
+            status["next_steps"].append("Check database connection")
+        
+        # Webhook listener status (we can't directly check if CLI is running, but provide instructions)
+        status["webhook_listener"]["instructions"] = "Run: ./scripts/start_stripe_listen.sh"
+        status["webhook_listener"]["check_terminal"] = "Look for 'Ready! Your webhook signing secret is whsec_...'"
+        status["webhook_listener"]["note"] = "Cannot auto-detect if Stripe CLI listener is running - check your terminal"
+        
+        # Next steps
+        status["next_steps"] = [
+            "Open webhook monitor: /ops/webhooks/monitor",
+            "Test webhook: ./scripts/test_wallet_funding.sh",
+            "Check debug endpoints: /ops/debug/payments"
+        ]
+        
+        return jsonify(status), 200
+    
     @app.route('/ops/webhooks/monitor', methods=['GET'])
     def webhook_monitor():
         """Simple webhook monitoring page - shows recent webhook events"""

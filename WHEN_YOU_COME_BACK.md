@@ -11,22 +11,24 @@
 
 ## 🎯 What To Do Next (5 Minutes)
 
-### Step 1: Check Server Status
+### Step 1: Check Server Status (In Browser!)
 
-**Is your Flask server running?**
+**Open Status Dashboard:**
+Visit: **https://app.ahoy.ooo/ops/status**
 
-```bash
-# Check if server is running
-curl http://localhost:5000/healthz
-```
+**What you should see:**
+- ✅ **Server Status:** Running (green badge)
+- ✅ **Database Status:** Connected (green badge)
+- ⚠️ **Webhook Listener:** Check Terminal (yellow badge - can't auto-detect)
+- **Next Steps:** List of actions to take
 
-**If you see:** `{"ok":true,"version":"..."}` → ✅ Server is running
-
-**If you see:** `Connection refused` → Start server:
+**If server shows "Not Running":**
+- Open terminal and run:
 ```bash
 cd /Users/agworkywork/ahoy-little-platform
 python app.py
 ```
+- Then refresh the status page
 
 ---
 
@@ -115,10 +117,9 @@ Browser (Monitor):
 ### Problem: No transaction appears in monitor
 
 **Check 1: Is server running?**
-```bash
-curl http://localhost:5000/healthz
-```
-If not, start it: `python app.py`
+- Visit: `/ops/status` (browser-based status dashboard)
+- Should show "Server Status: ✅ Running"
+- If not, start it: `python app.py`
 
 **Check 2: Is listener still running?**
 - Terminal 1 should show "Ready!" message
@@ -213,12 +214,14 @@ If something's not working, check these:
 
 When you come back, verify:
 
-- [ ] Terminal 1: Listener running (`> Ready!`)
-- [ ] Server: Running on port 5000 (`curl http://localhost:5000/healthz`)
-- [ ] Browser: Monitor page open (`/ops/webhooks/monitor`)
-- [ ] Test: Run `./scripts/test_wallet_funding.sh`
-- [ ] Verify: Transaction appears in monitor
-- [ ] Verify: Listener shows `[200 OK]`
+- [ ] **Browser:** Open `/ops/status` - check all statuses
+- [ ] **Server:** Shows "✅ Running" in status dashboard
+- [ ] **Database:** Shows "✅ Connected" in status dashboard
+- [ ] **Terminal 1:** Listener running (`> Ready!`)
+- [ ] **Browser:** Monitor page open (`/ops/webhooks/monitor`)
+- [ ] **Test:** Run `./scripts/test_wallet_funding.sh`
+- [ ] **Verify:** Transaction appears in monitor
+- [ ] **Verify:** Listener shows `[200 OK]`
 
 ---
 
@@ -264,6 +267,7 @@ When you come back, verify:
 
 ## 🔗 Quick Links
 
+- **Status Dashboard:** https://app.ahoy.ooo/ops/status ⭐ (Check everything here!)
 - **Monitor:** https://app.ahoy.ooo/ops/webhooks/monitor
 - **Debug Payments:** https://app.ahoy.ooo/ops/debug/payments
 - **Debug Checkout:** https://app.ahoy.ooo/ops/debug/checkout
