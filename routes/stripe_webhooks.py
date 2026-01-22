@@ -149,6 +149,32 @@ def handle_stripe_webhook():
                                 "total": p.total,
                                 "stripe_session": session_data.get("id"),
                             })
+                            
+                            # Send email notification
+                            try:
+                                from services.notifications import notify_merch_purchase
+                                
+                                # Get buyer email if available
+                                buyer_email = None
+                                if p.user_id:
+                                    user = db_session.query(User).filter(User.id == p.user_id).first()
+                                    if user:
+                                        buyer_email = user.email
+                                
+                                notify_merch_purchase(
+                                    purchase_id=p.id,
+                                    item_id=p.item_id,
+                                    item_name=None,  # Could load from merch data if available
+                                    quantity=p.qty,
+                                    amount=Decimal(str(p.amount)),
+                                    total=Decimal(str(p.total)),
+                                    buyer_email=buyer_email,
+                                    stripe_session_id=session_data.get("id")
+                                )
+                            except Exception as notify_error:
+                                # Don't fail webhook if notification fails
+                                import logging
+                                logging.error(f"Failed to send merch purchase notification: {notify_error}", exc_info=True)
             except Exception:
                 # Non-fatal for webhook: still allow boost record to proceed if applicable
                 pass
@@ -201,6 +227,43 @@ def handle_stripe_webhook():
                                 db_session=db_session,
                             )
                         db_session.commit()
+                        
+                        # Send email notifications
+                        try:
+                            from services.notifications import notify_boost_received
+                            from app import _load_artists_flat
+                            
+                            # Get artist name
+                            artist_name = None
+                            artists = _load_artists_flat()
+                            for artist in artists:
+                                if (str(artist.get('id', '')) == str(artist_id) or
+                                    artist.get('slug', '').lower() == str(artist_id).lower() or
+                                    artist.get('name', '').lower() == str(artist_id).lower()):
+                                    artist_name = artist.get('name')
+                                    break
+                            
+                            # Get tipper email if available
+                            tipper_email = None
+                            if user_id:
+                                user = db_session.query(User).filter(User.id == user_id).first()
+                                if user:
+                                    tipper_email = user.email
+                            
+                            notify_boost_received(
+                                artist_id=str(artist_id),
+                                artist_name=artist_name,
+                                boost_amount=Decimal(boost_amount_str),
+                                artist_payout=Decimal(artist_payout_str),
+                                total_paid=Decimal(total_paid_str),
+                                tipper_email=tipper_email,
+                                stripe_session_id=session_data.get("id")
+                            )
+                        except Exception as notify_error:
+                            # Don't fail webhook if notification fails
+                            import logging
+                            logging.error(f"Failed to send boost notification: {notify_error}", exc_info=True)
+                            
                 except Exception as e:
                     return jsonify({"error": str(e)}), 500
 

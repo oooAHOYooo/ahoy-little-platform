@@ -37,6 +37,8 @@ services:
         sync: false
       - key: SUPPORT_EMAIL
         sync: false
+      - key: AHOY_ADMIN_EMAIL
+        value: alex@ahoy.ooo
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT

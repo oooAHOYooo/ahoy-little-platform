@@ -357,3 +357,32 @@ class WalletTransaction(Base):
             f"amount={self.amount} balance_after={self.balance_after}>"
         )
 
+
+class ArtistPayout(Base):
+    __tablename__ = 'artist_payouts'
+
+    id = Column(Integer, primary_key=True)
+    artist_id = Column(String(255), nullable=False, index=True)  # Artist slug or ID
+    amount = Column(Numeric(10, 2), nullable=False)  # Amount to pay out
+    status = Column(String(50), nullable=False, default="pending", index=True)  # pending, processing, completed, failed
+    stripe_transfer_id = Column(String(255), nullable=True, unique=True, index=True)  # Stripe Transfer ID if using Stripe Connect
+    stripe_payout_id = Column(String(255), nullable=True, index=True)  # Stripe Payout ID
+    payment_method = Column(String(50), nullable=True)  # stripe_connect, manual, bank_transfer, etc.
+    payment_reference = Column(String(255), nullable=True)  # Reference number for manual payments
+    notes = Column(String(1000), nullable=True)  # Notes about the payout
+    related_tip_ids = Column(JSON, nullable=True)  # Array of Tip IDs included in this payout
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    processed_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+
+    __table_args__ = (
+        Index('ix_artist_payouts_artist_id_status', 'artist_id', 'status'),
+        Index('ix_artist_payouts_created_at', 'created_at'),
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<ArtistPayout id={self.id} artist_id={self.artist_id} amount={self.amount} "
+            f"status={self.status}>"
+        )
+

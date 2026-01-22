@@ -336,6 +336,44 @@ def stripe_webhook():
                 db_session.commit()
 
                 print(f"✅ Boost recorded: ${boost_amount_str} to artist {artist_id} (artist receives: ${artist_payout_str}, total paid: ${total_paid_str})")
+                
+                # Send email notifications
+                try:
+                    from services.notifications import notify_boost_received
+                    from app import _load_artists_flat
+                    from models import User
+                    
+                    # Get artist name
+                    artist_name = None
+                    artists = _load_artists_flat()
+                    for artist in artists:
+                        if (str(artist.get('id', '')) == str(artist_id) or
+                            artist.get('slug', '').lower() == str(artist_id).lower() or
+                            artist.get('name', '').lower() == str(artist_id).lower()):
+                            artist_name = artist.get('name')
+                            break
+                    
+                    # Get tipper email if available
+                    tipper_email = None
+                    if user_id:
+                        user = db_session.query(User).filter(User.id == user_id).first()
+                        if user:
+                            tipper_email = user.email
+                    
+                    notify_boost_received(
+                        artist_id=str(artist_id),
+                        artist_name=artist_name,
+                        boost_amount=Decimal(boost_amount_str),
+                        artist_payout=Decimal(artist_payout_str),
+                        total_paid=Decimal(total_paid_str),
+                        tipper_email=tipper_email,
+                        stripe_session_id=session_data.get("id")
+                    )
+                except Exception as notify_error:
+                    # Don't fail webhook if notification fails
+                    import logging
+                    logging.error(f"Failed to send boost notification: {notify_error}", exc_info=True)
+                
                 return jsonify({"status": "success"}), 200
 
         except Exception as e:
