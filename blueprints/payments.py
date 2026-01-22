@@ -787,7 +787,20 @@ def use_wallet():
 
 @bp.route("/wallet/transactions", methods=["GET"])
 def get_wallet_transactions():
-    """Get wallet transaction history for current user."""
+    """Get wallet transaction history for current user (HTML page or JSON API)."""
+    from flask import render_template
+    
+    # Check if this is a JSON API request (explicit format=json or Accept: application/json)
+    wants_json = (
+        request.args.get('format') == 'json' or
+        'application/json' in request.headers.get('Accept', '')
+    )
+    
+    if not wants_json:
+        # Render HTML page for browser navigation
+        return render_template('wallet_transactions.html')
+    
+    # Return JSON API response
     user_id = resolve_db_user_id()
     if not user_id:
         return jsonify({"transactions": []}), 200
@@ -795,12 +808,14 @@ def get_wallet_transactions():
     try:
         limit = int(request.args.get("limit", 50))
         limit = min(limit, 100)  # Max 100
+        offset = int(request.args.get("offset", 0))
 
         with get_session() as db_session:
             transactions = (
                 db_session.query(WalletTransaction)
                 .filter(WalletTransaction.user_id == user_id)
                 .order_by(WalletTransaction.created_at.desc())
+                .offset(offset)
                 .limit(limit)
                 .all()
             )

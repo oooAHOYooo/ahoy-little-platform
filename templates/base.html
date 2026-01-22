@@ -775,11 +775,6 @@
         <!-- Mobile Secondary Navigation - Secondary Features (above primary nav) -->
         <nav class="mobile-secondary-nav mobile-only" role="navigation"
             aria-label="Secondary Navigation">
-            <a href="/"
-                class="mobile-tab {% if request.endpoint == 'home' %}active{% endif %}">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
             <a href="{{ url_for('artists') }}"
                 class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
                 <i class="fas fa-users"></i>
@@ -823,6 +818,11 @@
                 class="mobile-tab {% if request.endpoint == 'shows' %}active{% endif %}">
                 <i class="fas fa-video"></i>
                 <span>Videos</span>
+            </a>
+            <a href="/radio"
+                class="mobile-tab {% if request.endpoint == 'radio_page' %}active{% endif %}">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>Radio</span>
             </a>
         </nav>
         <div class="desktop-only">

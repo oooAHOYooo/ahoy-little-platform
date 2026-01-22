@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Wallet Transactions - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <div class="mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h1 class="text-3xl font-bold text-white mb-2">
+          <i class="fas fa-history"></i> Wallet Transactions
+        </h1>
+        <p class="text-white/70">View your wallet transaction history</p>
+      </div>
+      <a href="/account" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Account
+      </a>
+    </div>
+  </div>
+
+  <!-- Wallet Balance Card -->
+  <div class="card glass mb-6" x-data="walletTransactions()" x-init="loadTransactions()">
+    <div class="card-header">
+      <div class="flex items-center justify-between">
+        <span>Current Balance</span>
+        <span class="text-2xl font-bold" x-text="formatCurrency(currentBalance)"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transactions List -->
+  <div class="card glass" x-data="walletTransactions()" x-init="loadTransactions()">
+    <div class="card-header">
+      <h2>Transaction History</h2>
+      <button @click="loadTransactions()" class="btn btn-ghost btn-sm" title="Refresh">
+        <i class="fas fa-sync-alt" :class="{'fa-spin': isLoading}"></i>
+      </button>
+    </div>
+    <div class="card-body">
+      <!-- Loading State -->
+      <div x-show="isLoading" class="text-center py-8">
+        <div class="spinner mx-auto mb-4"></div>
+        <p class="text-white/60">Loading transactions...</p>
+      </div>
+
+      <!-- Error State -->
+      <div x-show="error && !isLoading" class="text-center py-8">
+        <i class="fas fa-exclamation-triangle text-yellow-400 text-3xl mb-4"></i>
+        <p class="text-white/80 mb-4" x-text="error"></p>
+        <button @click="loadTransactions()" class="btn btn-primary">
+          <i class="fas fa-redo"></i> Try Again
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div x-show="!isLoading && !error && transactions.length === 0" class="text-center py-12">
+        <i class="fas fa-wallet text-white/30 text-5xl mb-4"></i>
+        <p class="text-white/60 text-lg mb-2">No transactions yet</p>
+        <p class="text-white/40 text-sm">Your wallet transactions will appear here</p>
+        <a href="/account" class="btn btn-primary mt-4">
+          <i class="fas fa-plus"></i> Add Funds
+        </a>
+      </div>
+
+      <!-- Transactions Table -->
+      <div x-show="!isLoading && !error && transactions.length > 0" class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-white/10">
+              <th class="text-left py-3 px-4 text-white/70 font-semibold">Date & Time</th>
+              <th class="text-left py-3 px-4 text-white/70 font-semibold">Type</th>
+              <th class="text-left py-3 px-4 text-white/70 font-semibold">Description</th>
+              <th class="text-right py-3 px-4 text-white/70 font-semibold">Amount</th>
+              <th class="text-right py-3 px-4 text-white/70 font-semibold">Balance After</th>
+              <th class="text-left py-3 px-4 text-white/70 font-semibold">Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="tx in transactions" :key="tx.id">
+              <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <td class="py-3 px-4 text-white/80 text-sm">
+                  <div x-text="formatDate(tx.created_at)"></div>
+                  <div class="text-white/50 text-xs" x-text="formatTime(tx.created_at)"></div>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="px-2 py-1 rounded text-xs font-medium"
+                    :class="{
+                      'bg-green-500/20 text-green-300': tx.type === 'fund',
+                      'bg-red-500/20 text-red-300': tx.type === 'spend',
+                      'bg-blue-500/20 text-blue-300': tx.type === 'refund'
+                    }">
+                    <i :class="{
+                      'fas fa-arrow-down': tx.type === 'fund',
+                      'fas fa-arrow-up': tx.type === 'spend',
+                      'fas fa-undo': tx.type === 'refund'
+                    }"></i>
+                    <span x-text="tx.type.charAt(0).toUpperCase() + tx.type.slice(1)"></span>
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-white/70 text-sm" x-text="tx.description || 'N/A'"></td>
+                <td class="py-3 px-4 text-right">
+                  <span class="font-semibold"
+                    :class="{
+                      'text-green-300': tx.type === 'fund',
+                      'text-red-300': tx.type === 'spend',
+                      'text-blue-300': tx.type === 'refund'
+                    }"
+                    x-text="(tx.type === 'fund' ? '+' : '-') + formatCurrency(Math.abs(tx.amount))">
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-right text-white/90 font-medium" x-text="formatCurrency(tx.balance_after)"></td>
+                <td class="py-3 px-4 text-white/60 text-xs font-mono" x-text="tx.reference_id ? tx.reference_id.substring(0, 20) : 'N/A'"></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Load More Button -->
+      <div x-show="!isLoading && !error && transactions.length > 0 && transactions.length >= 50" class="text-center mt-6">
+        <button @click="loadMore()" class="btn btn-ghost" :disabled="isLoadingMore">
+          <i class="fas fa-chevron-down"></i>
+          <span x-text="isLoadingMore ? 'Loading...' : 'Load More'"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function walletTransactions() {
+  return {
+    transactions: [],
+    currentBalance: 0,
+    isLoading: true,
+    isLoadingMore: false,
+    error: null,
+    limit: 50,
+    offset: 0,
+
+    async loadTransactions() {
+      this.isLoading = true;
+      this.error = null;
+      
+      try {
+        // Load current balance
+        const balanceResponse = await fetch('/payments/wallet');
+        if (balanceResponse.ok) {
+          const balanceData = await balanceResponse.json();
+          this.currentBalance = balanceData.balance || 0;
+        }
+
+        // Load transactions
+        const response = await fetch(`/payments/wallet/transactions?limit=${this.limit}`);
+        if (!response.ok) {
+          throw new Error('Failed to load transactions');
+        }
+        
+        const data = await response.json();
+        this.transactions = data.transactions || [];
+        this.offset = this.transactions.length;
+      } catch (err) {
+        console.error('Error loading transactions:', err);
+        this.error = 'Failed to load transactions. Please try again.';
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async loadMore() {
+      if (this.isLoadingMore || this.transactions.length < this.offset) return;
+      
+      this.isLoadingMore = true;
+      try {
+        const response = await fetch(`/payments/wallet/transactions?limit=${this.limit}&offset=${this.offset}`);
+        if (!response.ok) {
+          throw new Error('Failed to load more transactions');
+        }
+        
+        const data = await response.json();
+        if (data.transactions && data.transactions.length > 0) {
+          this.transactions = [...this.transactions, ...data.transactions];
+          this.offset = this.transactions.length;
+        }
+      } catch (err) {
+        console.error('Error loading more transactions:', err);
+      } finally {
+        this.isLoadingMore = false;
+      }
+    },
+
+    formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(amount || 0);
+    },
+
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    },
+
+    formatTime(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    }
+  };
+}
+</script>
+
+<style>
+.card {
+  background: rgba(17, 17, 17, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  table {
+    font-size: 0.875rem;
+  }
+
+  th, td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  /* Hide reference column on mobile */
+  th:nth-child(6),
+  td:nth-child(6) {
+    display: none;
+  }
+}
+</style>
+{% endblock %}

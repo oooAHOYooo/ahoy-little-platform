@@ -1128,8 +1128,14 @@ def checkout_process():
                                        qty=qty), 400
             amount = float(unit)              # unit price (authoritative)
             total = float(unit * qty)         # total (authoritative)
-        except Exception:
-            pass
+        except Exception as e:
+            current_app.logger.error(f"Error processing merch item {item_id}: {e}", exc_info=True)
+            return render_template("checkout.html",
+                                   error="Error processing merch item. Please try again.",
+                                   csrf_token=generate_csrf_token(),
+                                   kind=kind,
+                                   item_id=item_id or "",
+                                   qty=max(1, qty)), 500
 
     user_id = None
     try:
@@ -1241,9 +1247,29 @@ def checkout_process():
             ]
         else:
             # One-time purchases (merch/theme/subscription MVP): treat as a simple one-time payment.
-            unit_amount_cents = int(max(0, float(amount or 0)) * 100)
+            # Validate amount before proceeding
+            if not amount or float(amount or 0) <= 0:
+                current_app.logger.error(f"Invalid amount for {kind} purchase: amount={amount}, item_id={item_id}, qty={qty}")
+                return render_template("checkout.html",
+                                       error="Invalid purchase amount. Please try again.",
+                                       csrf_token=generate_csrf_token(),
+                                       kind=kind,
+                                       artist_id=artist_id or "",
+                                       amount=amount,
+                                       item_id=item_id or "",
+                                       qty=qty), 400
+            
+            unit_amount_cents = int(max(0, float(amount)) * 100)
             if unit_amount_cents <= 0:
-                raise ValueError("Invalid amount")
+                current_app.logger.error(f"Invalid unit_amount_cents for {kind} purchase: {unit_amount_cents}")
+                return render_template("checkout.html",
+                                       error="Invalid purchase amount. Please try again.",
+                                       csrf_token=generate_csrf_token(),
+                                       kind=kind,
+                                       artist_id=artist_id or "",
+                                       amount=amount,
+                                       item_id=item_id or "",
+                                       qty=qty), 400
             # For merch, always derive title from the merch catalog item when possible.
             safe_title = (request.form.get("title") or "Ahoy Purchase").strip()[:120]
             if kind == "merch" and item_id:

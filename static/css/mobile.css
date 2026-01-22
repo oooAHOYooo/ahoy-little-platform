@@ -1939,15 +1939,15 @@
         will-change: transform, color;
     }
 
-    /* Adjust for 5 tabs (Home, Artists, Merch, Events, Profile) */
+    /* Adjust for 4 tabs (Artists, Merch, Events, Profile) */
     @media (max-width: 420px) {
         .mobile-secondary-nav .mobile-tab {
-            max-width: 60px;
+            max-width: 70px;
             padding: 6px 8px 4px;
-            font-size: 8px;
+            font-size: 9px;
         }
         .mobile-secondary-nav .mobile-tab i {
-            font-size: 16px;
+            font-size: 17px;
         }
     }
 
@@ -2056,17 +2056,17 @@
         will-change: transform, color;
     }
 
-    /* Adjust for 4 tabs (Music, Podcasts, Live TV, Videos) */
+    /* Adjust for 5 tabs (Music, Podcasts, Live TV, Videos, Radio) */
     @media (max-width: 420px) {
         .mobile-bottom-nav .mobile-tab {
-            max-width: 80px;
-            padding: 8px 8px 4px;
+            max-width: 65px;
+            padding: 8px 6px 4px;
         }
         .mobile-bottom-nav .mobile-tab i {
-            font-size: 20px;
+            font-size: 18px;
         }
         .mobile-bottom-nav .mobile-tab span {
-            font-size: 10px;
+            font-size: 9px;
         }
     }
 
