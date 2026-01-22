@@ -188,7 +188,27 @@ All payouts are tracked in the `artist_payouts` table:
 
 - `scripts/scan_artist_payouts.py` - Find artists needing payouts
 - `scripts/send_artist_payout.py` - Process payouts
+- `scripts/batch_process_payouts.py` - Batch process all pending payouts
+- `scripts/export_accounting.py` - **Generate tax-ready accounting reports**
 - `scripts/test_email_notification.py` - Test email notifications
+
+## 📊 Tax & Accounting
+
+**See:** `docs/accounting/STRIPE_ACCOUNTING_GUIDE.md` for complete accounting documentation.
+
+**Quick Export:**
+```bash
+# Generate all tax-ready reports for 2024
+python scripts/export_accounting.py --type all --year 2024
+
+# Individual reports
+python scripts/export_accounting.py --type revenue --year 2024
+python scripts/export_accounting.py --type expenses --year 2024
+python scripts/export_accounting.py --type artist-1099 --year 2024
+python scripts/export_accounting.py --type platform-revenue --year 2024
+```
+
+This generates CSV files with all transactions, ready for tax preparation.
 
 ## ❓ FAQ
 
