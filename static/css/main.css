@@ -7530,33 +7530,7 @@ opacity:0.15;
         opacity: 0.9;
     }
 
-    /* List view - compact rows */
-    .music-container .music-list {
-        margin: 0 var(--spacing-md);
-    }
-
-    .music-container .music-list .list-header,
-    .music-container .music-list .list-item {
-        grid-template-columns: 40px 1fr 60px;
-        gap: var(--spacing-sm);
-        padding: 0.6rem var(--spacing-sm);
-    }
-
-    .music-container .music-list .col-cover {
-        width: 40px;
-        height: 40px;
-        border-radius: 6px;
-    }
-
-    .music-container .music-list h4 {
-        font-size: 0.95rem;
-        margin: 0;
-    }
-
-    .music-container .music-list p,
-    .music-container .music-list .col-artist {
-        font-size: 0.8rem;
-    }
+    /* List view - handled by inline styles in music.html template */
 }
 
 @media (max-width: 360px) {
@@ -17365,7 +17339,7 @@ img.loading {
     text-transform: uppercase;
 }
 
-/* Enhanced List View */
+/* Enhanced List View - iTunes Style */
 .music-list {
     background: var(--background-medium);
     border-radius: var(--border-radius-lg);
@@ -17373,77 +17347,173 @@ img.loading {
     overflow: hidden;
 }
 
-.list-header {
+.music-list .list-header {
     display: grid;
-    grid-template-columns: 60px 1fr 120px 60px;
+    grid-template-columns: 40px 1fr 150px 150px 70px 60px;
     gap: var(--spacing-md);
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: 12px 20px;
     background: var(--background-dark);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
     font-weight: 600;
     color: var(--text-secondary);
-    font-size: var(--font-size-sm);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
-.list-item {
+.music-list .list-item {
     display: grid;
-    grid-template-columns: 60px 1fr 120px 60px;
+    grid-template-columns: 40px 1fr 150px 150px 70px 60px;
     gap: var(--spacing-md);
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.15s ease;
     align-items: center;
+    position: relative;
 }
 
-.list-item:hover {
-    background: var(--background-light);
+.music-list .list-item:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
 }
 
-.list-item:last-child {
+.music-list .list-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.music-list .list-item:last-child {
     border-bottom: none;
 }
 
-.list-item.playing {
-    background: rgba(99, 102, 241, 0.1);
+.music-list .list-item.playing {
+    background: rgba(99, 102, 241, 0.15) !important;
     border-left: 3px solid var(--primary-color);
 }
 
-.col-cover {
+.music-list .col-number {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-tertiary);
+    font-weight: 400;
+    width: 40px;
+}
+
+.music-list .list-item:hover .col-number {
+    display: none;
+}
+
+.music-list .list-item:hover::before {
+    content: '▶';
+    position: absolute;
+    left: 20px;
+    color: var(--primary-color);
+    font-size: 12px;
+    width: 40px;
+    text-align: center;
+}
+
+.music-list .col-title {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.music-list .title-with-cover {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.music-list .mini-cover {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.music-list .mini-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.music-list .title-text {
+    min-width: 0;
+    flex: 1;
+}
+
+.music-list .col-title h4 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.music-list .col-artist {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.music-list .col-album {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.music-list .col-time {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    font-weight: 400;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.music-list .col-cover {
     width: 50px;
     height: 50px;
     border-radius: var(--border-radius-sm);
     overflow: hidden;
 }
 
-.col-cover img {
+.music-list .col-cover img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.col-title h4 {
-    font-size: var(--font-size-md);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 2px 0;
-}
-
-.col-title p {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    margin: 0;
-}
-
-.col-artist {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-}
-
-.col-duration {
+.music-list .col-duration {
     font-size: var(--font-size-sm);
     color: var(--text-tertiary);
     font-weight: 500;
+}
+
+/* Tablet adjustments for iTunes-style list */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .music-list .list-header,
+    .music-list .list-item {
+        grid-template-columns: 35px 1fr 120px 120px 60px 50px;
+        gap: var(--spacing-sm);
+        padding: 10px 16px;
+    }
+    
+    .music-list .col-album {
+        font-size: 12px;
+    }
+    
+    .music-list .col-artist {
+        font-size: 12px;
+    }
 }
 
 .col-type {
