@@ -44,6 +44,12 @@ Make a test boost or purchase, and you should receive an email notification!
 **When someone buys merch:**
 - Email with purchase details
 
+**When a new user registers:**
+- Email with user details (email, username, display name)
+
+**When a user funds their wallet:**
+- Email with funding amount and wallet balance (before/after)
+
 ## 💰 Sending Money to Artists
 
 ### Quick Example: Send $25 to Rob Meglio

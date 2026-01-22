@@ -54,6 +54,20 @@ export AHOY_ADMIN_EMAIL=alex@ahoy.ooo
 - Buyer email (if logged in)
 - Stripe session ID
 
+**User Registration Notifications:**
+- User ID
+- Email address
+- Username
+- Display name
+- Registration timestamp
+
+**Wallet Funding Notifications:**
+- User email and ID
+- Amount added to wallet
+- Balance before funding
+- Balance after funding
+- Stripe session ID
+
 ### Artist Email Notifications (Optional)
 
 To notify artists when they receive boosts, set environment variables:
