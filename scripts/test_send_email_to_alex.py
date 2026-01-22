@@ -2,15 +2,20 @@
 """
 Test script to send a test email directly to alex@ahoy.ooo.
 This verifies the email system is working and emails are being sent.
+
+Tests both notify_admin and notify_user functions with rate limiting.
 """
 import os
 import sys
+import time
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from services.emailer import send_email, can_send_email
+from services.emailer import can_send_email
 from services.notifications import (
+    notify_admin,
+    notify_user,
     notify_boost_received,
     notify_merch_purchase,
     notify_user_registered,
@@ -43,109 +48,141 @@ def main():
         print("\n" + "=" * 60)
         return
     
-    # Test 1: Simple test email
-    print("📧 Test 1: Sending simple test email...")
-    result = send_email(
-        to_email=target_email,
-        subject="🧪 Test Email - Ahoy Notifications System",
-        text="""This is a test email to verify the Ahoy notification system is working!
+    # Test 1: notify_admin
+    print("📧 Test 1: Testing notify_admin()...")
+    time.sleep(0.6)  # Space out sends to avoid rate limits
+    admin_result = notify_admin(
+        "🧪 Test Email - Admin Notification",
+        """This is a test of the notify_admin() function.
 
-If you receive this email, the notification system is properly configured.
+If you receive this email, admin notifications are working correctly.
 
-You will receive emails for:
-- New user registrations
-- Wallet funding
-- Artist boosts
-- Merch purchases
-- Daily payout summaries
-
-Best regards,
-Ahoy Platform
-""",
-        html="""
-<h2>🧪 Test Email - Ahoy Notifications System</h2>
-<p>This is a test email to verify the Ahoy notification system is working!</p>
-<p>If you receive this email, the notification system is properly configured.</p>
-<h3>You will receive emails for:</h3>
-<ul>
-    <li>New user registrations</li>
-    <li>Wallet funding</li>
-    <li>Artist boosts</li>
-    <li>Merch purchases</li>
-    <li>Daily payout summaries</li>
-</ul>
-<p>Best regards,<br>Ahoy Platform</p>
+The system uses rate limiting with retry logic to handle Resend's 2 requests/second limit.
 """
     )
     
-    if result.get("ok"):
-        print(f"✅ Test email sent successfully via {result.get('provider')}")
-        print(f"   Check {target_email} for the email")
+    if admin_result.get("ok"):
+        print(f"✅ Admin notification sent successfully via {admin_result.get('provider')}")
     else:
-        print(f"❌ Failed to send test email: {result.get('detail')}")
-        return
+        print(f"❌ Failed to send admin notification: {admin_result.get('detail')}")
+        if not can_send_email():
+            print("   Email service not configured - this is expected locally")
+            return
     
-    print()
+    # Test 2: notify_user
+    print("\n📧 Test 2: Testing notify_user()...")
+    time.sleep(0.6)  # Space out sends
+    user_result = notify_user(
+        target_email,
+        "🧪 Test Email - User Notification",
+        """This is a test of the notify_user() function.
+
+If you receive this email, user notifications are working correctly.
+
+The system includes:
+- Rate limiting with exponential backoff
+- Automatic retry on 429 errors
+- Environment labels for non-production
+"""
+    )
     
-    # Test 2: Boost notification
-    print("📧 Test 2: Sending boost notification...")
+    if user_result.get("ok"):
+        print(f"✅ User notification sent successfully via {user_result.get('provider')}")
+    else:
+        print(f"❌ Failed to send user notification: {user_result.get('detail')}")
+    
+    # Test 3: Boost notification (sends to admin + user)
+    print("\n📧 Test 3: Testing boost notification (admin + user)...")
+    time.sleep(0.6)
     boost_result = notify_boost_received(
         artist_id="rob-meglio",
         artist_name="Rob Meglio",
         boost_amount=Decimal("25.00"),
         artist_payout=Decimal("25.00"),
         total_paid=Decimal("27.50"),
-        tipper_email="test@example.com",
+        tipper_email=target_email,  # Send to target email as user
         stripe_session_id="test_session_123"
     )
-    if boost_result.get("admin_notified"):
-        print(f"✅ Boost notification sent to {target_email}")
-    else:
-        print("⚠️  Boost notification not sent")
+    print(f"   Admin notified: {'✅' if boost_result.get('admin_notified') else '❌'}")
+    print(f"   User notified: {'✅' if boost_result.get('user_notified') else '❌'}")
     
-    print()
-    
-    # Test 3: User registration
-    print("📧 Test 3: Sending user registration notification...")
+    # Test 4: User registration (sends to admin + user)
+    print("\n📧 Test 4: Testing user registration (admin + user)...")
+    time.sleep(0.6)
     reg_result = notify_user_registered(
         user_id=999,
-        email="newuser@example.com",
-        username="newuser",
-        display_name="New User"
+        email=target_email,
+        username="testuser",
+        display_name="Test User"
     )
-    if reg_result.get("admin_notified"):
-        print(f"✅ User registration notification sent to {target_email}")
-    else:
-        print("⚠️  User registration notification not sent")
+    print(f"   Admin notified: {'✅' if reg_result.get('admin_notified') else '❌'}")
+    print(f"   User notified: {'✅' if reg_result.get('user_notified') else '❌'}")
     
-    print()
-    
-    # Test 4: Wallet funding
-    print("📧 Test 4: Sending wallet funding notification...")
+    # Test 5: Wallet funding (sends to admin + user)
+    print("\n📧 Test 5: Testing wallet funding (admin + user)...")
+    time.sleep(0.6)
     wallet_result = notify_wallet_funded(
         user_id=999,
-        user_email="user@example.com",
+        user_email=target_email,
         amount=Decimal("50.00"),
         balance_before=Decimal("0.00"),
         balance_after=Decimal("50.00"),
         stripe_session_id="test_session_789"
     )
-    if wallet_result.get("admin_notified"):
-        print(f"✅ Wallet funding notification sent to {target_email}")
-    else:
-        print("⚠️  Wallet funding notification not sent")
+    print(f"   Admin notified: {'✅' if wallet_result.get('admin_notified') else '❌'}")
+    print(f"   User notified: {'✅' if wallet_result.get('user_notified') else '❌'}")
     
-    print()
+    # Test 6: Merch purchase (sends to admin + user)
+    print("\n📧 Test 6: Testing merch purchase (admin + user)...")
+    time.sleep(0.6)
+    merch_result = notify_merch_purchase(
+        purchase_id=999,
+        item_id="merch_123",
+        item_name="Test T-Shirt",
+        quantity=1,
+        amount=Decimal("20.00"),
+        total=Decimal("22.00"),
+        buyer_email=target_email,
+        stripe_session_id="test_session_456"
+    )
+    print(f"   Admin notified: {'✅' if merch_result.get('admin_notified') else '❌'}")
+    print(f"   User notified: {'✅' if merch_result.get('user_notified') else '❌'}")
+    
+    # Summary
+    print("\n" + "=" * 60)
+    print("📊 Test Summary:")
     print("=" * 60)
-    print("✅ All email tests completed!")
+    
+    tests = [
+        ("notify_admin", admin_result.get("ok")),
+        ("notify_user", user_result.get("ok")),
+        ("Boost (admin)", boost_result.get("admin_notified")),
+        ("Boost (user)", boost_result.get("user_notified")),
+        ("Registration (admin)", reg_result.get("admin_notified")),
+        ("Registration (user)", reg_result.get("user_notified")),
+        ("Wallet (admin)", wallet_result.get("admin_notified")),
+        ("Wallet (user)", wallet_result.get("user_notified")),
+        ("Merch (admin)", merch_result.get("admin_notified")),
+        ("Merch (user)", merch_result.get("user_notified")),
+    ]
+    
+    passed = sum(1 for _, ok in tests if ok)
+    total = len(tests)
+    
+    for name, ok in tests:
+        status = "✅ PASS" if ok else "❌ FAIL"
+        print(f"   {status}: {name}")
+    
+    print(f"\n   Results: {passed}/{total} tests passed")
     print(f"   Check {target_email} for test emails")
     print("=" * 60)
     
     # Verify admin email function
     admin_email = _get_admin_email()
-    print(f"\n📋 Admin Email Configuration:")
-    print(f"   _get_admin_email() returns: {admin_email or 'None (will use alex@ahoy.ooo as fallback)'}")
-    print(f"   Target email: {target_email}")
+    print(f"\n📋 Configuration:")
+    print(f"   Admin Email: {admin_email}")
+    print(f"   Target Email: {target_email}")
+    print(f"   Email Service: {'✅ Configured' if can_send_email() else '❌ Not configured'}")
 
 if __name__ == "__main__":
     main()

@@ -170,22 +170,7 @@ def register():
             # Log user in with Flask-Login
             login_user(user, remember=True)
 
-            # Optional welcome email (non-blocking)
-            try:
-                if can_send_email() and user.email:
-                    send_email(
-                        user.email,
-                        subject="Welcome to Ahoy ✨",
-                        text=(
-                            "You just claimed your Ahoy account — welcome!\n\n"
-                            f"Your username: @{user.username}\n\n"
-                            "Tip: Save tracks, build playlists, and make your profile yours.\n"
-                        ),
-                    )
-            except Exception:
-                pass
-
-            # Notify admin of new user registration
+            # Notify admin and user of new registration (unified)
             try:
                 from services.notifications import notify_user_registered
                 notify_user_registered(
@@ -256,7 +241,19 @@ def password_reset_request():
                 f"Reset it here (link expires in 1 hour):\n{reset_link}\n\n"
                 "If you didn’t request this, you can ignore this email."
             )
-            send_email(user.email, subject=subject, text=text)
+            # Notify user
+            from services.notifications import notify_user
+            notify_user(user.email, subject=subject, text=text)
+            
+            # Optional: Notify admin (non-blocking)
+            try:
+                from services.notifications import notify_admin
+                notify_admin(
+                    f"Password reset requested for {user.email}",
+                    f"Password reset link requested for user {user.email} (ID: {user.id})"
+                )
+            except Exception:
+                pass  # Don't fail password reset if admin notification fails
     except Exception:
         # Never leak details; keep response stable.
         pass

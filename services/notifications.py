@@ -1,8 +1,12 @@
 """
 Notification service for boosts and merch purchases.
 Sends email notifications to admins and optionally to artists.
+
+Unified notification system with rate limiting and retry logic.
 """
 import os
+import time
+import random
 import logging
 from decimal import Decimal
 from datetime import datetime
@@ -19,6 +23,160 @@ def _get_admin_email() -> Optional[str]:
         return email
     # Fallback to alex@ahoy.ooo if not set (for production)
     return "alex@ahoy.ooo"
+
+
+def _get_env_label() -> str:
+    """Get environment label for email subjects."""
+    env = (os.getenv("AHOY_ENV") or os.getenv("FLASK_ENV") or "prod").strip().lower()
+    if env == "production" or env == "prod":
+        return ""  # No label for production
+    return f"[{env}] "
+
+
+def send_email_with_retry(
+    to_email: str,
+    subject: str,
+    text: str,
+    html: Optional[str] = None,
+    max_retries: int = 5
+) -> Dict[str, Any]:
+    """
+    Send email with retry logic for rate limiting (429 errors).
+    
+    Implements exponential backoff with jitter:
+    - Retry delays: 0.7s, 1.2s, 2.0s, 3.5s, 5.0s
+    - Adds random jitter +/- 0.2s to avoid thundering herd
+    - Never throws exceptions; returns ok=False on failure
+    
+    Args:
+        to_email: Recipient email address
+        subject: Email subject
+        text: Plain text email body
+        html: Optional HTML email body
+        max_retries: Maximum number of retry attempts (default: 5)
+    
+    Returns:
+        Dict with keys: ok (bool), provider (str), detail (str|dict)
+    """
+    retry_delays = [0.7, 1.2, 2.0, 3.5, 5.0]
+    
+    for attempt in range(max_retries + 1):
+        result = send_email(to_email, subject, text, html)
+        
+        # Success - return immediately
+        if result.get("ok"):
+            if attempt > 0:
+                log.info(f"Email sent successfully after {attempt} retry(ies)")
+            return result
+        
+        # Check if it's a rate limit error (429)
+        detail = result.get("detail", {})
+        is_rate_limit = False
+        
+        if isinstance(detail, dict):
+            status = detail.get("status")
+            body = detail.get("body", "")
+            if status == 429 or "rate_limit" in str(body).lower() or "429" in str(body):
+                is_rate_limit = True
+        
+        # If not rate limit or last attempt, return error
+        if not is_rate_limit or attempt >= max_retries:
+            if attempt > 0:
+                log.warning(f"Email send failed after {attempt} retries: {result}")
+            return result
+        
+        # Calculate delay with jitter
+        base_delay = retry_delays[min(attempt, len(retry_delays) - 1)]
+        jitter = random.uniform(-0.2, 0.2)
+        delay = max(0.1, base_delay + jitter)  # Ensure at least 0.1s
+        
+        log.info(f"Rate limit hit (429), retrying in {delay:.2f}s (attempt {attempt + 1}/{max_retries})")
+        time.sleep(delay)
+    
+    # Should never reach here, but return last result
+    return result
+
+
+def notify_admin(
+    subject: str,
+    text: str,
+    tags: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
+    """
+    Send email notification to admin.
+    
+    Args:
+        subject: Email subject (will be prefixed with environment label)
+        text: Plain text email body
+        tags: Optional metadata tags (for future use)
+    
+    Returns:
+        Dict with keys: ok (bool), provider (str), detail (str|dict)
+    """
+    if not can_send_email():
+        log.warning("Email not configured, skipping admin notification")
+        return {"ok": False, "provider": "none", "detail": "email_not_configured"}
+    
+    admin_email = _get_admin_email()
+    if not admin_email:
+        log.warning("AHOY_ADMIN_EMAIL not set, skipping admin notification")
+        return {"ok": False, "provider": "none", "detail": "admin_email_not_set"}
+    
+    # Add environment label to subject
+    env_label = _get_env_label()
+    prefixed_subject = f"{env_label}{subject}"
+    
+    # Generate HTML from text (simple conversion)
+    html = text.replace("\n", "<br>\n")
+    
+    result = send_email_with_retry(admin_email, prefixed_subject, text, html)
+    
+    if not result.get("ok"):
+        log.error(f"Failed to notify admin: {result}")
+    
+    return result
+
+
+def notify_user(
+    to_email: str,
+    subject: str,
+    text: str,
+    tags: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
+    """
+    Send email notification to user.
+    
+    Args:
+        to_email: User's email address
+        subject: Email subject (environment label added only for non-prod)
+        text: Plain text email body
+        tags: Optional metadata tags (for future use)
+    
+    Returns:
+        Dict with keys: ok (bool), provider (str), detail (str|dict)
+    """
+    if not can_send_email():
+        log.warning("Email not configured, skipping user notification")
+        return {"ok": False, "provider": "none", "detail": "email_not_configured"}
+    
+    to_email = (to_email or "").strip()
+    if not to_email or "@" not in to_email:
+        log.warning(f"Invalid email address: {to_email}")
+        return {"ok": False, "provider": "none", "detail": "invalid_email"}
+    
+    # Add environment label only for non-production
+    env_label = _get_env_label()
+    prefixed_subject = f"{env_label}{subject}" if env_label else subject
+    
+    # Generate HTML from text (simple conversion)
+    html = text.replace("\n", "<br>\n")
+    
+    result = send_email_with_retry(to_email, prefixed_subject, text, html)
+    
+    if not result.get("ok"):
+        log.warning(f"Failed to notify user {to_email}: {result}")
+    
+    return result
 
 
 def _get_artist_email(artist_id: str) -> Optional[str]:
@@ -95,10 +253,8 @@ def notify_boost_received(
     total_str = f"${total_paid:.2f}"
     
     # Notify admin
-    if admin_email:
-        subject = f"💰 New Boost: ${boost_amount:.2f} to {artist_name or artist_id}"
-        text = f"""
-New boost received!
+    admin_subject = f"💰 New Boost: ${boost_amount:.2f} to {artist_name or artist_id}"
+    admin_text = f"""New boost received!
 
 Artist: {artist_name or artist_id}
 Boost Amount: {boost_str}
@@ -110,22 +266,8 @@ Stripe Session: {stripe_session_id or 'N/A'}
 You can process the payout using the script:
 python scripts/send_artist_payout.py --artist-id "{artist_id}" --amount {artist_payout}
 """
-        html = f"""
-<h2>💰 New Boost Received</h2>
-<p><strong>Artist:</strong> {artist_name or artist_id}</p>
-<p><strong>Boost Amount:</strong> {boost_str}</p>
-<p><strong>Artist Payout:</strong> {payout_str}</p>
-<p><strong>Total Paid:</strong> {total_str}</p>
-<p><strong>Tipper:</strong> {tipper_email or 'Guest'}</p>
-<p><strong>Stripe Session:</strong> {stripe_session_id or 'N/A'}</p>
-<hr>
-<p>You can process the payout using the script:</p>
-<pre>python scripts/send_artist_payout.py --artist-id "{artist_id}" --amount {artist_payout}</pre>
-"""
-        result = send_email(admin_email, subject, text, html)
-        results["admin_notified"] = result.get("ok", False)
-        if not result.get("ok"):
-            log.error(f"Failed to notify admin of boost: {result}")
+    admin_result = notify_admin(admin_subject, admin_text)
+    results["admin_notified"] = admin_result.get("ok", False)
     
     # Notify artist (optional)
     if artist_email:
@@ -143,10 +285,8 @@ Thank you for creating amazing content!
 <p>The funds will be processed and sent to you soon.</p>
 <p>Thank you for creating amazing content!</p>
 """
-        result = send_email(artist_email, subject, text, html)
-        results["artist_notified"] = result.get("ok", False)
-        if not result.get("ok"):
-            log.debug(f"Failed to notify artist of boost: {result}")
+        artist_result = notify_user(artist_email, subject, text)
+        results["artist_notified"] = artist_result.get("ok", False)
     
     return results
 
@@ -172,12 +312,9 @@ def notify_merch_purchase(
         log.warning("Email not configured, skipping merch purchase notification")
         return results
     
-    admin_email = _get_admin_email()
-    
-    if admin_email:
-        subject = f"🛍️ New Merch Purchase: ${total:.2f}"
-        text = f"""
-New merch purchase!
+    # Notify admin
+    admin_subject = f"🛍️ New Merch Purchase: ${total:.2f}"
+    admin_text = f"""New merch purchase!
 
 Purchase ID: {purchase_id}
 Item: {item_name or item_id or 'Unknown'}
@@ -187,20 +324,27 @@ Total: ${total:.2f}
 Buyer: {buyer_email or 'Guest'}
 Stripe Session: {stripe_session_id or 'N/A'}
 """
-        html = f"""
-<h2>🛍️ New Merch Purchase</h2>
-<p><strong>Purchase ID:</strong> {purchase_id}</p>
-<p><strong>Item:</strong> {item_name or item_id or 'Unknown'}</p>
-<p><strong>Quantity:</strong> {quantity}</p>
-<p><strong>Amount:</strong> ${amount:.2f}</p>
-<p><strong>Total:</strong> ${total:.2f}</p>
-<p><strong>Buyer:</strong> {buyer_email or 'Guest'}</p>
-<p><strong>Stripe Session:</strong> {stripe_session_id or 'N/A'}</p>
+    admin_result = notify_admin(admin_subject, admin_text)
+    results["admin_notified"] = admin_result.get("ok", False)
+    
+    # Notify user (receipt)
+    if buyer_email:
+        user_subject = f"🛍️ Order Confirmation: {item_name or 'Merch Purchase'}"
+        user_text = f"""Thank you for your purchase!
+
+Order Details:
+Item: {item_name or item_id or 'Merch Item'}
+Quantity: {quantity}
+Amount: ${amount:.2f}
+Total: ${total:.2f}
+Purchase ID: {purchase_id}
+
+Your order has been confirmed and will be processed soon.
+
+Thank you for supporting independent artists!
 """
-        result = send_email(admin_email, subject, text, html)
-        results["admin_notified"] = result.get("ok", False)
-        if not result.get("ok"):
-            log.error(f"Failed to notify admin of merch purchase: {result}")
+        user_result = notify_user(buyer_email, user_subject, user_text)
+        results["user_notified"] = user_result.get("ok", False)
     
     return results
 
@@ -213,21 +357,19 @@ def notify_user_registered(
 ) -> Dict[str, Any]:
     """
     Send email notification when a new user registers.
+    Sends to both admin and user.
     
     Returns dict with notification results.
     """
-    results = {"admin_notified": False}
+    results = {"admin_notified": False, "user_notified": False}
     
     if not can_send_email():
         log.warning("Email not configured, skipping user registration notification")
         return results
     
-    admin_email = _get_admin_email()
-    
-    if admin_email:
-        subject = f"👤 New User Registration: {email}"
-        text = f"""
-New user registered!
+    # Notify admin
+    admin_subject = f"👤 New User Registration: {email or username or 'Unknown'}"
+    admin_text = f"""New user registered!
 
 User ID: {user_id}
 Email: {email}
@@ -235,18 +377,31 @@ Username: {username or 'N/A'}
 Display Name: {display_name or 'N/A'}
 Registered: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}
 """
-        html = f"""
-<h2>👤 New User Registration</h2>
-<p><strong>User ID:</strong> {user_id}</p>
-<p><strong>Email:</strong> {email}</p>
-<p><strong>Username:</strong> {username or 'N/A'}</p>
-<p><strong>Display Name:</strong> {display_name or 'N/A'}</p>
-<p><strong>Registered:</strong> {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
+    admin_result = notify_admin(admin_subject, admin_text)
+    results["admin_notified"] = admin_result.get("ok", False)
+    
+    # Notify user (welcome email)
+    if email:
+        base_url = os.getenv("BASE_URL") or "https://app.ahoy.ooo"
+        user_subject = "Welcome to Ahoy Indie Media ✨"
+        user_text = f"""Welcome to Ahoy Indie Media!
+
+You just created your account — we're excited to have you!
+
+Your username: @{username or 'user'}
+
+Get started:
+- Discover new music and shows
+- Create playlists
+- Support your favorite artists
+- Build your profile
+
+Visit us: {base_url}
+
+Thank you for joining the Ahoy community!
 """
-        result = send_email(admin_email, subject, text, html)
-        results["admin_notified"] = result.get("ok", False)
-        if not result.get("ok"):
-            log.error(f"Failed to notify admin of user registration: {result}")
+        user_result = notify_user(email, user_subject, user_text)
+        results["user_notified"] = user_result.get("ok", False)
     
     return results
 
@@ -261,21 +416,19 @@ def notify_wallet_funded(
 ) -> Dict[str, Any]:
     """
     Send email notification when a user funds their wallet.
+    Sends to both admin and user.
     
     Returns dict with notification results.
     """
-    results = {"admin_notified": False}
+    results = {"admin_notified": False, "user_notified": False}
     
     if not can_send_email():
         log.warning("Email not configured, skipping wallet funding notification")
         return results
     
-    admin_email = _get_admin_email()
-    
-    if admin_email:
-        subject = f"💰 Wallet Funded: ${amount:.2f} by {user_email}"
-        text = f"""
-User funded their wallet!
+    # Notify admin
+    admin_subject = f"💰 Wallet Funded: ${amount:.2f} by {user_email}"
+    admin_text = f"""User funded their wallet!
 
 User: {user_email} (ID: {user_id})
 Amount Added: ${amount:.2f}
@@ -283,17 +436,23 @@ Balance Before: ${balance_before:.2f}
 Balance After: ${balance_after:.2f}
 Stripe Session: {stripe_session_id or 'N/A'}
 """
-        html = f"""
-<h2>💰 Wallet Funded</h2>
-<p><strong>User:</strong> {user_email} (ID: {user_id})</p>
-<p><strong>Amount Added:</strong> ${amount:.2f}</p>
-<p><strong>Balance Before:</strong> ${balance_before:.2f}</p>
-<p><strong>Balance After:</strong> ${balance_after:.2f}</p>
-<p><strong>Stripe Session:</strong> {stripe_session_id or 'N/A'}</p>
+    admin_result = notify_admin(admin_subject, admin_text)
+    results["admin_notified"] = admin_result.get("ok", False)
+    
+    # Notify user (confirmation)
+    if user_email:
+        user_subject = f"💰 Wallet Funded: ${amount:.2f} Added"
+        user_text = f"""Your wallet has been funded!
+
+Amount Added: ${amount:.2f}
+Previous Balance: ${balance_before:.2f}
+New Balance: ${balance_after:.2f}
+
+You can now use your wallet balance for instant checkout on boosts and merch purchases.
+
+Thank you for supporting independent artists!
 """
-        result = send_email(admin_email, subject, text, html)
-        results["admin_notified"] = result.get("ok", False)
-        if not result.get("ok"):
-            log.error(f"Failed to notify admin of wallet funding: {result}")
+        user_result = notify_user(user_email, user_subject, user_text)
+        results["user_notified"] = user_result.get("ok", False)
     
     return results
