@@ -325,17 +325,29 @@ function mySavesLibrary() {
         
         async unsaveContent(item) {
             try {
-                const response = await fetch('/api/bookmarks', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
+                // Use the unified bookmarks system
+                if (window.AhoyBookmarks) {
+                    const bookmarkItem = {
+                        type: item.type || 'track',
                         id: item.id,
-                        kind: item.type || 'track'
-                    })
-                });
-                
-                if (response.ok) {
+                        title: item.title,
+                        artwork: item.artwork
+                    };
+                    window.AhoyBookmarks.toggle(bookmarkItem);
                     this.savedContent = this.savedContent.filter(i => i.id !== item.id);
+                } else {
+                    // Fallback: need to find bookmark ID first, then delete
+                    const response = await fetch('/api/bookmarks');
+                    if (response.ok) {
+                        const data = await response.json();
+                        const bookmark = (data.items || []).find(b => 
+                            b.media_id == item.id && b.media_type === (item.type === 'track' ? 'music' : item.type)
+                        );
+                        if (bookmark) {
+                            await fetch(`/api/bookmarks/${bookmark.id}`, { method: 'DELETE' });
+                        }
+                        this.savedContent = this.savedContent.filter(i => i.id !== item.id);
+                    }
                 }
             } catch (error) {
                 console.error('Error unsaving content:', error);

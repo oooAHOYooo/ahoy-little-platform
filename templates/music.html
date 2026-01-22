@@ -515,27 +515,36 @@ function musicLibrary() {
                 const isCurrentlySaved = this.isSaved(track);
                 console.log('Currently saved:', isCurrentlySaved);
                 
-                const response = await fetch('/api/activity/bookmark', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
+                // Use the unified bookmarks system
+                if (window.AhoyBookmarks) {
+                    const item = {
+                        type: 'track',
                         id: track.id,
-                        kind: 'track'
-                    })
-                });
-                
-                console.log('Response status:', response.status);
-                const result = await response.json();
-                console.log('Response data:', result);
-                
-                if (response.ok) {
-                    // Update UI state
-                    track.saved = result.status === 'bookmarked';
-                    
-                    this.showNotification(result.status === 'bookmarked' ? 'Bookmarked track!' : 'Removed from bookmarks', 'success');
+                        title: track.title,
+                        artwork: track.cover_art
+                    };
+                    window.AhoyBookmarks.toggle(item);
+                    track.saved = !isCurrentlySaved;
+                    this.showNotification(!isCurrentlySaved ? 'Bookmarked track!' : 'Removed from bookmarks', 'success');
                 } else {
-                    console.error('Bookmark failed:', result);
-                    this.showNotification(result.error || 'Failed to bookmark track', 'error');
+                    // Fallback to API
+                    const response = await fetch('/api/bookmarks', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            media_id: String(track.id),
+                            media_type: 'music'
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        track.saved = result.persisted !== false;
+                        this.showNotification('Bookmarked track!', 'success');
+                    } else {
+                        console.error('Bookmark failed');
+                        this.showNotification('Failed to bookmark track', 'error');
+                    }
                 }
             } catch (error) {
                 console.error('Error bookmarking track:', error);

@@ -32,6 +32,7 @@ def me_activity():
 @bp.post("/bookmark")
 @limiter.limit("60/minute")
 def bookmark_toggle():
+    """Legacy endpoint - redirects to /api/bookmarks for PostgreSQL storage"""
     body = request.get_json(silent=True) or {}
     item_id = (body.get("id") or "").strip()
     kind = (body.get("kind") or "track").strip()
@@ -45,6 +46,14 @@ def bookmark_toggle():
     if not item_id:
         return jsonify({"error": "missing id"}), 400
 
+    # Map old format to new format
+    media_type_map = {
+        "track": "music",
+        "show": "show",
+        "artist": "artist"
+    }
+    media_type = media_type_map.get(kind, "music")
+    
     # For guests, just return success without persisting
     try:
         from flask_login import current_user
@@ -54,21 +63,46 @@ def bookmark_toggle():
         # No current_user available (guest)
         return jsonify({"ok": True, "status": "bookmarked", "id": item_id, "kind": kind, "persisted": False})
 
-    # For logged-in users, use existing logic
-    store = read_json(DATA_PATH, {})
-    bucket = _user_bucket(store, current_user.id)
-    key = f"{kind}:{item_id}"
+    # For logged-in users, use PostgreSQL via /api/bookmarks
+    try:
+        # Check if bookmark exists
+        from db import get_session
+        from models import Bookmark
+        with get_session() as session:
+            existing = (
+                session.query(Bookmark)
+                .filter(Bookmark.user_id == current_user.id, 
+                       Bookmark.media_id == item_id, 
+                       Bookmark.media_type == media_type)
+                .first()
+            )
+            
+            if existing:
+                # Remove bookmark
+                session.delete(existing)
+                status = "removed"
+            else:
+                # Add bookmark
+                b = Bookmark(user_id=current_user.id, media_id=item_id, media_type=media_type)
+                session.add(b)
+                status = "bookmarked"
+        
+        return jsonify({"ok": True, "status": status, "id": item_id, "kind": kind, "persisted": True})
+    except Exception as e:
+        # Fallback to legacy JSON storage if DB fails
+        store = read_json(DATA_PATH, {})
+        bucket = _user_bucket(store, current_user.id)
+        key = f"{kind}:{item_id}"
 
-    if key in bucket["bookmarks"]:
-        bucket["bookmarks"].remove(key)
-        status = "removed"
-    else:
-        bucket["bookmarks"].append(key)
-        status = "bookmarked"
+        if key in bucket["bookmarks"]:
+            bucket["bookmarks"].remove(key)
+            status = "removed"
+        else:
+            bucket["bookmarks"].append(key)
+            status = "bookmarked"
 
-    write_json(DATA_PATH, store)
-    # Removed: gamify hook (feature removed)
-    return jsonify({"ok": True, "status": status, "id": item_id, "kind": kind, "persisted": True})
+        write_json(DATA_PATH, store)
+        return jsonify({"ok": True, "status": status, "id": item_id, "kind": kind, "persisted": True})
 
 @bp.post("/played")
 @limiter.limit("120/minute")

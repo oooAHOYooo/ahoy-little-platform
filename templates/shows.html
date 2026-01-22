@@ -425,19 +425,34 @@ function showsPage() {
         async saveShow(show) {
             try {
                 const isCurrentlySaved = this.isSaved(show);
-                const response = await fetch('/api/bookmarks', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        id: show.id,
-                        kind: 'show'
-                    })
-                });
                 
-                if (response.ok) {
-                    const result = await response.json();
-                    show.saved = result.status === 'bookmarked';
-                    this.showNotification(result.status === 'bookmarked' ? 'Bookmarked show' : 'Removed from bookmarks', 'success');
+                // Use the unified bookmarks system
+                if (window.AhoyBookmarks) {
+                    const item = {
+                        type: 'show',
+                        id: show.id,
+                        title: show.title,
+                        artwork: show.thumbnail
+                    };
+                    window.AhoyBookmarks.toggle(item);
+                    show.saved = !isCurrentlySaved;
+                    this.showNotification(!isCurrentlySaved ? 'Bookmarked show' : 'Removed from bookmarks', 'success');
+                } else {
+                    // Fallback to API
+                    const response = await fetch('/api/bookmarks', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            media_id: String(show.id),
+                            media_type: 'show'
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        show.saved = result.persisted !== false;
+                        this.showNotification('Bookmarked show', 'success');
+                    }
                 }
             } catch (error) {
                 console.error('Error bookmarking show:', error);
