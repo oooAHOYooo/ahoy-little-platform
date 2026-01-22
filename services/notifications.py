@@ -15,7 +15,10 @@ log = logging.getLogger(__name__)
 def _get_admin_email() -> Optional[str]:
     """Get admin email from environment variable."""
     email = (os.getenv("AHOY_ADMIN_EMAIL") or os.getenv("SUPPORT_EMAIL") or "").strip()
-    return email if email else None
+    if email:
+        return email
+    # Fallback to alex@ahoy.ooo if not set (for production)
+    return "alex@ahoy.ooo"
 
 
 def _get_artist_email(artist_id: str) -> Optional[str]:
