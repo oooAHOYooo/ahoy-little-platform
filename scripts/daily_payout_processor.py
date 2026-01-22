@@ -100,21 +100,70 @@ def _get_artist_email(artist_id: str) -> Optional[str]:
 def get_pending_tips_for_artist(artist_id: str, db_session) -> List[Tip]:
     """Get all tips that haven't been included in a completed payout."""
     # Get all tips for this artist
-    all_tips = db_session.query(Tip).filter(
-        Tip.artist_id == str(artist_id)
-    ).order_by(Tip.created_at).all()
+    # Use try/except to handle missing columns in older database schemas
+    try:
+        all_tips = db_session.query(Tip).filter(
+            Tip.artist_id == str(artist_id)
+        ).order_by(Tip.created_at).all()
+    except Exception as e:
+        # If there's a column error, try selecting only basic columns
+        # This handles cases where database hasn't been fully migrated
+        print(f"⚠️  Warning: Could not load tips with full model, trying basic query: {e}")
+        try:
+            from sqlalchemy import text
+            # Query using raw SQL to avoid model column issues
+            result = db_session.execute(
+                text("SELECT id, artist_id, amount, artist_payout, created_at FROM tips WHERE artist_id = :artist_id ORDER BY created_at"),
+                {"artist_id": str(artist_id)}
+            )
+            # Convert to Tip objects manually
+            all_tips = []
+            for row in result:
+                tip = Tip()
+                tip.id = row.id
+                tip.artist_id = row.artist_id
+                tip.amount = row.amount
+                tip.artist_payout = getattr(row, 'artist_payout', None) or row.amount
+                tip.created_at = row.created_at
+                all_tips.append(tip)
+        except Exception as e2:
+            # Final fallback: use only basic columns that should always exist
+            try:
+                from sqlalchemy import text
+                result = db_session.execute(
+                    text("SELECT id, artist_id, amount, created_at FROM tips WHERE artist_id = :artist_id ORDER BY created_at"),
+                    {"artist_id": str(artist_id)}
+                )
+                all_tips = []
+                for row in result:
+                    tip = Tip()
+                    tip.id = row.id
+                    tip.artist_id = row.artist_id
+                    tip.amount = row.amount
+                    tip.created_at = row.created_at
+                    # artist_payout defaults to amount if column doesn't exist
+                    tip.artist_payout = tip.amount
+                    all_tips.append(tip)
+            except Exception as e3:
+                print(f"⚠️  Could not load tips for {artist_id}: {e3}")
+                return []
     
     # Get all completed payouts and their related tip IDs
-    completed_payouts = db_session.query(ArtistPayout).filter(
-        ArtistPayout.artist_id == str(artist_id),
-        ArtistPayout.status == "completed"
-    ).all()
-    
-    # Collect all tip IDs that have been paid out
+    # Handle case where artist_payouts table doesn't exist yet
     paid_tip_ids = set()
-    for payout in completed_payouts:
-        if payout.related_tip_ids:
-            paid_tip_ids.update(payout.related_tip_ids)
+    try:
+        completed_payouts = db_session.query(ArtistPayout).filter(
+            ArtistPayout.artist_id == str(artist_id),
+            ArtistPayout.status == "completed"
+        ).all()
+        
+        # Collect all tip IDs that have been paid out
+        for payout in completed_payouts:
+            if payout.related_tip_ids:
+                paid_tip_ids.update(payout.related_tip_ids)
+    except Exception:
+        # Table doesn't exist or other error - treat as no payouts completed yet
+        pass
     
     # Filter out tips that have been paid
     pending_tips = [tip for tip in all_tips if tip.id not in paid_tip_ids]
@@ -160,8 +209,9 @@ def scan_pending_payouts(min_amount: Decimal = Decimal("0.01")) -> List[Dict[str
                         break
             
             if pending_tips:
+                # Safely get amount, handling cases where artist_payout might not exist
                 total_pending = sum(
-                    Decimal(str(tip.artist_payout or tip.amount)) 
+                    Decimal(str(getattr(tip, 'artist_payout', None) or tip.amount)) 
                     for tip in pending_tips
                 )
                 
