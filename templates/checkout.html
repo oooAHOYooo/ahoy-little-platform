@@ -101,26 +101,7 @@
                     {% endif %}
                 </div>
                 {% endif %}
-                {% else %}
-                <div class="bg-white/5 rounded-lg p-4 border border-white/10 backdrop-filter: blur(12px) saturate(140%); -webkit-backdrop-filter: blur(12px) saturate(140%);">
-                    <p class="text-white/60 text-sm">Item</p>
-                    <p class="text-lg font-semibold">{{ title or 'Item' }}</p>
-                    <div class="flex justify-between text-sm mt-2">
-                        <span class="text-white/70">Qty</span>
-                        <span class="text-white font-medium">{{ qty or 1
-                            }}</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-white/70">Amount</span>
-                        <span class="text-white font-medium">${{
-                            '%.2f'|format(amount|float if amount else 0) }}</span>
-                    </div>
-                    <div class="flex justify-between pt-3 mt-2 border-t border-white/10">
-                        <span class="font-semibold">Total</span>
-                        <span class="font-semibold">${{
-                            '%.2f'|format(total if total is not none else (amount|float if amount else 0)) }}</span>
-                    </div>
-                </div>
+                {% endif %}
                 
                 {% if wallet_balance is not none %}
                 {% set total_amount = (total if total is not none else (amount|float if amount else 0)) %}

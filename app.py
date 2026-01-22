@@ -1502,10 +1502,11 @@ if _csrf_ext is not None:
     
     # Exempt Stripe webhook endpoint - webhooks don't include CSRF tokens
     try:
-        _csrf_ext.exempt(stripe_webhooks_bp)  # Exempt entire blueprint
+        from routes.stripe_webhooks import handle_stripe_webhook
+        _csrf_ext.exempt(handle_stripe_webhook)  # Exempt the webhook handler function
     except Exception as e:
         # Log but don't fail - endpoint will still work, just with CSRF check
-        print(f"Warning: Could not exempt Stripe webhook blueprint from CSRF: {e}")
+        print(f"Warning: Could not exempt Stripe webhook from CSRF: {e}")
 
 
 @app.route('/success')
