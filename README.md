@@ -405,6 +405,15 @@ gunicorn -w 4 -b 0.0.0.0:8000 app:app
 - Visit `/sitemap` for complete app structure
 - Visit `/debug` for system status
 
+### Artist Payouts
+- **Payout Guide:** `docs/features/ARTIST_PAYOUTS_GUIDE.md`
+- **Payout Explained:** `docs/features/ARTIST_PAYOUT_EXPLAINED.md`
+- **Automated Payouts:** `docs/features/AUTOMATED_PAYOUTS_GUIDE.md`
+- **Scripts:**
+  - `scripts/scan_artist_payouts.py` - Find artists needing payouts
+  - `scripts/send_artist_payout.py` - Process individual payouts
+  - `scripts/batch_process_payouts.py` - **Batch process all pending payouts via Stripe**
+
 ### Email Notifications
 - **Email Setup:** `docs/setup/EMAIL_SETUP_GUIDE.md`
 - **Service Comparison:** `docs/setup/EMAIL_SERVICE_COMPARISON.md`

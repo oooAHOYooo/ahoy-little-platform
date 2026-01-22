@@ -43,6 +43,26 @@ python scripts/send_artist_payout.py --artist-id "rob-meglio" --auto
 python scripts/send_artist_payout.py --payout-id 123 --mark-completed --reference "PAYPAL_TXN_ABC123"
 ```
 
+#### Option C: Batch Process Collected Payouts via Stripe (NEW)
+After collecting payouts, automatically process all pending payouts that have Stripe Connect configured:
+
+```bash
+# Preview what would be processed
+python scripts/batch_process_payouts.py --dry-run
+
+# Process all pending payouts with Stripe Connect automatically
+python scripts/batch_process_payouts.py --auto-process
+
+# Process only payouts above $10
+python scripts/batch_process_payouts.py --auto-process --min-amount 10.00
+```
+
+This workflow:
+1. **Collect payouts** - Create pending payout records (they accumulate)
+2. **Review** - Check what's pending: `python scripts/send_artist_payout.py --list-pending`
+3. **Batch process** - Run `batch_process_payouts.py --auto-process` to automatically send all via Stripe Connect
+4. **Manual follow-up** - Handle any that don't have Stripe Connect configured
+
 ## 🔍 Finding Artists Who Need Payouts
 
 ### Scan All Artists
