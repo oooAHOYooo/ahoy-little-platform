@@ -545,6 +545,10 @@ MIT License - see LICENSE file for details
 ### Payout Management
 ```bash
 # Scan all artists for pending payouts
+# Interactive Dashboard (Recommended)
+python scripts/dashboard.py
+
+# Or individual scripts:
 python scripts/scan_artist_payouts.py
 
 # Process payout for specific artist
