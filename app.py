@@ -1147,6 +1147,7 @@ def checkout_process():
 
     # Persist a pending purchase
     from db import get_session
+    from models import Purchase
     purchase_id = None
     with get_session() as s:
         p = Purchase(

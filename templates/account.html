@@ -17,7 +17,7 @@
         <div class="acct-actions">
           <a class="acct-action-btn" href="/bookmarks">
             <i class="fas fa-bookmark"></i>
-            <span>Saved</span>
+            <span>Bookmarks</span>
           </a>
           <button type="button" class="acct-action-btn acct-signout-btn"
             onclick="if(confirm('Sign out?')){fetch('/api/auth/logout',{method:'POST',credentials:'include'}).then(()=>window.location.reload())}">
@@ -35,7 +35,7 @@
           <div class="acct-stats">
             <div class="acct-stat">
               <div class="n">{{ stats.bookmarks or 0 }}</div>
-              <div class="l">Saved</div>
+              <div class="l">Bookmarks</div>
             </div>
             <div class="acct-stat">
               <div class="n">{{ stats.plays or 0 }}</div>
@@ -198,7 +198,34 @@
   {% else %}
     <div class="acct-guest glass" x-data="profileAuth()" x-init="init()">
       <h2>Account</h2>
-      <p class="muted">Claim a username and unlock saves and merch goodies.</p>
+      <p class="muted">Claim a username and unlock bookmarks and merch goodies.</p>
+      
+      <!-- Guest Bookmarks Info -->
+      <div class="acct-guest-bookmarks" x-data="{ bookmarkCount: 0 }" x-init="
+        if (window.AhoyBookmarks) {
+          bookmarkCount = window.AhoyBookmarks.count();
+        } else {
+          try {
+            const raw = localStorage.getItem('ahoy.bookmarks.v1');
+            if (raw) {
+              const data = JSON.parse(raw);
+              bookmarkCount = Object.keys(data.items || {}).length;
+            }
+          } catch(e) {}
+        }
+      ">
+        <div x-show="bookmarkCount > 0" class="guest-bookmarks-notice">
+          <i class="fas fa-bookmark"></i>
+          <div>
+            <strong>You have <span x-text="bookmarkCount"></span> bookmark<span x-text="bookmarkCount === 1 ? '' : 's'"></span> saved locally</strong>
+            <p>Log in to save them permanently and access from any device.</p>
+          </div>
+          <a href="/bookmarks" class="btn btn-secondary" style="margin-left: auto;">
+            <i class="fas fa-bookmark"></i>
+            View Bookmarks
+          </a>
+        </div>
+      </div>
 
       <div class="acct-auth-tabs" role="tablist" aria-label="Account access">
         <button type="button" class="acct-auth-tab" :class="{active: mode==='login'}"
@@ -400,6 +427,45 @@
   .acct-auth-foot { margin-top: 2px; font-size: 13px; color: rgba(255,255,255,0.70); }
   .acct-auth-foot a { color: rgba(167,139,250,0.95); font-weight: 900; }
   .acct-auth-legal a { color: rgba(255,255,255,0.85); text-decoration: underline; }
+
+  /* Guest Bookmarks Notice */
+  .acct-guest-bookmarks {
+    margin-top: 1rem;
+  }
+
+  .guest-bookmarks-notice {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(147, 51, 234, 0.1);
+    border: 1px solid rgba(147, 51, 234, 0.3);
+    border-radius: 12px;
+    flex-wrap: wrap;
+  }
+
+  .guest-bookmarks-notice i {
+    font-size: 1.5rem;
+    color: var(--accent-color, #9333ea);
+    flex-shrink: 0;
+  }
+
+  .guest-bookmarks-notice > div {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .guest-bookmarks-notice strong {
+    display: block;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 0.25rem;
+  }
+
+  .guest-bookmarks-notice p {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    font-size: 0.875rem;
+  }
 
   /* Ensure the primary CTA is always readable even if theme vars set --primary-color too light */
   .acct-guest .btn.btn-primary {

@@ -59,9 +59,18 @@
     });
     if (!r.ok) {
       // Not logged in or error - continue with guest mode
+      state.loggedIn = false;
       return;
     }
     const data = await r.json();
+    
+    // Check if we got persisted: false (guest response)
+    if (data.persisted === false) {
+      state.loggedIn = false;
+      return;
+    }
+    
+    state.loggedIn = true;
     const serverItems = toObj((data.items || []).map((x) => ({
       id: x.media_id,
       type: x.media_type,
@@ -69,7 +78,8 @@
       added_at: x.created_at,
     })), (x) => x.key);
 
-    state.items = { ...serverItems };
+    // Merge server items with local items (local takes precedence for guest bookmarks)
+    state.items = { ...serverItems, ...loadLocal() };
     saveLocal();
     state.serverLoaded = true;
   }
@@ -77,12 +87,27 @@
   async function toggle(it) {
     const key = it.key || keyOf(it.type, it.id);
     const exists = !!state.items[key];
+    const wasLoggedIn = state.loggedIn || window.LOGGED_IN;
+    
+    // Always save/remove locally first (works for both guests and logged-in users)
     exists ? removeLocalKey(key) : setLocalItem({ ...it, key });
     
     // Trigger a custom event to notify all Alpine.js components
     document.dispatchEvent(new CustomEvent('bookmarks:changed', { 
       detail: { items: state.items, action: exists ? 'remove' : 'add', item: it } 
     }));
+
+    // If adding and not logged in, show login prompt
+    if (!exists && !wasLoggedIn) {
+      // Show a friendly notification that they can log in to save permanently
+      if (window.__ahoyToast) {
+        window.__ahoyToast("Saved locally! Log in to save permanently across devices.");
+      }
+      // Dispatch event for UI to show login prompt
+      document.dispatchEvent(new CustomEvent('bookmark:guest-save', { 
+        detail: { item: it, action: 'save' } 
+      }));
+    }
 
     try {
       // Try to sync with server (session-based auth via cookies)
@@ -104,17 +129,29 @@
         }
       } else {
         const media_type = it.type === 'track' ? 'music' : it.type;
-        await fetch(API, { 
+        const response = await fetch(API, { 
           method: "POST", 
           headers: authHeaders(), 
           credentials: 'include',
           body: JSON.stringify({ media_id: String(it.id), media_type }) 
         });
+        
+        // Check if we got a persisted: false response (guest mode)
+        if (response.ok) {
+          const data = await response.json();
+          if (data.persisted === false && !wasLoggedIn) {
+            // Already showed toast above, but ensure state is correct
+            state.loggedIn = false;
+          } else if (data.persisted !== false) {
+            state.loggedIn = true;
+          }
+        }
       }
     } catch (e) {
       if (String(e?.message || '').includes('401') || String(e?.message || '').includes('Unauthorized')) {
         // Session expired or not logged in - continue with guest mode
         console.log('Not logged in, using guest mode for bookmarks');
+        state.loggedIn = false;
       }
     }
   }
