@@ -943,6 +943,26 @@ def wallet_fund_success():
                             // First check - record initial balance
                             if (pollCount === 0) {{
                                 initialBalance = currentBalance;
+                                // If balance is already > 0 on first check, webhook likely already processed
+                                if (currentBalance > 0) {{
+                                    // Assume webhook already processed, show success immediately
+                                    document.getElementById('status').innerHTML = 
+                                        '<span class="balance-updated">✓ Balance updated!</span>';
+                                    document.getElementById('status-text').textContent = '';
+                                    
+                                    const balanceDisplay = document.getElementById('balance-display');
+                                    balanceDisplay.textContent = `New Balance: ${{currentBalance.toFixed(2)}}`;
+                                    balanceDisplay.style.display = 'block';
+                                    
+                                    document.getElementById('redirect-message').style.display = 'block';
+                                    document.getElementById('manual-links').style.display = 'none';
+                                    
+                                    setTimeout(() => {{
+                                        window.location.href = '/account?wallet_funded=true';
+                                    }}, 2000);
+                                    
+                                    return true; // Stop polling
+                                }}
                             }}
                             
                             // Check if balance increased (webhook processed)
