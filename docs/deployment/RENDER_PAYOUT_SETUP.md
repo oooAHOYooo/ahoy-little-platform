@@ -53,8 +53,10 @@ This will send test emails to `alex@ahoy.ooo` to verify everything is working.
 ## 📧 Email Notifications
 
 Once configured, you'll automatically receive emails at `alex@ahoy.ooo` when:
-- Someone boosts an artist
-- Someone purchases merch
+- **New user registers** - User ID, email, username, display name
+- **User funds wallet** - Amount added, balance before/after
+- **Someone boosts an artist** - Artist name, amount, payout details
+- **Someone purchases merch** - Purchase details, item info
 
 ## 💰 Payout Script
 
@@ -73,11 +75,22 @@ python scripts/send_artist_payout.py --artist-id "rob-meglio" --auto
 
 ## 🔍 Verification Checklist
 
+### Required Setup
 - [ ] Email service configured (RESEND_API_KEY or SMTP_*)
-- [ ] SUPPORT_EMAIL set
-- [ ] Database migration run (`alembic upgrade head`)
-- [ ] Test email sent successfully
+- [ ] SUPPORT_EMAIL set in Render dashboard
+- [ ] AHOY_ADMIN_EMAIL already set to `alex@ahoy.ooo` (in render.yaml)
+- [ ] Database migration will run automatically on next deploy
+
+### Testing
+- [ ] Deploy completes successfully (migration runs automatically)
+- [ ] Test email sent successfully: `python scripts/test_email_notification.py`
 - [ ] Webhook endpoint accessible (for Stripe webhooks)
+
+### Verify Notifications Work
+- [ ] Create a test user account → Should receive registration email
+- [ ] Fund a test wallet → Should receive wallet funding email
+- [ ] Make a test boost → Should receive boost notification
+- [ ] Make a test purchase → Should receive merch notification
 
 ## 🚨 Important Notes
 
