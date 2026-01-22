@@ -64,3 +64,25 @@ services:
 databases:
   - name: ahoy-postgres
     plan: free
+
+  # Daily payout processor - runs at 9 AM UTC daily
+  - type: cron
+    name: daily-payout-processor
+    schedule: "0 9 * * *"  # 9 AM UTC daily
+    buildCommand: pip install -r requirements.txt
+    startCommand: python scripts/daily_payout_processor.py --auto-process --min-amount 1.00
+    envVars:
+      - key: AHOY_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ahoy-postgres
+          property: connectionString
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: SUPPORT_EMAIL
+        sync: false
+      - key: AHOY_ADMIN_EMAIL
+        value: alex@ahoy.ooo
