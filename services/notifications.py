@@ -238,19 +238,17 @@ def notify_boost_received(
     
     Returns dict with notification results.
     """
-    results = {"admin_notified": False, "artist_notified": False}
+    results = {"admin_notified": False, "user_notified": False, "artist_notified": False}
     
     if not can_send_email():
         log.warning("Email not configured, skipping boost notification")
         return results
     
-    admin_email = _get_admin_email()
-    artist_email = _get_artist_email(artist_id)
-    
     # Format amounts
     boost_str = f"${boost_amount:.2f}"
     payout_str = f"${artist_payout:.2f}"
     total_str = f"${total_paid:.2f}"
+    timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
     
     # Notify admin
     admin_subject = f"💰 New Boost: ${boost_amount:.2f} to {artist_name or artist_id}"
@@ -269,23 +267,35 @@ python scripts/send_artist_payout.py --artist-id "{artist_id}" --amount {artist_
     admin_result = notify_admin(admin_subject, admin_text)
     results["admin_notified"] = admin_result.get("ok", False)
     
+    # Notify user (tipper) - receipt confirmation
+    if tipper_email:
+        user_subject = f"✅ Boost Confirmation: ${boost_amount:.2f} to {artist_name or artist_id}"
+        user_text = f"""Thank you for your boost!
+
+Boost Details:
+Artist: {artist_name or artist_id}
+Boost Amount: {boost_str}
+Total Paid: {total_str}
+Date: {timestamp}
+
+100% of your boost (${boost_str}) goes directly to {artist_name or artist_id}.
+
+Thank you for supporting independent artists! 🎵
+"""
+        user_result = notify_user(tipper_email, user_subject, user_text)
+        results["user_notified"] = user_result.get("ok", False)
+    
     # Notify artist (optional)
+    artist_email = _get_artist_email(artist_id)
     if artist_email:
-        subject = f"🎉 You received a ${boost_amount:.2f} boost!"
-        text = f"""
-Great news! You received a boost of {boost_str}!
+        artist_subject = f"🎉 You received a ${boost_amount:.2f} boost!"
+        artist_text = f"""Great news! You received a boost of {boost_str}!
 
 The funds will be processed and sent to you soon.
 
 Thank you for creating amazing content!
 """
-        html = f"""
-<h2>🎉 You Received a Boost!</h2>
-<p>Great news! You received a boost of <strong>{boost_str}</strong>!</p>
-<p>The funds will be processed and sent to you soon.</p>
-<p>Thank you for creating amazing content!</p>
-"""
-        artist_result = notify_user(artist_email, subject, text)
+        artist_result = notify_user(artist_email, artist_subject, artist_text)
         results["artist_notified"] = artist_result.get("ok", False)
     
     return results

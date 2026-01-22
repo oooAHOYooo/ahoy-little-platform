@@ -405,6 +405,19 @@ gunicorn -w 4 -b 0.0.0.0:8000 app:app
 - Visit `/sitemap` for complete app structure
 - Visit `/debug` for system status
 
+### Email Notifications
+- **Email Setup:** `docs/setup/EMAIL_SETUP_GUIDE.md`
+- **Service Comparison:** `docs/setup/EMAIL_SERVICE_COMPARISON.md`
+- **Notification System:** `docs/deployment/EMAIL_NOTIFICATIONS.md`
+- **Testing:** Run `python scripts/test_send_email_to_alex.py`
+
+**Email Events:**
+- User registrations → Admin + User welcome email
+- Password reset requests → User reset link + Admin notification
+- Wallet funding → Admin summary + User confirmation
+- Artist boosts → Admin summary + User receipt + Artist notification (optional)
+- Merch purchases → Admin summary + User receipt
+
 ---
 
 ## 🎯 Key Capabilities
