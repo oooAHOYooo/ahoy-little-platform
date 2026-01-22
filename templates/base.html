@@ -439,6 +439,9 @@
             x-init="init()">
             <div class="status-bar-content">
                 <div class="status-left">
+                    <a href="/" class="status-action-btn status-home-btn" title="Home" aria-label="Home">
+                        <i class="fas fa-home"></i>
+                    </a>
                     <span class="status-time" id="statusTime"></span>
                     <span class="status-breadcrumb" x-text="breadcrumbText"
                         :title="breadcrumbText"
@@ -741,13 +744,6 @@
                             </div>
                         </div>
 
-                        <!-- Guest profile shortcut (Desktop) - Hidden when logged in -->
-                        <a href="/account" x-show="!isLoggedIn" x-cloak style="display: none;"
-                            class="ds-iconbtn nav-item hidden-mobile"
-                            title="Profile" aria-label="Profile">
-                            <i class="fas fa-user" aria-hidden="true" style="font-size:16px;"></i>
-                        </a>
-
                         <!-- Fullscreen Toggle (Desktop Only) -->
                         <button @click="toggleFullscreen()"
                             class="ds-iconbtn nav-item hidden-mobile"
@@ -784,6 +780,11 @@
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
+            <a href="{{ url_for('artists') }}"
+                class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
+                <i class="fas fa-users"></i>
+                <span>Artists</span>
+            </a>
             <a href="/merch"
                 class="mobile-tab {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}">
                 <i class="fas fa-shopping-bag"></i>
@@ -803,10 +804,15 @@
         <!-- Mobile Bottom Navigation - Media Features (Primary Row) -->
         <nav class="mobile-bottom-nav mobile-only" role="navigation"
             aria-label="Media Navigation">
-            <a href="/radio"
-                class="mobile-tab {% if request.endpoint == 'radio_page' %}active{% endif %}">
-                <i class="fas fa-broadcast-tower"></i>
-                <span>Radio</span>
+            <a href="{{ url_for('music') }}"
+                class="mobile-tab {% if request.endpoint == 'music' %}active{% endif %}">
+                <i class="fas fa-music"></i>
+                <span>Music</span>
+            </a>
+            <a href="/podcasts"
+                class="mobile-tab {% if request.endpoint == 'podcasts_page' or request.path.startswith('/podcasts') %}active{% endif %}">
+                <i class="fas fa-podcast"></i>
+                <span>Podcasts</span>
             </a>
             <a href="{{ url_for('live_tv_page') }}"
                 class="mobile-tab {% if request.endpoint == 'live_tv_page' %}active{% endif %}">
@@ -817,21 +823,6 @@
                 class="mobile-tab {% if request.endpoint == 'shows' %}active{% endif %}">
                 <i class="fas fa-video"></i>
                 <span>Videos</span>
-            </a>
-            <a href="{{ url_for('artists') }}"
-                class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
-                <i class="fas fa-users"></i>
-                <span>Artists</span>
-            </a>
-            <a href="{{ url_for('music') }}"
-                class="mobile-tab {% if request.endpoint == 'music' %}active{% endif %}">
-                <i class="fas fa-music"></i>
-                <span>Music</span>
-            </a>
-            <a href="/podcasts"
-                class="mobile-tab {% if request.endpoint == 'podcasts_page' or request.path.startswith('/podcasts') %}active{% endif %}">
-                <i class="fas fa-podcast"></i>
-                <span>Podcasts</span>
             </a>
         </nav>
         <div class="desktop-only">

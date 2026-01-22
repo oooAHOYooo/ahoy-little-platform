@@ -1473,6 +1473,13 @@ if _csrf_ext is not None:
     except Exception as e:
         # Log but don't fail - endpoint will still work, just with CSRF check
         print(f"Warning: Could not exempt wallet funding from CSRF: {e}")
+    
+    # Exempt Stripe webhook endpoint - webhooks don't include CSRF tokens
+    try:
+        _csrf_ext.exempt(stripe_webhooks_bp)  # Exempt entire blueprint
+    except Exception as e:
+        # Log but don't fail - endpoint will still work, just with CSRF check
+        print(f"Warning: Could not exempt Stripe webhook blueprint from CSRF: {e}")
 
 
 @app.route('/success')

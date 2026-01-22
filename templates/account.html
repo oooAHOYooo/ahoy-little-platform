@@ -824,6 +824,18 @@ function walletWidget(initialBalance) {
       // Refresh balance on mount
       this.refreshBalance();
       
+      // If coming from wallet success page, refresh more aggressively
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('wallet_funded') === 'true') {
+        // Refresh immediately and then again after a short delay
+        setTimeout(() => this.refreshBalance(), 500);
+        setTimeout(() => this.refreshBalance(), 2000);
+        // Clean up URL parameter
+        urlParams.delete('wallet_funded');
+        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+      }
+      
       // Check for reduced motion preference
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         document.documentElement.style.setProperty('--wallet-animation-duration', '0ms');

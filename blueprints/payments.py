@@ -827,7 +827,7 @@ def get_wallet_transactions():
 
 @bp.route("/wallet/success")
 def wallet_fund_success():
-    """Wallet funding success page - webhook will handle the actual funding."""
+    """Wallet funding success page - polls for balance update and redirects."""
     session_id = request.args.get("session_id")
     return f"""
     <!DOCTYPE html>
@@ -849,6 +849,7 @@ def wallet_fund_success():
             .container {{
                 text-align: center;
                 padding: 2rem;
+                max-width: 500px;
             }}
             .success-icon {{
                 font-size: 4rem;
@@ -859,10 +860,35 @@ def wallet_fund_success():
             }}
             p {{
                 opacity: 0.9;
+                margin: 0.5rem 0;
             }}
             a {{
                 color: white;
                 text-decoration: underline;
+            }}
+            .status {{
+                margin: 1rem 0;
+                padding: 0.75rem;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                min-height: 1.5rem;
+            }}
+            .spinner {{
+                display: inline-block;
+                width: 1rem;
+                height: 1rem;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-top-color: white;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+                margin-right: 0.5rem;
+            }}
+            @keyframes spin {{
+                to {{ transform: rotate(360deg); }}
+            }}
+            .balance-updated {{
+                color: #4ade80;
+                font-weight: 600;
             }}
         </style>
     </head>
@@ -870,15 +896,102 @@ def wallet_fund_success():
         <div class="container">
             <div class="success-icon">💰</div>
             <h1>Wallet Funded!</h1>
-            <p>Your wallet has been funded successfully.</p>
-            <p>The funds will appear in your wallet shortly.</p>
-            <p><a href="/account">View My Account</a> | <a href="/">Return to Ahoy</a></p>
+            <p>Your payment was processed successfully.</p>
+            <div class="status" id="status">
+                <span class="spinner"></span>
+                <span id="status-text">Updating your wallet balance...</span>
+            </div>
+            <p id="balance-display" style="display: none; font-size: 1.25rem; font-weight: 600; margin: 1rem 0;"></p>
+            <p id="redirect-message" style="display: none; opacity: 0.8;">Redirecting to your account...</p>
+            <p id="manual-links" style="margin-top: 1.5rem;">
+                <a href="/account">View My Account</a> | <a href="/">Return to Ahoy</a>
+            </p>
         </div>
         <script>
-            // Close window if opened in popup
-            if (window.opener) {{
-                setTimeout(() => window.close(), 2000);
-            }}
+            (function() {{
+                let initialBalance = 0;
+                let pollCount = 0;
+                const maxPolls = 30; // 30 seconds max
+                const pollInterval = 1000; // 1 second
+                
+                async function checkBalance() {{
+                    try {{
+                        const response = await fetch('/payments/wallet', {{ 
+                            credentials: 'include',
+                            cache: 'no-store'
+                        }});
+                        
+                        if (response.ok) {{
+                            const data = await response.json();
+                            const currentBalance = parseFloat(data.balance || 0);
+                            
+                            // First check - record initial balance
+                            if (pollCount === 0) {{
+                                initialBalance = currentBalance;
+                            }}
+                            
+                            // Check if balance increased (webhook processed)
+                            if (currentBalance > initialBalance) {{
+                                const addedAmount = currentBalance - initialBalance;
+                                document.getElementById('status').innerHTML = 
+                                    '<span class="balance-updated">✓ Balance updated!</span>';
+                                document.getElementById('status-text').textContent = '';
+                                
+                                const balanceDisplay = document.getElementById('balance-display');
+                                balanceDisplay.textContent = `New Balance: ${{currentBalance.toFixed(2)}}`;
+                                balanceDisplay.style.display = 'block';
+                                
+                                document.getElementById('redirect-message').style.display = 'block';
+                                document.getElementById('manual-links').style.display = 'none';
+                                
+                                // Redirect to account page after 2 seconds with flag to refresh
+                                setTimeout(() => {{
+                                    window.location.href = '/account?wallet_funded=true';
+                                }}, 2000);
+                                
+                                return true; // Stop polling
+                            }}
+                            
+                            pollCount++;
+                            
+                            // Update status message
+                            if (pollCount < maxPolls) {{
+                                document.getElementById('status-text').textContent = 
+                                    `Checking balance... ({{pollCount}}/{{maxPolls}})`;
+                                setTimeout(checkBalance, pollInterval);
+                            }} else {{
+                                // Timeout - webhook might be delayed
+                                document.getElementById('status').innerHTML = 
+                                    '<span>⚠ Balance update may be delayed. Please check your account.</span>';
+                                document.getElementById('status-text').textContent = 
+                                    'If your balance doesn\'t update within a few minutes, please contact support.';
+                            }}
+                        }} else {{
+                            throw new Error('Failed to fetch balance');
+                        }}
+                    }} catch (error) {{
+                        console.error('Error checking balance:', error);
+                        pollCount++;
+                        
+                        if (pollCount < maxPolls) {{
+                            document.getElementById('status-text').textContent = 
+                                `Retrying... ({{pollCount}}/{{maxPolls}})`;
+                            setTimeout(checkBalance, pollInterval);
+                        }} else {{
+                            document.getElementById('status').innerHTML = 
+                                '<span>⚠ Unable to verify balance. Please check your account.</span>';
+                        }}
+                    }}
+                }}
+                
+                // Start checking balance immediately
+                checkBalance();
+                
+                // Close window if opened in popup
+                if (window.opener) {{
+                    setTimeout(() => window.close(), 5000);
+                }}
+            }})();
         </script>
     </body>
     </html>

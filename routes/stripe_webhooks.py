@@ -75,6 +75,7 @@ def handle_stripe_webhook():
         if metadata.get("type") == "wallet_fund":
             user_id_str = metadata.get("user_id")
             amount_str = metadata.get("amount")
+            session_id = session_data.get("id")
             
             if user_id_str and amount_str:
                 try:
@@ -96,15 +97,28 @@ def handle_stripe_webhook():
                                 balance_before=balance_before,
                                 balance_after=balance_after,
                                 description=f"Wallet funding via Stripe",
-                                reference_id=session_data.get("id"),
+                                reference_id=session_id,
                                 reference_type="stripe_checkout",
                                 created_at=datetime.utcnow(),
                             )
                             db_session.add(transaction)
                             db_session.commit()
+                            
+                            # Log successful wallet funding
+                            import logging
+                            logging.info(f"Wallet funded: user_id={user_id}, amount=${amount:.2f}, balance_before=${balance_before:.2f}, balance_after=${balance_after:.2f}, session_id={session_id}")
+                        else:
+                            import logging
+                            logging.error(f"Wallet funding failed: User {user_id} not found for session {session_id}")
                 except Exception as e:
                     # Log error but don't fail webhook
-                    print(f"Error processing wallet funding: {e}")
+                    import logging
+                    import traceback
+                    logging.error(f"Error processing wallet funding: {e}", exc_info=True)
+                    logging.error(f"Wallet funding error details: user_id={user_id_str}, amount={amount_str}, session_id={session_id}, traceback={traceback.format_exc()}")
+            else:
+                import logging
+                logging.warning(f"Wallet funding webhook missing required metadata: user_id={user_id_str}, amount={amount_str}, session_id={session_id}")
             
             return jsonify({"status": "ok"}), 200
 

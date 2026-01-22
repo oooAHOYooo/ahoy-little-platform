@@ -73,13 +73,14 @@
                 @loadedmetadata="onAudioLoaded()"
                 @timeupdate="onTimeUpdate()"
                 @ended="onMediaEnded()"
+                @durationchange="onDurationChange()"
                 x-ref="audioPlayer">
                 Your browser does not support the audio tag.
             </audio>
 
             <!-- Timeline -->
             <div class="timeline">
-                <input type="range" min="0" :max="Math.floor(currentMedia.duration_seconds)" x-model.number="currentTime" @input="seekAudio">
+                <input type="range" min="0" :max="Math.floor(currentMedia.duration_seconds || 0)" x-model.number="currentTime" @input="seekAudio($event)">
             </div>
             <div class="time-info">
                 <span x-text="formatTime(currentTime)"></span> / <span x-text="formatTime(currentMedia.duration_seconds)"></span>
@@ -413,6 +414,21 @@ function fullPlayer() {
         
         onAudioLoaded() {
             this.isLoading = false;
+            // Ensure duration is set from audio element if available
+            if (this.$refs.audioPlayer && this.$refs.audioPlayer.duration) {
+                if (!this.currentMedia.duration_seconds) {
+                    this.currentMedia.duration_seconds = this.$refs.audioPlayer.duration;
+                }
+            }
+        },
+        
+        onDurationChange() {
+            // Update duration when it becomes available
+            if (this.$refs.audioPlayer && this.$refs.audioPlayer.duration) {
+                if (!this.currentMedia.duration_seconds || this.currentMedia.duration_seconds === 0) {
+                    this.currentMedia.duration_seconds = this.$refs.audioPlayer.duration;
+                }
+            }
         },
         
         onTimeUpdate() {
@@ -420,10 +436,17 @@ function fullPlayer() {
             if (player) {
                 this.currentTime = player.currentTime;
                 this.progressPercent = (this.currentTime / (this.currentMedia?.duration_seconds || 1)) * 100;
-            } else if (this.mediaType === 'music' && window.mediaPlayer) {
-                this.currentTime = window.mediaPlayer.currentTime || 0;
-                const total = this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 0;
-                this.progressPercent = (this.currentTime / (total || 1)) * 100;
+            } else if (this.mediaType === 'music') {
+                // Try audio element first, then global player
+                if (this.$refs.audioPlayer) {
+                    this.currentTime = this.$refs.audioPlayer.currentTime || 0;
+                    const total = this.currentMedia?.duration_seconds || this.$refs.audioPlayer.duration || 0;
+                    this.progressPercent = (this.currentTime / (total || 1)) * 100;
+                } else if (window.mediaPlayer) {
+                    this.currentTime = window.mediaPlayer.currentTime || 0;
+                    const total = this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 0;
+                    this.progressPercent = (this.currentTime / (total || 1)) * 100;
+                }
             }
         },
         
@@ -433,6 +456,19 @@ function fullPlayer() {
         },
         
         // Progress and volume
+        seekAudio(event) {
+            // Handle range input seeking
+            const newTime = parseFloat(event.target.value) || 0;
+            this.currentTime = newTime;
+            
+            if (this.$refs.videoPlayer) {
+                this.$refs.videoPlayer.currentTime = newTime;
+            }
+            if (this.mediaType === 'music' && window.mediaPlayer) {
+                window.mediaPlayer.seekTo(newTime);
+            }
+        },
+        
         seekTo(event) {
             const progressBar = event.currentTarget;
             const rect = progressBar.getBoundingClientRect();
@@ -533,6 +569,66 @@ function fullPlayer() {
 </script>
 
 <style>
+/* Timeline styling */
+.timeline {
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.timeline input[type="range"] {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.timeline input[type="range"]:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.timeline input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--accent-color, #00d4ff);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.timeline input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.timeline input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--accent-color, #00d4ff);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.timeline input[type="range"]::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+.time-info {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
 /* Player-specific bookmark styling */
 .media-header {
     display: flex;
@@ -613,6 +709,176 @@ function fullPlayer() {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    /* Make player container compact and flush to bottom on mobile */
+    .player-container {
+        min-height: auto !important;
+        position: fixed;
+        bottom: calc(var(--bottom-nav-h, 60px) + var(--secondary-nav-h, 48px) + env(safe-area-inset-bottom));
+        left: 0;
+        right: 0;
+        top: auto;
+        z-index: 10005;
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+        padding: 0;
+        max-height: calc(100vh - var(--bottom-nav-h, 60px) - var(--secondary-nav-h, 48px) - env(safe-area-inset-bottom));
+        overflow-y: auto;
+        height: auto;
+    }
+    
+    /* Ensure body has padding to account for fixed player */
+    body:has(.player-container) {
+        padding-bottom: calc(var(--bottom-nav-h, 60px) + var(--secondary-nav-h, 48px) + env(safe-area-inset-bottom) + 200px);
+    }
+    
+    /* Compact player main area */
+    .player-main {
+        padding: 12px !important;
+        flex: 0 0 auto !important;
+        justify-content: flex-start !important;
+        max-height: none;
+    }
+    
+    /* Compact audio player */
+    .audio-player {
+        max-width: 100% !important;
+        width: 100%;
+    }
+    
+    /* Smaller album art on mobile */
+    .audio-visualizer {
+        margin-bottom: 12px !important;
+    }
+    
+    .album-art {
+        width: 50px !important;
+        height: 50px !important;
+        margin: 0 auto 8px;
+    }
+    
+    /* Compact timeline */
+    .timeline {
+        width: 100%;
+        margin: 8px 0;
+    }
+    
+    .timeline input[type="range"] {
+        width: 100%;
+        height: 4px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        outline: none;
+        cursor: pointer;
+    }
+    
+    .timeline input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 12px;
+        height: 12px;
+        background: var(--accent-color, #00d4ff);
+        border-radius: 50%;
+        cursor: pointer;
+    }
+    
+    .timeline input[type="range"]::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+        background: var(--accent-color, #00d4ff);
+        border-radius: 50%;
+        cursor: pointer;
+        border: none;
+    }
+    
+    /* Compact time info */
+    .time-info {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.7);
+        text-align: center;
+        margin: 4px 0 8px;
+    }
+    
+    /* Compact media info */
+    .media-info {
+        max-width: 100%;
+        padding: 0 8px;
+    }
+    
+    .media-info h2 {
+        font-size: 14px !important;
+        margin-bottom: 4px;
+    }
+    
+    .artist-name {
+        font-size: 12px !important;
+        margin-bottom: 8px;
+    }
+    
+    .description {
+        font-size: 11px;
+        display: none; /* Hide description on mobile to save space */
+    }
+    
+    /* Compact player controls - position at bottom */
+    .player-controls {
+        position: relative !important;
+        bottom: auto !important;
+        padding: 8px 12px !important;
+        background: transparent !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .control-buttons {
+        gap: 8px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .control-btn {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 14px !important;
+    }
+    
+    .play-btn {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 16px !important;
+    }
+    
+    /* Compact progress section */
+    .progress-section {
+        margin-bottom: 8px !important;
+        gap: 8px !important;
+    }
+    
+    .progress-bar {
+        height: 3px !important;
+    }
+    
+    .time-current,
+    .time-total {
+        font-size: 10px !important;
+        min-width: 35px;
+    }
+    
+    /* Hide volume section on mobile to save space */
+    .volume-section {
+        display: none;
+    }
+    
+    /* Compact bookmark button */
+    .bookmark-button {
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+        margin: 8px auto;
+        display: block;
+    }
+    
     .media-header {
         flex-direction: column;
         gap: 1rem;
@@ -622,6 +888,11 @@ function fullPlayer() {
         align-self: flex-start;
         padding: 10px 16px;
         font-size: 14px;
+    }
+    
+    /* Hide video player controls overlay on mobile if needed */
+    .video-player {
+        max-height: 40vh;
     }
 }
 </style>

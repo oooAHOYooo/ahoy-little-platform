@@ -1656,6 +1656,36 @@
         flex: 1;
         min-width: 0;
     }
+    
+    .status-home-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        min-height: 24px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #e5e7eb;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        flex-shrink: 0;
+    }
+    
+    .status-home-btn:hover {
+        background: rgba(255, 255, 255, 0.10);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+    
+    .status-home-btn:active {
+        transform: scale(0.95);
+    }
+    
+    .status-home-btn i {
+        font-size: 10px;
+    }
 
     /* Ensure the tiny logo is always visible as white on dark or colored assets */
     .status-logo {
@@ -1909,11 +1939,15 @@
         will-change: transform, color;
     }
 
-    /* Smush 6 tabs comfortably on small phones */
+    /* Adjust for 5 tabs (Home, Artists, Merch, Events, Profile) */
     @media (max-width: 420px) {
         .mobile-secondary-nav .mobile-tab {
             max-width: 60px;
             padding: 6px 8px 4px;
+            font-size: 8px;
+        }
+        .mobile-secondary-nav .mobile-tab i {
+            font-size: 16px;
         }
     }
 
@@ -2022,10 +2056,10 @@
         will-change: transform, color;
     }
 
-    /* Smush 6 tabs comfortably on small phones */
+    /* Adjust for 4 tabs (Music, Podcasts, Live TV, Videos) */
     @media (max-width: 420px) {
         .mobile-bottom-nav .mobile-tab {
-            max-width: 62px;
+            max-width: 80px;
             padding: 8px 8px 4px;
         }
         .mobile-bottom-nav .mobile-tab i {
