@@ -235,7 +235,15 @@ class MediaPlayer {
             this._fallbackIndex = 0;
             source = candidates[0] || null;
         } else {
-            const candidates = [track.audio_url, track.preview_url, track.full_url, track.url, track.src].filter(Boolean);
+            // Prioritize full tracks over previews - if full_url exists, use it instead of preview_url
+            // This prevents 30-second previews from playing when full tracks are available
+            const candidates = [];
+            if (track.audio_url) candidates.push(track.audio_url);
+            if (track.full_url) candidates.push(track.full_url); // Prefer full_url over preview_url
+            if (track.preview_url && !track.full_url) candidates.push(track.preview_url); // Only use preview if no full_url
+            if (track.url) candidates.push(track.url);
+            if (track.src) candidates.push(track.src);
+            
             this._fallbackSources = candidates;
             this._fallbackIndex = 0;
             source = candidates[0] || null;

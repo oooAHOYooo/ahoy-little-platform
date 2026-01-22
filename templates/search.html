@@ -89,7 +89,7 @@
                                 <button class="action-btn bm-btn"
                                     @click.stop="toggleBookmark(item)"
                                     :aria-pressed="isBookmarked(item)"
-                                    :class="{'just-bookmarked': isBookmarked(item)}">
+                                    :class="{'bookmarked': isBookmarked(item), 'just-bookmarked': isBookmarked(item)}">
                                     <span aria-hidden="true">
                                         <i x-show="isBookmarked(item)" class="fas fa-bookmark" style="color: var(--accent-color);"></i>
                                         <i x-show="!isBookmarked(item)" class="far fa-bookmark"></i>
@@ -141,15 +141,16 @@
                             <span class="type-badge" x-text="getItemTypeLabel(item.kind)"></span>
                         </div>
                         <div class="col-actions">
-                            <button class="action-btn bm-btn"
-                                @click.stop="toggleBookmark(item)"
-                                :aria-pressed="isBookmarked(item)">
-                                <span aria-hidden="true">
-                                    <i x-show="isBookmarked(item)" class="fas fa-bookmark"></i>
-                                    <i x-show="!isBookmarked(item)" class="far fa-bookmark"></i>
-                                </span>
-                                <span class="sr-only" x-text="isBookmarked(item) ? 'Remove bookmark' : 'Add bookmark'"></span>
-                            </button>
+                                <button class="action-btn bm-btn"
+                                    @click.stop="toggleBookmark(item)"
+                                    :aria-pressed="isBookmarked(item)"
+                                    :class="{'bookmarked': isBookmarked(item)}">
+                                    <span aria-hidden="true">
+                                        <i x-show="isBookmarked(item)" class="fas fa-bookmark" style="color: var(--accent-color);"></i>
+                                        <i x-show="!isBookmarked(item)" class="far fa-bookmark"></i>
+                                    </span>
+                                    <span class="sr-only" x-text="isBookmarked(item) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                                </button>
                         </div>
                     </div>
                 </template>
@@ -359,12 +360,41 @@ function searchResults() {
 
         async toggleBookmark(item) {
             try {
+                // Use unified bookmarks system
+                if (window.AhoyBookmarks) {
+                    const type = item.kind === 'music' ? 'track' : item.kind;
+                    const bookmarkItem = {
+                        type: type,
+                        id: item.id,
+                        title: item.title || item.name,
+                        artwork: this.getItemImage(item)
+                    };
+                    const wasBookmarked = window.AhoyBookmarks.isBookmarked(type, item.id);
+                    window.AhoyBookmarks.toggle(bookmarkItem);
+                    
+                    // Update UI immediately
+                    item.saved = !wasBookmarked;
+                    
+                    // Force Alpine reactivity
+                    this.$nextTick(() => {
+                        const buttons = document.querySelectorAll(`[data-id="${item.id}"]`);
+                        buttons.forEach(btn => {
+                            const isNowBookmarked = window.AhoyBookmarks.isBookmarked(type, item.id);
+                            btn.classList.toggle('bookmarked', isNowBookmarked);
+                            btn.setAttribute('aria-pressed', isNowBookmarked);
+                        });
+                    });
+                    
+                    return;
+                }
+                
+                // Fallback to API
                 const isBookmarked = this.isBookmarked(item);
                 const url = isBookmarked ? `/api/bookmarks/${item.id}` : '/api/bookmarks';
                 const method = isBookmarked ? 'DELETE' : 'POST';
                 const body = isBookmarked ? null : JSON.stringify({
-                    item_id: item.id,
-                    item_type: item.kind
+                    media_id: String(item.id),
+                    media_type: item.kind === 'music' ? 'music' : item.kind
                 });
 
                 const response = await fetch(url, {
@@ -388,6 +418,11 @@ function searchResults() {
         },
 
         isBookmarked(item) {
+            // Use unified bookmarks system
+            if (window.AhoyBookmarks) {
+                const type = item.kind === 'music' ? 'track' : item.kind;
+                return window.AhoyBookmarks.isBookmarked(type, item.id);
+            }
             return item.bookmarked || false;
         },
 

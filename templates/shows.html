@@ -188,11 +188,13 @@
                                 <div class="show-actions">
                                     <button class="action-btn bm-btn"
                                         @click.stop="toggleBookmark({ type: 'show', id: show.id, title: show.title, artwork: show.thumbnail })"
-                                        :aria-pressed="isBookmarked('show', show.id)">
+                                        :aria-pressed="isBookmarked('show', show.id)"
+                                        :class="{ 'bookmarked': isBookmarked('show', show.id) }">
                                         <span aria-hidden="true">
                                             <i
                                                 x-show="isBookmarked('show', show.id)"
-                                                class="fas fa-bookmark"></i>
+                                                class="fas fa-bookmark"
+                                                style="color: var(--accent-color);"></i>
                                             <i
                                                 x-show="!isBookmarked('show', show.id)"
                                                 class="far fa-bookmark"></i>
@@ -242,11 +244,13 @@
                             <div class="col-actions">
                                 <button class="action-btn bm-btn"
                                     @click.stop="toggleBookmark({ type: 'show', id: show.id, title: show.title, artwork: show.thumbnail })"
-                                    :aria-pressed="isBookmarked('show', show.id)">
+                                    :aria-pressed="isBookmarked('show', show.id)"
+                                    :class="{ 'bookmarked': isBookmarked('show', show.id) }">
                                     <span aria-hidden="true">
                                         <i
                                             x-show="isBookmarked('show', show.id)"
-                                            class="fas fa-bookmark"></i>
+                                            class="fas fa-bookmark"
+                                            style="color: var(--accent-color);"></i>
                                         <i
                                             x-show="!isBookmarked('show', show.id)"
                                             class="far fa-bookmark"></i>

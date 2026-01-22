@@ -280,7 +280,7 @@
                                     <button class="action-btn bm-btn"
                                         @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image })"
                                         :aria-pressed="isBookmarked('artist', artist.id || artist.slug)"
-                                        :class="{ 'just-bookmarked': isBookmarked('artist', artist.id || artist.slug) }">
+                                        :class="{ 'bookmarked': isBookmarked('artist', artist.id || artist.slug), 'just-bookmarked': isBookmarked('artist', artist.id || artist.slug) }">
                                         <span aria-hidden="true">
                                             <i
                                                 x-show="isBookmarked('artist', artist.id || artist.slug)"
@@ -336,7 +336,7 @@
                                 <button class="action-btn bm-btn"
                                     @click.stop="toggleBookmark({ type: 'artist', id: artist.id || artist.slug, title: artist.name, artwork: artist.image }); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
                                     :aria-pressed="isBookmarked('artist', artist.id || artist.slug)"
-                                    :class="{ 'just-bookmarked': isBookmarked('artist', artist.id || artist.slug) }">
+                                    :class="{ 'bookmarked': isBookmarked('artist', artist.id || artist.slug), 'just-bookmarked': isBookmarked('artist', artist.id || artist.slug) }">
                                     <span aria-hidden="true">
                                         <i
                                             x-show="isBookmarked('artist', artist.id || artist.slug)"

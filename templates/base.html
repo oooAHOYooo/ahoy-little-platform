@@ -3061,10 +3061,57 @@
                         title: this.currentTrack.title,
                         artwork: this.currentTrack.cover_art || this.currentTrack.thumbnail
                     };
+                    
+                    // Use the unified bookmark toggle - this dispatches bookmarks:changed event
+                    // which should update all Alpine.js components
+                    const wasBookmarked = window.AhoyBookmarks.isBookmarked(type, item.id);
                     window.AhoyBookmarks.toggle(item);
+                    
+                    // Update local state immediately
                     this.updateSavedState();
-                    // Notify others
-                    document.dispatchEvent(new CustomEvent('bookmarks:changed', { detail: { item, totalCount: window.AhoyBookmarks.count?.() } }));
+                    
+                    // Force Alpine.js reactivity update for all components using isBookmarked
+                    // This ensures bookmark buttons across the site update
+                    this.$nextTick(() => {
+                        const isNowBookmarked = window.AhoyBookmarks.isBookmarked(type, item.id);
+                        
+                        // Update all bookmark buttons with matching attributes
+                        const buttons = document.querySelectorAll(
+                            `[data-type="${type}"][data-id="${item.id}"], ` +
+                            `[data-bookmark][data-id="${item.id}"], ` +
+                            `[data-bookmark][data-type="${type}"][data-id="${item.id}"]`
+                        );
+                        buttons.forEach(btn => {
+                            btn.classList.toggle('bookmarked', isNowBookmarked);
+                            btn.classList.toggle('saved', isNowBookmarked);
+                            btn.classList.toggle('just-bookmarked', isNowBookmarked && !wasBookmarked);
+                            btn.setAttribute('aria-pressed', isNowBookmarked);
+                            
+                            // Update icon if present
+                            const icons = btn.querySelectorAll('i.fa-bookmark, i.far.fa-bookmark, i.fas.fa-bookmark');
+                            icons.forEach(icon => {
+                                icon.className = isNowBookmarked ? 'fas fa-bookmark' : 'far fa-bookmark';
+                                if (isNowBookmarked) {
+                                    icon.style.color = 'var(--accent-color)';
+                                } else {
+                                    icon.style.color = '';
+                                }
+                            });
+                            
+                            // Remove animation class after delay
+                            if (isNowBookmarked && !wasBookmarked) {
+                                setTimeout(() => {
+                                    btn.classList.remove('just-bookmarked');
+                                }, 600);
+                            }
+                        });
+                        
+                        // Trigger Alpine.js reactivity by dispatching a custom event
+                        // that components can listen to for forced updates
+                        document.dispatchEvent(new CustomEvent('bookmark:force-update', {
+                            detail: { type, id: item.id, isBookmarked: isNowBookmarked }
+                        }));
+                    });
                 },
 
                 updateSavedState() {

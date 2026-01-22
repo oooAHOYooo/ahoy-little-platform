@@ -954,6 +954,24 @@ def checkout_page():
                         found = it
                         break
             if found:
+                # Check if item has already been purchased (1:1 nature - only one in stock)
+                try:
+                    with get_session() as s:
+                        existing_purchase = s.query(Purchase).filter(
+                            Purchase.type == "merch",
+                            Purchase.item_id == str(item_id)
+                        ).first()
+                        if existing_purchase:
+                            return render_template('checkout.html',
+                                                   error="This item has already been purchased and is no longer available.",
+                                                   kind=kind,
+                                                   item_id=item_id,
+                                                   qty=qty,
+                                                   csrf_token=generate_csrf_token()), 400
+                except Exception as e:
+                    current_app.logger.warning(f"Error checking for existing purchase: {e}")
+                    # Continue with checkout if we can't check (fail open for availability)
+                
                 # Respect item availability flags if present.
                 if found.get("available") is False:
                     return render_template('checkout.html',
@@ -1109,6 +1127,25 @@ def checkout_process():
                                        kind=kind,
                                        item_id=item_id or "",
                                        qty=max(1, qty)), 400
+            
+            # Check if item has already been purchased (1:1 nature - only one in stock)
+            try:
+                with get_session() as s:
+                    existing_purchase = s.query(Purchase).filter(
+                        Purchase.type == "merch",
+                        Purchase.item_id == str(item_id)
+                    ).first()
+                    if existing_purchase:
+                        return render_template("checkout.html",
+                                               error="This item has already been purchased and is no longer available.",
+                                               csrf_token=generate_csrf_token(),
+                                               kind=kind,
+                                               item_id=item_id or "",
+                                               qty=max(1, qty)), 400
+            except Exception as e:
+                current_app.logger.warning(f"Error checking for existing purchase: {e}")
+                # Continue with checkout if we can't check (fail open for availability)
+            
             if found.get("available") is False:
                 return render_template("checkout.html",
                                        error="This item is not available.",
@@ -1920,7 +1957,26 @@ def merch():
     from storage import read_json
     from utils.observability import get_release
     merch_catalog = read_json('data/merch.json', {"items": []})
-    response = make_response(render_template('merch.html', merch=merch_catalog, release=get_release()))
+    
+    # Query database for purchased merch items (any status: pending, paid, fulfilled)
+    purchased_item_ids = set()
+    try:
+        with get_session() as s:
+            purchases = s.query(Purchase).filter(
+                Purchase.type == "merch",
+                Purchase.item_id.isnot(None)
+            ).all()
+            purchased_item_ids = {str(p.item_id) for p in purchases if p.item_id}
+    except Exception as e:
+        current_app.logger.warning(f"Error querying purchased merch items: {e}")
+        # Continue without purchased items list if query fails
+    
+    response = make_response(render_template(
+        'merch.html', 
+        merch=merch_catalog, 
+        release=get_release(),
+        purchased_item_ids=purchased_item_ids
+    ))
     # Merch changes frequently; avoid serving stale HTML that can "stick" in app/webview caches.
     response.headers['Cache-Control'] = 'no-store'
     return response

@@ -613,6 +613,84 @@
         outline: none;
     }
 
+    /* Mobile Bookmark Buttons - Enhanced Touch Targets & Visibility */
+    .bm-btn,
+    .save-btn,
+    .action-btn.bm-btn {
+        min-width: 44px !important;
+        min-height: 44px !important;
+        width: 44px !important;
+        height: 44px !important;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 212, 255, 0.3);
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 12px !important;
+        font-size: 18px !important;
+        padding: 0 !important;
+    }
+    
+    /* Enhanced saved state visibility on mobile */
+    .bm-btn[aria-pressed="true"],
+    .save-btn.bookmarked,
+    .bm-btn.bookmarked {
+        background: rgba(0, 212, 255, 0.25) !important;
+        border: 2px solid var(--accent-color) !important;
+        color: var(--accent-color) !important;
+        box-shadow: 0 0 12px rgba(0, 212, 255, 0.4) !important;
+    }
+    
+    .bm-btn[aria-pressed="true"] i,
+    .save-btn.bookmarked i,
+    .bm-btn.bookmarked i {
+        color: var(--accent-color) !important;
+        font-weight: 900 !important;
+    }
+    
+    /* Active/pressed state for mobile */
+    .bm-btn:active,
+    .save-btn:active {
+        transform: scale(0.9) !important;
+        background: rgba(0, 212, 255, 0.35) !important;
+    }
+    
+    /* Bookmark icon size on mobile */
+    .bm-btn i,
+    .save-btn i {
+        font-size: 18px !important;
+    }
+    
+    /* Ensure filled bookmark icon is visible */
+    .bm-btn[aria-pressed="true"] .fas.fa-bookmark,
+    .save-btn.bookmarked .fas.fa-bookmark,
+    .bm-btn.bookmarked .fas.fa-bookmark {
+        display: block !important;
+        opacity: 1 !important;
+        color: var(--accent-color) !important;
+    }
+    
+    /* Hide outline icon when bookmarked */
+    .bm-btn[aria-pressed="true"] .far.fa-bookmark,
+    .save-btn.bookmarked .far.fa-bookmark,
+    .bm-btn.bookmarked .far.fa-bookmark {
+        display: none !important;
+    }
+    
+    /* Show outline icon when not bookmarked */
+    .bm-btn[aria-pressed="false"] .far.fa-bookmark,
+    .save-btn:not(.bookmarked) .far.fa-bookmark,
+    .bm-btn:not(.bookmarked) .far.fa-bookmark {
+        display: block !important;
+    }
+    
+    /* Hide filled icon when not bookmarked */
+    .bm-btn[aria-pressed="false"] .fas.fa-bookmark,
+    .save-btn:not(.bookmarked) .fas.fa-bookmark,
+    .bm-btn:not(.bookmarked) .fas.fa-bookmark {
+        display: none !important;
+    }
+
     /* Bookmarks: hide unified header, use Podcasts-style mobile header */
     .bookmarks-container {
         padding: 18px 18px calc(40px + env(safe-area-inset-bottom)) 18px;

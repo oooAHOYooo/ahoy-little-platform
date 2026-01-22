@@ -71,8 +71,36 @@
     background: rgba(255,255,255,0.03);
     overflow: hidden;
     transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    position: relative;
   }
   .merch-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.14); background: rgba(255,255,255,0.045); }
+  .merch-card.sale-pending {
+    opacity: 0.65;
+    pointer-events: none;
+  }
+  .merch-card.sale-pending:hover { transform: none; }
+  .sale-pending-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(255, 193, 7, 0.15);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: rgba(255, 193, 7, 0.95);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+  }
+  .sale-pending-badge i {
+    font-size: 12px;
+  }
   .merch-media { aspect-ratio: 4/3; background: rgba(0,0,0,0.35); }
   .merch-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .merch-body { padding: 12px; }
@@ -114,8 +142,15 @@
     color: rgba(255,255,255,0.92);
     text-decoration: none;
     font-weight: 800;
+    cursor: pointer;
   }
   .merch-cta:hover { background: rgba(255,255,255,0.1); }
+  .merch-cta:disabled,
+  .merch-cta.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
   .merch-empty {
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.08);
@@ -128,8 +163,10 @@
 
 {% block content %}
 {% set merch_items = (merch.get('items', []) if merch and merch.get is defined else []) %}
+{% set purchased_item_ids = purchased_item_ids|default([]) %}
 
 <script type="application/json" id="merch-items-json">{{ merch_items|tojson }}</script>
+<script type="application/json" id="purchased-items-json">{{ purchased_item_ids|list|tojson }}</script>
 
 <div class="merch-shell"
   x-data="merchStore()"
@@ -162,9 +199,13 @@
   {% if merch_items and merch_items|length %}
   <div class="merch-grid">
     <template x-for="i in filtered()" :key="i.id">
-      <div class="merch-card">
+      <div class="merch-card" :class="{ 'sale-pending': isPurchased(i) }">
         <div class="merch-media">
           <img :src="i.image_url" :alt="i.name || i.id" loading="lazy" decoding="async">
+          <div x-show="isPurchased(i)" class="sale-pending-badge">
+            <i class="fas fa-clock" aria-hidden="true"></i>
+            <span>Sale Pending</span>
+          </div>
         </div>
         <div class="merch-body">
           <div class="merch-top">
@@ -184,10 +225,14 @@
           <div class="merch-actions">
             <input class="qty" type="number" min="1" value="1"
               :id="'qty_' + (i.id || '')"
+              :disabled="isPurchased(i)"
               aria-label="Quantity">
-            <a class="merch-cta" href="#" @click.prevent="checkout(i)">
-              <span>Checkout</span>
-              <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            <a class="merch-cta" 
+               :class="{ 'disabled': isPurchased(i) }"
+               href="#" 
+               @click.prevent="isPurchased(i) ? null : checkout(i)">
+              <span x-text="isPurchased(i) ? 'Sold' : 'Checkout'"></span>
+              <i :class="isPurchased(i) ? 'fas fa-lock' : 'fas fa-arrow-right'" aria-hidden="true"></i>
             </a>
           </div>
         </div>
@@ -208,6 +253,7 @@ function merchStore() {
     q: '',
     sort: 'featured',
     items: [],
+    purchasedItemIds: new Set(),
     init() {
       try {
         const node = document.getElementById('merch-items-json');
@@ -217,6 +263,18 @@ function merchStore() {
       } catch (_) {
         this.items = [];
       }
+      try {
+        const purchasedNode = document.getElementById('purchased-items-json');
+        const purchasedRaw = (purchasedNode && purchasedNode.textContent) ? purchasedNode.textContent : '[]';
+        const purchasedParsed = JSON.parse(purchasedRaw || '[]');
+        this.purchasedItemIds = new Set(Array.isArray(purchasedParsed) ? purchasedParsed.map(String) : []);
+      } catch (_) {
+        this.purchasedItemIds = new Set();
+      }
+    },
+    isPurchased(i) {
+      if (!i || !i.id) return false;
+      return this.purchasedItemIds.has(String(i.id));
     },
     norm(s) { return String(s || '').toLowerCase(); },
     isMerch(i) {
@@ -244,6 +302,9 @@ function merchStore() {
       return chips.slice(0, 2);
     },
     checkout(i) {
+      if (this.isPurchased(i)) {
+        return false; // Prevent checkout for purchased items
+      }
       const id = encodeURIComponent(i.id || '');
       const title = encodeURIComponent(i.name || i.id || 'Merch');
       const amount = encodeURIComponent(i.price_usd ?? '');

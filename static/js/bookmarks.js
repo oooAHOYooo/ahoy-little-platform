@@ -350,6 +350,25 @@
           const wasBookmarked = window.AhoyBookmarks.isBookmarked(type, id);
           window.AhoyBookmarks.toggle(item);
           
+          // Force immediate UI update for mobile responsiveness
+          this.$nextTick(() => {
+            // Update all bookmark buttons for this item
+            const buttons = document.querySelectorAll(`[data-type="${type}"][data-id="${id}"]`);
+            buttons.forEach(btn => {
+              const isNowBookmarked = window.AhoyBookmarks.isBookmarked(type, id);
+              btn.classList.toggle('bookmarked', isNowBookmarked);
+              btn.classList.toggle('just-bookmarked', isNowBookmarked && !wasBookmarked);
+              btn.setAttribute('aria-pressed', isNowBookmarked);
+              
+              // Remove animation class after animation completes
+              if (isNowBookmarked && !wasBookmarked) {
+                setTimeout(() => {
+                  btn.classList.remove('just-bookmarked');
+                }, 600);
+              }
+            });
+          });
+          
           // Dispatch bookmark change event for navbar updates
           document.dispatchEvent(new CustomEvent('bookmarks:changed', {
             detail: { 
@@ -380,12 +399,17 @@
             window.__ahoyToast && window.__ahoyToast("Bookmarked!");
             // Trigger notification system
             window.__ahoyNotifyNewBookmark && window.__ahoyNotifyNewBookmark();
+          } else {
+            window.__ahoyToast && window.__ahoyToast("Removed from bookmarks");
           }
         }
       },
 
       isBookmarked(type, id) {
+        // Force reactivity by accessing state
         if (window.AhoyBookmarks) {
+          // Trigger reactivity by checking state
+          const count = window.AhoyBookmarks.count();
           return window.AhoyBookmarks.isBookmarked(type, id);
         }
         return false;
