@@ -27,6 +27,8 @@ Ahoy Indie Media is a comprehensive Flask-based media platform that brings toget
 - **Merch Store** - Buy physical items from artists
 - **Stripe Integration** - Secure, PCI-compliant payments
 - **Transaction History** - Complete audit trail of all payments
+- **Artist Payouts** - Automated payout system with Stripe Connect support
+- **Email Notifications** - Real-time notifications for boosts, purchases, and payouts
 
 ### 👤 Powerful User Features
 - **Playlists** - Create unlimited playlists and organize your content
@@ -134,13 +136,28 @@ The app will automatically find an available port (5001-5010) and display the UR
 - Boost artists with tips
 - All boosts go into artist "buckets"
 - Track artist earnings
-- Admin dashboard for payouts
+- 100% of boost amount goes to artist
+- Automatic payout processing
 
 **Merch Store:**
 - Physical items from artists
 - Secure checkout
 - Order tracking
 - Purchase history
+
+**Artist Payout System:**
+- Automated daily payout scanning
+- Stripe Connect integration for automatic transfers
+- Manual payout tracking and management
+- Complete payout history and audit trail
+- Email notifications for all payouts
+
+**Email Notifications:**
+- Real-time notifications for boosts and purchases
+- User registration alerts
+- Wallet funding notifications
+- Daily payout summaries
+- All notifications sent to admin email
 
 ### 👤 User Management
 
@@ -256,6 +273,9 @@ ahoy-little-platform/
 - `GET /payments/wallet` - Get wallet balance
 - `POST /payments/wallet/fund` - Fund wallet
 - `GET /payments/wallet/transactions` - Transaction history
+- `POST /payments/boost-session` - Create boost checkout session
+- `GET /payments/artist/<id>/boosts` - Get artist boost statistics
+- `GET /payments/artist/<id>/earnings` - Get artist earnings
 
 ### Database
 
@@ -263,9 +283,10 @@ ahoy-little-platform/
 - `User` - User accounts and profiles
 - `Playlist` - User playlists
 - `Bookmark` - Saved content
-- `Tip` - Artist boosts/tips
+- `Tip` - Artist boosts/tips (with fee breakdown)
 - `Purchase` - Merch purchases
 - `WalletTransaction` - Wallet activity
+- `ArtistPayout` - Payout tracking and management
 - `ListeningSession` - Listening tracking
 - `Achievement` - Gamification badges
 - `Quest` - Daily/weekly quests
@@ -291,9 +312,12 @@ STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-**Email (Password Reset):**
+**Email (Notifications & Password Reset):**
 ```bash
-# Option 1: Resend
+# Admin email for notifications
+AHOY_ADMIN_EMAIL=alex@ahoy.ooo
+
+# Option 1: Resend (Recommended)
 RESEND_API_KEY=...
 SUPPORT_EMAIL=...
 
@@ -302,6 +326,16 @@ SMTP_HOST=...
 SMTP_PORT=...
 SMTP_USER=...
 SMTP_PASS=...
+```
+
+**Artist Payouts (Optional):**
+```bash
+# Stripe Connect accounts for automatic transfers
+ARTIST_STRIPE_ACCOUNT_ROB_MEGLIO=acct_xxxxx
+ARTIST_STRIPE_ACCOUNT_ARTIST_NAME=acct_yyyyy
+
+# Artist email notifications (optional)
+ARTIST_EMAIL_ROB_MEGLIO=rob@example.com
 ```
 
 **Optional:**
@@ -356,6 +390,12 @@ gunicorn -w 4 -b 0.0.0.0:8000 app:app
 - **User Workflows:** `docs/features/WALLET_USER_WORKFLOW.md`
 - **Security:** `docs/features/STRIPE_SECURITY.md`
 
+### Admin & Payout Guides
+- **Artist Payouts:** `docs/features/ARTIST_PAYOUTS_GUIDE.md`
+- **Automated Payouts:** `docs/features/AUTOMATED_PAYOUTS_GUIDE.md`
+- **Payout Process:** `docs/features/ARTIST_PAYOUT_EXPLAINED.md`
+- **Render Setup:** `docs/deployment/RENDER_PAYOUT_SETUP.md`
+
 ### Developer Guides
 - **API Reference:** See `SITEMAP.md`
 - **Troubleshooting:** `docs/troubleshooting/WALLET_TROUBLESHOOTING.md`
@@ -374,6 +414,8 @@ gunicorn -w 4 -b 0.0.0.0:8000 app:app
 - ✅ Direct fan support via boosts/tips
 - ✅ Merch store integration
 - ✅ Earnings tracking and payouts
+- ✅ Automated payout processing (Stripe Connect)
+- ✅ Email notifications when receiving boosts
 - ✅ Social media integration
 
 ### For Music Fans
@@ -442,11 +484,31 @@ MIT License - see LICENSE file for details
 ## 🎉 What's New
 
 ### Recent Updates
+- ✅ **Email Notification System** - Real-time notifications for boosts, purchases, user registrations, and wallet funding
+- ✅ **Artist Payout System** - Complete payout tracking and management with Stripe Connect support
+- ✅ **Automated Daily Payouts** - Daily scanning and automatic processing of artist payouts
+- ✅ **Payout Management Scripts** - Tools to scan, process, and track all artist payouts
 - ✅ Wallet system with instant checkout
 - ✅ Liquid dark glass design refresh
-- ✅ Console error logging for checkout
 - ✅ Enhanced payment flows
 - ✅ Improved user experience
+
+### Admin Features
+- 📧 **Email Notifications** - Get notified at `alex@ahoy.ooo` for:
+  - New user registrations
+  - Wallet funding (with balance info)
+  - Artist boosts (with payout details)
+  - Merch purchases
+  - Daily payout summaries
+- 💰 **Payout Management**:
+  - Scan all artists for pending payouts
+  - Automatic Stripe Connect transfers
+  - Manual payout tracking
+  - Complete audit trail
+- 🤖 **Automation**:
+  - Daily payout scanning (9 AM UTC)
+  - Automatic processing for Stripe Connect artists
+  - Email summaries with action items
 
 ### Coming Soon
 - 🔜 Partial wallet payments
@@ -456,6 +518,36 @@ MIT License - see LICENSE file for details
 
 ---
 
+## 🛠️ Admin Tools & Scripts
+
+### Payout Management
+```bash
+# Scan all artists for pending payouts
+python scripts/scan_artist_payouts.py
+
+# Process payout for specific artist
+python scripts/send_artist_payout.py --artist-id "rob-meglio" --auto
+
+# Daily automated payout processor
+python scripts/daily_payout_processor.py --auto-process
+```
+
+### Email Testing
+```bash
+# Test all notification types
+python scripts/test_email_notification.py
+
+# Test email to alex@ahoy.ooo specifically
+python scripts/test_send_email_to_alex.py
+```
+
+### Documentation
+- **Quick Start:** `docs/deployment/RENDER_SETUP_COMPLETE.md`
+- **Payout Guide:** `docs/features/ARTIST_PAYOUTS_GUIDE.md`
+- **Automation:** `docs/features/AUTOMATED_PAYOUTS_GUIDE.md`
+
+---
+
 **Built with ❤️ for independent creators and music lovers**
 
-*Last Updated: January 2025 | Version: 1.0.0*
+*Last Updated: January 2025 | Version: 1.1.0*
