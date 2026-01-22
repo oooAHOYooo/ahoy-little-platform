@@ -10,7 +10,12 @@ from decimal import Decimal
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from services.notifications import notify_boost_received, notify_merch_purchase
+from services.notifications import (
+    notify_boost_received, 
+    notify_merch_purchase,
+    notify_user_registered,
+    notify_wallet_funded
+)
 from services.emailer import can_send_email, send_email
 
 def main():
@@ -75,6 +80,38 @@ def main():
         print("✅ Merch purchase notification sent to admin")
     else:
         print("⚠️  Merch purchase notification not sent (check logs)")
+    
+    print()
+    
+    # Test 4: User registration notification
+    print("📧 Test 4: Sending user registration notification...")
+    reg_result = notify_user_registered(
+        user_id=999,
+        email="test@example.com",
+        username="testuser",
+        display_name="Test User"
+    )
+    if reg_result.get("admin_notified"):
+        print("✅ User registration notification sent to admin")
+    else:
+        print("⚠️  User registration notification not sent (check logs)")
+    
+    print()
+    
+    # Test 5: Wallet funding notification
+    print("📧 Test 5: Sending wallet funding notification...")
+    wallet_result = notify_wallet_funded(
+        user_id=999,
+        user_email="test@example.com",
+        amount=Decimal("25.00"),
+        balance_before=Decimal("0.00"),
+        balance_after=Decimal("25.00"),
+        stripe_session_id="test_session_789"
+    )
+    if wallet_result.get("admin_notified"):
+        print("✅ Wallet funding notification sent to admin")
+    else:
+        print("⚠️  Wallet funding notification not sent (check logs)")
     
     print()
     print("✅ All tests completed!")

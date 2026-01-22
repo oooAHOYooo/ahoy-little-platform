@@ -5,6 +5,7 @@ Sends email notifications to admins and optionally to artists.
 import os
 import logging
 from decimal import Decimal
+from datetime import datetime
 from typing import Optional, Dict, Any
 from services.emailer import send_email, can_send_email
 
@@ -197,5 +198,99 @@ Stripe Session: {stripe_session_id or 'N/A'}
         results["admin_notified"] = result.get("ok", False)
         if not result.get("ok"):
             log.error(f"Failed to notify admin of merch purchase: {result}")
+    
+    return results
+
+
+def notify_user_registered(
+    user_id: int,
+    email: str,
+    username: Optional[str] = None,
+    display_name: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Send email notification when a new user registers.
+    
+    Returns dict with notification results.
+    """
+    results = {"admin_notified": False}
+    
+    if not can_send_email():
+        log.warning("Email not configured, skipping user registration notification")
+        return results
+    
+    admin_email = _get_admin_email()
+    
+    if admin_email:
+        subject = f"👤 New User Registration: {email}"
+        text = f"""
+New user registered!
+
+User ID: {user_id}
+Email: {email}
+Username: {username or 'N/A'}
+Display Name: {display_name or 'N/A'}
+Registered: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}
+"""
+        html = f"""
+<h2>👤 New User Registration</h2>
+<p><strong>User ID:</strong> {user_id}</p>
+<p><strong>Email:</strong> {email}</p>
+<p><strong>Username:</strong> {username or 'N/A'}</p>
+<p><strong>Display Name:</strong> {display_name or 'N/A'}</p>
+<p><strong>Registered:</strong> {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
+"""
+        result = send_email(admin_email, subject, text, html)
+        results["admin_notified"] = result.get("ok", False)
+        if not result.get("ok"):
+            log.error(f"Failed to notify admin of user registration: {result}")
+    
+    return results
+
+
+def notify_wallet_funded(
+    user_id: int,
+    user_email: str,
+    amount: Decimal,
+    balance_before: Decimal,
+    balance_after: Decimal,
+    stripe_session_id: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Send email notification when a user funds their wallet.
+    
+    Returns dict with notification results.
+    """
+    results = {"admin_notified": False}
+    
+    if not can_send_email():
+        log.warning("Email not configured, skipping wallet funding notification")
+        return results
+    
+    admin_email = _get_admin_email()
+    
+    if admin_email:
+        subject = f"💰 Wallet Funded: ${amount:.2f} by {user_email}"
+        text = f"""
+User funded their wallet!
+
+User: {user_email} (ID: {user_id})
+Amount Added: ${amount:.2f}
+Balance Before: ${balance_before:.2f}
+Balance After: ${balance_after:.2f}
+Stripe Session: {stripe_session_id or 'N/A'}
+"""
+        html = f"""
+<h2>💰 Wallet Funded</h2>
+<p><strong>User:</strong> {user_email} (ID: {user_id})</p>
+<p><strong>Amount Added:</strong> ${amount:.2f}</p>
+<p><strong>Balance Before:</strong> ${balance_before:.2f}</p>
+<p><strong>Balance After:</strong> ${balance_after:.2f}</p>
+<p><strong>Stripe Session:</strong> {stripe_session_id or 'N/A'}</p>
+"""
+        result = send_email(admin_email, subject, text, html)
+        results["admin_notified"] = result.get("ok", False)
+        if not result.get("ok"):
+            log.error(f"Failed to notify admin of wallet funding: {result}")
     
     return results

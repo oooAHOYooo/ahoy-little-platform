@@ -185,6 +185,19 @@ def register():
             except Exception:
                 pass
 
+            # Notify admin of new user registration
+            try:
+                from services.notifications import notify_user_registered
+                notify_user_registered(
+                    user_id=user.id,
+                    email=user.email,
+                    username=user.username,
+                    display_name=user.display_name
+                )
+            except Exception as notify_error:
+                # Don't fail registration if notification fails
+                current_app.logger.error(f"Failed to send user registration notification: {notify_error}", exc_info=True)
+
             return jsonify({
                 "success": True,
                 "user": {

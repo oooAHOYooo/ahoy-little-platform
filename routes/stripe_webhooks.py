@@ -107,6 +107,21 @@ def handle_stripe_webhook():
                             # Log successful wallet funding
                             import logging
                             logging.info(f"Wallet funded: user_id={user_id}, amount=${amount:.2f}, balance_before=${balance_before:.2f}, balance_after=${balance_after:.2f}, session_id={session_id}")
+                            
+                            # Send email notification
+                            try:
+                                from services.notifications import notify_wallet_funded
+                                notify_wallet_funded(
+                                    user_id=user_id,
+                                    user_email=user.email,
+                                    amount=amount,
+                                    balance_before=balance_before,
+                                    balance_after=balance_after,
+                                    stripe_session_id=session_id
+                                )
+                            except Exception as notify_error:
+                                # Don't fail webhook if notification fails
+                                logging.error(f"Failed to send wallet funding notification: {notify_error}", exc_info=True)
                         else:
                             import logging
                             logging.error(f"Wallet funding failed: User {user_id} not found for session {session_id}")
