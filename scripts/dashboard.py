@@ -17,7 +17,7 @@ from typing import Dict, List, Optional
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from db import get_session
-from models import ArtistPayout, Tip, Purchase, WalletTransaction
+from models import ArtistPayout, Tip, Purchase, WalletTransaction, User
 
 
 class Colors:
@@ -96,6 +96,209 @@ def get_database_stats() -> Dict:
     return stats
 
 
+def format_table(data: List[Dict], columns: List[str], max_rows: int = 20):
+    """Format data as a table."""
+    if not data:
+        return "  (No data)"
+    
+    # Truncate if too many rows
+    display_data = data[:max_rows]
+    
+    # Calculate column widths
+    widths = {col: len(col) for col in columns}
+    for row in display_data:
+        for col in columns:
+            val = str(row.get(col, ''))
+            widths[col] = max(widths[col], len(val))
+    
+    # Build table
+    lines = []
+    
+    # Header
+    header = "  " + " | ".join(col.ljust(widths[col]) for col in columns)
+    lines.append(header)
+    lines.append("  " + "-" * (len(header) - 2))
+    
+    # Rows
+    for row in display_data:
+        line = "  " + " | ".join(str(row.get(col, '')).ljust(widths[col]) for col in columns)
+        lines.append(line)
+    
+    if len(data) > max_rows:
+        lines.append(f"  ... and {len(data) - max_rows} more rows")
+    
+    return "\n".join(lines)
+
+
+def show_recent_tips(limit: int = 20):
+    """Show recent tips/boosts."""
+    with get_session() as db_session:
+        tips = db_session.query(Tip).order_by(Tip.created_at.desc()).limit(limit).all()
+        
+        data = []
+        for tip in tips:
+            artist_name = get_artist_name(tip.artist_id)
+            data.append({
+                'ID': tip.id,
+                'Date': tip.created_at.strftime('%Y-%m-%d %H:%M'),
+                'Artist': artist_name[:20],
+                'Amount': f"${float(tip.amount):.2f}",
+                'Total Paid': f"${float(tip.total_paid or tip.amount):.2f}",
+                'User ID': tip.user_id or 'Guest',
+            })
+        
+        return format_table(data, ['ID', 'Date', 'Artist', 'Amount', 'Total Paid', 'User ID'])
+
+
+def show_recent_payouts(limit: int = 20):
+    """Show recent payouts."""
+    with get_session() as db_session:
+        payouts = db_session.query(ArtistPayout).order_by(
+            ArtistPayout.completed_at.desc().nulls_last(),
+            ArtistPayout.created_at.desc()
+        ).limit(limit).all()
+        
+        data = []
+        for payout in payouts:
+            artist_name = get_artist_name(payout.artist_id)
+            status_color = Colors.OKGREEN if payout.status == 'completed' else Colors.WARNING if payout.status == 'pending' else Colors.FAIL
+            status_display = f"{status_color}{payout.status}{Colors.ENDC}"
+            
+            completed_date = payout.completed_at.strftime('%Y-%m-%d') if payout.completed_at else 'Pending'
+            
+            data.append({
+                'ID': payout.id,
+                'Date': completed_date,
+                'Artist': artist_name[:20],
+                'Amount': f"${float(payout.amount):.2f}",
+                'Status': payout.status,
+                'Method': (payout.payment_method or 'manual')[:15],
+            })
+        
+        return format_table(data, ['ID', 'Date', 'Artist', 'Amount', 'Status', 'Method'])
+
+
+def show_pending_payouts():
+    """Show all pending payouts."""
+    with get_session() as db_session:
+        payouts = db_session.query(ArtistPayout).filter(
+            ArtistPayout.status == 'pending'
+        ).order_by(ArtistPayout.created_at.desc()).all()
+        
+        if not payouts:
+            return "  ✅ No pending payouts"
+        
+        data = []
+        for payout in payouts:
+            artist_name = get_artist_name(payout.artist_id)
+            days_old = (datetime.now() - payout.created_at).days
+            
+            data.append({
+                'ID': payout.id,
+                'Created': payout.created_at.strftime('%Y-%m-%d'),
+                'Days Old': days_old,
+                'Artist': artist_name[:20],
+                'Amount': f"${float(payout.amount):.2f}",
+                'Method': (payout.payment_method or 'manual')[:15],
+            })
+        
+        return format_table(data, ['ID', 'Created', 'Days Old', 'Artist', 'Amount', 'Method'])
+
+
+def show_recent_purchases(limit: int = 20):
+    """Show recent purchases."""
+    with get_session() as db_session:
+        purchases = db_session.query(Purchase).filter(
+            Purchase.status == 'paid'
+        ).order_by(Purchase.created_at.desc()).limit(limit).all()
+        
+        data = []
+        for purchase in purchases:
+            data.append({
+                'ID': purchase.id,
+                'Date': purchase.created_at.strftime('%Y-%m-%d %H:%M'),
+                'Type': purchase.type[:15],
+                'Amount': f"${float(purchase.amount):.2f}",
+                'Total': f"${float(purchase.total):.2f}",
+                'User ID': purchase.user_id or 'Guest',
+            })
+        
+        return format_table(data, ['ID', 'Date', 'Type', 'Amount', 'Total', 'User ID'])
+
+
+def show_recent_wallet_transactions(limit: int = 20):
+    """Show recent wallet transactions."""
+    with get_session() as db_session:
+        transactions = db_session.query(WalletTransaction).order_by(
+            WalletTransaction.created_at.desc()
+        ).limit(limit).all()
+        
+        data = []
+        for tx in transactions:
+            type_color = Colors.OKGREEN if tx.type == 'fund' else Colors.WARNING if tx.type == 'spend' else Colors.OKCYAN
+            type_display = f"{type_color}{tx.type}{Colors.ENDC}"
+            
+            data.append({
+                'ID': tx.id,
+                'Date': tx.created_at.strftime('%Y-%m-%d %H:%M'),
+                'User ID': tx.user_id,
+                'Type': tx.type,
+                'Amount': f"${float(tx.amount):.2f}",
+                'Balance': f"${float(tx.balance_after):.2f}",
+            })
+        
+        return format_table(data, ['ID', 'Date', 'User ID', 'Type', 'Amount', 'Balance'])
+
+
+def show_artist_summary():
+    """Show summary by artist (pending tips)."""
+    with get_session() as db_session:
+        # Get all tips grouped by artist
+        tips = db_session.query(Tip).all()
+        
+        # Get completed payouts
+        completed_payouts = db_session.query(ArtistPayout).filter(
+            ArtistPayout.status == 'completed'
+        ).all()
+        
+        # Track paid tip IDs
+        paid_tip_ids = set()
+        for payout in completed_payouts:
+            if payout.related_tip_ids:
+                paid_tip_ids.update(payout.related_tip_ids)
+        
+        # Group by artist
+        artist_data = {}
+        for tip in tips:
+            if tip.id in paid_tip_ids:
+                continue  # Already paid
+            
+            if tip.artist_id not in artist_data:
+                artist_data[tip.artist_id] = {
+                    'artist_id': tip.artist_id,
+                    'count': 0,
+                    'total': Decimal('0'),
+                }
+            
+            artist_data[tip.artist_id]['count'] += 1
+            artist_data[tip.artist_id]['total'] += Decimal(str(tip.artist_payout or tip.amount))
+        
+        if not artist_data:
+            return "  ✅ No pending tips for any artist"
+        
+        # Convert to list and sort
+        data = []
+        for artist_id, info in sorted(artist_data.items(), key=lambda x: x[1]['total'], reverse=True):
+            artist_name = get_artist_name(artist_id)
+            data.append({
+                'Artist': artist_name[:25],
+                'Pending Tips': info['count'],
+                'Total Pending': f"${float(info['total']):.2f}",
+            })
+        
+        return format_table(data, ['Artist', 'Pending Tips', 'Total Pending'])
+
+
 def show_dashboard():
     """Display main dashboard with stats."""
     clear_screen()
@@ -115,8 +318,8 @@ def show_dashboard():
         print(f"  {Colors.OKCYAN}Total Tips:{Colors.ENDC} {stats.get('total_tips', 0)}")
         print(f"  {Colors.OKCYAN}Total Tips Amount:{Colors.ENDC} ${stats.get('total_tips_amount', 0):,.2f}")
     
-    # Available Scripts
-    print_section("📜 Available Scripts")
+    # Data Views
+    print_section("📋 View Data")
     
     scripts = [
         {
@@ -378,6 +581,18 @@ def main():
             break
         elif choice == '0':
             continue  # Refresh dashboard
+        elif choice == '8':
+            show_data_view('recent_tips')
+        elif choice == '9':
+            show_data_view('recent_payouts')
+        elif choice == '10':
+            show_data_view('pending_payouts')
+        elif choice == '11':
+            show_data_view('recent_purchases')
+        elif choice == '12':
+            show_data_view('wallet_transactions')
+        elif choice == '13':
+            show_data_view('artist_summary')
         elif choice.isdigit():
             idx = int(choice) - 1
             if 0 <= idx < len(scripts):
