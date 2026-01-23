@@ -21868,7 +21868,8 @@ img.loading {
     max-width: 1200px;
     margin: 0 auto;
     padding: var(--spacing-2xl) var(--spacing-lg);
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--border-radius-lg);
     margin-bottom: var(--spacing-2xl);
 }
@@ -21880,22 +21881,25 @@ img.loading {
 }
 
 .boost-jar-header h2 {
-    font-size: var(--font-size-3xl);
-    font-weight: 700;
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
     margin: 0 0 var(--spacing-sm) 0;
     color: var(--text-primary);
+    letter-spacing: -0.02em;
 }
 
 .boost-jar-subtitle {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
     color: var(--text-secondary);
-    margin: 0 0 var(--spacing-xs) 0;
+    margin: 0 0 var(--spacing-lg) 0;
+    font-weight: 400;
 }
 
 .boost-jar-fee-note {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     margin: 0 0 var(--spacing-xl) 0;
+    font-weight: 400;
 }
 
 .boost-amount-buttons {
@@ -21972,22 +21976,21 @@ img.loading {
 
 .boost-submit-btn {
     width: 100%;
-    padding: var(--spacing-lg) var(--spacing-xl);
-    font-size: var(--font-size-lg);
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    border: none;
-    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--border-radius-md);
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transition: all 0.2s ease;
     margin-bottom: var(--spacing-lg);
 }
 
 .boost-submit-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
 }
 
 .boost-submit-btn:disabled {
