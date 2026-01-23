@@ -453,8 +453,8 @@
                         aria-label="Search">
                         <i class="fas fa-search"></i>
                     </button>
-                    <a href="/bookmarks" class="status-action-btn"
-                        title="Bookmarks" aria-label="Bookmarks">
+                    <a href="/my-saves" class="status-action-btn"
+                        title="Saved" aria-label="Saved">
                         <i class="fas fa-bookmark"></i>
                         <span class="notification-badge"
                             x-show="hasNewBookmarks"
@@ -537,8 +537,8 @@
                             aria-hidden="true"></i>
                         <span>Radio</span>
                     </a>
-                    <a href="/bookmarks"
-                        class="mobile-tab {% if request.endpoint == 'bookmarks_page' %}active{% endif %}">
+                    <a href="/my-saves"
+                        class="mobile-tab {% if request.endpoint == 'my_saves' %}active{% endif %}">
                         <i class="fas fa-bookmark" aria-hidden="true"></i>
                         <span>Saved</span>
                     </a>
@@ -650,6 +650,7 @@
                                 @click="accountMenuOpen = !accountMenuOpen; console.log('Account menu clicked, new state:', accountMenuOpen)"
                                 class="ds-iconbtn ds-iconbtn--account nav-item account-menu-btn"
                                 title="Account">
+                                <span class="account-username" x-text="userProfile.username || userProfile.display_name || 'User'"></span>
                                 <i class="fas fa-user"
                                     style="font-size:16px;color:#bdbdbd;"></i>
                                 <i class="fas fa-chevron-down"
@@ -695,7 +696,7 @@
                                         </div>
                                     </a>
 
-                                    <a href="/bookmarks"
+                                    <a href="/my-saves"
                                         class="account-menu-item account-menu-item-badge"
                                         @click="accountMenuOpen = false">
                                         <i
@@ -1349,8 +1350,8 @@
                             <span>Merch</span>
                         </a>
                         <a
-                            class="app-sidebar-item {% if request.endpoint == 'bookmarks_page' %}active{% endif %}"
-                            href="/bookmarks"
+                            class="app-sidebar-item {% if request.endpoint == 'my_saves' %}active{% endif %}"
+                            href="/my-saves"
                             data-icon="bookmark">
                             <i class="fas fa-bookmark" aria-hidden="true"></i>
                             <span>Saved</span>
@@ -1786,7 +1787,7 @@
                         <li><a href="{{ url_for('artists') }}">Artists</a></li>
                         <li><a href="/events">Events</a></li>
                         <li><a href="/merch">Merch</a></li>
-                        <li><a href="/bookmarks">Saved</a></li>
+                        <li><a href="/my-saves">Saved</a></li>
                     </ul>
                 </div>
 
@@ -1846,7 +1847,7 @@
                     <a href="{{ url_for('artists') }}"
                         class="quicklink">Artists</a>
                     <span class="quicklink-sep">•</span>
-                    <a href="/bookmarks" class="quicklink">Bookmarks</a>
+                    <a href="/my-saves" class="quicklink">Saved</a>
                 </div>
             </div>
         </div>
@@ -2737,7 +2738,7 @@
                     try { window.history.forward(); } catch (_) {}
                 },
                 openNotifications() {
-                    window.location.href = '/bookmarks';
+                    window.location.href = '/my-saves';
                 },
                 goPremium() {
                     document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Premium coming soon' }));
@@ -2963,6 +2964,26 @@
                             }
                         } catch (e) {
                             console.warn('Error setting up playlistchange event:', e);
+                        }
+                        
+                        try {
+                            if (mp.on && typeof mp.on === 'function') {
+                                mp.on('trackchange', (track) => {
+                                    try {
+                                        this.currentTrack = track || mp.currentTrack;
+                                        // Update saved state when track changes
+                                        this.updateSavedState();
+                                        // Keep Now Playing UI in sync (glassy theme only; no visualizer)
+                                        if (window.nowPlayingController && this.currentTrack) {
+                                            window.nowPlayingController.onTrackChange(this.currentTrack);
+                                        }
+                                    } catch (e) {
+                                        console.warn('Error in trackchange handler:', e);
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            console.warn('Error setting up trackchange event:', e);
                         }
                         }
                     } catch (e) {
@@ -3509,9 +3530,9 @@
                     }
                 },
                 goToCollection(id) {
-                    // Navigate to bookmarks/collections page
+                    // Navigate to saved page
                     // Ideally we would filter by collection ID, but simple navigation for now
-                    window.location.href = '/bookmarks';
+                    window.location.href = '/my-saves';
                 },
                 async sendTip() {
                     if (!this.selectedArtistId || !this.tipAmount) return;

@@ -5,48 +5,60 @@
 {% block content %}
 <div class="shows-page" x-data="showsPage()" x-init="init()">
     <div class="shows-container">
-        <!-- Unified Rotating Hero -->
-        <section class="unified-hero tv-hero"
-            x-data="createUnifiedHero({ pageType: 'videos', rotationSpeed: 14000 })"
-            x-init="init()"
-            @touchstart="handleTouchStart" @touchmove="handleTouchMove"
-            @touchend="handleTouchEnd">
-            <div class="unified-hero-feed hero-feed"
-                :style="`transform: translateX(${heroOffset}px)`">
-                <template x-for="(item, index) in heroItems" :key="item.id">
-                    <div class="hero-item" x-show="getItemImage(item)"
-                        :class="{'active': currentHeroIndex === index}"
-                        :style="`background-image: url(${getItemImage(item)})`"
-                        @click="playHeroItem(item)">
-                        <div class="hero-overlay">
-                            <div class="hero-content">
-                                <div class="hero-badge ahoy-subheader"
-                                    x-text="getPageBadge()"></div>
-                                <h1 x-text="getItemTitle(item)"></h1>
-                                <p x-text="getItemSubtitle(item)"></p>
-                                <button @click.stop="playHeroItem(item)"
-                                    class="hero-play-btn">
-                                    <i class="fas fa-play"></i>
-                                </button>
+        <!-- Embedded Video Player Section -->
+        <section class="embedded-video-section" x-show="true">
+            <div class="video-player-wrapper">
+                <!-- Video Player -->
+                <div x-show="currentVideo" class="embedded-video-player">
+                    <video 
+                        :src="currentVideo?.video_url || currentVideo?.mp4_link"
+                        :poster="currentVideo?.thumbnail"
+                        @loadedmetadata="onVideoLoaded()"
+                        @timeupdate="onTimeUpdate()"
+                        @ended="onVideoEnded()"
+                        @play="isPlaying = true"
+                        @pause="isPlaying = false"
+                        controls
+                        x-ref="videoPlayer"
+                        class="embedded-video">
+                        Your browser does not support the video tag.
+                    </video>
+                    
+                    <!-- Video Info Overlay -->
+                    <div class="video-info-overlay">
+                        <div class="video-info-content">
+                            <h2 class="video-title" x-text="currentVideo?.title || 'Untitled'"></h2>
+                            <div class="video-meta">
+                                <span class="video-host" x-text="currentVideo?.host || ''"></span>
+                                <span class="video-type" x-show="currentVideo?.type" 
+                                    x-text="String(currentVideo?.type || '').replace(/_/g, ' ')"></span>
                             </div>
+                            <p class="video-description" x-text="currentVideo?.description || ''"></p>
+                        </div>
+                        <div class="video-actions-bar">
+                            <button @click="viewSolo()" class="action-btn view-solo-btn">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span>View Solo</span>
+                            </button>
+                            <button @click="toggleBookmark({ type: 'show', id: currentVideo?.id, title: currentVideo?.title, artwork: currentVideo?.thumbnail })"
+                                class="action-btn bookmark-btn"
+                                :class="{ 'bookmarked': isBookmarked('show', currentVideo?.id) }"
+                                :aria-pressed="isBookmarked('show', currentVideo?.id)">
+                                <i :class="isBookmarked('show', currentVideo?.id) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+                                <span x-text="isBookmarked('show', currentVideo?.id) ? 'Bookmarked' : 'Bookmark'"></span>
+                            </button>
                         </div>
                     </div>
-                </template>
-            </div>
-            <div class="hero-controls">
-                <button @click="prevHero()" class="hero-nav">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button @click="nextHero()" class="hero-nav">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-            <div class="hero-indicators">
-                <template x-for="(item, index) in heroItems" :key="item.id">
-                    <button @click="setHeroIndex(index)"
-                        :class="{'active': currentHeroIndex === index}"
-                        class="hero-dot"></button>
-                </template>
+                </div>
+                
+                <!-- Placeholder when no video selected -->
+                <div x-show="!currentVideo" class="video-placeholder">
+                    <div class="placeholder-content">
+                        <i class="fas fa-play-circle"></i>
+                        <h3>Select a video to play</h3>
+                        <p>Click on any video below to start watching</p>
+                    </div>
+                </div>
             </div>
         </section>
         <!-- Unified Header Section -->
@@ -186,15 +198,20 @@
                                     <i class="fas fa-play"></i>
                                 </button>
                                 <div class="show-actions">
+                                    <button @click.stop="viewSoloShow(show)"
+                                        class="action-btn view-solo-mini-btn"
+                                        title="View Solo">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </button>
                                     <button class="action-btn bm-btn"
                                         @click.stop="toggleBookmark({ type: 'show', id: show.id, title: show.title, artwork: show.thumbnail })"
                                         :aria-pressed="isBookmarked('show', show.id)"
-                                        :class="{ 'bookmarked': isBookmarked('show', show.id) }">
+                                        :class="{ 'bookmarked': isBookmarked('show', show.id) }"
+                                        title="Bookmark">
                                         <span aria-hidden="true">
                                             <i
                                                 x-show="isBookmarked('show', show.id)"
-                                                class="fas fa-bookmark"
-                                                style="color: var(--accent-color);"></i>
+                                                class="fas fa-bookmark"></i>
                                             <i
                                                 x-show="!isBookmarked('show', show.id)"
                                                 class="far fa-bookmark"></i>
@@ -242,15 +259,21 @@
                             </div>
                             <span class="col-host" x-text="show.host"></span>
                             <div class="col-actions">
+                                <button @click.stop="viewSoloShow(show)"
+                                    class="action-btn view-solo-mini-btn"
+                                    title="View Solo">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    <span class="sr-only">View Solo</span>
+                                </button>
                                 <button class="action-btn bm-btn"
                                     @click.stop="toggleBookmark({ type: 'show', id: show.id, title: show.title, artwork: show.thumbnail })"
                                     :aria-pressed="isBookmarked('show', show.id)"
-                                    :class="{ 'bookmarked': isBookmarked('show', show.id) }">
+                                    :class="{ 'bookmarked': isBookmarked('show', show.id) }"
+                                    title="Bookmark">
                                     <span aria-hidden="true">
                                         <i
                                             x-show="isBookmarked('show', show.id)"
-                                            class="fas fa-bookmark"
-                                            style="color: var(--accent-color);"></i>
+                                            class="fas fa-bookmark"></i>
                                         <i
                                             x-show="!isBookmarked('show', show.id)"
                                             class="far fa-bookmark"></i>
@@ -292,6 +315,11 @@
                                 @click.stop="playShow(show)" title="Watch">
                                 <i class="fas fa-play" aria-hidden="true"></i>
                                 <span class="sr-only">Watch</span>
+                            </button>
+                            <button type="button" class="episode-btn view-solo-mini-btn"
+                                @click.stop="viewSoloShow(show)" title="View Solo">
+                                <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                                <span class="sr-only">View Solo</span>
                             </button>
                             <button type="button" class="episode-btn bm-btn"
                                 @click.stop="toggleBookmark({ type: 'show', id: show.id, title: show.title, artwork: show.thumbnail })"
@@ -336,10 +364,54 @@ function showsPage() {
         selectedCategory: 'all',
         viewMode: 'grid',
         isLoading: true,
+        currentVideo: null,
+        hasPlayed: false,
+        isPlaying: false,
+        currentTime: 0,
         
         // Initialize
         async init() {
             await this.loadShows();
+            
+            // Check if there's a video ID in URL params to auto-play
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('play');
+            if (videoId) {
+                const video = this.shows.find(s => String(s.id) === String(videoId));
+                if (video) {
+                    // Use setTimeout to ensure DOM is ready
+                    setTimeout(() => {
+                        this.playShow(video);
+                    }, 100);
+                }
+            }
+            
+            // Handle browser back/forward navigation
+            window.addEventListener('popstate', (event) => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const videoId = urlParams.get('play');
+                if (videoId) {
+                    const video = this.shows.find(s => String(s.id) === String(videoId));
+                    if (video) {
+                        this.currentVideo = video;
+                        this.hasPlayed = true;
+                        this.$nextTick(() => {
+                            if (this.$refs.videoPlayer) {
+                                this.$refs.videoPlayer.load();
+                                this.$refs.videoPlayer.play().catch(err => {
+                                    console.error('Error playing video:', err);
+                                });
+                            }
+                        });
+                    }
+                } else {
+                    // Clear video if no play param
+                    this.currentVideo = null;
+                    if (this.$refs.videoPlayer) {
+                        this.$refs.videoPlayer.pause();
+                    }
+                }
+            });
         },
         
         // Data loading
@@ -404,7 +476,50 @@ function showsPage() {
         
         // Actions
         playShow(show) {
+            // Play in embedded player instead of navigating
+            this.currentVideo = show;
+            this.hasPlayed = true;
+            
+            // Update URL without page reload for shareable links
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.set('play', show.id);
+            window.history.pushState({ play: show.id }, '', newUrl);
+            
+            this.$nextTick(() => {
+                if (this.$refs.videoPlayer) {
+                    this.$refs.videoPlayer.load();
+                    this.$refs.videoPlayer.play().catch(err => {
+                        console.error('Error playing video:', err);
+                    });
+                }
+            });
+            // Scroll to top to show the player
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        
+        viewSolo() {
+            if (this.currentVideo) {
+                window.location.href = `/player?id=${this.currentVideo.id}&type=show`;
+            }
+        },
+        
+        viewSoloShow(show) {
             window.location.href = `/player?id=${show.id}&type=show`;
+        },
+        
+        onVideoLoaded() {
+            // Video metadata loaded
+        },
+        
+        onTimeUpdate() {
+            if (this.$refs.videoPlayer) {
+                this.currentTime = this.$refs.videoPlayer.currentTime;
+            }
+        },
+        
+        onVideoEnded() {
+            this.isPlaying = false;
+            // Optionally auto-play next video or clear
         },
         
         playRandomShow() {

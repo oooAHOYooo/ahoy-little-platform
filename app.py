@@ -2029,26 +2029,14 @@ def artist_profile(artist_slug):
 
 @app.route('/my-saves')
 def my_saves():
-    """Legacy route: redirect to Bookmarks"""
-    from flask import redirect
-    return redirect('/bookmarks', code=302)
+    """Saved page - main bookmarks/saves page"""
+    return render_template("my_saves.html")
 
 @app.route("/bookmarks")
 def bookmarks_page():
-    """Server-rendered bookmarks page (uses Flask + file store for logged-in users)"""
-    # If logged in, read server-side bookmarks so page renders on first paint.
-    uid = None
-    if current_user.is_authenticated:
-        uid = f"user:{current_user.id}"
-    items = []
-    if uid:
-        from pathlib import Path
-        import json
-        data_path = Path("data/bookmarks.json")
-        if data_path.exists():
-            data = json.loads(data_path.read_text(encoding="utf-8"))
-            items = list(data.get("users", {}).get(uid, {}).get("items", {}).values())
-    return render_template("bookmarks.html", items=items)
+    """Legacy route: redirect to Saved page"""
+    from flask import redirect
+    return redirect('/my-saves', code=302)
 
 @app.route('/playlists')
 def playlists_index():
@@ -2635,13 +2623,8 @@ def _get_month_name(month_abbr):
     }
     return months.get(month_abbr.lower(), month_abbr.capitalize())
 
-@app.route('/artists/<artist_id>/follow', methods=['POST'])
-def follow_artist(artist_id):
-    """Follow or unfollow an artist"""
-    user_id = resolve_db_user_id()
-    if not user_id:
-        return jsonify({'error': 'Authentication required'}), 401
-    
+def _handle_follow_artist(artist_id, user_id):
+    """Helper function to handle follow/unfollow logic"""
     # Normalize artist_id (could be slug, id, or name)
     artists_data = load_json_data('artists.json', {'artists': []})
     artist = None
@@ -2658,7 +2641,7 @@ def follow_artist(artist_id):
             break
     
     if not artist:
-        return jsonify({'error': 'Artist not found'}), 404
+        return None, jsonify({'error': 'Artist not found'}), 404
     
     # Use slug, id, or name as the artist identifier
     artist_identifier = artist.get('slug') or artist.get('id') or artist.get('name')
@@ -2675,7 +2658,7 @@ def follow_artist(artist_id):
                 # Unfollow
                 db_session.delete(existing)
                 db_session.commit()
-                return jsonify({'following': False, 'message': 'Unfollowed artist'}), 200
+                return artist, jsonify({'following': False, 'message': 'Unfollowed artist'}), 200
             else:
                 # Follow
                 follow = UserArtistFollow(
@@ -2684,9 +2667,55 @@ def follow_artist(artist_id):
                 )
                 db_session.add(follow)
                 db_session.commit()
-                return jsonify({'following': True, 'message': 'Following artist'}), 200
+                return artist, jsonify({'following': True, 'message': 'Following artist'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return None, jsonify({'error': str(e)}), 500
+
+@app.route('/artists/<artist_id>/follow', methods=['POST'])
+def follow_artist(artist_id):
+    """Follow or unfollow an artist"""
+    user_id = resolve_db_user_id()
+    if not user_id:
+        return jsonify({'error': 'Authentication required'}), 401
+    
+    result = _handle_follow_artist(artist_id, user_id)
+    if result[0] is None:  # Error case
+        return result[1], result[2]
+    return result[1], result[2]
+
+@app.route('/api/artists/follow', methods=['POST'])
+def api_follow_artist():
+    """API endpoint to follow an artist"""
+    user_id = resolve_db_user_id()
+    if not user_id:
+        return jsonify({'error': 'Authentication required'}), 401
+    
+    data = request.get_json()
+    artist_id = data.get('artist_id') if data else None
+    if not artist_id:
+        return jsonify({'error': 'artist_id is required'}), 400
+    
+    result = _handle_follow_artist(artist_id, user_id)
+    if result[0] is None:  # Error case
+        return result[1], result[2]
+    return result[1], result[2]
+
+@app.route('/api/artists/unfollow', methods=['POST'])
+def api_unfollow_artist():
+    """API endpoint to unfollow an artist"""
+    user_id = resolve_db_user_id()
+    if not user_id:
+        return jsonify({'error': 'Authentication required'}), 401
+    
+    data = request.get_json()
+    artist_id = data.get('artist_id') if data else None
+    if not artist_id:
+        return jsonify({'error': 'artist_id is required'}), 400
+    
+    result = _handle_follow_artist(artist_id, user_id)
+    if result[0] is None:  # Error case
+        return result[1], result[2]
+    return result[1], result[2]
 
 @app.route('/api/performances')
 def api_performances():

@@ -15,7 +15,7 @@
           {% if current_user.email %}<span class="acct-email">{{ current_user.email }}</span>{% endif %}
         </div>
         <div class="acct-actions">
-          <a class="acct-action-btn" href="/bookmarks">
+          <a class="acct-action-btn" href="/my-saves">
             <i class="fas fa-bookmark"></i>
             <span>Bookmarks</span>
           </a>
@@ -46,9 +46,6 @@
               <div class="l">Merch Orders</div>
             </div>
           </div>
-          <p class="muted text-sm" style="margin:10px 0 0;">
-            This page is intentionally lightweight and read-only for speed.
-          </p>
         </div>
       </div>
 
@@ -220,7 +217,7 @@
             <strong>You have <span x-text="bookmarkCount"></span> bookmark<span x-text="bookmarkCount === 1 ? '' : 's'"></span> saved locally</strong>
             <p>Log in to save them permanently and access from any device.</p>
           </div>
-          <a href="/bookmarks" class="btn btn-secondary" style="margin-left: auto;">
+          <a href="/my-saves" class="btn btn-secondary" style="margin-left: auto;">
             <i class="fas fa-bookmark"></i>
             View Bookmarks
           </a>

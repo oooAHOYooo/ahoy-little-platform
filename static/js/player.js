@@ -214,7 +214,13 @@ class MediaPlayer {
     
     // Player controls
     play(track) {
+        const previousTrack = this.currentTrack;
         this.currentTrack = track;
+        
+        // Emit trackchange event if track actually changed
+        if (previousTrack !== track && (previousTrack?.id !== track?.id || previousTrack?.title !== track?.title)) {
+            this.emit('trackchange', track);
+        }
         
         // Determine which element to use
         const isVideo = track.type === 'show' || track.video_url || track.mp4_link;
@@ -406,7 +412,9 @@ class MediaPlayer {
         }
         
         const nextTrack = this.playlist[this.currentIndex];
-        this.play(nextTrack);
+        if (nextTrack) {
+            this.play(nextTrack);
+        }
     }
     
     previousTrack() {
@@ -419,7 +427,9 @@ class MediaPlayer {
         }
         
         const prevTrack = this.playlist[this.currentIndex];
-        this.play(prevTrack);
+        if (prevTrack) {
+            this.play(prevTrack);
+        }
     }
     
     setShuffle(shuffled) {

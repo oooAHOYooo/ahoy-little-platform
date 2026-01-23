@@ -257,28 +257,42 @@ function mySavesLibrary() {
         },
         
         async loadSavedContent() {
-            try {
-                // Try server first (guest-safe)
-                const response = await fetch('/api/bookmarks');
-                if (!response.ok) throw new Error('Not available');
-                const data = await response.json();
-                // Convert bookmarks to saved content format
-                this.savedContent = (data.items || []).map(item => ({
+            // Use the unified AhoyBookmarks system (same as bookmarks page)
+            if (window.AhoyBookmarks) {
+                const items = window.AhoyBookmarks.all();
+                this.savedContent = items.map(item => ({
                     id: item.id,
                     type: item.type,
                     title: item.title,
                     artwork: item.artwork,
                     saved_at: item.added_at || new Date().toISOString()
                 }));
-            } catch (error) {
-                // If server fails, use local storage
-                console.log('Server unavailable, using local storage for bookmarks');
-                const localBookmarks = JSON.parse(localStorage.getItem('ahoy_bookmarks') || '[]');
-                this.savedContent = localBookmarks.map(bookmark => {
-                    const [kind, id] = bookmark.split(':');
-                    return { id, type: kind, saved_at: new Date().toISOString() };
-                });
+            } else {
+                // Fallback: try to read directly from localStorage
+                try {
+                    const rawData = localStorage.getItem('ahoy.bookmarks.v1');
+                    if (rawData) {
+                        const data = JSON.parse(rawData);
+                        if (data.items) {
+                            this.savedContent = Object.values(data.items).map(item => ({
+                                id: item.id,
+                                type: item.type,
+                                title: item.title,
+                                artwork: item.artwork,
+                                saved_at: item.added_at || new Date().toISOString()
+                            }));
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error reading bookmarks:', e);
+                    this.savedContent = [];
+                }
             }
+            
+            // Listen for bookmark changes to update the list
+            document.addEventListener('bookmarks:changed', () => {
+                this.loadSavedContent();
+            });
         },
         
         
@@ -325,7 +339,7 @@ function mySavesLibrary() {
         
         async unsaveContent(item) {
             try {
-                // Use the unified bookmarks system
+                // Use the unified bookmarks system (same as bookmarks page)
                 if (window.AhoyBookmarks) {
                     const bookmarkItem = {
                         type: item.type || 'track',
@@ -334,20 +348,10 @@ function mySavesLibrary() {
                         artwork: item.artwork
                     };
                     window.AhoyBookmarks.toggle(bookmarkItem);
-                    this.savedContent = this.savedContent.filter(i => i.id !== item.id);
-                } else {
-                    // Fallback: need to find bookmark ID first, then delete
-                    const response = await fetch('/api/bookmarks');
-                    if (response.ok) {
-                        const data = await response.json();
-                        const bookmark = (data.items || []).find(b => 
-                            b.media_id == item.id && b.media_type === (item.type === 'track' ? 'music' : item.type)
-                        );
-                        if (bookmark) {
-                            await fetch(`/api/bookmarks/${bookmark.id}`, { method: 'DELETE' });
-                        }
-                        this.savedContent = this.savedContent.filter(i => i.id !== item.id);
-                    }
+                    // Reload to reflect changes
+                    setTimeout(() => {
+                        this.loadSavedContent();
+                    }, 100);
                 }
             } catch (error) {
                 console.error('Error unsaving content:', error);

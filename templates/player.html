@@ -80,10 +80,10 @@
 
             <!-- Timeline -->
             <div class="timeline">
-                <input type="range" min="0" :max="Math.floor(currentMedia.duration_seconds || 0)" x-model.number="currentTime" @input="seekAudio($event)">
+                <input type="range" min="0" :max="Math.floor(currentMedia?.duration_seconds || window.mediaPlayer?.duration || 0)" :value="Math.floor(currentTime)" @input="seekAudio($event)" @change="seekAudio($event)">
             </div>
             <div class="time-info">
-                <span x-text="formatTime(currentTime)"></span> / <span x-text="formatTime(currentMedia.duration_seconds)"></span>
+                <span x-text="formatTime(currentTime)"></span> / <span x-text="formatTime(currentMedia?.duration_seconds || window.mediaPlayer?.duration || 0)"></span>
             </div>
 
             <!-- Bookmark Button -->
@@ -128,23 +128,31 @@
     <!-- Player Controls -->
     <div class="player-controls">
         <div class="control-buttons">
-            <button @click="previousTrack()" class="control-btn">
+            <button @click="previousTrack()" class="control-btn" title="Previous">
                 <i class="fas fa-step-backward"></i>
             </button>
-            <button @click="togglePlay()" class="control-btn play-btn">
+            <button @click="seekBackward()" class="control-btn" title="15 seconds back">
+                <i class="fas fa-backward"></i>
+            </button>
+            <button @click="togglePlay()" class="control-btn play-btn" :title="isPlaying ? 'Pause' : 'Play'">
                 <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
             </button>
-            <button @click="nextTrack()" class="control-btn">
+            <button @click="seekForward()" class="control-btn" title="15 seconds forward">
+                <i class="fas fa-forward"></i>
+            </button>
+            <button @click="nextTrack()" class="control-btn" title="Next">
                 <i class="fas fa-step-forward"></i>
             </button>
             <button @click="toggleShuffle()"
                 class="control-btn"
-                :class="{'active': isShuffled}">
+                :class="{'active': isShuffled}"
+                title="Shuffle">
                 <i class="fas fa-random"></i>
             </button>
             <button @click="toggleRepeat()"
                 class="control-btn"
-                :class="{'active': isRepeated}">
+                :class="{'active': isRepeated}"
+                title="Repeat">
                 <i class="fas fa-redo"></i>
             </button>
         </div>
@@ -261,14 +269,21 @@ function fullPlayer() {
         },
         
         loadDefaultMedia() {
-            // Load default media or from global player
-            this.currentMedia = {
-                id: 'default',
-                title: 'Welcome to Ahoy',
-                artist: 'Ahoy Indie Media',
-                duration_seconds: 180,
-                cover_art: '/static/img/default-cover.jpg'
-            };
+            // Load from global player if there's a current track, otherwise use default
+            if (window.mediaPlayer && window.mediaPlayer.currentTrack) {
+                this.currentMedia = window.mediaPlayer.currentTrack;
+                this.mediaType = (this.currentMedia.type === 'show' || this.currentMedia.video_url || this.currentMedia.mp4_link) ? 'show' : 'music';
+                this.isPlaying = window.mediaPlayer.isPlaying;
+                this.currentTime = window.mediaPlayer.currentTime || 0;
+            } else {
+                this.currentMedia = {
+                    id: 'default',
+                    title: 'Welcome to Ahoy',
+                    artist: 'Ahoy Indie Media',
+                    duration_seconds: 180,
+                    cover_art: '/static/img/default-cover.jpg'
+                };
+            }
             this.setupMediaPlayer();
             this.setupGlobalPlayerSync();
         },
@@ -308,31 +323,47 @@ function fullPlayer() {
             this.volume = window.mediaPlayer.volume;
             this.isMuted = window.mediaPlayer.isMuted;
             this.currentTime = window.mediaPlayer.currentTime || 0;
-            this.progressPercent = (this.currentTime / (this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 1)) * 100;
+            const duration = this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 0;
+            this.progressPercent = duration > 0 ? (this.currentTime / duration) * 100 : 0;
+            
+            // Sync current media if global player has a track
+            if (this.mediaType === 'music' && window.mediaPlayer.currentTrack && !this.currentMedia) {
+                this.currentMedia = window.mediaPlayer.currentTrack;
+            }
             
             // Event listeners
             window.mediaPlayer.on('play', () => {
                 this.isPlaying = true;
+                // Update current media if it changed
+                if (this.mediaType === 'music' && window.mediaPlayer.currentTrack) {
+                    this.currentMedia = window.mediaPlayer.currentTrack;
+                }
             });
             window.mediaPlayer.on('pause', () => {
                 this.isPlaying = false;
             });
             window.mediaPlayer.on('timeupdate', (time) => {
                 if (this.mediaType === 'music') {
-                    this.currentTime = time;
-                    this.progressPercent = (this.currentTime / (this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 1)) * 100;
+                    this.currentTime = time || 0;
+                    const duration = this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 0;
+                    this.progressPercent = duration > 0 ? (this.currentTime / duration) * 100 : 0;
                 }
             });
             window.mediaPlayer.on('durationchange', (duration) => {
                 if (this.mediaType === 'music') {
                     // Prefer media metadata if present; fallback to player-reported duration
                     const total = this.currentMedia?.duration_seconds || duration || 0;
-                    this.progressPercent = (this.currentTime / (total || 1)) * 100;
+                    this.progressPercent = total > 0 ? (this.currentTime / total) * 100 : 0;
                 }
             });
             window.mediaPlayer.on('volumechange', (data) => {
                 this.volume = data.volume;
                 this.isMuted = data.muted;
+            });
+            window.mediaPlayer.on('trackchange', () => {
+                if (this.mediaType === 'music' && window.mediaPlayer.currentTrack) {
+                    this.currentMedia = window.mediaPlayer.currentTrack;
+                }
             });
         },
         
@@ -341,24 +372,63 @@ function fullPlayer() {
             if (this.mediaType === 'show' && this.$refs.videoPlayer) {
                 if (this.isPlaying) {
                     this.$refs.videoPlayer.pause();
+                    this.isPlaying = false;
                 } else {
-                    this.$refs.videoPlayer.play();
+                    this.$refs.videoPlayer.play().then(() => {
+                        this.isPlaying = true;
+                    }).catch(err => {
+                        console.error('Error playing video:', err);
+                    });
                 }
-            } else if (this.mediaType === 'music' && this.$refs.audioPlayer) {
+            } else if (this.mediaType === 'music') {
                 // Delegate music control to global player for consistent playback + visualizer
+                if (!window.mediaPlayer) {
+                    console.warn('Global mediaPlayer not available');
+                    return;
+                }
+                
                 if (this.isPlaying) {
-                    window.mediaPlayer?.pause();
+                    window.mediaPlayer.pause();
+                    // State will be updated via event listener
                 } else {
                     if (this.currentMedia) {
-                        window.mediaPlayer?.play(this.currentMedia);
+                        window.mediaPlayer.play(this.currentMedia);
+                        // State will be updated via event listener
+                    } else if (window.mediaPlayer.currentTrack) {
+                        // Resume if there's already a track playing
+                        window.mediaPlayer.resume();
                     }
                 }
             }
-            this.isPlaying = !this.isPlaying;
             
             // Update media session state
             if (window.mediaSessionManager) {
-                window.mediaSessionManager.updatePlaybackState(this.isPlaying ? 'playing' : 'paused');
+                window.mediaSessionManager.updatePlaybackState(this.isPlaying ? 'paused' : 'playing');
+            }
+        },
+        
+        seekBackward() {
+            if (this.mediaType === 'music' && window.mediaPlayer) {
+                const newTime = Math.max(0, (window.mediaPlayer.currentTime || this.currentTime || 0) - 15);
+                window.mediaPlayer.seekTo(newTime);
+                this.currentTime = newTime;
+            } else if (this.mediaType === 'show' && this.$refs.videoPlayer) {
+                const newTime = Math.max(0, (this.$refs.videoPlayer.currentTime || 0) - 15);
+                this.$refs.videoPlayer.currentTime = newTime;
+                this.currentTime = newTime;
+            }
+        },
+        
+        seekForward() {
+            const duration = this.currentMedia?.duration_seconds || window.mediaPlayer?.duration || 0;
+            if (this.mediaType === 'music' && window.mediaPlayer) {
+                const newTime = Math.min(duration, (window.mediaPlayer.currentTime || this.currentTime || 0) + 15);
+                window.mediaPlayer.seekTo(newTime);
+                this.currentTime = newTime;
+            } else if (this.mediaType === 'show' && this.$refs.videoPlayer) {
+                const newTime = Math.min(duration, (this.$refs.videoPlayer.currentTime || 0) + 15);
+                this.$refs.videoPlayer.currentTime = newTime;
+                this.currentTime = newTime;
             }
         },
         
@@ -388,11 +458,15 @@ function fullPlayer() {
         
         toggleMute() {
             this.isMuted = !this.isMuted;
-            if (this.$refs.audioPlayer) {
-                this.$refs.audioPlayer.muted = this.isMuted;
-            }
-            if (this.$refs.videoPlayer) {
-                this.$refs.videoPlayer.muted = this.isMuted;
+            if (this.mediaType === 'music' && window.mediaPlayer) {
+                window.mediaPlayer.setMuted(this.isMuted);
+            } else {
+                if (this.$refs.audioPlayer) {
+                    this.$refs.audioPlayer.muted = this.isMuted;
+                }
+                if (this.$refs.videoPlayer) {
+                    this.$refs.videoPlayer.muted = this.isMuted;
+                }
             }
         },
         
@@ -437,15 +511,16 @@ function fullPlayer() {
                 this.currentTime = player.currentTime;
                 this.progressPercent = (this.currentTime / (this.currentMedia?.duration_seconds || 1)) * 100;
             } else if (this.mediaType === 'music') {
-                // Try audio element first, then global player
-                if (this.$refs.audioPlayer) {
-                    this.currentTime = this.$refs.audioPlayer.currentTime || 0;
-                    const total = this.currentMedia?.duration_seconds || this.$refs.audioPlayer.duration || 0;
-                    this.progressPercent = (this.currentTime / (total || 1)) * 100;
-                } else if (window.mediaPlayer) {
+                // For music, always use global player for consistency
+                if (window.mediaPlayer) {
                     this.currentTime = window.mediaPlayer.currentTime || 0;
                     const total = this.currentMedia?.duration_seconds || window.mediaPlayer.duration || 0;
-                    this.progressPercent = (this.currentTime / (total || 1)) * 100;
+                    this.progressPercent = (total > 0 ? (this.currentTime / total) * 100 : 0);
+                } else if (this.$refs.audioPlayer) {
+                    // Fallback to local audio element if global player not available
+                    this.currentTime = this.$refs.audioPlayer.currentTime || 0;
+                    const total = this.currentMedia?.duration_seconds || this.$refs.audioPlayer.duration || 0;
+                    this.progressPercent = (total > 0 ? (this.currentTime / total) * 100 : 0);
                 }
             }
         },
@@ -457,30 +532,37 @@ function fullPlayer() {
         
         // Progress and volume
         seekAudio(event) {
-            // Handle range input seeking
+            // Handle range input seeking (timeline slider)
             const newTime = parseFloat(event.target.value) || 0;
             this.currentTime = newTime;
             
-            if (this.$refs.videoPlayer) {
+            if (this.mediaType === 'show' && this.$refs.videoPlayer) {
                 this.$refs.videoPlayer.currentTime = newTime;
-            }
-            if (this.mediaType === 'music' && window.mediaPlayer) {
+            } else if (this.mediaType === 'music' && window.mediaPlayer) {
                 window.mediaPlayer.seekTo(newTime);
+            } else if (this.mediaType === 'music' && this.$refs.audioPlayer) {
+                this.$refs.audioPlayer.currentTime = newTime;
             }
         },
         
         seekTo(event) {
+            // Handle progress bar click seeking
             const progressBar = event.currentTarget;
             const rect = progressBar.getBoundingClientRect();
             const clickX = event.clientX - rect.left;
-            const percentage = clickX / rect.width;
-            const newTime = percentage * (this.currentMedia?.duration_seconds || 0);
+            const percentage = Math.max(0, Math.min(1, clickX / rect.width));
+            const duration = this.currentMedia?.duration_seconds || window.mediaPlayer?.duration || 0;
+            const newTime = percentage * duration;
             
-            if (this.$refs.videoPlayer) {
+            if (this.mediaType === 'show' && this.$refs.videoPlayer) {
                 this.$refs.videoPlayer.currentTime = newTime;
-            }
-            if (this.mediaType === 'music' && window.mediaPlayer) {
+                this.currentTime = newTime;
+            } else if (this.mediaType === 'music' && window.mediaPlayer) {
                 window.mediaPlayer.seekTo(newTime);
+                this.currentTime = newTime;
+            } else if (this.mediaType === 'music' && this.$refs.audioPlayer) {
+                this.$refs.audioPlayer.currentTime = newTime;
+                this.currentTime = newTime;
             }
         },
         
@@ -490,11 +572,15 @@ function fullPlayer() {
             const clickX = event.clientX - rect.left;
             this.volume = Math.max(0, Math.min(1, clickX / rect.width));
             
-            if (this.$refs.videoPlayer) {
-                this.$refs.videoPlayer.volume = this.volume;
-            }
             if (this.mediaType === 'music' && window.mediaPlayer) {
                 window.mediaPlayer.setVolume(this.volume);
+            } else {
+                if (this.$refs.videoPlayer) {
+                    this.$refs.videoPlayer.volume = this.volume;
+                }
+                if (this.$refs.audioPlayer) {
+                    this.$refs.audioPlayer.volume = this.volume;
+                }
             }
         },
         
