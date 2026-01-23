@@ -12229,6 +12229,44 @@ img.loading {
 .col-actions {
     display: flex;
     gap: var(--spacing-xs);
+    align-items: center;
+}
+
+.col-actions .action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.col-actions .action-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.col-actions .view-solo-mini-btn {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(0, 150, 200, 0.1) 100%);
+    border-color: rgba(0, 212, 255, 0.3);
+    color: var(--accent-color, #00d4ff);
+    box-shadow: 0 2px 8px rgba(0, 212, 255, 0.2);
+}
+
+.col-actions .view-solo-mini-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.25) 0%, rgba(0, 150, 200, 0.2) 100%);
+    border-color: rgba(0, 212, 255, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
 }
 
 /* Artists Grid */
