@@ -10,14 +10,21 @@ Usage:
 import os
 import sys
 import subprocess
-from datetime import datetime
+import json
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional
+from decimal import Decimal
+from collections import defaultdict
+from sqlalchemy import func
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from db import get_session
-from models import ArtistPayout, Tip, Purchase, WalletTransaction, User
+from models import (
+    ArtistPayout, Tip, Purchase, WalletTransaction, User,
+    PlayHistory, ListeningSession, Bookmark, UserArtistFollow
+)
 
 
 class Colors:
@@ -49,6 +56,33 @@ def print_section(title: str):
     """Print a section header."""
     print(f"\n{Colors.BOLD}{Colors.OKCYAN}{title}{Colors.ENDC}")
     print(f"{Colors.OKCYAN}{'-' * len(title)}{Colors.ENDC}")
+
+
+def load_json_data(filename: str, default=None):
+    """Load JSON data from static/data directory."""
+    filepath = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        'static', 'data', filename
+    )
+    try:
+        if os.path.exists(filepath):
+            with open(filepath, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"{Colors.WARNING}Warning: Could not load {filename}: {e}{Colors.ENDC}")
+    return default or {}
+
+
+def get_artist_name(artist_id: str) -> str:
+    """Get artist name from artist_id."""
+    try:
+        artists_data = load_json_data('artists.json', {'artists': []})
+        for artist in artists_data.get('artists', []):
+            if artist.get('slug') == artist_id or artist.get('id') == artist_id:
+                return artist.get('name', artist_id)
+    except Exception:
+        pass
+    return artist_id
 
 
 def get_database_stats() -> Dict:
@@ -90,8 +124,75 @@ def get_database_stats() -> Dict:
             all_tips = db_session.query(Tip).all()
             stats['total_tips_amount'] = sum(float(t.total_paid or t.amount) for t in all_tips)
             
+            # Content stats - Songs
+            music_data = load_json_data('music.json', {'tracks': []})
+            total_songs = len(music_data.get('tracks', []))
+            stats['total_songs'] = total_songs
+            
+            # Plays per song
+            song_plays = db_session.query(
+                PlayHistory.media_id,
+                func.count(PlayHistory.id).label('play_count')
+            ).filter(
+                PlayHistory.media_type == 'track'
+            ).group_by(PlayHistory.media_id).all()
+            
+            stats['songs_with_plays'] = len(song_plays)
+            stats['total_song_plays'] = sum(p.play_count for p in song_plays)
+            stats['avg_plays_per_song'] = round(
+                stats['total_song_plays'] / total_songs if total_songs > 0 else 0, 1
+            )
+            
+            # Top played songs
+            top_songs = sorted(song_plays, key=lambda x: x.play_count, reverse=True)[:5]
+            stats['top_songs'] = [
+                {'id': s.media_id, 'plays': s.play_count}
+                for s in top_songs
+            ]
+            
+            # Content stats - Videos
+            videos_data = load_json_data('videos.json', {'videos': []})
+            total_videos = len(videos_data.get('videos', []))
+            stats['total_videos'] = total_videos
+            
+            # Plays per video (check for video media_type or specific video IDs)
+            video_plays = db_session.query(
+                PlayHistory.media_id,
+                func.count(PlayHistory.id).label('play_count')
+            ).filter(
+                PlayHistory.media_type.in_(['video', 'clip', 'short'])
+            ).group_by(PlayHistory.media_id).all()
+            
+            stats['videos_with_plays'] = len(video_plays)
+            stats['total_video_plays'] = sum(p.play_count for p in video_plays)
+            stats['avg_plays_per_video'] = round(
+                stats['total_video_plays'] / total_videos if total_videos > 0 else 0, 1
+            )
+            
+            # Top played videos
+            top_videos = sorted(video_plays, key=lambda x: x.play_count, reverse=True)[:5]
+            stats['top_videos'] = [
+                {'id': v.media_id, 'plays': v.play_count}
+                for v in top_videos
+            ]
+            
+            # User stats
+            total_users = db_session.query(User).count()
+            stats['total_users'] = total_users
+            
+            active_users_30d = db_session.query(User).filter(
+                User.last_active_at >= datetime.now() - timedelta(days=30)
+            ).count()
+            stats['active_users_30d'] = active_users_30d
+            
+            # Visitor tracking - get unique IPs from recent requests
+            # Note: This is a simplified approach. For production, you'd want a proper visitor tracking table
+            stats['unique_visitors_note'] = "Visitor tracking requires log parsing or dedicated tracking table"
+            
     except Exception as e:
         stats['error'] = str(e)
+        import traceback
+        stats['traceback'] = traceback.format_exc()
     
     return stats
 
@@ -299,6 +400,132 @@ def show_artist_summary():
         return format_table(data, ['Artist', 'Pending Tips', 'Total Pending'])
 
 
+def show_data_view(view_type: str):
+    """Show different data views."""
+    clear_screen()
+    print_header(f"📊 {view_type.replace('_', ' ').title()}")
+    
+    try:
+        if view_type == 'recent_tips':
+            print(show_recent_tips())
+        elif view_type == 'recent_payouts':
+            print(show_recent_payouts())
+        elif view_type == 'pending_payouts':
+            print(show_pending_payouts())
+        elif view_type == 'recent_purchases':
+            print(show_recent_purchases())
+        elif view_type == 'wallet_transactions':
+            print(show_recent_wallet_transactions())
+        elif view_type == 'artist_summary':
+            print(show_artist_summary())
+        elif view_type == 'top_songs':
+            with get_session() as db_session:
+                song_plays = db_session.query(
+                    PlayHistory.media_id,
+                    func.count(PlayHistory.id).label('play_count')
+                ).filter(
+                    PlayHistory.media_type == 'track'
+                ).group_by(PlayHistory.media_id).order_by(
+                    func.count(PlayHistory.id).desc()
+                ).limit(20).all()
+                
+                music_data = load_json_data('music.json', {'tracks': []})
+                tracks_dict = {t['id']: t for t in music_data.get('tracks', [])}
+                
+                data = []
+                for song in song_plays:
+                    track_info = tracks_dict.get(song.media_id, {})
+                    title = track_info.get('title', song.media_id)[:40]
+                    artist = track_info.get('artist', 'Unknown')[:25]
+                    data.append({
+                        'Title': title,
+                        'Artist': artist,
+                        'Plays': song.play_count,
+                    })
+                
+                print(format_table(data, ['Title', 'Artist', 'Plays']))
+        elif view_type == 'top_videos':
+            with get_session() as db_session:
+                video_plays = db_session.query(
+                    PlayHistory.media_id,
+                    func.count(PlayHistory.id).label('play_count')
+                ).filter(
+                    PlayHistory.media_type.in_(['video', 'clip', 'short'])
+                ).group_by(PlayHistory.media_id).order_by(
+                    func.count(PlayHistory.id).desc()
+                ).limit(20).all()
+                
+                videos_data = load_json_data('videos.json', {'videos': []})
+                videos_dict = {v['id']: v for v in videos_data.get('videos', [])}
+                
+                data = []
+                for video in video_plays:
+                    video_info = videos_dict.get(video.media_id, {})
+                    title = video_info.get('title', video.media_id)[:50]
+                    data.append({
+                        'Title': title,
+                        'Plays': video.play_count,
+                    })
+                
+                print(format_table(data, ['Title', 'Plays']))
+        else:
+            print(f"{Colors.FAIL}Unknown view type: {view_type}{Colors.ENDC}")
+    except Exception as e:
+        print(f"{Colors.FAIL}Error loading view: {e}{Colors.ENDC}")
+        import traceback
+        print(traceback.format_exc())
+    
+    print()
+    input(f"{Colors.WARNING}Press Enter to continue...{Colors.ENDC}")
+
+
+def get_unique_visitors(exclude_ips: List[str] = None) -> Dict:
+    """Get unique visitor stats from logs or request tracking."""
+    exclude_ips = exclude_ips or []
+    # Get user's IPs to exclude (from environment or common localhost IPs)
+    user_ips = exclude_ips + ['127.0.0.1', 'localhost', '::1']
+    
+    # Try to get visitor count from recent PlayHistory (unique user_ids)
+    try:
+        with get_session() as db_session:
+            # Get unique users who have played content in last 30 days
+            thirty_days_ago = datetime.now() - timedelta(days=30)
+            unique_visitors_30d = db_session.query(
+                func.count(func.distinct(PlayHistory.user_id))
+            ).filter(
+                PlayHistory.played_at >= thirty_days_ago
+            ).scalar() or 0
+            
+            # Get unique users who have played content in last 7 days
+            seven_days_ago = datetime.now() - timedelta(days=7)
+            unique_visitors_7d = db_session.query(
+                func.count(func.distinct(PlayHistory.user_id))
+            ).filter(
+                PlayHistory.played_at >= seven_days_ago
+            ).scalar() or 0
+            
+            # Get unique users who have played content in last 24 hours
+            one_day_ago = datetime.now() - timedelta(days=1)
+            unique_visitors_24h = db_session.query(
+                func.count(func.distinct(PlayHistory.user_id))
+            ).filter(
+                PlayHistory.played_at >= one_day_ago
+            ).scalar() or 0
+            
+            return {
+                'visitors_24h': unique_visitors_24h,
+                'visitors_7d': unique_visitors_7d,
+                'visitors_30d': unique_visitors_30d,
+            }
+    except Exception as e:
+        return {
+            'error': str(e),
+            'visitors_24h': 0,
+            'visitors_7d': 0,
+            'visitors_30d': 0,
+        }
+
+
 def show_dashboard():
     """Display main dashboard with stats."""
     clear_screen()
@@ -310,13 +537,55 @@ def show_dashboard():
     
     if 'error' in stats:
         print(f"{Colors.FAIL}❌ Error loading stats: {stats['error']}{Colors.ENDC}")
+        if 'traceback' in stats:
+            print(f"{Colors.WARNING}Traceback:{Colors.ENDC}\n{stats['traceback']}")
     else:
+        # Financial Stats
+        print(f"\n{Colors.BOLD}💰 Financial{Colors.ENDC}")
         print(f"  {Colors.OKGREEN}Pending Payouts:{Colors.ENDC} {stats.get('pending_payouts', 0)}")
         print(f"  {Colors.WARNING}Pending Amount:{Colors.ENDC} ${stats.get('pending_amount', 0):,.2f}")
         print(f"  {Colors.OKGREEN}Completed Today:{Colors.ENDC} {stats.get('completed_today', 0)}")
         print(f"  {Colors.OKCYAN}Tips Today:{Colors.ENDC} {stats.get('tips_today', 0)}")
         print(f"  {Colors.OKCYAN}Total Tips:{Colors.ENDC} {stats.get('total_tips', 0)}")
         print(f"  {Colors.OKCYAN}Total Tips Amount:{Colors.ENDC} ${stats.get('total_tips_amount', 0):,.2f}")
+        
+        # Content Stats
+        print(f"\n{Colors.BOLD}🎵 Music Content{Colors.ENDC}")
+        print(f"  {Colors.OKGREEN}Total Songs:{Colors.ENDC} {stats.get('total_songs', 0)}")
+        print(f"  {Colors.OKCYAN}Songs with Plays:{Colors.ENDC} {stats.get('songs_with_plays', 0)}")
+        print(f"  {Colors.OKCYAN}Total Song Plays:{Colors.ENDC} {stats.get('total_song_plays', 0):,}")
+        print(f"  {Colors.OKCYAN}Avg Plays per Song:{Colors.ENDC} {stats.get('avg_plays_per_song', 0)}")
+        
+        if stats.get('top_songs'):
+            print(f"  {Colors.BOLD}Top 5 Songs:{Colors.ENDC}")
+            for i, song in enumerate(stats['top_songs'], 1):
+                song_title = song['id'][:30]
+                print(f"    {i}. {song_title}: {song['plays']} plays")
+        
+        print(f"\n{Colors.BOLD}🎬 Video Content{Colors.ENDC}")
+        print(f"  {Colors.OKGREEN}Total Videos:{Colors.ENDC} {stats.get('total_videos', 0)}")
+        print(f"  {Colors.OKCYAN}Videos with Plays:{Colors.ENDC} {stats.get('videos_with_plays', 0)}")
+        print(f"  {Colors.OKCYAN}Total Video Plays:{Colors.ENDC} {stats.get('total_video_plays', 0):,}")
+        print(f"  {Colors.OKCYAN}Avg Plays per Video:{Colors.ENDC} {stats.get('avg_plays_per_video', 0)}")
+        
+        if stats.get('top_videos'):
+            print(f"  {Colors.BOLD}Top 5 Videos:{Colors.ENDC}")
+            for i, video in enumerate(stats['top_videos'], 1):
+                video_title = video['id'][:30]
+                print(f"    {i}. {video_title}: {video['plays']} plays")
+        
+        # User & Visitor Stats
+        print(f"\n{Colors.BOLD}👥 Users & Visitors{Colors.ENDC}")
+        print(f"  {Colors.OKGREEN}Total Users:{Colors.ENDC} {stats.get('total_users', 0)}")
+        print(f"  {Colors.OKCYAN}Active Users (30d):{Colors.ENDC} {stats.get('active_users_30d', 0)}")
+        
+        visitor_stats = get_unique_visitors()
+        if 'error' not in visitor_stats:
+            print(f"  {Colors.OKCYAN}Unique Visitors (24h):{Colors.ENDC} {visitor_stats.get('visitors_24h', 0)}")
+            print(f"  {Colors.OKCYAN}Unique Visitors (7d):{Colors.ENDC} {visitor_stats.get('visitors_7d', 0)}")
+            print(f"  {Colors.OKCYAN}Unique Visitors (30d):{Colors.ENDC} {visitor_stats.get('visitors_30d', 0)}")
+        else:
+            print(f"  {Colors.WARNING}Visitor stats unavailable{Colors.ENDC}")
     
     # Data Views
     print_section("📋 View Data")
@@ -376,6 +645,16 @@ def show_dashboard():
         print(f"     {Colors.OKBLUE}{script['description']}{Colors.ENDC}")
         print(f"     {Colors.WARNING}Script:{Colors.ENDC} {script['script']}")
         print()
+    
+    print_section("📋 Data Views")
+    print(f"  {Colors.BOLD}8.{Colors.ENDC} Recent Tips")
+    print(f"  {Colors.BOLD}9.{Colors.ENDC} Recent Payouts")
+    print(f"  {Colors.BOLD}10.{Colors.ENDC} Pending Payouts")
+    print(f"  {Colors.BOLD}11.{Colors.ENDC} Recent Purchases")
+    print(f"  {Colors.BOLD}12.{Colors.ENDC} Wallet Transactions")
+    print(f"  {Colors.BOLD}13.{Colors.ENDC} Artist Summary")
+    print(f"  {Colors.BOLD}14.{Colors.ENDC} Top Songs by Plays")
+    print(f"  {Colors.BOLD}15.{Colors.ENDC} Top Videos by Plays")
     
     print_section("⚙️  Quick Actions")
     print(f"  {Colors.BOLD}0.{Colors.ENDC} Refresh Dashboard")
@@ -593,6 +872,10 @@ def main():
             show_data_view('wallet_transactions')
         elif choice == '13':
             show_data_view('artist_summary')
+        elif choice == '14':
+            show_data_view('top_songs')
+        elif choice == '15':
+            show_data_view('top_videos')
         elif choice.isdigit():
             idx = int(choice) - 1
             if 0 <= idx < len(scripts):
