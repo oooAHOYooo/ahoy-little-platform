@@ -45,6 +45,7 @@
                     aria-label="Sort music">
                     <option value="title">Sort: Title</option>
                     <option value="artist">Sort: Artist</option>
+                    <option value="plays">Sort: Plays</option>
                     <option value="added_date">Sort: Date Added</option>
                 </select>
             </div>
@@ -150,6 +151,7 @@
                     <select x-model="sortBy" @change="sortMusic()">
                         <option value="title">Title</option>
                         <option value="artist">Artist</option>
+                        <option value="plays">Plays</option>
                         <option value="added_date">Date Added</option>
                     </select>
                 </div>
@@ -221,12 +223,13 @@
     <!-- Music List View -->
     <div x-show="viewMode === 'list'" class="music-list">
         <div class="list-header">
-            <span class="col-number">#</span>
-            <span class="col-title">Name</span>
+            <span class="col-play"></span>
+            <span class="col-title">Title</span>
             <span class="col-artist">Artist</span>
-            <span class="col-album">Album</span>
-            <span class="col-time">Time</span>
-            <span class="col-actions"></span>
+            <span class="col-plays" @click="sortByPlays()">
+                plays <i class="fas fa-sort-down" x-show="sortBy === 'plays'"></i>
+            </span>
+            <span class="col-bookmark"></span>
         </div>
 
         <div class="list-items">
@@ -235,36 +238,28 @@
                     @click="playTrack(track)"
                     :class="{'playing': currentTrack?.id === track.id}">
 
-                    <div class="col-number" x-text="index + 1"></div>
+                    <div class="col-play">
+                        <button class="play-btn" @click.stop="playTrack(track)" title="Play">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
 
                     <div class="col-title">
-                        <div class="title-with-cover">
-                            <div class="mini-cover">
-                                <img
-                                    :src="track.cover_art || '/static/img/default-cover.jpg'"
-                                    :alt="track.title"
-                                    class="image-placeholder"
-                                    loading="lazy">
-                            </div>
-                            <div class="title-text">
-                                <h4 x-text="track.title"></h4>
-                            </div>
-                        </div>
+                        <span class="title-text" x-text="track.title"></span>
                     </div>
 
                     <span class="col-artist" x-text="track.artist"></span>
-                    <span class="col-album" x-text="track.album || 'Single'"></span>
-                    <span class="col-time" x-text="formatTime(track.duration_seconds || 0)"></span>
-
-                    <div class="col-actions">
+                    <span class="col-plays" x-text="track.play_count || 0"></span>
+                    <div class="col-bookmark">
                         <button class="action-btn bm-btn"
-                            @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art }); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
+                            @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art })"
                             :aria-pressed="isBookmarked('track', track.id)"
-                            :class="{ 'bookmarked': isBookmarked('track', track.id), 'just-bookmarked': isBookmarked('track', track.id) }">
-                                    <span aria-hidden="true">
-                                        <i x-show="isBookmarked('track', track.id)" class="fas fa-bookmark" style="color: var(--accent-color);"></i>
-                                        <i x-show="!isBookmarked('track', track.id)" class="far fa-bookmark"></i>
-                                    </span>
+                            :class="{ 'bookmarked': isBookmarked('track', track.id) }"
+                            title="Bookmark">
+                            <span aria-hidden="true">
+                                <i x-show="isBookmarked('track', track.id)" class="fas fa-bookmark"></i>
+                                <i x-show="!isBookmarked('track', track.id)" class="far fa-bookmark"></i>
+                            </span>
                             <span class="sr-only" x-text="isBookmarked('track', track.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
                         </button>
                     </div>
@@ -407,7 +402,7 @@ function musicLibrary() {
         viewMode: 'grid',
         searchQuery: '',
         selectedArtist: '',
-        sortBy: 'title',
+        sortBy: 'plays',
         isLoading: true,
         currentTrack: null,
         showAddToBoardModal: false,
@@ -423,10 +418,6 @@ function musicLibrary() {
         
         // Initialize
         async loadMusic() {
-            // Set list view as default on mobile
-            if (window.innerWidth <= 768) {
-                this.viewMode = 'list';
-            }
             
             try {
                 this.isLoading = true;
@@ -491,10 +482,22 @@ function musicLibrary() {
                         return a.artist.localeCompare(b.artist);
                     case 'added_date':
                         return new Date(b.added_date || 0) - new Date(a.added_date || 0);
+                    case 'plays':
+                        return (b.play_count || 0) - (a.play_count || 0);
                     default:
                         return 0;
                 }
             });
+        },
+        
+        sortByPlays() {
+            if (this.sortBy === 'plays') {
+                // Toggle ascending/descending if already sorted by plays
+                this.filteredTracks.reverse();
+            } else {
+                this.sortBy = 'plays';
+                this.sortMusic();
+            }
         },
         
         // Track actions
@@ -808,118 +811,74 @@ function musicLibrary() {
         border: none !important;
     }
 
-    /* iTunes-like mobile list items */
+    /* Mobile list items */
     .music-container .music-list .list-header {
         display: none !important;
     }
 
     .music-container .music-list .list-item {
         display: grid !important;
-        grid-template-columns: 36px 1fr 60px !important;
+        grid-template-columns: 35px 1fr 50px !important;
         gap: 12px !important;
-        padding: 12px 16px !important;
-        margin: 0 !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        padding: 10px 14px !important;
+        margin: 0 0 2px 0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-radius: 4px !important;
         width: 100% !important;
         box-sizing: border-box !important;
         align-items: center !important;
-        background: transparent !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        backdrop-filter: blur(10px) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
     }
 
     .music-container .music-list .list-item:nth-child(even) {
-        background: rgba(255, 255, 255, 0.02) !important;
+        background: rgba(255, 255, 255, 0.03) !important;
     }
 
     .music-container .music-list .list-item:hover {
         background: rgba(255, 255, 255, 0.08) !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
     }
 
     .music-container .music-list .list-item.playing {
-        background: rgba(99, 102, 241, 0.15) !important;
-        border-left: 3px solid var(--primary-color) !important;
+        background: rgba(99, 102, 241, 0.2) !important;
+        border-color: rgba(99, 102, 241, 0.4) !important;
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.2) !important;
     }
 
-    /* Track number - hidden on mobile, show play icon on hover */
-    .music-container .music-list .col-number {
-        display: none !important;
-    }
-
-    .music-container .music-list .list-item::before {
-        content: '';
-        width: 36px;
-        text-align: center;
-        font-size: 12px;
-        color: var(--text-tertiary);
-    }
-
-    .music-container .music-list .list-item:hover::before {
-        content: '▶';
-        color: var(--primary-color);
-    }
-
-    /* Title with cover art */
+    /* Title column on mobile */
     .music-container .music-list .col-title {
         min-width: 0 !important;
         flex: 1 !important;
         overflow: hidden !important;
-    }
-
-    .music-container .music-list .title-with-cover {
         display: flex !important;
         align-items: center !important;
-        gap: 12px !important;
     }
 
-    .music-container .music-list .mini-cover {
-        width: 48px !important;
-        height: 48px !important;
-        flex-shrink: 0 !important;
-        border-radius: 6px !important;
-        overflow: hidden !important;
-    }
-
-    .music-container .music-list .mini-cover img {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
-    }
-
-    .music-container .music-list .title-text {
-        min-width: 0 !important;
+    .music-container .music-list .col-title .title-text {
         flex: 1 !important;
-        overflow: hidden !important;
-    }
-
-    .music-container .music-list .col-title h4 {
+        min-width: 0 !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        line-height: 1.4 !important;
-        font-size: 14px !important;
-        font-weight: 500 !important;
+        font-size: 10px !important;
+        font-weight: 400 !important;
         color: var(--text-primary) !important;
+        line-height: 1.2 !important;
     }
 
-    /* Hide artist, album columns on mobile */
+    /* Hide columns on mobile */
     .music-container .music-list .col-artist,
-    .music-container .music-list .col-album {
+    .music-container .music-list .col-plays {
         display: none !important;
     }
 
-    /* Time column - show on mobile */
-    .music-container .music-list .col-time {
-        font-size: 12px !important;
-        color: var(--text-tertiary) !important;
-        text-align: right !important;
-        font-variant-numeric: tabular-nums !important;
-        flex-shrink: 0 !important;
-    }
-
-    /* Actions column */
-    .music-container .music-list .col-actions {
-        display: none !important;
+    /* Bookmark column on mobile */
+    .music-container .music-list .col-bookmark {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     /* Long press for actions on mobile */
