@@ -222,49 +222,48 @@
 
     <!-- Music List View -->
     <div x-show="viewMode === 'list'" class="music-list">
-        <div class="list-header">
-            <span class="col-play"></span>
-            <span class="col-title">Title</span>
-            <span class="col-artist">Artist</span>
-            <span class="col-plays" @click="sortByPlays()">
-                plays <i class="fas fa-sort-down" x-show="sortBy === 'plays'"></i>
-            </span>
-            <span class="col-bookmark"></span>
-        </div>
-
-        <div class="list-items">
-            <template x-for="(track, index) in filteredTracks" :key="track.id">
-                <div class="list-item"
-                    @click="playTrack(track)"
-                    :class="{'playing': currentTrack?.id === track.id}">
-
-                    <div class="col-play">
-                        <button class="play-btn" @click.stop="playTrack(track)" title="Play">
-                            <i class="fas fa-play"></i>
-                        </button>
-                    </div>
-
-                    <div class="col-title">
-                        <span class="title-text" x-text="track.title"></span>
-                    </div>
-
-                    <span class="col-artist" x-text="track.artist"></span>
-                    <span class="col-plays" x-text="track.play_count || 0"></span>
-                    <div class="col-bookmark">
-                        <button class="action-btn bm-btn"
-                            @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art })"
-                            :aria-pressed="isBookmarked('track', track.id)"
-                            :class="{ 'bookmarked': isBookmarked('track', track.id) }"
-                            title="Bookmark">
-                            <span aria-hidden="true">
-                                <i x-show="isBookmarked('track', track.id)" class="fas fa-bookmark"></i>
-                                <i x-show="!isBookmarked('track', track.id)" class="far fa-bookmark"></i>
-                            </span>
-                            <span class="sr-only" x-text="isBookmarked('track', track.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
-                        </button>
-                    </div>
-                </div>
-            </template>
+        <div class="music-table-wrap">
+            <table class="music-table">
+                <thead>
+                    <tr>
+                        <th class="col-play"></th>
+                        <th class="col-title">Title</th>
+                        <th class="col-artist">Artist</th>
+                        <th class="col-plays" @click="sortByPlays()">
+                            Plays <i class="fas fa-sort-down" x-show="sortBy === 'plays'"></i>
+                        </th>
+                        <th class="col-action">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="(track, index) in filteredTracks" :key="track.id">
+                        <tr class="music-table-row"
+                            @click="playTrack(track)"
+                            :class="{'playing': currentTrack?.id === track.id}">
+                            <td class="col-play" data-label="">
+                                <button class="play-btn" @click.stop="playTrack(track)" :aria-label="'Play ' + track.title">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </td>
+                            <td class="col-title" data-label="Title">
+                                <span class="title-text" x-text="track.title"></span>
+                            </td>
+                            <td class="col-artist" data-label="Artist" x-text="track.artist"></td>
+                            <td class="col-plays" data-label="Plays" x-text="track.play_count || 0"></td>
+                            <td class="col-action" data-label="Action">
+                                <button class="action-btn bm-btn"
+                                    @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art })"
+                                    :aria-pressed="isBookmarked('track', track.id)"
+                                    :class="{ 'bookmarked': isBookmarked('track', track.id) }"
+                                    :aria-label="isBookmarked('track', track.id) ? 'Remove bookmark' : 'Add bookmark'">
+                                    <i x-show="isBookmarked('track', track.id)" class="fas fa-bookmark"></i>
+                                    <i x-show="!isBookmarked('track', track.id)" class="far fa-bookmark"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -800,91 +799,5 @@ function musicLibrary() {
 {% block extra_head %}
 <script src="{{ url_for('static', filename='js/unified-hero.js') }}"></script>
 <style>
-/* Mobile music list view - iTunes style */
-@media (max-width: 768px) {
-    /* Style list view for mobile */
-    .music-container .music-list {
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 100% !important;
-        border-radius: 0 !important;
-        border: none !important;
-    }
-
-    /* Mobile list items */
-    .music-container .music-list .list-header {
-        display: none !important;
-    }
-
-    .music-container .music-list .list-item {
-        display: grid !important;
-        grid-template-columns: 35px 1fr 50px !important;
-        gap: 12px !important;
-        padding: 10px 14px !important;
-        margin: 0 0 2px 0 !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        border-radius: 4px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        align-items: center !important;
-        background: rgba(255, 255, 255, 0.02) !important;
-        backdrop-filter: blur(10px) saturate(150%) !important;
-        -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
-    }
-
-    .music-container .music-list .list-item:nth-child(even) {
-        background: rgba(255, 255, 255, 0.03) !important;
-    }
-
-    .music-container .music-list .list-item:hover {
-        background: rgba(255, 255, 255, 0.08) !important;
-        border-color: rgba(255, 255, 255, 0.15) !important;
-    }
-
-    .music-container .music-list .list-item.playing {
-        background: rgba(99, 102, 241, 0.2) !important;
-        border-color: rgba(99, 102, 241, 0.4) !important;
-        box-shadow: 0 0 20px rgba(99, 102, 241, 0.2) !important;
-    }
-
-    /* Title column on mobile */
-    .music-container .music-list .col-title {
-        min-width: 0 !important;
-        flex: 1 !important;
-        overflow: hidden !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    .music-container .music-list .col-title .title-text {
-        flex: 1 !important;
-        min-width: 0 !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        font-size: 10px !important;
-        font-weight: 400 !important;
-        color: var(--text-primary) !important;
-        line-height: 1.2 !important;
-    }
-
-    /* Hide columns on mobile */
-    .music-container .music-list .col-artist,
-    .music-container .music-list .col-plays {
-        display: none !important;
-    }
-
-    /* Bookmark column on mobile */
-    .music-container .music-list .col-bookmark {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-
-    /* Long press for actions on mobile */
-    .music-container .music-list .list-item:active {
-        background: rgba(255, 255, 255, 0.12) !important;
-    }
-}
 </style>
 {% endblock %}

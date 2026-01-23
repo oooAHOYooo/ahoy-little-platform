@@ -3006,6 +3006,11 @@ def terms_of_service():
     """Terms of Service page"""
     return render_template('terms.html')
 
+@app.route('/beta-testers')
+def beta_testers_page():
+    """Beta Testers page with installation instructions"""
+    return render_template('beta_testers.html')
+
 # Debug Routes
 @app.route('/debug')
 def debug_page():

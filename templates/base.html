@@ -414,11 +414,12 @@
             <div class="orb blue"></div>
             <div class="orb purple"></div>
             <div class="orb blue-alt"></div>
-            
+
             <!-- Glass Panel Container -->
             <div class="loader-content">
                 <div class="logo-glass">
-                    <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
+                    <img
+                        src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
                         alt="Ahoy Logo"
                         class="loader-logo"
                         onerror="this.style.display='none'">
@@ -439,7 +440,8 @@
             x-init="init()">
             <div class="status-bar-content">
                 <div class="status-left">
-                    <a href="/" class="status-action-btn status-home-btn" title="Home" aria-label="Home">
+                    <a href="/" class="status-action-btn status-home-btn"
+                        title="Home" aria-label="Home">
                         <i class="fas fa-home"></i>
                     </a>
                     <span class="status-time" id="statusTime"></span>
@@ -642,21 +644,9 @@
 
                     <!-- Utilities (Right) -->
                     <div class="ds-statusbar__right">
-                        <!-- Account Features Dropdown (Desktop Only - Logged In) -->
-                        <div class="hidden-mobile account-menu-container"
-                            x-show="isLoggedIn" x-cloak
-                            @click.outside="accountMenuOpen = false">
-                            <button
-                                @click="accountMenuOpen = !accountMenuOpen; console.log('Account menu clicked, new state:', accountMenuOpen)"
-                                class="ds-iconbtn ds-iconbtn--account nav-item account-menu-btn"
-                                title="Account">
-                                <span class="account-username" x-text="userProfile.username || userProfile.display_name || 'User'"></span>
-                                <i class="fas fa-user"
-                                    style="font-size:16px;color:#bdbdbd;"></i>
-                                <i class="fas fa-chevron-down"
-                                    style="font-size:10px;color:#bdbdbd;transition:transform .2s;"
-                                    :class="{'rotate-180': accountMenuOpen}"></i>
-                            </button>
+                        <!-- Username Text (Desktop Only) - Plain text like time display -->
+                        <span class="hidden-mobile account-username"
+                            x-text="isLoggedIn ? (userProfile.username || userProfile.display_name || 'User') : 'guest'"></span>
 
                             <!-- Unified Account Features Dropdown -->
                             <div x-show="accountMenuOpen"
@@ -749,20 +739,27 @@
                         <button @click="toggleFullscreen()"
                             class="ds-iconbtn nav-item hidden-mobile"
                             title="Fullscreen">
-                            <i class="fas fa-expand" style="font-size:16px;"></i>
+                            <i class="fas fa-expand"
+                                style="font-size:16px;"></i>
                         </button>
                     </div>
 
-                    <!-- Mobile Right: Explore + Guest (text) -->
-                    <div class="mobile-only" style="display:flex; gap:8px;">
+                    <!-- Mobile Right: Explore + Account -->
+                    <div class="mobile-only" style="display:flex; gap:8px; align-items:center;">
                         <button id="openExplore" class="nav-item"
                             style="min-width:44px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#e5e7eb;">
                             Explore
                         </button>
-                        <button id="openAccount" class="nav-item"
-                            style="min-width:44px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#e5e7eb;">
-                            Guest
-                        </button>
+                        <span class="account-username" 
+                            x-text="isLoggedIn ? (userProfile.username || userProfile.display_name || 'User') : 'guest'"
+                            style="font-size: 13px; color: rgba(255,255,255,0.82);"></span>
+                        <a href="/account" 
+                            class="ds-iconbtn ds-iconbtn--account nav-item"
+                            aria-label="Profile"
+                            title="Profile"
+                            style="min-width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-user"></i>
+                        </a>
                     </div>
                 </div>
             </nav>
@@ -1475,10 +1472,12 @@
                             title="Boost">
                             <i class="fas fa-bolt"></i>
                         </button>
-                        <button @click="toggleBookmarkCurrent()" class="now-playing-btn"
+                        <button @click="toggleBookmarkCurrent()"
+                            class="now-playing-btn"
                             :class="{'active': isSaved}"
                             title="Bookmark">
-                            <i :class="isSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"
+                            <i
+                                :class="isSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"
                                 :style="isSaved ? 'color: var(--accent-color);' : ''"></i>
                         </button>
                     </div>
@@ -1598,7 +1597,8 @@
                         :class="{'liked': isLiked}" title="Like">
                         <i class="fas fa-heart"></i>
                     </button>
-                    <button @click="toggleBookmarkCurrent()" class="action-btn bm-btn"
+                    <button @click="toggleBookmarkCurrent()"
+                        class="action-btn bm-btn"
                         :class="{'saved': isSaved}"
                         :aria-pressed="isSaved"
                         title="Bookmark">
@@ -1800,6 +1800,7 @@
                         <li><a href="/terms" rel="nofollow">Terms of
                                 Service</a></li>
                         <li><a href="/security">Security</a></li>
+                        <li><a href="/beta-testers">Beta Testers</a></li>
                         <li><a
                                 href="{{ url_for('sitemap_page') }}">Sitemap</a></li>
                     </ul>
@@ -1809,8 +1810,10 @@
             <div class="footer-bottom">
                 <p class="footer-copyright">&copy; 2026 Ahoy Indie Media. All
                     rights reserved.</p>
-                {% if current_user.is_authenticated and current_user.email == 'alex@ahoy.ooo' %}
-                <a href="/admin" class="footer-admin-link" title="Admin Dashboard">⚙</a>
+                {% if current_user.is_authenticated and current_user.email ==
+                'alex@ahoy.ooo' %}
+                <a href="/admin" class="footer-admin-link"
+                    title="Admin Dashboard">⚙</a>
                 {% endif %}
             </div>
         </footer>
@@ -3975,8 +3978,8 @@
         }
     </script>
 
-    <!-- Extended Hover Effects for Sidebar Icons -->
-    <script>
+        <!-- Extended Hover Effects for Sidebar Icons -->
+        <script>
         (function() {
             // Extended hover detection for sidebar items (1.5 seconds)
             const EXTENDED_HOVER_DELAY = 1500; // 1.5 seconds

@@ -2,6 +2,22 @@
 
 .app-header {
     position: relative;
+    -webkit-app-region: drag;
+    isolation: isolate;
+    contain: layout style;
+    pointer-events: auto;
+}
+
+.app-header * {
+    -webkit-app-region: no-drag;
+}
+
+.app-header .ds-statusbar__right,
+.app-header .account-menu-container,
+.app-header button,
+.app-header a {
+    -webkit-app-region: no-drag;
+    pointer-events: auto;
 }
 
 /* Mobile optimizations */

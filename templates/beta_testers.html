@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Beta Testers - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="policy-container">
+    <div class="policy-header">
+        <h1>Beta Testers</h1>
+        <p class="policy-updated">Join our beta testing program and help shape the future of Ahoy Indie Media</p>
+    </div>
+
+    <div class="policy-content">
+        <section class="policy-section">
+            <h2>Welcome Beta Testers!</h2>
+            <p>Thank you for your interest in beta testing the Ahoy Indie Media mobile app! Your feedback is invaluable in helping us create the best possible experience for independent music discovery.</p>
+            <p><strong>This is an in-person beta testing session.</strong> Please follow the instructions below to install the app on your device.</p>
+        </section>
+
+        <section class="policy-section">
+            <h2>Android Installation</h2>
+            
+            <h3>Prerequisites</h3>
+            <ul>
+                <li>Android device running Android 5.0 (API level 21) or higher</li>
+                <li>USB cable to connect your device to a computer (for direct installation)</li>
+                <li>Or ability to download APK files directly on your device</li>
+            </ul>
+
+            <h3>Installation Steps</h3>
+            
+            <h4>Option 1: Direct APK Installation (Recommended)</h4>
+            <ol>
+                <li><strong>Enable Unknown Sources:</strong>
+                    <ul>
+                        <li>Go to <strong>Settings</strong> → <strong>Security</strong> (or <strong>Apps & Notifications</strong> on newer Android versions)</li>
+                        <li>Enable <strong>"Install unknown apps"</strong> or <strong>"Unknown sources"</strong></li>
+                        <li>If prompted, select your browser or file manager and allow installation from that source</li>
+                    </ul>
+                </li>
+                <li><strong>Download the APK:</strong>
+                    <ul>
+                        <li>During the in-person session, you'll receive a download link or QR code</li>
+                        <li>Scan the QR code or click the download link on your Android device</li>
+                        <li>The APK file will download to your device</li>
+                    </ul>
+                </li>
+                <li><strong>Install the App:</strong>
+                    <ul>
+                        <li>Open your device's <strong>Downloads</strong> folder or notification panel</li>
+                        <li>Tap on the downloaded APK file (e.g., <code>AhoyIndieMedia-Android-release.apk</code>)</li>
+                        <li>Tap <strong>"Install"</strong> when prompted</li>
+                        <li>Wait for the installation to complete</li>
+                    </ul>
+                </li>
+                <li><strong>Launch the App:</strong>
+                    <ul>
+                        <li>Once installed, tap <strong>"Open"</strong> or find the Ahoy Indie Media icon in your app drawer</li>
+                        <li>The app will launch and you can start testing!</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h4>Option 2: USB Installation (Alternative)</h4>
+            <ol>
+                <li><strong>Enable USB Debugging:</strong>
+                    <ul>
+                        <li>Go to <strong>Settings</strong> → <strong>About Phone</strong></li>
+                        <li>Tap <strong>Build Number</strong> 7 times to enable Developer Options</li>
+                        <li>Go back to <strong>Settings</strong> → <strong>Developer Options</strong></li>
+                        <li>Enable <strong>"USB Debugging"</strong></li>
+                    </ul>
+                </li>
+                <li><strong>Connect Your Device:</strong>
+                    <ul>
+                        <li>Connect your Android device to a computer via USB</li>
+                        <li>Accept the USB debugging prompt on your device</li>
+                    </ul>
+                </li>
+                <li><strong>Install via ADB:</strong>
+                    <ul>
+                        <li>On the computer, use ADB (Android Debug Bridge) to install the APK</li>
+                        <li>Command: <code>adb install AhoyIndieMedia-Android-release.apk</code></li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h3>Troubleshooting Android Installation</h3>
+            <ul>
+                <li><strong>"Install blocked" error:</strong> Make sure you've enabled "Install unknown apps" for your browser or file manager</li>
+                <li><strong>"App not installed" error:</strong> Try uninstalling any previous beta versions first, then reinstall</li>
+                <li><strong>Storage issues:</strong> Ensure you have at least 50MB of free storage space</li>
+                <li><strong>Compatibility:</strong> If the app won't install, your device may not meet the minimum Android version requirement</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>iOS Installation</h2>
+            
+            <h3>Prerequisites</h3>
+            <ul>
+                <li>iPhone or iPad running iOS 13.0 or higher</li>
+                <li>Apple ID (for TestFlight installation)</li>
+                <li>Or access to a development build via Xcode (for in-person installation)</li>
+            </ul>
+
+            <h3>Installation Steps</h3>
+            
+            <h4>Option 1: TestFlight (Recommended)</h4>
+            <ol>
+                <li><strong>Install TestFlight:</strong>
+                    <ul>
+                        <li>Download <strong>TestFlight</strong> from the App Store (if not already installed)</li>
+                        <li>TestFlight is Apple's official beta testing platform</li>
+                    </ul>
+                </li>
+                <li><strong>Join the Beta:</strong>
+                    <ul>
+                        <li>During the in-person session, you'll receive a TestFlight invitation link</li>
+                        <li>Open the invitation link on your iOS device</li>
+                        <li>Or enter the redemption code in the TestFlight app</li>
+                    </ul>
+                </li>
+                <li><strong>Install the App:</strong>
+                    <ul>
+                        <li>Tap <strong>"Accept"</strong> to join the beta test</li>
+                        <li>Tap <strong>"Install"</strong> in TestFlight</li>
+                        <li>Wait for the installation to complete</li>
+                    </ul>
+                </li>
+                <li><strong>Launch the App:</strong>
+                    <ul>
+                        <li>Open the Ahoy Indie Media app from your home screen</li>
+                        <li>You may need to trust the developer certificate on first launch</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h4>Option 2: Development Build (In-Person Only)</h4>
+            <ol>
+                <li><strong>Prepare Your Device:</strong>
+                    <ul>
+                        <li>Connect your iPhone/iPad to a Mac computer via USB</li>
+                        <li>Unlock your device and trust the computer if prompted</li>
+                    </ul>
+                </li>
+                <li><strong>Trust Developer Certificate:</strong>
+                    <ul>
+                        <li>Go to <strong>Settings</strong> → <strong>General</strong> → <strong>VPN & Device Management</strong></li>
+                        <li>Find the developer certificate and tap <strong>"Trust"</strong></li>
+                    </ul>
+                </li>
+                <li><strong>Install via Xcode:</strong>
+                    <ul>
+                        <li>The development team will install the app directly using Xcode</li>
+                        <li>This method is typically used during in-person beta testing sessions</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h3>Troubleshooting iOS Installation</h3>
+            <ul>
+                <li><strong>"Untrusted Developer" error:</strong> Go to Settings → General → VPN & Device Management and trust the developer certificate</li>
+                <li><strong>TestFlight link not working:</strong> Make sure you're opening the link on your iOS device, not a computer</li>
+                <li><strong>App crashes on launch:</strong> Try deleting and reinstalling the app, or check if your iOS version is compatible</li>
+                <li><strong>Installation fails:</strong> Ensure you have enough storage space (at least 100MB free)</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>What to Test</h2>
+            <p>As a beta tester, we'd love your feedback on:</p>
+            <ul>
+                <li><strong>User Interface:</strong> Is the app easy to navigate? Are buttons and menus intuitive?</li>
+                <li><strong>Performance:</strong> Does the app load quickly? Are there any laggy or slow sections?</li>
+                <li><strong>Features:</strong> Try out music discovery, playlists, artist pages, and other core features</li>
+                <li><strong>Bugs:</strong> Report any crashes, errors, or unexpected behavior</li>
+                <li><strong>Design:</strong> How does the app look and feel? Any design suggestions?</li>
+                <li><strong>Content:</strong> Is the music and content loading correctly?</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>Reporting Feedback</h2>
+            <p>Your feedback is crucial! Please report issues and suggestions through:</p>
+            <ul>
+                <li><strong>In-App Feedback:</strong> Use the feedback feature within the app (Settings → Feedback)</li>
+                <li><strong>Email:</strong> Send detailed feedback to <a href="mailto:beta@ahoyindie.com">beta@ahoyindie.com</a></li>
+                <li><strong>In-Person:</strong> Share feedback directly with the team during the beta testing session</li>
+            </ul>
+            <p>When reporting bugs, please include:</p>
+            <ul>
+                <li>Device model and OS version</li>
+                <li>Steps to reproduce the issue</li>
+                <li>Screenshots or screen recordings (if possible)</li>
+                <li>What you expected to happen vs. what actually happened</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>Important Notes</h2>
+            <ul>
+                <li><strong>Beta versions may be unstable:</strong> The app is still in development and may have bugs or incomplete features</li>
+                <li><strong>Data may be reset:</strong> Beta versions may require app updates that reset your data</li>
+                <li><strong>Not for production use:</strong> Please don't rely on the beta app for critical tasks</li>
+                <li><strong>Confidentiality:</strong> Please keep beta features and details confidential until public release</li>
+                <li><strong>Regular updates:</strong> New beta versions will be released regularly - make sure to update when available</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>Need Help?</h2>
+            <p>If you encounter any issues during installation or testing:</p>
+            <div class="contact-info">
+                <p><strong>Beta Support Email:</strong> <a href="mailto:beta@ahoyindie.com">beta@ahoyindie.com</a></p>
+                <p><strong>General Support:</strong> <a href="mailto:support@ahoyindie.com">support@ahoyindie.com</a></p>
+                <p><strong>In-Person Assistance:</strong> Ask the team during the beta testing session</p>
+            </div>
+        </section>
+
+        <section class="policy-section">
+            <h2>Thank You!</h2>
+            <p>We're incredibly grateful for your participation in our beta testing program. Your feedback helps us build a better app for the entire indie music community. Happy testing! 🎵</p>
+        </section>
+    </div>
+</div>
+{% endblock %}

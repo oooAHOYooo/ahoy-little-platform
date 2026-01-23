@@ -36,16 +36,17 @@
                             <p class="video-description" x-text="currentVideo?.description || ''"></p>
                         </div>
                         <div class="video-actions-bar">
-                            <button @click="viewSolo()" class="action-btn view-solo-btn">
+                            <button @click="viewSolo()" class="action-btn view-solo-btn" title="View Solo">
                                 <i class="fas fa-external-link-alt"></i>
-                                <span>View Solo</span>
+                                <span class="sr-only">View Solo</span>
                             </button>
                             <button @click="toggleBookmark({ type: 'show', id: currentVideo?.id, title: currentVideo?.title, artwork: currentVideo?.thumbnail })"
                                 class="action-btn bookmark-btn"
                                 :class="{ 'bookmarked': isBookmarked('show', currentVideo?.id) }"
-                                :aria-pressed="isBookmarked('show', currentVideo?.id)">
+                                :aria-pressed="isBookmarked('show', currentVideo?.id)"
+                                :title="isBookmarked('show', currentVideo?.id) ? 'Remove bookmark' : 'Bookmark'">
                                 <i :class="isBookmarked('show', currentVideo?.id) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
-                                <span x-text="isBookmarked('show', currentVideo?.id) ? 'Bookmarked' : 'Bookmark'"></span>
+                                <span class="sr-only" x-text="isBookmarked('show', currentVideo?.id) ? 'Remove bookmark' : 'Bookmark'"></span>
                             </button>
                         </div>
                     </div>

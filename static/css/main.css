@@ -2604,7 +2604,6 @@ opacity:0.15;
     font-family: inherit;
     color: rgba(255, 255, 255, 0.82);
     white-space: nowrap;
-    text-transform: uppercase;
     letter-spacing: 0;
     line-height: 1;
     display: inline-block;
@@ -17832,201 +17831,426 @@ img.loading {
     text-transform: uppercase;
 }
 
-/* Enhanced List View - iTunes Style */
+/* Music List View - Dark Glass Table Style */
 .music-list {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-radius: var(--border-radius-lg);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(20, 20, 30, 0.3) 100%);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+    position: relative;
 }
 
-.music-list .list-header {
-    display: grid;
-    grid-template-columns: 40px 2.5fr 1.5fr 70px 50px;
-    gap: 16px;
-    padding: 10px 16px;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    font-weight: 600;
-    color: var(--text-secondary);
+.music-list::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.2) 50%, 
+        transparent 100%);
+    pointer-events: none;
+}
+
+.music-table-wrap {
+    overflow-x: auto;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.music-table-wrap::-webkit-scrollbar {
+    height: 6px;
+}
+
+.music-table-wrap::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.music-table-wrap::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.music-table-wrap::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.music-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+}
+
+.music-table thead {
+    background: linear-gradient(180deg, 
+        rgba(0, 0, 0, 0.5) 0%, 
+        rgba(0, 0, 0, 0.3) 100%);
+    backdrop-filter: blur(25px) saturate(200%);
+    -webkit-backdrop-filter: blur(25px) saturate(200%);
     position: sticky;
     top: 0;
     z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.music-list .list-item {
-    display: grid;
-    grid-template-columns: 40px 2.5fr 1.5fr 70px 50px;
-    gap: 16px;
-    padding: 8px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    align-items: center;
+.music-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    white-space: nowrap;
     position: relative;
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(10px) saturate(150%);
-    -webkit-backdrop-filter: blur(10px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    margin-bottom: 2px;
 }
 
-.music-list .list-item:nth-child(even) {
+.music-table th::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.15) 50%, 
+        transparent 100%);
+}
+
+.music-table th.col-play {
+    width: 50px;
+    text-align: center;
+    padding: 12px 8px;
+}
+
+.music-table th.col-plays {
+    text-align: right;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s ease;
+    padding-right: 20px;
+}
+
+.music-table th.col-plays:hover {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.music-table th.col-action {
+    text-align: center;
+    width: 70px;
+    padding: 12px 8px;
+}
+
+.music-table tbody tr {
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    position: relative;
+}
+
+.music-table tbody tr::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: background 0.25s ease;
+}
+
+.music-table tbody tr:nth-child(even) {
     background: rgba(255, 255, 255, 0.03);
 }
 
-.music-list .list-item:hover {
+.music-table tbody tr:hover {
     background: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(255, 255, 255, 0.15);
     transform: translateX(2px);
+    box-shadow: -4px 0 12px rgba(99, 102, 241, 0.15);
 }
 
-.music-list .list-item:last-child {
-    border-bottom: none;
+.music-table tbody tr:hover::before {
+    background: linear-gradient(180deg, 
+        rgba(99, 102, 241, 0.6) 0%, 
+        rgba(99, 102, 241, 0.3) 100%);
 }
 
-.music-list .list-item.playing {
-    background: rgba(99, 102, 241, 0.2) !important;
-    border-color: rgba(99, 102, 241, 0.4);
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+.music-table tbody tr.playing {
+    background: linear-gradient(90deg, 
+        rgba(99, 102, 241, 0.15) 0%, 
+        rgba(99, 102, 241, 0.08) 100%) !important;
+    box-shadow: 
+        inset 0 0 20px rgba(99, 102, 241, 0.1),
+        0 0 30px rgba(99, 102, 241, 0.2);
 }
 
-
-.music-list .col-title {
-    min-width: 0;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
+.music-table tbody tr.playing::before {
+    background: linear-gradient(180deg, 
+        rgba(99, 102, 241, 1) 0%, 
+        rgba(99, 102, 241, 0.6) 100%);
 }
 
-.music-list .col-title .title-text {
-    flex: 1;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.music-table td {
+    padding: 10px 16px;
+    vertical-align: middle;
     font-size: 10px;
-    font-weight: 400;
-    color: var(--text-primary);
-    line-height: 1.2;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.85);
 }
 
-.music-list .col-artist {
-    font-size: 10px;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.2;
+.music-table td.col-play {
+    text-align: center;
+    padding: 10px 8px;
+    width: 50px;
 }
 
-.music-list .col-play {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.music-list .col-play .play-btn {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.7);
-    padding: 6px 8px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
+.music-table td.col-play .play-btn {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0;
+    border-radius: 50%;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     width: 28px;
     height: 28px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     font-size: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.music-list .col-play .play-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.9);
-    transform: scale(1.1);
+.music-table td.col-play .play-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 1);
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.music-list .list-item.playing .col-play .play-btn {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.15) 100%);
-    border-color: rgba(99, 102, 241, 0.4);
-    color: var(--primary-color);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+.music-table tbody tr.playing td.col-play .play-btn {
+    background: linear-gradient(135deg, 
+        rgba(99, 102, 241, 0.3) 0%, 
+        rgba(99, 102, 241, 0.2) 100%);
+    border-color: rgba(99, 102, 241, 0.5);
+    color: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
 }
 
-.music-list .col-plays {
-    font-size: 10px;
-    color: var(--text-tertiary);
+.music-table td.col-title {
+    min-width: 0;
+    max-width: 0;
+}
+
+.music-table td.col-title .title-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 500;
+    display: block;
+}
+
+.music-table td.col-artist {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.music-table td.col-plays {
     text-align: right;
+    color: rgba(255, 255, 255, 0.5);
     font-variant-numeric: tabular-nums;
-    cursor: pointer;
-    user-select: none;
-    line-height: 1.2;
+    padding-right: 20px;
 }
 
-.music-list .col-plays:hover {
-    color: var(--text-secondary);
+.music-table td.col-action {
+    text-align: center;
+    width: 70px;
+    padding: 10px 8px;
 }
 
-.music-list .col-plays i {
-    margin-left: 4px;
-    font-size: 10px;
-}
-
-.music-list .col-bookmark {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.music-list .col-bookmark .bm-btn {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.music-table td.col-action .bm-btn {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     color: rgba(255, 255, 255, 0.7);
-    padding: 6px 8px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    width: 32px;
-    height: 32px;
-    display: flex;
+    padding: 0;
+    border-radius: 50%;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    font-size: 11px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.music-list .col-bookmark .bm-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.9);
+.music-table td.col-action .bm-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.95);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.music-list .col-bookmark .bm-btn.bookmarked,
-.music-list .col-bookmark .bm-btn[aria-pressed="true"] {
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(0, 150, 200, 0.15) 100%);
-    border-color: rgba(0, 212, 255, 0.4);
-    color: var(--accent-color, #00d4ff);
-    box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
+.music-table td.col-action .bm-btn.bookmarked,
+.music-table td.col-action .bm-btn[aria-pressed="true"] {
+    background: linear-gradient(135deg, 
+        rgba(0, 212, 255, 0.25) 0%, 
+        rgba(0, 150, 200, 0.2) 100%);
+    border-color: rgba(0, 212, 255, 0.5);
+    color: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
 }
 
-.music-list .col-bookmark .bm-btn.bookmarked:hover,
-.music-list .col-bookmark .bm-btn[aria-pressed="true"]:hover {
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.3) 0%, rgba(0, 150, 200, 0.25) 100%);
-    border-color: rgba(0, 212, 255, 0.6);
-    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+.music-table td.col-action .bm-btn.bookmarked:hover,
+.music-table td.col-action .bm-btn[aria-pressed="true"]:hover {
+    background: linear-gradient(135deg, 
+        rgba(0, 212, 255, 0.35) 0%, 
+        rgba(0, 150, 200, 0.3) 100%);
+    border-color: rgba(0, 212, 255, 0.7);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+    transform: scale(1.15);
+}
+
+/* Mobile: Convert table to stacked cards */
+@media (max-width: 640px) {
+    .music-list {
+        border-radius: 12px;
+        margin: 0 -16px;
+        border-left: none;
+        border-right: none;
+        border-radius: 0;
+    }
+
+    .music-table-wrap {
+        overflow-x: visible;
+    }
+
+    .music-table thead {
+        display: none;
+    }
+
+    .music-table tbody tr {
+        display: block;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.04) 0%, 
+            rgba(255, 255, 255, 0.02) 100%);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 14px 16px;
+        box-shadow: 
+            0 4px 12px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: all 0.25s ease;
+    }
+
+    .music-table tbody tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 
+            0 8px 20px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .music-table tbody tr.playing {
+        background: linear-gradient(135deg, 
+            rgba(99, 102, 241, 0.2) 0%, 
+            rgba(99, 102, 241, 0.1) 100%);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: 
+            0 8px 24px rgba(99, 102, 241, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .music-table tbody tr::before {
+        display: none;
+    }
+
+    .music-table tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        text-align: left !important;
+        border: none;
+        gap: 12px;
+    }
+
+    .music-table tbody td.col-play {
+        display: flex;
+        justify-content: flex-start;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 8px;
+    }
+
+    .music-table tbody td.col-play:before {
+        content: "";
+        display: none;
+    }
+
+    .music-table tbody td:not(.col-play):not(.col-action):before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 60px;
+        flex-shrink: 0;
+    }
+
+    .music-table tbody td.col-action {
+        justify-content: flex-end;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        margin-top: 8px;
+    }
+
+    .music-table tbody td.col-action:before {
+        content: "";
+        display: none;
+    }
+
+    .music-table tbody td.col-title .title-text {
+        display: inline;
+        flex: 1;
+        text-align: right;
+    }
+
+    .music-table tbody td.col-artist,
+    .music-table tbody td.col-plays {
+        text-align: right;
+        flex: 1;
+    }
 }
 
 .music-list .col-cover {
@@ -18048,19 +18272,6 @@ img.loading {
     font-weight: 500;
 }
 
-/* Tablet adjustments for music list */
-@media (max-width: 1024px) and (min-width: 769px) {
-    .music-list .list-header,
-    .music-list .list-item {
-        grid-template-columns: 35px 2.2fr 1.3fr 60px 45px;
-        gap: 12px;
-        padding: 8px 14px;
-    }
-    
-    .music-list .col-artist {
-        font-size: 10px;
-    }
-}
 
 .col-type {
     font-size: var(--font-size-xs);
