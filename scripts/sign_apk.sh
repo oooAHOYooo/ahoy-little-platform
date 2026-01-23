@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 """
-Android APK signing script for Ahoy Indie Media
-Signs and aligns APK for release distribution
+Android APK/AAB signing script for Ahoy Indie Media
+Signs and aligns APK or signs AAB for release distribution
 """
 
 set -euo pipefail
@@ -12,7 +12,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}Android APK Signing Script${NC}"
+echo -e "${GREEN}Android APK/AAB Signing Script${NC}"
 
 # Check required environment variables
 required_vars=(
@@ -32,28 +32,37 @@ done
 if [[ ${#missing_vars[@]} -gt 0 ]]; then
     echo -e "${YELLOW}Warning: Missing environment variables:${NC}"
     printf '%s\n' "${missing_vars[@]}"
-    echo -e "${YELLOW}Skipping signing - will output unsigned APK${NC}"
+    echo -e "${YELLOW}Skipping signing - will output unsigned file${NC}"
     exit 0
 fi
 
-# Input APK path
-INPUT_APK="${1:-android/app/build/outputs/apk/release/app-release-unsigned.apk}"
-OUTPUT_APK="AhoyIndieMedia-Android-release.apk"
+# Input file path
+INPUT_FILE="${1:-android/app/build/outputs/apk/release/app-release-unsigned.apk}"
 
-if [[ ! -f "$INPUT_APK" ]]; then
-    echo -e "${RED}Error: Input APK not found: $INPUT_APK${NC}"
+if [[ ! -f "$INPUT_FILE" ]]; then
+    echo -e "${RED}Error: Input file not found: $INPUT_FILE${NC}"
     echo "Please build the APK first with: ./gradlew assembleRelease"
+    echo "Or build the AAB with: ./gradlew bundleRelease"
     exit 1
 fi
 
-echo -e "${GREEN}Signing APK: $INPUT_APK${NC}"
+# Detect file type
+if [[ "$INPUT_FILE" == *.aab ]]; then
+    FILE_TYPE="AAB"
+    OUTPUT_FILE="AhoyIndieMedia-Android-release.aab"
+    echo -e "${GREEN}Signing AAB: $INPUT_FILE${NC}"
+else
+    FILE_TYPE="APK"
+    OUTPUT_FILE="AhoyIndieMedia-Android-release.apk"
+    echo -e "${GREEN}Signing APK: $INPUT_FILE${NC}"
+fi
 
 # Decode keystore from base64
 echo "Decoding keystore..."
 echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > keystore.jks
 
-# Sign the APK
-echo "Signing APK with jarsigner..."
+# Sign the file
+echo "Signing $FILE_TYPE with jarsigner..."
 jarsigner \
     -verbose \
     -sigalg SHA256withRSA \
@@ -61,19 +70,24 @@ jarsigner \
     -keystore keystore.jks \
     -storepass "$ANDROID_KEYSTORE_PASSWORD" \
     -keypass "$ANDROID_KEY_PASSWORD" \
-    "$INPUT_APK" \
+    "$INPUT_FILE" \
     "$ANDROID_KEY_ALIAS"
 
-# Align the APK
-echo "Aligning APK with zipalign..."
-zipalign -v 4 "$INPUT_APK" "$OUTPUT_APK"
+# Align the APK (AABs don't need alignment)
+if [[ "$FILE_TYPE" == "APK" ]]; then
+    echo "Aligning APK with zipalign..."
+    zipalign -v 4 "$INPUT_FILE" "$OUTPUT_FILE"
+else
+    # For AAB, just copy the signed file
+    cp "$INPUT_FILE" "$OUTPUT_FILE"
+fi
 
-# Verify the signed APK
-echo "Verifying signed APK..."
-jarsigner -verify -verbose -certs "$OUTPUT_APK"
+# Verify the signed file
+echo "Verifying signed $FILE_TYPE..."
+jarsigner -verify -verbose -certs "$OUTPUT_FILE"
 
 # Clean up
 rm -f keystore.jks
 
-echo -e "${GREEN}✅ APK signed successfully: $OUTPUT_APK${NC}"
-echo -e "${GREEN}File size: $(du -h "$OUTPUT_APK" | cut -f1)${NC}"
+echo -e "${GREEN}✅ $FILE_TYPE signed successfully: $OUTPUT_FILE${NC}"
+echo -e "${GREEN}File size: $(du -h "$OUTPUT_FILE" | cut -f1)${NC}"
