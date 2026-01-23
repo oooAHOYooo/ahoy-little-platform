@@ -215,6 +215,24 @@ class MediaPlayer {
     // Player controls
     play(track) {
         const previousTrack = this.currentTrack;
+        
+        // If same track is already playing, just resume if paused
+        if (previousTrack && previousTrack.id === track.id && previousTrack.title === track.title) {
+            const isVideo = track.type === 'show' || track.video_url || track.mp4_link;
+            const mediaElement = isVideo ? this.videoElement : this.audioElement;
+            
+            if (mediaElement.paused) {
+                mediaElement.play().then(() => {
+                    this.isPlaying = true;
+                    this.emit('play');
+                }).catch(error => {
+                    console.error('Error resuming media:', error);
+                    this.emit('error', error);
+                });
+            }
+            return;
+        }
+        
         this.currentTrack = track;
         
         // Emit trackchange event if track actually changed
@@ -226,11 +244,15 @@ class MediaPlayer {
         const isVideo = track.type === 'show' || track.video_url || track.mp4_link;
         const mediaElement = isVideo ? this.videoElement : this.audioElement;
         
-        // Pause other element
+        // Pause other element first
         if (isVideo) {
-            this.audioElement.pause();
+            if (!this.audioElement.paused) {
+                this.audioElement.pause();
+            }
         } else {
-            this.videoElement.pause();
+            if (!this.videoElement.paused) {
+                this.videoElement.pause();
+            }
         }
         
         // Set source - try multiple possible URL fields and prepare fallback list
@@ -261,67 +283,88 @@ class MediaPlayer {
             return;
         }
         
-        // Ensure source is a valid URL
-        if (typeof source === 'string' && source.trim()) {
-            // Avoid stale caching issues on certain CDNs by adding a light cache-buster for first play
-            const srcWithBuster = source + (String(source).includes('?') ? '&' : '?') + 'v=' + Date.now();
-            mediaElement.src = srcWithBuster;
-            try { mediaElement.load(); } catch (_) {}
-        } else {
-            console.error('Invalid source URL:', source);
-            this.emit('error', new Error('Invalid source URL'));
-            return;
-        }
+        // Check if source changed before loading
+        const currentSrc = mediaElement.src;
+        const srcWithBuster = source + (String(source).includes('?') ? '&' : '?') + 'v=' + Date.now();
+        const sourceChanged = !currentSrc || !currentSrc.includes(source.split('?')[0]);
         
-        // Set properties
-        mediaElement.volume = this.volume;
-        mediaElement.muted = this.isMuted;
-        
-        // Play
-        mediaElement.play().then(() => {
-            this.isPlaying = true;
-            this.emit('play');
+        // Only load if source actually changed
+        if (sourceChanged && typeof source === 'string' && source.trim()) {
+            // Pause current playback before changing source to prevent AbortError
+            if (!mediaElement.paused) {
+                mediaElement.pause();
+            }
             
-            // Notify Now Playing controller after playback starts (for audio tracks)
-            // This ensures the audio element has a source before we try to connect analyser
-            if (!isVideo && window.nowPlayingController) {
-                // Update track info first
-                window.nowPlayingController.onTrackChange(track);
+            mediaElement.src = srcWithBuster;
+            // Use canplay event instead of immediate load() to prevent race conditions
+            const onCanPlay = () => {
+                mediaElement.removeEventListener('canplay', onCanPlay);
+                mediaElement.volume = this.volume;
+                mediaElement.muted = this.isMuted;
                 
-                // Then try to connect analyser (but don't break if it fails)
-                setTimeout(() => {
-                    if (window.nowPlayingController && window.mediaPlayer.audioElement) {
-                        window.nowPlayingController.audioElement = window.mediaPlayer.audioElement;
-                        window.nowPlayingController.connectAudio();
+                // Play after source is ready
+                mediaElement.play().then(() => {
+                    this.isPlaying = true;
+                    this.emit('play');
+                    
+                    // Notify Now Playing controller after playback starts (for audio tracks)
+                    if (!isVideo && window.nowPlayingController) {
+                        window.nowPlayingController.onTrackChange(track);
+                        
+                        setTimeout(() => {
+                            if (window.nowPlayingController && window.mediaPlayer.audioElement) {
+                                window.nowPlayingController.audioElement = window.mediaPlayer.audioElement;
+                                window.nowPlayingController.connectAudio();
+                            }
+                        }, 200);
                     }
-                }, 200);
+                }).catch(error => {
+                    console.error('Error playing media:', error);
+                    // Common case: Autoplay policy NotAllowedError until user gesture
+                    if (typeof error?.name === 'string' && error.name.toLowerCase().includes('notallowed')) {
+                        const retryOnGesture = () => {
+                            mediaElement.play().then(() => {
+                                this.isPlaying = true;
+                                this.emit('play');
+                                document.removeEventListener('click', retryOnGesture, { capture: true });
+                                document.removeEventListener('touchstart', retryOnGesture, { capture: true });
+                            }).catch((err) => {
+                                console.error('Retry play failed:', err);
+                                this.emit('error', err);
+                            });
+                        };
+                        document.addEventListener('click', retryOnGesture, { once: true, capture: true });
+                        document.addEventListener('touchstart', retryOnGesture, { once: true, capture: true });
+                        try { document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Tap anywhere to start audio' })); } catch (_) {}
+                    } else if (error.name !== 'AbortError') {
+                        // Don't log AbortError as it's expected when switching tracks quickly
+                        this.emit('error', error);
+                    }
+                });
+            };
+            
+            mediaElement.addEventListener('canplay', onCanPlay, { once: true });
+            try { 
+                mediaElement.load(); 
+            } catch (e) {
+                // If load fails, try playing anyway
+                console.warn('load() failed, trying play anyway:', e);
+                onCanPlay();
             }
-        }).catch(error => {
-            console.error('Error playing media:', error);
-            // Common case: Autoplay policy NotAllowedError until user gesture
-            if (typeof error?.name === 'string' && error.name.toLowerCase().includes('notallowed')) {
-                const retryOnGesture = () => {
-                    // Attempt to unlock AudioContext too
-                    // Visualizer removed for MVP: no WebAudio analyser to resume.
-                    mediaElement.play().then(() => {
-                        this.isPlaying = true;
-                        this.emit('play');
-                        document.removeEventListener('click', retryOnGesture, { capture: true });
-                        document.removeEventListener('touchstart', retryOnGesture, { capture: true });
-                    }).catch((err) => {
-                        console.error('Retry play failed:', err);
-                        this.emit('error', err);
-                    });
-                };
-                // One-shot listeners
-                document.addEventListener('click', retryOnGesture, { once: true, capture: true });
-                document.addEventListener('touchstart', retryOnGesture, { once: true, capture: true });
-                // Inform user subtly
-                try { document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Tap anywhere to start audio' })); } catch (_) {}
-            } else {
-                this.emit('error', error);
-            }
-        });
+        } else {
+            // Source hasn't changed, just play/resume
+            mediaElement.volume = this.volume;
+            mediaElement.muted = this.isMuted;
+            mediaElement.play().then(() => {
+                this.isPlaying = true;
+                this.emit('play');
+            }).catch(error => {
+                console.error('Error playing media:', error);
+                if (error.name !== 'AbortError') {
+                    this.emit('error', error);
+                }
+            });
+        }
     }
     
     pause() {

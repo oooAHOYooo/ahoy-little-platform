@@ -926,9 +926,23 @@
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
     }
 
-    /* Compact mobile now-playing wrapper */
+    /* Compact mobile now-playing wrapper - ensure it never expands */
     .now-playing-wrapper {
         height: 80px !important;
+        max-height: 80px !important;
+        overflow: hidden !important;
+    }
+    
+    /* Prevent any full-screen player on mobile */
+    .now-playing-sticky {
+        max-height: 80px !important;
+        overflow: hidden !important;
+    }
+    
+    /* Hide any expanded player views on mobile */
+    .now-playing-expanded,
+    .player-fullscreen {
+        display: none !important;
     }
 
     /* Compact container */

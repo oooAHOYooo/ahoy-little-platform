@@ -2613,6 +2613,14 @@ opacity:0.15;
     line-height: 1;
 }
 
+/* Desktop-specific styling for username/guest text */
+@media (min-width: 769px) {
+    .hidden-mobile.account-username {
+        font-size: 10px;
+        text-transform: uppercase;
+    }
+}
+
 .account-avatar {
     width: 22px;
     height: 22px;
@@ -18054,6 +18062,11 @@ img.loading {
     border-color: rgba(99, 102, 241, 0.5);
     color: rgba(255, 255, 255, 1);
     box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
+
+.music-table td.col-play .play-btn i {
+    display: block;
+    line-height: 1;
 }
 
 .music-table td.col-title {

@@ -241,8 +241,11 @@
                             @click="playTrack(track)"
                             :class="{'playing': currentTrack?.id === track.id}">
                             <td class="col-play" data-label="">
-                                <button class="play-btn" @click.stop="playTrack(track)" :aria-label="'Play ' + track.title">
-                                    <i class="fas fa-play"></i>
+                                <button class="play-btn" 
+                                    @click.stop="playTrack(track)" 
+                                    :aria-label="(currentTrack?.id === track.id && isPlaying) ? 'Pause ' + track.title : 'Play ' + track.title">
+                                    <i x-show="currentTrack?.id === track.id && isPlaying" class="fas fa-pause"></i>
+                                    <i x-show="!(currentTrack?.id === track.id && isPlaying)" class="fas fa-play"></i>
                                 </button>
                             </td>
                             <td class="col-title" data-label="Title">
@@ -404,6 +407,7 @@ function musicLibrary() {
         sortBy: 'plays',
         isLoading: true,
         currentTrack: null,
+        isPlaying: false,
         showAddToBoardModal: false,
         showCreateBoardModal: false,
         selectedTrack: null,
@@ -417,6 +421,32 @@ function musicLibrary() {
         
         // Initialize
         async loadMusic() {
+            // Listen to player events
+            if (window.mediaPlayer) {
+                window.mediaPlayer.on('play', () => {
+                    this.isPlaying = true;
+                });
+                window.mediaPlayer.on('pause', () => {
+                    this.isPlaying = false;
+                });
+                window.mediaPlayer.on('trackchange', (track) => {
+                    this.currentTrack = track;
+                    this.isPlaying = true;
+                });
+            }
+            
+            // Also listen to custom events
+            document.addEventListener('play-track', (e) => {
+                this.currentTrack = e.detail.track;
+            });
+            
+            document.addEventListener('ahoy:player:play', () => {
+                this.isPlaying = true;
+            });
+            
+            document.addEventListener('ahoy:player:pause', () => {
+                this.isPlaying = false;
+            });
             
             try {
                 this.isLoading = true;
@@ -501,14 +531,45 @@ function musicLibrary() {
         
         // Track actions
         playTrack(track) {
-            this.currentTrack = track;
-            // Dispatch custom event to trigger global player
-            document.dispatchEvent(new CustomEvent('play-track', {
-                detail: { 
-                    track: track,
-                    type: 'track'
+            // Prevent multiple rapid calls
+            if (this._playTrackDebounce) {
+                clearTimeout(this._playTrackDebounce);
+            }
+            
+            this._playTrackDebounce = setTimeout(() => {
+                // If same track is playing, toggle pause
+                if (this.currentTrack?.id === track.id && this.isPlaying) {
+                    this.togglePlayPause();
+                    return;
                 }
-            }));
+                
+                this.currentTrack = track;
+                
+                // Dispatch custom event to trigger global player
+                document.dispatchEvent(new CustomEvent('play-track', {
+                    detail: { 
+                        track: track,
+                        type: 'track'
+                    }
+                }));
+            }, 100);
+        },
+        
+        togglePlayPause() {
+            if (!window.mediaPlayer) return;
+            
+            if (this.isPlaying) {
+                window.mediaPlayer.pause();
+                this.isPlaying = false;
+            } else {
+                if (this.currentTrack) {
+                    window.mediaPlayer.play(this.currentTrack);
+                    this.isPlaying = true;
+                } else if (window.mediaPlayer.currentTrack) {
+                    window.mediaPlayer.resume();
+                    this.isPlaying = true;
+                }
+            }
         },
 
         playRandomTrack() {
