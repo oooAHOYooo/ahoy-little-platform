@@ -24,6 +24,7 @@ from utils.auth import admin_required, get_effective_user
 from utils.observability import init_sentry
 from utils.logging_init import init_logging, init_request_logging
 from utils.security_headers import attach_security_headers, create_csp_report_blueprint
+from utils.cdn import init_cdn
 from utils.csrf_init import init_csrf
 # Removed: blueprints/auth.py (consolidated into api/auth)
 from blueprints.api.auth import bp as api_auth_bp
@@ -217,7 +218,10 @@ def create_app():
     
     # Initialize security headers
     attach_security_headers(app)
-    
+
+    # Initialize CDN support
+    init_cdn(app)
+
     # Register CSP report blueprint
     app.register_blueprint(create_csp_report_blueprint())
     

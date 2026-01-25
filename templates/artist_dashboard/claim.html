@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}Claim Artist Profile - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="claim-container">
+    <header class="claim-header">
+        <a href="{{ url_for('artist_dashboard.dashboard_home') }}" class="back-link">&larr; Back to Dashboard</a>
+        <h1>Claim Your Artist Profile</h1>
+        <p class="subtitle">Select your artist profile below to claim it. Once verified, you'll have access to your earnings dashboard.</p>
+    </header>
+
+    {% if artists %}
+    <div class="search-box">
+        <input type="text" id="artist-search" placeholder="Search artists..." class="search-input">
+    </div>
+
+    <div class="artists-grid" id="artists-grid">
+        {% for artist in artists %}
+        <div class="artist-card" data-name="{{ artist.name | lower }}" data-slug="{{ artist.slug | lower if artist.slug else '' }}">
+            <div class="artist-image">
+                {% if artist.image %}
+                <img src="{{ artist.image }}" alt="{{ artist.name }}" loading="lazy">
+                {% else %}
+                <div class="placeholder-image">{{ artist.name[0] | upper }}</div>
+                {% endif %}
+            </div>
+            <div class="artist-info">
+                <h3>{{ artist.name }}</h3>
+                <p class="artist-type">{{ artist.type | capitalize if artist.type else 'Artist' }}</p>
+                {% if artist.genres %}
+                <p class="artist-genres">{{ artist.genres | join(', ') }}</p>
+                {% endif %}
+            </div>
+            <button type="button" class="btn btn-claim" data-artist-id="{{ artist.slug or artist.id }}" data-artist-name="{{ artist.name }}">
+                Claim Profile
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-artists">
+        <p>All artist profiles have been claimed or no artists are available.</p>
+        <a href="{{ url_for('artist_dashboard.dashboard_home') }}" class="btn btn-secondary">Return to Dashboard</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Claim Modal -->
+<div id="claim-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h2>Confirm Claim</h2>
+        <p>You are claiming the profile for: <strong id="modal-artist-name"></strong></p>
+        <p class="modal-note">After claiming, an admin will verify your identity. You'll receive access once verified.</p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" id="modal-cancel">Cancel</button>
+            <button type="button" class="btn btn-primary" id="modal-confirm">Confirm Claim</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.claim-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.back-link {
+    color: var(--text-secondary, #999);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.back-link:hover {
+    color: var(--text-primary, #fff);
+}
+
+.claim-header {
+    margin-bottom: 2rem;
+}
+
+.claim-header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary, #fff);
+}
+
+.claim-header .subtitle {
+    color: var(--text-secondary, #999);
+}
+
+.search-box {
+    margin-bottom: 2rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border-radius: 12px;
+    background: var(--glass-bg, rgba(255, 255, 255, 0.05));
+    color: var(--text-primary, #fff);
+    font-size: 1rem;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color, #667eea);
+}
+
+.artists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.artist-card {
+    background: var(--glass-bg, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s;
+}
+
+.artist-card:hover {
+    border-color: var(--primary-color, #667eea);
+    transform: translateY(-2px);
+}
+
+.artist-card.hidden {
+    display: none;
+}
+
+.artist-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.artist-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.placeholder-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-color, #667eea);
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.artist-info h3 {
+    margin: 0 0 0.25rem 0;
+    color: var(--text-primary, #fff);
+    font-size: 1.1rem;
+}
+
+.artist-type {
+    color: var(--primary-color, #667eea);
+    font-size: 0.85rem;
+    margin: 0 0 0.25rem 0;
+}
+
+.artist-genres {
+    color: var(--text-secondary, #999);
+    font-size: 0.8rem;
+    margin: 0 0 1rem 0;
+}
+
+.btn-claim {
+    margin-top: auto;
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--primary-color, #667eea);
+    color: var(--primary-color, #667eea);
+}
+
+.btn-claim:hover {
+    background: var(--primary-color, #667eea);
+    color: #fff;
+}
+
+.no-artists {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary, #999);
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--card-bg, #1a1a1a);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.modal-content h2 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary, #fff);
+}
+
+.modal-content p {
+    color: var(--text-secondary, #999);
+    margin-bottom: 0.5rem;
+}
+
+.modal-note {
+    font-size: 0.9rem;
+    margin-top: 1rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.modal-actions .btn {
+    flex: 1;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.2));
+    color: var(--text-primary, #fff);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+</style>
+
+<script>
+(function() {
+    const searchInput = document.getElementById('artist-search');
+    const artistsGrid = document.getElementById('artists-grid');
+    const modal = document.getElementById('claim-modal');
+    const modalArtistName = document.getElementById('modal-artist-name');
+    const modalCancel = document.getElementById('modal-cancel');
+    const modalConfirm = document.getElementById('modal-confirm');
+    let selectedArtistId = null;
+
+    // Search functionality
+    if (searchInput && artistsGrid) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            const cards = artistsGrid.querySelectorAll('.artist-card');
+
+            cards.forEach(card => {
+                const name = card.dataset.name || '';
+                const slug = card.dataset.slug || '';
+                const matches = name.includes(query) || slug.includes(query);
+                card.classList.toggle('hidden', !matches);
+            });
+        });
+    }
+
+    // Claim button handling
+    document.querySelectorAll('.btn-claim').forEach(btn => {
+        btn.addEventListener('click', function() {
+            selectedArtistId = this.dataset.artistId;
+            modalArtistName.textContent = this.dataset.artistName;
+            modal.style.display = 'flex';
+        });
+    });
+
+    // Modal cancel
+    modalCancel.addEventListener('click', function() {
+        modal.style.display = 'none';
+        selectedArtistId = null;
+    });
+
+    // Modal confirm
+    modalConfirm.addEventListener('click', async function() {
+        if (!selectedArtistId) return;
+
+        modalConfirm.disabled = true;
+        modalConfirm.textContent = 'Claiming...';
+
+        try {
+            const response = await fetch('{{ url_for("artist_dashboard.claim_artist") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ artist_id: selectedArtistId }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                window.location.href = '{{ url_for("artist_dashboard.dashboard_home") }}';
+            } else {
+                alert(data.error || 'Failed to claim artist');
+                modal.style.display = 'none';
+            }
+        } catch (error) {
+            alert('An error occurred. Please try again.');
+            modal.style.display = 'none';
+        } finally {
+            modalConfirm.disabled = false;
+            modalConfirm.textContent = 'Confirm Claim';
+        }
+    });
+
+    // Close modal on backdrop click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            selectedArtistId = null;
+        }
+    });
+})();
+</script>
+{% endblock %}

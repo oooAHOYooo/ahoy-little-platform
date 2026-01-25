@@ -386,3 +386,30 @@ class ArtistPayout(Base):
             f"status={self.status}>"
         )
 
+
+class ArtistClaim(Base):
+    """
+    Links a user account to an artist profile.
+    Allows artists to claim their profile and access their dashboard.
+    """
+    __tablename__ = 'artist_claims'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    artist_id = Column(String(255), nullable=False, unique=True, index=True)  # Artist slug from JSON
+    artist_name = Column(String(255), nullable=True)  # Cached artist name
+    status = Column(String(50), nullable=False, default='pending', index=True)  # pending, verified, rejected
+    verification_code = Column(String(100), nullable=True)  # Code for verification
+    stripe_account_id = Column(String(255), nullable=True, index=True)  # Stripe Connect account ID
+    payout_email = Column(String(255), nullable=True)  # Email for payouts if not using Stripe Connect
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    verified_at = Column(DateTime, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'artist_id', name='uq_artist_claim_user_artist'),
+        Index('ix_artist_claims_user_id_status', 'user_id', 'status'),
+    )
+
+    def __repr__(self) -> str:
+        return f"<ArtistClaim id={self.id} user_id={self.user_id} artist_id={self.artist_id} status={self.status}>"
+

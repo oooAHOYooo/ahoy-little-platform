@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(render services list:*)",
+      "Bash(stripe config:*)",
+      "Bash(render workspace list:*)",
+      "Bash(render workspace current:*)",
+      "Bash(render config:*)",
+      "Bash(render:*)",
+      "Bash(echo $RENDER_API_KEY)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(gcloud:*)",
+      "Bash(npx cap:*)",
+      "Bash(fastlane supply:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)"
+    ]
+  }
+}

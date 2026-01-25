@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Artist Dashboard - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="artist-dashboard-container">
+    <header class="dashboard-header">
+        <h1>Artist Dashboard</h1>
+        <p class="subtitle">Manage your artist profile, view earnings, and track your audience.</p>
+    </header>
+
+    {% if claims %}
+    <section class="claims-section">
+        <h2>Your Artist Profiles</h2>
+        <div class="claims-grid">
+            {% for claim in claims %}
+            <div class="claim-card status-{{ claim.status }}">
+                <div class="claim-info">
+                    <h3>{{ claim.artist_name or claim.artist_id }}</h3>
+                    <span class="status-badge {{ claim.status }}">{{ claim.status | capitalize }}</span>
+                </div>
+                <div class="claim-actions">
+                    {% if claim.status == 'verified' %}
+                    <a href="{{ url_for('artist_dashboard.artist_stats', artist_id=claim.artist_id) }}" class="btn btn-primary">View Dashboard</a>
+                    {% elif claim.status == 'pending' %}
+                    <span class="pending-text">Awaiting verification...</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="claim-cta">
+        <h2>{% if claims %}Claim Another Artist{% else %}Claim Your Artist Profile{% endif %}</h2>
+        <p>If you're an artist on Ahoy, claim your profile to access your earnings dashboard, view your audience stats, and manage payouts.</p>
+        <a href="{{ url_for('artist_dashboard.claim_artist') }}" class="btn btn-primary btn-lg">Claim Artist Profile</a>
+    </section>
+</div>
+
+<style>
+.artist-dashboard-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary, #fff);
+}
+
+.dashboard-header .subtitle {
+    color: var(--text-secondary, #999);
+    font-size: 1.1rem;
+}
+
+.claims-section {
+    margin-bottom: 3rem;
+}
+
+.claims-section h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-primary, #fff);
+}
+
+.claims-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.claim-card {
+    background: var(--glass-bg, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+.claim-card.status-verified {
+    border-color: var(--success-color, #4ade80);
+}
+
+.claim-card.status-pending {
+    border-color: var(--warning-color, #fbbf24);
+}
+
+.claim-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary, #fff);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.verified {
+    background: var(--success-color, #4ade80);
+    color: #000;
+}
+
+.status-badge.pending {
+    background: var(--warning-color, #fbbf24);
+    color: #000;
+}
+
+.status-badge.rejected {
+    background: var(--error-color, #f87171);
+    color: #fff;
+}
+
+.pending-text {
+    color: var(--text-secondary, #999);
+    font-style: italic;
+}
+
+.claim-cta {
+    background: var(--glass-bg, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border-radius: 16px;
+    padding: 2.5rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.claim-cta h2 {
+    margin-bottom: 1rem;
+    color: var(--text-primary, #fff);
+}
+
+.claim-cta p {
+    color: var(--text-secondary, #999);
+    margin-bottom: 1.5rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: var(--primary-color, #667eea);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover, #5a6fd6);
+    transform: translateY(-1px);
+}
+
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+</style>
+{% endblock %}

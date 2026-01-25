@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Security headers middleware for Ahoy Indie Media
-Handles security headers and CSP reporting
+Handles security headers, CSP reporting, and CDN cache optimization
 """
 
 import os
@@ -11,10 +11,13 @@ from flask import Blueprint, request, jsonify
 
 logger = structlog.get_logger()
 
+# CDN configuration
+CDN_URL = os.getenv('CDN_URL', '').rstrip('/')
+
 
 def attach_security_headers(app):
     """Attach security headers middleware to Flask app"""
-    
+
     @app.after_request
     def add_security_headers(response):
         """Add security headers to all responses"""
@@ -22,37 +25,57 @@ def attach_security_headers(app):
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['X-Frame-Options'] = 'DENY'
         response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-        
-        # Add Expires headers for static assets (fixes Pingdom F0 grade)
+
+        # Check if this is a static asset request
+        is_static = request.path.startswith('/static/')
+
+        # Add cache headers for static assets (CDN-optimized)
         if response.content_type:
+            # Static assets: long cache with immutable (1 year)
             if response.content_type.startswith('text/css'):
                 response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
                 response.headers['Expires'] = 'Thu, 31 Dec 2026 23:59:59 GMT'
+                if is_static:
+                    response.headers['Vary'] = 'Accept-Encoding'
             elif response.content_type.startswith('application/javascript') or response.content_type.startswith('text/javascript'):
                 response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
                 response.headers['Expires'] = 'Thu, 31 Dec 2026 23:59:59 GMT'
+                if is_static:
+                    response.headers['Vary'] = 'Accept-Encoding'
             elif response.content_type.startswith('image/'):
                 response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
                 response.headers['Expires'] = 'Thu, 31 Dec 2026 23:59:59 GMT'
             elif response.content_type.startswith('font/'):
                 response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
                 response.headers['Expires'] = 'Thu, 31 Dec 2026 23:59:59 GMT'
-        
+                # CORS headers for fonts (needed for CDN cross-origin)
+                response.headers['Access-Control-Allow-Origin'] = '*'
+            elif response.content_type.startswith('application/json') and is_static:
+                # JSON data files can be cached but with shorter TTL
+                response.headers['Cache-Control'] = 'public, max-age=3600'
+                response.headers['Vary'] = 'Accept-Encoding'
+
         # Production-only headers
         if os.getenv('FLASK_ENV') == 'production':
             response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
-            
+
+            # Build CSP with optional CDN support
+            cdn_sources = ''
+            if CDN_URL:
+                cdn_sources = f' {CDN_URL}'
+
             # Content Security Policy
             csp = (
-                "default-src 'self'; "
-                "img-src 'self' data: https:; "
-                "media-src 'self' https:; "
-                "style-src 'self' 'unsafe-inline'; "
-                "script-src 'self'; "
+                f"default-src 'self'{cdn_sources}; "
+                f"img-src 'self' data: https:{cdn_sources}; "
+                f"media-src 'self' https:{cdn_sources}; "
+                f"style-src 'self' 'unsafe-inline'{cdn_sources}; "
+                f"script-src 'self'{cdn_sources}; "
+                f"font-src 'self' data:{cdn_sources}; "
                 "connect-src 'self' https:;"
             )
             response.headers['Content-Security-Policy'] = csp
-        
+
         return response
 
 

@@ -38,7 +38,7 @@ services:
       - key: SUPPORT_EMAIL
         sync: false
       - key: AHOY_ADMIN_EMAIL
-        value: alex@ahoy.ooo
+        value: alex@littlemarket.org
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT
@@ -85,4 +85,4 @@ databases:
       - key: SUPPORT_EMAIL
         sync: false
       - key: AHOY_ADMIN_EMAIL
-        value: alex@ahoy.ooo
+        value: alex@littlemarket.org
