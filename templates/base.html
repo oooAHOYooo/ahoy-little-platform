@@ -1945,6 +1945,9 @@
         <script defer
             src="{{ url_for('static', filename='js/loader.js') }}"></script>
 
+        <!-- Cross-platform Storage Helper (must load before other scripts) -->
+        <script src="{{ url_for('static', filename='js/storage.js') }}"></script>
+
         <!-- JavaScript -->
         <script>window.LOGGED_IN = JSON.parse('{{ LOGGED_IN|tojson|safe }}');</script>
         <script>

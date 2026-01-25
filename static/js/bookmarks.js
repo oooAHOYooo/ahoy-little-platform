@@ -10,9 +10,13 @@
   const keyOf = (type, id) => `${type}:${id}`;
   const toObj = (arr, keyFn) => arr.reduce((m, x) => (m[keyFn(x)] = x, m), {});
 
-  function loadLocal() {
+  async function loadLocal() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      // Use AhoyStorage if available (Capacitor), fallback to localStorage
+      const storage = window.AhoyStorage || {
+        getItem: (key) => Promise.resolve(localStorage.getItem(key))
+      };
+      const raw = await storage.getItem(STORAGE_KEY);
       if (!raw) return {};
       const parsed = JSON.parse(raw);
       return parsed.items || {};
@@ -20,11 +24,28 @@
       return {};
     }
   }
-  function saveLocal() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ items: state.items }));
+  async function saveLocal() {
+    try {
+      // Use AhoyStorage if available (Capacitor), fallback to localStorage
+      const storage = window.AhoyStorage || {
+        setItem: (key, value) => {
+          localStorage.setItem(key, value);
+          return Promise.resolve();
+        }
+      };
+      await storage.setItem(STORAGE_KEY, JSON.stringify({ items: state.items }));
+    } catch (e) {
+      console.error('Failed to save bookmarks:', e);
+      // Fallback to localStorage if async storage fails
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ items: state.items }));
+      } catch (e2) {
+        console.error('localStorage fallback also failed:', e2);
+      }
+    }
   }
 
-  function setLocalItem(it) {
+  async function setLocalItem(it) {
     const k = it.key || keyOf(it.type, it.id);
     const now = new Date().toISOString();
     state.items[k] = { 
@@ -35,11 +56,11 @@
       access_count: it.access_count || 0,
       tags: it.tags || []
     };
-    saveLocal();
+    await saveLocal();
   }
-  function removeLocalKey(k) {
+  async function removeLocalKey(k) {
     delete state.items[k];
-    saveLocal();
+    await saveLocal();
   }
 
   // Session-based auth (no JWT tokens needed)
@@ -79,8 +100,9 @@
     })), (x) => x.key);
 
     // Merge server items with local items (local takes precedence for guest bookmarks)
-    state.items = { ...serverItems, ...loadLocal() };
-    saveLocal();
+    const localItems = await loadLocal();
+    state.items = { ...serverItems, ...localItems };
+    await saveLocal();
     state.serverLoaded = true;
   }
 
@@ -90,7 +112,11 @@
     const wasLoggedIn = state.loggedIn || window.LOGGED_IN;
     
     // Always save/remove locally first (works for both guests and logged-in users)
-    exists ? removeLocalKey(key) : setLocalItem({ ...it, key });
+    if (exists) {
+      await removeLocalKey(key);
+    } else {
+      await setLocalItem({ ...it, key });
+    }
     
     // Trigger a custom event to notify all Alpine.js components
     document.dispatchEvent(new CustomEvent('bookmarks:changed', { 
@@ -196,7 +222,7 @@
     }
   }
   
-  function deleteNest(nestId) {
+  async function deleteNest(nestId) {
     const nests = loadNests();
     delete nests[nestId];
     saveNests(nests);
@@ -207,13 +233,13 @@
         item.nest_id = null;
       }
     });
-    saveLocal();
+    await saveLocal();
   }
   
-  function addToNest(itemKey, nestId) {
+  async function addToNest(itemKey, nestId) {
     if (state.items[itemKey]) {
       state.items[itemKey].nest_id = nestId;
-      saveLocal();
+      await saveLocal();
       
       // Update nest count
       const nests = loadNests();
@@ -224,11 +250,11 @@
     }
   }
   
-  function removeFromNest(itemKey) {
+  async function removeFromNest(itemKey) {
     if (state.items[itemKey]) {
       const oldNestId = state.items[itemKey].nest_id;
       state.items[itemKey].nest_id = null;
-      saveLocal();
+      await saveLocal();
       
       // Update nest count
       if (oldNestId) {
@@ -275,11 +301,11 @@
     return opacity;
   }
   
-  function markAccessed(itemKey) {
+  async function markAccessed(itemKey) {
     if (state.items[itemKey]) {
       state.items[itemKey].last_accessed = new Date().toISOString();
       state.items[itemKey].access_count = (state.items[itemKey].access_count || 0) + 1;
-      saveLocal();
+      await saveLocal();
     }
   }
 
@@ -303,7 +329,12 @@
     markAccessed
   };
 
-  state.items = loadLocal();
+  // Initialize state asynchronously
+  (async function init() {
+    state.items = await loadLocal();
+    // Trigger initial fetch
+    fetchServer().catch(e => console.error('Failed to fetch server bookmarks:', e));
+  })();
 
   // ✅ Integrate with Alpine.js (support both "before Alpine loads" and "after")
   function registerAlpineData() {
