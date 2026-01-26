@@ -238,6 +238,10 @@ class MediaPlayer {
         // Emit trackchange event if track actually changed
         if (previousTrack !== track && (previousTrack?.id !== track?.id || previousTrack?.title !== track?.title)) {
             this.emit('trackchange', track);
+            // Track recently played for habit discovery
+            if (window.trackRecentPlay) {
+                window.trackRecentPlay(track);
+            }
         }
         
         // Determine which element to use

@@ -5,221 +5,189 @@
 {% block content %}
 <div class="my-saves-container" x-data="mySavesLibrary()"
     x-init="loadUserData()">
-    <!-- Xbox/Skate 4 Style Profile Header -->
-    <div class="profile-hero">
-        <div class="profile-background"></div>
-        <div class="profile-content">
-            <div class="profile-avatar-section">
-                <div class="profile-avatar-large">
-                    <template x-if="window.LOGGED_IN">
-                        <img
-                            :src="userProfile.avatar || '/static/img/default-avatar.png'"
-                            :alt="userProfile.display_name || 'User'"
-                            class="avatar-image">
-                    </template>
-                    <template x-if="!window.LOGGED_IN">
-                        <span class="user-label">Guest</span>
-                    </template>
-                </div>
+    <!-- Dark Liquid Glass Profile Header -->
+    <div class="saves-profile-hero">
+        <div class="saves-profile-glow"></div>
+        <div class="saves-profile-content">
+            <div class="saves-avatar-wrapper">
+                <template x-if="window.LOGGED_IN">
+                    <img
+                        :src="userProfile.avatar || '/static/img/default-avatar.png'"
+                        :alt="userProfile.display_name || 'User'"
+                        class="saves-avatar-img">
+                </template>
+                <template x-if="!window.LOGGED_IN">
+                    <div class="saves-avatar-guest">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </template>
             </div>
-            <div class="profile-info">
-                <h1 class="profile-username"
-                    x-text="userProfile.display_name || 'User'"></h1>
-                <p class="profile-tagline"
-                    x-text="userProfile.bio || 'Music & Show Enthusiast'"></p>
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <span class="stat-number"
-                            x-text="userStats.saved_tracks || 0"></span>
-                        <span class="stat-label">Tracks</span>
+            <div class="saves-profile-info">
+                <h1 class="saves-username" x-text="userProfile.display_name || 'Explorer'"></h1>
+                <p class="saves-tagline" x-text="userProfile.bio || 'Discovering new sounds'"></p>
+                <div class="saves-stats">
+                    <div class="saves-stat">
+                        <span class="saves-stat-number" x-text="bookmarkCount"></span>
+                        <span class="saves-stat-label">Bookmarks</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-number"
-                            x-text="userStats.saved_shows || 0"></span>
-                        <span class="stat-label">Shows</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number"
-                            x-text="userStats.playlists || 0"></span>
-                        <span class="stat-label">Playlists</span>
+                    <div class="saves-stat">
+                        <span class="saves-stat-number" x-text="recentlyPlayed.length"></span>
+                        <span class="saves-stat-label">Recently Played</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Header -->
-    <div class="page-header">
-        <h1>My Saves</h1>
-    </div>
-
-    <!-- Navigation Tabs -->
-    <div class="saves-nav">
+    <!-- Navigation Tabs - Glass Style -->
+    <div class="saves-tabs-glass">
         <button @click="activeTab = 'saved'"
             :class="{'active': activeTab === 'saved'}"
-            class="nav-tab">
-            <i class="fas fa-bookmark"></i> Bookmarks
-        </button>
-        <button @click="activeTab = 'collections'"
-            :class="{'active': activeTab === 'collections'}"
-            class="nav-tab">
-            <i class="fas fa-folder"></i> Collections
+            class="saves-tab-btn">
+            <i class="fas fa-bookmark"></i>
+            <span>Bookmarks</span>
+            <span class="saves-tab-count" x-text="bookmarkCount"></span>
         </button>
         <button @click="activeTab = 'recent'"
             :class="{'active': activeTab === 'recent'}"
-            class="nav-tab">
-            <i class="fas fa-clock"></i> Recently Played
+            class="saves-tab-btn">
+            <i class="fas fa-history"></i>
+            <span>Recently Played</span>
+            <span class="saves-tab-count" x-text="recentlyPlayed.length"></span>
         </button>
     </div>
 
-    <!-- Saved Content Tab -->
-    <div x-show="activeTab === 'saved'" class="saves-content">
-        <div class="content-filters">
+    <!-- Bookmarks Tab -->
+    <div x-show="activeTab === 'saved'" class="saves-content-glass">
+        <!-- Filter Pills -->
+        <div class="saves-filter-pills">
             <button @click="savedFilter = 'all'"
                 :class="{'active': savedFilter === 'all'}"
-                class="filter-btn">All</button>
+                class="saves-pill">All</button>
             <button @click="savedFilter = 'track'"
                 :class="{'active': savedFilter === 'track'}"
-                class="filter-btn">Tracks</button>
+                class="saves-pill">Tracks</button>
             <button @click="savedFilter = 'show'"
                 :class="{'active': savedFilter === 'show'}"
-                class="filter-btn">Shows</button>
+                class="saves-pill">Shows</button>
             <button @click="savedFilter = 'artist'"
                 :class="{'active': savedFilter === 'artist'}"
-                class="filter-btn">Artists</button>
+                class="saves-pill">Artists</button>
         </div>
 
-        <div class="saved-grid">
-            <template x-for="item in filteredSavedContent" :key="item.id">
-                <div class="saved-item" @click="playContent(item)">
-                    <div class="item-cover">
+        <!-- Bookmarks Grid -->
+        <div class="saves-grid">
+            <template x-for="item in filteredSavedContent" :key="item.key || item.id">
+                <div class="saves-card" @click="playContent(item)">
+                    <div class="saves-card-art">
                         <img
-                            :src="item.cover_art || item.thumbnail || '/static/img/default-cover.jpg'"
-                            :alt="item.title || item.name">
-                        <div class="item-overlay">
-                            <button @click.stop="playContent(item)"
-                                class="play-btn">
+                            :src="item.artwork || item.cover_art || item.thumbnail || '/static/img/default-cover.jpg'"
+                            :alt="item.title || item.name"
+                            loading="lazy">
+                        <div class="saves-card-overlay">
+                            <button @click.stop="playContent(item)" class="saves-play-btn">
                                 <i class="fas fa-play"></i>
                             </button>
-                            <div class="item-actions">
-                                <button @click.stop="unsaveContent(item)"
-                                    class="action-btn">
-                                    <i class="fas fa-bookmark"></i>
-                                </button>
-                                <button @click.stop="showAddToPlaylist(item)"
-                                    class="action-btn">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
                         </div>
+                        <button @click.stop="unsaveContent(item)" class="saves-remove-btn" title="Remove bookmark">
+                            <i class="fas fa-bookmark"></i>
+                        </button>
+                        <span class="saves-type-badge" x-text="item.type"></span>
                     </div>
-                    <div class="item-info">
+                    <div class="saves-card-info">
                         <h3 x-text="item.title || item.name"></h3>
-                        <p x-text="item.artist || item.host"></p>
-                        <div class="item-meta">
-                            <span class="saved-date"
-                                x-text="formatDate(item.saved_at)"></span>
-                        </div>
+                        <p x-text="item.artist || item.host || ''"></p>
+                        <span class="saves-date" x-text="formatDate(item.saved_at)"></span>
                     </div>
                 </div>
             </template>
         </div>
 
-        <div x-show="filteredSavedContent.length === 0" class="empty-state">
-            <div class="icon">🔖</div>
+        <!-- Empty State -->
+        <div x-show="filteredSavedContent.length === 0" class="saves-empty-glass">
+            <div class="saves-empty-icon">
+                <i class="fas fa-bookmark"></i>
+            </div>
             <h3>No bookmarks yet</h3>
-            <p>Click the bookmark icon on any show, track, or artist to save it
-                here.</p>
-            <a class="btn" href="/shows">Browse Shows</a>
-        </div>
-    </div>
-
-    <!-- Collections Tab -->
-    <div x-show="activeTab === 'collections'" class="collections-content">
-        <div class="collections-header">
-            <h2>My Collections</h2>
-            <button @click="showCreateCollection = true" class="btn btn-primary">
-                <i class="fas fa-plus"></i> New Collection
-            </button>
-        </div>
-
-        <div class="collections-grid">
-            <template x-for="collection in userCollections" :key="collection.id">
-                <div class="collection-card">
-                    <div class="collection-header">
-                        <h3 x-text="collection.name"></h3>
-                        <p x-text="collection.description"></p>
-                        <div class="collection-meta">
-                            <span x-text="collection.items?.length || 0"></span> items
-                        </div>
-                    </div>
-                    <div class="collection-actions">
-                        <button @click="viewCollection(collection)" class="btn btn-secondary">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                        <!-- Make Playlist Button -->
-                        <button 
-                            class="px-3 py-2 rounded-xl bg-black/80 text-white hover:bg-black transition text-sm desktop-only"
-                            data-make-playlist
-                            :data-collection-id="collection.id"
-                            :data-collection-name="collection.name"
-                            :data-owner="userProfile.username"
-                            title="Turn this collection into an ordered playlist"
-                        >
-                            ▶️ Make Playlist
-                        </button>
-                    </div>
-                </div>
-            </template>
-        </div>
-
-        <div x-show="userCollections.length === 0" class="empty-state">
-            <div class="icon">📁</div>
-            <h3>No collections yet</h3>
-            <p>Create collections to organize your favorite content.</p>
-            <button @click="showCreateCollection = true" class="btn desktop-only">Create Collection</button>
+            <p>Tap the bookmark icon on any track, show, or artist to save it here for easy access.</p>
+            <a class="saves-cta-btn" href="/shows">Discover Shows</a>
         </div>
     </div>
 
     <!-- Recently Played Tab -->
-    <div x-show="activeTab === 'recent'" class="recent-content">
-        <div class="recent-list">
-            <template x-for="item in recentlyPlayed"
-                :key="item.id + '-' + item.type">
-                <div class="recent-item" @click="playContent(item)">
-                    <div class="item-cover">
+    <div x-show="activeTab === 'recent'" class="saves-content-glass">
+        <div class="saves-recent-list">
+            <template x-for="item in recentlyPlayed" :key="item.key || (item.id + '-' + item.type)">
+                <div class="saves-recent-item" @click="playContent(item)">
+                    <div class="saves-recent-art">
                         <img
-                            :src="item.data?.cover_art || item.data?.thumbnail || '/static/img/default-cover.jpg'"
-                            :alt="item.data?.title || item.data?.name">
-                    </div>
-                    <div class="item-info">
-                        <h3 x-text="item.data?.title || item.data?.name"></h3>
-                        <p x-text="item.data?.artist || item.data?.host"></p>
-                        <div class="item-meta">
-                            <span class="played-date"
-                                x-text="formatDate(item.played_at)"></span>
+                            :src="item.artwork || item.cover_art || item.thumbnail || '/static/img/default-cover.jpg'"
+                            :alt="item.title || item.name"
+                            loading="lazy">
+                        <div class="saves-recent-play">
+                            <i class="fas fa-play"></i>
                         </div>
                     </div>
-                    <div class="item-actions">
-                        <button @click.stop="playContent(item)"
-                            class="play-btn-small">
-                            <i class="fas fa-play"></i>
+                    <div class="saves-recent-info">
+                        <h3 x-text="item.title || item.name"></h3>
+                        <p x-text="item.artist || item.host || ''"></p>
+                        <span class="saves-recent-time" x-text="formatRelativeTime(item.played_at)"></span>
+                    </div>
+                    <div class="saves-recent-actions">
+                        <button @click.stop="toggleBookmark(item)"
+                            class="saves-action-btn"
+                            :class="{'bookmarked': isBookmarked(item)}"
+                            :title="isBookmarked(item) ? 'Remove bookmark' : 'Add bookmark'">
+                            <i class="fas fa-bookmark"></i>
                         </button>
                     </div>
                 </div>
             </template>
         </div>
 
-        <div x-show="recentlyPlayed.length === 0" class="empty-state">
-            <i class="fas fa-clock"></i>
-            <h3>No recent activity</h3>
-            <p>Start playing content to see your recent activity here!</p>
+        <!-- Empty State -->
+        <div x-show="recentlyPlayed.length === 0" class="saves-empty-glass">
+            <div class="saves-empty-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            <h3>No recent plays</h3>
+            <p>Content you listen to will appear here so you can easily find it again.</p>
+            <a class="saves-cta-btn" href="/music">Browse Music</a>
         </div>
     </div>
 
 </div>
 
 <script>
+// Recently Played Storage Key
+const RECENT_STORAGE_KEY = 'ahoy.recentlyPlayed.v1';
+const MAX_RECENT_ITEMS = 50;
+
+// Track plays globally
+window.trackRecentPlay = function(item) {
+    if (!item || !item.id) return;
+    try {
+        const raw = localStorage.getItem(RECENT_STORAGE_KEY);
+        let recent = raw ? JSON.parse(raw) : [];
+        const playRecord = {
+            id: item.id,
+            type: item.type || 'track',
+            title: item.title || item.name,
+            artist: item.artist || item.host || '',
+            artwork: item.artwork || item.cover_art || item.thumbnail,
+            key: `${item.type || 'track'}:${item.id}`,
+            played_at: new Date().toISOString()
+        };
+        recent = recent.filter(r => r.key !== playRecord.key);
+        recent.unshift(playRecord);
+        recent = recent.slice(0, MAX_RECENT_ITEMS);
+        localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(recent));
+        document.dispatchEvent(new CustomEvent('recentlyPlayed:updated', { detail: { recent } }));
+    } catch (e) {
+        console.error('Error tracking recent play:', e);
+    }
+};
+
 function mySavesLibrary() {
     return {
         // State
@@ -227,11 +195,13 @@ function mySavesLibrary() {
         savedFilter: 'all',
         savedContent: [],
         recentlyPlayed: [],
-        userCollections: [],
-        userStats: null,
-        selectedContent: null,
-        showCreateCollection: false,
-        
+        bookmarkCount: 0,
+
+        // User profile (from global)
+        get userProfile() {
+            return window.userProfile || { display_name: 'Explorer', bio: '' };
+        },
+
         // Computed
         get filteredSavedContent() {
             if (this.savedFilter === 'all') {
@@ -239,153 +209,137 @@ function mySavesLibrary() {
             }
             return this.savedContent.filter(item => item.type === this.savedFilter);
         },
-        
+
         // Initialize
         async loadUserData() {
-            try {
-                await Promise.all([
-                    this.loadSavedContent(),
-                    this.loadRecentlyPlayed(),
-                    this.loadUserCollections(),
-                    this.loadUserStats()
-                ]);
-                
-                // Images will load automatically
-            } catch (error) {
-                console.error('Error loading user data:', error);
-            }
+            await this.loadSavedContent();
+            this.loadRecentlyPlayed();
+
+            // Listen for updates
+            document.addEventListener('bookmarks:changed', () => {
+                this.loadSavedContent();
+            });
+            document.addEventListener('recentlyPlayed:updated', () => {
+                this.loadRecentlyPlayed();
+            });
         },
-        
+
         async loadSavedContent() {
-            // Use the unified AhoyBookmarks system (same as bookmarks page)
             if (window.AhoyBookmarks) {
                 const items = window.AhoyBookmarks.all();
                 this.savedContent = items.map(item => ({
                     id: item.id,
                     type: item.type,
                     title: item.title,
+                    artist: item.artist || '',
+                    host: item.host || '',
                     artwork: item.artwork,
+                    cover_art: item.artwork,
+                    thumbnail: item.artwork,
+                    key: item.key || `${item.type}:${item.id}`,
                     saved_at: item.added_at || new Date().toISOString()
                 }));
+                this.bookmarkCount = items.length;
             } else {
-                // Fallback: try to read directly from localStorage
                 try {
                     const rawData = localStorage.getItem('ahoy.bookmarks.v1');
                     if (rawData) {
                         const data = JSON.parse(rawData);
                         if (data.items) {
-                            this.savedContent = Object.values(data.items).map(item => ({
+                            const items = Object.values(data.items);
+                            this.savedContent = items.map(item => ({
                                 id: item.id,
                                 type: item.type,
                                 title: item.title,
+                                artist: item.artist || '',
+                                host: item.host || '',
                                 artwork: item.artwork,
+                                cover_art: item.artwork,
+                                thumbnail: item.artwork,
+                                key: item.key || `${item.type}:${item.id}`,
                                 saved_at: item.added_at || new Date().toISOString()
                             }));
+                            this.bookmarkCount = items.length;
                         }
                     }
                 } catch (e) {
                     console.error('Error reading bookmarks:', e);
                     this.savedContent = [];
+                    this.bookmarkCount = 0;
                 }
-            }
-            
-            // Listen for bookmark changes to update the list
-            document.addEventListener('bookmarks:changed', () => {
-                this.loadSavedContent();
-            });
-        },
-        
-        
-        
-        async loadRecentlyPlayed() {
-            try {
-                const response = await fetch('/api/recently-played');
-                const data = await response.json();
-                this.recentlyPlayed = data.recently_played || [];
-            } catch (error) {
-                console.error('Error loading recently played:', error);
             }
         },
 
-        async loadUserCollections() {
+        loadRecentlyPlayed() {
             try {
-                const response = await fetch('/api/collections/');
-                if (response.ok) {
-                    this.userCollections = await response.json();
-                }
-            } catch (error) {
-                console.error('Error loading collections:', error);
-                this.userCollections = [];
+                const raw = localStorage.getItem(RECENT_STORAGE_KEY);
+                this.recentlyPlayed = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                console.error('Error loading recently played:', e);
+                this.recentlyPlayed = [];
             }
         },
-        
-        async loadUserStats() {
-            try {
-                const response = await fetch('/api/user/stats');
-                const data = await response.json();
-                this.userStats = data.stats;
-            } catch (error) {
-                console.error('Error loading user stats:', error);
-            }
-        },
-        
-        
+
         // Content actions
         async playContent(item) {
+            window.trackRecentPlay(item);
             if (window.globalPlayer) {
                 window.globalPlayer.playTrack(item);
             }
         },
-        
+
         async unsaveContent(item) {
-            try {
-                // Use the unified bookmarks system (same as bookmarks page)
-                if (window.AhoyBookmarks) {
-                    const bookmarkItem = {
-                        type: item.type || 'track',
-                        id: item.id,
-                        title: item.title,
-                        artwork: item.artwork
-                    };
-                    window.AhoyBookmarks.toggle(bookmarkItem);
-                    // Reload to reflect changes
-                    setTimeout(() => {
-                        this.loadSavedContent();
-                    }, 100);
-                }
-            } catch (error) {
-                console.error('Error unsaving content:', error);
+            if (window.AhoyBookmarks) {
+                const bookmarkItem = {
+                    type: item.type || 'track',
+                    id: item.id,
+                    title: item.title,
+                    artwork: item.artwork
+                };
+                window.AhoyBookmarks.toggle(bookmarkItem);
+                setTimeout(() => this.loadSavedContent(), 100);
             }
         },
 
-        // Removed: viewCollection - collections feature removed
-        
-        
+        isBookmarked(item) {
+            if (window.AhoyBookmarks) {
+                return window.AhoyBookmarks.isBookmarked(item.type || 'track', item.id);
+            }
+            return false;
+        },
 
-        showNotification(message, type = 'info') {
-            // Simple notification system
-            const notification = document.createElement('div');
-            notification.className = `notification notification-${type}`;
-            notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: var(--primary-color);
-                color: white;
-                padding: 12px 20px;
-                border-radius: 8px;
-                z-index: 1000;
-                animation: slideIn 0.3s ease;
-            `;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 3000);
+        toggleBookmark(item) {
+            if (window.AhoyBookmarks) {
+                const bookmarkItem = {
+                    type: item.type || 'track',
+                    id: item.id,
+                    title: item.title,
+                    artwork: item.artwork || item.cover_art || item.thumbnail
+                };
+                window.AhoyBookmarks.toggle(bookmarkItem);
+                setTimeout(() => this.loadSavedContent(), 100);
+            }
         },
 
         // Utility functions
         formatDate(dateString) {
             if (!dateString) return '';
             return new Date(dateString).toLocaleDateString();
+        },
+
+        formatRelativeTime(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString();
         }
     };
 }
