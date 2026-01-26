@@ -311,16 +311,9 @@ class MediaPlayer {
                     this.isPlaying = true;
                     this.emit('play');
                     
-                    // Notify Now Playing controller after playback starts (for audio tracks)
+                    // Update Now Playing glass theme colors
                     if (!isVideo && window.nowPlayingController) {
                         window.nowPlayingController.onTrackChange(track);
-                        
-                        setTimeout(() => {
-                            if (window.nowPlayingController && window.mediaPlayer.audioElement) {
-                                window.nowPlayingController.audioElement = window.mediaPlayer.audioElement;
-                                window.nowPlayingController.connectAudio();
-                            }
-                        }, 200);
                     }
                 }).catch(error => {
                     console.error('Error playing media:', error);
