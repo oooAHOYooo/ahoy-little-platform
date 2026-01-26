@@ -18,12 +18,17 @@
         background: var(--mobile-bg);
         color: var(--mobile-text);
         overflow-x: hidden !important;
-        overflow-y: auto !important; /* Enable vertical scrolling */
-        height: auto !important; /* Allow body to expand with content */
-        min-height: 100vh; /* Ensure minimum viewport height */
-        /* Hide scrollbars on mobile to prevent artifacts on Android WebView */
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none; /* IE/Edge */
+        overflow-y: auto !important;
+        height: auto !important;
+        min-height: 100vh;
+        min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+        /* Android WebView scroll fixes */
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        overscroll-behavior-y: contain;
+        /* Hide scrollbars on mobile */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
 
     /* Hide webkit scrollbars on mobile (Chrome, Safari, Android WebView) */
@@ -33,6 +38,14 @@
         width: 0;
         height: 0;
         background: transparent;
+    }
+
+    /* Fix Android scroll blocking */
+    .content-area,
+    main,
+    .app-content {
+        touch-action: pan-y;
+        overscroll-behavior-y: contain;
     }
 
     /* One-column flow and spacing rhythm */

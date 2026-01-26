@@ -11016,15 +11016,16 @@ img.loading {
         height: 150px;
     }
 
-    /* Unified Header Mobile */
+    /* Unified Header Mobile - compact */
     .unified-header {
-        max-height: 300px;
-        padding: var(--spacing-md) 0;
+        max-height: 260px;
+        padding: var(--spacing-sm) 0;
+        margin-top: 0;
     }
 
     .header-content {
-        padding: 0 var(--spacing-md);
-        gap: var(--spacing-sm);
+        padding: 0 var(--spacing-sm);
+        gap: var(--spacing-xs);
     }
 
     .header-title .hero-media {
