@@ -1,37 +1,32 @@
 {
-  "generated_at": "2026-01-12T17:33:29.603346+00:00",
+  "generated_at": "2026-01-26T22:40:55.131308+00:00",
   "items": [
     {
-      "id": "sample_merch2",
-      "name": "Sample Merch2",
-      "image_url": "/static/merch/images/sample-merch2.jpg",
+      "id": "pro_1",
+      "name": "PRO #1 T-Shirt",
+      "image_url": "https://storage.googleapis.com/ahoy-dynamic-content/merch-2026/PRO%20-%20%231%20-%20FRONT.jpg",
       "price_usd": 20.0,
       "kind": "merch",
-      "available": true
+      "available": true,
+      "image_url_back": "https://storage.googleapis.com/ahoy-dynamic-content/merch-2026/PRO%20-%20%231%20-%20BACK.jpg"
     },
     {
-      "id": "sample_merch3",
-      "name": "Sample Merch3",
-      "image_url": "/static/merch/images/sample-merch3.jpeg",
+      "id": "pro_2",
+      "name": "PRO #2 T-Shirt",
+      "image_url": "https://storage.googleapis.com/ahoy-dynamic-content/merch-2026/PRO%20%232%20-%20FRONT.jpg",
       "price_usd": 20.0,
       "kind": "merch",
-      "available": true
+      "available": true,
+      "image_url_back": "https://storage.googleapis.com/ahoy-dynamic-content/merch-2026/PRO%20%232%20-%20BACK.jpg"
     },
     {
-      "id": "sample_merch4",
-      "name": "Sample Merch4",
-      "image_url": "/static/merch/images/sample-merch4.jpeg",
+      "id": "pro_3",
+      "name": "PRO #3 T-Shirt",
+      "image_url": "https://storage.googleapis.com/ahoy-dynamic-content/merch-2026/PRO%20%233%20-%20FRONT.jpg",
       "price_usd": 20.0,
       "kind": "merch",
-      "available": true
-    },
-    {
-      "id": "samplemerch1",
-      "name": "Samplemerch1",
-      "image_url": "/static/merch/images/samplemerch1.jpeg",
-      "price_usd": 20.0,
-      "kind": "merch",
-      "available": true
+      "available": true,
+      "image_url_back": "https://storage.googleapis.com/ahoy-dynamic-content/merch-2026/PRO%20%233%20-%20BACK.jpg"
     }
   ]
 }

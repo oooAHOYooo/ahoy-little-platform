@@ -1154,7 +1154,8 @@ def checkout_process():
                                        item_id=item_id or "",
                                        qty=max(1, qty)), 400
 
-            qty = int(max(1, qty))
+            # For one-of-a-kind merch items, enforce quantity = 1
+            qty = 1
             unit = float(found.get("price_usd") or 0)
             if unit <= 0:
                 return render_template("checkout.html",
@@ -1164,7 +1165,7 @@ def checkout_process():
                                        item_id=item_id or "",
                                        qty=qty), 400
             amount = float(unit)              # unit price (authoritative)
-            total = float(unit * qty)         # total (authoritative)
+            total = float(unit * qty)         # total (authoritative) - always 1 for one-of-a-kind
         except Exception as e:
             current_app.logger.error(f"Error processing merch item {item_id}: {e}", exc_info=True)
             return render_template("checkout.html",
@@ -1498,14 +1499,23 @@ def checkout_process():
         success_url = url_for("checkout_success", pid=purchase_id, _external=True)
         cancel_url = url_for("checkout_page", type=kind, artist_id=artist_id or "", amount=amount, item_id=item_id or "", qty=qty, title=request.form.get("title") or "", _external=True)
 
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            line_items=line_items,
-            mode="payment",
-            success_url=success_url,
-            cancel_url=cancel_url,
-            metadata=metadata,
-        )
+        # For merch purchases, collect shipping address
+        checkout_params = {
+            "payment_method_types": ["card"],
+            "line_items": line_items,
+            "mode": "payment",
+            "success_url": success_url,
+            "cancel_url": cancel_url,
+            "metadata": metadata,
+        }
+        
+        # Add shipping address collection for merch purchases
+        if kind == "merch":
+            checkout_params["shipping_address_collection"] = {
+                "allowed_countries": ["US", "CA"],  # Add more countries as needed
+            }
+        
+        checkout_session = stripe.checkout.Session.create(**checkout_params)
 
         # Persist Stripe session id
         with get_session() as s:
