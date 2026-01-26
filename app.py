@@ -3851,6 +3851,15 @@ def admin_orders():
             "amount": p.amount,
             "total": p.total,
             "stripe_id": p.stripe_id,
+            "shipping": {
+                "name": p.shipping_name,
+                "line1": p.shipping_line1,
+                "line2": p.shipping_line2,
+                "city": p.shipping_city,
+                "state": p.shipping_state,
+                "postal_code": p.shipping_postal_code,
+                "country": p.shipping_country,
+            } if p.shipping_name else None,
         } for p in rows]
     return jsonify({"orders": orders})
 

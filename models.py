@@ -307,6 +307,15 @@ class Purchase(Base):
     stripe_id = Column(String(255), nullable=True, index=True)
     status = Column(String(50), nullable=False, default="pending", index=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    
+    # Shipping address fields
+    shipping_name = Column(String(255), nullable=True)
+    shipping_line1 = Column(String(255), nullable=True)
+    shipping_line2 = Column(String(255), nullable=True)
+    shipping_city = Column(String(100), nullable=True)
+    shipping_state = Column(String(50), nullable=True)
+    shipping_postal_code = Column(String(20), nullable=True)
+    shipping_country = Column(String(2), nullable=True)
 
     __table_args__ = (
         Index('ix_purchases_user_id_created_at', 'user_id', 'created_at'),

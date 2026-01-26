@@ -152,6 +152,19 @@ def handle_stripe_webhook():
                             p.status = "paid"
                         if not p.stripe_id:
                             p.stripe_id = session_data.get("id")
+                        
+                        # Extract and store shipping address if available
+                        shipping_details = session_data.get("shipping_details") or {}
+                        shipping_address = shipping_details.get("address") or {}
+                        if shipping_address:
+                            p.shipping_name = shipping_details.get("name")
+                            p.shipping_line1 = shipping_address.get("line1")
+                            p.shipping_line2 = shipping_address.get("line2")
+                            p.shipping_city = shipping_address.get("city")
+                            p.shipping_state = shipping_address.get("state")
+                            p.shipping_postal_code = shipping_address.get("postal_code")
+                            p.shipping_country = shipping_address.get("country")
+                        
                         db_session.commit()
                         # Notify admins for non-tip purchases (merch, tickets, etc.)
                         if str(p.type or "").strip() == "merch":

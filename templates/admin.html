@@ -226,6 +226,7 @@
             <th>Item</th>
             <th>Qty</th>
             <th>Total</th>
+            <th>Shipping Address</th>
             <th>Stripe</th>
           </tr>
         </thead>
@@ -238,11 +239,24 @@
               <td x-text="o.item_id || ''"></td>
               <td x-text="o.qty || 1"></td>
               <td x-text="formatMoney(o.total)"></td>
+              <td class="muted text-sm">
+                <template x-if="o.shipping">
+                  <div>
+                    <div x-text="o.shipping.name || ''"></div>
+                    <div x-text="(o.shipping.line1 || '') + (o.shipping.line2 ? ', ' + o.shipping.line2 : '')"></div>
+                    <div x-text="(o.shipping.city || '') + ', ' + (o.shipping.state || '') + ' ' + (o.shipping.postal_code || '')"></div>
+                    <div x-text="o.shipping.country || ''"></div>
+                  </div>
+                </template>
+                <template x-if="!o.shipping">
+                  <span class="muted">—</span>
+                </template>
+              </td>
               <td class="muted" x-text="o.stripe_id || ''"></td>
             </tr>
           </template>
           <tr x-show="!orders.length">
-            <td colspan="7" class="muted" style="padding:14px;">No orders yet.</td>
+            <td colspan="8" class="muted" style="padding:14px;">No orders yet.</td>
           </tr>
         </tbody>
       </table>

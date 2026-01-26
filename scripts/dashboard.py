@@ -307,7 +307,7 @@ def show_pending_payouts():
 
 
 def show_recent_purchases(limit: int = 20):
-    """Show recent purchases."""
+    """Show recent purchases with shipping addresses."""
     with get_session() as db_session:
         purchases = db_session.query(Purchase).filter(
             Purchase.status == 'paid'
@@ -315,16 +315,37 @@ def show_recent_purchases(limit: int = 20):
         
         data = []
         for purchase in purchases:
+            # Format shipping address
+            shipping = ""
+            if purchase.shipping_name:
+                addr_parts = []
+                if purchase.shipping_line1:
+                    addr_parts.append(purchase.shipping_line1)
+                if purchase.shipping_line2:
+                    addr_parts.append(purchase.shipping_line2)
+                if purchase.shipping_city:
+                    city_state = purchase.shipping_city
+                    if purchase.shipping_state:
+                        city_state += f", {purchase.shipping_state}"
+                    if purchase.shipping_postal_code:
+                        city_state += f" {purchase.shipping_postal_code}"
+                    addr_parts.append(city_state)
+                if purchase.shipping_country:
+                    addr_parts.append(purchase.shipping_country)
+                shipping = f"{purchase.shipping_name}\n" + "\n".join(addr_parts) if addr_parts else purchase.shipping_name
+            
             data.append({
                 'ID': purchase.id,
                 'Date': purchase.created_at.strftime('%Y-%m-%d %H:%M'),
                 'Type': purchase.type[:15],
+                'Item': (purchase.item_id or '')[:20],
                 'Amount': f"${float(purchase.amount):.2f}",
                 'Total': f"${float(purchase.total):.2f}",
                 'User ID': purchase.user_id or 'Guest',
+                'Shipping': shipping or '—',
             })
         
-        return format_table(data, ['ID', 'Date', 'Type', 'Amount', 'Total', 'User ID'])
+        return format_table(data, ['ID', 'Date', 'Type', 'Item', 'Amount', 'Total', 'User ID', 'Shipping'])
 
 
 def show_recent_wallet_transactions(limit: int = 20):

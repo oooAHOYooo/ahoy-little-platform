@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+
+{% block title %}Achievements & Progress - Ahoy Indie Media{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dashboard page styling - similar to portfolio */
+    .dashboard-page {
+        min-height: 100vh;
+        background: #0f0f14;
+        padding: 2rem 1rem;
+        color: #f0f0f7;
+    }
+
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .hero-header {
+        text-align: center;
+        color: #f0f0f7;
+        margin-bottom: 2rem;
+    }
+
+    .hero-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+        letter-spacing: 0.2px;
+    }
+
+    .hero-header p {
+        font-size: 0.95rem;
+        color: #a6a6b3;
+    }
+
+    /* Stats cards */
+    .dashboard-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+
+    .stat-card .stat-value {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum";
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #f0f0f7;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-card .stat-label {
+        color: #7a7a89;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    /* Charts */
+    .charts-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+
+    .chart-card h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #e6e6f0;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+
+    /* Achievements grid */
+    .achievements-section {
+        margin-top: 2rem;
+    }
+
+    .achievements-section h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #e6e6f0;
+    }
+
+    .achievements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+    }
+
+    .achievement-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+        text-align: center;
+        min-height: 120px;
+    }
+
+    .achievement-card.unlocked {
+        border-color: rgba(0, 212, 255, 0.5);
+        background: rgba(0, 212, 255, 0.08);
+    }
+
+    .achievement-card .badge {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: rgba(0, 212, 255, 0.08);
+        border: 1px solid rgba(0, 212, 255, 0.25);
+        color: #00d4ff;
+        font-size: 1.5rem;
+    }
+
+    .achievement-card.unlocked .badge {
+        background: rgba(0, 212, 255, 0.15);
+        border-color: rgba(0, 212, 255, 0.5);
+    }
+
+    .achievement-card .label {
+        font-size: 0.85rem;
+        color: #f0f0f7;
+        font-weight: 600;
+    }
+
+    .achievement-card .tier {
+        font-size: 0.7rem;
+        color: #7a7a89;
+        text-transform: uppercase;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 767px) {
+        .dashboard-page {
+            padding: 1rem 0.75rem;
+        }
+
+        .charts-section {
+            grid-template-columns: 1fr;
+        }
+
+        .chart-container {
+            height: 250px;
+        }
+
+        .achievements-grid {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page" x-data="dashboardWidget()" x-init="init()">
+    <div class="dashboard-container">
+        <div class="hero-header">
+            <h1>Achievements & Progress</h1>
+            <p>Track your journey and unlock rewards</p>
+        </div>
+
+        <!-- Loading State -->
+        <div x-show="isLoading" style="text-align: center; padding: 3rem;">
+            <p>Loading achievements...</p>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div x-show="!isLoading">
+            <!-- Stats Cards -->
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-value" x-text="badgeCount"></div>
+                    <div class="stat-label">Badges Earned</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" x-text="formatListeningTime(listenTime)"></div>
+                    <div class="stat-label">Listening Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" x-text="questsCompleted"></div>
+                    <div class="stat-label">Quests Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" x-text="recentAchievements.length"></div>
+                    <div class="stat-label">Recent Achievements</div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <!-- Badge Distribution Chart -->
+                <div class="chart-card">
+                    <h3>Badges by Tier</h3>
+                    <div class="chart-container">
+                        <canvas id="badgeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Achievement Timeline Chart -->
+                <div class="chart-card">
+                    <h3>Achievement Timeline</h3>
+                    <div class="chart-container">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements Grid -->
+            <div class="achievements-section">
+                <h3>Your Badges</h3>
+                <div class="achievements-grid">
+                    <template x-for="badge in badges" :key="badge.key">
+                        <div class="achievement-card unlocked">
+                            <div class="badge">
+                                <i :class="badge.icon || 'fas fa-trophy'"></i>
+                            </div>
+                            <div class="label" x-text="badge.title"></div>
+                            <div class="tier" x-text="(badge.tier || 'bronze').toUpperCase()"></div>
+                        </div>
+                    </template>
+                    <template x-if="badges.length === 0">
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #7a7a89;">
+                            <p>No badges earned yet. Start playing and saving to unlock achievements!</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+    function dashboardWidget() {
+        return {
+            isLoading: true,
+            badges: [],
+            recentAchievements: [],
+            listenTime: 0,
+            questsCompleted: 0,
+            badgeChart: null,
+            timelineChart: null,
+
+            get badgeCount() {
+                return this.badges.length;
+            },
+
+            async init() {
+                await this.loadDashboardData();
+            },
+
+            async loadDashboardData() {
+                try {
+                    this.isLoading = true;
+                    const response = await fetch('/api/me/gamification');
+                    if (!response.ok) {
+                        throw new Error('Failed to load dashboard data');
+                    }
+                    const data = await response.json();
+
+                    this.badges = data.badges || [];
+                    this.recentAchievements = data.achievements_recent || [];
+                    this.listenTime = (data.listen || {}).total_seconds || 0;
+                    this.questsCompleted = (data.quests_today || []).filter(q => q.done).length;
+
+                    // Render charts after data is loaded
+                    this.$nextTick(() => {
+                        this.renderBadgeChart();
+                        this.renderTimelineChart();
+                    });
+                } catch (error) {
+                    console.error('Error loading dashboard data:', error);
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
+            renderBadgeChart() {
+                const ctx = document.getElementById('badgeChart');
+                if (!ctx || this.badges.length === 0) return;
+
+                // Destroy existing chart if it exists
+                if (this.badgeChart) {
+                    this.badgeChart.destroy();
+                }
+
+                // Count badges by tier
+                const tierCounts = {};
+                this.badges.forEach(badge => {
+                    const tier = badge.tier || 'bronze';
+                    tierCounts[tier] = (tierCounts[tier] || 0) + 1;
+                });
+
+                const tiers = Object.keys(tierCounts);
+                const counts = Object.values(tierCounts);
+
+                const colors = {
+                    bronze: '#cd7f32',
+                    silver: '#c0c0c0',
+                    gold: '#ffd700',
+                    platinum: '#e5e4e2'
+                };
+
+                this.badgeChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: tiers.map(t => t.charAt(0).toUpperCase() + t.slice(1)),
+                        datasets: [{
+                            data: counts,
+                            backgroundColor: tiers.map(t => colors[t] || '#667eea'),
+                            borderWidth: 2,
+                            borderColor: '#0f0f14'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    font: {
+                                        size: 12
+                                    },
+                                    color: '#f0f0f7'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        return `${label}: ${value} badge${value !== 1 ? 's' : ''}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+
+            renderTimelineChart() {
+                const ctx = document.getElementById('timelineChart');
+                if (!ctx || this.recentAchievements.length === 0) {
+                    // Show empty state
+                    return;
+                }
+
+                // Destroy existing chart if it exists
+                if (this.timelineChart) {
+                    this.timelineChart.destroy();
+                }
+
+                // Create timeline data (simplified - using recent achievements)
+                const labels = this.recentAchievements.map((_, i) => `Achievement ${i + 1}`);
+                const data = this.recentAchievements.map((_, i) => i + 1);
+
+                this.timelineChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Achievements Unlocked',
+                            data: data,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#667eea'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `Total: ${context.parsed.y} achievements`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: '#7a7a89'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#7a7a89'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.05)'
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+
+            formatListeningTime(seconds) {
+                if (!seconds) return '0m';
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                if (hours > 0) {
+                    return `${hours}h ${minutes}m`;
+                }
+                return `${minutes}m`;
+            }
+        };
+    }
+</script>
+{% endblock %}
+
+
+
+
