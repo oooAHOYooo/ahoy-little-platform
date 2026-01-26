@@ -347,8 +347,9 @@ function merchStore() {
       const amount = encodeURIComponent(i.price_usd ?? '');
       const qtyEl = document.getElementById('qty_' + (i.id || ''));
       const qty = encodeURIComponent((qtyEl && qtyEl.value) ? qtyEl.value : '1');
-      // Use location.assign to avoid Illegal invocation errors in Alpine.js context
-      window.location.assign(`/checkout?type=merch&item_id=${id}&qty=${qty}&amount=${amount}&title=${title}`);
+      // Use a function reference to avoid Illegal invocation errors in Alpine.js context
+      const assign = window.location.assign.bind(window.location);
+      assign(`/checkout?type=merch&item_id=${id}&qty=${qty}&amount=${amount}&title=${title}`);
     },
   };
 }

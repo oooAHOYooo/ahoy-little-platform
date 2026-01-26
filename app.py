@@ -1511,11 +1511,11 @@ def checkout_process():
             "metadata": metadata,
         }
         
-        # Add shipping address collection for merch purchases
+        # Add shipping address collection for merch purchases (US only)
         if kind == "merch":
             try:
                 checkout_params["shipping_address_collection"] = {
-                    "allowed_countries": ["US", "CA"],  # Add more countries as needed
+                    "allowed_countries": ["US"],
                 }
             except Exception as shipping_err:
                 current_app.logger.warning(f"Error setting shipping address collection: {shipping_err}")
