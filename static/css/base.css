@@ -13,39 +13,59 @@
         --mobile-card-strong: rgba(255, 255, 255, 0.08);
     }
 
-    html,
+    /* CRITICAL: Mobile scroll fix for Android */
+    html {
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: scroll !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: none;
+    }
+
     body {
         background: var(--mobile-bg);
         color: var(--mobile-text);
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
+        min-height: 100%;
+        min-height: 100dvh;
         height: auto !important;
-        min-height: 100vh;
-        min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
-        /* Android WebView scroll fixes */
-        -webkit-overflow-scrolling: touch;
-        touch-action: pan-y;
-        overscroll-behavior-y: contain;
-        /* Hide scrollbars on mobile */
+        overflow-x: hidden;
+        overflow-y: visible !important;
+        position: relative;
+        /* Scrollbar hidden but scroll enabled */
         scrollbar-width: none;
         -ms-overflow-style: none;
     }
 
-    /* Hide webkit scrollbars on mobile (Chrome, Safari, Android WebView) */
+    body.overflow-x-hidden {
+        overflow-y: visible !important;
+    }
+
+    /* Hide webkit scrollbars on mobile */
     html::-webkit-scrollbar,
     body::-webkit-scrollbar {
         display: none;
         width: 0;
         height: 0;
-        background: transparent;
     }
 
-    /* Fix Android scroll blocking */
+    /* Ensure content area scrolls */
     .content-area,
-    main,
-    .app-content {
-        touch-action: pan-y;
-        overscroll-behavior-y: contain;
+    .app-content,
+    main {
+        overflow: visible !important;
+        height: auto !important;
+        min-height: auto;
+        touch-action: pan-x pan-y;
+    }
+
+    /* Prevent fixed elements from blocking scroll */
+    .mobile-status-bar,
+    .app-header,
+    .mobile-bottom-nav,
+    .mobile-secondary-nav,
+    .now-playing-wrapper {
+        touch-action: none;
+        pointer-events: auto;
     }
 
     /* One-column flow and spacing rhythm */
