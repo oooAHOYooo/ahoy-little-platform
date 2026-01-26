@@ -647,6 +647,14 @@
                         <!-- Username Text (Desktop Only) - Plain text like time display -->
                         <span class="hidden-mobile account-username"
                             x-text="isLoggedIn ? (userProfile.username || userProfile.display_name || 'User') : 'guest'"></span>
+                        
+                        <!-- Account Icon Button (Desktop Only) - Liquid Glass Style -->
+                        <a href="/account" 
+                            class="hidden-mobile account-icon-btn"
+                            aria-label="Account"
+                            title="Account">
+                            <i class="fas fa-user-circle"></i>
+                        </a>
 
                             <!-- Unified Account Features Dropdown -->
                             <div x-show="accountMenuOpen"
@@ -1785,6 +1793,7 @@
                         <li><a href="/live-tv">Live TV</a></li>
                         <li><a href="{{ url_for('shows') }}">Videos</a></li>
                         <li><a href="{{ url_for('artists') }}">Artists</a></li>
+                        <li><a href="/radio">Radio</a></li>
                         <li><a href="/events">Events</a></li>
                         <li><a href="/merch">Merch</a></li>
                         <li><a href="/my-saves">Saved</a></li>

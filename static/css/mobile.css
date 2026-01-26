@@ -1537,18 +1537,13 @@
         justify-self: end;
     }
 
-    /* Show logo image centered on mobile */
+    /* Hide logo on mobile - user doesn't want it showing */
     .nav-logo {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
+        display: none !important;
     }
 
     .nav-logo img {
-        display: inline-block !important;
-        height: 18px;
-        max-width: 120px;
-        object-fit: contain;
+        display: none !important;
     }
 
     .nav-title-mobile {
@@ -2345,6 +2340,9 @@
     body,
     html {
         overflow-x: hidden !important;
+        overflow-y: auto !important; /* Enable vertical scrolling */
+        height: auto !important; /* Allow body to expand with content */
+        min-height: 100vh; /* Ensure minimum viewport height */
     }
 }
 

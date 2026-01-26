@@ -18,6 +18,21 @@
         background: var(--mobile-bg);
         color: var(--mobile-text);
         overflow-x: hidden !important;
+        overflow-y: auto !important; /* Enable vertical scrolling */
+        height: auto !important; /* Allow body to expand with content */
+        min-height: 100vh; /* Ensure minimum viewport height */
+        /* Hide scrollbars on mobile to prevent artifacts on Android WebView */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+    }
+
+    /* Hide webkit scrollbars on mobile (Chrome, Safari, Android WebView) */
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+        background: transparent;
     }
 
     /* One-column flow and spacing rhythm */
