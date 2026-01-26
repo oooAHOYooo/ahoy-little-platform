@@ -30,9 +30,9 @@ class MediaPlayer {
         // Create audio element for music
         this.audioElement = document.createElement('audio');
         this.audioElement.preload = 'metadata';
-        // Improve compatibility with iOS/Safari and WebAudio
+        // Improve compatibility with iOS/Safari
         try { this.audioElement.setAttribute('playsinline', ''); } catch (_) {}
-        try { this.audioElement.crossOrigin = 'anonymous'; } catch (_) {}
+        // Note: crossOrigin removed - causes CORS issues with S3 and visualizer is disabled
         this.audioElement.style.display = 'none';
         document.body.appendChild(this.audioElement);
         
