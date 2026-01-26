@@ -1323,6 +1323,8 @@ def checkout_process():
                                 break
                 except Exception:
                     pass
+            # For merch, quantity is always 1 (one-of-a-kind)
+            merch_quantity = 1 if kind == "merch" else int(max(1, qty))
             line_items = [
                 {
                     "price_data": {
@@ -1330,7 +1332,7 @@ def checkout_process():
                         "product_data": {"name": safe_title},
                         "unit_amount": unit_amount_cents,
                     },
-                    "quantity": int(max(1, qty)),
+                    "quantity": merch_quantity,
                 }
             ]
 
@@ -1511,11 +1513,28 @@ def checkout_process():
         
         # Add shipping address collection for merch purchases
         if kind == "merch":
-            checkout_params["shipping_address_collection"] = {
-                "allowed_countries": ["US", "CA"],  # Add more countries as needed
-            }
+            try:
+                checkout_params["shipping_address_collection"] = {
+                    "allowed_countries": ["US", "CA"],  # Add more countries as needed
+                }
+            except Exception as shipping_err:
+                current_app.logger.warning(f"Error setting shipping address collection: {shipping_err}")
+                # Continue without shipping collection if there's an error
         
-        checkout_session = stripe.checkout.Session.create(**checkout_params)
+        try:
+            current_app.logger.info(f"Creating Stripe checkout session for {kind}, amount={amount}, qty={qty}")
+            checkout_session = stripe.checkout.Session.create(**checkout_params)
+            current_app.logger.info(f"Stripe checkout session created: {checkout_session.id}")
+        except stripe.error.StripeError as stripe_err:
+            current_app.logger.error(f"Stripe error creating checkout session: {stripe_err}", exc_info=True)
+            return render_template("checkout.html",
+                                   error=f"Payment processing error: {str(stripe_err)}",
+                                   csrf_token=generate_csrf_token(),
+                                   kind=kind,
+                                   artist_id=artist_id or "",
+                                   amount=amount,
+                                   item_id=item_id or "",
+                                   qty=qty), 500
 
         # Persist Stripe session id
         with get_session() as s:
