@@ -190,7 +190,8 @@
                         :src="track.cover_art || '/static/img/default-cover.jpg'"
                         :alt="track.title"
                         class="image-placeholder"
-                        loading="lazy">
+                        loading="lazy"
+                        @error="handleImageError($event, track)">
                     <div class="track-overlay">
                         <button @click.stop="playTrack(track)" class="play-btn">
                             <i class="fas fa-play"></i>
@@ -401,6 +402,7 @@ function musicLibrary() {
         tracks: [],
         filteredTracks: [],
         artists: [],
+        artistCoverMap: {},
         viewMode: 'grid',
         searchQuery: '',
         selectedArtist: '',
@@ -455,13 +457,8 @@ function musicLibrary() {
                 this.tracks = data.tracks || [];
                 this.filteredTracks = [...this.tracks];
                 this.extractArtists();
+                this.buildArtistCoverMap();
                 this.sortMusic();
-                
-                // Images will load automatically
-                
-                // Add debugging
-                console.log('Loaded tracks:', this.tracks.length);
-                console.log('First track:', this.tracks[0]);
             } catch (error) {
                 console.error('Error loading music:', error);
             } finally {
@@ -471,14 +468,53 @@ function musicLibrary() {
         
         extractArtists() {
             const artistSet = new Set();
-            
+
             this.tracks.forEach(track => {
                 if (track.artist) artistSet.add(track.artist);
             });
-            
+
             this.artists = Array.from(artistSet).sort();
         },
-        
+
+        // Build a map of artist -> array of valid cover URLs for fallback
+        buildArtistCoverMap() {
+            this.artistCoverMap = {};
+            this.tracks.forEach(track => {
+                if (track.artist && track.cover_art) {
+                    if (!this.artistCoverMap[track.artist]) {
+                        this.artistCoverMap[track.artist] = [];
+                    }
+                    // Avoid duplicates
+                    if (!this.artistCoverMap[track.artist].includes(track.cover_art)) {
+                        this.artistCoverMap[track.artist].push(track.cover_art);
+                    }
+                }
+            });
+        },
+
+        // Handle image load errors - try another cover from same artist
+        handleImageError(event, track) {
+            const img = event.target;
+            const failedSrc = img.src;
+
+            // Mark this URL as failed
+            if (!this._failedImages) this._failedImages = new Set();
+            this._failedImages.add(failedSrc);
+
+            // Try to find another cover from the same artist
+            const artistCovers = this.artistCoverMap[track.artist] || [];
+            const validCover = artistCovers.find(url => !this._failedImages.has(url));
+
+            if (validCover) {
+                img.src = validCover;
+                // Also update the track object so bookmarks get the right image
+                track.cover_art = validCover;
+            } else {
+                // All artist covers failed, use default
+                img.src = '/static/img/default-cover.jpg';
+            }
+        },
+
         // Filtering and sorting
         filterMusic() {
             let filtered = [...this.tracks];
