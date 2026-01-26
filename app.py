@@ -1545,9 +1545,18 @@ def checkout_process():
 
         return redirect(checkout_session.url)
     except Exception as e:
+        # Log the full error with context for debugging
+        import traceback
+        error_trace = traceback.format_exc()
+        current_app.logger.error(
+            f"Checkout setup failed: {str(e)}\n"
+            f"Kind: {kind}, Item ID: {item_id}, Amount: {amount}, Qty: {qty}\n"
+            f"Traceback: {error_trace}",
+            exc_info=True
+        )
         # Fall back to success page with an error; keep purchase recorded for diagnostics
         return render_template("checkout.html",
-                               error=f"Checkout setup failed. {str(e)}",
+                               error=f"Checkout setup failed: {str(e)}. Please try again or contact support.",
                                csrf_token=generate_csrf_token(),
                                kind=kind,
                                artist_id=artist_id or "",
