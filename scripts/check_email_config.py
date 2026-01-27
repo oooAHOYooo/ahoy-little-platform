@@ -55,8 +55,8 @@ def main():
     if admin_email:
         print(f"   ✅ {admin_email}")
     else:
-        print(f"   ❌ Not set")
-        print(f"   ⚠️  Will use fallback: alex@ahoy.ooo")
+        print(f"   ❌ Not set (AHOY_ADMIN_EMAIL or SUPPORT_EMAIL)")
+        print(f"   ⚠️  Admin notifications will be SKIPPED until configured")
     
     # Check if email can be sent
     print(f"\n✅ Can Send Email:")
@@ -74,9 +74,9 @@ def main():
             print(f"   - Set SUPPORT_EMAIL")
     
     # Test email if configured
-    if can_send:
+    if can_send and admin_email:
         print(f"\n🧪 Testing Email Send...")
-        test_email = admin_email or "alex@ahoy.ooo"
+        test_email = admin_email
         result = send_email(
             to_email=test_email,
             subject="🧪 Email Configuration Test",
@@ -105,7 +105,10 @@ def main():
         print(f"   6. Run this script again to test")
     else:
         print(f"   ✅ Email is configured and working!")
-        print(f"   You should receive notifications at: {admin_email or 'alex@ahoy.ooo'}")
+        if admin_email:
+            print(f"   You should receive notifications at: {admin_email}")
+        else:
+            print(f"   ⚠️  Set AHOY_ADMIN_EMAIL to receive admin notifications")
 
 if __name__ == "__main__":
     main()

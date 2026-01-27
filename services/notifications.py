@@ -17,12 +17,18 @@ log = logging.getLogger(__name__)
 
 
 def _get_admin_email() -> Optional[str]:
-    """Get admin email from environment variable."""
+    """
+    Get admin email from environment variable.
+
+    Set AHOY_ADMIN_EMAIL or SUPPORT_EMAIL in your environment.
+    Returns None if not configured (notifications will be skipped).
+    """
     email = (os.getenv("AHOY_ADMIN_EMAIL") or os.getenv("SUPPORT_EMAIL") or "").strip()
     if email:
         return email
-    # Fallback to alex@ahoy.ooo if not set (for production)
-    return "alex@ahoy.ooo"
+    # No hardcoded fallback - must be configured via environment
+    log.warning("AHOY_ADMIN_EMAIL not set - admin notifications will be skipped")
+    return None
 
 
 def _get_env_label() -> str:

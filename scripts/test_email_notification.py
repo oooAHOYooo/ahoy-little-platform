@@ -19,9 +19,15 @@ from services.notifications import (
 from services.emailer import can_send_email, send_email
 
 def main():
-    admin_email = os.getenv("AHOY_ADMIN_EMAIL") or os.getenv("SUPPORT_EMAIL") or "alex@ahoy.ooo"
-    
+    admin_email = os.getenv("AHOY_ADMIN_EMAIL") or os.getenv("SUPPORT_EMAIL")
+
     print("🧪 Testing Email Notifications\n")
+
+    if not admin_email:
+        print("❌ AHOY_ADMIN_EMAIL or SUPPORT_EMAIL not set!")
+        print("   Set one of these environment variables to run this test")
+        sys.exit(1)
+
     print(f"Admin Email: {admin_email}")
     print(f"Email Service Available: {can_send_email()}\n")
     

@@ -361,8 +361,12 @@ def process_payouts(results: List[Dict[str, Any]], auto_process: bool = False, d
 
 def send_summary_email(results: List[Dict[str, Any]], processing_results: Dict[str, Any]):
     """Send email summary to admin."""
-    admin_email = _get_admin_email() or "alex@ahoy.ooo"
-    
+    admin_email = _get_admin_email()
+
+    if not admin_email:
+        print(f"⚠️  AHOY_ADMIN_EMAIL not set, skipping email summary")
+        return
+
     if not can_send_email():
         print(f"⚠️  Email not configured, skipping email summary")
         print(f"   Would send to: {admin_email}")

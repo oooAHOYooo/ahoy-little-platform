@@ -110,6 +110,38 @@ Tests use pytest with fixtures in `tests/conftest.py`:
 
 Test environment auto-uses SQLite in-memory database.
 
+## Shared Utilities
+
+### Fee Calculations (`utils/fees.py`)
+```python
+from utils.fees import calculate_boost_fees, PLATFORM_FEE_PERCENT
+# All payment fee logic is centralized here
+```
+
+### API Helpers (`utils/api_helpers.py`)
+```python
+from utils.api_helpers import parse_pagination, ALLOWED_MEDIA_TYPES
+# Shared pagination, media type validation
+```
+
+## Required Environment Variables
+
+Production requires these (validated at startup):
+- `SECRET_KEY` - Flask session secret (fails if missing)
+- `AHOY_ADMIN_EMAIL` - Admin notification recipient (warnings if missing)
+- `STRIPE_SECRET_KEY` - Stripe API key
+- `RESEND_API_KEY` - Email service
+
+## Video/Show URLs
+
+Shows use human-readable slugs for sharing:
+```
+/player?id=palbot-causes-tension&type=show
+/player?id=justin-arena-space-cadet&type=show
+```
+
+Show IDs are in `static/data/shows.json`. Thumbnails extracted via `scripts/extract_video_thumbnails.py`.
+
 ## Desktop/Mobile Builds
 
 See `packaging/` directory:
