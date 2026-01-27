@@ -13,7 +13,11 @@
       "views": 1250,
       "type": "episode",
       "is_live": false,
-      "tags": ["episode", "alive-on-central", "live-performance"],
+      "tags": [
+        "episode",
+        "alive-on-central",
+        "live-performance"
+      ],
       "host_slug": "ahoy-indie-media",
       "category": "Episodes"
     },
@@ -30,7 +34,11 @@
       "views": 980,
       "type": "episode",
       "is_live": false,
-      "tags": ["episode", "alive-on-central", "live-performance"],
+      "tags": [
+        "episode",
+        "alive-on-central",
+        "live-performance"
+      ],
       "host_slug": "ahoy-indie-media",
       "category": "Episodes"
     },
@@ -47,7 +55,11 @@
       "views": 1100,
       "type": "episode",
       "is_live": false,
-      "tags": ["episode", "alive-on-central", "live-performance"],
+      "tags": [
+        "episode",
+        "alive-on-central",
+        "live-performance"
+      ],
       "host_slug": "ahoy-indie-media",
       "category": "Episodes"
     },
@@ -64,7 +76,11 @@
       "views": 890,
       "type": "episode",
       "is_live": false,
-      "tags": ["episode", "alive-on-central", "live-performance"],
+      "tags": [
+        "episode",
+        "alive-on-central",
+        "live-performance"
+      ],
       "host_slug": "ahoy-indie-media",
       "category": "Episodes"
     },
@@ -81,7 +97,12 @@
       "views": 2100,
       "type": "clip",
       "is_live": false,
-      "tags": ["clip", "tallboyz", "dave-gunn", "skateboarding"],
+      "tags": [
+        "clip",
+        "tallboyz",
+        "dave-gunn",
+        "skateboarding"
+      ],
       "host_slug": "tallboyz",
       "category": "Clips"
     },
@@ -98,7 +119,12 @@
       "views": 1800,
       "type": "clip",
       "is_live": false,
-      "tags": ["clip", "alex-figueroa", "full-part", "skateboarding"],
+      "tags": [
+        "clip",
+        "alex-figueroa",
+        "full-part",
+        "skateboarding"
+      ],
       "host_slug": "alex-figueroa",
       "category": "Clips"
     },
@@ -115,7 +141,13 @@
       "views": 1650,
       "type": "clip",
       "is_live": false,
-      "tags": ["clip", "tallboyz", "andrew-leverton", "full-part", "skateboarding"],
+      "tags": [
+        "clip",
+        "tallboyz",
+        "andrew-leverton",
+        "full-part",
+        "skateboarding"
+      ],
       "host_slug": "andrew-leverton",
       "category": "Clips"
     },
@@ -132,7 +164,13 @@
       "views": 3200,
       "type": "clip",
       "is_live": false,
-      "tags": ["clip", "tallboyz", "dave-gunn", "challenge", "comedy"],
+      "tags": [
+        "clip",
+        "tallboyz",
+        "dave-gunn",
+        "challenge",
+        "comedy"
+      ],
       "host_slug": "dave-gunn",
       "category": "Clips"
     },
@@ -149,8 +187,62 @@
       "views": 2400,
       "type": "clip",
       "is_live": false,
-      "tags": ["clip", "tallboyz", "dave-gunn", "full-part", "skateboarding"],
+      "tags": [
+        "clip",
+        "tallboyz",
+        "dave-gunn",
+        "full-part",
+        "skateboarding"
+      ],
       "host_slug": "dave-gunn",
+      "category": "Clips"
+    },
+    {
+      "id": "clip_23",
+      "title": "[Pal-Bot 1] - [Clip] - [Causes Tension in Couples Relationship]",
+      "host": "Rob Meglio",
+      "description": "Pal-Bot causes tension in a couple's relationship - a clip from Pal-Bot 1.",
+      "duration_seconds": 0,
+      "video_url": "https://storage.googleapis.com/ahoy-videos/snips/palbot-causes-tension-in-couples-relationship.mp4",
+      "trailer_url": "https://storage.googleapis.com/ahoy-videos/snips/palbot-causes-tension-in-couples-relationship.mp4",
+      "thumbnail": "/static/thumbnails/clip_23_71f8226a4aae.jpg",
+      "published_date": "2025-03-03",
+      "views": 0,
+      "type": "clip",
+      "is_live": false,
+      "tags": [
+        "clip",
+        "pal-bot",
+        "pal-bot-1",
+        "rob-meglio",
+        "comedy",
+        "drama"
+      ],
+      "host_slug": "rob-meglio",
+      "category": "Clips"
+    },
+    {
+      "id": "clip_24",
+      "title": "[Pal-Bot 1] - [Clip] - [Surprise Engagement and a Robotic Dilemma]",
+      "host": "Rob Meglio",
+      "description": "A surprise engagement and a robotic dilemma - a clip from Pal-Bot 1.",
+      "duration_seconds": 0,
+      "video_url": "https://storage.googleapis.com/ahoy-videos/snips/surprise-engagement-and-a-robotic-dilemma.mp4",
+      "trailer_url": "https://storage.googleapis.com/ahoy-videos/snips/surprise-engagement-and-a-robotic-dilemma.mp4",
+      "thumbnail": "/static/thumbnails/clip_24_574aba9ad84b.jpg",
+      "published_date": "2025-03-03",
+      "views": 0,
+      "type": "clip",
+      "is_live": false,
+      "tags": [
+        "clip",
+        "pal-bot",
+        "pal-bot-1",
+        "rob-meglio",
+        "comedy",
+        "drama"
+      ],
+      "host_slug": "rob-meglio",
       "category": "Clips"
     },
     {
@@ -166,7 +258,12 @@
       "views": 450,
       "type": "promo",
       "is_live": false,
-      "tags": ["promo", "ahoy-cabaret", "best-video", "rob-meglio"],
+      "tags": [
+        "promo",
+        "ahoy-cabaret",
+        "best-video",
+        "rob-meglio"
+      ],
       "host_slug": "rob-meglio",
       "category": "Promos"
     },
@@ -183,7 +280,12 @@
       "views": 680,
       "type": "promo",
       "is_live": false,
-      "tags": ["promo", "tutorial", "website", "rob-meglio"],
+      "tags": [
+        "promo",
+        "tutorial",
+        "website",
+        "rob-meglio"
+      ],
       "host_slug": "rob-meglio",
       "category": "Promos"
     },
@@ -200,7 +302,12 @@
       "views": 1200,
       "type": "promo",
       "is_live": false,
-      "tags": ["promo", "tallboyz", "trailer", "obslete"],
+      "tags": [
+        "promo",
+        "tallboyz",
+        "trailer",
+        "obslete"
+      ],
       "host_slug": "tallboyz",
       "category": "Promos"
     },
@@ -217,7 +324,12 @@
       "views": 1850,
       "type": "music_video",
       "is_live": false,
-      "tags": ["music-video", "samuel-dylan-witch", "weary-chest", "indie"],
+      "tags": [
+        "music-video",
+        "samuel-dylan-witch",
+        "weary-chest",
+        "indie"
+      ],
       "host_slug": "samuel-dylan-witch",
       "category": "Music Video"
     },
@@ -234,7 +346,12 @@
       "views": 2200,
       "type": "music_video",
       "is_live": false,
-      "tags": ["music-video", "justin-arena", "when-you-wake-up", "indie"],
+      "tags": [
+        "music-video",
+        "justin-arena",
+        "when-you-wake-up",
+        "indie"
+      ],
       "host_slug": "justin-arena",
       "category": "Music Video"
     },
@@ -251,7 +368,12 @@
       "views": 1950,
       "type": "music_video",
       "is_live": false,
-      "tags": ["music-video", "justin-arena", "space-cadet", "indie"],
+      "tags": [
+        "music-video",
+        "justin-arena",
+        "space-cadet",
+        "indie"
+      ],
       "host_slug": "justin-arena",
       "category": "Music Video"
     },
@@ -268,7 +390,12 @@
       "views": 1400,
       "type": "short_film",
       "is_live": false,
-      "tags": ["short-film", "pal-bot", "rob-meglio", "drama"],
+      "tags": [
+        "short-film",
+        "pal-bot",
+        "rob-meglio",
+        "drama"
+      ],
       "host_slug": "rob-meglio",
       "category": "Short Film"
     },
@@ -285,7 +412,12 @@
       "views": 850,
       "type": "promo",
       "is_live": false,
-      "tags": ["promo", "pal-bot-2", "trailer", "rob-meglio"],
+      "tags": [
+        "promo",
+        "pal-bot-2",
+        "trailer",
+        "rob-meglio"
+      ],
       "host_slug": "rob-meglio",
       "category": "Promo"
     },
@@ -302,7 +434,13 @@
       "views": 720,
       "type": "promo",
       "is_live": false,
-      "tags": ["promo", "ahoy-cabaret", "best-video", "rob-meglio", "update"],
+      "tags": [
+        "promo",
+        "ahoy-cabaret",
+        "best-video",
+        "rob-meglio",
+        "update"
+      ],
       "host_slug": "rob-meglio",
       "category": "Promo"
     },
@@ -319,7 +457,12 @@
       "views": 2800,
       "type": "broadcast",
       "is_live": false,
-      "tags": ["episode", "ahoy-cabaret", "holiday", "spectacular"],
+      "tags": [
+        "episode",
+        "ahoy-cabaret",
+        "holiday",
+        "spectacular"
+      ],
       "host_slug": "ahoy-indie-media",
       "category": "Broadcast"
     },
@@ -336,7 +479,13 @@
       "views": 1650,
       "type": "episode",
       "is_live": false,
-      "tags": ["episode", "rob-show", "coulter-davis", "interview", "lost-content"],
+      "tags": [
+        "episode",
+        "rob-show",
+        "coulter-davis",
+        "interview",
+        "lost-content"
+      ],
       "host_slug": "rob-meglio",
       "category": "Episodes"
     },
@@ -353,7 +502,12 @@
       "views": 3200,
       "type": "broadcast",
       "is_live": false,
-      "tags": ["episode", "ahoy-cabaret", "best-video", "live-performance"],
+      "tags": [
+        "episode",
+        "ahoy-cabaret",
+        "best-video",
+        "live-performance"
+      ],
       "host_slug": "ahoy-indie-media",
       "category": "Broadcast"
     },
@@ -365,29 +519,44 @@
       "duration_seconds": 5400,
       "video_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Ahoy_poets%20and%20friends%20-%203%20-%20ready.mov",
       "trailer_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Ahoy_poets%20and%20friends%20-%203%20-%20ready.mov",
-      "thumbnail": "",
+      "thumbnail": "/static/thumbnails/poets_3_a0e72c328dba.jpg",
       "published_date": "2025-09-15",
       "views": 0,
       "type": "broadcast",
       "is_live": false,
-      "tags": ["live", "poets", "poets-and-friends", "koffee", "poetry", "live-performance"],
+      "tags": [
+        "live",
+        "poets",
+        "poets-and-friends",
+        "koffee",
+        "poetry",
+        "live-performance"
+      ],
       "host_slug": "ahoy-indie-media",
       "category": "Broadcast"
     },
     {
       "id": "poets_4",
-      "title": "Poets & Friends #4: Spooky Edition",
+      "title": "Poets & Friends #4",
       "host": "Ahoy Indie Media",
       "description": "Poets & Friends #4 (Spooky Edition). Thursday, Oct 30, 2025. Doors 6:00 PM. Readings 6:30–8:00 PM. Koffee? — 104 Audubon St, New Haven, CT. Costumes encouraged. Food available at Koffee?. Bring friends.",
       "duration_seconds": 5400,
       "video_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Poets4Total.mp4",
       "trailer_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Poets4Total.mp4",
-      "thumbnail": "",
+      "thumbnail": "/static/thumbnails/poets_4_24ec074f1c38.jpg",
       "published_date": "2025-10-30",
       "views": 0,
       "type": "broadcast",
       "is_live": false,
-      "tags": ["live", "poets", "poets-and-friends", "koffee", "poetry", "live-performance", "spooky"],
+      "tags": [
+        "live",
+        "poets",
+        "poets-and-friends",
+        "koffee",
+        "poetry",
+        "live-performance",
+        "spooky"
+      ],
       "host_slug": "ahoy-indie-media",
       "category": "Broadcast"
     }
