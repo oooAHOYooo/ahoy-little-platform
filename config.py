@@ -118,6 +118,8 @@ class BaseConfig:
         SESSION_TYPE = "filesystem"  # Great for local dev; not for multi-instance prod
     REMEMBER_COOKIE_HTTPONLY = True
     JSON_SORT_KEYS = False
+    # Static file caching (1 year for immutable assets)
+    SEND_FILE_MAX_AGE_DEFAULT = 31536000  # 1 year in seconds
     RATELIMIT_DEFAULT = "200/hour"
     CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "").split(",") if os.environ.get("CORS_ORIGINS") else []
     # Stripe configuration (test vs live based on AHOY_ENV)

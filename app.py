@@ -15,7 +15,7 @@ from typing import Optional
 # Removed: user_manager.py (consolidated to database-based auth)
 from dotenv import load_dotenv
 load_dotenv()
-import re, pathlib
+import re
 from pathlib import Path
 
 from config import get_config
@@ -628,14 +628,7 @@ def create_app():
             key = ""
         return {"STRIPE_PUBLISHABLE_KEY": key}
 
-    # Enable compression (optional)
-    try:
-        from flask_compress import Compress
-        Compress(app)
-        print("Compression enabled")
-    except ImportError:
-        print("WARN: Flask-Compress not available, compression disabled")
-
+    # Enable compression (configured at module level)
     # Downloads routes
     DOWNLOADS_DIR = Path("downloads")
     DIST_DIR = Path("dist")
@@ -854,7 +847,7 @@ def create_app():
 # Create the app instance for backward compatibility
 app = create_app()
 # ==== Forgiving Artist API (slug or case-insensitive name) ==================
-ARTISTS_PATH = pathlib.Path("static/data/artists.json")
+ARTISTS_PATH = Path("static/data/artists.json")
 
 def _slugify(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", (s or "").strip().lower()).strip("-")
