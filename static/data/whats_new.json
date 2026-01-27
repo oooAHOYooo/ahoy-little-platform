@@ -28,7 +28,15 @@
         },
         "videos": {
           "title": "Video Updates",
-          "items": []
+          "items": [
+            {
+              "type": "content",
+              "title": "New Pal-Bot Clips Added",
+              "description": "Two new clips from Pal-Bot 1 are now available - 'Causes Tension in Couples Relationship' and 'Surprise Engagement and a Robotic Dilemma'.",
+              "date": "2026-01-27",
+              "link": "/player?id=palbot-causes-tension&type=show"
+            }
+          ]
         },
         "artists": {
           "title": "Artist Updates",
@@ -72,6 +80,19 @@
                 "Live shows"
               ],
               "link": "/live-tv"
+            },
+            {
+              "type": "feature",
+              "title": "Shareable Video Links",
+              "description": "Videos now have human-readable URLs for easy sharing. Share your favorite clips with clean links like /player?id=palbot-causes-tension instead of cryptic IDs.",
+              "date": "2026-01-27",
+              "features": [
+                "Human-readable video slugs",
+                "Easy-to-share URLs",
+                "Automatic thumbnail generation",
+                "Local thumbnail caching for faster loads"
+              ],
+              "link": "/shows"
             },
             {
               "type": "feature",
