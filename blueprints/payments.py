@@ -8,6 +8,13 @@ from datetime import datetime
 from db import get_session
 from models import Tip, User, UserArtistPosition, WalletTransaction
 from services.user_resolver import resolve_db_user_id
+from utils.fees import (
+    PLATFORM_FEE_PERCENT,
+    STRIPE_PERCENTAGE,
+    STRIPE_FIXED,
+    calculate_boost_fees,
+    calculate_fee_and_net,
+)
 import uuid
 
 bp = Blueprint("payments", __name__, url_prefix="/payments")
@@ -17,57 +24,6 @@ bp = Blueprint("payments", __name__, url_prefix="/payments")
 # Initialize Stripe
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
-
-# ==========================================
-# BOOSTING SYSTEM - FEE CALCULATION
-# New Logic: Artist receives 100% of boostAmount
-# Tipper pays: boostAmount + stripeFee + platformFee
-# ==========================================
-
-# Fee Constants
-PLATFORM_FEE_PERCENT = Decimal("0.075")  # 7.5%
-STRIPE_PERCENTAGE = Decimal("0.029")     # 2.9%
-STRIPE_FIXED = Decimal("0.30")           # $0.30
-
-
-def calculate_boost_fees(boost_amount: Decimal):
-    """
-    Calculate all fees for a boost.
-    
-    New Logic:
-    - Artist receives 100% of boostAmount
-    - Tipper pays: boostAmount + stripeFee + platformFee
-    
-    Returns:
-        tuple: (stripe_fee, platform_fee, total_charge, artist_payout, platform_revenue)
-    """
-    # Round boost amount to 2 decimals
-    boost_amount = round(boost_amount, 2)
-    
-    # Calculate Stripe fee: (boostAmount * 2.9%) + $0.30
-    stripe_fee = round((boost_amount * STRIPE_PERCENTAGE) + STRIPE_FIXED, 2)
-    
-    # Calculate platform fee: boostAmount * 7.5%
-    platform_fee = round(boost_amount * PLATFORM_FEE_PERCENT, 2)
-    
-    # Total charge to tipper
-    total_charge = round(boost_amount + stripe_fee + platform_fee, 2)
-    
-    # Artist receives 100% of boost amount
-    artist_payout = boost_amount
-    
-    # Platform revenue is the platform fee
-    platform_revenue = platform_fee
-    
-    return stripe_fee, platform_fee, total_charge, artist_payout, platform_revenue
-
-
-# Legacy function for backward compatibility
-def calculate_fee_and_net(amount: Decimal):
-    """Legacy: Calculate platform fee (7.5%) and net amount after fee."""
-    fee = amount * PLATFORM_FEE_PERCENT
-    net = amount - fee
-    return fee, net
 
 
 def update_user_artist_position(user_id: int, artist_id: str, boost_amount: Decimal, boost_datetime: datetime, db_session):

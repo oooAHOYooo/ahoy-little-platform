@@ -6,23 +6,7 @@ from db import get_session
 from models import Tip
 from datetime import datetime
 from services.user_resolver import resolve_db_user_id
-
-# Reuse fee calculation from existing payments blueprint
-try:
-    from blueprints.payments import calculate_boost_fees
-except Exception:
-    # Fallback fee calc if import path changes
-    def calculate_boost_fees(boost_amount: Decimal):
-        PLATFORM_FEE_PERCENT = Decimal("0.075")
-        STRIPE_PERCENTAGE = Decimal("0.029")
-        STRIPE_FIXED = Decimal("0.30")
-        boost_amount = round(boost_amount, 2)
-        stripe_fee = round((boost_amount * STRIPE_PERCENTAGE) + STRIPE_FIXED, 2)
-        platform_fee = round(boost_amount * PLATFORM_FEE_PERCENT, 2)
-        total_charge = round(boost_amount + stripe_fee + platform_fee, 2)
-        artist_payout = boost_amount
-        platform_revenue = platform_fee
-        return stripe_fee, platform_fee, total_charge, artist_payout, platform_revenue
+from utils.fees import calculate_boost_fees
 
 bp = Blueprint("boost_stripe", __name__, url_prefix="/api/boost/stripe")
 # Back-compat/alias blueprint to expose /api/boost/confirm as requested

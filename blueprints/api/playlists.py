@@ -4,25 +4,10 @@ from sqlalchemy import asc, func
 
 from db import get_session
 from models import Playlist, PlaylistItem
+from utils.api_helpers import ALLOWED_MEDIA_TYPES, parse_pagination
 
 
 bp = Blueprint("api_playlists", __name__, url_prefix="/api/playlists")
-
-ALLOWED_MEDIA_TYPES = {"music", "show", "artist", "clip"}
-
-
-def parse_pagination():
-    try:
-        page = max(int(request.args.get("page", 1)), 1)
-    except Exception:
-        page = 1
-    try:
-        per_page = int(request.args.get("per_page", 50))
-    except Exception:
-        per_page = 50
-    per_page = max(1, min(per_page, 100))
-    offset = (page - 1) * per_page
-    return page, per_page, offset
 
 
 def require_owner(playlist: Playlist, user_id: int):
