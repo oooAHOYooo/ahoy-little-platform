@@ -1,7 +1,7 @@
 {
   "shows": [
     {
-      "id": "episode_17",
+      "id": "alive-on-central-ep2",
       "title": "[Episode] - [Alive on Central - Episode 2]",
       "host": "Jack Galvin",
       "description": "Alive on Central Episode 2 - featuring local artists and live performances from the Central area.",
@@ -22,7 +22,7 @@
       "category": "Episodes"
     },
     {
-      "id": "episode_18",
+      "id": "alive-on-central-ep3",
       "title": "[Episode] - [Alive on Central - Episode 3]",
       "host": "Jack Galvin",
       "description": "Alive on Central Episode 3 - continuing the series with more local talent and performances.",
@@ -43,7 +43,7 @@
       "category": "Episodes"
     },
     {
-      "id": "episode_19",
+      "id": "alive-on-central-ep4",
       "title": "[Episode] - [Alive on Central - Episode 4]",
       "host": "Jack Galvin",
       "description": "Alive on Central Episode 4 - showcasing emerging artists and their creative process.",
@@ -64,7 +64,7 @@
       "category": "Episodes"
     },
     {
-      "id": "episode_20",
+      "id": "alive-on-central-ep5",
       "title": "[Episode] - [Alive on Central - Episode 5]",
       "host": "Jack Galvin",
       "description": "Alive on Central Episode 5 - the latest installment featuring fresh local talent.",
@@ -85,7 +85,7 @@
       "category": "Episodes"
     },
     {
-      "id": "clip_1",
+      "id": "dave-gunn-nomusic",
       "title": "[Tallboyz] - [Clip] - [Dave Gunn] - [NoMusic]",
       "host": "Tallboyz",
       "description": "Dave Gunn showcasing his skills in this exclusive clip from Tallboyz.",
@@ -107,7 +107,7 @@
       "category": "Clips"
     },
     {
-      "id": "clip_2",
+      "id": "fig-the-gnarth",
       "title": "[Alex Figueroa] - [Full Part] - [The Gnarth]",
       "host": "Alex Figueroa",
       "description": "Alex Figueroa's full part featuring The Gnarth - a complete showcase of his talent.",
@@ -129,7 +129,7 @@
       "category": "Clips"
     },
     {
-      "id": "clip_3",
+      "id": "andrew-leverton-formality",
       "title": "[Tallboyz] - [Full Part] - [Andrew Leverton]-[Formaility]",
       "host": "Andrew Leverton",
       "description": "Andrew Leverton's full part showcasing Formaility - a complete skateboarding segment.",
@@ -152,7 +152,7 @@
       "category": "Clips"
     },
     {
-      "id": "clip_21",
+      "id": "dave-gunn-30-hotdogs",
       "title": "[Tallboyz] - [Dave Gunn]-[30 Days 30 Hotdogs]",
       "host": "Dave Gunn",
       "description": "Dave Gunn's 30 Days 30 Hotdogs challenge - a unique take on daily content creation.",
@@ -175,7 +175,7 @@
       "category": "Clips"
     },
     {
-      "id": "clip_22",
+      "id": "dave-gunn-always-next-time",
       "title": "[Tallboyz] - [Full Part] - [Always Next Time]-[Dave Gunn]",
       "host": "Dave Gunn",
       "description": "Dave Gunn's full part 'Always Next Time' - a complete skateboarding showcase.",
@@ -198,14 +198,14 @@
       "category": "Clips"
     },
     {
-      "id": "clip_23",
+      "id": "palbot-causes-tension",
       "title": "[Pal-Bot 1] - [Clip] - [Causes Tension in Couples Relationship]",
       "host": "Rob Meglio",
       "description": "Pal-Bot causes tension in a couple's relationship - a clip from Pal-Bot 1.",
       "duration_seconds": 0,
       "video_url": "https://storage.googleapis.com/ahoy-videos/snips/palbot-causes-tension-in-couples-relationship.mp4",
       "trailer_url": "https://storage.googleapis.com/ahoy-videos/snips/palbot-causes-tension-in-couples-relationship.mp4",
-      "thumbnail": "/static/thumbnails/clip_23_71f8226a4aae.jpg",
+      "thumbnail": "/static/thumbnails/palbot-causes-tension_71f8226a4aae.jpg",
       "published_date": "2025-03-03",
       "views": 0,
       "type": "clip",
@@ -222,14 +222,14 @@
       "category": "Clips"
     },
     {
-      "id": "clip_24",
+      "id": "palbot-surprise-engagement",
       "title": "[Pal-Bot 1] - [Clip] - [Surprise Engagement and a Robotic Dilemma]",
       "host": "Rob Meglio",
       "description": "A surprise engagement and a robotic dilemma - a clip from Pal-Bot 1.",
       "duration_seconds": 0,
       "video_url": "https://storage.googleapis.com/ahoy-videos/snips/surprise-engagement-and-a-robotic-dilemma.mp4",
       "trailer_url": "https://storage.googleapis.com/ahoy-videos/snips/surprise-engagement-and-a-robotic-dilemma.mp4",
-      "thumbnail": "/static/thumbnails/clip_24_574aba9ad84b.jpg",
+      "thumbnail": "/static/thumbnails/palbot-surprise-engagement_574aba9ad84b.jpg",
       "published_date": "2025-03-03",
       "views": 0,
       "type": "clip",
@@ -246,7 +246,7 @@
       "category": "Clips"
     },
     {
-      "id": "promo_7",
+      "id": "cabaret-fliers-promo",
       "title": "[Promo] - [Ahoy Cabaret @ Best Video] - [Rob hangs fliers around the havens]",
       "host": "Rob Meglio",
       "description": "Rob Meglio promotes the Ahoy Cabaret at Best Video by hanging fliers around the havens.",
@@ -268,7 +268,7 @@
       "category": "Promos"
     },
     {
-      "id": "promo_8",
+      "id": "how-to-find-website",
       "title": "[Promo] - [Meglio] - [How to find the website]",
       "host": "Rob Meglio",
       "description": "Rob Meglio teaches viewers how to find and navigate the Ahoy Indie Media website.",
@@ -290,7 +290,7 @@
       "category": "Promos"
     },
     {
-      "id": "promo_23",
+      "id": "tallboyz-obslete-trailer",
       "title": "[Promo] - [Tallboyz] - [Obslete Trailer]",
       "host": "Tallboyz",
       "description": "The official trailer for Tallboyz' Obslete project - a preview of what's to come.",
@@ -312,7 +312,7 @@
       "category": "Promos"
     },
     {
-      "id": "music_13",
+      "id": "samuel-dylan-witch-weary-chest",
       "title": "[Music Video] - [Samuel Dylan Witch] - [Weary Chest]",
       "host": "Samuel Dylan Witch",
       "description": "Official music video for Samuel Dylan Witch's 'Weary Chest' - a haunting and beautiful composition.",
@@ -334,7 +334,7 @@
       "category": "Music Video"
     },
     {
-      "id": "music_14",
+      "id": "justin-arena-when-you-wake-up",
       "title": "[Music Video] - [Justin Arena] - [When You Wake Up]",
       "host": "Justin Arena",
       "description": "Official music video for Justin Arena's 'When You Wake Up' - a dreamy indie track.",
@@ -356,7 +356,7 @@
       "category": "Music Video"
     },
     {
-      "id": "music_24",
+      "id": "justin-arena-space-cadet",
       "title": "[Music Video] - [Justin Arena] - [Space Cadet]",
       "host": "Justin Arena",
       "description": "Official music video for Justin Arena's 'Space Cadet' - exploring cosmic themes through music.",
@@ -378,7 +378,7 @@
       "category": "Music Video"
     },
     {
-      "id": "short_25",
+      "id": "pal-bot-short-film",
       "title": "[Short Film] - [Pal-Bot] - [Rob Meglio]",
       "host": "Rob Meglio",
       "description": "Pal-Bot - a short film by Rob Meglio exploring themes of friendship and technology.",
@@ -400,7 +400,7 @@
       "category": "Short Film"
     },
     {
-      "id": "promo_26",
+      "id": "pal-bot-2-trailer",
       "title": "[Promo] - [Pal-Bot 2 Trailer]",
       "host": "Rob Meglio",
       "description": "Trailer for Pal-Bot 2 - the sequel to the acclaimed short film.",
@@ -422,7 +422,7 @@
       "category": "Promo"
     },
     {
-      "id": "promo_15",
+      "id": "cabaret-rob-updates",
       "title": "[Promo] - [Ahoy Cabaret @ Best Video] - [Rob Updates]",
       "host": "Rob Meglio",
       "description": "Rob Meglio provides updates about the Ahoy Cabaret at Best Video.",
@@ -445,7 +445,7 @@
       "category": "Promo"
     },
     {
-      "id": "broadcast_16",
+      "id": "ahoy-cabaret-ep1",
       "title": "[Episode] - [Ahoy Cabaret - Episode 1] - [Holiday Spectacular]",
       "host": "Ahoy Indie Media",
       "description": "Ahoy Cabaret Episode 1 - Holiday Spectacular featuring special performances and festive content.",
@@ -467,7 +467,7 @@
       "category": "Broadcast"
     },
     {
-      "id": "episode_27",
+      "id": "rob-show-coulter-interview",
       "title": "[Episode] - [The Rob Show] - [Coulter Davis Lost Interview]",
       "host": "Rob Meglio",
       "description": "The Rob Show presents a lost interview with Coulter Davis - previously unreleased content.",
@@ -490,7 +490,7 @@
       "category": "Episodes"
     },
     {
-      "id": "broadcast_28",
+      "id": "ahoy-cabaret-ep2",
       "title": "[Episode] - [Ahoy Cabaret - Episode 2] - [Best Video]",
       "host": "Ahoy Indie Media",
       "description": "Ahoy Cabaret Episode 2 at Best Video - featuring live performances and local talent.",
@@ -512,14 +512,14 @@
       "category": "Broadcast"
     },
     {
-      "id": "poets_3",
+      "id": "poets-and-friends-3",
       "title": "Poets and Friends #3",
       "host": "Ahoy Indie Media",
       "description": "Live poetry + performance @ Koffee? featuring local poets. Doors open at 6pm, showtime 6:30pm SHARP. Hosted by Mickey Vampiro. Show runs 60-90 minutes. Merch available (maybe).",
       "duration_seconds": 5400,
       "video_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Ahoy_poets%20and%20friends%20-%203%20-%20ready.mov",
       "trailer_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Ahoy_poets%20and%20friends%20-%203%20-%20ready.mov",
-      "thumbnail": "/static/thumbnails/poets_3_a0e72c328dba.jpg",
+      "thumbnail": "/static/thumbnails/poets-and-friends-3_a0e72c328dba.jpg",
       "published_date": "2025-09-15",
       "views": 0,
       "type": "broadcast",
@@ -536,14 +536,14 @@
       "category": "Broadcast"
     },
     {
-      "id": "poets_4",
+      "id": "poets-and-friends-4",
       "title": "Poets & Friends #4",
       "host": "Ahoy Indie Media",
       "description": "Poets & Friends #4 (Spooky Edition). Thursday, Oct 30, 2025. Doors 6:00 PM. Readings 6:30–8:00 PM. Koffee? — 104 Audubon St, New Haven, CT. Costumes encouraged. Food available at Koffee?. Bring friends.",
       "duration_seconds": 5400,
       "video_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Poets4Total.mp4",
       "trailer_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Poets4Total.mp4",
-      "thumbnail": "/static/thumbnails/poets_4_24ec074f1c38.jpg",
+      "thumbnail": "/static/thumbnails/poets-and-friends-4_24ec074f1c38.jpg",
       "published_date": "2025-10-30",
       "views": 0,
       "type": "broadcast",
