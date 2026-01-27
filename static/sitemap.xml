@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://ahoy-indie-media.onrender.com/</loc>
+        <loc>https://app.ahoy.ooo/</loc>
         <lastmod>2025-01-22</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://ahoy-indie-media.onrender.com/music</loc>
+        <loc>https://app.ahoy.ooo/music</loc>
         <lastmod>2025-01-22</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://ahoy-indie-media.onrender.com/shows</loc>
+        <loc>https://app.ahoy.ooo/shows</loc>
         <lastmod>2025-01-22</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://ahoy-indie-media.onrender.com/artists</loc>
+        <loc>https://app.ahoy.ooo/artists</loc>
         <lastmod>2025-01-22</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://ahoy-indie-media.onrender.com/cast</loc>
+        <loc>https://app.ahoy.ooo/cast</loc>
         <lastmod>2025-01-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://ahoy-indie-media.onrender.com/downloads</loc>
+        <loc>https://app.ahoy.ooo/downloads</loc>
         <lastmod>2025-01-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://ahoy-indie-media.onrender.com/privacy</loc>
+        <loc>https://app.ahoy.ooo/privacy</loc>
         <lastmod>2025-01-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.3</priority>
     </url>
     <url>
-        <loc>https://ahoy-indie-media.onrender.com/terms</loc>
+        <loc>https://app.ahoy.ooo/terms</loc>
         <lastmod>2025-01-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.3</priority>
     </url>
     <url>
-        <loc>https://ahoy-indie-media.onrender.com/security</loc>
+        <loc>https://app.ahoy.ooo/security</loc>
         <lastmod>2025-01-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.3</priority>

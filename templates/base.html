@@ -44,7 +44,7 @@
 
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
-        <meta property="og:url" content="{{ request.url }}">
+        <meta property="og:url" content="https://app.ahoy.ooo">
         <meta property="og:title"
             content="{% block og_title %}Ahoy Indie Media - Discover Indie Music & Videos{% endblock %}">
         <meta property="og:description"
@@ -57,7 +57,7 @@
 
         <!-- Twitter -->
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:url" content="{{ request.url }}">
+        <meta name="twitter:url" content="https://app.ahoy.ooo">
         <meta name="twitter:title"
             content="{% block twitter_title %}Ahoy Indie Media - Discover Indie Music & Videos{% endblock %}">
         <meta name="twitter:description"
@@ -67,7 +67,51 @@
         <meta name="twitter:image:alt" content="Ahoy Indie Media Logo">
 
         <!-- Canonical URL -->
-        <link rel="canonical" href="{{ request.url }}">
+        <link rel="canonical" href="https://app.ahoy.ooo">
+
+        <!-- Apple App Store / iOS App Links -->
+        <meta name="apple-itunes-app" content="app-id=YOUR_APP_ID, app-argument=https://app.ahoy.ooo">
+        <meta name="apple-app-site-association" content="https://app.ahoy.ooo/.well-known/apple-app-site-association">
+        <link rel="alternate" href="ios-app://YOUR_APP_ID/https://app.ahoy.ooo">
+
+        <!-- Google Play Store / Android App Links -->
+        <link rel="alternate" href="android-app://com.ahoy.app/https/app.ahoy.ooo">
+        <meta name="google-play-app" content="app-id=com.ahoy.app">
+        <!-- App Links for Android -->
+        <meta property="al:android:app_name" content="Ahoy">
+        <meta property="al:android:package" content="com.ahoy.app">
+        <meta property="al:android:url" content="ahoy://app/https://app.ahoy.ooo">
+        <meta property="al:web:url" content="https://app.ahoy.ooo">
+        <meta property="al:web:should_fallback" content="true">
+
+        <!-- Enhanced SEO for Google Search Console -->
+        <meta name="google-site-verification" content="YOUR_GOOGLE_VERIFICATION_CODE">
+        <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+        <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+        
+        <!-- Additional SEO Meta Tags -->
+        <meta name="language" content="English">
+        <meta name="revisit-after" content="7 days">
+        <meta name="rating" content="general">
+        <meta name="distribution" content="global">
+        <meta name="geo.region" content="US">
+        <meta name="geo.placename" content="United States">
+        
+        <!-- Mobile App Deep Linking -->
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="format-detection" content="telephone=no">
+        
+        <!-- Enhanced Open Graph for App Stores -->
+        <meta property="og:locale" content="en_US">
+        <meta property="og:locale:alternate" content="en_GB">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="Ahoy Indie Media">
+        <meta property="og:url" content="https://app.ahoy.ooo">
+        
+        <!-- Schema.org Structured Data (JSON-LD will be added via script if needed) -->
+        <meta name="application-name" content="Ahoy">
+        <meta name="msapplication-TileColor" content="#111111">
+        <meta name="msapplication-config" content="/browserconfig.xml">
 
         <!-- Favicon -->
         <link rel="icon" type="image/png"

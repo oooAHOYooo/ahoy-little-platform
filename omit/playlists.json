@@ -1,0 +1,24 @@
+{
+  "alex": {
+    "lists": [
+      {
+        "id": "f50daeb9",
+        "name": "My List",
+        "description": "test",
+        "items": [
+          "track:demo-track-1"
+        ]
+      }
+    ]
+  },
+  "testuser2": {
+    "lists": [
+      {
+        "id": "9eb4c175",
+        "name": "My List",
+        "description": "test",
+        "items": []
+      }
+    ]
+  }
+}

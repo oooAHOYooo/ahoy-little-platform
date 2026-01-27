@@ -20,4 +20,4 @@ Allow: /cast
 Allow: /downloads
 
 # Sitemap location
-Sitemap: https://ahoy-indie-media.onrender.com/sitemap.xml
+Sitemap: https://app.ahoy.ooo/sitemap.xml

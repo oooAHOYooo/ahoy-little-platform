@@ -17,7 +17,16 @@
       "Bash(grep:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(python scripts/extract_video_thumbnails.py:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(git stash pop:*)",
+      "Bash(python:*)",
+      "Bash(pytest:*)",
+      "Bash(ls:*)",
+      "Bash(__NEW_LINE_9d50795297688dbe__ echo \"\")",
+      "Bash(__NEW_LINE_4550983e298d0c45__ echo \"\")"
     ]
   }
 }
