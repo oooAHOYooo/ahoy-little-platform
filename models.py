@@ -302,8 +302,8 @@ class Purchase(Base):
     artist_id = Column(String(50), nullable=True, index=True)
     item_id = Column(String(50), nullable=True, index=True)
     qty = Column(Integer, nullable=False, default=1)
-    amount = Column(Float, nullable=False)         # amount before fees
-    total = Column(Float, nullable=False)          # final charge
+    amount = Column(Numeric(10, 2), nullable=False)         # amount before fees
+    total = Column(Numeric(10, 2), nullable=False)          # final charge
     stripe_id = Column(String(255), nullable=True, index=True)
     status = Column(String(50), nullable=False, default="pending", index=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)

@@ -1368,7 +1368,8 @@ def checkout_process():
                                         with get_session() as s2:
                                             user = s2.query(User).filter(User.id == current_user.id).first()
                                             wallet_balance = float(user.wallet_balance or 0) if user else 0.0
-                                    except:
+                                    except Exception as wb_err:
+                                        logging.warning(f"Could not fetch wallet balance: {wb_err}")
                                         wallet_balance = None
                                     return render_template("checkout.html",
                                                          error="Unable to determine purchase total. Please try again.",
@@ -1387,7 +1388,8 @@ def checkout_process():
                             with get_session() as s2:
                                 user = s2.query(User).filter(User.id == current_user.id).first()
                                 wallet_balance = float(user.wallet_balance or 0) if user else 0.0
-                        except:
+                        except Exception as wb_err:
+                            logging.warning(f"Could not fetch wallet balance: {wb_err}")
                             wallet_balance = None
                         return render_template("checkout.html",
                                              error="Invalid purchase amount",
@@ -1448,7 +1450,8 @@ def checkout_process():
                                     with get_session() as s2:
                                         user = s2.query(User).filter(User.id == current_user.id).first()
                                         wallet_balance = float(user.wallet_balance or 0) if user else 0.0
-                                except:
+                                except Exception as wb_err:
+                                    logging.warning(f"Could not fetch wallet balance: {wb_err}")
                                     wallet_balance = None
                                 return render_template("checkout.html",
                                                      error="Purchase record not found. Wallet has been refunded. Please try again.",
@@ -1467,7 +1470,8 @@ def checkout_process():
                             with get_session() as s2:
                                 user = s2.query(User).filter(User.id == current_user.id).first()
                                 wallet_balance = float(user.wallet_balance or 0) if user else 0.0
-                        except:
+                        except Exception as wb_err:
+                            logging.warning(f"Could not fetch wallet balance: {wb_err}")
                             wallet_balance = None
                         return render_template("checkout.html",
                                              error=error or "Insufficient wallet balance",
@@ -1485,7 +1489,8 @@ def checkout_process():
                         with get_session() as s2:
                             user = s2.query(User).filter(User.id == current_user.id).first()
                             wallet_balance = float(user.wallet_balance or 0) if user else 0.0
-                    except:
+                    except Exception as wb_err:
+                        logging.warning(f"Could not fetch wallet balance: {wb_err}")
                         wallet_balance = None
                     return render_template("checkout.html",
                                          error=f"Wallet payment error: {str(e)}",
