@@ -227,7 +227,8 @@
             <th>Qty</th>
             <th>Total</th>
             <th>Shipping Address</th>
-            <th>Stripe</th>
+            <th>Tracking</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -252,25 +253,74 @@
                   <span class="muted">—</span>
                 </template>
               </td>
-              <td class="muted" x-text="o.stripe_id || ''"></td>
+              <td class="muted text-sm">
+                <template x-if="o.tracking_number">
+                  <span x-text="o.tracking_number"></span>
+                </template>
+                <template x-if="!o.tracking_number">
+                  <span class="muted">—</span>
+                </template>
+              </td>
+              <td>
+                <template x-if="o.status === 'paid'">
+                  <button class="btn btn-small" @click="openFulfillModal(o)">Fulfill</button>
+                </template>
+                <template x-if="o.status === 'fulfilled'">
+                  <span class="muted text-sm" x-text="o.fulfilled_at ? 'Shipped ' + formatDate(o.fulfilled_at) : 'Fulfilled'"></span>
+                </template>
+              </td>
             </tr>
           </template>
           <tr x-show="!orders.length">
-            <td colspan="8" class="muted" style="padding:14px;">No orders yet.</td>
+            <td colspan="10" class="muted" style="padding:14px;">No orders yet.</td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
+
+  <!-- Fulfill Order Modal -->
+  <div x-show="fulfillModal.show" class="modal-overlay" @click.self="closeFulfillModal()" style="display:none;">
+    <div class="modal-content glass" @click.stop>
+      <h3>Mark Order as Fulfilled</h3>
+      <p class="muted">Order #<span x-text="fulfillModal.order?.id"></span> - <span x-text="fulfillModal.order?.item_id"></span></p>
+
+      <div style="margin: 16px 0;">
+        <label for="tracking_number" style="display:block; margin-bottom:6px; font-size:13px;">Tracking Number (optional)</label>
+        <input type="text" id="tracking_number" x-model="fulfillModal.trackingNumber"
+               placeholder="e.g. 1Z999AA10123456784"
+               style="width:100%; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(0,0,0,0.3); color:#fff;">
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+        <button class="btn btn-secondary" @click="closeFulfillModal()">Cancel</button>
+        <button class="btn" @click="fulfillOrder()" :disabled="fulfillModal.loading">
+          <span x-show="!fulfillModal.loading">Mark Fulfilled</span>
+          <span x-show="fulfillModal.loading">Saving...</span>
+        </button>
+      </div>
+
+      <div x-show="fulfillModal.error" class="error-msg" style="margin-top:12px; color:#f87171;" x-text="fulfillModal.error"></div>
+    </div>
+  </div>
 </div>
 
 <script>
+const CSRF_TOKEN = '{{ csrf_token }}';
+
 function adminDashboard() {
   return {
     stats: { users: {}, orders: {}, plays: {}, listening: {}, engagement: {} },
     analytics: null,
     users: [],
     orders: [],
+    fulfillModal: {
+      show: false,
+      order: null,
+      trackingNumber: '',
+      loading: false,
+      error: ''
+    },
     async init() {
       await this.refresh();
     },
@@ -288,6 +338,61 @@ function adminDashboard() {
         if (o.ok) this.orders = (await o.json()).orders || [];
       } catch (e) {
         console.error('Failed to load admin data', e);
+      }
+    },
+    openFulfillModal(order) {
+      this.fulfillModal = {
+        show: true,
+        order: order,
+        trackingNumber: '',
+        loading: false,
+        error: ''
+      };
+    },
+    closeFulfillModal() {
+      this.fulfillModal.show = false;
+      this.fulfillModal.order = null;
+      this.fulfillModal.trackingNumber = '';
+      this.fulfillModal.error = '';
+    },
+    async fulfillOrder() {
+      if (!this.fulfillModal.order) return;
+      this.fulfillModal.loading = true;
+      this.fulfillModal.error = '';
+
+      try {
+        const res = await fetch(`/api/admin/orders/${this.fulfillModal.order.id}/fulfill`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': CSRF_TOKEN
+          },
+          body: JSON.stringify({
+            tracking_number: this.fulfillModal.trackingNumber || null
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          this.fulfillModal.error = data.error || 'Failed to fulfill order';
+          this.fulfillModal.loading = false;
+          return;
+        }
+
+        // Update the order in our local state
+        const idx = this.orders.findIndex(o => o.id === this.fulfillModal.order.id);
+        if (idx >= 0) {
+          this.orders[idx].status = 'fulfilled';
+          this.orders[idx].tracking_number = this.fulfillModal.trackingNumber || null;
+          this.orders[idx].fulfilled_at = new Date().toISOString();
+        }
+
+        this.closeFulfillModal();
+      } catch (e) {
+        console.error('Error fulfilling order', e);
+        this.fulfillModal.error = 'Network error. Please try again.';
+        this.fulfillModal.loading = false;
       }
     },
     formatDate(iso) {
@@ -330,5 +435,9 @@ function adminDashboard() {
   .pill.st-paid { border-color: rgba(16,185,129,0.35); background: rgba(16,185,129,0.10); }
   .pill.st-pending { border-color: rgba(245,158,11,0.30); background: rgba(245,158,11,0.10); }
   .pill.st-fulfilled { border-color: rgba(59,130,246,0.28); background: rgba(59,130,246,0.10); }
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:1000; }
+  .modal-content { background:rgba(30,30,40,0.95); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:24px; min-width:340px; max-width:90vw; }
+  .modal-content h3 { margin:0 0 8px 0; }
+  .btn-small { padding:6px 12px; font-size:11px; }
 </style>
 {% endblock %}

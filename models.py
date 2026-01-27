@@ -317,6 +317,10 @@ class Purchase(Base):
     shipping_postal_code = Column(String(20), nullable=True)
     shipping_country = Column(String(2), nullable=True)
 
+    # Fulfillment tracking
+    tracking_number = Column(String(100), nullable=True)
+    fulfilled_at = Column(DateTime, nullable=True)
+
     __table_args__ = (
         Index('ix_purchases_user_id_created_at', 'user_id', 'created_at'),
         Index('ix_purchases_type_created_at', 'type', 'created_at'),

@@ -416,6 +416,61 @@ Thank you for joining the Ahoy community!
     return results
 
 
+def notify_order_fulfilled(
+    purchase_id: int,
+    item_name: Optional[str],
+    buyer_email: Optional[str] = None,
+    tracking_number: Optional[str] = None,
+    shipping_address: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Send email notification when a merch order is fulfilled/shipped.
+
+    Returns dict with notification results.
+    """
+    results = {"admin_notified": False, "user_notified": False}
+
+    if not can_send_email():
+        log.warning("Email not configured, skipping order fulfilled notification")
+        return results
+
+    timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+
+    # Notify admin
+    admin_subject = f"📦 Order Fulfilled: #{purchase_id}"
+    admin_text = f"""Order has been marked as fulfilled!
+
+Purchase ID: {purchase_id}
+Item: {item_name or 'Merch Item'}
+Tracking Number: {tracking_number or 'N/A'}
+Recipient: {buyer_email or 'N/A'}
+Fulfilled At: {timestamp}
+"""
+    admin_result = notify_admin(admin_subject, admin_text)
+    results["admin_notified"] = admin_result.get("ok", False)
+
+    # Notify buyer
+    if buyer_email:
+        user_subject = f"📦 Your Order Has Shipped! #{purchase_id}"
+        tracking_line = f"Tracking Number: {tracking_number}" if tracking_number else "Tracking information will be provided separately if available."
+        address_line = f"\nShipping To:\n{shipping_address}" if shipping_address else ""
+
+        user_text = f"""Great news! Your order is on its way!
+
+Order Details:
+Order #: {purchase_id}
+Item: {item_name or 'Merch Item'}
+{tracking_line}
+{address_line}
+
+Thank you for supporting independent artists!
+"""
+        user_result = notify_user(buyer_email, user_subject, user_text)
+        results["user_notified"] = user_result.get("ok", False)
+
+    return results
+
+
 def notify_wallet_funded(
     user_id: int,
     user_email: str,

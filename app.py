@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, session, send_from_directory, make_response, redirect, url_for
+from flask import Flask, render_template, jsonify, request, session, send_from_directory, make_response, redirect, url_for, current_app
 try:
     from flask_session import Session as FlaskSession
 except Exception:  # ImportError or env issues
@@ -1013,9 +1013,8 @@ def checkout_page():
     wallet_balance = None
     try:
         from flask_login import current_user
+        from models import User
         if current_user.is_authenticated:
-            from db import get_session
-            from models import User
             with get_session() as s:
                 user = s.query(User).filter(User.id == current_user.id).first()
                 if user:
@@ -3472,7 +3471,8 @@ def admin_artist_earnings():
 @_admin_session_required
 def admin_page():
     """Admin page (read-only stats)"""
-    return render_template('admin.html')
+    from utils.csrf import generate_csrf_token
+    return render_template('admin.html', csrf_token=generate_csrf_token())
 
 @app.route('/feedback')
 def feedback_page():
@@ -3851,6 +3851,8 @@ def admin_orders():
             "amount": p.amount,
             "total": p.total,
             "stripe_id": p.stripe_id,
+            "tracking_number": p.tracking_number,
+            "fulfilled_at": p.fulfilled_at.isoformat() if p.fulfilled_at else None,
             "shipping": {
                 "name": p.shipping_name,
                 "line1": p.shipping_line1,
@@ -3862,6 +3864,96 @@ def admin_orders():
             } if p.shipping_name else None,
         } for p in rows]
     return jsonify({"orders": orders})
+
+
+@app.route('/api/admin/orders/<int:order_id>/fulfill', methods=['PUT'])
+@login_required
+@_admin_session_required
+def admin_fulfill_order(order_id):
+    """Mark a merch order as fulfilled with optional tracking number."""
+    from db import get_session
+    from models import Purchase, User
+    from utils.csrf import validate_csrf
+    from datetime import datetime
+
+    # Validate CSRF token from header
+    csrf_token = request.headers.get("X-CSRF-Token")
+    session_token = session.get("csrf_token")
+    if not csrf_token or not session_token or csrf_token != session_token:
+        return jsonify({"error": "Invalid CSRF token"}), 400
+
+    data = request.json or {}
+    tracking_number = (data.get("tracking_number") or "").strip()[:100] or None
+
+    with get_session() as s:
+        purchase = s.query(Purchase).filter(
+            Purchase.id == order_id,
+            Purchase.type == "merch"
+        ).first()
+
+        if not purchase:
+            return jsonify({"error": "Order not found"}), 404
+
+        if purchase.status == "fulfilled":
+            return jsonify({"error": "Order already fulfilled"}), 400
+
+        if purchase.status != "paid":
+            return jsonify({"error": "Only paid orders can be fulfilled"}), 400
+
+        # Update the purchase
+        purchase.status = "fulfilled"
+        purchase.fulfilled_at = datetime.utcnow()
+        if tracking_number:
+            purchase.tracking_number = tracking_number
+
+        # Get buyer email if user exists
+        buyer_email = None
+        if purchase.user_id:
+            user = s.query(User).filter(User.id == purchase.user_id).first()
+            if user:
+                buyer_email = user.email
+
+        # Build shipping address string for email
+        shipping_address = None
+        if purchase.shipping_name:
+            addr_parts = [purchase.shipping_name]
+            if purchase.shipping_line1:
+                addr_parts.append(purchase.shipping_line1)
+            if purchase.shipping_line2:
+                addr_parts.append(purchase.shipping_line2)
+            city_line = ", ".join(filter(None, [
+                purchase.shipping_city,
+                purchase.shipping_state,
+                purchase.shipping_postal_code
+            ]))
+            if city_line:
+                addr_parts.append(city_line)
+            if purchase.shipping_country:
+                addr_parts.append(purchase.shipping_country)
+            shipping_address = "\n".join(addr_parts)
+
+        s.commit()
+
+        # Send notification email
+        try:
+            from services.notifications import notify_order_fulfilled
+            notify_order_fulfilled(
+                purchase_id=purchase.id,
+                item_name=purchase.item_id,
+                buyer_email=buyer_email,
+                tracking_number=tracking_number,
+                shipping_address=shipping_address
+            )
+        except Exception as e:
+            current_app.logger.warning(f"Failed to send fulfillment notification: {e}")
+
+    return jsonify({
+        "success": True,
+        "message": "Order marked as fulfilled",
+        "order_id": order_id,
+        "tracking_number": tracking_number
+    })
+
 
 @app.route('/api/admin/users/<int:user_id>', methods=['DELETE'])
 @login_required
