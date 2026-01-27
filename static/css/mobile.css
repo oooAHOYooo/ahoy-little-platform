@@ -5,28 +5,37 @@
    This MUST be at the top to override all other rules
    ======================================== */
 @media (max-width: 800px) {
-    html, body {
+    html {
+        height: auto !important;
+        min-height: 100%;
         overflow-y: scroll !important;
         overflow-x: hidden !important;
-        height: auto !important;
         position: relative !important;
         -webkit-overflow-scrolling: touch !important;
     }
-
-    /* Ensure the entire document can scroll */
+    
     body {
+        overflow-y: scroll !important;
+        overflow-x: hidden !important;
+        height: auto !important;
         min-height: 100vh;
         min-height: 100dvh;
+        position: relative !important;
+        -webkit-overflow-scrolling: touch !important;
     }
 
     /* Don't let any wrapper block scrolling */
     .app-main,
     .content-area,
     .app-content,
-    main {
+    main,
+    .main-content,
+    .app-shell {
         overflow: visible !important;
         height: auto !important;
+        min-height: auto !important;
         position: relative !important;
+        touch-action: pan-y !important;
     }
 }
 

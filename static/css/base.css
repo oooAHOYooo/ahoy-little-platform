@@ -15,7 +15,8 @@
 
     /* CRITICAL: Mobile scroll fix for Android */
     html {
-        height: 100%;
+        height: auto !important;
+        min-height: 100%;
         overflow-x: hidden;
         overflow-y: scroll !important;
         -webkit-overflow-scrolling: touch;
@@ -25,19 +26,20 @@
     body {
         background: var(--mobile-bg);
         color: var(--mobile-text);
-        min-height: 100%;
+        min-height: 100vh;
         min-height: 100dvh;
         height: auto !important;
-        overflow-x: hidden;
-        overflow-y: visible !important;
+        overflow-x: hidden !important;
+        overflow-y: scroll !important;
         position: relative;
+        -webkit-overflow-scrolling: touch;
         /* Scrollbar hidden but scroll enabled */
         scrollbar-width: none;
         -ms-overflow-style: none;
     }
 
     body.overflow-x-hidden {
-        overflow-y: visible !important;
+        overflow-y: scroll !important;
     }
 
     /* Hide webkit scrollbars on mobile */
