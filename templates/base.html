@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="overflow-y: scroll !important; height: auto !important; touch-action: pan-y !important;">
 
     <head>
         <meta charset="UTF-8">
@@ -131,7 +131,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260128a' %}
+        {% set css_version = 'v20260128b' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -448,7 +448,8 @@
     </head>
 
     <body x-data="appData()"
-        class="overflow-x-hidden">
+        class="overflow-x-hidden"
+        style="overflow-y: scroll !important; height: auto !important; touch-action: pan-y !important; -webkit-overflow-scrolling: touch !important;">
         {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false)
         %}
 
