@@ -835,6 +835,27 @@ def create_app():
         except Exception:
             return jsonify({'error': 'File not found'}), 404
 
+    @app.route('/refresh')
+    def refresh():
+        """Escape hatch: clear SW + caches and redirect to /. Use when app won't update or scroll on mobile."""
+        html = '''<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Refreshing…</title></head><body><p>Clearing cache and redirecting…</p>
+<script>
+(function(){
+  if (window.caches && caches.keys) { caches.keys().then(function(n){ n.forEach(function(k){ caches.delete(k); }); }); }
+  if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+    navigator.serviceWorker.getRegistrations().then(function(r){ r.forEach(function(reg){ reg.unregister(); }); });
+  }
+  window.location.replace('/?' + Date.now());
+})();
+</script></body></html>'''
+        r = make_response(html)
+        r.headers['Content-Type'] = 'text/html; charset=utf-8'
+        r.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+        r.headers['Pragma'] = 'no-cache'
+        r.headers['Expires'] = '0'
+        return r
+
     @app.route('/')
     def home():
         """Main discovery page with Now Playing feed"""

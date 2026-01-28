@@ -140,22 +140,11 @@ self.addEventListener('fetch', (event) => {
         url.pathname.endsWith('.woff2');
 
     if (isNavigationOrHTML) {
-        // Network-first for HTML pages - ensures users always see latest content
+        // Always fetch HTML from network - never cache so users always get latest
         event.respondWith(
-            fetch(request)
-                .then((response) => {
-                    if (response && response.status === 200) {
-                        const responseToCache = response.clone();
-                        caches.open(CACHE_NAME).then((cache) => {
-                            cache.put(request, responseToCache);
-                        });
-                    }
-                    return response;
-                })
-                .catch(() => {
-                    // Offline fallback
-                    return caches.match(request).then((cached) => cached || caches.match('/'));
-                })
+            fetch(request, { cache: 'no-store' })
+                .then((response) => response)
+                .catch(() => caches.match(request).then((cached) => cached || caches.match('/')))
         );
         return;
     }

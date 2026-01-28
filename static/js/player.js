@@ -331,7 +331,7 @@ class MediaPlayer {
                             });
                         };
                         document.addEventListener('click', retryOnGesture, { once: true, capture: true });
-                        document.addEventListener('touchstart', retryOnGesture, { once: true, capture: true });
+                        document.addEventListener('touchstart', retryOnGesture, { once: true, capture: true, passive: true });
                         try { document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Tap anywhere to start audio' })); } catch (_) {}
                     } else if (error.name !== 'AbortError') {
                         // Don't log AbortError as it's expected when switching tracks quickly

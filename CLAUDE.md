@@ -17,7 +17,14 @@
 - Data: `static/data/*.json`
 - Mobile scroll fixes: `templates/base.html:500-585`, `static/js/loader.js`
 
-**Cache Busting:** Increment `css_version` in `templates/base.html` (~line 186) when changing CSS/JS
+**Cache Busting:** Increment `css_version` in `templates/base.html` (~line 141) when changing CSS/JS
+
+**Cache strategy (always fresh):**
+- **HTML:** `no-cache, no-store` via `utils/security_headers.py` and meta tags in `base.html`. Never cached by service worker.
+- **On every load:** First script in body unregisters all service workers and clears all Cache API caches.
+- **Service worker:** Registration is disabled. If an old SW is still active, it never caches HTML (fetch with `cache: 'no-store'`).
+- **Static CSS/JS:** Long cache + versioned URLs (`?v=css_version`); bump version on deploy for fresh assets.
+- **Escape hatch:** `/refresh` clears SW + caches and redirects to `/`.
 
 ---
 
@@ -71,6 +78,8 @@ with get_session() as session:
 - `templates/base.html` - scroll fix script at lines 500-585
 - `static/js/loader.js` - mobile exit at line 25
 - `static/css/loader.css` - hides loader on mobile via CSS
+
+**If mobile won't scroll or update:** HTML is now no-cache so users get latest. Stuck users can open `/refresh` (or tap the red sync icon in the status bar) to clear SW + caches and reload.
 
 **Preventive suggestions (so scroll doesn’t break again):**
 1. **New touch handlers:** Avoid `event.preventDefault()` on `touchstart`/`touchmove` unless the handler is scoped to a small control (e.g. a dial). Prefer `touch-action: pan-y` (or `manipulation`) in CSS so vertical scroll is allowed.

@@ -28,8 +28,13 @@ def attach_security_headers(app):
 
         # Add cache headers for static assets (CDN-optimized)
         if response.content_type:
+            # HTML: never cache so mobile/desktop always get latest (fixes scroll + updates)
+            if response.content_type.startswith('text/html'):
+                response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                response.headers['Pragma'] = 'no-cache'
+                response.headers['Expires'] = '0'
             # Static assets: long cache with immutable (1 year)
-            if response.content_type.startswith('text/css'):
+            elif response.content_type.startswith('text/css'):
                 response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
                 response.headers['Expires'] = 'Thu, 31 Dec 2026 23:59:59 GMT'
                 if is_static:

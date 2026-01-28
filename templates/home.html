@@ -1617,12 +1617,10 @@ function homePage() {
             window.location.href = '/auth';
         },
 
-        // Save warning system
+        // Save warning system (disabled on mobile - browser prompt can block scroll)
         setupSaveWarning() {
-            // Track when user creates content
             this.trackUserActivity();
-            
-            // Warn before leaving page
+            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
             window.addEventListener('beforeunload', (e) => {
                 if (this.hasUnsavedWork) {
                     e.preventDefault();

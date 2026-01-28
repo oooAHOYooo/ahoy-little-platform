@@ -5,6 +5,16 @@
         <meta charset="UTF-8">
         <meta name="viewport"
             content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
+
+        <!-- Mobile: hide loading screen immediately so it never appears or blocks scroll -->
+        <style>
+        @media (max-width: 768px) {
+            #app-loader { display: none !important; visibility: hidden !important; pointer-events: none !important; opacity: 0 !important; z-index: -1 !important; }
+        }
+        </style>
 
         <!-- Performance: DNS prefetch and preconnect for external resources -->
         <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -131,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260128m' %}
+        {% set css_version = 'v20260128n' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -453,25 +463,22 @@
         {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false)
         %}
 
-        <!-- NUCLEAR SCROLL FIX + HARD REFRESH + CACHE CLEAR -->
+        <!-- NUCLEAR SCROLL FIX + FRESH CACHE: clear SW + caches on every load -->
         <script>
-        // IMMEDIATELY clear all caches and unregister service workers on EVERY page load
         (function() {
-            // Unregister ALL service workers
+            // Unregister ALL service workers first (so they stop intercepting)
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
                     for (var i = 0; i < registrations.length; i++) {
                         registrations[i].unregister();
-                        console.log('Unregistered service worker');
                     }
                 });
             }
-            // Clear ALL caches
+            // Clear ALL Cache API caches (SW caches, etc.)
             if ('caches' in window) {
                 caches.keys().then(function(names) {
                     for (var i = 0; i < names.length; i++) {
                         caches.delete(names[i]);
-                        console.log('Deleted cache:', names[i]);
                     }
                 });
             }
@@ -520,6 +527,7 @@
                     html.style.setProperty('height', 'auto', 'important');
                     html.style.setProperty('touch-action', 'pan-y', 'important');
                     html.style.setProperty('overscroll-behavior', 'auto', 'important');
+                    html.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
                 }
                 if (body) {
                     body.style.setProperty('overflow-y', 'scroll', 'important');
@@ -529,6 +537,7 @@
                     body.style.setProperty('touch-action', 'pan-y', 'important');
                     body.style.setProperty('overscroll-behavior', 'auto', 'important');
                     body.style.setProperty('position', 'relative', 'important');
+                    body.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
                 }
 
                 // Fix all elements with bad touch-action
@@ -639,9 +648,9 @@
                             x-show="hasNewBookmarks"
                             x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
                     </a>
-                    <button onclick="hardRefresh()" class="status-action-btn" title="Hard Refresh" type="button" aria-label="Hard Refresh" style="color: #ff6b6b;">
+                    <a href="/refresh" class="status-action-btn" title="Get latest version (fix scroll/update)" aria-label="Refresh app" style="color: #ff6b6b;">
                         <i class="fas fa-sync-alt"></i>
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -2033,6 +2042,9 @@
             <div class="footer-bottom">
                 <p class="footer-copyright">&copy; 2026 Ahoy Indie Media. All
                     rights reserved.</p>
+                <p class="footer-refresh mobile-only" style="margin-top: 8px; font-size: 0.85rem; opacity: 0.85;">
+                    Having trouble? <a href="/refresh">Get the latest version</a>
+                </p>
                 {% if current_user.is_authenticated and current_user.email ==
                 'alex@ahoy.ooo' %}
                 <a href="/admin" class="footer-admin-link"
@@ -2075,6 +2087,9 @@
                     <span class="quicklink-sep">•</span>
                     <a href="/my-saves" class="quicklink">Saved</a>
                 </div>
+                <p class="compact-footer-refresh mobile-only" style="margin-top: 6px; font-size: 0.75rem; opacity: 0.8;">
+                    Having trouble? <a href="/refresh" style="color: rgba(255,255,255,0.9); text-decoration: underline;">Get the latest version</a>
+                </p>
             </div>
         </div>
 

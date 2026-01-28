@@ -4,8 +4,10 @@
 
 {% block content %}
 <div class="music-container" x-data="musicLibrary()" x-init="loadMusic()">
-    {% from "macros/subpage_header.html" import subpage_hero, subpage_section_header %}
-    {{ subpage_hero(title="Music Library", subtitle="Explore", icon_class="fas fa-music") }}
+    {% from "macros/subpage_header.html" import subpage_hero,
+    subpage_section_header %}
+    {{ subpage_hero(title="Music Library", subtitle="Explore",
+    icon_class="fas fa-music") }}
 
     <!-- Mobile: match Podcasts header + compact controls before the list -->
     <section class="podcasts-section mobile-only">
@@ -68,9 +70,13 @@
     </section>
 
     <!-- Unified Rotating Hero -->
-    <section class="unified-hero tv-hero" x-data="createUnifiedHero({ pageType: 'music', rotationSpeed: 14000 })" x-init="init()"
-        @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd">
-        <div class="unified-hero-feed hero-feed" :style="`transform: translateX(${heroOffset}px)`">
+    <section class="unified-hero tv-hero"
+        x-data="createUnifiedHero({ pageType: 'music', rotationSpeed: 14000 })"
+        x-init="init()"
+        @touchstart="handleTouchStart" @touchmove="handleTouchMove"
+        @touchend="handleTouchEnd">
+        <div class="unified-hero-feed hero-feed"
+            :style="`transform: translateX(${heroOffset}px)`">
             <template x-for="(item, index) in heroItems" :key="item.id">
                 <div class="hero-item" x-show="getItemImage(item)"
                     :class="{'active': currentHeroIndex === index}"
@@ -78,10 +84,12 @@
                     @click="playHeroItem(item)">
                     <div class="hero-overlay">
                         <div class="hero-content">
-                            <div class="hero-badge ahoy-subheader" x-text="getPageBadge()"></div>
+                            <div class="hero-badge ahoy-subheader"
+                                x-text="getPageBadge()"></div>
                             <h1 x-text="getItemTitle(item)"></h1>
                             <p x-text="getItemSubtitle(item)"></p>
-                            <button @click.stop="playHeroItem(item)" class="hero-play-btn">
+                            <button @click.stop="playHeroItem(item)"
+                                class="hero-play-btn">
                                 <i class="fas fa-play"></i>
                             </button>
                         </div>
@@ -99,7 +107,9 @@
         </div>
         <div class="hero-indicators">
             <template x-for="(item, index) in heroItems" :key="item.id">
-                <button @click="setHeroIndex(index)" :class="{'active': currentHeroIndex === index}" class="hero-dot"></button>
+                <button @click="setHeroIndex(index)"
+                    :class="{'active': currentHeroIndex === index}"
+                    class="hero-dot"></button>
             </template>
         </div>
     </section>
@@ -114,7 +124,8 @@
                         <a href="/my-saves" class="bookmark-count-badge">
                             <i class="fas fa-bookmark"></i>
                             <span x-text="bookmarkCount()"></span>
-                            <span x-text="bookmarkCount() === 1 ? 'saved' : 'saved'"></span>
+                            <span
+                                x-text="bookmarkCount() === 1 ? 'saved' : 'saved'"></span>
                         </a>
                     </div>
                 </div>
@@ -201,11 +212,15 @@
                                 @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art }); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
                                 :aria-pressed="isBookmarked('track', track.id)"
                                 :class="{ 'bookmarked': isBookmarked('track', track.id), 'just-bookmarked': isBookmarked('track', track.id) }">
-                                    <span aria-hidden="true">
-                                        <i x-show="isBookmarked('track', track.id)" class="fas fa-bookmark" style="color: var(--accent-color);"></i>
-                                        <i x-show="!isBookmarked('track', track.id)" class="far fa-bookmark"></i>
-                                    </span>
-                                <span class="sr-only" x-text="isBookmarked('track', track.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
+                                <span aria-hidden="true">
+                                    <i x-show="isBookmarked('track', track.id)"
+                                        class="fas fa-bookmark"
+                                        style="color: var(--accent-color);"></i>
+                                    <i x-show="!isBookmarked('track', track.id)"
+                                        class="far fa-bookmark"></i>
+                                </span>
+                                <span class="sr-only"
+                                    x-text="isBookmarked('track', track.id) ? 'Remove bookmark' : 'Add bookmark'"></span>
                             </button>
                         </div>
                     </div>
@@ -231,37 +246,48 @@
                         <th class="col-title">Title</th>
                         <th class="col-artist">Artist</th>
                         <th class="col-plays" @click="sortByPlays()">
-                            Plays <i class="fas fa-sort-down" x-show="sortBy === 'plays'"></i>
+                            Plays <i class="fas fa-sort-down"
+                                x-show="sortBy === 'plays'"></i>
                         </th>
                         <th class="col-action">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <template x-for="(track, index) in filteredTracks" :key="track.id">
+                    <template x-for="(track, index) in filteredTracks"
+                        :key="track.id">
                         <tr class="music-table-row"
                             @click="playTrack(track)"
                             :class="{'playing': currentTrack?.id === track.id}">
-                            <td class="col-play" data-label="">
-                                <button class="play-btn" 
-                                    @click.stop="playTrack(track)" 
+                            <td class="col-play" data-label>
+                                <button class="play-btn"
+                                    @click.stop="playTrack(track)"
                                     :aria-label="(currentTrack?.id === track.id && isPlaying) ? 'Pause ' + track.title : 'Play ' + track.title">
-                                    <i x-show="currentTrack?.id === track.id && isPlaying" class="fas fa-pause"></i>
-                                    <i x-show="!(currentTrack?.id === track.id && isPlaying)" class="fas fa-play"></i>
+                                    <i
+                                        x-show="currentTrack?.id === track.id && isPlaying"
+                                        class="fas fa-pause"></i>
+                                    <i
+                                        x-show="!(currentTrack?.id === track.id && isPlaying)"
+                                        class="fas fa-play"></i>
                                 </button>
                             </td>
                             <td class="col-title" data-label="Title">
-                                <span class="title-text" x-text="track.title"></span>
+                                <span class="title-text"
+                                    x-text="track.title"></span>
                             </td>
-                            <td class="col-artist" data-label="Artist" x-text="track.artist"></td>
-                            <td class="col-plays" data-label="Plays" x-text="track.play_count || 0"></td>
+                            <td class="col-artist" data-label="Artist"
+                                x-text="track.artist"></td>
+                            <td class="col-plays" data-label="Plays"
+                                x-text="track.play_count || 0"></td>
                             <td class="col-action" data-label="Action">
                                 <button class="action-btn bm-btn"
                                     @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art })"
                                     :aria-pressed="isBookmarked('track', track.id)"
                                     :class="{ 'bookmarked': isBookmarked('track', track.id) }"
                                     :aria-label="isBookmarked('track', track.id) ? 'Remove bookmark' : 'Add bookmark'">
-                                    <i x-show="isBookmarked('track', track.id)" class="fas fa-bookmark"></i>
-                                    <i x-show="!isBookmarked('track', track.id)" class="far fa-bookmark"></i>
+                                    <i x-show="isBookmarked('track', track.id)"
+                                        class="fas fa-bookmark"></i>
+                                    <i x-show="!isBookmarked('track', track.id)"
+                                        class="far fa-bookmark"></i>
                                 </button>
                             </td>
                         </tr>
@@ -761,7 +787,8 @@ function musicLibrary() {
         },
         
         showUpgradePrompt() {
-            // Show upgrade prompt for guest users
+            // Do not show upgrade popup on mobile - can block scroll / cause issues
+            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
             const prompt = document.createElement('div');
             prompt.className = 'upgrade-prompt';
             prompt.innerHTML = `

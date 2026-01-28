@@ -23,6 +23,7 @@
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
+
     /* Optimize rendering performance */
     * {
         -webkit-font-smoothing: antialiased;
@@ -42,8 +43,21 @@
     }
 
     /* Better touch targets */
-    a, button, input, select, textarea, [role="button"] {
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    [role="button"] {
         touch-action: manipulation;
+    }
+
+    /* Never show upgrade/save popup on mobile - can block scroll */
+    .upgrade-prompt {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        opacity: 0 !important;
     }
 
     /* Optimize images */
@@ -75,13 +89,16 @@
     cursor: pointer;
     transition: all 0.2s ease;
 }
+
 .mobile-hamburger:hover {
     color: #fff;
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.1);
 }
+
 .mobile-hamburger.active {
-    color: #a78bfa; /* purple-400 */
+    color: #a78bfa;
+    /* purple-400 */
     background: rgba(167, 139, 250, 0.12);
     border-color: rgba(167, 139, 250, 0.25);
 }
@@ -95,71 +112,85 @@
     -webkit-backdrop-filter: blur(4px);
     z-index: 10002;
 }
+
 .offcanvas-panel {
     position: fixed;
     top: 0;
     height: 100%;
-    width: 288px; /* w-72 */
+    width: 288px;
+    /* w-72 */
     background: #f9fafb;
     color: #0f172a;
-    border: 1px solid rgba(15,23,42,0.08);
-    box-shadow: 0 18px 50px rgba(0,0,0,0.20);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.20);
     padding: 20px;
     z-index: 10003;
     transform: translateX(0);
     transition: transform 0.3s ease;
     -webkit-overflow-scrolling: touch;
 }
+
 .offcanvas-left {
     left: 0;
     transform: translateX(-100%);
 }
+
 .offcanvas-right {
     right: 0;
     transform: translateX(100%);
 }
+
 .offcanvas-panel.open.offcanvas-left,
 .offcanvas-panel.open.offcanvas-right {
     transform: translateX(0);
 }
+
 .offcanvas-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 14px;
 }
+
 .offcanvas-header h2 {
     font-size: 16px;
     font-weight: 700;
     margin: 0;
 }
+
 .offcanvas-close {
-    color: rgba(17,24,39,0.8);
+    color: rgba(17, 24, 39, 0.8);
     background: transparent;
-    border: 1px solid rgba(17,24,39,0.12);
+    border: 1px solid rgba(17, 24, 39, 0.12);
     border-radius: 8px;
     padding: 6px 10px;
     cursor: pointer;
 }
+
 .offcanvas-close:hover {
-    background: rgba(17,24,39,0.06);
+    background: rgba(17, 24, 39, 0.06);
 }
+
 .offcanvas-user-summary {
     margin: 6px 0 10px;
 }
+
 .offcanvas-user-summary .name {
     font-weight: 700;
 }
+
 .offcanvas-user-summary .meta {
     font-size: 12px;
-    color: rgba(17,24,39,0.7);
+    color: rgba(17, 24, 39, 0.7);
 }
+
 .offcanvas-nav {
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding-top: 8px;
 }
+
 .offcanvas-nav a,
 .offcanvas-action {
     display: flex;
@@ -169,21 +200,24 @@
     border-radius: 10px;
     background: rgba(17, 24, 39, 0.04);
     border: 1px solid rgba(17, 24, 39, 0.08);
-    color: rgba(17,24,39,0.9);
+    color: rgba(17, 24, 39, 0.9);
     text-decoration: none;
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease;
 }
+
 .offcanvas-nav a:hover,
 .offcanvas-action:hover {
     background: rgba(17, 24, 39, 0.08);
     border-color: rgba(17, 24, 39, 0.12);
 }
+
 .offcanvas-action.danger {
     color: #fecaca;
     border-color: rgba(239, 68, 68, 0.35);
     background: rgba(239, 68, 68, 0.08);
 }
+
 .offcanvas-nav i {
     width: 18px;
     text-align: center;
@@ -200,15 +234,17 @@
     color: #0f172a;
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
-    box-shadow: 0 -20px 40px rgba(0,0,0,0.15);
+    box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.15);
     z-index: 10004;
     transform: translateY(100%);
     transition: transform 0.3s ease;
     -webkit-overflow-scrolling: touch;
 }
+
 .sheet-panel.open {
     transform: translateY(0);
 }
+
 .sheet-header {
     position: sticky;
     top: 0;
@@ -218,6 +254,7 @@
     align-items: center;
     justify-content: space-between;
 }
+
 .sheet-handle {
     position: absolute;
     top: 6px;
@@ -226,31 +263,44 @@
     width: 36px;
     height: 4px;
     border-radius: 999px;
-    background: rgba(0,0,0,0.15);
+    background: rgba(0, 0, 0, 0.15);
 }
+
 .sheet-title {
     font-weight: 700;
 }
+
 .sheet-close {
-    color: rgba(17,24,39,0.8);
+    color: rgba(17, 24, 39, 0.8);
     background: transparent;
-    border: 1px solid rgba(17,24,39,0.12);
+    border: 1px solid rgba(17, 24, 39, 0.12);
     border-radius: 8px;
     padding: 6px 10px;
     cursor: pointer;
 }
+
 .sheet-user {
     padding: 8px 14px;
 }
-.sheet-user .name { font-weight: 700; }
-.sheet-user .meta { font-size: 12px; color: rgba(17,24,39,0.65); }
+
+.sheet-user .name {
+    font-weight: 700;
+}
+
+.sheet-user .meta {
+    font-size: 12px;
+    color: rgba(17, 24, 39, 0.65);
+}
+
 .sheet-nav {
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding: 8px 14px 16px;
 }
-.sheet-nav a, .sheet-action {
+
+.sheet-nav a,
+.sheet-action {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -258,20 +308,26 @@
     border-radius: 12px;
     background: rgba(17, 24, 39, 0.04);
     border: 1px solid rgba(17, 24, 39, 0.08);
-    color: rgba(17,24,39,0.9);
+    color: rgba(17, 24, 39, 0.9);
     text-decoration: none;
 }
+
 .sheet-action.danger {
     color: #b91c1c;
     border-color: rgba(239, 68, 68, 0.35);
     background: rgba(239, 68, 68, 0.08);
 }
-.sheet-nav i { width: 18px; text-align:center; }
+
+.sheet-nav i {
+    width: 18px;
+    text-align: center;
+}
 
 @media (max-width: 768px) {
     .mobile-hamburger {
         display: inline-flex;
     }
+
     /* keep desktop features hidden on mobile */
     .nav-features {
         display: none;
@@ -669,13 +725,18 @@ img[src*="default-cover.jpg"] {
     }
 
     /* Better touch targets */
-    button, a, input, select, textarea {
+    button,
+    a,
+    input,
+    select,
+    textarea {
         min-height: 44px;
         min-width: 44px;
     }
 
     /* Reduce animations on mobile for performance */
     @media (prefers-reduced-motion: reduce) {
+
         *,
         *::before,
         *::after {
@@ -1215,7 +1276,7 @@ img[src*="default-cover.jpg"] {
         position: relative !important;
         -webkit-overflow-scrolling: touch !important;
     }
-    
+
     body {
         overflow-y: scroll !important;
         overflow-x: hidden !important;
@@ -1493,7 +1554,8 @@ img[src*="default-cover.jpg"] {
         max-width: none !important;
         margin: 0 !important;
         gap: 12px !important;
-        padding: 0 !important; /* gutters come from .content-area.app-content */
+        padding: 0 !important;
+        /* gutters come from .content-area.app-content */
     }
 
     .panelstream-player.hero-player {
@@ -1576,7 +1638,9 @@ img[src*="default-cover.jpg"] {
         scroll-snap-type: x proximity;
     }
 
-    #channel-selector::-webkit-scrollbar { display: none; }
+    #channel-selector::-webkit-scrollbar {
+        display: none;
+    }
 
     #channel-selector .channel-button {
         scroll-snap-align: start;
@@ -1826,6 +1890,7 @@ img[src*="default-cover.jpg"] {
    Universal mobile subpage headers (match Podcasts)
    ========================================================================== */
 @media (max-width: 768px) {
+
     /* Music: hide large desktop hero/header, use Podcasts-style mobile header */
     .music-container {
         padding: 18px 18px calc(40px + env(safe-area-inset-bottom)) 18px;
@@ -1877,7 +1942,7 @@ img[src*="default-cover.jpg"] {
         font-size: 18px !important;
         padding: 0 !important;
     }
-    
+
     /* Enhanced saved state visibility on mobile */
     .bm-btn[aria-pressed="true"],
     .save-btn.bookmarked,
@@ -1887,27 +1952,27 @@ img[src*="default-cover.jpg"] {
         color: var(--accent-color) !important;
         box-shadow: 0 0 12px rgba(0, 212, 255, 0.4) !important;
     }
-    
+
     .bm-btn[aria-pressed="true"] i,
     .save-btn.bookmarked i,
     .bm-btn.bookmarked i {
         color: var(--accent-color) !important;
         font-weight: 900 !important;
     }
-    
+
     /* Active/pressed state for mobile */
     .bm-btn:active,
     .save-btn:active {
         transform: scale(0.9) !important;
         background: rgba(0, 212, 255, 0.35) !important;
     }
-    
+
     /* Bookmark icon size on mobile */
     .bm-btn i,
     .save-btn i {
         font-size: 18px !important;
     }
-    
+
     /* Ensure filled bookmark icon is visible */
     .bm-btn[aria-pressed="true"] .fas.fa-bookmark,
     .save-btn.bookmarked .fas.fa-bookmark,
@@ -1916,21 +1981,21 @@ img[src*="default-cover.jpg"] {
         opacity: 1 !important;
         color: var(--accent-color) !important;
     }
-    
+
     /* Hide outline icon when bookmarked */
     .bm-btn[aria-pressed="true"] .far.fa-bookmark,
     .save-btn.bookmarked .far.fa-bookmark,
     .bm-btn.bookmarked .far.fa-bookmark {
         display: none !important;
     }
-    
+
     /* Show outline icon when not bookmarked */
     .bm-btn[aria-pressed="false"] .far.fa-bookmark,
     .save-btn:not(.bookmarked) .far.fa-bookmark,
     .bm-btn:not(.bookmarked) .far.fa-bookmark {
         display: block !important;
     }
-    
+
     /* Hide filled icon when not bookmarked */
     .bm-btn[aria-pressed="false"] .fas.fa-bookmark,
     .save-btn:not(.bookmarked) .fas.fa-bookmark,
@@ -2184,7 +2249,7 @@ img[src*="default-cover.jpg"] {
         max-height: 70px !important;
         overflow: hidden !important;
     }
-    
+
     /* Hide any expanded player views on mobile */
     .now-playing-expanded,
     .player-fullscreen {
@@ -2368,11 +2433,12 @@ img[src*="default-cover.jpg"] {
     }
 
     /* Normalize vertical rhythm (base.css sets generic section margins) */
-    .app-content > section {
+    .app-content>section {
         margin-top: var(--section-gap, 20px) !important;
         margin-bottom: 0 !important;
     }
-    .app-content > section:first-child {
+
+    .app-content>section:first-child {
         /* Tiny breathing room under the top chrome without a big dead zone */
         margin-top: 10px !important;
     }
@@ -2487,13 +2553,16 @@ img[src*="default-cover.jpg"] {
         grid-template-columns: 1fr !important;
         gap: var(--card-gap, 12px) !important;
     }
+
     .grid-item {
         height: auto !important;
         border-radius: var(--card-radius, 16px) !important;
     }
+
     .item-header {
         padding: var(--card-pad, 14px) !important;
     }
+
     .playing-list {
         display: flex !important;
         flex-direction: column !important;
@@ -2508,17 +2577,21 @@ img[src*="default-cover.jpg"] {
    - Keep accessible (44px targets), but make "Watch Now" + content primary
    ========================================================== */
 @media (max-width: 480px) {
+
     /* Home hero/dashboard: tighten oversized internal padding/typography from inline `<style>` */
     .home-page .dash-overlay {
         padding: var(--card-pad, 14px) !important;
     }
+
     .home-page .dash-content h2 {
         font-size: 1.45rem !important;
     }
+
     .home-page .dash-content p {
         font-size: 0.95rem !important;
         margin-bottom: 0.9rem !important;
     }
+
     .home-page .dash-play-btn {
         padding: 0.7rem 1.1rem !important;
         font-size: 0.9rem !important;
@@ -2541,6 +2614,7 @@ img[src*="default-cover.jpg"] {
         color: rgba(255, 255, 255, 0.82) !important;
         padding: 0.5rem 0.9rem !important;
     }
+
     .auth-login-btn.auth-cta i {
         color: rgba(255, 255, 255, 0.70) !important;
     }
@@ -3015,7 +3089,7 @@ img[src*="default-cover.jpg"] {
         flex: 1;
         min-width: 0;
     }
-    
+
     .status-home-btn {
         display: flex;
         align-items: center;
@@ -3032,16 +3106,16 @@ img[src*="default-cover.jpg"] {
         transition: all 0.15s ease;
         flex-shrink: 0;
     }
-    
+
     .status-home-btn:hover {
         background: rgba(255, 255, 255, 0.10);
         border-color: rgba(255, 255, 255, 0.12);
     }
-    
+
     .status-home-btn:active {
         transform: scale(0.95);
     }
-    
+
     .status-home-btn i {
         font-size: 10px;
     }
@@ -3053,11 +3127,12 @@ img[src*="default-cover.jpg"] {
         line-height: 0;
         flex-shrink: 0;
     }
+
     .status-logo img {
         height: 12px;
         width: auto;
         /* Make black logos render white and boost contrast */
-        filter: brightness(0) invert(1) drop-shadow(0 0 1px rgba(255,255,255,0.25));
+        filter: brightness(0) invert(1) drop-shadow(0 0 1px rgba(255, 255, 255, 0.25));
         opacity: .95;
     }
 
@@ -3178,6 +3253,7 @@ img[src*="default-cover.jpg"] {
 
 /* Mobile Account Features Bar (above bottom nav) */
 @media (max-width: 767px) {
+
     /* Hide account bar - now using single bottom nav */
     .mobile-account-bar {
         display: none !important;
@@ -3302,6 +3378,7 @@ img[src*="default-cover.jpg"] {
             padding: 6px 8px 4px;
             font-size: 9px;
         }
+
         .mobile-secondary-nav .mobile-tab i {
             font-size: 17px;
         }
@@ -3333,7 +3410,8 @@ img[src*="default-cover.jpg"] {
 
     .mobile-secondary-nav .mobile-tab.active {
         /* Mobile active state: prefer color-fill over big shapes */
-        color: #a78bfa; /* purple-400 */
+        color: #a78bfa;
+        /* purple-400 */
         background: transparent;
         border: none;
     }
@@ -3413,9 +3491,11 @@ img[src*="default-cover.jpg"] {
             max-width: 60px;
             padding: 4px 4px 2px;
         }
+
         .mobile-bottom-nav .mobile-tab i {
             font-size: 17px;
         }
+
         .mobile-bottom-nav .mobile-tab span {
             font-size: 8px;
         }
@@ -3449,7 +3529,8 @@ img[src*="default-cover.jpg"] {
 
     /* Prominent circular active state - purple circle with white icon */
     .mobile-bottom-nav .mobile-tab.active {
-        color: #a78bfa; /* purple-400 */
+        color: #a78bfa;
+        /* purple-400 */
     }
 
     .mobile-bottom-nav .mobile-tab.active::before {
@@ -3604,9 +3685,12 @@ img[src*="default-cover.jpg"] {
     body,
     html {
         overflow-x: hidden !important;
-        overflow-y: auto !important; /* Enable vertical scrolling */
-        height: auto !important; /* Allow body to expand with content */
-        min-height: 100vh; /* Ensure minimum viewport height */
+        overflow-y: auto !important;
+        /* Enable vertical scrolling */
+        height: auto !important;
+        /* Allow body to expand with content */
+        min-height: 100vh;
+        /* Ensure minimum viewport height */
     }
 }
 
@@ -4088,13 +4172,17 @@ img[src*="default-cover.jpg"] {
         font-size: 0.9rem;
     }
 }
+
 /* ======================================================================
    EMERGENCY MOBILE SCROLL FIX - Maximum specificity overrides
    Added to fix Android Chrome scroll issues
    ====================================================================== */
 @media screen and (max-width: 1024px) {
+
     /* Force scroll on html and body with maximum specificity */
-    html, html[class], html:root {
+    html,
+    html[class],
+    html:root {
         height: auto !important;
         min-height: 100% !important;
         max-height: none !important;
@@ -4106,7 +4194,9 @@ img[src*="default-cover.jpg"] {
         touch-action: pan-y !important;
     }
 
-    body, body[class], body.overflow-x-hidden {
+    body,
+    body[class],
+    body.overflow-x-hidden {
         height: auto !important;
         min-height: 100vh !important;
         min-height: 100dvh !important;

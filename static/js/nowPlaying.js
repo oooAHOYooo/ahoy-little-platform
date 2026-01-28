@@ -107,5 +107,5 @@ window.nowPlayingController = new NowPlayingController();
     };
     document.addEventListener('play-track', start, { once: true });
     document.addEventListener('click', start, { once: true, capture: true });
-    document.addEventListener('touchstart', start, { once: true, capture: true });
+    document.addEventListener('touchstart', start, { once: true, capture: true, passive: true });
 })();
