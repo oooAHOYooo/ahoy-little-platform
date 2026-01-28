@@ -4393,8 +4393,14 @@ if __name__ == "__main__":
         if gunicorn_bin and is_macos and not want_gunicorn:
             print("🧯 macOS detected: skipping gunicorn by default to avoid fork()/objc crashes.")
             print("   Set AHOY_USE_GUNICORN=1 if you want to run gunicorn locally anyway.")
-        if is_windows:
+        # Allow network access with AHOY_HOST=0.0.0.0 for mobile testing
+        host = os.environ.get('AHOY_HOST', '127.0.0.1')
+        if host == '0.0.0.0':
+            import socket
+            local_ip = socket.gethostbyname(socket.gethostname())
+            print(f"Starting Flask dev server on http://{local_ip}:{chosen} (network accessible)")
+        elif is_windows:
             print(f"Starting Flask dev server on http://127.0.0.1:{chosen} (Windows detected)")
         else:
             print(f"Starting Flask dev server on http://127.0.0.1:{chosen}")
-        app.run(port=chosen, use_reloader=False)
+        app.run(host=host, port=chosen, use_reloader=False)
