@@ -966,8 +966,8 @@
     <!-- Homepage intentionally ends at "What's New at Ahoy" -->
 
     <!-- Create Account Modal -->
-    <div x-show="showCreateAccountModal" class="modal-overlay"
-        @click="closeCreateAccountModal()">
+    <div x-show="showCreateAccountModal" x-cloak class="modal-overlay"
+        @click="closeCreateAccountModal()" style="display:none;">
         <div class="modal-content create-account-modal" @click.stop>
             <div class="modal-header">
                 <h3>Save Your Work</h3>

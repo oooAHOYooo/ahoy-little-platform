@@ -4114,3 +4114,20 @@ img[src*="default-cover.jpg"] {
         touch-action: manipulation !important;
     }
 }
+
+/* ======================================================================
+   FIX: Ensure hidden modals/overlays don't block touch events
+   ====================================================================== */
+.modal-overlay[style*="display: none"],
+.modal-overlay[style*="display:none"],
+.modal-overlay:not([style]),
+[x-cloak],
+[x-show]:not(.show) {
+    pointer-events: none !important;
+    touch-action: auto !important;
+}
+
+/* Ensure x-cloak elements are hidden */
+[x-cloak] {
+    display: none !important;
+}
