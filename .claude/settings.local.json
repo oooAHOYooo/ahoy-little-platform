@@ -27,7 +27,12 @@
       "Bash(ls:*)",
       "Bash(__NEW_LINE_9d50795297688dbe__ echo \"\")",
       "Bash(__NEW_LINE_4550983e298d0c45__ echo \"\")",
-      "Bash(git show:*)"
+      "Bash(git show:*)",
+      "Bash(ipconfig getifaddr:*)",
+      "Bash(ipconfig:*)",
+      "Bash(pkill:*)",
+      "Bash(FLASK_RUN_HOST=0.0.0.0 python:*)",
+      "Bash(AHOY_HOST=0.0.0.0 python app.py:*)"
     ]
   }
 }

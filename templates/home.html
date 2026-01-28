@@ -5,7 +5,32 @@
 {% block content %}
 <div class="home-page" x-data="homePage()" x-init="init()">
     {% from "macros/subpage_header.html" import subpage_hero %}
-    {{ subpage_hero(title="Home", subtitle="Explore", icon_class="fas fa-home") }}
+    {{ subpage_hero(title="Home", subtitle="Explore", icon_class="fas fa-home")
+    }}
+
+    <!-- Poets and Friends #7 highlight (Jan 28–29, 2026 only) -->
+    {% if show_poets7_banner and poets7_event %}
+    <section class="poets7-banner"
+        aria-label="Poets and Friends #7 – upcoming event">
+        <a href="{{ poets7_event.rsvp_url }}" class="poets7-banner-link"
+            target="_blank" rel="noopener">
+            <div class="poets7-banner-inner">
+                <img class="poets7-banner-img" src="{{ poets7_event.image }}"
+                    alt="Poets and Friends #7" />
+                <div class="poets7-banner-overlay">
+                    <span class="poets7-banner-kicker">{% if
+                        poets7_event.is_tomorrow %}Tomorrow!{% else %}Tonight!{%
+                        endif %}</span>
+                    <h2 class="poets7-banner-title">Another Poets and Friends
+                        #7</h2>
+                    <p class="poets7-banner-meta">{{ poets7_event.time }} · {{
+                        poets7_event.venue }}</p>
+                    <span class="poets7-banner-cta">RSVP</span>
+                </div>
+            </div>
+        </a>
+    </section>
+    {% endif %}
 
     <!-- Live Dashboard (TV & Radio) -->
     <section class="live-dashboard">
@@ -20,18 +45,19 @@
                     <div class="dash-overlay">
                         <div class="dash-badges">
                             <span class="live-badge">LIVE TV</span>
-                            <span class="channel-badge" x-text="tvCurrentChannel?.name || 'Channel 01 — Misc'"></span>
+                            <span class="channel-badge"
+                                x-text="tvCurrentChannel?.name || 'Channel 01 — Misc'"></span>
                         </div>
                         <!-- Channel Navigation -->
                         <div class="channel-nav" x-show="tvChannels.length > 1">
-                            <button class="channel-nav-btn" 
-                                    @click.stop="switchTVChannel('prev')"
-                                    aria-label="Previous channel">
+                            <button class="channel-nav-btn"
+                                @click.stop="switchTVChannel('prev')"
+                                aria-label="Previous channel">
                                 <i class="fas fa-chevron-left"></i>
                             </button>
-                            <button class="channel-nav-btn" 
-                                    @click.stop="switchTVChannel('next')"
-                                    aria-label="Next channel">
+                            <button class="channel-nav-btn"
+                                @click.stop="switchTVChannel('next')"
+                                aria-label="Next channel">
                                 <i class="fas fa-chevron-right"></i>
                             </button>
                         </div>
@@ -40,12 +66,13 @@
                             <p
                                 x-text="tvCurrent?.artist || tvCurrent?.host || ''"></p>
                             <div class="dash-actions">
-                                <button class="dash-play-btn" 
-                                        x-show="tvCurrent && tvCurrent.id !== 'placeholder' && tvCurrent.id !== 'error'"
-                                        @click.stop="playShow(tvCurrent)">
+                                <button class="dash-play-btn"
+                                    x-show="tvCurrent && tvCurrent.id !== 'placeholder' && tvCurrent.id !== 'error'"
+                                    @click.stop="playShow(tvCurrent)">
                                     <i class="fas fa-play"></i> Watch Now
                                 </button>
-                                <a href="/live-tv" class="dash-guide-btn" @click.stop>
+                                <a href="/live-tv" class="dash-guide-btn"
+                                    @click.stop>
                                     <i class="fas fa-tv"></i> View All Channels
                                 </a>
                             </div>
@@ -103,7 +130,8 @@
         <div class="tv-channel-strip" x-show="tvChannels.length > 1">
             <div class="tv-channel-strip-header">
                 <div class="tv-channel-strip-title">Live TV Channels</div>
-                <div class="tv-channel-strip-subtitle">Tap a channel to switch</div>
+                <div class="tv-channel-strip-subtitle">Tap a channel to
+                    switch</div>
             </div>
             <div class="tv-channel-strip-list">
                 <template x-for="(ch, idx) in tvChannels" :key="ch.id">
@@ -112,7 +140,8 @@
                         :class="{'active': tvCurrentChannel && tvCurrentChannel.id === ch.id}"
                         @click.stop="selectTVChannel(idx)">
                         <div class="tv-channel-strip-meta">
-                            <span class="tv-channel-strip-name" x-text="getTVChannelName(ch, idx)"></span>
+                            <span class="tv-channel-strip-name"
+                                x-text="getTVChannelName(ch, idx)"></span>
                             <span class="tv-channel-strip-live">LIVE</span>
                         </div>
                         <div class="tv-channel-strip-now"
@@ -127,6 +156,83 @@
     </section>
 
     <style>
+    /* Poets and Friends #7 banner (Jan 28–29, 2026) */
+    .poets7-banner {
+        margin-bottom: 1.5rem;
+    }
+    .poets7-banner-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .poets7-banner-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    }
+    .poets7-banner-inner {
+        position: relative;
+        aspect-ratio: 920 / 520;
+        max-height: 320px;
+        background: #1a1a1a;
+    }
+    .poets7-banner-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .poets7-banner-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 45%, transparent 70%);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 1.25rem 1.5rem;
+    }
+    .poets7-banner-kicker {
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #c4b5fd;
+        margin-bottom: 0.35rem;
+    }
+    .poets7-banner-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin: 0 0 0.35rem 0;
+        color: #fff;
+        line-height: 1.2;
+    }
+    .poets7-banner-meta {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.85);
+        margin: 0 0 0.6rem 0;
+    }
+    .poets7-banner-cta {
+        display: inline-block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #fff;
+        background: rgba(99, 102, 241, 0.9);
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        width: fit-content;
+    }
+    @media (max-width: 640px) {
+        .poets7-banner-inner { max-height: 220px; }
+        .poets7-banner-overlay { padding: 1rem; }
+        .poets7-banner-title { font-size: 1.25rem; }
+    }
+
     /* Live Dashboard Styles */
     .live-dashboard {
         margin-bottom: 2rem;
@@ -762,24 +868,31 @@
     </style>
 
     <!-- What's New at Ahoy Section -->
-    <section class="whats-new-section" x-data="whatsNew()" x-init="loadUpdates()">
+    <section class="whats-new-section" x-data="whatsNew()"
+        x-init="loadUpdates()">
         <div class="whats-new-container">
             <div class="whats-new-header">
                 <h2>What's New at Ahoy</h2>
-                <a :href="getViewAllUrl()" class="view-all-link" x-show="!isLoading && updates.length > 0">
+                <a :href="getViewAllUrl()" class="view-all-link"
+                    x-show="!isLoading && updates.length > 0">
                     View All <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
             <div x-show="isLoading" class="whats-new-loading">
                 <span>Loading updates...</span>
             </div>
-            <div x-show="!isLoading && updates.length > 0" class="whats-new-updates">
-                <template x-for="update in updates" :key="update.id || update.title">
-                    <a :href="getUpdateUrl(update)" class="whats-new-item clickable" :class="'type-' + (update.type || 'update')">
+            <div x-show="!isLoading && updates.length > 0"
+                class="whats-new-updates">
+                <template x-for="update in updates"
+                    :key="update.id || update.title">
+                    <a :href="getUpdateUrl(update)"
+                        class="whats-new-item clickable"
+                        :class="'type-' + (update.type || 'update')">
                         <div class="whats-new-content">
                             <h3 x-text="update.title"></h3>
                             <p x-text="update.description"></p>
-                            <span class="whats-new-date" x-text="formatDate(update.date, update.type)"></span>
+                            <span class="whats-new-date"
+                                x-text="formatDate(update.date, update.type)"></span>
                         </div>
                         <div class="whats-new-arrow">
                             <i class="fas fa-chevron-right"></i>
@@ -787,7 +900,8 @@
                     </a>
                 </template>
             </div>
-            <div x-show="!isLoading && updates.length === 0" class="whats-new-empty">
+            <div x-show="!isLoading && updates.length === 0"
+                class="whats-new-empty">
                 <p>No updates available at this time.</p>
                 <a href="/whats-new" class="view-archive-link">View Archive</a>
             </div>
