@@ -4056,3 +4056,61 @@ img[src*="default-cover.jpg"] {
         font-size: 0.9rem;
     }
 }
+/* ======================================================================
+   EMERGENCY MOBILE SCROLL FIX - Maximum specificity overrides
+   Added to fix Android Chrome scroll issues
+   ====================================================================== */
+@media screen and (max-width: 1024px) {
+    /* Force scroll on html and body with maximum specificity */
+    html, html[class], html:root {
+        height: auto !important;
+        min-height: 100% !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: scroll !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: auto !important;
+        position: relative !important;
+        touch-action: pan-y !important;
+    }
+
+    body, body[class], body.overflow-x-hidden {
+        height: auto !important;
+        min-height: 100vh !important;
+        min-height: 100dvh !important;
+        max-height: none !important;
+        overflow-x: hidden !important;
+        overflow-y: scroll !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: auto !important;
+        position: relative !important;
+        touch-action: pan-y !important;
+    }
+
+    /* Force all potential wrappers to allow scroll through */
+    .app-shell,
+    .app-main,
+    .main-content,
+    .content-area,
+    .app-content,
+    main,
+    #app,
+    #root,
+    [x-data] {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        position: relative !important;
+        touch-action: pan-y !important;
+    }
+
+    /* Ensure fixed elements don't block touch */
+    .mobile-status-bar,
+    .app-header,
+    .mobile-bottom-nav,
+    .mobile-secondary-nav,
+    .now-playing-wrapper,
+    .now-playing-sticky {
+        touch-action: manipulation !important;
+    }
+}
