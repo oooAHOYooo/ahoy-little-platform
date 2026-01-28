@@ -136,11 +136,9 @@
             href="{{ url_for('static', filename='css/loader.css') }}">
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/main.css') }}">
-        <!-- Combined: global.css + base.css (reduces HTTP requests) -->
+        <!-- Combined: global.css + base.css + mobile.css (reduces HTTP requests) -->
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/combined.css') }}">
-        <link rel="stylesheet"
-            href="{{ url_for('static', filename='css/mobile.css') }}">
         {% block extra_css %}{% endblock %}
 
         <!-- Google Fonts - Inter (optimized loading with font-display: swap) -->
