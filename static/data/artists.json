@@ -121,8 +121,8 @@
       "id": "artist_19",
       "name": "Alex Figueroa",
       "slug": "alex-figueroa",
-      "type": "host",
-      "description": "Show host and content creator: Alex Figueroa",
+      "type": "skater",
+      "description": "Skater and content creator: Alex Figueroa",
       "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bclips%5D%5Bfig-theGnarth%5D.jpg",
       "social_links": {},
       "genres": [
@@ -157,8 +157,8 @@
       "id": "artist_20",
       "name": "Andrew Leverton",
       "slug": "andrew-leverton",
-      "type": "host",
-      "description": "Show host and content creator: Andrew Leverton",
+      "type": "skater",
+      "description": "Skater and content creator: Andrew Leverton",
       "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bfullpart%5D%5BAndrewLeverton%5D%5BFormatility%5D.jpg",
       "social_links": {},
       "genres": [
@@ -381,8 +381,8 @@
       "id": "artist_21",
       "name": "Dave Gunn",
       "slug": "dave-gunn",
-      "type": "host",
-      "description": "Show host and content creator: Dave Gunn",
+      "type": "skater",
+      "description": "Skater and content creator: Dave Gunn",
       "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bclip%5D%5BTallboyz%5D%5BDave%20Gunn%20-%20Hotdog%20Days%5D.png",
       "social_links": {},
       "genres": [
@@ -1305,32 +1305,6 @@
       "updated_at": "2025-09-12T10:51:54.401846"
     },
     {
-      "id": "artist_002",
-      "name": "Sarah Chen",
-      "slug": "sarah-chen",
-      "genre": "Indie Folk",
-      "bio": "An emerging indie folk artist known for her haunting melodies and introspective lyrics, often performing in intimate acoustic settings.",
-      "avatar": "https://example.com/avatars/sarah-chen.jpg",
-      "cover_image": "https://example.com/covers/sarah-chen-cover.jpg",
-      "location": "New Haven, CT",
-      "website": "https://sarahchenmusic.com",
-      "social_links": {
-        "instagram": "https://instagram.com/sarahchenmusic",
-        "spotify": "https://open.spotify.com/artist/sarahchen",
-        "bandcamp": "https://sarahchen.bandcamp.com"
-      },
-      "track_count": 8,
-      "show_count": 12,
-      "followers": 1200,
-      "total_plays": 18000,
-      "tags": [
-        "indie",
-        "folk",
-        "acoustic"
-      ],
-      "verified": false
-    },
-    {
       "id": "artist_15",
       "name": "Spider in Stereo",
       "slug": "spider-in-stereo",
@@ -1370,8 +1344,8 @@
       "id": "artist_18",
       "name": "Tallboyz",
       "slug": "tallboyz",
-      "type": "host",
-      "description": "Show host and content creator: Tallboyz",
+      "type": "skater",
+      "description": "Skater and content creator: Tallboyz",
       "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bclips%5D%5BquietGunn%5D.jpg",
       "social_links": {},
       "genres": [
@@ -1656,6 +1630,6 @@
       "updated_at": "2025-09-12T10:51:54.403718"
     }
   ],
-  "total_count": 22,
+  "total_count": 21,
   "last_updated": "2025-09-12T10:52:01.881438"
 }
