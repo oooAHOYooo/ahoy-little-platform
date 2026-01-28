@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport"
-            content="width=device-width, initial-scale=1.0, user-scalable=no">
+            content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 
         <!-- Performance: DNS prefetch and preconnect for external resources -->
         <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -131,7 +131,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260128e' %}
+        {% set css_version = 'v20260128f' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -457,57 +457,80 @@
         <script>
         // Hard refresh function - clears all caches
         function hardRefresh() {
-            // Clear caches
             if ('caches' in window) {
                 caches.keys().then(function(names) {
                     for (let name of names) caches.delete(name);
                 });
             }
-            // Clear localStorage cache markers
             try {
-                Object.keys(localStorage).forEach(key => {
-                    if (key.includes('cache') || key.includes('version')) {
-                        localStorage.removeItem(key);
-                    }
-                });
+                localStorage.clear();
+                sessionStorage.clear();
             } catch(e) {}
-            // Force reload from server
-            window.location.reload(true);
+            window.location.href = window.location.href.split('?')[0] + '?nocache=' + Date.now();
         }
 
-        // NUCLEAR: Remove ALL touch event listeners that might block scroll
+        // ULTRA NUCLEAR SCROLL FIX
         (function() {
-            // Override addEventListener to prevent any touchmove preventDefault
-            const originalAddEventListener = EventTarget.prototype.addEventListener;
-            EventTarget.prototype.addEventListener = function(type, listener, options) {
-                if (type === 'touchmove' || type === 'touchstart') {
-                    // Wrap listener to prevent preventDefault on touch events
-                    const wrappedListener = function(e) {
-                        // Don't let anything call preventDefault on touchmove
-                        const originalPreventDefault = e.preventDefault.bind(e);
-                        e.preventDefault = function() {
-                            console.log('Blocked preventDefault on', type);
-                            // Do nothing - allow scroll
-                        };
-                        return listener.call(this, e);
-                    };
-                    return originalAddEventListener.call(this, type, wrappedListener, options);
+            // Completely disable preventDefault on ALL touch events
+            const noop = function() {};
+
+            // Override at prototype level
+            if (typeof TouchEvent !== 'undefined') {
+                Object.defineProperty(TouchEvent.prototype, 'preventDefault', {
+                    value: noop,
+                    writable: false
+                });
+            }
+
+            // Force scroll styles immediately and continuously
+            function forceScroll() {
+                var html = document.documentElement;
+                var body = document.body;
+
+                if (html) {
+                    html.style.setProperty('overflow-y', 'scroll', 'important');
+                    html.style.setProperty('overflow-x', 'hidden', 'important');
+                    html.style.setProperty('height', 'auto', 'important');
+                    html.style.setProperty('touch-action', 'pan-y', 'important');
+                    html.style.setProperty('overscroll-behavior', 'auto', 'important');
                 }
-                return originalAddEventListener.call(this, type, listener, options);
-            };
+                if (body) {
+                    body.style.setProperty('overflow-y', 'scroll', 'important');
+                    body.style.setProperty('overflow-x', 'hidden', 'important');
+                    body.style.setProperty('height', 'auto', 'important');
+                    body.style.setProperty('min-height', '100vh', 'important');
+                    body.style.setProperty('touch-action', 'pan-y', 'important');
+                    body.style.setProperty('overscroll-behavior', 'auto', 'important');
+                    body.style.setProperty('position', 'relative', 'important');
+                }
 
-            // Force scroll on document ready
-            document.addEventListener('DOMContentLoaded', function() {
-                document.documentElement.style.cssText += 'overflow-y: scroll !important; height: auto !important; touch-action: pan-y !important;';
-                document.body.style.cssText += 'overflow-y: scroll !important; height: auto !important; touch-action: pan-y !important;';
-
-                // Remove touch-action: none from all elements
+                // Fix all elements with bad touch-action
                 document.querySelectorAll('*').forEach(function(el) {
-                    if (getComputedStyle(el).touchAction === 'none') {
-                        el.style.touchAction = 'pan-y';
+                    var ta = getComputedStyle(el).touchAction;
+                    if (ta === 'none' || ta === 'pan-x') {
+                        el.style.setProperty('touch-action', 'pan-y', 'important');
                     }
                 });
-            });
+            }
+
+            // Run immediately
+            forceScroll();
+
+            // Run on DOM ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', forceScroll);
+            }
+
+            // Run on window load
+            window.addEventListener('load', forceScroll);
+
+            // Run every 500ms for first 5 seconds to catch any late changes
+            var scrollFixCount = 0;
+            var scrollFixInterval = setInterval(function() {
+                forceScroll();
+                scrollFixCount++;
+                if (scrollFixCount > 10) clearInterval(scrollFixInterval);
+            }, 500);
         })();
         </script>
 
