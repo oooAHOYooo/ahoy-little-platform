@@ -3,7 +3,7 @@
  * Provides offline caching for UI shell and static assets
  */
 
-const CACHE_NAME = 'ahoy-indie-media-v8';
+const CACHE_NAME = 'ahoy-indie-media-v9';
 const STATIC_CACHE_URLS = [
     '/',
     '/static/css/loader.css',
@@ -120,43 +120,82 @@ self.addEventListener('fetch', (event) => {
         return;
     }
     
-    event.respondWith(
-        caches.match(request)
-            .then((cachedResponse) => {
+    // HTML pages and navigation: Network-first (ensures users see latest push)
+    // Static assets (images, fonts): Cache-first (faster loading)
+    const isNavigationOrHTML = request.mode === 'navigate' ||
+        request.destination === 'document' ||
+        url.pathname === '/' ||
+        url.pathname.endsWith('.html');
+
+    const isStaticAsset = url.pathname.startsWith('/static/images/') ||
+        url.pathname.startsWith('/static/img/') ||
+        url.pathname.startsWith('/static/fonts/') ||
+        url.pathname.endsWith('.png') ||
+        url.pathname.endsWith('.jpg') ||
+        url.pathname.endsWith('.jpeg') ||
+        url.pathname.endsWith('.gif') ||
+        url.pathname.endsWith('.webp') ||
+        url.pathname.endsWith('.ico') ||
+        url.pathname.endsWith('.woff') ||
+        url.pathname.endsWith('.woff2');
+
+    if (isNavigationOrHTML) {
+        // Network-first for HTML pages - ensures users always see latest content
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    if (response && response.status === 200) {
+                        const responseToCache = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(request, responseToCache);
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    // Offline fallback
+                    return caches.match(request).then((cached) => cached || caches.match('/'));
+                })
+        );
+        return;
+    }
+
+    if (isStaticAsset) {
+        // Cache-first for images/fonts (they don't change often)
+        event.respondWith(
+            caches.match(request).then((cachedResponse) => {
                 if (cachedResponse) {
-                    console.log('Service Worker: Serving from cache', request.url);
                     return cachedResponse;
                 }
-                
-                console.log('Service Worker: Fetching from network', request.url);
-                return fetch(request)
-                    .then((response) => {
-                        // Don't cache non-successful responses
-                        if (!response || response.status !== 200 || response.type !== 'basic') {
-                            return response;
-                        }
-                        
-                        // Clone the response for caching
+                return fetch(request).then((response) => {
+                    if (response && response.status === 200 && response.type === 'basic') {
                         const responseToCache = response.clone();
-                        
-                        caches.open(CACHE_NAME)
-                            .then((cache) => {
-                                cache.put(request, responseToCache);
-                            });
-                        
-                        return response;
-                    })
-                    .catch((error) => {
-                        console.error('Service Worker: Fetch failed', error);
-                        
-                        // Return offline page for navigation requests
-                        if (request.mode === 'navigate') {
-                            return caches.match('/');
-                        }
-                        
-                        throw error;
-                    });
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(request, responseToCache);
+                        });
+                    }
+                    return response;
+                });
             })
+        );
+        return;
+    }
+
+    // Stale-while-revalidate for CSS/JS (fast load + background update)
+    event.respondWith(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.match(request).then((cachedResponse) => {
+                const fetchPromise = fetch(request).then((networkResponse) => {
+                    if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+                        cache.put(request, networkResponse.clone());
+                    }
+                    return networkResponse;
+                }).catch(() => cachedResponse);
+
+                // Return cached immediately, update in background
+                return cachedResponse || fetchPromise;
+            });
+        })
     );
 });
 
