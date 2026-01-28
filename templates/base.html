@@ -131,7 +131,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260128f' %}
+        {% set css_version = 'v20260128g' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -453,13 +453,40 @@
         {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false)
         %}
 
-        <!-- NUCLEAR SCROLL FIX + HARD REFRESH -->
+        <!-- NUCLEAR SCROLL FIX + HARD REFRESH + CACHE CLEAR -->
         <script>
+        // IMMEDIATELY clear all caches and unregister service workers on EVERY page load
+        (function() {
+            // Unregister ALL service workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for (var i = 0; i < registrations.length; i++) {
+                        registrations[i].unregister();
+                        console.log('Unregistered service worker');
+                    }
+                });
+            }
+            // Clear ALL caches
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (var i = 0; i < names.length; i++) {
+                        caches.delete(names[i]);
+                        console.log('Deleted cache:', names[i]);
+                    }
+                });
+            }
+        })();
+
         // Hard refresh function - clears all caches
         function hardRefresh() {
             if ('caches' in window) {
                 caches.keys().then(function(names) {
                     for (let name of names) caches.delete(name);
+                });
+            }
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    registrations.forEach(function(r) { r.unregister(); });
                 });
             }
             try {
@@ -3973,19 +4000,21 @@
 
         {% block extra_scripts %}{% endblock %}
 
-        <!-- Service Worker Registration -->
+        <!-- Service Worker Registration - DISABLED FOR NOW TO FIX CACHE ISSUES -->
         <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/static/service-worker.js')
-                    .then((registration) => {
-                        console.log('Service Worker registered successfully:', registration.scope);
-                    })
-                    .catch((error) => {
-                        console.log('Service Worker registration failed:', error);
-                    });
-            });
-        }
+        // DISABLED: Service worker was caching old CSS and breaking scroll
+        // if ('serviceWorker' in navigator) {
+        //     window.addEventListener('load', () => {
+        //         navigator.serviceWorker.register('/static/service-worker.js')
+        //             .then((registration) => {
+        //                 console.log('Service Worker registered successfully:', registration.scope);
+        //             })
+        //             .catch((error) => {
+        //                 console.log('Service Worker registration failed:', error);
+        //             });
+        //     });
+        // }
+        console.log('Service Worker registration disabled - clearing old caches');
     </script>
         <script>
         // Initialize NProgress with enhanced configuration (guarded: CDN may be blocked)
