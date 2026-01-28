@@ -88,6 +88,18 @@ npx cap sync && npx cap open ios   # or android
 
 ## Session Log
 
+### 2026-01-28: Spotify-Style Persistent Mini Player
+- **Change:** Replaced full-screen player with always-visible mini player
+- **Features:** Empty state when no track, disabled buttons, dark glass aesthetic
+- **Redirect:** `/player` route now redirects to content pages
+- **Files:** `base.html`, `main.css`, `combined.css`, `app.py`
+
+### 2026-01-28: Service Worker Cache Fix
+- **Issue:** Users not seeing latest deployments
+- **Fix:** Network-first for HTML, stale-while-revalidate for CSS/JS
+- **Version:** Bumped to v9
+- **Files:** `static/service-worker.js`
+
 ### 2026-01-28: Mobile Scroll Freeze Fix
 - **Issue:** Screen froze after loading popup finished
 - **Cause:** `loader.js` ran fetch interceptor before mobile check
