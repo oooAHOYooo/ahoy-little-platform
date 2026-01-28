@@ -53,9 +53,19 @@ def attach_security_headers(app):
                 # CORS headers for fonts
                 response.headers['Access-Control-Allow-Origin'] = '*'
             elif response.content_type.startswith('application/json') and is_static:
-                # JSON data files can be cached but with shorter TTL
-                response.headers['Cache-Control'] = 'public, max-age=3600'
-                response.headers['Vary'] = 'Accept-Encoding'
+                # IMPORTANT:
+                # - `/static/data/*.json` contains frequently-updated “app content” (music/shows/whats_new/etc).
+                #   Users must see updates on a normal refresh.
+                # - Other static JSON can still be cached if desired, but default to safety here.
+                if request.path.startswith('/static/data/'):
+                    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                    response.headers['Pragma'] = 'no-cache'
+                    response.headers['Expires'] = '0'
+                    response.headers['Vary'] = 'Accept-Encoding'
+                else:
+                    # JSON data files can be cached but with shorter TTL
+                    response.headers['Cache-Control'] = 'public, max-age=3600'
+                    response.headers['Vary'] = 'Accept-Encoding'
 
         # Production-only headers
         if os.getenv('FLASK_ENV') == 'production':

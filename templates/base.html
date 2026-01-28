@@ -621,6 +621,38 @@
             </div>
         </div>
 
+        <!-- Loader failsafe: never let #app-loader trap the UI -->
+        <script>
+        (function () {
+          try {
+            var loader = document.getElementById('app-loader');
+            if (!loader) return;
+
+            function hardHide() {
+              try { loader.classList && loader.classList.add('hidden'); } catch (e) {}
+              try { loader.style.opacity = '0'; } catch (e) {}
+              try { loader.style.visibility = 'hidden'; } catch (e) {}
+              try { loader.style.pointerEvents = 'none'; } catch (e) {}
+              // Ensure it's actually removed from layout shortly after fade attempt
+              setTimeout(function () {
+                try { loader.style.display = 'none'; } catch (e) {}
+                try { document.dispatchEvent(new CustomEvent('loader:hidden')); } catch (e) {}
+              }, 800);
+            }
+
+            // If the full load event happens, hide quickly
+            window.addEventListener('load', function () {
+              setTimeout(hardHide, 900);
+            });
+
+            // Absolute max: hide no matter what (covers hung resources / loader.js not running)
+            setTimeout(hardHide, 15000);
+          } catch (e) {
+            // As a last resort, do nothing (avoid blocking page scripts)
+          }
+        })();
+        </script>
+
         <!-- Mobile Status Bar (fixed top, compact) -->
         <div class="mobile-status-bar mobile-only" x-data="statusBar()"
             x-init="init()">

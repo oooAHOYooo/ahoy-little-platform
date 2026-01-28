@@ -2495,6 +2495,13 @@ def api_whats_new():
             # If data is malformed, return empty
             return jsonify({"updates": []})
         
+        def _whats_new_slugify(text: str) -> str:
+            """URL-friendly slug for What's New items (stable enough for anchors)."""
+            s = (text or "").strip().lower()
+            s = re.sub(r"[^a-z0-9]+", "-", s)
+            s = re.sub(r"-{2,}", "-", s).strip("-")
+            return s or "update"
+
         # Extract all items from monthly structure and flatten for backward compatibility
         all_items = []
         updates = data.get("updates", {})
@@ -2511,12 +2518,21 @@ def api_whats_new():
                         continue
                     for section_name, section_data in sections.items():
                         if isinstance(section_data, dict) and "items" in section_data:
-                            for item in section_data.get("items", []):
+                            # Ensure anchor slugs are unique within this (year, month, section)
+                            used_slugs = set()
+                            for idx, item in enumerate(section_data.get("items", [])):
                                 if isinstance(item, dict):
                                     item_copy = item.copy()
                                     item_copy["year"] = year
                                     item_copy["month"] = month
                                     item_copy["section"] = section_name
+                                    base = _whats_new_slugify(f"{item.get('title','')}-{item.get('date','')}")
+                                    slug = base
+                                    # De-dupe slugs for safety
+                                    if slug in used_slugs:
+                                        slug = f"{base}-{idx+1}"
+                                    used_slugs.add(slug)
+                                    item_copy["slug"] = slug
                                     all_items.append(item_copy)
         
         # Sort by date (newest first)
@@ -2611,15 +2627,51 @@ def whats_new_month(year, month):
             logging.warning(f'whats_new_month: month {month_lower} not found for year {year_str}. Available months: {available_months}')
             return render_template('404.html'), 404
         
-        # Get all sections (with empty arrays if section doesn't exist)
-        sections = {
-            "music": month_data.get("music", {"title": "Music Updates", "items": []}) if isinstance(month_data.get("music"), dict) else {"title": "Music Updates", "items": []},
-            "videos": month_data.get("videos", {"title": "Video Updates", "items": []}) if isinstance(month_data.get("videos"), dict) else {"title": "Video Updates", "items": []},
-            "artists": month_data.get("artists", {"title": "Artist Updates", "items": []}) if isinstance(month_data.get("artists"), dict) else {"title": "Artist Updates", "items": []},
-            "platform": month_data.get("platform", {"title": "Platform Updates", "items": []}) if isinstance(month_data.get("platform"), dict) else {"title": "Platform Updates", "items": []},
-            "merch": month_data.get("merch", {"title": "Merch Updates", "items": []}) if isinstance(month_data.get("merch"), dict) else {"title": "Merch Updates", "items": []},
-            "events": month_data.get("events", {"title": "Events Updates", "items": []}) if isinstance(month_data.get("events"), dict) else {"title": "Events Updates", "items": []}
-        }
+        def _whats_new_slugify(text: str) -> str:
+            s = (text or "").strip().lower()
+            s = re.sub(r"[^a-z0-9]+", "-", s)
+            s = re.sub(r"-{2,}", "-", s).strip("-")
+            return s or "update"
+
+        def _add_item_slugs(section_key: str, section_obj: dict) -> dict:
+            """Return section with per-item `slug` for anchor linking."""
+            if not isinstance(section_obj, dict):
+                return {"title": f"{section_key.capitalize()} Updates", "items": []}
+            items = section_obj.get("items", [])
+            if not isinstance(items, list):
+                items = []
+            used = set()
+            out_items = []
+            for idx, it in enumerate(items):
+                if not isinstance(it, dict):
+                    continue
+                it2 = it.copy()
+                base = _whats_new_slugify(f"{it.get('title','')}-{it.get('date','')}")
+                slug = base
+                if slug in used:
+                    slug = f"{base}-{idx+1}"
+                used.add(slug)
+                it2["slug"] = slug
+                out_items.append(it2)
+            return {
+                "title": section_obj.get("title", f"{section_key.capitalize()} Updates"),
+                "items": out_items
+            }
+
+        # Get all sections (with empty arrays if section doesn't exist) and ensure item slugs
+        sections = {}
+        for key, fallback_title in [
+            ("music", "Music Updates"),
+            ("videos", "Video Updates"),
+            ("artists", "Artist Updates"),
+            ("platform", "Platform Updates"),
+            ("merch", "Merch Updates"),
+            ("events", "Events Updates"),
+        ]:
+            raw = month_data.get(key)
+            if not isinstance(raw, dict):
+                raw = {"title": fallback_title, "items": []}
+            sections[key] = _add_item_slugs(key, raw)
         
         month_name = _get_month_name(month_lower)
         
@@ -2680,9 +2732,33 @@ def whats_new_section(year, month, section):
             logging.warning(f'whats_new_section: month {month_lower} not found for year {year_str}. Available months: {available_months}')
             return render_template('404.html'), 404
         
+        def _whats_new_slugify(text: str) -> str:
+            s = (text or "").strip().lower()
+            s = re.sub(r"[^a-z0-9]+", "-", s)
+            s = re.sub(r"-{2,}", "-", s).strip("-")
+            return s or "update"
+
         section_data = month_data.get(section_lower, {})
         if not isinstance(section_data, dict):
             section_data = {"title": f"{section.capitalize()} Updates", "items": []}
+
+        # Ensure each item has a stable `slug` for anchor links
+        items = section_data.get("items", [])
+        if not isinstance(items, list):
+            items = []
+        used = set()
+        out_items = []
+        for idx, it in enumerate(items):
+            if not isinstance(it, dict):
+                continue
+            it2 = it.copy()
+            base = _whats_new_slugify(f"{it.get('title','')}-{it.get('date','')}")
+            slug = base
+            if slug in used:
+                slug = f"{base}-{idx+1}"
+            used.add(slug)
+            it2["slug"] = slug
+            out_items.append(it2)
         
         month_name = _get_month_name(month_lower)
         
@@ -2692,7 +2768,7 @@ def whats_new_section(year, month, section):
                              month_name=month_name,
                              section=section_lower,
                              section_title=section_data.get("title", f"{section.capitalize()} Updates"),
-                             items=section_data.get("items", []))
+                             items=out_items)
     except Exception as e:
         import logging
         logging.error(f'Error in whats_new_section: {e}', exc_info=True)

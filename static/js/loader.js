@@ -23,12 +23,14 @@
 
     // On mobile: immediately hide loader and exit - NO other code runs
     if (isMobileDevice()) {
-        var loader = document.getElementById('app-loader');
-        if (loader) {
-            loader.style.display = 'none';
-            loader.style.visibility = 'hidden';
-            loader.style.pointerEvents = 'none';
-            loader.style.opacity = '0';
+        // IMPORTANT: don't use `var loader` here — `var` is function-scoped and
+        // collides with the `const loader` used in desktop code below.
+        var mobileLoader = document.getElementById('app-loader');
+        if (mobileLoader) {
+            mobileLoader.style.display = 'none';
+            mobileLoader.style.visibility = 'hidden';
+            mobileLoader.style.pointerEvents = 'none';
+            mobileLoader.style.opacity = '0';
         }
         // Expose empty API to prevent errors if other code tries to use it
         window.loaderProgress = {

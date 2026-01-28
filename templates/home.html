@@ -8,30 +8,6 @@
     {{ subpage_hero(title="Home", subtitle="Explore", icon_class="fas fa-home")
     }}
 
-    <!-- Poets and Friends #7 highlight (Jan 28–29, 2026 only) -->
-    {% if show_poets7_banner and poets7_event %}
-    <section class="poets7-banner"
-        aria-label="Poets and Friends #7 – upcoming event">
-        <a href="{{ poets7_event.rsvp_url }}" class="poets7-banner-link"
-            target="_blank" rel="noopener">
-            <div class="poets7-banner-inner">
-                <img class="poets7-banner-img" src="{{ poets7_event.image }}"
-                    alt="Poets and Friends #7" />
-                <div class="poets7-banner-overlay">
-                    <span class="poets7-banner-kicker">{% if
-                        poets7_event.is_tomorrow %}Tomorrow!{% else %}Tonight!{%
-                        endif %}</span>
-                    <h2 class="poets7-banner-title">Another Poets and Friends
-                        #7</h2>
-                    <p class="poets7-banner-meta">{{ poets7_event.time }} · {{
-                        poets7_event.venue }}</p>
-                    <span class="poets7-banner-cta">RSVP</span>
-                </div>
-            </div>
-        </a>
-    </section>
-    {% endif %}
-
     <!-- Live Dashboard (TV & Radio) -->
     <section class="live-dashboard">
         <div class="dashboard-grid">
@@ -153,12 +129,38 @@
                 </template>
             </div>
         </div>
+
+        <!-- Poets and Friends #7 highlight (Jan 28–29, 2026 only) -->
+        {% if show_poets7_banner and poets7_event %}
+        <section class="poets7-banner"
+            aria-label="Poets and Friends #7 – upcoming event">
+            <a href="{{ poets7_event.rsvp_url }}" class="poets7-banner-link"
+                target="_blank" rel="noopener">
+                <div class="poets7-banner-inner">
+                    <img class="poets7-banner-img" src="{{ poets7_event.image }}"
+                        alt="Poets and Friends #7" />
+                    <div class="poets7-banner-overlay">
+                        <span class="poets7-banner-kicker">{% if
+                            poets7_event.is_tomorrow %}Tomorrow!{% else %}Tonight!{%
+                            endif %}</span>
+                        <h2 class="poets7-banner-title">Another Poets and Friends
+                            #7</h2>
+                        <p class="poets7-banner-meta">{{ poets7_event.time }} · {{
+                            poets7_event.venue }}</p>
+                        <span class="poets7-banner-cta">RSVP</span>
+                    </div>
+                </div>
+            </a>
+        </section>
+        {% endif %}
     </section>
 
     <style>
     /* Poets and Friends #7 banner (Jan 28–29, 2026) */
     .poets7-banner {
+        margin-top: 1rem;
         margin-bottom: 1.5rem;
+        width: 100%;
     }
     .poets7-banner-link {
         display: block;
@@ -169,6 +171,7 @@
         border: 1px solid rgba(255, 255, 255, 0.12);
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+        width: 100%;
     }
     .poets7-banner-link:hover {
         transform: translateY(-2px);
@@ -179,6 +182,7 @@
         aspect-ratio: 920 / 520;
         max-height: 320px;
         background: #1a1a1a;
+        width: 100%;
     }
     .poets7-banner-img {
         width: 100%;
@@ -2119,7 +2123,10 @@ function whatsNew() {
         getUpdateUrl(update) {
             // If update has year, month, and section, link to section detail page
             if (update.year && update.month && update.section) {
-                return `/whats-new/${update.year}/${update.month}/${update.section}`;
+                const base = `/whats-new/${update.year}/${update.month}/${update.section}`;
+                // If we have a per-item slug, deep-link to the specific item
+                if (update.slug) return `${base}#update-${update.slug}`;
+                return base;
             }
             // Fallback: if update has a direct link, use it
             if (update.link) {

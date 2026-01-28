@@ -95,6 +95,11 @@
                         class="filter-tab-mobile">
                         <span>Hosts</span>
                     </button>
+                    <button @click="setType('filmmaker')"
+                        :class="{'active': selectedType === 'filmmaker'}"
+                        class="filter-tab-mobile">
+                        <span>Filmmakers</span>
+                    </button>
                     <button @click="setType('producer')"
                         :class="{'active': selectedType === 'producer'}"
                         class="filter-tab-mobile">
@@ -192,6 +197,11 @@
                             class="filter-tab">
                             <span>Hosts</span>
                         </button>
+                        <button @click="setType('filmmaker')"
+                            :class="{'active': selectedType === 'filmmaker'}"
+                            class="filter-tab">
+                            <span>Filmmakers</span>
+                        </button>
                         <button @click="setType('producer')"
                             :class="{'active': selectedType === 'producer'}"
                             class="filter-tab">
@@ -214,6 +224,11 @@
                             :class="{'active': selectedType === 'host'}"
                             class="filter-tab-mobile">
                             <span>Hosts</span>
+                        </button>
+                        <button @click="setType('filmmaker')"
+                            :class="{'active': selectedType === 'filmmaker'}"
+                            class="filter-tab-mobile">
+                            <span>Filmmakers</span>
                         </button>
                         <button @click="setType('producer')"
                             :class="{'active': selectedType === 'producer'}"

@@ -2,15 +2,14 @@
   "artists": [
     {
       "id": "artist_17",
-      "name": "Ahoy Indie Media",
-      "slug": "ahoy-indie-media",
-      "type": "host",
-      "description": "Show host and content creator: Ahoy Indie Media",
+      "name": "Jack Galvin",
+      "slug": "jack-galvin",
+      "type": "filmmaker",
+      "description": "Filmmaker: Jack Galvin",
       "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5Bepisode%5D%5BAlive%20on%20Central%5D%5BEpisode%202%5D.png",
       "social_links": {},
       "genres": [
-        "Episodes",
-        "Broadcast"
+        "Filmmaker"
       ],
       "albums": [],
       "shows": [
@@ -263,8 +262,13 @@
       "slug": "clones-of-clarence",
       "type": "musician",
       "description": "Musician and artist: Clones of Clarence",
-      "image": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/8b/4d/cc/8b4dcc19-b47c-5478-b2de-18587dc0c4b3/artwork.jpg/592x592bf.webp",
-      "social_links": {},
+      "image": "https://f4.bcbits.com/img/0005919987_25.jpg",
+      "social_links": {
+        "bandcamp": "https://clonesofclarence.bandcamp.com/",
+        "bandcamp_music": "https://clonesofclarence.bandcamp.com/music",
+        "bandcamp_community": "https://clonesofclarence.bandcamp.com/community",
+        "bandcamp_contact": "https://clonesofclarence.bandcamp.com/contact?b=1005157309&n=Clones%20of%20Clarence"
+      },
       "genres": [
         "Indie"
       ],
@@ -1004,8 +1008,9 @@
       "id": "artist_001",
       "name": "Rob Meglio",
       "slug": "rob-meglio",
+      "type": "filmmaker",
       "genre": "Alternative Rock",
-      "bio": "A passionate musician and host who explores the intersection of culture and music through intimate conversations and live performances.",
+      "bio": "A passionate filmmaker who explores the intersection of culture and music through intimate conversations and live performances.",
       "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5BPROMO%5D%5BAhoy%20Cabaret%5D%5BBV%20Update%5D.jpg",
       "avatar": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5BPROMO%5D%5BAhoy%20Cabaret%5D%5BBV%20Update%5D.jpg",
       "cover_image": "https://example.com/covers/rob-meglio-cover.jpg",
@@ -1023,7 +1028,7 @@
       "tags": [
         "alternative",
         "culture",
-        "host"
+        "filmmaker"
       ],
       "verified": true,
       "shows": [
@@ -1135,8 +1140,8 @@
       "id": "artist_22",
       "name": "Alex Gonzalez",
       "slug": "alex-gonzalez",
-      "type": "host",
-      "description": "Filmmaker and content creator: Alex Gonzalez",
+      "type": "filmmaker",
+      "description": "Filmmaker: Alex Gonzalez",
       "image": "https://media.licdn.com/dms/image/v2/D4E03AQEdMlJ-UiyiXA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1705887712341?e=2147483647&v=beta&t=0hqcXEmlpKCBSzAA8tNWKpeT-MHsWfKgYL5ZUU9D1nI",
       "social_links": {},
       "genres": [
