@@ -72,6 +72,13 @@ with get_session() as session:
 - `static/js/loader.js` - mobile exit at line 25
 - `static/css/loader.css` - hides loader on mobile via CSS
 
+**Preventive suggestions (so scroll doesn’t break again):**
+1. **New touch handlers:** Avoid `event.preventDefault()` on `touchstart`/`touchmove` unless the handler is scoped to a small control (e.g. a dial). Prefer `touch-action: pan-y` (or `manipulation`) in CSS so vertical scroll is allowed.
+2. **New CSS:** Never set `touch-action: none` or `overflow: hidden` on `html` or `body`. Use `overflow: hidden` only on components (modals, cards, loader overlay).
+3. **Loader / new “loading” scripts:** Any script that runs before first paint should detect mobile early and exit before registering fetch interceptors or global touch/scroll listeners. See `loader.js` (mobile check at top, then `return`).
+4. **New full-screen overlays:** Use `pointer-events: none` when hidden so they don’t block touch. The scroll fix in `base.html` already tries to disable blocking overlays; keep that in mind when adding new modals.
+5. **Before shipping mobile UX changes:** Manually test vertical scroll on a real device (or Chrome DevTools mobile) after load and after closing any overlay.
+
 ## Builds
 
 **Desktop (Electron):** `packaging/build-all.sh`, `electron/`
@@ -106,3 +113,9 @@ npx cap sync && npx cap open ios   # or android
 - **Fix:** Mobile check at TOP of IIFE, exits immediately
 - **Files:** `static/js/loader.js`, `static/css/loader.css`
 - **Safe:** Loader is cosmetic only, no functionality impact
+
+### 2026-01-28: Mobile subheader spacing + scroll-prevention notes
+- **Change:** Added 12px top margin on mobile for subheaders so they are not flush with status bar
+- **Targets:** `.podcasts-hero`, `.page-header`, `.music-subheader`, `.shows-subheader`, `.bookmarks-subheader`, `.artists-subheader`, `.mobile-search-header` (all @max-width 768px)
+- **Docs:** CLAUDE.md "Preventive suggestions" for keeping mobile scroll working (touch handlers, CSS, loader pattern, overlays, manual test)
+- **Files:** `static/css/combined.css`, `CLAUDE.md`, `templates/base.html` (css_version → v20260128m)

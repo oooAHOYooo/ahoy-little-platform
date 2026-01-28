@@ -874,7 +874,7 @@ img[src*="default-cover.jpg"] {
 /* ===== Mobile compact overrides (≤768px) for Artists subheader ===== */
 @media (max-width: 768px) {
     .artists-page .unified-header.artists-subheader {
-        margin-top: 8px;
+        margin-top: 12px;
         margin-bottom: 10px;
     }
 
@@ -1138,7 +1138,7 @@ img[src*="default-cover.jpg"] {
     .music-subheader,
     .shows-subheader,
     .bookmarks-subheader {
-        margin-top: 8px;
+        margin-top: 12px;
         margin-bottom: 10px;
     }
 
@@ -1457,6 +1457,12 @@ img[src*="default-cover.jpg"] {
     /* Mobile subpage hero: title-only (hide FA icons) */
     .podcasts-hero h1 i {
         display: none !important;
+    }
+
+    /* Add top margin so subheader is not flush with status bar */
+    .podcasts-hero,
+    .page-header {
+        margin-top: 12px !important;
     }
 
     /* Add a bit more margin between title and subheader on mobile */
@@ -3889,6 +3895,7 @@ img[src*="default-cover.jpg"] {
         align-items: center;
         justify-content: space-between;
         padding: 1.25rem 1.5rem;
+        margin-top: 12px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
