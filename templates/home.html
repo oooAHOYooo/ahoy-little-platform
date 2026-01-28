@@ -964,52 +964,7 @@
     </style>
 
     <!-- Homepage intentionally ends at "What's New at Ahoy" -->
-
-    <!-- Create Account Modal -->
-    <div x-show="showCreateAccountModal" x-cloak class="modal-overlay"
-        @click="closeCreateAccountModal()" style="display:none;">
-        <div class="modal-content create-account-modal" @click.stop>
-            <div class="modal-header">
-                <h3>Save Your Work</h3>
-                <button @click="closeCreateAccountModal()"
-                    class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="save-warning-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <h4>Don't Lose Your Work!</h4>
-                <p>You're creating playlists and saving content, but without an
-                    account, your work will be lost when you leave this
-                    page.</p>
-                <div class="benefits-list">
-                    <div class="benefit-item">
-                        <i class="fas fa-check"></i>
-                        <span>Save playlists permanently</span>
-                    </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-check"></i>
-                        <span>Access your content anywhere</span>
-                    </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-check"></i>
-                        <span>Sync across devices</span>
-                    </div>
-                    <div class="benefit-item">
-                        <i class="fas fa-check"></i>
-                        <span>Get personalized recommendations</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button @click="closeCreateAccountModal()"
-                    class="btn btn-secondary">Continue as Guest</button>
-                <button @click="goToAuth()" class="btn btn-primary">
-                    <i class="fas fa-user-plus"></i> Create Free Account
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- REMOVED: "Save Your Work" modal - was blocking scroll on mobile -->
 </div>
 
 <script>

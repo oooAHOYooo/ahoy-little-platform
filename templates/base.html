@@ -131,7 +131,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260128h' %}
+        {% set css_version = 'v20260128i' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -538,6 +538,24 @@
                         el.style.setProperty('touch-action', 'pan-y', 'important');
                     }
                 });
+
+                // Disable ALL overlays and modals that might be blocking
+                document.querySelectorAll('.modal-overlay, .overlay, [class*="overlay"], [class*="modal"]').forEach(function(el) {
+                    var display = getComputedStyle(el).display;
+                    var visibility = getComputedStyle(el).visibility;
+                    var opacity = getComputedStyle(el).opacity;
+                    // If element appears hidden, ensure it can't block touch
+                    if (display === 'none' || visibility === 'hidden' || opacity === '0') {
+                        el.style.setProperty('pointer-events', 'none', 'important');
+                    }
+                });
+
+                // Force loader to be non-blocking after it's hidden
+                var loader = document.getElementById('app-loader');
+                if (loader && (loader.classList.contains('hidden') || getComputedStyle(loader).display === 'none')) {
+                    loader.style.setProperty('pointer-events', 'none', 'important');
+                    loader.style.setProperty('display', 'none', 'important');
+                }
             }
 
             // Run immediately
@@ -549,14 +567,20 @@
             }
 
             // Run on window load
-            window.addEventListener('load', forceScroll);
+            window.addEventListener('load', function() {
+                forceScroll();
+                // Extra aggressive: run again after Alpine.js likely initialized
+                setTimeout(forceScroll, 100);
+                setTimeout(forceScroll, 500);
+                setTimeout(forceScroll, 1000);
+            });
 
-            // Run every 500ms for first 5 seconds to catch any late changes
+            // Run every 500ms for first 10 seconds to catch any late changes
             var scrollFixCount = 0;
             var scrollFixInterval = setInterval(function() {
                 forceScroll();
                 scrollFixCount++;
-                if (scrollFixCount > 10) clearInterval(scrollFixInterval);
+                if (scrollFixCount > 20) clearInterval(scrollFixInterval);
             }, 500);
         })();
         </script>
