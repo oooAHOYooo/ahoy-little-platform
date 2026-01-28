@@ -1006,7 +1006,8 @@
       "slug": "rob-meglio",
       "genre": "Alternative Rock",
       "bio": "A passionate musician and host who explores the intersection of culture and music through intimate conversations and live performances.",
-      "avatar": "https://example.com/avatars/rob-meglio.jpg",
+      "image": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5BPROMO%5D%5BAhoy%20Cabaret%5D%5BBV%20Update%5D.jpg",
+      "avatar": "https://storage.googleapis.com/ahoy-videos/thumbnails/%5BahoyThumb%5D%5BPROMO%5D%5BAhoy%20Cabaret%5D%5BBV%20Update%5D.jpg",
       "cover_image": "https://example.com/covers/rob-meglio-cover.jpg",
       "location": "New Haven, CT",
       "website": "https://robmeglio.com",
@@ -1129,6 +1130,25 @@
         "Promo",
         "Episodes"
       ]
+    },
+    {
+      "id": "artist_22",
+      "name": "Alex Gonzalez",
+      "slug": "alex-gonzalez",
+      "type": "host",
+      "description": "Filmmaker and content creator: Alex Gonzalez",
+      "image": "https://media.licdn.com/dms/image/v2/D4E03AQEdMlJ-UiyiXA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1705887712341?e=2147483647&v=beta&t=0hqcXEmlpKCBSzAA8tNWKpeT-MHsWfKgYL5ZUU9D1nI",
+      "social_links": {},
+      "genres": [
+        "Filmmaker"
+      ],
+      "albums": [],
+      "shows": [],
+      "tracks": [],
+      "followers": 0,
+      "verified": false,
+      "created_at": "2025-01-28T12:00:00.000000",
+      "updated_at": "2025-01-28T12:00:00.000000"
     },
     {
       "id": "artist_12",
@@ -1636,6 +1656,6 @@
       "updated_at": "2025-09-12T10:51:54.403718"
     }
   ],
-  "total_count": 21,
+  "total_count": 22,
   "last_updated": "2025-09-12T10:52:01.881438"
 }
