@@ -131,7 +131,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260128j' %}
+        {% set css_version = 'v20260128k' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -1692,6 +1692,13 @@
                             <i
                                 :class="isSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"
                                 :style="isSaved ? 'color: var(--accent-color);' : ''"></i>
+                        </button>
+                        <button @click="shareTrack()"
+                            class="now-playing-btn now-playing-share-btn"
+                            :class="{'disabled': !currentTrack}"
+                            :disabled="!currentTrack"
+                            title="Share">
+                            <i class="fas fa-share-alt"></i>
                         </button>
                     </div>
 
@@ -3560,6 +3567,45 @@
                     // Just toggle play if there's a track
                     if (this.currentTrack) {
                         this.togglePlay();
+                    }
+                },
+
+                // Share current track - uses native share on mobile, clipboard on desktop
+                async shareTrack() {
+                    if (!this.currentTrack) return;
+
+                    const track = this.currentTrack;
+                    const title = track.title || 'Unknown Track';
+                    const artist = track.artist || track.host || 'Unknown Artist';
+                    const shareText = `🎵 ${title} by ${artist}`;
+                    const shareUrl = window.location.origin + '/music';
+
+                    // Use native Web Share API on mobile (fast, native feel)
+                    if (navigator.share && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                        try {
+                            await navigator.share({
+                                title: title,
+                                text: shareText + ' on Ahoy Indie Media',
+                                url: shareUrl
+                            });
+                        } catch (err) {
+                            if (err.name !== 'AbortError') {
+                                console.warn('Share failed:', err);
+                            }
+                        }
+                    } else {
+                        // Desktop fallback: copy to clipboard
+                        try {
+                            await navigator.clipboard.writeText(shareText + ' - ' + shareUrl);
+                            // Brief visual feedback
+                            const btn = document.querySelector('.now-playing-share-btn');
+                            if (btn) {
+                                btn.classList.add('active');
+                                setTimeout(() => btn.classList.remove('active'), 1500);
+                            }
+                        } catch (err) {
+                            console.warn('Clipboard failed:', err);
+                        }
                     }
                 },
 

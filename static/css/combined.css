@@ -2242,9 +2242,17 @@ img[src*="default-cover.jpg"] {
         font-size: 16px !important;
     }
 
-    /* Hide non-essential controls on mobile */
-    .now-playing-controls .now-playing-btn:nth-child(n+4) {
+    /* Hide non-essential controls on mobile (keep share visible) */
+    .now-playing-controls .now-playing-btn:nth-child(n+4):not(.now-playing-share-btn) {
         display: none !important;
+    }
+
+    /* Share button: smaller on mobile, always visible */
+    .now-playing-share-btn {
+        display: flex !important;
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 12px !important;
     }
 
     /* Compact progress bar at bottom */
