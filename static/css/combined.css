@@ -2289,10 +2289,27 @@ img[src*="default-cover.jpg"] {
         padding-bottom: calc(var(--bottom-nav-h, 60px) + var(--secondary-nav-h, 48px) + env(safe-area-inset-bottom) + var(--section-gap, 20px));
     }
 
-    /* When the global player is visible, add enough space so the last content isn't hidden. */
-    body.has-player .content-pad-bottom {
+    /* Player is always visible (Spotify-style), so always add space */
+    body.has-player .content-pad-bottom,
+    .content-pad-bottom {
         /* `--player-h` is now 80px for compact mobile widget */
         padding-bottom: calc(var(--bottom-nav-h, 60px) + var(--secondary-nav-h, 48px) + env(safe-area-inset-bottom) + 80px + var(--section-gap, 20px));
+    }
+
+    /* Mobile empty state styles */
+    .now-playing-empty-art {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 18px !important;
+        border-radius: 8px !important;
+    }
+
+    .now-playing-empty-title {
+        font-size: 13px !important;
+    }
+
+    .now-playing-empty-artist {
+        font-size: 10px !important;
     }
 }
 

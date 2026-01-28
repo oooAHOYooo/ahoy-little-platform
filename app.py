@@ -838,7 +838,30 @@ def create_app():
     @app.route('/')
     def home():
         """Main discovery page with Now Playing feed"""
-        response = make_response(render_template('home.html'))
+        from datetime import date
+        today = date.today()
+        # Poets and Friends #7 banner: show Jan 28–29, 2026 only; remove Jan 30+
+        show_poets7_banner = (today.year == 2026 and today.month == 1 and today.day in (28, 29))
+        poets7_event = None
+        if show_poets7_banner:
+            events_data = load_json_data('events.json', {'events': []})
+            for e in events_data.get('events', []):
+                if e.get('title') == 'Poets and Friends #7' and e.get('status') == 'upcoming':
+                    poets7_event = {
+                        'title': e.get('title'),
+                        'date': e.get('date'),
+                        'time': e.get('time'),
+                        'venue': e.get('venue'),
+                        'image': e.get('image'),
+                        'rsvp_url': e.get('rsvp_external_url') or '/events',
+                        'is_tomorrow': today.day == 28,
+                    }
+                    break
+        response = make_response(render_template(
+            'home.html',
+            show_poets7_banner=show_poets7_banner,
+            poets7_event=poets7_event,
+        ))
         response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
         return response
 
@@ -2018,10 +2041,15 @@ def merch():
 
 @app.route('/player')
 def player():
-    """Full-screen player page"""
-    media_id = request.args.get('id')
-    media_type = request.args.get('type', 'music')  # music, show, video
-    return render_template('player.html', media_id=media_id, media_type=media_type)
+    """Redirect to appropriate content page - full player replaced by persistent mini player"""
+    media_type = request.args.get('type', 'music')
+    # Redirect to the relevant content section instead of full player
+    if media_type == 'show':
+        return redirect(url_for('shows'))
+    elif media_type == 'podcast':
+        return redirect(url_for('podcasts'))
+    else:
+        return redirect(url_for('music'))
 
 @app.route('/artists/featured')
 def featured_artists():

@@ -5,8 +5,10 @@
 **Current Issues:** None active
 
 **Recent Changes (2026-01-28):**
+- Spotify-style persistent mini player: always visible, no full-screen player
+- Service worker v9: network-first for HTML (users always see latest push)
 - Fixed mobile scroll freeze: `static/js/loader.js` now skips ALL code on mobile (exits at line 25)
-- Files: `loader.js`, `loader.css`
+- Files: `base.html`, `main.css`, `combined.css`, `app.py`, `service-worker.js`
 
 **Key Paths:**
 - App entry: `app.py` (Flask factory `create_app()`)

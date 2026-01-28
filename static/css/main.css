@@ -24592,6 +24592,54 @@ img.loading {
     box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5);
 }
 
+/* Empty state - Spotify-style persistent player */
+.now-playing-empty-art {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 24px;
+}
+
+.now-playing-empty-title {
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-weight: 500 !important;
+}
+
+.now-playing-empty-artist {
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-size: 12px !important;
+}
+
+/* Disabled button states */
+.now-playing-btn.disabled,
+.now-playing-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.now-playing-btn.disabled:hover,
+.now-playing-btn:disabled:hover {
+    transform: none;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.now-playing-play-btn.disabled,
+.now-playing-play-btn:disabled {
+    background: rgba(99, 102, 241, 0.3);
+    box-shadow: none;
+}
+
+.now-playing-progress-bar.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
 .now-playing-btn.active.liked {
     background: rgba(236, 72, 153, 0.3);
     color: #ec4899;
