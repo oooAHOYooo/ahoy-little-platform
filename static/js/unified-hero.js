@@ -214,14 +214,11 @@ function createUnifiedHero(config = {}) {
             const diffX = this.touchStartX - touchX;
             const diffY = this.touchStartY - touchY;
 
-            // Only hijack scroll after significant horizontal movement (10px threshold)
-            // This allows vertical scrolling to work normally
-            const minThreshold = 10;
-            if (Math.abs(diffX) > minThreshold && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+            // Track if horizontal swipe but NEVER block vertical scroll
+            if (Math.abs(diffX) > 30 && Math.abs(diffX) > Math.abs(diffY) * 2) {
                 this.isDragging = true;
-                // Only prevent default if clearly a horizontal swipe
-                event.preventDefault();
             }
+            // REMOVED: event.preventDefault() - was blocking vertical scroll
         },
         
         handleTouchEnd(event) {

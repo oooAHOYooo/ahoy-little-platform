@@ -568,13 +568,13 @@ img[src*="default-cover.jpg"] {
         touch-action: pan-x pan-y;
     }
 
-    /* Prevent fixed elements from blocking scroll */
+    /* Fixed elements - allow touch interactions but don't block page scroll */
     .mobile-status-bar,
     .app-header,
     .mobile-bottom-nav,
     .mobile-secondary-nav,
     .now-playing-wrapper {
-        touch-action: none;
+        touch-action: manipulation;
         pointer-events: auto;
     }
 
