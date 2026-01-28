@@ -144,8 +144,74 @@ Show IDs are in `static/data/shows.json`. Thumbnails extracted via `scripts/extr
 
 ## Desktop/Mobile Builds
 
+### Electron (Desktop)
 See `packaging/` directory:
 - `packaging/build-all.sh` - Master build script
 - `packaging/DESKTOP_BUILD_GUIDE.md` - Full documentation
 - Electron app in `electron/`
-- Capacitor for iOS/Android in `android/`
+
+### Capacitor (iOS/Android)
+Mobile apps use Capacitor with **remote URL mode** - they load the website from `https://ahoy-indie-media.onrender.com` rather than bundling assets. This means web updates deploy instantly without app store releases.
+
+```bash
+# Sync web assets and native plugins
+npx cap sync
+
+# Open in Android Studio
+npx cap open android
+
+# Open in Xcode
+npx cap open ios
+
+# After making changes, sync again
+npx cap sync android
+npx cap sync ios
+```
+
+Configuration: `capacitor.config.ts`
+- Android: `android/` folder
+- iOS: `ios/` folder
+
+## CSS Architecture
+
+### Main Files
+- `static/css/main.css` - Primary styles (large file, all components)
+- `static/css/combined.css` - Contains global reset, base styles, and mobile overrides
+- `static/css/loader.css` - Loading screen styles
+- `static/css/design-tokens.css` - CSS variables (colors, spacing, etc.)
+
+### Cache Busting
+CSS files use version query parameters in `templates/base.html`:
+```jinja
+{% set css_version = 'v20260128i' %}
+<link rel="stylesheet" href="/static/css/combined.css?{{ css_version }}">
+```
+**Important:** Increment the version when making CSS changes to bust browser cache.
+
+## Service Worker
+
+`static/service-worker.js` caches static assets for offline use.
+- Cache name: `ahoy-indie-media-v8` (increment when updating cached files)
+- Updates `STATIC_CACHE_URLS` array when adding/removing CSS/JS files
+- Currently **disabled** in `base.html` to prevent caching issues during development
+
+**Note:** If users report seeing old styles, the service worker may be serving cached files. Clear caches by incrementing `CACHE_NAME` in service-worker.js.
+
+## Mobile Considerations
+
+### Scroll Issues
+If vertical scroll stops working on mobile:
+1. Check for `touch-action: none` in CSS (should use `manipulation` or `pan-y`)
+2. Check for `event.preventDefault()` in touch handlers (remove from scroll handlers)
+3. Check for `overflow: hidden` on `body` or `html` elements
+4. Service worker may be serving old cached CSS - increment cache version
+5. Modals/overlays may have `pointer-events` blocking scroll
+
+### Touch Handlers
+Touch event handlers in `static/js/unified-hero.js` and templates should NOT call `preventDefault()` during touch move events - this blocks native scrolling.
+
+### Key Files for Mobile
+- `templates/base.html` - Viewport meta, scroll fix script, cache clearing
+- `static/css/combined.css` - Mobile-specific overrides at bottom
+- `static/js/unified-hero.js` - Carousel touch handling
+- `static/js/mobile.js` - Mobile menu interactions
