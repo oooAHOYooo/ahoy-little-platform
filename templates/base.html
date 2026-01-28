@@ -130,15 +130,17 @@
         <title>{% block title %}Ahoy Indie Media{% endblock %}</title>
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
+        <!-- Cache buster: Change this version to force CSS reload -->
+        {% set css_version = 'v20260128a' %}
         <link rel="stylesheet"
-            href="{{ url_for('static', filename='css/design-tokens.css') }}">
+            href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
-            href="{{ url_for('static', filename='css/loader.css') }}">
+            href="{{ url_for('static', filename='css/loader.css') }}?{{ css_version }}">
         <link rel="stylesheet"
-            href="{{ url_for('static', filename='css/main.css') }}">
+            href="{{ url_for('static', filename='css/main.css') }}?{{ css_version }}">
         <!-- Combined: global.css + base.css + mobile.css (reduces HTTP requests) -->
         <link rel="stylesheet"
-            href="{{ url_for('static', filename='css/combined.css') }}">
+            href="{{ url_for('static', filename='css/combined.css') }}?{{ css_version }}">
         {% block extra_css %}{% endblock %}
 
         <!-- Google Fonts - Inter (optimized loading with font-display: swap) -->
