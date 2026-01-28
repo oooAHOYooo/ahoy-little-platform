@@ -131,7 +131,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260128d' %}
+        {% set css_version = 'v20260128e' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -453,6 +453,64 @@
         {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false)
         %}
 
+        <!-- NUCLEAR SCROLL FIX + HARD REFRESH -->
+        <script>
+        // Hard refresh function - clears all caches
+        function hardRefresh() {
+            // Clear caches
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) caches.delete(name);
+                });
+            }
+            // Clear localStorage cache markers
+            try {
+                Object.keys(localStorage).forEach(key => {
+                    if (key.includes('cache') || key.includes('version')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+            } catch(e) {}
+            // Force reload from server
+            window.location.reload(true);
+        }
+
+        // NUCLEAR: Remove ALL touch event listeners that might block scroll
+        (function() {
+            // Override addEventListener to prevent any touchmove preventDefault
+            const originalAddEventListener = EventTarget.prototype.addEventListener;
+            EventTarget.prototype.addEventListener = function(type, listener, options) {
+                if (type === 'touchmove' || type === 'touchstart') {
+                    // Wrap listener to prevent preventDefault on touch events
+                    const wrappedListener = function(e) {
+                        // Don't let anything call preventDefault on touchmove
+                        const originalPreventDefault = e.preventDefault.bind(e);
+                        e.preventDefault = function() {
+                            console.log('Blocked preventDefault on', type);
+                            // Do nothing - allow scroll
+                        };
+                        return listener.call(this, e);
+                    };
+                    return originalAddEventListener.call(this, type, wrappedListener, options);
+                }
+                return originalAddEventListener.call(this, type, listener, options);
+            };
+
+            // Force scroll on document ready
+            document.addEventListener('DOMContentLoaded', function() {
+                document.documentElement.style.cssText += 'overflow-y: scroll !important; height: auto !important; touch-action: pan-y !important;';
+                document.body.style.cssText += 'overflow-y: scroll !important; height: auto !important; touch-action: pan-y !important;';
+
+                // Remove touch-action: none from all elements
+                document.querySelectorAll('*').forEach(function(el) {
+                    if (getComputedStyle(el).touchAction === 'none') {
+                        el.style.touchAction = 'pan-y';
+                    }
+                });
+            });
+        })();
+        </script>
+
         <!-- Full Page Loading Screen with Progress -->
         <div id="app-loader">
             <!-- Floating Ambient Light Orbs -->
@@ -507,6 +565,9 @@
                             x-show="hasNewBookmarks"
                             x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
                     </a>
+                    <button onclick="hardRefresh()" class="status-action-btn" title="Hard Refresh" type="button" aria-label="Hard Refresh" style="color: #ff6b6b;">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
             </div>
         </div>
