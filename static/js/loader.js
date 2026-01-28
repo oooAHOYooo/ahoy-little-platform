@@ -1,17 +1,53 @@
 /**
  * Advanced Loading Progress Tracker
  * Tracks actual resource loading and provides smooth 0-100% progress
+ *
+ * MOBILE: Loader is completely disabled on mobile to prevent scroll freeze issues.
+ * The CSS also hides #app-loader on mobile as a fallback.
  */
 
 (function() {
     'use strict';
-    
+
+    // MOBILE CHECK FIRST - Skip ALL loader logic on mobile to prevent scroll freeze
+    // Must check before any other code runs (including fetch interceptor)
+    function isMobileDevice() {
+        // Check multiple indicators for mobile
+        var width = window.innerWidth || document.documentElement.clientWidth || 768;
+        var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        var isNarrow = width <= 768;
+        // Also check user agent as backup
+        var mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        return isNarrow || (isTouchDevice && mobileUA);
+    }
+
+    // On mobile: immediately hide loader and exit - NO other code runs
+    if (isMobileDevice()) {
+        var loader = document.getElementById('app-loader');
+        if (loader) {
+            loader.style.display = 'none';
+            loader.style.visibility = 'hidden';
+            loader.style.pointerEvents = 'none';
+            loader.style.opacity = '0';
+        }
+        // Expose empty API to prevent errors if other code tries to use it
+        window.loaderProgress = {
+            set: function() {},
+            hide: function() {}
+        };
+        // Dispatch the loader:hidden event in case any code depends on it
+        document.dispatchEvent(new CustomEvent('loader:hidden'));
+        return; // EXIT - no fetch interceptor, no event listeners, nothing
+    }
+
+    // ========== DESKTOP ONLY CODE BELOW ==========
+
     const loader = document.getElementById('app-loader');
     const progressBar = document.getElementById('progress-bar');
     const progressText = document.getElementById('progress-text');
     const progressDetails = document.getElementById('progress-details');
     const progressPercent = document.getElementById('progress-percent');
-    
+
     if (!loader) return;
     
     let progress = 0;
@@ -251,7 +287,7 @@
         };
     }
     
-    // Start tracking
+    // Start tracking (mobile already exited at top of script)
     function init() {
         setProgress(0, 'BOOT ▸ INITIALIZING', 'preparing your experience…');
         
@@ -290,11 +326,15 @@
     }
     
     function hideLoader() {
+        if (animationFrame) {
+            cancelAnimationFrame(animationFrame);
+            animationFrame = null;
+        }
         if (loader) {
             loader.classList.add('hidden');
-            setTimeout(() => {
+            // Desktop gets a 500ms fade-out delay (mobile already exited at top of script)
+            setTimeout(function() {
                 loader.style.display = 'none';
-                // Dispatch event for other scripts
                 document.dispatchEvent(new CustomEvent('loader:hidden'));
             }, 500);
         }
