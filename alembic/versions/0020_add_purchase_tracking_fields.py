@@ -1,7 +1,7 @@
-"""0020_add_purchase_tracking_fields
+"""0020_purchase_tracking_fields
 
-Revision ID: 0020_add_purchase_tracking_fields
-Revises: 0019_add_purchase_shipping_address
+Revision ID: 0020_purchase_tracking_fields
+Revises: 0019_purchase_shipping_addr
 Create Date: 2026-01-27
 
 """
@@ -11,8 +11,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "0020_add_purchase_tracking_fields"
-down_revision = "0019_add_purchase_shipping_address"
+revision = "0020_purchase_tracking_fields"
+down_revision = "0019_purchase_shipping_addr"
 branch_labels = None
 depends_on = None
 

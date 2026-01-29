@@ -1,6 +1,6 @@
-"""0019_add_purchase_shipping_address
+"""0019_purchase_shipping_addr
 
-Revision ID: 0019_add_purchase_shipping_address
+Revision ID: 0019_purchase_shipping_addr
 Revises: 0018_create_artist_payouts
 Create Date: 2026-01-26
 
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "0019_add_purchase_shipping_address"
+revision = "0019_purchase_shipping_addr"
 down_revision = "0018_create_artist_payouts"
 branch_labels = None
 depends_on = None

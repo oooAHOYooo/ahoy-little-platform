@@ -1,7 +1,7 @@
-"""0021_fix_purchase_decimal_precision
+"""0021_purchase_decimal_precision
 
-Revision ID: 0021_fix_purchase_decimal_precision
-Revises: 0020_add_purchase_tracking_fields
+Revision ID: 0021_purchase_decimal_precision
+Revises: 0020_purchase_tracking_fields
 Create Date: 2026-01-27
 
 Fix Purchase model to use Numeric(10,2) instead of Float for financial columns.
@@ -13,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0021_fix_purchase_decimal_precision'
-down_revision = '0020_add_purchase_tracking_fields'
+revision = '0021_purchase_decimal_precision'
+down_revision = '0020_purchase_tracking_fields'
 branch_labels = None
 depends_on = None
 
