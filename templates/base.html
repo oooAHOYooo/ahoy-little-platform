@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260129b' %}
+        {% set css_version = 'v20260129j' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -1695,10 +1695,11 @@
                         </button>
                         <button @click="currentTrack ? togglePlay() : null"
                             class="now-playing-btn now-playing-play-btn"
-                            :disabled="!currentTrack"
-                            :class="{'disabled': !currentTrack}"
-                            :title="isPlaying ? 'Pause' : 'Play'">
-                            <i
+                            :disabled="!currentTrack || isLoading"
+                            :class="{'disabled': !currentTrack, 'loading': isLoading}"
+                            :title="isLoading ? 'Loading...' : (isPlaying ? 'Pause' : 'Play')">
+                            <i x-show="isLoading" class="fas fa-spinner fa-spin"></i>
+                            <i x-show="!isLoading"
                                 :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
                         </button>
                         <button @click="nextTrack()" class="now-playing-btn"
@@ -1787,8 +1788,10 @@
                     <!-- Progress Bar -->
                     <div class="now-playing-progress">
                         <div class="now-playing-progress-bar"
-                            @click="currentTrack ? seekTo($event) : null"
-                            :class="{'disabled': !currentTrack}">
+                            @mousedown="currentTrack ? scrubStart($event) : null"
+                            @touchstart="currentTrack ? scrubStart($event) : null"
+                            @click.stop
+                            :class="{'disabled': !currentTrack, 'scrubbing': isScrubbing, 'loading': isLoading}">
                             <div class="now-playing-progress-fill"
                                 :style="`width: ${progressPercent}%`"></div>
                             <div class="now-playing-progress-handle"
@@ -1796,7 +1799,7 @@
                                 x-show="currentTrack"></div>
                         </div>
                         <div class="now-playing-time">
-                            <span x-text="currentTrack ? formatTime(currentTime) : '--:--'"></span>
+                            <span x-text="currentTrack ? formatTime(isScrubbing ? (scrubPercent / 100) * duration : currentTime) : '--:--'"></span>
                             <span x-text="currentTrack ? formatTime(duration) : '--:--'"></span>
                         </div>
                     </div>
@@ -2254,7 +2257,7 @@
 
         <!-- Loading Progress Tracker -->
         <script defer
-            src="{{ url_for('static', filename='js/loader.js') }}"></script>
+            src="{{ url_for('static', filename='js/loader.js') }}?{{ css_version }}"></script>
 
         <!-- Cross-platform Storage Helper (must load before other scripts) -->
         <script src="{{ url_for('static', filename='js/storage.js') }}"></script>
@@ -2273,7 +2276,7 @@
             src="{{ url_for('static', filename='js/app.js') }}"></script>
         <!-- Player: kept global (drives the bottom now-playing bar everywhere) -->
         <script defer
-            src="{{ url_for('static', filename='js/player.js') }}"></script>
+            src="{{ url_for('static', filename='js/player.js') }}?{{ css_version }}"></script>
         <!-- Player Queue: manages up-next queue and auto-pause on video -->
         <script defer
             src="{{ url_for('static', filename='js/player-queue.js') }}"></script>
@@ -3162,6 +3165,13 @@
                 isShuffled: false,
                 isRepeated: false,
 
+                // Scrubbing state
+                isScrubbing: false,
+                scrubPercent: 0,
+
+                // Loading state
+                isLoading: false,
+
                 // Queue state
                 showQueue: false,
                 queueItems: [],
@@ -3232,7 +3242,10 @@
                                 mp.on('timeupdate', (t) => {
                                     try {
                                         this.currentTime = t;
-                                        this.progressPercent = this.duration ? (t / this.duration) * 100 : 0;
+                                        // Only update progress visually if not scrubbing
+                                        if (!this.isScrubbing) {
+                                            this.progressPercent = this.duration ? (t / this.duration) * 100 : 0;
+                                        }
                                     } catch (e) {
                                         console.warn('Error in timeupdate handler:', e);
                                     }
@@ -3289,6 +3302,20 @@
                             }
                         } catch (e) {
                             console.warn('Error setting up playlistchange event:', e);
+                        }
+
+                        try {
+                            if (mp.on && typeof mp.on === 'function') {
+                                mp.on('loading', (isLoading) => {
+                                    try {
+                                        this.isLoading = !!isLoading;
+                                    } catch (e) {
+                                        // Silently ignore
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            // Silently ignore
                         }
                         
                         try {
@@ -3434,19 +3461,19 @@
 
                 togglePlay() {
                     try {
-                        if (window.mediaPlayer && typeof window.mediaPlayer === 'object') {
-                            if (this.isPlaying) {
-                                if (typeof window.mediaPlayer.pause === 'function') {
-                                    window.mediaPlayer.pause();
-                                }
-                            } else {
-                                if (this.currentTrack && typeof window.mediaPlayer.play === 'function') {
-                                    window.mediaPlayer.play(this.currentTrack);
-                                } else if (typeof window.mediaPlayer.resume === 'function') {
-                                    window.mediaPlayer.resume();
-                                }
+                        const mp = window.mediaPlayer;
+                        if (!mp || typeof mp !== 'object') return;
+                        // Use mediaPlayer as source of truth so toggle is correct even if UI state was stale
+                        const actuallyPlaying = !!mp.isPlaying;
+                        if (actuallyPlaying) {
+                            if (typeof mp.pause === 'function') mp.pause();
+                        } else {
+                            const track = mp.currentTrack || this.currentTrack;
+                            if (track && typeof mp.play === 'function') {
+                                mp.play(track);
+                            } else if (typeof mp.resume === 'function') {
+                                mp.resume();
                             }
-                            return;
                         }
                     } catch (e) {
                         console.warn('Error in togglePlay:', e);
@@ -3638,17 +3665,82 @@
 
                 seekTo(event) {
                     try {
-                        if (!window.mediaPlayer) return;
+                        if (!window.mediaPlayer || !this.currentTrack) return;
                         const progressBar = event.currentTarget;
-                        const rect = progressBar.getBoundingClientRect();
+                        const rect = progressBar && progressBar.getBoundingClientRect
+                            ? progressBar.getBoundingClientRect.call(progressBar) : { left: 0, width: 1 };
                         const clickX = event.clientX - rect.left;
-                        const percentage = clickX / rect.width;
+                        const percentage = Math.max(0, Math.min(1, clickX / rect.width));
                         const newTime = percentage * (this.duration || 0);
+                        this.progressPercent = percentage * 100;
                         if (typeof window.mediaPlayer.seekTo === 'function') {
                             window.mediaPlayer.seekTo(newTime);
                         }
                     } catch (e) {
                         console.warn('Error in seekTo:', e);
+                    }
+                },
+
+                // Scrubbing methods for drag-to-seek
+                scrubStart(event) {
+                    try {
+                        if (!this.currentTrack) return;
+                        this.isScrubbing = true;
+                        this._scrubBar = event.currentTarget;
+                        this.scrubMove(event);
+                        // Add global listeners for mouse/touch move and end
+                        document.addEventListener('mousemove', this._boundScrubMove = this.scrubMove.bind(this));
+                        document.addEventListener('mouseup', this._boundScrubEnd = this.scrubEnd.bind(this));
+                        document.addEventListener('touchmove', this._boundScrubMove, { passive: false });
+                        document.addEventListener('touchend', this._boundScrubEnd);
+                        document.addEventListener('touchcancel', this._boundScrubEnd);
+                    } catch (e) {
+                        console.warn('Error in scrubStart:', e);
+                    }
+                },
+
+                scrubMove(event) {
+                    try {
+                        if (!this.isScrubbing || !this._scrubBar) return;
+                        event.preventDefault();
+                        const el = this._scrubBar;
+                        const rect = el && el.getBoundingClientRect
+                            ? el.getBoundingClientRect.call(el) : { left: 0, width: 1 };
+                        // Handle both mouse and touch events
+                        const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+                        const offsetX = clientX - rect.left;
+                        const percentage = Math.max(0, Math.min(1, offsetX / rect.width));
+                        this.scrubPercent = percentage * 100;
+                        this.progressPercent = this.scrubPercent;
+                    } catch (e) {
+                        console.warn('Error in scrubMove:', e);
+                    }
+                },
+
+                scrubEnd(event) {
+                    try {
+                        if (!this.isScrubbing) return;
+                        // Calculate final position and seek
+                        const newTime = (this.scrubPercent / 100) * (this.duration || 0);
+                        if (window.mediaPlayer && typeof window.mediaPlayer.seekTo === 'function') {
+                            window.mediaPlayer.seekTo(newTime);
+                        }
+                        this.isScrubbing = false;
+                        // Remove global listeners
+                        if (this._boundScrubMove) {
+                            document.removeEventListener('mousemove', this._boundScrubMove);
+                            document.removeEventListener('touchmove', this._boundScrubMove);
+                        }
+                        if (this._boundScrubEnd) {
+                            document.removeEventListener('mouseup', this._boundScrubEnd);
+                            document.removeEventListener('touchend', this._boundScrubEnd);
+                            document.removeEventListener('touchcancel', this._boundScrubEnd);
+                        }
+                        this._boundScrubMove = null;
+                        this._boundScrubEnd = null;
+                        this._scrubBar = null;
+                    } catch (e) {
+                        console.warn('Error in scrubEnd:', e);
                     }
                 },
 
