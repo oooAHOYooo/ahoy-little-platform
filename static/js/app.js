@@ -68,7 +68,7 @@ const _pendingRequests = new Map();
 
 // Global fetch wrapper for request deduplication (only for GET requests)
 // This prevents multiple components from making the same API call simultaneously
-const _originalFetch = window.fetch;
+const _originalFetch = (window.fetch && window.fetch.bind) ? window.fetch.bind(window) : window.fetch;
 window.fetch = function(url, options = {}) {
   const method = (options.method || 'GET').toUpperCase();
   const isGet = method === 'GET';

@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260129j' %}
+        {% set css_version = 'v20260129k' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -3080,6 +3080,7 @@
         <script>
         // Enhanced image loading to prevent infinite loops
         (function () {
+            try {
             const loadedImages = new Set();
             const loadingImages = new Set();
 
@@ -3139,6 +3140,9 @@
                     });
                 });
             });
+            } catch (e) {
+                console.warn('Image dedup init error:', e);
+            }
         })();
 
         // Global Player Alpine.js Function (proxy to window.mediaPlayer)
