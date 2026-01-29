@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260128n' %}
+        {% set css_version = 'v20260129b' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -1741,6 +1741,47 @@
                             title="Share">
                             <i class="fas fa-share-alt"></i>
                         </button>
+                        <button @click="toggleQueue()"
+                            class="now-playing-btn now-playing-queue-btn"
+                            :class="{'active': showQueue}"
+                            title="Queue">
+                            <i class="fas fa-list"></i>
+                            <span x-show="queueLength > 0" class="queue-badge" x-text="queueLength"></span>
+                        </button>
+                    </div>
+
+                    <!-- Queue Panel -->
+                    <div class="now-playing-queue-panel" x-show="showQueue" x-cloak
+                        @click.away="showQueue = false"
+                        x-transition:enter="queue-enter"
+                        x-transition:leave="queue-leave">
+                        <div class="queue-header">
+                            <h4>Up Next</h4>
+                            <button @click="clearQueue()" class="queue-clear-btn"
+                                x-show="queueLength > 0" title="Clear queue">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        <div class="queue-list" x-show="queueLength > 0">
+                            <template x-for="(item, index) in queueItems" :key="index">
+                                <div class="queue-item" @click="playFromQueueAt(index)">
+                                    <img :src="item.cover_art || item.thumbnail || '/static/img/default-cover.jpg'"
+                                        class="queue-item-art" :alt="item.title">
+                                    <div class="queue-item-info">
+                                        <div class="queue-item-title" x-text="item.title"></div>
+                                        <div class="queue-item-artist" x-text="item.artist || item.host || ''"></div>
+                                    </div>
+                                    <button @click.stop="removeFromQueue(index)" class="queue-item-remove" title="Remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="queue-empty" x-show="queueLength === 0">
+                            <i class="fas fa-music"></i>
+                            <p>Queue is empty</p>
+                            <span>Add tracks to play next</span>
+                        </div>
                     </div>
 
                     <!-- Progress Bar -->
@@ -2233,8 +2274,11 @@
         <!-- Player: kept global (drives the bottom now-playing bar everywhere) -->
         <script defer
             src="{{ url_for('static', filename='js/player.js') }}"></script>
+        <!-- Player Queue: manages up-next queue and auto-pause on video -->
+        <script defer
+            src="{{ url_for('static', filename='js/player-queue.js') }}"></script>
 
-        <!-- Now Playing (lazy loaded): avoids parsing heavy scripts on pages where it’s unused -->
+        <!-- Now Playing (lazy loaded): avoids parsing heavy scripts on pages where it's unused -->
         <script type="module">
         (function () {
           const hasNowPlayingUI = !!document.querySelector('.now-playing-glass');
@@ -3118,6 +3162,11 @@
                 isShuffled: false,
                 isRepeated: false,
 
+                // Queue state
+                showQueue: false,
+                queueItems: [],
+                queueLength: 0,
+
                 init() {
                     // Wrap entire initialization in try-catch to prevent blocking page execution
                     try {
@@ -3301,7 +3350,62 @@
                         console.warn('Error initializing bookmark state or clock:', e);
                     }
 
+                    // Listen for queue changes
+                    try {
+                        document.addEventListener('queue:changed', () => {
+                            this.syncQueue();
+                        });
+                        this.syncQueue();
+                    } catch (e) {
+                        console.warn('Error setting up queue listener:', e);
+                    }
+
                     // Visualizer removed: no fullscreen/visualizer state needed.
+                },
+
+                // Queue methods
+                syncQueue() {
+                    if (window.playerQueue) {
+                        this.queueItems = window.playerQueue.getQueue();
+                        this.queueLength = window.playerQueue.length;
+                    }
+                },
+                toggleQueue() {
+                    this.showQueue = !this.showQueue;
+                    if (this.showQueue) this.syncQueue();
+                },
+                addToQueue(track) {
+                    if (window.playerQueue) {
+                        window.playerQueue.addToQueue(track);
+                        this.syncQueue();
+                    }
+                },
+                playNext(track) {
+                    if (window.playerQueue) {
+                        window.playerQueue.playNext(track);
+                        this.syncQueue();
+                    }
+                },
+                removeFromQueue(index) {
+                    if (window.playerQueue) {
+                        window.playerQueue.remove(index);
+                        this.syncQueue();
+                    }
+                },
+                clearQueue() {
+                    if (window.playerQueue) {
+                        window.playerQueue.clear();
+                        this.syncQueue();
+                    }
+                },
+                playFromQueueAt(index) {
+                    if (window.playerQueue && this.queueItems[index]) {
+                        const track = this.queueItems[index];
+                        window.playerQueue.remove(index);
+                        this.playTrack(track);
+                        this.syncQueue();
+                        this.showQueue = false;
+                    }
                 },
 
                 playTrack(track) {

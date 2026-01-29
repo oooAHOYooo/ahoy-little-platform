@@ -22,8 +22,9 @@ class MediaPlayer {
             lastTick: null,
             lastPersist: 0
         };
-        
+
         this.initializePlayer();
+        this._restoreState();
     }
     
     initializePlayer() {
@@ -505,6 +506,9 @@ class MediaPlayer {
     handleTrackEnd() {
         if (this.isRepeated) {
             this.play(this.currentTrack);
+        } else if (window.playerQueue && !window.playerQueue.isEmpty()) {
+            // Queue takes priority over playlist
+            window.playerQueue.playFromQueue();
         } else if (this.playlist.length > 0) {
             this.nextTrack();
         } else {
@@ -512,9 +516,66 @@ class MediaPlayer {
         }
     }
     
+    // State persistence for navigation
+    _saveState() {
+        try {
+            const state = {
+                track: this.currentTrack,
+                time: this.currentTime,
+                volume: this.volume,
+                muted: this.isMuted,
+                shuffled: this.isShuffled,
+                repeated: this.isRepeated,
+                wasPlaying: this.isPlaying
+            };
+            sessionStorage.setItem('ahoy.player.state', JSON.stringify(state));
+        } catch (e) { /* quota exceeded or private mode */ }
+    }
+
+    _restoreState() {
+        try {
+            const raw = sessionStorage.getItem('ahoy.player.state');
+            if (!raw) return;
+            const state = JSON.parse(raw);
+            if (!state.track) return;
+
+            this.volume = state.volume ?? 1;
+            this.isMuted = state.muted ?? false;
+            this.isShuffled = state.shuffled ?? false;
+            this.isRepeated = state.repeated ?? false;
+
+            // Restore track without auto-playing
+            this.currentTrack = state.track;
+            this.emit('trackchange', state.track);
+
+            // Set up media element
+            const isVideo = state.track.type === 'show' || state.track.video_url || state.track.mp4_link;
+            const el = isVideo ? this.videoElement : this.audioElement;
+            const src = state.track.audio_url || state.track.full_url || state.track.preview_url || state.track.url || state.track.video_url || state.track.mp4_link;
+            if (src) {
+                el.src = src;
+                el.volume = this.volume;
+                el.muted = this.isMuted;
+                el.currentTime = state.time || 0;
+                this.currentTime = state.time || 0;
+                this.emit('timeupdate', this.currentTime);
+
+                // Auto-resume if was playing (requires user gesture on mobile)
+                if (state.wasPlaying) {
+                    el.play().catch(() => {
+                        // Autoplay blocked - user will need to tap play
+                    });
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to restore player state:', e);
+        }
+    }
+
     // Passive listening-time helpers
     _onStarted() {
         this.listening.lastTick = Date.now();
+        this._saveState();
     }
     _onPaused() {
         if (this.listening.lastTick) {
@@ -526,6 +587,7 @@ class MediaPlayer {
             }
         }
         this.listening.lastTick = null;
+        this._saveState();
     }
     _onTimeProgress() {
         if (!this.isPlaying) return;
@@ -549,6 +611,8 @@ class MediaPlayer {
         try {
             window.dispatchEvent(new CustomEvent('listening:update', { detail: { totalSeconds: this.listening.totalSec } }));
         } catch (_) {}
+        // Also save player state for navigation persistence
+        this._saveState();
     }
     
     // Cleanup

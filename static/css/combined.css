@@ -2313,17 +2313,39 @@ img[src*="default-cover.jpg"] {
         font-size: 16px !important;
     }
 
-    /* Hide non-essential controls on mobile (keep share visible) */
-    .now-playing-controls .now-playing-btn:nth-child(n+4):not(.now-playing-share-btn) {
+    /* Hide non-essential controls on mobile (keep share and queue visible) */
+    .now-playing-controls .now-playing-btn:nth-child(n+4):not(.now-playing-share-btn):not(.now-playing-queue-btn) {
         display: none !important;
     }
 
-    /* Share button: smaller on mobile, always visible */
-    .now-playing-share-btn {
+    /* Share and queue buttons: smaller on mobile, always visible */
+    .now-playing-share-btn,
+    .now-playing-queue-btn {
         display: flex !important;
         width: 32px !important;
         height: 32px !important;
         font-size: 12px !important;
+    }
+
+    /* Queue badge smaller on mobile */
+    .queue-badge {
+        min-width: 14px !important;
+        height: 14px !important;
+        font-size: 9px !important;
+        top: -2px !important;
+        right: -2px !important;
+    }
+
+    /* Queue panel full-width on mobile */
+    .now-playing-queue-panel {
+        left: 8px !important;
+        right: 8px !important;
+        width: auto !important;
+        max-height: 50vh !important;
+    }
+
+    .queue-list {
+        max-height: calc(50vh - 80px) !important;
     }
 
     /* Compact progress bar at bottom */
@@ -4243,8 +4265,7 @@ img[src*="default-cover.jpg"] {
 .modal-overlay[style*="display: none"],
 .modal-overlay[style*="display:none"],
 .modal-overlay:not([style]),
-[x-cloak],
-[x-show]:not(.show) {
+[x-cloak] {
     pointer-events: none !important;
     touch-action: auto !important;
 }
