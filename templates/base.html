@@ -1735,13 +1735,6 @@
                                 :class="isSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"
                                 :style="isSaved ? 'color: var(--accent-color);' : ''"></i>
                         </button>
-                        <button @click="shareTrack()"
-                            class="now-playing-btn now-playing-share-btn"
-                            :class="{'disabled': !currentTrack}"
-                            :disabled="!currentTrack"
-                            title="Share">
-                            <i class="fas fa-share-alt"></i>
-                        </button>
                         <button @click="toggleQueue()"
                             class="now-playing-btn now-playing-queue-btn"
                             :class="{'active': showQueue}"
@@ -3210,6 +3203,7 @@
                                         this.currentTrack = mp.currentTrack;
                                         // Update saved state when track changes
                                         this.updateSavedState();
+                                        this.updateFavoritedState();
                                         // Keep Now Playing UI in sync (glassy theme only; no visualizer)
                                         if (window.nowPlayingController && mp.currentTrack) {
                                             window.nowPlayingController.onTrackChange(mp.currentTrack);
@@ -3291,6 +3285,7 @@
                                         this.currentTrack = mp.currentTrack;
                                         // Update saved state when track changes
                                         this.updateSavedState();
+                                        this.updateFavoritedState();
                                         // Keep Now Playing UI in sync (glassy theme only; no visualizer)
                                         if (window.nowPlayingController && mp.currentTrack) {
                                             window.nowPlayingController.onTrackChange(mp.currentTrack);
@@ -3325,6 +3320,7 @@
                                         this.currentTrack = track || mp.currentTrack;
                                         // Update saved state when track changes
                                         this.updateSavedState();
+                                        this.updateFavoritedState();
                                         // Keep Now Playing UI in sync (glassy theme only; no visualizer)
                                         if (window.nowPlayingController && this.currentTrack) {
                                             window.nowPlayingController.onTrackChange(this.currentTrack);
@@ -3361,6 +3357,7 @@
                         document.addEventListener('bookmarks:changed', () => {
                             try {
                                 this.updateSavedState();
+                                this.updateFavoritedState();
                             } catch (err) {
                                 console.warn('Error updating saved state from bookmark change:', err);
                             }
@@ -3372,6 +3369,7 @@
                     // Initialize bookmark state and start clock animation
                     try {
                         this.updateSavedState();
+                        this.updateFavoritedState();
                         this.startClock();
                     } catch (e) {
                         console.warn('Error initializing bookmark state or clock:', e);
@@ -3497,6 +3495,7 @@
                     
                     // Update local state immediately
                     this.updateSavedState();
+                    this.updateFavoritedState();
                     
                     // Force Alpine.js reactivity update for all components using isBookmarked
                     // This ensures bookmark buttons across the site update
@@ -3549,6 +3548,34 @@
                     }
                     const type = (this.currentTrack.type === 'show' ? 'show' : (this.currentTrack.type || 'track'));
                     this.isSaved = !!window.AhoyBookmarks.isBookmarked?.(type, this.currentTrack.id);
+                },
+
+                toggleFavoriteCurrent() {
+                    if (!this.currentTrack || !window.AhoyBookmarks) return;
+                    const type = (this.currentTrack.type === 'show' ? 'show' : (this.currentTrack.type || 'track'));
+                    const item = {
+                        type,
+                        id: this.currentTrack.id,
+                        title: this.currentTrack.title,
+                        artwork: this.currentTrack.cover_art || this.currentTrack.thumbnail
+                    };
+                    
+                    // Use the unified bookmark toggle - favorites use the same bookmark system
+                    const wasFavorited = window.AhoyBookmarks.isBookmarked(type, item.id);
+                    window.AhoyBookmarks.toggle(item);
+                    
+                    // Update local state immediately
+                    this.updateFavoritedState();
+                    this.updateSavedState(); // Also update bookmark state since they're the same
+                },
+
+                updateFavoritedState() {
+                    if (!this.currentTrack || !window.AhoyBookmarks) {
+                        this.isFavorited = false;
+                        return;
+                    }
+                    const type = (this.currentTrack.type === 'show' ? 'show' : (this.currentTrack.type || 'track'));
+                    this.isFavorited = !!window.AhoyBookmarks.isBookmarked?.(type, this.currentTrack.id);
                 },
 
                 previousTrack() {
