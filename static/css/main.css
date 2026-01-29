@@ -24675,6 +24675,9 @@ img.loading {
     cursor: pointer;
     position: relative;
     transition: height 0.2s ease;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .now-playing-progress-bar:hover {
@@ -24708,6 +24711,50 @@ img.loading {
 
 .now-playing-progress-bar:hover .now-playing-progress-handle {
     opacity: 1;
+}
+
+/* Scrubbing state */
+.now-playing-progress-bar.scrubbing {
+    height: 6px;
+}
+
+.now-playing-progress-bar.scrubbing .now-playing-progress-handle {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+.now-playing-progress-bar.scrubbing .now-playing-progress-fill {
+    transition: none;
+}
+
+/* Loading state - animated shimmer */
+.now-playing-progress-bar.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.now-playing-progress-bar.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Play button loading state */
+.now-playing-play-btn.loading {
+    opacity: 0.7;
 }
 
 .now-playing-time {
@@ -24916,23 +24963,129 @@ img.loading {
     /* Desktop styles remain unchanged */
 }
 
-/* Mobile styles are now in mobile.css to avoid conflicts */
+/* Mobile styles for now-playing mini player */
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .now-playing-wrapper {
-        height: 90px;
+        height: 80px;
+    }
+
+    .now-playing-container {
+        padding: 10px 16px 24px;
+        gap: 12px;
+    }
+
+    .now-playing-album-art {
+        width: 50px;
+        height: 50px;
     }
 
     .now-playing-info {
-        min-width: 120px;
+        flex: 1;
+        min-width: 0;
     }
 
     .now-playing-title {
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .now-playing-artist {
+        font-size: 12px;
+    }
+
+    /* Hide only shuffle and repeat on mobile - keep prev/play/next/boost/bookmark/share/queue */
+    .now-playing-controls .now-playing-btn:nth-child(4),  /* shuffle */
+    .now-playing-controls .now-playing-btn:nth-child(5) { /* repeat */
+        display: none;
+    }
+
+    .now-playing-controls {
+        gap: 2px;
+    }
+
+    .now-playing-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
+    }
+
+    .now-playing-play-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 15px;
+    }
+
+    /* Hide category pills on mobile */
+    .now-playing-category {
+        display: none;
+    }
+
+    /* Progress bar mobile */
+    .now-playing-progress {
+        padding: 0 16px 6px;
+    }
+
+    .now-playing-time {
+        font-size: 10px;
+    }
+
+    /* Queue panel mobile */
+    .now-playing-queue-panel {
+        width: calc(100vw - 32px);
+        right: 16px;
+        left: 16px;
+        max-height: 60vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .now-playing-wrapper {
+        height: 72px;
+    }
+
+    .now-playing-container {
+        padding: 6px 10px 18px;
+        gap: 8px;
+    }
+
+    .now-playing-album-art {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+    }
+
+    .now-playing-info {
+        min-width: 80px;
+    }
+
+    .now-playing-title {
+        font-size: 12px;
+    }
+
+    .now-playing-artist {
+        font-size: 10px;
+    }
+
+    .now-playing-controls {
+        gap: 1px;
+    }
+
+    .now-playing-btn {
+        width: 28px;
+        height: 28px;
         font-size: 11px;
+        border-radius: 6px;
+    }
+
+    .now-playing-play-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 13px;
+    }
+
+    /* Hide boost on very small screens to fit everything */
+    .now-playing-controls .now-playing-btn:nth-child(6) { /* boost */
+        display: none;
     }
 
     .category-pill {

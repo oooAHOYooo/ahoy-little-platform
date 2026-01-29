@@ -32,7 +32,8 @@
       "Bash(ipconfig:*)",
       "Bash(pkill:*)",
       "Bash(FLASK_RUN_HOST=0.0.0.0 python:*)",
-      "Bash(AHOY_HOST=0.0.0.0 python app.py:*)"
+      "Bash(AHOY_HOST=0.0.0.0 python app.py:*)",
+      "Bash(node --check:*)"
     ]
   }
 }

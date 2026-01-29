@@ -618,18 +618,17 @@ function musicLibrary() {
         },
         
         togglePlayPause() {
-            if (!window.mediaPlayer) return;
-            
-            if (this.isPlaying) {
-                window.mediaPlayer.pause();
-                this.isPlaying = false;
+            const mp = window.mediaPlayer;
+            if (!mp) return;
+            // Use mediaPlayer as source of truth so toggle is correct even if UI state was stale
+            if (mp.isPlaying) {
+                mp.pause();
             } else {
-                if (this.currentTrack) {
-                    window.mediaPlayer.play(this.currentTrack);
-                    this.isPlaying = true;
-                } else if (window.mediaPlayer.currentTrack) {
-                    window.mediaPlayer.resume();
-                    this.isPlaying = true;
+                const track = mp.currentTrack || this.currentTrack;
+                if (track) {
+                    mp.play(track);
+                } else {
+                    mp.resume();
                 }
             }
         },

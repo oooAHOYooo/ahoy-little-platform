@@ -80,10 +80,14 @@
 
             <!-- Timeline -->
             <div class="timeline">
-                <input type="range" min="0" :max="Math.floor(currentMedia?.duration_seconds || window.mediaPlayer?.duration || 0)" :value="Math.floor(currentTime)" @input="seekAudio($event)" @change="seekAudio($event)">
+                <input type="range" min="0"
+                    :max="Math.floor(currentMedia?.duration_seconds || window.mediaPlayer?.duration || 0)"
+                    :value="Math.floor(currentTime)" @input="seekAudio($event)"
+                    @change="seekAudio($event)">
             </div>
             <div class="time-info">
-                <span x-text="formatTime(currentTime)"></span> / <span x-text="formatTime(currentMedia?.duration_seconds || window.mediaPlayer?.duration || 0)"></span>
+                <span x-text="formatTime(currentTime)"></span> / <span
+                    x-text="formatTime(currentMedia?.duration_seconds || window.mediaPlayer?.duration || 0)"></span>
             </div>
 
             <!-- Bookmark Button -->
@@ -95,7 +99,8 @@
                 <i
                     :class="isBookmarked(currentMedia.id) ? 'fas fa-bookmark' : 'far fa-bookmark'"
                     :style="isBookmarked(currentMedia.id) ? 'color: var(--accent-color)' : ''"></i>
-                <span x-text="isBookmarked(currentMedia.id) ? 'Bookmarked' : 'Bookmark'"></span>
+                <span
+                    x-text="isBookmarked(currentMedia.id) ? 'Bookmarked' : 'Bookmark'"></span>
             </button>
         </div>
 
@@ -128,16 +133,20 @@
     <!-- Player Controls -->
     <div class="player-controls">
         <div class="control-buttons">
-            <button @click="previousTrack()" class="control-btn" title="Previous">
+            <button @click="previousTrack()" class="control-btn"
+                title="Previous">
                 <i class="fas fa-step-backward"></i>
             </button>
-            <button @click="seekBackward()" class="control-btn" title="15 seconds back">
+            <button @click="seekBackward()" class="control-btn"
+                title="15 seconds back">
                 <i class="fas fa-backward"></i>
             </button>
-            <button @click="togglePlay()" class="control-btn play-btn" :title="isPlaying ? 'Pause' : 'Play'">
+            <button @click="togglePlay()" class="control-btn play-btn"
+                :title="isPlaying ? 'Pause' : 'Play'">
                 <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
             </button>
-            <button @click="seekForward()" class="control-btn" title="15 seconds forward">
+            <button @click="seekForward()" class="control-btn"
+                title="15 seconds forward">
                 <i class="fas fa-forward"></i>
             </button>
             <button @click="nextTrack()" class="control-btn" title="Next">
@@ -382,21 +391,20 @@ function fullPlayer() {
                 }
             } else if (this.mediaType === 'music') {
                 // Delegate music control to global player for consistent playback + visualizer
-                if (!window.mediaPlayer) {
+                const mp = window.mediaPlayer;
+                if (!mp) {
                     console.warn('Global mediaPlayer not available');
                     return;
                 }
-                
-                if (this.isPlaying) {
-                    window.mediaPlayer.pause();
-                    // State will be updated via event listener
+                // Use mediaPlayer as source of truth so toggle is correct even if UI state was stale
+                if (mp.isPlaying) {
+                    mp.pause();
                 } else {
-                    if (this.currentMedia) {
-                        window.mediaPlayer.play(this.currentMedia);
-                        // State will be updated via event listener
-                    } else if (window.mediaPlayer.currentTrack) {
-                        // Resume if there's already a track playing
-                        window.mediaPlayer.resume();
+                    const track = mp.currentTrack || this.currentMedia;
+                    if (track) {
+                        mp.play(track);
+                    } else {
+                        mp.resume();
                     }
                 }
             }

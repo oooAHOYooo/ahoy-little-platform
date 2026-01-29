@@ -1,14 +1,25 @@
 # CLAUDE.md
 
+**This file is loaded as workspace context.** When the user starts a session, read the "Quick Reference" and "User's current focus" below first so you know where we left off.
+
+---
+
 ## Quick Reference (Read First)
 
 **Current Issues:** None active
 
-**Recent Changes (2026-01-28):**
-- Spotify-style persistent mini player: always visible, no full-screen player
-- Service worker v9: network-first for HTML (users always see latest push)
-- Fixed mobile scroll freeze: `static/js/loader.js` now skips ALL code on mobile (exits at line 25)
-- Files: `base.html`, `main.css`, `combined.css`, `app.py`, `service-worker.js`
+**User's current focus (pick up from here):**
+- **Music player and toggle play/pause** — User asked to get music playing reliably and to fix toggle play/pause. We did: (1) fix Illegal invocation (safe `getBoundingClientRect.call(el)` in base.html seek/scrub), (2) suppress AbortError on resume and use bound `element.play.bind(element)` everywhere in `player.js`, (3) make all toggle play/pause use `window.mediaPlayer.isPlaying` and `window.mediaPlayer.currentTrack` as single source of truth (base.html mini player, music.html, player.js playerData, player.html). (4) `pause()` now sets `isPlaying = false` immediately. (5) Token-light prompt for new sessions added at `.claude/PROMPT_LIGHT.md`. When the user asks for "anything else" or "check again," assume they want to continue from this player/music work unless they say otherwise.
+
+**Recent Changes (2026-01-29):**
+- Music playback: instant play after `load()`, bound `play()`, AbortError suppressed, loading state cleared
+- Toggle play/pause: all UIs use `mediaPlayer.isPlaying` / `mediaPlayer.currentTrack`; `pause()` sets `isPlaying = false` up front
+- Illegal invocation fix: `getBoundingClientRect.call(element)` in base.html seekTo/scrubMove
+- Token-light prompt: `.claude/PROMPT_LIGHT.md` for copy-paste into new Claude sessions
+- Cache: `css_version` → v20260129i in `templates/base.html` (~line 144)
+
+**Previous (2026-01-28):**
+- Spotify-style persistent mini player, service worker v9, mobile scroll freeze fix
 
 **Key Paths:**
 - App entry: `app.py` (Flask factory `create_app()`)
@@ -103,6 +114,22 @@ npx cap sync && npx cap open ios   # or android
 ---
 
 ## Session Log
+
+### 2026-01-29: Toggle play/pause + session context
+- **User requests:** Make sure music plays, toggle play/pause works, "check again," then a token-light request for Claude and update CLAUDE.md so when they log in Claude "automatically goes" (picks up context).
+- **Toggle:** All toggle logic (base mini player, music.html, player.js playerData, player.html) now uses `window.mediaPlayer.isPlaying` and `window.mediaPlayer.currentTrack` as source of truth so play/pause and icons stay in sync. `pause()` sets `this.isPlaying = false` before calling element.pause().
+- **Session context:** CLAUDE.md now has "User's current focus" at the top so new sessions know we've been on player/music work; added `.claude/PROMPT_LIGHT.md` for token-light copy-paste into new sessions.
+- **Files:** `templates/base.html`, `templates/music.html`, `templates/player.html`, `static/js/player.js`, `CLAUDE.md`, `.claude/PROMPT_LIGHT.md`
+
+### 2026-01-29: Instant Audio Playback + Mobile Mini Player
+- **Issue:** Audio didn't play immediately when clicking tracks/podcasts
+- **Cause:** `player.js` waited for `canplay` event before calling `play()`
+- **Fix:** Call `load()` then `play()` immediately; browser streams as data arrives
+- **Also:** Added `_playAborted` flag for rapid track switching; fixed loading state clearing
+- **Mobile:** Mini player shows prev/play/next/boost/bookmark/share/queue (hides shuffle, repeat)
+- **Mobile CSS:** Compact buttons (32px→28px on small phones), boost hidden under 480px
+- **Cache:** Added version param to `player.js` and `loader.js` script tags
+- **Files:** `static/js/player.js`, `static/css/main.css`, `templates/base.html` (css_version → v20260129g)
 
 ### 2026-01-28: Spotify-Style Persistent Mini Player
 - **Change:** Replaced full-screen player with always-visible mini player
