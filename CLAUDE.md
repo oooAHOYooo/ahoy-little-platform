@@ -37,6 +37,10 @@
 - **Static CSS/JS:** Long cache + versioned URLs (`?v=css_version`); bump version on deploy for fresh assets.
 - **Escape hatch:** `/refresh` clears SW + caches and redirects to `/`.
 
+**Mobile app shows old version (not what `python app.py` serves):**
+- The **native app (Capacitor)** loads from the **deployed** URL (`capacitor.config.ts` → `server.url`: e.g. `https://ahoy-indie-media.onrender.com` or whatever `app.ahoy.ooo` points to). It does **not** load from your local `python app.py`. So mobile will always show whatever is deployed at that URL.
+- **Fix:** (1) **Deploy** your latest code to the host that serves `app.ahoy.ooo` (e.g. Render). (2) **Force fresh content on the device:** In the app, go to **app.ahoy.ooo/refresh** (use in-app browser/URL if available, or open that URL in the phone’s browser and log in again), or **Settings → Apps → Ahoy Indie Media → Storage → Clear cache** (or Clear data), then reopen the app. After deploy, `/refresh` or clearing cache ensures the WebView gets new HTML instead of cached old UI.
+
 ---
 
 ## Project Overview
