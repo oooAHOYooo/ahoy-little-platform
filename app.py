@@ -2388,9 +2388,10 @@ def api_live_tv_channels():
         
         music_videos = [s for s in shows if (s.get('category') == 'music video' or 'music-video' in s.get('tags', []) or 'musicvideos' in safe_join_tags(s.get('tags', [])))]
         films = [s for s in shows if (s.get('category') == 'short film' or s.get('category') == 'film' or 'short-film' in s.get('tags', []))]
-        live_shows = [s for s in shows if (s.get('category') == 'broadcast' or 'live' in safe_join_tags(s.get('tags', [])) or 'episode' in s.get('category', ''))]
+        # Live Shows: broadcast/live/episodes, but exclude video-podcast so those go to Misc
+        live_shows = [s for s in shows if (s.get('category') == 'broadcast' or 'live' in safe_join_tags(s.get('tags', [])) or 'episode' in s.get('category', '')) and 'video-podcast' not in s.get('tags', [])]
 
-        # Misc: everything not already in the other channels (video only)
+        # Misc: everything not already in the other channels (video only), including video-podcast clips
         # Use .get() to safely access id, filter out None values
         included_ids = {s.get('id') for s in music_videos + films + live_shows if s.get('id')}
         misc_videos = [s for s in shows if s.get('id') and s.get('id') not in included_ids]
