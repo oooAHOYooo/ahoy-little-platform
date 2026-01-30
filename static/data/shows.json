@@ -482,6 +482,7 @@
       "tags": [
         "episode",
         "rob-show",
+        "video-podcast",
         "coulter-davis",
         "interview",
         "lost-content"
@@ -538,7 +539,7 @@
     {
       "id": "poets-and-friends-4",
       "title": "Poets & Friends #4",
-      "host": "Jack Galvin",
+      "host": "Ahoy Indie Media",
       "description": "Poets & Friends #4 (Spooky Edition). Thursday, Oct 30, 2025. Doors 6:00 PM. Readings 6:30–8:00 PM. Koffee? — 104 Audubon St, New Haven, CT. Costumes encouraged. Food available at Koffee?. Bring friends.",
       "duration_seconds": 5400,
       "video_url": "https://storage.googleapis.com/ahoy-videos/live/poets/Poets4Total.mp4",
@@ -557,8 +558,79 @@
         "live-performance",
         "spooky"
       ],
-      "host_slug": "jack-galvin",
+      "host_slug": "ahoy-indie-media",
       "category": "Broadcast"
+    },
+    {
+      "id": "the-rob-show-dominic-jace-clip",
+      "title": "[The Rob Show] - [Dominic Jace] - [2022] - [Clip]",
+      "host": "Rob Meglio",
+      "description": "The Rob Show clip featuring Dominic Jace (2022).",
+      "duration_seconds": null,
+      "video_url": "https://storage.googleapis.com/ahoy-videos/video-pods/the-rob-show/%5BThe%20Rob%20Show%20%5D%20%5BDominic%20Jace%5D%20%5B2022%5D%20%5BClip%5D.mp4",
+      "trailer_url": "https://storage.googleapis.com/ahoy-videos/video-pods/the-rob-show/%5BThe%20Rob%20Show%20%5D%20%5BDominic%20Jace%5D%20%5B2022%5D%20%5BClip%5D.mp4",
+      "thumbnail": "/static/thumbnails/the-rob-show-dominic-jace-clip_a44a3430995d.jpg",
+      "published_date": "2022-01-01",
+      "views": 0,
+      "type": "episode",
+      "is_live": false,
+      "tags": [
+        "episode",
+        "rob-show",
+        "the-rob-show",
+        "video-podcast",
+        "clip",
+        "dominic-jace"
+      ],
+      "host_slug": "rob-meglio",
+      "category": "Episodes"
+    },
+    {
+      "id": "the-rob-show-colleen-holt-clip",
+      "title": "[The Rob Show] - [Colleen Holt] - [2022] - [Clip]",
+      "host": "Rob Meglio",
+      "description": "The Rob Show clip featuring Colleen Holt (2022).",
+      "duration_seconds": null,
+      "video_url": "https://storage.googleapis.com/ahoy-videos/video-pods/the-rob-show/%5BThe%20Rob%20Show%5D%20%5BColleen%20Holt%5D%20%5B2022%5D%20%5BClip%5D.mp4",
+      "trailer_url": "https://storage.googleapis.com/ahoy-videos/video-pods/the-rob-show/%5BThe%20Rob%20Show%5D%20%5BColleen%20Holt%5D%20%5B2022%5D%20%5BClip%5D.mp4",
+      "thumbnail": "/static/thumbnails/the-rob-show-colleen-holt-clip_db868cef2ca3.jpg",
+      "published_date": "2022-01-01",
+      "views": 0,
+      "type": "episode",
+      "is_live": false,
+      "tags": [
+        "episode",
+        "rob-show",
+        "the-rob-show",
+        "video-podcast",
+        "clip",
+        "colleen-holt"
+      ],
+      "host_slug": "rob-meglio",
+      "category": "Episodes"
+    },
+    {
+      "id": "the-rob-show-tyler-2022",
+      "title": "[The Rob Show] - [Tyler] - [2022]",
+      "host": "Rob Meglio",
+      "description": "The Rob Show featuring Tyler (2022).",
+      "duration_seconds": null,
+      "video_url": "https://storage.googleapis.com/ahoy-videos/video-pods/the-rob-show/%5BThe%20Rob%20Show%5D%20%5BTyler%5D%20%5B2022%5D%20.mp4",
+      "trailer_url": "https://storage.googleapis.com/ahoy-videos/video-pods/the-rob-show/%5BThe%20Rob%20Show%5D%20%5BTyler%5D%20%5B2022%5D%20.mp4",
+      "thumbnail": "/static/thumbnails/the-rob-show-tyler-2022_5da2b6516986.jpg",
+      "published_date": "2022-01-01",
+      "views": 0,
+      "type": "episode",
+      "is_live": false,
+      "tags": [
+        "episode",
+        "rob-show",
+        "the-rob-show",
+        "video-podcast",
+        "tyler"
+      ],
+      "host_slug": "rob-meglio",
+      "category": "Episodes"
     }
   ]
 }

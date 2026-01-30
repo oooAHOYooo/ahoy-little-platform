@@ -31,6 +31,13 @@
           "items": [
             {
               "type": "content",
+              "title": "New The Rob Show Video Clips Added",
+              "description": "Three new video clips from The Rob Show are now available: Dominic Jace, Colleen Holt, and Tyler (2022).",
+              "date": "2026-01-30",
+              "link": "/player?id=the-rob-show-dominic-jace-clip&type=show"
+            },
+            {
+              "type": "content",
               "title": "New Pal-Bot Clips Added",
               "description": "Two new clips from Pal-Bot 1 are now available - 'Causes Tension in Couples Relationship' and 'Surprise Engagement and a Robotic Dilemma'.",
               "date": "2026-01-27",

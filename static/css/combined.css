@@ -1010,6 +1010,12 @@ img[src*="default-cover.jpg"] {
     margin-bottom: 12px;
 }
 
+.shows-subheader {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
 /* Glass card container */
 .music-subheader .header-content,
 .shows-subheader .header-content,

@@ -120,6 +120,11 @@
                             class="filter-tab">
                             All Videos
                         </button>
+                        <button @click="setCategory('video_podcast')"
+                            :class="{'active': selectedCategory === 'video_podcast'}"
+                            class="filter-tab">
+                            Video Podcast
+                        </button>
                         <button @click="setCategory('episode')"
                             :class="{'active': selectedCategory === 'episode'}"
                             class="filter-tab">
@@ -452,7 +457,9 @@ function showsPage() {
             }
             
             // Category filter
-            if (this.selectedCategory !== 'all') {
+            if (this.selectedCategory === 'video_podcast') {
+                filtered = filtered.filter(show => (show.tags || []).includes('video-podcast'));
+            } else if (this.selectedCategory !== 'all') {
                 filtered = filtered.filter(show => show.type === this.selectedCategory);
             }
             
