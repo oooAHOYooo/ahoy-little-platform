@@ -53,8 +53,11 @@ class MediaPlayer {
             this.emit('loading', true);
         });
         this.audioElement.addEventListener('loadedmetadata', () => {
-            this.duration = this.audioElement.duration;
-            this.emit('durationchange', this.duration);
+            const d = this.audioElement.duration;
+            if (typeof d === 'number' && d > 0 && !isNaN(d)) {
+                this.duration = d;
+                this.emit('durationchange', this.duration);
+            }
         });
         this.audioElement.addEventListener('canplay', () => {
             this.emit('loading', false);
@@ -270,7 +273,15 @@ class MediaPlayer {
         }
         
         this.currentTrack = track;
-        
+        this.currentTime = 0;
+
+        // Set duration from track metadata so timeline shows total length as soon as play is hit
+        const trackDuration = track.duration_seconds ?? track.duration;
+        if (typeof trackDuration === 'number' && trackDuration > 0 && !isNaN(trackDuration)) {
+            this.duration = trackDuration;
+            this.emit('durationchange', this.duration);
+        }
+
         // Emit trackchange event if track actually changed
         if (previousTrack !== track && (previousTrack?.id !== track?.id || previousTrack?.title !== track?.title)) {
             this.emit('trackchange', track);

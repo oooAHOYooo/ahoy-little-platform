@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260130a' %}
+        {% set css_version = 'v20260130b' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -1621,7 +1621,7 @@
             x-init="document.body.classList.add('has-player')">
 
             <!-- Glassy Now Playing Bar -->
-            <div class="now-playing-glass now-playing-sticky">
+            <div class="now-playing-glass now-playing-sticky" :class="{'now-playing-is-playing': currentTrack && isPlaying}">
                 <div class="now-playing-container">
                     <!-- Left: Album Artwork -->
                     <div class="now-playing-album-art"

@@ -193,8 +193,8 @@
     <div x-show="viewMode === 'grid'" class="music-grid">
         <template x-for="track in filteredTracks" :key="track.id">
             <div class="track-card"
-                @click="playTrack(track)"
-                :class="{'playing': currentTrack?.id === track.id}">
+                @click="(currentTrack?.id === track.id && isPlaying) ? togglePlayPause() : playTrack(track)"
+                :class="{'playing': currentTrack?.id === track.id, 'playing-active': currentTrack?.id === track.id && isPlaying}">
 
                 <div class="track-cover">
                     <img
@@ -203,9 +203,10 @@
                         class="image-placeholder"
                         loading="lazy"
                         @error="handleImageError($event, track)">
-                    <div class="track-overlay">
-                        <button @click.stop="playTrack(track)" class="play-btn">
-                            <i class="fas fa-play"></i>
+                    <div class="track-overlay" :class="{'track-overlay-visible': currentTrack?.id === track.id && isPlaying}">
+                        <button @click.stop="(currentTrack?.id === track.id && isPlaying) ? togglePlayPause() : playTrack(track)" class="play-btn" :aria-label="(currentTrack?.id === track.id && isPlaying) ? 'Pause' : 'Play'">
+                            <i x-show="currentTrack?.id === track.id && isPlaying" class="fas fa-pause"></i>
+                            <i x-show="!(currentTrack?.id === track.id && isPlaying)" class="fas fa-play"></i>
                         </button>
                         <div class="track-actions">
                             <button class="action-btn save-btn bm-btn"
@@ -449,8 +450,10 @@ function musicLibrary() {
         
         // Initialize
         async loadMusic() {
-            // Listen to player events
+            // Listen to player events and sync current state
             if (window.mediaPlayer) {
+                this.currentTrack = window.mediaPlayer.currentTrack || null;
+                this.isPlaying = !!window.mediaPlayer.isPlaying;
                 window.mediaPlayer.on('play', () => {
                     this.isPlaying = true;
                 });
