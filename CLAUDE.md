@@ -2,6 +2,8 @@
 
 **This file is loaded as workspace context.** When the user starts a session, read the "Quick Reference" and "User's current focus" below first so you know where we left off.
 
+**For Claude Code / heavy coding sessions:** Read this file first to understand the repo and avoid re-explaining architecture. High-impact, copy-paste prompts that assume CLAUDE.md context are in `.claude/PROMPTS_CLAUDE_CODE.md`.
+
 ---
 
 ## Quick Reference (Read First)
@@ -111,6 +113,7 @@ with get_session() as session:
 ```bash
 npx cap sync && npx cap open ios   # or android
 ```
+**Sync with Android Studio / Xcode:** Run `npx cap sync` (or `npx cap sync android` / `npx cap sync ios`), then `npx cap open android` or `npx cap open ios`. See `packaging/IDE_SYNC.md`.
 
 ## Env Vars (Required in Production)
 `SECRET_KEY`, `DATABASE_URL`, `STRIPE_SECRET_KEY`, `RESEND_API_KEY`, `AHOY_ADMIN_EMAIL`

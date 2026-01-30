@@ -1680,7 +1680,7 @@
                         <template x-if="!currentTrack">
                             <div>
                                 <div class="now-playing-title now-playing-empty-title">Select a track</div>
-                                <div class="now-playing-artist now-playing-empty-artist">Browse music, podcasts, or radio</div>
+                                <div class="now-playing-artist now-playing-empty-artist">Browse <a href="{{ url_for('music') }}" class="now-playing-empty-link">music</a>, <a href="/podcasts" class="now-playing-empty-link">podcasts</a>, or <a href="/radio" class="now-playing-empty-link">radio</a></div>
                             </div>
                         </template>
                     </div>

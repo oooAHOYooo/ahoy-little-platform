@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-"""
-Android APK/AAB signing script for Ahoy Indie Media
-Signs and aligns APK or signs AAB for release distribution
-"""
+# Android APK/AAB signing script for Ahoy Indie Media
+# Signs and aligns APK or signs AAB for release distribution
 
 set -euo pipefail
 

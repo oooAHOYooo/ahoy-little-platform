@@ -24370,7 +24370,7 @@ img.loading {
    GLASSY NOW PLAYING COMPONENT
    ============================================================ */
 
-/* Wrapper for Now Playing */
+/* Wrapper for Now Playing - fixed at bottom so it stays visible while scrolling */
 .now-playing-wrapper {
     position: fixed;
     bottom: 0;
@@ -24380,6 +24380,11 @@ img.loading {
     height: 90px;
     z-index: 1000;
     pointer-events: none;
+}
+
+/* Reserve space at bottom of page so footer (and last content) scrolls above the bar */
+body.has-player {
+    padding-bottom: 90px;
 }
 
 /* Glassy Now Playing Bar */
@@ -24613,6 +24618,16 @@ img.loading {
 .now-playing-empty-artist {
     color: rgba(255, 255, 255, 0.4) !important;
     font-size: 12px !important;
+}
+
+.now-playing-empty-link {
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+}
+
+.now-playing-empty-link:hover {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: underline;
 }
 
 /* Disabled button states */

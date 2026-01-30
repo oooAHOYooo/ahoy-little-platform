@@ -2419,6 +2419,11 @@ img[src*="default-cover.jpg"] {
         padding-bottom: calc(var(--bottom-nav-h, 60px) + var(--secondary-nav-h, 48px) + env(safe-area-inset-bottom) + 80px + var(--section-gap, 20px));
     }
 
+    /* Reserve bottom space so footer scrolls above the now-playing bar (mobile bar height 70px) */
+    body.has-player {
+        padding-bottom: 70px;
+    }
+
     /* Mobile empty state styles */
     .now-playing-empty-art {
         width: 50px !important;
