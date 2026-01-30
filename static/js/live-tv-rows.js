@@ -16,6 +16,8 @@
     nowThumb: null,
     nowTitle: null,
     nextTitle: null,
+    hoverPreviewTimer: null,
+    hoverPreviewEl: null,
   };
 
   function getCurrentSlotForRow(schedule, row) {
@@ -89,6 +91,62 @@
     return rowDef?.label || `Channel — ${channelName || 'Unknown'}`;
   }
 
+  function ensurePreviewEl() {
+    if (state.hoverPreviewEl) return state.hoverPreviewEl;
+    const el = document.createElement('div');
+    el.className = 'live-tv-channel-preview';
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = '<img src="" alt=""><div class="live-tv-channel-preview-title"></div><div class="live-tv-channel-preview-meta"></div>';
+    document.body.appendChild(el);
+    state.hoverPreviewEl = el;
+    return el;
+  }
+
+  function getPreviewDataForRow(rowIdx) {
+    const ch = state.channels[rowIdx];
+    if (!ch) return null;
+    const schedule = window.CHANNEL_SCHEDULE;
+    const slot = getCurrentSlotForRow(schedule, rowIdx);
+    const thumb = slot?.thumb || ch.items?.[0]?.thumbnail || '/static/img/default-cover.jpg';
+    const title = slot?.title || ch.items?.[0]?.title || '—';
+    const meta = slot?.category || ch.items?.[0]?.category || ch.name || '';
+    return { thumb, title: cleanTitle(title), meta };
+  }
+
+  function showPreview(button, rowIdx) {
+    const data = getPreviewDataForRow(rowIdx);
+    if (!data) return;
+    const el = ensurePreviewEl();
+    const img = el.querySelector('img');
+    const titleEl = el.querySelector('.live-tv-channel-preview-title');
+    const metaEl = el.querySelector('.live-tv-channel-preview-meta');
+    if (img) img.src = data.thumb;
+    if (titleEl) titleEl.textContent = data.title;
+    if (metaEl) metaEl.textContent = data.meta;
+    const rect = button.getBoundingClientRect();
+    const previewWidth = 280;
+    const padding = 12;
+    let left = rect.left + (rect.width / 2) - (previewWidth / 2);
+    let top = rect.top - padding;
+    if (left < padding) left = padding;
+    if (left + previewWidth > window.innerWidth - padding) left = window.innerWidth - previewWidth - padding;
+    if (top < padding) top = rect.bottom + padding;
+    el.style.left = left + 'px';
+    el.style.top = top + 'px';
+    el.classList.add('visible');
+    el.setAttribute('aria-hidden', 'false');
+  }
+
+  function hidePreview() {
+    if (state.hoverPreviewTimer) {
+      clearTimeout(state.hoverPreviewTimer);
+      state.hoverPreviewTimer = null;
+    }
+    if (state.hoverPreviewEl) {
+      state.hoverPreviewEl.classList.remove('visible');
+      state.hoverPreviewEl.setAttribute('aria-hidden', 'true');
+    }
+  }
 
   function renderRows() {
     const selectorContainer = byId('channel-selector');
@@ -128,6 +186,18 @@
         nowLine.textContent = '—';
       }
       button.appendChild(nowLine);
+
+      // Hover preview: show after 1 second
+      button.addEventListener('mouseenter', () => {
+        hidePreview();
+        state.hoverPreviewTimer = setTimeout(() => {
+          state.hoverPreviewTimer = null;
+          showPreview(button, rowIdx);
+        }, 1000);
+      });
+      button.addEventListener('mouseleave', () => {
+        hidePreview();
+      });
 
       // Click handler
       button.addEventListener('click', () => {

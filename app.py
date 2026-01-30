@@ -910,11 +910,15 @@ def api_artist(slug_or_name):
     # slug match
     for a in artists:
         if _slugify(a.get("slug") or a.get("name", "")) == key:
-            return jsonify(a)
+            r = jsonify(a)
+            r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            return r
     # case-insensitive name match
     for a in artists:
         if (a.get("name", "").strip().lower()) == key:
-            return jsonify(a)
+            r = jsonify(a)
+            r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            return r
     return jsonify({"error": "not_found"}), 404
 # ===========================================================================
 # ==== JSON Sitemap: GET /api/_sitemap =======================================
@@ -2109,7 +2113,10 @@ def artist_profile(artist_slug):
         except Exception:
             pass
     
-    return render_template('artist_detail.html', artist=artist, is_following=is_following)
+    response = make_response(render_template('artist_detail.html', artist=artist, is_following=is_following))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    return response
 
 @app.route('/my-saves')
 def my_saves():
@@ -2399,6 +2406,7 @@ def api_live_tv_channels():
             rnd.shuffle(items_copy)
             return items_copy
 
+        # Order must match Live TV UI: Channel 01 Misc, 02 Short Films, 03 Music Videos, 04 Live Shows
         channels = [
             {
                 'id': 'misc',
@@ -2406,14 +2414,14 @@ def api_live_tv_channels():
                 'items': daily_shuffle(misc, 'misc'),
             },
             {
-                'id': 'music-videos',
-                'name': 'Music Videos',
-                'items': daily_shuffle(music_videos, 'music'),
-            },
-            {
                 'id': 'films',
                 'name': 'Films',
                 'items': daily_shuffle(films, 'films'),
+            },
+            {
+                'id': 'music-videos',
+                'name': 'Music Videos',
+                'items': daily_shuffle(music_videos, 'music'),
             },
             {
                 'id': 'live-shows',
@@ -2434,8 +2442,8 @@ def api_live_tv_channels():
         response = jsonify({
             'channels': [
                 {'id': 'misc', 'name': 'Misc', 'items': []},
-                {'id': 'music-videos', 'name': 'Music Videos', 'items': []},
                 {'id': 'films', 'name': 'Films', 'items': []},
+                {'id': 'music-videos', 'name': 'Music Videos', 'items': []},
                 {'id': 'live-shows', 'name': 'Live Shows', 'items': []},
             ],
             'error': 'Failed to load channels'
@@ -2948,7 +2956,9 @@ def api_artist_profile(artist_name):
         if h_slug == artist_slug or h_name == artist_name_lc or artist_slug in tags:
             artist_shows.append(s)
 
-    return jsonify({'artist': artist, 'tracks': artist_tracks, 'shows': artist_shows})
+    resp = jsonify({'artist': artist, 'tracks': artist_tracks, 'shows': artist_shows})
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return resp
 
 @app.route('/api/artists/<int:artist_id>/music')
 def api_artist_music(artist_id):
