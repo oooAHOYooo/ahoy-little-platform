@@ -1750,7 +1750,13 @@
                         x-transition:enter="queue-enter"
                         x-transition:leave="queue-leave">
                         <div class="queue-header">
-                            <h4>Up Next</h4>
+                            <div class="queue-header-left">
+                                <h4>Up Next</h4>
+                                <div class="queue-header-actions">
+                                    <a class="queue-add-btn" href="/music" @click="showQueue = false">Add Tracks</a>
+                                    <a class="queue-add-btn" href="/podcasts" @click="showQueue = false">Add Podcasts</a>
+                                </div>
+                            </div>
                             <button @click="clearQueue()" class="queue-clear-btn"
                                 x-show="queueLength > 0" title="Clear queue">
                                 <i class="fas fa-trash-alt"></i>
@@ -1775,6 +1781,10 @@
                             <i class="fas fa-music"></i>
                             <p>Queue is empty</p>
                             <span>Add tracks to play next</span>
+                            <div class="queue-empty-actions">
+                                <a class="queue-add-btn" href="/music" @click="showQueue = false">Add Tracks</a>
+                                <a class="queue-add-btn" href="/podcasts" @click="showQueue = false">Add Podcasts</a>
+                            </div>
                         </div>
                     </div>
 
@@ -2267,6 +2277,129 @@
             src="{{ url_for('static', filename='js/bookmarks.js') }}"></script>
         <script defer
             src="{{ url_for('static', filename='js/app.js') }}"></script>
+        <!-- Queue Handler: Alpine.js data for queue buttons -->
+        <script>
+        // Global Queue Handler for Alpine.js
+        (function() {
+            function registerQueueHandler() {
+                if (typeof Alpine === "undefined") {
+                    setTimeout(registerQueueHandler, 100);
+                    return;
+                }
+                
+                Alpine.data("globalQueueHandler", () => ({
+                    showCountFade: false,
+                    queueCount: 0,
+                    
+                    init() {
+                        // Listen for queue changes
+                        document.addEventListener('queue:changed', () => {
+                            this.updateQueueCount();
+                        });
+                        this.updateQueueCount();
+                    },
+                    
+                    updateQueueCount() {
+                        if (window.playerQueue) {
+                            this.queueCount = window.playerQueue.length;
+                        }
+                    },
+                    
+                    addToQueue(type, id, title, artwork, itemData) {
+                        if (!window.playerQueue) {
+                            console.warn('Player queue not available');
+                            return;
+                        }
+                        
+                        // Build queue item from provided data or itemData
+                        let queueItem;
+                        if (itemData && typeof itemData === 'object') {
+                            // Use the full item data if provided
+                            queueItem = {
+                                ...itemData,
+                                id: itemData.id || id,
+                                title: itemData.title || title || '',
+                                cover_art: itemData.cover_art || itemData.artwork || artwork || '/static/img/default-cover.jpg',
+                                type: itemData.type || (type === 'track' ? 'music' : (type === 'podcast-episode' ? 'podcast' : type)),
+                                artist: itemData.artist || itemData.showTitle || '',
+                                audio_url: itemData.audio_url || itemData.url || ''
+                            };
+                        } else {
+                            // Create minimal queue item
+                            queueItem = {
+                                id: id,
+                                title: title || '',
+                                cover_art: artwork || '/static/img/default-cover.jpg',
+                                type: type === 'track' ? 'music' : (type === 'podcast-episode' ? 'podcast' : type),
+                                artist: '',
+                                audio_url: ''
+                            };
+                        }
+                        
+                        // Check if already in queue
+                        const queue = window.playerQueue.getQueue();
+                        const isAlreadyQueued = queue.some(item => {
+                            const itemId = String(item.id || '');
+                            const itemKey = item.key || '';
+                            // Check by id or by key (for podcast episodes)
+                            return itemId === String(id) || itemKey === String(id);
+                        });
+                        
+                        if (isAlreadyQueued) {
+                            // Show notification that it's already in queue
+                            if (window.__ahoyToast) {
+                                window.__ahoyToast('Already in queue');
+                            }
+                            return;
+                        }
+                        
+                        // Add to queue
+                        window.playerQueue.addToQueue(queueItem);
+                        
+                        // Update count and show animation
+                        this.queueCount = window.playerQueue.length;
+                        this.showCountFade = true;
+                        
+                        // Show notification
+                        if (window.__ahoyToast) {
+                            window.__ahoyToast('Added to queue');
+                        }
+                        
+                        // Dispatch queue changed event
+                        document.dispatchEvent(new CustomEvent('queue:changed', {
+                            detail: { action: 'add', items: [queueItem] }
+                        }));
+                        
+                        // Force UI update
+                        this.$nextTick(() => {
+                            const buttons = document.querySelectorAll(`[data-type="${type}"][data-id="${id}"]`);
+                            buttons.forEach(btn => {
+                                btn.classList.add('in-queue');
+                            });
+                        });
+                    },
+                    
+                    isInQueue(type, id) {
+                        if (!window.playerQueue) return false;
+                        const queue = window.playerQueue.getQueue();
+                        return queue.some(item => {
+                            const itemId = String(item.id || '');
+                            const itemKey = String(item.key || '');
+                            // Check by id or by key (for podcast episodes)
+                            return itemId === String(id) || itemKey === String(id);
+                        });
+                    }
+                }));
+            }
+            
+            // Register when Alpine is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', registerQueueHandler);
+            } else {
+                registerQueueHandler();
+            }
+        })();
+        </script>
         <!-- Player: kept global (drives the bottom now-playing bar everywhere) -->
         <script defer
             src="{{ url_for('static', filename='js/player.js') }}?{{ css_version }}"></script>

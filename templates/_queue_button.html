@@ -1,0 +1,35 @@
+{# templates/_queue_button.html #}
+{% macro queue_button(type, id, title="", artwork="", item_data=None) -%}
+{% if LOGGED_IN %}
+<div class="queue-container" x-data="globalQueueHandler()" x-init="init()">
+  <button class="queue-btn action-btn"
+    data-queue
+    data-type="{{ type }}"
+    data-id="{{ id }}"
+    data-title="{{ title }}"
+    data-artwork="{{ artwork }}"
+    @click.stop="addToQueue('{{ type }}', '{{ id }}', '{{ title }}', '{{ artwork }}', {{ item_data|tojson|safe if item_data else 'null' }})"
+    :class="{ 'in-queue': isInQueue('{{ type }}', '{{ id }}') }"
+    aria-pressed="false"
+    title="Add to queue">
+    <span data-queue-icon aria-hidden="true">
+      <i :class="isInQueue('{{ type }}', '{{ id }}') ? 'fas fa-list-check' : 'fas fa-list-plus'"></i>
+    </span>
+    <span data-queue-label class="sr-only">Add to queue</span>
+
+    <!-- Count fade animation -->
+    <div class="queue-count-fade"
+      x-show="showCountFade"
+      x-transition:enter="transition ease-out duration-300"
+      x-transition:enter-start="opacity-0 scale-75"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="transition ease-in duration-500"
+      x-transition:leave-start="opacity-100 scale-100"
+      x-transition:leave-end="opacity-0 scale-50"
+      x-text="queueCount"
+      x-init="setTimeout(() => showCountFade = false, 2000)">
+    </div>
+  </button>
+</div>
+{% endif %}
+{%- endmacro %}

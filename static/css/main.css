@@ -5597,6 +5597,92 @@ opacity:0.15;
     font-size: 1.1rem;
 }
 
+/* Queue Button Styles */
+.queue-btn {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.queue-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.queue-btn.in-queue {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(56, 142, 60, 0.15) 100%);
+    border-color: rgba(76, 175, 80, 0.4);
+    color: #81c784;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    filter: saturate(1.2);
+}
+
+.queue-btn.in-queue:hover {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(56, 142, 60, 0.25) 100%);
+    border-color: rgba(76, 175, 80, 0.6);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px) scale(1.02);
+}
+
+.queue-btn i {
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.queue-btn.in-queue i {
+    color: #81c784;
+    filter: drop-shadow(0 0 4px rgba(76, 175, 80, 0.5));
+}
+
+.queue-container {
+    display: inline-flex;
+    align-items: center;
+}
+
+.queue-count-fade {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--primary-color, #00d4ff);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 212, 255, 0.4);
+}
+
+.queue-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    background: rgba(76, 175, 80, 0.2);
+    border: 1px solid rgba(76, 175, 80, 0.4);
+    border-radius: 12px;
+    color: #81c784;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
 /* Bookmark grid layout */
 .bm-grid {
     display: grid;
@@ -24862,6 +24948,46 @@ body.has-player {
     font-size: 14px;
     font-weight: 600;
     color: #fff;
+}
+
+.queue-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.queue-header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.queue-add-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 12px;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.queue-add-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.queue-empty-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .queue-clear-btn {

@@ -33,6 +33,41 @@
         </div>
     </section>
 
+    <!-- Recent Queue Section (only for logged in users) -->
+    {% if LOGGED_IN %}
+    <section class="podcasts-section" x-data="recentQueueSection()" x-init="init()" x-show="recentQueueItems.length > 0">
+        <div class="podcasts-section-header">
+            <h2>Recent Queue</h2>
+            <span class="queue-count-badge" x-text="recentQueueItems.length"></span>
+        </div>
+        <div class="episode-list">
+            <template x-for="(item, index) in recentQueueItems" :key="item.id || item.key || index">
+                <article class="episode-row">
+                    <img class="episode-art" :src="item.cover_art || item.artwork || '/static/img/default-cover.jpg'" alt="">
+                    <div class="episode-meta">
+                        <div class="episode-title" x-text="item.title"></div>
+                        <div class="episode-subtitle">
+                            <span class="episode-time" x-text="item.artist || item.showTitle || ''"></span>
+                        </div>
+                    </div>
+                    <div class="episode-actions">
+                        <button type="button" class="episode-btn"
+                            @click="playFromQueue(index)" title="Play">
+                            <i class="fas fa-play" aria-hidden="true"></i>
+                            <span class="sr-only">Play</span>
+                        </button>
+                        <button type="button" class="episode-btn"
+                            @click="removeFromQueue(index)" title="Remove">
+                            <i class="fas fa-times" aria-hidden="true"></i>
+                            <span class="sr-only">Remove</span>
+                        </button>
+                    </div>
+                </article>
+            </template>
+        </div>
+    </section>
+    {% endif %}
+
     <section class="podcasts-section">
         <div class="podcasts-section-header">
             <h2>Episodes</h2>
@@ -57,6 +92,17 @@
                             <i class="fas fa-play" aria-hidden="true"></i>
                             <span class="sr-only">Play</span>
                         </button>
+                        {% if LOGGED_IN %}
+                        <div class="queue-container" x-data="globalQueueHandler()" x-init="init()">
+                            <button type="button" class="episode-btn queue-btn"
+                                @click.stop="addToQueue('podcast-episode', ep.key, ep.title, ep.artwork, ep)"
+                                :class="{ 'in-queue': isInQueue('podcast-episode', ep.key) }"
+                                title="Add to queue">
+                                <i :class="isInQueue('podcast-episode', ep.key) ? 'fas fa-list-check' : 'fas fa-list-plus'" aria-hidden="true"></i>
+                                <span class="sr-only">Add to queue</span>
+                            </button>
+                        </div>
+                        {% endif %}
                         <button type="button" class="episode-btn bm-btn"
                             @click="toggleBookmark(ep)" title="Bookmark">
                             <i class="fas fa-bookmark" aria-hidden="true"></i>
@@ -478,6 +524,50 @@ function podcastContactForm() {
                 document.dispatchEvent(new CustomEvent('ahoy:boost:open', {
                     detail: { recipientType: 'podcast', recipientId: show.slug, recipientName: show.title }
                 }));
+            }
+        };
+    }
+
+    // Recent Queue Section Handler
+    function recentQueueSection() {
+        return {
+            recentQueueItems: [],
+            
+            init() {
+                this.loadRecentQueue();
+                // Listen for queue changes
+                document.addEventListener('queue:changed', () => {
+                    this.loadRecentQueue();
+                });
+            },
+            
+            loadRecentQueue() {
+                if (window.playerQueue) {
+                    const queue = window.playerQueue.getQueue();
+                    // Show most recent items (last 5)
+                    this.recentQueueItems = queue.slice(-5).reverse();
+                }
+            },
+            
+            playFromQueue(index) {
+                // Calculate actual queue index (from the end)
+                if (window.playerQueue) {
+                    const queue = window.playerQueue.getQueue();
+                    const actualIndex = queue.length - 1 - index;
+                    const item = queue[actualIndex];
+                    if (item) {
+                        document.dispatchEvent(new CustomEvent('play-track', { detail: item }));
+                    }
+                }
+            },
+            
+            removeFromQueue(index) {
+                if (window.playerQueue) {
+                    const queue = window.playerQueue.getQueue();
+                    const actualIndex = queue.length - 1 - index;
+                    window.playerQueue.remove(actualIndex);
+                    this.loadRecentQueue();
+                }
             }
         };
     }
