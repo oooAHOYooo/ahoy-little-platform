@@ -550,7 +550,7 @@ class MediaPlayer {
         }
     }
     
-    // State persistence for navigation
+    // State persistence: sessionStorage for same-tab navigation, localStorage for cross-session resume
     _saveState() {
         try {
             const state = {
@@ -563,12 +563,16 @@ class MediaPlayer {
                 wasPlaying: this.isPlaying
             };
             sessionStorage.setItem('ahoy.player.state', JSON.stringify(state));
+            if (this.currentTrack) {
+                localStorage.setItem('ahoy.player.lastPlayed', JSON.stringify(state));
+            }
         } catch (e) { /* quota exceeded or private mode */ }
     }
 
     _restoreState() {
         try {
-            const raw = sessionStorage.getItem('ahoy.player.state');
+            let raw = sessionStorage.getItem('ahoy.player.state');
+            if (!raw) raw = localStorage.getItem('ahoy.player.lastPlayed');
             if (!raw) return;
             const state = JSON.parse(raw);
             if (!state.track) return;
@@ -578,31 +582,42 @@ class MediaPlayer {
             this.isShuffled = state.shuffled ?? false;
             this.isRepeated = state.repeated ?? false;
 
-            // Restore track without auto-playing
             this.currentTrack = state.track;
             this.emit('trackchange', state.track);
 
-            // Set up media element
             const isVideo = state.track.type === 'show' || state.track.video_url || state.track.mp4_link;
             const el = isVideo ? this.videoElement : this.audioElement;
             const src = state.track.audio_url || state.track.full_url || state.track.preview_url || state.track.url || state.track.video_url || state.track.mp4_link;
-            if (src) {
-                el.src = src;
-                el.volume = this.volume;
-                el.muted = this.isMuted;
-                el.currentTime = state.time || 0;
-                this.currentTime = state.time || 0;
-                this.emit('timeupdate', this.currentTime);
+            if (!src) return;
 
-                // Auto-resume if was playing (requires user gesture on mobile)
-                if (state.wasPlaying && el.play) {
+            el.src = src;
+            el.volume = this.volume;
+            el.muted = this.isMuted;
+            const seekTime = Math.max(0, state.time || 0);
+            const wasPlaying = !!state.wasPlaying;
+
+            const onLoaded = () => {
+                el.removeEventListener('loadedmetadata', onLoaded);
+                el.removeEventListener('error', onError);
+                el.currentTime = seekTime;
+                this.currentTime = seekTime;
+                this.emit('timeupdate', this.currentTime);
+                if (wasPlaying && el.play) {
                     const playFn = el.play.bind(el);
                     playFn().catch(err => {
                         if (err && err.name === 'AbortError') return;
-                        // Autoplay blocked - user will need to tap play
+                        // Autoplay blocked - user can tap play to resume
                     });
                 }
-            }
+            };
+            const onError = () => {
+                el.removeEventListener('loadedmetadata', onLoaded);
+                el.removeEventListener('error', onError);
+            };
+            el.addEventListener('loadedmetadata', onLoaded, { once: true });
+            el.addEventListener('error', onError, { once: true });
+
+            try { el.load(); } catch (_) {}
         } catch (e) {
             console.warn('Failed to restore player state:', e);
         }
