@@ -33,8 +33,7 @@
         </div>
     </section>
 
-    <!-- Recent Queue Section (only for logged in users) -->
-    {% if LOGGED_IN %}
+    <!-- Recent Queue Section -->
     <section class="podcasts-section" x-data="recentQueueSection()" x-init="init()" x-show="recentQueueItems.length > 0">
         <div class="podcasts-section-header">
             <h2>Recent Queue</h2>
@@ -66,8 +65,6 @@
             </template>
         </div>
     </section>
-    {% endif %}
-
     <section class="podcasts-section">
         <div class="podcasts-section-header">
             <h2>Episodes</h2>
@@ -92,7 +89,6 @@
                             <i class="fas fa-play" aria-hidden="true"></i>
                             <span class="sr-only">Play</span>
                         </button>
-                        {% if LOGGED_IN %}
                         <div class="queue-container" x-data="globalQueueHandler()" x-init="init()">
                             <button type="button" class="episode-btn queue-btn"
                                 @click.stop="addToQueue('podcast-episode', ep.key, ep.title, ep.artwork, ep)"
@@ -102,7 +98,6 @@
                                 <span class="sr-only">Add to queue</span>
                             </button>
                         </div>
-                        {% endif %}
                         <button type="button" class="episode-btn bm-btn"
                             @click="toggleBookmark(ep)" title="Bookmark">
                             <i class="fas fa-bookmark" aria-hidden="true"></i>

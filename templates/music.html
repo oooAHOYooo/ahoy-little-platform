@@ -189,8 +189,7 @@
         </div>
     </section>
 
-    <!-- Recent Queue Section (only for logged in users) -->
-    {% if LOGGED_IN %}
+    <!-- Recent Queue Section -->
     <section class="podcasts-section" x-data="recentQueueSection()" x-init="init()" x-show="recentQueueItems.length > 0">
         <div class="podcasts-section-header">
             <h2>Recent Queue</h2>
@@ -222,7 +221,6 @@
             </template>
         </div>
     </section>
-    {% endif %}
 
     <!-- Music Grid View -->
     <div x-show="viewMode === 'grid'" class="music-grid">
@@ -244,7 +242,6 @@
                             <i x-show="!(currentTrack?.id === track.id && isPlaying)" class="fas fa-play"></i>
                         </button>
                         <div class="track-actions">
-                            {% if LOGGED_IN %}
                             <div class="queue-container" x-data="globalQueueHandler()" x-init="init()">
                                 <button class="action-btn queue-btn"
                                     @click.stop="addToQueue('track', track.id, track.title, track.cover_art, track)"
@@ -254,7 +251,6 @@
                                     <span class="sr-only">Add to queue</span>
                                 </button>
                             </div>
-                            {% endif %}
                             <button class="action-btn save-btn bm-btn"
                                 @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art }); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
                                 :aria-pressed="isBookmarked('track', track.id)"
