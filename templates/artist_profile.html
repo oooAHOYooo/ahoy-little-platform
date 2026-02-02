@@ -105,6 +105,10 @@
                     <div class="track-info">
                         <h3 x-text="track.title"></h3>
                         <p x-text="track.album || 'Single'"></p>
+                        <div class="track-meta">
+                            <span class="track-duration"
+                                x-text="formatTime(track.duration_seconds || 0)"></span>
+                        </div>
                     </div>
                 </div>
             </template>
@@ -116,7 +120,7 @@
                 <span class="col-title">#</span>
                 <span class="col-title">Title</span>
                 <span class="col-title">Album</span>
-                <span class="col-title">Duration</span>
+                <span class="col-duration">Duration</span>
                 <span class="col-title">Actions</span>
             </div>
             <div class="list-items">
@@ -134,6 +138,8 @@
                         </div>
                         <span class="col-album"
                             x-text="track.album || 'Single'"></span>
+                        <span class="col-duration"
+                            x-text="formatTime(track.duration_seconds || 0)"></span>
                         <div class="col-actions">
                             <button @click.stop="likeTrack(track)"
                                 class="action-btn"
@@ -295,6 +301,13 @@ function artistProfile() {
         
         // Utility functions
         
+        formatTime(seconds) {
+            if (!seconds || seconds === 0 || isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        },
+
         formatDate(dateString) {
             if (!dateString) return '';
             return new Date(dateString).toLocaleDateString();

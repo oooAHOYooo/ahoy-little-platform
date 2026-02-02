@@ -6976,12 +6976,30 @@ opacity:0.15;
     letter-spacing: 0.5px;
 }
 
+.card-duration {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
 /* Search List */
 .search-list {
     background: var(--card-background);
     border-radius: 8px;
     border: 1px solid var(--border-color);
     overflow: hidden;
+}
+
+.search-list .list-header,
+.search-list .list-item {
+    grid-template-columns: 60px 1fr 200px 90px 100px 80px;
+}
+
+.search-list .col-duration {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
 }
 
 .list-header {
@@ -13797,6 +13815,11 @@ img.loading {
     align-items: center;
 }
 
+.tracks-list .list-header,
+.tracks-list .list-item {
+    grid-template-columns: 40px 1fr 1fr 80px 100px;
+}
+
 .list-item:hover {
     background: var(--background-light);
 }
@@ -18692,6 +18715,12 @@ img.loading {
     padding-right: 20px;
 }
 
+.music-table th.col-duration {
+    text-align: right;
+    width: 70px;
+    padding-right: 20px;
+}
+
 .music-table th.col-plays:hover {
     color: rgba(255, 255, 255, 0.9);
 }
@@ -18837,6 +18866,13 @@ img.loading {
     padding-right: 20px;
 }
 
+.music-table td.col-duration {
+    text-align: right;
+    color: rgba(255, 255, 255, 0.6);
+    font-variant-numeric: tabular-nums;
+    padding-right: 20px;
+}
+
 .music-table td.col-action {
     text-align: center;
     width: 70px;
@@ -18961,6 +18997,12 @@ img.loading {
     .music-table td.col-artist {
         min-width: 120px;
         max-width: 150px;
+    }
+
+    .music-table th.col-duration,
+    .music-table td.col-duration {
+        width: 55px;
+        padding-right: 12px;
     }
 
     .music-table th.col-plays,

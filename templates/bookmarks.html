@@ -491,6 +491,11 @@
                         <div class="card-meta">
                             <p class="card-date"
                                 x-text="'Saved ' + formatDate(item.added_at)"></p>
+                            <div class="card-duration"
+                                x-show="item.type === 'track'">
+                                <i class="far fa-clock"></i>
+                                <span x-text="formatTime(item.duration_seconds || 0)"></span>
+                            </div>
                             <div class="access-count"
                                 x-show="item.access_count > 0">
                                 <i class="fas fa-eye"></i>
@@ -576,6 +581,8 @@ function bookmarksPageHandler() {
         filterNest: null,
         bookmarks: {},
         nests: {},
+        trackLookup: {},
+        trackLookupLoaded: false,
         // Wizard state
         showWizard: false,
         wizardStep: 1,
@@ -655,7 +662,7 @@ function bookmarksPageHandler() {
             this.closeWizard();
         },
         
-        loadBookmarks() {
+        async loadBookmarks() {
             this.bookmarks = {};
             
             // Try multiple sources for bookmark data
@@ -680,6 +687,40 @@ function bookmarksPageHandler() {
                     console.error('Error reading localStorage:', e);
                 }
             }
+
+            await this.enrichTrackBookmarks();
+        },
+
+        async ensureTrackLookup() {
+            if (this.trackLookupLoaded) return;
+            try {
+                const response = await fetch('/api/music');
+                const data = await response.json();
+                const tracks = Array.isArray(data.tracks) ? data.tracks : [];
+                this.trackLookup = tracks.reduce((acc, track) => {
+                    if (track && track.id) acc[String(track.id)] = track;
+                    return acc;
+                }, {});
+                this.trackLookupLoaded = true;
+            } catch (e) {
+                console.warn('Failed to load track lookup for bookmarks', e);
+                this.trackLookupLoaded = true;
+            }
+        },
+
+        async enrichTrackBookmarks() {
+            const trackItems = Object.values(this.bookmarks || {}).filter(item => item.type === 'track');
+            if (trackItems.length === 0) return;
+            await this.ensureTrackLookup();
+            trackItems.forEach(item => {
+                const track = this.trackLookup[String(item.id)];
+                if (!track) return;
+                if (!item.duration_seconds) item.duration_seconds = track.duration_seconds || 0;
+                if (!item.artist && track.artist) item.artist = track.artist;
+                if (!item.audio_url && track.audio_url) item.audio_url = track.audio_url;
+                if (!item.cover_art && track.cover_art) item.cover_art = track.cover_art;
+                if (!item.artwork && track.cover_art) item.artwork = track.cover_art;
+            });
         },
         
         loadNests() {
@@ -758,6 +799,13 @@ function bookmarksPageHandler() {
             if (diffDays <= 7) return `${diffDays} days ago`;
             if (diffDays <= 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
             return date.toLocaleDateString();
+        },
+
+        formatTime(seconds) {
+            if (!seconds || seconds === 0 || isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         },
 
         // Collection management

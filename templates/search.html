@@ -105,6 +105,8 @@
                         <p x-text="getItemSubtitle(item)"></p>
                         <div class="card-meta">
                             <span class="card-type" x-text="getItemTypeLabel(item.kind)"></span>
+                            <span class="card-duration" x-show="item.kind === 'music'"
+                                x-text="formatTime(item.duration || item.duration_seconds || 0)"></span>
                         </div>
                     </div>
                 </div>
@@ -117,6 +119,7 @@
                 <span class="col-cover"></span>
                 <span class="col-title">Title</span>
                 <span class="col-subtitle">Artist/Host</span>
+                <span class="col-duration">Duration</span>
                 <span class="col-type">Type</span>
                 <span class="col-actions">Actions</span>
             </div>
@@ -137,6 +140,8 @@
                         <div class="col-subtitle">
                             <p x-text="getItemSubtitle(item)"></p>
                         </div>
+                        <div class="col-duration"
+                            x-text="item.kind === 'music' ? formatTime(item.duration || item.duration_seconds || 0) : ''"></div>
                         <div class="col-type">
                             <span class="type-badge" x-text="getItemTypeLabel(item.kind)"></span>
                         </div>
@@ -260,6 +265,9 @@ function searchResults() {
         // Content actions
         playContent(item) {
             if (window.globalPlayer) {
+                if (item.kind === 'music' && !item.duration_seconds && item.duration) {
+                    item.duration_seconds = item.duration;
+                }
                 window.globalPlayer.playTrack(item);
             }
         },
@@ -356,6 +364,13 @@ function searchResults() {
                 'artist': 'ARTIST'
             };
             return labels[kind] || 'CONTENT';
+        },
+
+        formatTime(seconds) {
+            if (!seconds || seconds === 0 || isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         },
 
         async toggleBookmark(item) {

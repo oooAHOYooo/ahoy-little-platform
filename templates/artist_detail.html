@@ -147,6 +147,10 @@ endblock %}
                     <div class="track-info">
                         <h4 x-text="item.title"></h4>
                         <p x-text="item.subtitle"></p>
+                        <div class="track-meta" x-show="item.kind === 'track'">
+                            <span class="track-duration"
+                                x-text="formatTime(item.data?.duration_seconds || 0)"></span>
+                        </div>
                     </div>
                 </div>
             </template>
@@ -326,6 +330,13 @@ function artistDetail() {
             this.lastBookmarkAction;
             if (window.AhoyBookmarks) return window.AhoyBookmarks.isBookmarked(type === 'show' ? 'show' : 'track', id);
             return false;
+        },
+
+        formatTime(seconds) {
+            if (!seconds || seconds === 0 || isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         },
 
         lastBookmarkAction: 0

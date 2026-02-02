@@ -628,17 +628,17 @@ function fullPlayer() {
         
         // Utility functions
         formatTime(seconds) {
-            if (!seconds) return '0:00';
+            if (!seconds || seconds === 0 || isNaN(seconds)) return '00:00';
             const mins = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         },
         
         formatDuration(seconds) {
-            if (!seconds) return '0:00';
+            if (!seconds || seconds === 0 || isNaN(seconds)) return '00:00';
             const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         },
         
         formatDate(dateString) {

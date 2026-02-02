@@ -202,7 +202,8 @@
                     <div class="episode-meta">
                         <div class="episode-title" x-text="item.title"></div>
                         <div class="episode-subtitle">
-                            <span class="episode-time" x-text="item.artist || ''"></span>
+                            <span class="episode-time"
+                                x-text="item.artist ? item.artist + ' - ' + formatTime(item.duration_seconds || 0) : formatTime(item.duration_seconds || 0)"></span>
                         </div>
                     </div>
                     <div class="episode-actions">
@@ -273,6 +274,8 @@
                     <h4 x-text="track.title"></h4>
                     <p x-text="track.artist"></p>
                     <div class="track-meta">
+                        <span class="track-duration"
+                            x-text="formatTime(track.duration_seconds || 0)"></span>
                     </div>
                 </div>
             </div>
@@ -288,6 +291,7 @@
                         <th class="col-play"></th>
                         <th class="col-title">Title</th>
                         <th class="col-artist">Artist</th>
+                        <th class="col-duration">Time</th>
                         <th class="col-plays" @click="sortByPlays()">
                             Plays <i class="fas fa-sort-down"
                                 x-show="sortBy === 'plays'"></i>
@@ -319,6 +323,8 @@
                             </td>
                             <td class="col-artist" data-label="Artist"
                                 x-text="track.artist"></td>
+                            <td class="col-duration" data-label="Time"
+                                x-text="formatTime(track.duration_seconds || 0)"></td>
                             <td class="col-plays" data-label="Plays"
                                 x-text="track.play_count || 0"></td>
                             <td class="col-action" data-label="Action">
@@ -953,10 +959,10 @@ function musicLibrary() {
         
         // Utility functions
         formatTime(seconds) {
-            if (!seconds || seconds === 0) return '--:--';
+            if (!seconds || seconds === 0 || isNaN(seconds)) return '00:00';
             const mins = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
     };
 }
