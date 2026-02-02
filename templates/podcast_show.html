@@ -94,7 +94,7 @@
                                 @click.stop="addToQueue('podcast-episode', ep.key, ep.title, ep.artwork, ep)"
                                 :class="{ 'in-queue': isInQueue('podcast-episode', ep.key) }"
                                 title="Add to queue">
-                                <i :class="isInQueue('podcast-episode', ep.key) ? 'fas fa-list-check' : 'fas fa-list-plus'" aria-hidden="true"></i>
+                                <i :class="isInQueue('podcast-episode', ep.key) ? 'fas fa-check' : 'fas fa-plus'" aria-hidden="true"></i>
                                 <span class="sr-only">Add to queue</span>
                             </button>
                         </div>

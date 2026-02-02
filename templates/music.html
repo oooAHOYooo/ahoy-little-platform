@@ -248,7 +248,7 @@
                                     @click.stop="addToQueue('track', track.id, track.title, track.cover_art, track)"
                                     :class="{ 'in-queue': isInQueue('track', track.id) }"
                                     title="Add to queue">
-                                    <i :class="isInQueue('track', track.id) ? 'fas fa-list-check' : 'fas fa-list-plus'" aria-hidden="true"></i>
+                                    <i :class="isInQueue('track', track.id) ? 'fas fa-check' : 'fas fa-plus'" aria-hidden="true"></i>
                                     <span class="sr-only">Add to queue</span>
                                 </button>
                             </div>
@@ -274,7 +274,7 @@
                     <h4 x-text="track.title"></h4>
                     <p x-text="track.artist"></p>
                     <div class="track-meta">
-                        <span class="track-duration"
+                        <span class="track-duration glass-tag"
                             x-text="formatTime(track.duration_seconds || 0)"></span>
                     </div>
                 </div>

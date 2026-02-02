@@ -1735,7 +1735,7 @@
                                 :class="isSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"
                                 :style="isSaved ? 'color: var(--accent-color);' : ''"></i>
                         </button>
-                        <button @click="toggleQueue()"
+                        <button @click.stop="toggleQueue()"
                             class="now-playing-btn now-playing-queue-btn"
                             :class="{'active': showQueue}"
                             title="Queue">
@@ -2308,6 +2308,14 @@
                     addToQueue(type, id, title, artwork, itemData) {
                         if (!window.playerQueue) {
                             console.warn('Player queue not available');
+                            // Retry shortly in case player-queue.js hasn't loaded yet.
+                            setTimeout(() => {
+                                if (window.playerQueue) {
+                                    this.addToQueue(type, id, title, artwork, itemData);
+                                } else if (window.__ahoyToast) {
+                                    window.__ahoyToast('Queue not ready yet');
+                                }
+                            }, 200);
                             return;
                         }
                         
@@ -2318,16 +2326,18 @@
                             queueItem = {
                                 ...itemData,
                                 id: itemData.id || id,
+                                key: itemData.key || id,
                                 title: itemData.title || title || '',
                                 cover_art: itemData.cover_art || itemData.artwork || artwork || '/static/img/default-cover.jpg',
                                 type: itemData.type || (type === 'track' ? 'music' : (type === 'podcast-episode' ? 'podcast' : type)),
                                 artist: itemData.artist || itemData.showTitle || '',
-                                audio_url: itemData.audio_url || itemData.url || ''
+                                audio_url: itemData.audio_url || itemData.mp3url || itemData.full_url || itemData.preview_url || itemData.url || itemData.src || ''
                             };
                         } else {
                             // Create minimal queue item
                             queueItem = {
                                 id: id,
+                                key: id,
                                 title: title || '',
                                 cover_art: artwork || '/static/img/default-cover.jpg',
                                 type: type === 'track' ? 'music' : (type === 'podcast-episode' ? 'podcast' : type),

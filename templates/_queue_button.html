@@ -13,7 +13,7 @@
     aria-pressed="false"
     title="Add to queue">
     <span data-queue-icon aria-hidden="true">
-      <i :class="isInQueue('{{ type }}', '{{ id }}') ? 'fas fa-list-check' : 'fas fa-list-plus'"></i>
+      <i :class="isInQueue('{{ type }}', '{{ id }}') ? 'fas fa-check' : 'fas fa-plus'"></i>
     </span>
     <span data-queue-label class="sr-only">Add to queue</span>
 

@@ -1,3 +1,4 @@
 pytest
 httpx
 pytest-cov
+mutagen==1.47.0
