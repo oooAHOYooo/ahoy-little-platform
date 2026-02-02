@@ -34,7 +34,15 @@
       "Bash(FLASK_RUN_HOST=0.0.0.0 python:*)",
       "Bash(AHOY_HOST=0.0.0.0 python app.py:*)",
       "Bash(node --check:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(./gradlew wrapper:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(open:*)",
+      "Bash(./gradlew assembleRelease:*)",
+      "Bash(./gradlew bundleRelease:*)",
+      "Bash(keytool:*)",
+      "Bash(echo:*)",
+      "Bash(jarsigner:*)"
     ]
   }
 }

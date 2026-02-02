@@ -11,14 +11,16 @@
 **Current Issues:** None active
 
 **User's current focus (pick up from here):**
-- **Music player and toggle play/pause** — User asked to get music playing reliably and to fix toggle play/pause. We did: (1) fix Illegal invocation (safe `getBoundingClientRect.call(el)` in base.html seek/scrub), (2) suppress AbortError on resume and use bound `element.play.bind(element)` everywhere in `player.js`, (3) make all toggle play/pause use `window.mediaPlayer.isPlaying` and `window.mediaPlayer.currentTrack` as single source of truth (base.html mini player, music.html, player.js playerData, player.html). (4) `pause()` now sets `isPlaying = false` immediately. (5) Token-light prompt for new sessions added at `.claude/PROMPT_LIGHT.md`. When the user asks for "anything else" or "check again," assume they want to continue from this player/music work unless they say otherwise.
+- **Mobile beta builds (Android + iOS)** — Android build is working end-to-end with signed AAB ready for Play Store internal testing. iOS archive builds from terminal but needs Apple Developer team account for signing in Xcode. User has a Google Developer account and wants to get test betas out.
 
-**Recent Changes (2026-01-29):**
-- Music playback: instant play after `load()`, bound `play()`, AbortError suppressed, loading state cleared
-- Toggle play/pause: all UIs use `mediaPlayer.isPlaying` / `mediaPlayer.currentTrack`; `pause()` sets `isPlaying = false` up front
-- Illegal invocation fix: `getBoundingClientRect.call(element)` in base.html seekTo/scrubMove
-- Token-light prompt: `.claude/PROMPT_LIGHT.md` for copy-paste into new Claude sessions
-- Cache: `css_version` → v20260129i in `templates/base.html` (~line 144)
+**Recent Changes (2026-02-02):**
+- Android: Gradle upgraded 8.0.2→8.11.1, AGP 8.0.0→8.7.3 (Java 21 compat)
+- Android: Signing config wired into `build.gradle` via `keystore/sign.properties`
+- Android: Signed AAB + APK built and ready for Play Store upload
+- iOS: Archive built (`ios/App/build/App.xcarchive`), needs team signing in Xcode
+
+**Previous (2026-01-29):**
+- Music playback, toggle play/pause, instant audio, mobile mini player
 
 **Previous (2026-01-28):**
 - Spotify-style persistent mini player, service worker v9, mobile scroll freeze fix
@@ -115,12 +117,42 @@ npx cap sync && npx cap open ios   # or android
 ```
 **Sync with Android Studio / Xcode:** Run `npx cap sync` (or `npx cap sync android` / `npx cap sync ios`), then `npx cap open android` or `npx cap open ios`. See `packaging/IDE_SYNC.md`.
 
+**Android signed build (terminal):**
+```bash
+npx cap sync android
+cd android && ./gradlew bundleRelease assembleRelease   # builds signed AAB + APK
+```
+- Signing config: `android/app/build.gradle` reads from `android/keystore/sign.properties`
+- Keystore: `android/keystore/ahoy-release.jks` (password: `26trustdaL0RD`, alias: `ahoy`)
+- **AAB** (Play Store): `android/app/build/outputs/bundle/release/app-release.aab`
+- **APK** (direct install): `android/app/build/outputs/apk/release/app-release-unsigned.apk`
+- Upload AAB to Google Play Console → Testing → Internal testing
+- Keystore is gitignored — back it up somewhere safe; same keystore required for all future uploads
+- Gradle 8.11.1 + AGP 8.7.3 (requires Java 21)
+
+**iOS build (terminal):**
+```bash
+npx cap sync ios
+cd ios/App && xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -archivePath ./build/App.xcarchive archive CODE_SIGNING_ALLOWED=NO
+open build/App.xcarchive   # opens Xcode Organizer for signing + upload to TestFlight
+```
+- Needs Apple Developer team account for signing
+- In Xcode Organizer: Distribute App → TestFlight & App Store → select team → Upload
+
 ## Env Vars (Required in Production)
 `SECRET_KEY`, `DATABASE_URL`, `STRIPE_SECRET_KEY`, `RESEND_API_KEY`, `AHOY_ADMIN_EMAIL`
 
 ---
 
 ## Session Log
+
+### 2026-02-02: Android & iOS beta build setup
+- **Goal:** Set up native builds for Play Store internal testing and TestFlight
+- **Android:** Upgraded Gradle 8.0.2→8.11.1 and AGP 8.0.0→8.7.3 for Java 21 compatibility. Created release keystore (`android/keystore/ahoy-release.jks`, password `26trustdaL0RD`, alias `ahoy`). Wired signing config into `build.gradle` via `keystore/sign.properties`. Built signed AAB + APK from terminal.
+- **iOS:** Built archive from terminal with `xcodebuild` (unsigned). Opens in Xcode Organizer for team signing. User needs Apple Developer team account to sign and upload to TestFlight.
+- **Gradle fix:** Android Studio showed "incompatible Java 21 and Gradle 8.0.2" — upgraded wrapper + AGP from terminal.
+- **Gitignore:** Uncommented `*.jks`, `*.keystore`, added `keystore/` to `android/.gitignore`
+- **Files:** `android/gradle/wrapper/gradle-wrapper.properties`, `android/build.gradle`, `android/app/build.gradle`, `android/keystore/ahoy-release.jks`, `android/keystore/sign.properties`, `android/.gitignore`, `ios/App/build/App.xcarchive`
 
 ### 2026-01-29: Toggle play/pause + session context
 - **User requests:** Make sure music plays, toggle play/pause works, "check again," then a token-light request for Claude and update CLAUDE.md so when they log in Claude "automatically goes" (picks up context).
