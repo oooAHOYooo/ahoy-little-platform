@@ -48,7 +48,21 @@
       "Bash(xcrun simctl:*)",
       "Bash(sudo chmod:*)",
       "Bash(find:*)",
-      "Bash(pod deintegrate:*)"
+      "Bash(pod deintegrate:*)",
+      "Bash(git -C /Users/agworkywork/ahoy-little-platform status)",
+      "Bash(git -C /Users/agworkywork/ahoy-little-platform diff --stat)",
+      "Bash(git -C /Users/agworkywork/ahoy-little-platform log --oneline -5)",
+      "Bash(git -C /Users/agworkywork/ahoy-little-platform add static/css/main.css static/js/player.js templates/base.html templates/music.html templates/player.html utils/logging_init.py)",
+      "Bash(git -C /Users/agworkywork/ahoy-little-platform commit -m \"$\\(cat <<''EOF''\nFix duplicate MP3 loads in Safari, play/pause toggle, and restyle bottom bar\n\n- Remove audioElement.load\\(\\) from stalled/suspend/abort handler \\(Safari fires aggressively\\)\n- All togglePlay\\(\\) paths now use resume\\(\\) instead of play\\(\\) to avoid re-fetching audio\n- Same-track detection uses String\\(id\\) comparison for type-safe matching\n- resume\\(\\) optimistically sets isPlaying for instant icon toggle\n- Suppress \"audio failed to load\" toast during session state restoration\n- Queue button is now icon-only \\(removed \"Queue\" text label\\)\n- Redesigned bottom bar: deeper glass effect, purple gradient play button, refined glow\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /Users/agworkywork/ahoy-little-platform push)",
+      "Bash(/Users/agworkywork/.pyenv/versions/3.11.0/bin/python:*)",
+      "Bash(git -C /Users/agworkywork/ahoy-little-platform add app.py static/js/player.js static/css/main.css templates/base.html templates/music.html templates/player.html)",
+      "Bash(git -C /Users/agworkywork/ahoy-little-platform commit -m \"$\\(cat <<''EOF''\nFix audio proxy \\(missing requests import\\) and exempt from rate limit\n\n- proxy_audio\\(\\) used `requests` without importing it — every call was 500\n- Added `import requests as requests_lib` inside the function\n- Exempt /proxy/audio from rate limiter \\(audio streams shouldn''t count\\)\n- Suppress error toast during session state restoration\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(emulator:*)",
+      "Bash(adb devices:*)",
+      "Bash(./quick-test.sh)",
+      "Bash(adb wait-for-device:*)",
+      "Bash(adb shell:*)"
     ]
   }
 }
