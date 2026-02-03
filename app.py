@@ -2078,8 +2078,10 @@ def performances():
     return response
 
 @app.route('/proxy/audio')
+@limiter.exempt
 def proxy_audio():
     """Proxy audio files to bypass CORS on localhost testing"""
+    import requests as requests_lib
     from urllib.parse import unquote
 
     url = request.args.get('url')
@@ -2096,7 +2098,7 @@ def proxy_audio():
 
     try:
         # Fetch audio from external source
-        resp = requests.get(url, timeout=30, stream=True)
+        resp = requests_lib.get(url, timeout=30, stream=True)
         resp.raise_for_status()
 
         # Create response with audio data
@@ -2106,7 +2108,7 @@ def proxy_audio():
         response.headers['Cache-Control'] = 'public, max-age=3600'
 
         return response
-    except requests.exceptions.RequestException as e:
+    except requests_lib.exceptions.RequestException as e:
         abort(502, f'Failed to fetch audio: {str(e)}')
 
 @app.route('/merch')
