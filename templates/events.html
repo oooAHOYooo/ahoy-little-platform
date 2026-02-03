@@ -95,6 +95,10 @@
                             @click.stop>
                             Watch
                         </a>
+                        <a class="episode-open" x-show="evt.rsvp_external_url" :href="evt.rsvp_external_url"
+                            target="_blank" rel="noopener" @click.stop>
+                            View
+                        </a>
                         <span class="episode-open" x-show="!evt.videoUrl && evt.videoStatus" style="opacity:0.7; cursor:default;">
                             <span x-text="evt.videoStatus"></span>
                         </span>
