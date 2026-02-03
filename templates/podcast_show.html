@@ -7,7 +7,7 @@
     <section class="podcast-show-hero">
         <img class="podcast-show-hero-art"
             src="{{ show.artwork or '/static/img/default-cover.jpg' }}"
-            alt="">
+            alt>
         <div class="podcast-show-hero-meta">
             <div class="podcast-show-hero-kicker">Podcast</div>
             <h1 class="podcast-show-hero-title">{{ show.title }}</h1>
@@ -34,19 +34,25 @@
     </section>
 
     <!-- Recent Queue Section -->
-    <section class="podcasts-section" x-data="recentQueueSection()" x-init="init()" x-show="recentQueueItems.length > 0">
+    <section class="podcasts-section" x-data="recentQueueSection()"
+        x-init="init()" x-show="recentQueueItems.length > 0">
         <div class="podcasts-section-header">
             <h2>Recent Queue</h2>
-            <span class="queue-count-badge" x-text="recentQueueItems.length"></span>
+            <span class="queue-count-badge"
+                x-text="recentQueueItems.length"></span>
         </div>
         <div class="episode-list">
-            <template x-for="(item, index) in recentQueueItems" :key="item.id || item.key || index">
+            <template x-for="(item, index) in recentQueueItems"
+                :key="item.id || item.key || index">
                 <article class="episode-row">
-                    <img class="episode-art" :src="item.cover_art || item.artwork || '/static/img/default-cover.jpg'" alt="">
+                    <img class="episode-art"
+                        :src="item.cover_art || item.artwork || '/static/img/default-cover.jpg'"
+                        alt>
                     <div class="episode-meta">
                         <div class="episode-title" x-text="item.title"></div>
                         <div class="episode-subtitle">
-                            <span class="episode-time" x-text="item.artist || item.showTitle || ''"></span>
+                            <span class="episode-time"
+                                x-text="item.artist || item.showTitle || ''"></span>
                         </div>
                     </div>
                     <div class="episode-actions">
@@ -73,13 +79,15 @@
         <div class="episode-list">
             <template x-for="ep in episodes" :key="ep.key">
                 <article class="episode-row">
-                    <img class="episode-art" :src="ep.artwork" alt="">
+                    <img class="episode-art" :src="ep.artwork" alt>
                     <div class="episode-meta">
                         <div class="episode-title" x-text="ep.title"></div>
                         <div class="episode-subtitle">
-                            <span class="episode-time" x-text="ep.duration"></span>
+                            <span class="episode-time"
+                                x-text="ep.duration"></span>
                             <span class="episode-dot" x-show="ep.date">•</span>
-                            <span class="episode-date" x-show="ep.date" x-text="ep.date"></span>
+                            <span class="episode-date" x-show="ep.date"
+                                x-text="ep.date"></span>
                         </div>
                         <div class="episode-desc" x-text="ep.description"></div>
                     </div>
@@ -89,12 +97,15 @@
                             <i class="fas fa-play" aria-hidden="true"></i>
                             <span class="sr-only">Play</span>
                         </button>
-                        <div class="queue-container" x-data="globalQueueHandler()" x-init="init()">
+                        <div class="queue-container"
+                            x-data="globalQueueHandler()" x-init="init()">
                             <button type="button" class="episode-btn queue-btn"
                                 @click.stop="addToQueue('podcast-episode', ep.key, ep.title, ep.artwork, ep)"
                                 :class="{ 'in-queue': isInQueue('podcast-episode', ep.key) }"
                                 title="Add to queue">
-                                <i :class="isInQueue('podcast-episode', ep.key) ? 'fas fa-check' : 'fas fa-plus'" aria-hidden="true"></i>
+                                <i
+                                    :class="isInQueue('podcast-episode', ep.key) ? 'fas fa-check' : 'fas fa-plus'"
+                                    aria-hidden="true"></i>
                                 <span class="sr-only">Add to queue</span>
                             </button>
                         </div>
@@ -114,28 +125,30 @@
         <div class="podcast-contact-container">
             <div class="podcast-contact-header">
                 <h2>Get in Touch</h2>
-                <p>Have a question, topic suggestion, or want to be a guest on {{ show.title }}? We'd love to hear from you.</p>
+                <p>Have a question, topic suggestion, or want to be a guest on
+                    {{ show.title }}? We'd love to hear from you.</p>
             </div>
 
-            <form 
+            <form
                 id="podcastContactForm"
-                action="https://formspree.io/f/YOUR_FORM_ID" 
+                action="https://formspree.io/f/YOUR_FORM_ID"
                 method="POST"
                 x-data="podcastContactForm()"
                 @submit.prevent="submitForm"
                 class="podcast-contact-form">
-                
+
                 <!-- Hidden field for show name -->
                 <input type="hidden" name="podcast_show" :value="show.title">
                 <input type="hidden" name="show_slug" :value="show.slug">
 
                 <!-- Name Field -->
                 <div class="form-group">
-                    <label for="contact_name">Name <span class="required">*</span></label>
-                    <input 
-                        type="text" 
-                        id="contact_name" 
-                        name="name" 
+                    <label for="contact_name">Name <span
+                            class="required">*</span></label>
+                    <input
+                        type="text"
+                        id="contact_name"
+                        name="name"
                         x-model="formData.name"
                         required
                         placeholder="Your name"
@@ -145,11 +158,12 @@
 
                 <!-- Email Field -->
                 <div class="form-group">
-                    <label for="contact_email">Email <span class="required">*</span></label>
-                    <input 
-                        type="email" 
-                        id="contact_email" 
-                        name="email" 
+                    <label for="contact_email">Email <span
+                            class="required">*</span></label>
+                    <input
+                        type="email"
+                        id="contact_email"
+                        name="email"
                         x-model="formData.email"
                         required
                         placeholder="your@email.com"
@@ -160,26 +174,29 @@
                 <!-- Subject Field -->
                 <div class="form-group">
                     <label for="contact_subject">What's this about?</label>
-                    <select 
-                        id="contact_subject" 
-                        name="subject" 
+                    <select
+                        id="contact_subject"
+                        name="subject"
                         x-model="formData.subject"
                         class="form-input">
-                        <option value="">Select a topic...</option>
+                        <option value>Select a topic...</option>
                         <option value="guest">I want to be a guest</option>
                         <option value="topic">Topic suggestion</option>
-                        <option value="question">Question about the show</option>
-                        <option value="collaboration">Collaboration opportunity</option>
+                        <option value="question">Question about the
+                            show</option>
+                        <option value="collaboration">Collaboration
+                            opportunity</option>
                         <option value="other">Other</option>
                     </select>
                 </div>
 
                 <!-- Message Field -->
                 <div class="form-group">
-                    <label for="contact_message">Message <span class="required">*</span></label>
-                    <textarea 
-                        id="contact_message" 
-                        name="message" 
+                    <label for="contact_message">Message <span
+                            class="required">*</span></label>
+                    <textarea
+                        id="contact_message"
+                        name="message"
                         x-model="formData.message"
                         required
                         rows="6"
@@ -189,27 +206,34 @@
                 </div>
 
                 <!-- Honeypot field for spam protection -->
-                <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
+                <input type="text" name="_gotcha" style="display:none"
+                    tabindex="-1" autocomplete="off">
 
                 <!-- Submit Button -->
                 <div class="form-actions">
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         :disabled="isSubmitting"
                         class="btn btn-primary btn-large">
-                        <i class="fas fa-paper-plane" x-show="!isSubmitting"></i>
-                        <i class="fas fa-spinner fa-spin" x-show="isSubmitting"></i>
-                        <span x-text="isSubmitting ? 'Sending...' : 'Send Message'"></span>
+                        <i class="fas fa-paper-plane"
+                            x-show="!isSubmitting"></i>
+                        <i class="fas fa-spinner fa-spin"
+                            x-show="isSubmitting"></i>
+                        <span
+                            x-text="isSubmitting ? 'Sending...' : 'Send Message'"></span>
                     </button>
                 </div>
 
                 <!-- Success/Error Messages -->
-                <div x-show="showSuccess" class="form-message form-message-success" x-cloak>
+                <div x-show="showSuccess"
+                    class="form-message form-message-success" x-cloak>
                     <i class="fas fa-check-circle"></i>
-                    <p>Thank you! Your message has been sent successfully. We'll get back to you soon.</p>
+                    <p>Thank you! Your message has been sent successfully. We'll
+                        get back to you soon.</p>
                 </div>
 
-                <div x-show="showError" class="form-message form-message-error" x-cloak>
+                <div x-show="showError" class="form-message form-message-error"
+                    x-cloak>
                     <i class="fas fa-exclamation-circle"></i>
                     <p x-text="errorMessage"></p>
                 </div>
@@ -491,7 +515,10 @@ function podcastContactForm() {
                 eps.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
                 this.episodes = eps;
             },
-            play(ep) {
+            async play(ep) {
+                if (window.__ahoyEnsurePlayer) {
+                    await window.__ahoyEnsurePlayer();
+                }
                 document.dispatchEvent(new CustomEvent('play-track', { detail: ep }));
             },
             playLatest() {
@@ -568,4 +595,3 @@ function podcastContactForm() {
     }
 </script>
 {% endblock %}
-

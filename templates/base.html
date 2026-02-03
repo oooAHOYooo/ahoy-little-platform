@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260203a' %}
+        {% set css_version = 'v20260203b' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -2414,9 +2414,59 @@
         <!-- Player: kept global (drives the bottom now-playing bar everywhere) -->
         <script defer
             src="{{ url_for('static', filename='js/player.js') }}?{{ css_version }}"></script>
+        <script>
+        // Ensure mediaPlayer is available before attempting playback
+        window.__ahoyEnsurePlayer = window.__ahoyEnsurePlayer || (() => {
+            let promise = null;
+            return () => {
+                if (window.mediaPlayer && typeof window.mediaPlayer.play === 'function') {
+                    return Promise.resolve(true);
+                }
+                if (promise) return promise;
+                promise = new Promise((resolve) => {
+                    const existing = document.querySelector('script[data-ahoy-player="true"]');
+                    if (existing) {
+                        existing.addEventListener('load', () => resolve(true), { once: true });
+                        existing.addEventListener('error', () => resolve(false), { once: true });
+                        return;
+                    }
+                    const s = document.createElement('script');
+                    s.src = "{{ url_for('static', filename='js/player.js') }}?{{ css_version }}";
+                    s.defer = true;
+                    s.async = true;
+                    s.dataset.ahoyPlayer = 'true';
+                    s.onload = () => resolve(true);
+                    s.onerror = () => resolve(false);
+                    document.head.appendChild(s);
+                });
+                return promise;
+            };
+        })();
+        </script>
         <!-- Player Queue: manages up-next queue and auto-pause on video -->
         <script defer
             src="{{ url_for('static', filename='js/player-queue.js') }}?{{ css_version }}"></script>
+
+        <!-- Global Queue Handler for Alpine.js -->
+        <script>
+        function globalQueueHandler() {
+            return {
+                addToQueue(type, id, title, artwork, trackObj) {
+                    if (!window.playerQueue) return;
+                    const item = trackObj || { type, id, title, artwork };
+                    window.playerQueue.addToQueue(item);
+                },
+                isInQueue(type, id) {
+                    if (!window.playerQueue) return false;
+                    const queue = window.playerQueue.getQueue();
+                    return queue.some(item => item.type === type && item.id === id);
+                },
+                init() {
+                    // Initialize if needed
+                }
+            };
+        }
+        </script>
 
         <!-- Now Playing (lazy loaded): avoids parsing heavy scripts on pages where it's unused -->
         <script type="module">
@@ -3306,6 +3356,7 @@
                 progressPercent: 0,
                 volume: 50,
                 isMuted: false,
+                _playerBound: false,
 
                 // Player state
                 isLiked: false,
@@ -3488,10 +3539,75 @@
                         } catch (e) {
                             console.warn('Error setting up trackchange event:', e);
                         }
+                        
+                            // Mark bindings to avoid duplicate listeners per instance
+                            this._playerBound = true;
                         }
                     } catch (e) {
                         console.warn('Error initializing mediaPlayer:', e);
                     }
+
+                    // Late-bind if player loads after Alpine init (prevents stale UI)
+                    try {
+                        if (!this._playerBound && window.__ahoyEnsurePlayer) {
+                            window.__ahoyEnsurePlayer().then(() => {
+                                if (this._playerBound) return;
+                                const mp = window.mediaPlayer;
+                                if (!mp || typeof mp.on !== 'function') return;
+
+                                // Hydrate once player is ready
+                                this.currentTrack = mp.currentTrack || this.currentTrack;
+                                this.isPlaying = !!mp.isPlaying;
+                                this.currentTime = mp.currentTime || 0;
+                                this.duration = mp.duration || 0;
+                                this.isMuted = !!mp.isMuted;
+                                this.volume = (typeof mp.volume === 'number') ? Math.round(mp.volume * 100) : this.volume;
+                                this.isShuffled = !!mp.isShuffled;
+                                this.isRepeated = !!mp.isRepeated;
+
+                                mp.on('play', () => {
+                                    this.isPlaying = true;
+                                    this.currentTrack = mp.currentTrack;
+                                    this.updateSavedState();
+                                    this.updateFavoritedState();
+                                    if (window.nowPlayingController && mp.currentTrack) {
+                                        window.nowPlayingController.onTrackChange(mp.currentTrack);
+                                    }
+                                });
+                                mp.on('pause', () => { this.isPlaying = false; });
+                                mp.on('timeupdate', (t) => {
+                                    this.currentTime = t;
+                                    if (!this.isScrubbing) {
+                                        this.progressPercent = this.duration ? (t / this.duration) * 100 : 0;
+                                    }
+                                });
+                                mp.on('durationchange', (d) => { this.duration = d; });
+                                mp.on('volumechange', ({ volume, muted }) => {
+                                    this.volume = Math.round(volume * 100);
+                                    this.isMuted = !!muted;
+                                });
+                                mp.on('playlistchange', () => {
+                                    this.currentTrack = mp.currentTrack;
+                                    this.updateSavedState();
+                                    this.updateFavoritedState();
+                                    if (window.nowPlayingController && mp.currentTrack) {
+                                        window.nowPlayingController.onTrackChange(mp.currentTrack);
+                                    }
+                                });
+                                mp.on('loading', (isLoading) => { this.isLoading = !!isLoading; });
+                                mp.on('trackchange', (track) => {
+                                    this.currentTrack = track || mp.currentTrack;
+                                    this.updateSavedState();
+                                    this.updateFavoritedState();
+                                    if (window.nowPlayingController && this.currentTrack) {
+                                        window.nowPlayingController.onTrackChange(this.currentTrack);
+                                    }
+                                });
+
+                                this._playerBound = true;
+                            }).catch(() => {});
+                        }
+                    } catch (_) {}
 
                     // Listen for custom play events from anywhere
                     try {
@@ -3588,11 +3704,14 @@
                     }
                 },
 
-                playTrack(track) {
+                async playTrack(track) {
                     try {
                         this.currentTrack = track;
                         // Update saved state when track changes
                         this.updateSavedState();
+                        if (window.__ahoyEnsurePlayer) {
+                            await window.__ahoyEnsurePlayer();
+                        }
                         if (window.mediaPlayer && typeof window.mediaPlayer === 'object' && typeof window.mediaPlayer.play === 'function') {
                             window.mediaPlayer.play(track);
                             return;

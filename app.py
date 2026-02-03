@@ -2077,6 +2077,38 @@ def performances():
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
+@app.route('/proxy/audio')
+def proxy_audio():
+    """Proxy audio files to bypass CORS on localhost testing"""
+    from urllib.parse import unquote
+
+    url = request.args.get('url')
+    if not url:
+        abort(400, 'Missing url parameter')
+
+    # Decode the URL
+    url = unquote(url)
+
+    # Security: only allow S3 and Google Storage URLs
+    if not (url.startswith('https://') and
+            ('s3' in url or 'storage.googleapis.com' in url or 'ahoycollection' in url)):
+        abort(403, 'Invalid audio source')
+
+    try:
+        # Fetch audio from external source
+        resp = requests.get(url, timeout=30, stream=True)
+        resp.raise_for_status()
+
+        # Create response with audio data
+        response = make_response(resp.content)
+        response.headers['Content-Type'] = 'audio/mpeg'
+        response.headers['Content-Length'] = resp.headers.get('Content-Length', len(resp.content))
+        response.headers['Cache-Control'] = 'public, max-age=3600'
+
+        return response
+    except requests.exceptions.RequestException as e:
+        abort(502, f'Failed to fetch audio: {str(e)}')
+
 @app.route('/merch')
 def merch():
     """Merch store page"""

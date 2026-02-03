@@ -190,15 +190,20 @@
     </section>
 
     <!-- Recent Queue Section -->
-    <section class="podcasts-section" x-data="recentQueueSection()" x-init="init()" x-show="recentQueueItems.length > 0">
+    <section class="podcasts-section" x-data="recentQueueSection()"
+        x-init="init()" x-show="recentQueueItems.length > 0">
         <div class="podcasts-section-header">
             <h2>Recent Queue</h2>
-            <span class="queue-count-badge" x-text="recentQueueItems.length"></span>
+            <span class="queue-count-badge"
+                x-text="recentQueueItems.length"></span>
         </div>
         <div class="episode-list">
-            <template x-for="(item, index) in recentQueueItems" :key="item.id || index">
+            <template x-for="(item, index) in recentQueueItems"
+                :key="item.id || index">
                 <article class="episode-row">
-                    <img class="episode-art" :src="item.cover_art || '/static/img/default-cover.jpg'" alt="">
+                    <img class="episode-art"
+                        :src="item.cover_art || '/static/img/default-cover.jpg'"
+                        alt>
                     <div class="episode-meta">
                         <div class="episode-title" x-text="item.title"></div>
                         <div class="episode-subtitle">
@@ -237,18 +242,29 @@
                         class="image-placeholder"
                         loading="lazy"
                         @error="handleImageError($event, track)">
-                    <div class="track-overlay" :class="{'track-overlay-visible': currentTrack?.id === track.id && isPlaying}">
-                        <button @click.stop="(currentTrack?.id === track.id && isPlaying) ? togglePlayPause() : playTrack(track)" class="play-btn" :aria-label="(currentTrack?.id === track.id && isPlaying) ? 'Pause' : 'Play'">
-                            <i x-show="currentTrack?.id === track.id && isPlaying" class="fas fa-pause"></i>
-                            <i x-show="!(currentTrack?.id === track.id && isPlaying)" class="fas fa-play"></i>
+                    <div class="track-overlay"
+                        :class="{'track-overlay-visible': currentTrack?.id === track.id && isPlaying}">
+                        <button
+                            @click.stop="(currentTrack?.id === track.id && isPlaying) ? togglePlayPause() : playTrack(track)"
+                            class="play-btn"
+                            :aria-label="(currentTrack?.id === track.id && isPlaying) ? 'Pause' : 'Play'">
+                            <i
+                                x-show="currentTrack?.id === track.id && isPlaying"
+                                class="fas fa-pause"></i>
+                            <i
+                                x-show="!(currentTrack?.id === track.id && isPlaying)"
+                                class="fas fa-play"></i>
                         </button>
                         <div class="track-actions">
-                            <div class="queue-container" x-data="globalQueueHandler()" x-init="init()">
+                            <div class="queue-container"
+                                x-data="globalQueueHandler()" x-init="init()">
                                 <button class="action-btn queue-btn"
                                     @click.stop="addToQueue('track', track.id, track.title, track.cover_art, track)"
                                     :class="{ 'in-queue': isInQueue('track', track.id) }"
                                     title="Add to queue">
-                                    <i :class="isInQueue('track', track.id) ? 'fas fa-check' : 'fas fa-plus'" aria-hidden="true"></i>
+                                    <i
+                                        :class="isInQueue('track', track.id) ? 'fas fa-check' : 'fas fa-plus'"
+                                        aria-hidden="true"></i>
                                     <span class="sr-only">Add to queue</span>
                                 </button>
                             </div>
@@ -328,12 +344,16 @@
                             <td class="col-plays" data-label="Plays"
                                 x-text="track.play_count || 0"></td>
                             <td class="col-action" data-label="Action">
-                                <div class="queue-container" x-data="globalQueueHandler()" x-init="init()">
+                                <div class="queue-container"
+                                    x-data="globalQueueHandler()"
+                                    x-init="init()">
                                     <button class="action-btn queue-btn"
                                         @click.stop="addToQueue('track', track.id, track.title, track.cover_art, track)"
                                         :class="{ 'in-queue': isInQueue('track', track.id) }"
                                         title="Add to queue">
-                                        <i :class="isInQueue('track', track.id) ? 'fas fa-check' : 'fas fa-plus'" aria-hidden="true"></i>
+                                        <i
+                                            :class="isInQueue('track', track.id) ? 'fas fa-check' : 'fas fa-plus'"
+                                            aria-hidden="true"></i>
                                     </button>
                                 </div>
                                 <button class="action-btn bm-btn"
@@ -524,7 +544,8 @@ function musicLibrary() {
             
             // Also listen to custom events
             document.addEventListener('play-track', (e) => {
-                this.currentTrack = e.detail.track;
+                const track = (e.detail && (e.detail.track || e.detail)) || null;
+                if (track) this.currentTrack = track;
             });
             
             document.addEventListener('ahoy:player:play', () => {
@@ -657,7 +678,7 @@ function musicLibrary() {
                 clearTimeout(this._playTrackDebounce);
             }
 
-            this._playTrackDebounce = setTimeout(() => {
+            this._playTrackDebounce = setTimeout(async () => {
                 // If same track is playing, toggle pause
                 if (this.currentTrack?.id === track.id && this.isPlaying) {
                     this.togglePlayPause();
@@ -671,9 +692,14 @@ function musicLibrary() {
                 const sorted = [...this.filteredTracks].sort((a, b) =>
                     (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' })
                 );
-                window.mediaPlayer.setPlaylist(sorted);
-                const idx = sorted.findIndex(t => t.id === track.id);
-                window.mediaPlayer.currentIndex = idx >= 0 ? idx : 0;
+                if (window.__ahoyEnsurePlayer) {
+                    await window.__ahoyEnsurePlayer();
+                }
+                if (window.mediaPlayer && typeof window.mediaPlayer.setPlaylist === 'function') {
+                    window.mediaPlayer.setPlaylist(sorted);
+                    const idx = sorted.findIndex(t => t.id === track.id);
+                    window.mediaPlayer.currentIndex = idx >= 0 ? idx : 0;
+                }
 
                 // Dispatch custom event to trigger global player
                 document.dispatchEvent(new CustomEvent('play-track', {

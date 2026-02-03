@@ -26,7 +26,22 @@ class MediaPlayer {
         this.initializePlayer();
         this._restoreState();
     }
-    
+
+    // Convert external URLs to proxy URLs for local testing (bypasses CORS)
+    _getAudioUrl(url) {
+        if (!url) return url;
+        // If running on localhost, proxy external URLs through /proxy/audio
+        const isLocalhost = window.location.hostname === 'localhost' ||
+                           window.location.hostname === '127.0.0.1';
+        const isExternal = url.startsWith('https://') &&
+                          (url.includes('s3') || url.includes('storage.googleapis.com') || url.includes('ahoycollection'));
+
+        if (isLocalhost && isExternal) {
+            return `/proxy/audio?url=${encodeURIComponent(url)}`;
+        }
+        return url;
+    }
+
     initializePlayer() {
         // Create audio element for music
         this.audioElement = document.createElement('audio');
@@ -91,7 +106,8 @@ class MediaPlayer {
                         if (typeof nextSrc === 'string' && nextSrc.trim()) {
                             // Bust cache slightly to avoid stale errors
                             const srcWithBuster = nextSrc + (nextSrc.includes('?') ? '&' : '?') + 'v=' + Date.now();
-                            this.audioElement.src = srcWithBuster;
+                            const proxiedSrc = this._getAudioUrl(srcWithBuster);
+                            this.audioElement.src = proxiedSrc;
                             try { this.audioElement.load(); } catch (_) {}
                             this.audioElement.play().catch(() => {/* ignore; policy-locked will retry on gesture */});
                             return;
@@ -347,8 +363,9 @@ class MediaPlayer {
             // Emit loading event for UI feedback
             this.emit('loading', true);
 
-            // Use source URL directly - no cache buster to enable browser caching
-            mediaElement.src = source;
+            // Use source URL (proxied for localhost testing to bypass CORS)
+            const proxiedSource = this._getAudioUrl(source);
+            mediaElement.src = proxiedSource;
             mediaElement.volume = this.volume;
             mediaElement.muted = this.isMuted;
 
@@ -609,7 +626,8 @@ class MediaPlayer {
             const src = state.track.audio_url || state.track.full_url || state.track.preview_url || state.track.url || state.track.video_url || state.track.mp4_link;
             if (!src) return;
 
-            el.src = src;
+            const proxiedSrc = this._getAudioUrl(src);
+            el.src = proxiedSrc;
             el.volume = this.volume;
             el.muted = this.isMuted;
             const seekTime = Math.max(0, state.time || 0);

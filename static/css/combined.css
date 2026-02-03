@@ -2240,7 +2240,7 @@ img[src*="default-cover.jpg"] {
         position: fixed;
         left: 0;
         right: 0;
-        bottom: calc(var(--bottom-nav-h, 50px) + var(--secondary-nav-h, 40px));
+        bottom: 0;
         z-index: 10005;
         background: var(--footer-glass-bg);
         backdrop-filter: var(--footer-glass-blur);
@@ -2263,6 +2263,10 @@ img[src*="default-cover.jpg"] {
         height: 70px !important;
         max-height: 70px !important;
         overflow: hidden !important;
+    }
+
+    body.has-player {
+        padding-bottom: 70px !important;
     }
 
     /* Prevent any full-screen player on mobile */

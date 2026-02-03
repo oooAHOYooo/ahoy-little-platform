@@ -5,7 +5,9 @@
 {% block content %}
 <div class="podcasts-page" x-data="podcastsHub()" x-init="init()">
     {% from "macros/subpage_header.html" import subpage_hero %}
-    {{ subpage_hero(title="Podcasts", subtitle="Fresh episodes and shows from independent creators.", icon_class="fas fa-podcast", scope_class="") }}
+    {{ subpage_hero(title="Podcasts",
+    subtitle="Fresh episodes and shows from independent creators.",
+    icon_class="fas fa-podcast", scope_class="") }}
 
     <section class="podcasts-section">
         <div class="podcasts-section-header">
@@ -15,15 +17,18 @@
         <div class="episode-list">
             <template x-for="ep in episodes" :key="ep.key">
                 <article class="episode-row" @click="openShow(ep.showSlug)">
-                    <img class="episode-art" :src="ep.artwork" alt="">
+                    <img class="episode-art" :src="ep.artwork" alt>
                     <div class="episode-meta">
                         <div class="episode-title" x-text="ep.title"></div>
                         <div class="episode-subtitle">
-                            <span class="episode-show" x-text="ep.showTitle"></span>
+                            <span class="episode-show"
+                                x-text="ep.showTitle"></span>
                             <span class="episode-dot">•</span>
-                            <span class="episode-time" x-text="ep.duration"></span>
+                            <span class="episode-time"
+                                x-text="ep.duration"></span>
                             <span class="episode-dot" x-show="ep.date">•</span>
-                            <span class="episode-date" x-show="ep.date" x-text="ep.date"></span>
+                            <span class="episode-date" x-show="ep.date"
+                                x-text="ep.date"></span>
                         </div>
                         <div class="episode-desc" x-text="ep.description"></div>
                     </div>
@@ -34,12 +39,15 @@
                             <i class="fas fa-play" aria-hidden="true"></i>
                             <span class="sr-only">Play</span>
                         </button>
-                        <div class="queue-container" x-data="globalQueueHandler()" x-init="init()">
+                        <div class="queue-container"
+                            x-data="globalQueueHandler()" x-init="init()">
                             <button type="button" class="episode-btn queue-btn"
                                 @click.stop="addToQueue('podcast-episode', ep.key, ep.title, ep.artwork, ep)"
                                 :class="{ 'in-queue': isInQueue('podcast-episode', ep.key) }"
                                 title="Add to queue">
-                                <i :class="isInQueue('podcast-episode', ep.key) ? 'fas fa-check' : 'fas fa-plus'" aria-hidden="true"></i>
+                                <i
+                                    :class="isInQueue('podcast-episode', ep.key) ? 'fas fa-check' : 'fas fa-plus'"
+                                    aria-hidden="true"></i>
                                 <span class="sr-only">Add to queue</span>
                             </button>
                         </div>
@@ -48,9 +56,11 @@
                             <i class="fas fa-bookmark" aria-hidden="true"></i>
                             <span class="sr-only">Bookmark</span>
                         </button>
-                        <a class="episode-open" :href="`/podcasts/${ep.showSlug}`"
+                        <a class="episode-open"
+                            :href="`/podcasts/${ep.showSlug}`"
                             @click.stop>
-                            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+                            <i class="fas fa-external-link-alt"
+                                aria-hidden="true"></i>
                             <span class="sr-only">Open</span>
                         </a>
                     </div>
@@ -66,9 +76,10 @@
         <div class="podcast-shows">
             <template x-for="show in shows" :key="show.slug">
                 <a class="podcast-show-card" :href="`/podcasts/${show.slug}`">
-                    <img :src="show.artwork" alt="" class="podcast-show-art">
+                    <img :src="show.artwork" alt class="podcast-show-art">
                     <div class="podcast-show-title" x-text="show.title"></div>
-                    <div class="podcast-show-desc" x-text="show.description"></div>
+                    <div class="podcast-show-desc"
+                        x-text="show.description"></div>
                     <div class="podcast-show-updated"
                         x-text="show.last_updated ? `Updated ${show.last_updated}` : ''"></div>
                 </a>
@@ -139,15 +150,20 @@
                 eps.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
                 this.episodes = eps;
             },
-            play(ep) {
+            async play(ep) {
                 // Set the full episode list as the playlist (sorted A-Z by title)
                 // so next/prev buttons navigate through all episodes
                 const sorted = [...this.episodes].sort((a, b) =>
                     (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' })
                 );
-                window.mediaPlayer.setPlaylist(sorted);
-                const idx = sorted.findIndex(e => e.key === ep.key);
-                window.mediaPlayer.currentIndex = idx >= 0 ? idx : 0;
+                if (window.__ahoyEnsurePlayer) {
+                    await window.__ahoyEnsurePlayer();
+                }
+                if (window.mediaPlayer && typeof window.mediaPlayer.setPlaylist === 'function') {
+                    window.mediaPlayer.setPlaylist(sorted);
+                    const idx = sorted.findIndex(e => e.key === ep.key);
+                    window.mediaPlayer.currentIndex = idx >= 0 ? idx : 0;
+                }
 
                 document.dispatchEvent(new CustomEvent('play-track', { detail: ep }));
             },
@@ -170,4 +186,3 @@
     }
 </script>
 {% endblock %}
-
