@@ -81,7 +81,9 @@ Then `./gradlew bundleRelease` will output a signed AAB.
 - **Content rating:** complete the questionnaire.
 - **Pricing & distribution:** free/paid, countries.
 - **Upload** the signed AAB (Release → Create new release → Upload).
-- **Privacy policy URL** if required for your app type.
+- **Privacy policy URL** (required for store listing and if your app collects user data or targets children under 13). Use your live app URL + `/privacy`, e.g.:
+  - **https://ahoy-indie-media.onrender.com/privacy**  
+  - Or your custom domain: **https://app.ahoy.ooo/privacy** (if you use that for the app).
 
 ## Summary checklist
 

@@ -42,7 +42,13 @@
       "Bash(./gradlew bundleRelease:*)",
       "Bash(keytool:*)",
       "Bash(echo:*)",
-      "Bash(jarsigner:*)"
+      "Bash(jarsigner:*)",
+      "Bash(pod install)",
+      "Bash(chmod:*)",
+      "Bash(xcrun simctl:*)",
+      "Bash(sudo chmod:*)",
+      "Bash(find:*)",
+      "Bash(pod deintegrate:*)"
     ]
   }
 }

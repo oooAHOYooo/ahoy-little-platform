@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }} - Events - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="events-page event-detail-page">
+    <nav class="ds-crumbs event-detail-crumbs" aria-label="Breadcrumb">
+        <span class="ds-crumbs__item">
+            <a href="/events" class="ds-crumbs__link">Events</a>
+            <span class="ds-crumbs__sep">›</span>
+        </span>
+        <span class="ds-crumbs__item">
+            <span class="ds-crumbs__current">{{ event.title }}</span>
+        </span>
+    </nav>
+
+    <section class="podcast-show-hero" style="margin-top: 12px;">
+        <img class="podcast-show-hero-art"
+            src="{{ event.image or '/static/img/default-cover.jpg' }}"
+            alt="{{ event.title }}">
+        <div class="podcast-show-hero-meta">
+            <div class="podcast-show-hero-kicker">Event</div>
+            <h1 class="podcast-show-hero-title event-detail-title">{{
+                event.title }}</h1>
+            {% if event.description %}
+            <p class="podcast-show-hero-desc">{{ event.description }}</p>
+            {% endif %}
+            <div class="episode-subtitle" style="margin-bottom: 10px;">
+                {% if event.date %}<span>{{ event.date }}</span>{% endif %}
+                {% if event.time %}<span class="episode-dot">•</span><span>{{
+                    event.time }}</span>{% endif %}
+                {% if event.venue %}<span class="episode-dot">•</span><span>{{
+                    event.venue }}</span>{% endif %}
+            </div>
+            {% if event.venue_address %}
+            <div class="episode-desc">{{ event.venue_address }}</div>
+            {% endif %}
+        </div>
+    </section>
+
+    {% if event.photos %}
+    <section class="podcasts-section" style="margin-top: 16px;">
+        <div class="podcasts-section-header">
+            <h2>Photos</h2>
+        </div>
+        <div class="episode-list">
+            {% for photo in event.photos %}
+            <article class="episode-row">
+                <img class="episode-art" src="{{ photo }}"
+                    alt="{{ event.title }} photo">
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

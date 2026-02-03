@@ -102,6 +102,41 @@
             </div>
         </div>
 
+        {% if poets_widget %}
+        <section class="poets8-widget"
+            aria-label="{{ poets_widget.title }} widget">
+            <a href="{{ poets_widget.url }}" class="poets8-widget-link">
+                <div class="poets8-widget-inner">
+                    <div class="poets8-widget-media">
+                        <img
+                            src="{{ poets_widget.image or '/static/img/default-cover.jpg' }}"
+                            alt="{{ poets_widget.title }}">
+                    </div>
+                    <div class="poets8-widget-body">
+                        <span class="poets8-widget-kicker">Upcoming event</span>
+                        <h3 class="poets8-widget-title">{{ poets_widget.title
+                            }}</h3>
+                        {% if poets_widget.description %}
+                        <p class="poets8-widget-desc">{{
+                            poets_widget.description }}</p>
+                        {% endif %}
+                        <div class="poets8-widget-meta">
+                            {% if poets_widget.date %}<span>{{ poets_widget.date
+                                }}</span>{% endif %}
+                            {% if poets_widget.time %}<span
+                                class="episode-dot">•</span><span>{{
+                                poets_widget.time }}</span>{% endif %}
+                            {% if poets_widget.venue %}<span
+                                class="episode-dot">•</span><span>{{
+                                poets_widget.venue }}</span>{% endif %}
+                        </div>
+                        <span class="poets8-widget-cta">View details</span>
+                    </div>
+                </div>
+            </a>
+        </section>
+        {% endif %}
+
         <!-- Live TV Channel Strip (shows what's playing on each channel) -->
         <div class="tv-channel-strip" x-show="tvChannels.length > 1">
             <div class="tv-channel-strip-header">
@@ -130,29 +165,33 @@
             </div>
         </div>
 
-        <!-- Poets and Friends #7 highlight (Jan 28–29, 2026 only) -->
-        {% if show_poets7_banner and poets7_event %}
+        <!-- Featured upcoming event banner (today or tomorrow) -->
+        {% if show_featured_banner and featured_event %}
         <section class="poets7-banner"
-            aria-label="Poets and Friends #7 – upcoming event">
-            <a href="{{ poets7_event.rsvp_url }}" class="poets7-banner-link"
+            aria-label="{{ featured_event.title }} – upcoming event">
+            <a href="{{ featured_event.rsvp_url }}" class="poets7-banner-link"
                 target="_blank" rel="noopener">
                 <div class="poets7-banner-inner">
-                    <img class="poets7-banner-img" src="{{ poets7_event.image }}"
-                        alt="Poets and Friends #7" />
+                    <img class="poets7-banner-img"
+                        src="{{ featured_event.image }}"
+                        alt="{{ featured_event.title }}" />
                     <div class="poets7-banner-overlay">
                         <span class="poets7-banner-kicker">{% if
-                            poets7_event.is_tomorrow %}Tomorrow!{% else %}Tonight!{%
+                            featured_event.is_tomorrow %}Tomorrow!{% else
+                            %}Tonight!{%
                             endif %}</span>
-                        <h2 class="poets7-banner-title">Another Poets and Friends
-                            #7</h2>
-                        <p class="poets7-banner-meta">{{ poets7_event.time }} · {{
-                            poets7_event.venue }}</p>
+                        <h2 class="poets7-banner-title">{{ featured_event.title
+                            }}</h2>
+                        <p class="poets7-banner-meta">{{ featured_event.time }}
+                            · {{
+                            featured_event.venue }}</p>
                         <span class="poets7-banner-cta">RSVP</span>
                     </div>
                 </div>
             </a>
         </section>
         {% endif %}
+
     </section>
 
     <style>
@@ -235,6 +274,102 @@
         .poets7-banner-inner { max-height: 220px; }
         .poets7-banner-overlay { padding: 1rem; }
         .poets7-banner-title { font-size: 1.25rem; }
+    }
+
+    .poets8-widget {
+        margin-top: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .poets8-widget-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(20, 20, 20, 0.6);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .poets8-widget-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+    .poets8-widget-inner {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 1.25rem;
+        align-items: center;
+        padding: 1.25rem;
+    }
+    .poets8-widget-media {
+        width: 160px;
+        height: 160px;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: #111;
+        flex-shrink: 0;
+    }
+    .poets8-widget-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .poets8-widget-kicker {
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(99, 102, 241, 0.9);
+        display: inline-block;
+        margin-bottom: 0.35rem;
+    }
+    .poets8-widget-title {
+        font-size: 1.35rem;
+        font-weight: 800;
+        margin: 0 0 0.4rem 0;
+        color: #fff;
+    }
+    .poets8-widget-desc {
+        margin: 0 0 0.65rem 0;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    .poets8-widget-meta {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 0.8rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        align-items: center;
+    }
+    .poets8-widget-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #fff;
+        background: rgba(99, 102, 241, 0.85);
+        padding: 0.45rem 0.85rem;
+        border-radius: 999px;
+        width: fit-content;
+    }
+    @media (max-width: 640px) {
+        .poets8-widget-inner {
+            grid-template-columns: 1fr;
+        }
+        .poets8-widget-media {
+            width: 100%;
+            height: 220px;
+        }
     }
 
     /* Live Dashboard Styles */

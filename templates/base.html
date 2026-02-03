@@ -2597,6 +2597,13 @@
                 add('Upcoming', null);
                 return crumbs;
             }
+            if (normalized.startsWith('/events/')) {
+                add('Events', '/events');
+                const eventTitle = titleFrom('.event-detail-title') || titleFrom('.event-detail-page h1')
+                    || normalized.split('/').pop().replace(/-/g, ' ');
+                add(eventTitle || 'Event', null);
+                return crumbs;
+            }
             if (normalized === '/merch') {
                 add('Merch', '/merch');
                 add('Store', null);

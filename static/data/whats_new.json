@@ -131,6 +131,26 @@
             }
           ]
         }
+      },
+      "feb": {
+        "music": { "title": "Music Updates", "items": [] },
+        "videos": { "title": "Video Updates", "items": [] },
+        "artists": { "title": "Artist Updates", "items": [] },
+        "platform": { "title": "Platform Updates", "items": [] },
+        "merch": { "title": "Merch Updates", "items": [] },
+        "events": {
+          "title": "Events Updates",
+          "items": [
+            {
+              "type": "content",
+              "title": "Poet and Friends #8 – Stupid Cupid",
+              "description": "Poet and Friends are back at Koffee? Thursday, Feb 26, 6:30pm. 104 Audubon St, New Haven, CT. ",
+              "date": "2026-02-26",
+              "link": "/events",
+              "link_external": "https://partiful.com/e/XTg8Cf9NAHSPE8VwslhdJ"
+            }
+          ]
+        }
       }
     }
   },

@@ -21,4 +21,13 @@ end
 
 post_install do |installer|
   assertDeploymentTarget(installer)
+
+  # Fix CocoaPods script permissions for Xcode sandbox
+  installer.pods_project.targets.each do |target|
+    target.build_phases.each do |phase|
+      if phase.is_a?(Xcodeproj::Project::Object::PBXShellScriptBuildPhase)
+        phase.shell_path = '/bin/bash'
+      end
+    end
+  end
 end

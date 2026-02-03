@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, session, send_from_directory, make_response, redirect, url_for, current_app
+from flask import Flask, render_template, jsonify, request, session, send_from_directory, make_response, redirect, url_for, current_app, abort
 try:
     from flask_session import Session as FlaskSession
 except Exception:  # ImportError or env issues
@@ -859,29 +859,56 @@ def create_app():
     @app.route('/')
     def home():
         """Main discovery page with Now Playing feed"""
-        from datetime import date
+        from datetime import date, timedelta
         today = date.today()
-        # Poets and Friends #7 banner: show Jan 28–29, 2026 only; remove Jan 30+
-        show_poets7_banner = (today.year == 2026 and today.month == 1 and today.day in (28, 29))
-        poets7_event = None
-        if show_poets7_banner:
-            events_data = load_json_data('events.json', {'events': []})
-            for e in events_data.get('events', []):
-                if e.get('title') == 'Poets and Friends #7' and e.get('status') == 'upcoming':
-                    poets7_event = {
-                        'title': e.get('title'),
-                        'date': e.get('date'),
-                        'time': e.get('time'),
-                        'venue': e.get('venue'),
-                        'image': e.get('image'),
-                        'rsvp_url': e.get('rsvp_external_url') or '/events',
-                        'is_tomorrow': today.day == 28,
-                    }
-                    break
+        # Featured event banner: first upcoming event when it's today or tomorrow
+        show_featured_banner = False
+        featured_event = None
+        events_data = load_json_data('events.json', {'events': []})
+        for e in events_data.get('events', []):
+            if e.get('status') != 'upcoming':
+                continue
+            d = e.get('date')
+            if not d:
+                continue
+            try:
+                event_date = date.fromisoformat(d) if isinstance(d, str) else d
+            except (TypeError, ValueError):
+                continue
+            delta = (event_date - today).days
+            if delta in (0, 1):  # today or tomorrow
+                show_featured_banner = True
+                featured_event = {
+                    'title': e.get('title'),
+                    'date': d,
+                    'time': e.get('time'),
+                    'venue': e.get('venue'),
+                    'image': e.get('image'),
+                    'rsvp_url': e.get('rsvp_external_url') or '/events',
+                    'is_tomorrow': delta == 1,
+                }
+                break
+        # Upcoming Poets #8 widget (homepage card)
+        poets_widget = None
+        for e in events_data.get('events', []):
+            if (e.get('title') or '').strip().lower() != 'poet and friends #8':
+                continue
+            poets_widget = {
+                'id': e.get('id'),
+                'title': e.get('title'),
+                'date': e.get('date'),
+                'time': e.get('time'),
+                'venue': e.get('venue'),
+                'image': e.get('image'),
+                'description': e.get('description'),
+                'url': f"/events/{quote(str(e.get('id') or ''))}" if e.get('id') else '/events',
+            }
+            break
         response = make_response(render_template(
             'home.html',
-            show_poets7_banner=show_poets7_banner,
-            poets7_event=poets7_event,
+            show_featured_banner=show_featured_banner,
+            featured_event=featured_event,
+            poets_widget=poets_widget,
         ))
         response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
         return response
@@ -922,7 +949,7 @@ def api_artist(slug_or_name):
     return jsonify({"error": "not_found"}), 404
 # ===========================================================================
 # ==== JSON Sitemap: GET /api/_sitemap =======================================
-from urllib.parse import unquote
+from urllib.parse import unquote, quote
 from flask import jsonify
 
 def _generate_sitemap(flask_app):
@@ -2024,6 +2051,22 @@ def events_page():
     events_data = load_json_data('events.json', {'events': []})
     videos_data = load_json_data('videos.json', {'videos': []})
     response = make_response(render_template('events.html', events=events_data, videos=videos_data))
+    response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
+    return response
+
+@app.route('/events/<event_id>')
+def event_detail(event_id):
+    """Event detail page (past or upcoming)."""
+    events_data = load_json_data('events.json', {'events': []})
+    event_key = unquote(event_id or '')
+    event = None
+    for e in events_data.get('events', []):
+        if str(e.get('id', '')) == event_key:
+            event = e
+            break
+    if not event:
+        abort(404)
+    response = make_response(render_template('event_detail.html', event=event))
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
