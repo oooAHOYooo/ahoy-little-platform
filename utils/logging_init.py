@@ -69,6 +69,12 @@ def init_logging():
         stream=os.sys.stdout,
         level=getattr(logging, log_level),
     )
+
+    # Reduce noisy dev logs (werkzeug access logs, limiter warnings)
+    if flask_env != "production":
+        logging.getLogger("werkzeug").setLevel(logging.WARNING)
+        logging.getLogger("flask_limiter").setLevel(logging.CRITICAL)
+        logging.getLogger("flask_limiter.extension").setLevel(logging.CRITICAL)
     
     logger = structlog.get_logger()
     logger.info("Logging initialized", 
@@ -112,7 +118,10 @@ def init_request_logging(app):
         try:
             # Skip logging static files in development to reduce noise
             flask_env = os.getenv("FLASK_ENV", "development")
-            if flask_env != "production" and request.path.startswith("/static/"):
+            if flask_env != "production" and (
+                request.path.startswith("/static/")
+                or request.path.startswith("/proxy/audio")
+            ):
                 return response
             
             # Calculate duration

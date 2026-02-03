@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260203b' %}
+        {% set css_version = 'v20260203d' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -1699,8 +1699,8 @@
                             :class="{'disabled': !currentTrack, 'loading': isLoading}"
                             :title="isLoading ? 'Loading...' : (isPlaying ? 'Pause' : 'Play')">
                             <i x-show="isLoading" class="fas fa-spinner fa-spin"></i>
-                            <i x-show="!isLoading"
-                                :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+                            <i x-show="!isLoading && !isPlaying" class="fas fa-play"></i>
+                            <i x-show="!isLoading && isPlaying" class="fas fa-pause"></i>
                         </button>
                         <button @click="nextTrack()" class="now-playing-btn"
                             :disabled="!currentTrack"
@@ -1740,7 +1740,6 @@
                             :class="{'active': showQueue}"
                             title="Queue">
                             <i class="fas fa-list"></i>
-                            <span class="queue-label">Queue</span>
                             <span x-show="queueLength > 0" class="queue-badge" x-text="queueLength"></span>
                         </button>
                     </div>
@@ -1789,24 +1788,7 @@
                         </div>
                     </div>
 
-                    <!-- Progress Bar -->
-                    <div class="now-playing-progress">
-                        <div class="now-playing-progress-bar"
-                            @mousedown="currentTrack ? scrubStart($event) : null"
-                            @touchstart="currentTrack ? scrubStart($event) : null"
-                            @click.stop
-                            :class="{'disabled': !currentTrack, 'scrubbing': isScrubbing, 'loading': isLoading}">
-                            <div class="now-playing-progress-fill"
-                                :style="`width: ${progressPercent}%`"></div>
-                            <div class="now-playing-progress-handle"
-                                :style="`left: ${progressPercent}%`"
-                                x-show="currentTrack"></div>
-                        </div>
-                        <div class="now-playing-time">
-                            <span x-text="currentTrack ? formatTime(isScrubbing ? (scrubPercent / 100) * duration : currentTime) : '00:00'"></span>
-                            <span x-text="currentTrack ? formatTime(duration) : '00:00'"></span>
-                        </div>
-                    </div>
+                    <!-- Progress Bar (disabled for now) -->
                 </div>
             </div>
         </div>
@@ -2412,7 +2394,7 @@
         })();
         </script>
         <!-- Player: kept global (drives the bottom now-playing bar everywhere) -->
-        <script defer
+        <script defer data-ahoy-player="true"
             src="{{ url_for('static', filename='js/player.js') }}?{{ css_version }}"></script>
         <script>
         // Ensure mediaPlayer is available before attempting playback
@@ -3735,17 +3717,16 @@
                     try {
                         const mp = window.mediaPlayer;
                         if (!mp || typeof mp !== 'object') return;
-                        // Use mediaPlayer as source of truth so toggle is correct even if UI state was stale
-                        const actuallyPlaying = !!mp.isPlaying;
-                        if (actuallyPlaying) {
+                        // Use mediaPlayer.isPlaying as source of truth
+                        if (mp.isPlaying) {
                             if (typeof mp.pause === 'function') mp.pause();
-                        } else {
-                            const track = mp.currentTrack || this.currentTrack;
-                            if (track && typeof mp.play === 'function') {
-                                mp.play(track);
-                            } else if (typeof mp.resume === 'function') {
-                                mp.resume();
-                            }
+                        } else if (mp.currentTrack) {
+                            // Always resume — MediaPlayer.play() handles same-track detection
+                            // but resume() is cheaper: no src check, no load(), just play()
+                            if (typeof mp.resume === 'function') mp.resume();
+                        } else if (this.currentTrack && typeof mp.play === 'function') {
+                            // No mediaPlayer track at all — use UI track
+                            mp.play(this.currentTrack);
                         }
                     } catch (e) {
                         console.warn('Error in togglePlay:', e);

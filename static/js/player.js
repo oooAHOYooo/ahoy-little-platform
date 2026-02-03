@@ -91,6 +91,8 @@ class MediaPlayer {
         });
         this.audioElement.addEventListener('error', () => {
             this.emit('loading', false);
+            // Don't show toast or retry during state restoration (stale URLs are expected)
+            if (this._isRestoring) return;
             try {
                 const code = (this.audioElement.error && this.audioElement.error.code) || 'unknown';
                 console.error('Audio element error, code:', code, this.audioElement.error);
@@ -135,14 +137,14 @@ class MediaPlayer {
             // Final soft retry by reloading the current source once
             try { this.audioElement.load(); } catch (_) {}
         });
-        // Network hiccup handling - attempt a single gentle retry
+        // Network hiccup handling - only retry play(), never re-load() (avoids duplicate requests in Safari)
         ['stalled','suspend','abort'].forEach(evt => {
             this.audioElement.addEventListener(evt, () => {
-                if (!this._networkRetried && this.currentTrack) {
+                if (!this._networkRetried && this.currentTrack && this.isPlaying) {
                     this._networkRetried = true;
-                    try { this.audioElement.load(); } catch (_) {}
+                    // Don't call load() — that re-fetches the MP3. Just nudge play().
                     this.audioElement.play().catch(()=>{});
-                    setTimeout(() => { this._networkRetried = false; }, 5000);
+                    setTimeout(() => { this._networkRetried = false; }, 10000);
                 }
             });
         });
@@ -267,8 +269,8 @@ class MediaPlayer {
     play(track) {
         const previousTrack = this.currentTrack;
         
-        // If same track is already playing, just resume if paused
-        if (previousTrack && previousTrack.id === track.id && previousTrack.title === track.title) {
+        // If same track is already loaded, just resume if paused (don't re-set src)
+        if (previousTrack && (previousTrack === track || (previousTrack.id != null && String(previousTrack.id) === String(track.id)))) {
             const isVideo = track.type === 'show' || track.video_url || track.mp4_link;
             const mediaElement = isVideo ? this.videoElement : this.audioElement;
             
@@ -432,14 +434,23 @@ class MediaPlayer {
         if (this.videoElement && !this.videoElement.paused) {
             this.videoElement.pause();
         }
+        // Ensure UI updates even if no native pause event fires
+        this.emit('pause');
+        this._onPaused();
     }
     
     resume() {
         const activeElement = this.getActiveElement();
         if (activeElement && activeElement.play) {
+            // Optimistically update state so UI toggles immediately
+            this.isPlaying = true;
+            this.emit('play');
             const playFn = activeElement.play.bind(activeElement);
             playFn().catch(error => {
                 if (error && error.name === 'AbortError') return;
+                // Revert optimistic update on real errors
+                this.isPlaying = false;
+                this.emit('pause');
                 console.error('Error resuming media:', error);
                 this.emit('error', error);
             });
@@ -626,6 +637,9 @@ class MediaPlayer {
             const src = state.track.audio_url || state.track.full_url || state.track.preview_url || state.track.url || state.track.video_url || state.track.mp4_link;
             if (!src) return;
 
+            // Suppress error toast during restoration — stale URLs are expected
+            this._isRestoring = true;
+
             const proxiedSrc = this._getAudioUrl(src);
             el.src = proxiedSrc;
             el.volume = this.volume;
@@ -633,9 +647,12 @@ class MediaPlayer {
             const seekTime = Math.max(0, state.time || 0);
             const wasPlaying = !!state.wasPlaying;
 
+            const clearRestoring = () => { this._isRestoring = false; };
+
             const onLoaded = () => {
                 el.removeEventListener('loadedmetadata', onLoaded);
                 el.removeEventListener('error', onError);
+                clearRestoring();
                 el.currentTime = seekTime;
                 this.currentTime = seekTime;
                 this.emit('timeupdate', this.currentTime);
@@ -650,11 +667,12 @@ class MediaPlayer {
             const onError = () => {
                 el.removeEventListener('loadedmetadata', onLoaded);
                 el.removeEventListener('error', onError);
+                clearRestoring();
             };
             el.addEventListener('loadedmetadata', onLoaded, { once: true });
             el.addEventListener('error', onError, { once: true });
 
-            try { el.load(); } catch (_) {}
+            try { el.load(); } catch (_) { clearRestoring(); }
         } catch (e) {
             console.warn('Failed to restore player state:', e);
         }
@@ -801,16 +819,10 @@ window.playerData = function() {
         togglePlay() {
             const mp = window.mediaPlayer;
             if (!mp) return;
-            // Use mediaPlayer as source of truth so toggle is correct even if UI state was stale
             if (mp.isPlaying) {
                 this.pauseTrack();
-            } else {
-                const track = mp.currentTrack;
-                if (track) {
-                    window.mediaPlayer.play(track);
-                } else {
-                    window.mediaPlayer.resume();
-                }
+            } else if (mp.currentTrack) {
+                mp.resume();
             }
         },
         

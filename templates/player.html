@@ -390,22 +390,12 @@ function fullPlayer() {
                     });
                 }
             } else if (this.mediaType === 'music') {
-                // Delegate music control to global player for consistent playback + visualizer
                 const mp = window.mediaPlayer;
-                if (!mp) {
-                    console.warn('Global mediaPlayer not available');
-                    return;
-                }
-                // Use mediaPlayer as source of truth so toggle is correct even if UI state was stale
+                if (!mp) return;
                 if (mp.isPlaying) {
                     mp.pause();
-                } else {
-                    const track = mp.currentTrack || this.currentMedia;
-                    if (track) {
-                        mp.play(track);
-                    } else {
-                        mp.resume();
-                    }
+                } else if (mp.currentTrack) {
+                    mp.resume();
                 }
             }
             

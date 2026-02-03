@@ -18680,6 +18680,15 @@ img.loading {
     opacity: 1;
 }
 
+@media (hover: none),
+(pointer: coarse) {
+
+    .track-overlay,
+    .track-actions {
+        opacity: 1;
+    }
+}
+
 .artist-actions {
     position: absolute;
     top: var(--spacing-sm);
@@ -24741,12 +24750,13 @@ body.has-player {
     position: relative;
     width: 100%;
     height: 100%;
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    background: rgba(0, 0, 0, 0.45);
-    background-image: var(--glass-gradient, linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%));
-    border-radius: 24px 24px 0 0;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    background: linear-gradient(135deg, rgba(10, 10, 20, 0.75) 0%, rgba(20, 12, 35, 0.7) 50%, rgba(10, 10, 20, 0.75) 100%);
+    background-image: var(--glass-gradient, linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(168, 85, 247, 0.08) 50%, rgba(236, 72, 153, 0.06) 100%));
+    border-radius: 20px 20px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     pointer-events: auto;
     z-index: 10;
     transition: all 0.3s ease;
@@ -24754,7 +24764,8 @@ body.has-player {
 
 /* Visual indicator when a track is actively playing */
 .now-playing-glass.now-playing-is-playing {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(99, 102, 241, 0.35), 0 0 20px rgba(99, 102, 241, 0.15);
+    border-top: 1px solid rgba(139, 92, 246, 0.3);
+    box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.2), 0 -2px 20px rgba(139, 92, 246, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .now-playing-container {
@@ -24911,8 +24922,8 @@ body.has-player {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     background: rgba(255, 255, 255, 0.1);
     border: none;
     border-radius: 50%;
@@ -24937,18 +24948,19 @@ body.has-player {
 }
 
 .now-playing-play-btn {
-    width: 42px;
-    height: 42px;
-    background: var(--dominant-color, #6366f1);
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
     color: #ffffff;
     font-size: 16px;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    border-radius: 50%;
+    box-shadow: 0 2px 12px rgba(139, 92, 246, 0.5);
 }
 
 .now-playing-play-btn:hover {
-    background: var(--secondary-color, #8b5cf6);
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.5);
+    background: linear-gradient(135deg, #a78bfa, #818cf8);
+    transform: scale(1.08);
+    box-shadow: 0 4px 18px rgba(139, 92, 246, 0.6);
 }
 
 /* Empty state - Spotify-style persistent player */
@@ -25151,18 +25163,7 @@ body.has-player {
     position: relative;
 }
 
-.queue-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    margin-left: 2px;
-}
-
-@media (max-width: 768px) {
-    .queue-label {
-        display: none;
-    }
-}
+/* Queue button is icon-only; badge shows count */
 
 .queue-badge {
     position: absolute;
@@ -25418,6 +25419,14 @@ body.has-player {
 /* Mobile styles for now-playing mini player */
 
 @media (max-width: 768px) {
+    .now-playing-wrapper {
+        position: fixed !important;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: translateZ(0);
+    }
+
     .now-playing-wrapper {
         height: 80px;
     }
