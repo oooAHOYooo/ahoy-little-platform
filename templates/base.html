@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260130b' %}
+        {% set css_version = 'v20260203a' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -1740,6 +1740,7 @@
                             :class="{'active': showQueue}"
                             title="Queue">
                             <i class="fas fa-list"></i>
+                            <span class="queue-label">Queue</span>
                             <span x-show="queueLength > 0" class="queue-badge" x-text="queueLength"></span>
                         </button>
                     </div>
@@ -2415,7 +2416,7 @@
             src="{{ url_for('static', filename='js/player.js') }}?{{ css_version }}"></script>
         <!-- Player Queue: manages up-next queue and auto-pause on video -->
         <script defer
-            src="{{ url_for('static', filename='js/player-queue.js') }}"></script>
+            src="{{ url_for('static', filename='js/player-queue.js') }}?{{ css_version }}"></script>
 
         <!-- Now Playing (lazy loaded): avoids parsing heavy scripts on pages where it's unused -->
         <script type="module">

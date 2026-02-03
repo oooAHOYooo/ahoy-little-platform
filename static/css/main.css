@@ -8915,7 +8915,7 @@ body.debug-layout .card {
     letter-spacing: 0.5px;
 }
 
-/* Queue Items */
+/* Sidebar Queue Items (scoped to avoid conflicts with now-playing queue panel) */
 .queue-mini {
     display: flex;
     flex-direction: column;
@@ -8923,12 +8923,12 @@ body.debug-layout .card {
     margin-bottom: 0.5rem;
 }
 
-.queue-item {
+.queue-mini .queue-item {
     position: relative;
 }
 
-.queue-add-btn,
-.queue-remove-btn {
+.queue-mini .queue-remove-btn,
+.item-mini .queue-add-btn {
     position: absolute;
     top: 50%;
     right: 0.25rem;
@@ -8949,23 +8949,23 @@ body.debug-layout .card {
     padding: 0;
 }
 
-.queue-item:hover .queue-remove-btn,
+.queue-mini .queue-item:hover .queue-remove-btn,
 .item-mini:hover .queue-add-btn {
     opacity: 1;
 }
 
-.queue-add-btn:hover,
-.queue-remove-btn:hover {
+.queue-mini .queue-remove-btn:hover,
+.item-mini .queue-add-btn:hover {
     background: rgba(255, 255, 255, 0.2);
     color: white;
 }
 
-.queue-add-btn {
+.item-mini .queue-add-btn {
     background: rgba(99, 102, 241, 0.3);
     color: #6366f1;
 }
 
-.queue-add-btn:hover {
+.item-mini .queue-add-btn:hover {
     background: rgba(99, 102, 241, 0.5);
 }
 
@@ -19030,8 +19030,12 @@ img.loading {
 
 .music-table td.col-action {
     text-align: center;
-    width: 70px;
+    width: 90px;
     padding: 10px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
 .music-table td.col-action .bm-btn {
@@ -19079,6 +19083,45 @@ img.loading {
     border-color: rgba(0, 212, 255, 0.7);
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
     transform: scale(1.15);
+}
+
+/* Queue button in music list view */
+.music-table td.col-action .queue-container {
+    display: inline-flex;
+}
+
+.music-table td.col-action .queue-btn {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0;
+    border-radius: 50%;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 11px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.music-table td.col-action .queue-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.95);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.music-table td.col-action .queue-btn.in-queue {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.25) 0%, rgba(56, 142, 60, 0.2) 100%);
+    border-color: rgba(76, 175, 80, 0.5);
+    color: #81c784;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
 }
 
 /* Mobile: Keep table structure, make it responsive with horizontal scroll */
@@ -19173,7 +19216,7 @@ img.loading {
 
     .music-table th.col-action,
     .music-table td.col-action {
-        width: 60px;
+        width: 76px;
         padding: 8px 6px;
     }
 
@@ -19193,7 +19236,8 @@ img.loading {
         font-size: 9px;
     }
 
-    .music-table td.col-action .bm-btn {
+    .music-table td.col-action .bm-btn,
+    .music-table td.col-action .queue-btn {
         width: 24px;
         height: 24px;
         font-size: 10px;
@@ -25107,12 +25151,26 @@ body.has-player {
     position: relative;
 }
 
+.queue-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-left: 2px;
+}
+
+@media (max-width: 768px) {
+    .queue-label {
+        display: none;
+    }
+}
+
 .queue-badge {
     position: absolute;
     top: -4px;
     right: -4px;
     background: var(--accent-color, #00d4ff);
     color: #0d0d1a;
+    animation: queueBadgePop 0.3s ease-out;
     font-size: 10px;
     font-weight: 700;
     min-width: 16px;
@@ -25333,6 +25391,22 @@ body.has-player {
     to {
         opacity: 0;
         transform: translateY(10px);
+    }
+}
+
+@keyframes queueBadgePop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    60% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }
 

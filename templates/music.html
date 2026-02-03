@@ -328,6 +328,14 @@
                             <td class="col-plays" data-label="Plays"
                                 x-text="track.play_count || 0"></td>
                             <td class="col-action" data-label="Action">
+                                <div class="queue-container" x-data="globalQueueHandler()" x-init="init()">
+                                    <button class="action-btn queue-btn"
+                                        @click.stop="addToQueue('track', track.id, track.title, track.cover_art, track)"
+                                        :class="{ 'in-queue': isInQueue('track', track.id) }"
+                                        title="Add to queue">
+                                        <i :class="isInQueue('track', track.id) ? 'fas fa-check' : 'fas fa-plus'" aria-hidden="true"></i>
+                                    </button>
+                                </div>
                                 <button class="action-btn bm-btn"
                                     @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art })"
                                     :aria-pressed="isBookmarked('track', track.id)"
@@ -648,19 +656,28 @@ function musicLibrary() {
             if (this._playTrackDebounce) {
                 clearTimeout(this._playTrackDebounce);
             }
-            
+
             this._playTrackDebounce = setTimeout(() => {
                 // If same track is playing, toggle pause
                 if (this.currentTrack?.id === track.id && this.isPlaying) {
                     this.togglePlayPause();
                     return;
                 }
-                
+
                 this.currentTrack = track;
-                
+
+                // Set the full filtered library as the playlist (sorted A-Z by title)
+                // so next/prev buttons navigate through all visible tracks
+                const sorted = [...this.filteredTracks].sort((a, b) =>
+                    (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' })
+                );
+                window.mediaPlayer.setPlaylist(sorted);
+                const idx = sorted.findIndex(t => t.id === track.id);
+                window.mediaPlayer.currentIndex = idx >= 0 ? idx : 0;
+
                 // Dispatch custom event to trigger global player
                 document.dispatchEvent(new CustomEvent('play-track', {
-                    detail: { 
+                    detail: {
                         track: track,
                         type: 'track'
                     }
@@ -989,17 +1006,20 @@ function recentQueueSection() {
         },
         
         playFromQueue(index) {
-            // Calculate actual queue index (from the end)
+            // Calculate actual queue index (displayed items are last 5 reversed)
             if (window.playerQueue) {
                 const queue = window.playerQueue.getQueue();
                 const actualIndex = queue.length - 1 - index;
                 const item = queue[actualIndex];
                 if (item) {
+                    // Remove from queue before playing (same as now-playing panel behavior)
+                    window.playerQueue.remove(actualIndex);
                     document.dispatchEvent(new CustomEvent('play-track', { detail: item }));
+                    this.loadRecentQueue();
                 }
             }
         },
-        
+
         removeFromQueue(index) {
             if (window.playerQueue) {
                 const queue = window.playerQueue.getQueue();

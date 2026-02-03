@@ -140,6 +140,15 @@
                 this.episodes = eps;
             },
             play(ep) {
+                // Set the full episode list as the playlist (sorted A-Z by title)
+                // so next/prev buttons navigate through all episodes
+                const sorted = [...this.episodes].sort((a, b) =>
+                    (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' })
+                );
+                window.mediaPlayer.setPlaylist(sorted);
+                const idx = sorted.findIndex(e => e.key === ep.key);
+                window.mediaPlayer.currentIndex = idx >= 0 ? idx : 0;
+
                 document.dispatchEvent(new CustomEvent('play-track', { detail: ep }));
             },
             openShow(slug) {

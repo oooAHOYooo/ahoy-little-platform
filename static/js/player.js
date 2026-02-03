@@ -571,7 +571,9 @@ class MediaPlayer {
                 muted: this.isMuted,
                 shuffled: this.isShuffled,
                 repeated: this.isRepeated,
-                wasPlaying: this.isPlaying
+                wasPlaying: this.isPlaying,
+                playlist: this.playlist,
+                currentIndex: this.currentIndex
             };
             sessionStorage.setItem('ahoy.player.state', JSON.stringify(state));
             if (this.currentTrack) {
@@ -592,6 +594,12 @@ class MediaPlayer {
             this.isMuted = state.muted ?? false;
             this.isShuffled = state.shuffled ?? false;
             this.isRepeated = state.repeated ?? false;
+
+            // Restore playlist so next/prev work after page reload
+            if (Array.isArray(state.playlist) && state.playlist.length > 0) {
+                this.playlist = state.playlist;
+                this.currentIndex = typeof state.currentIndex === 'number' ? state.currentIndex : 0;
+            }
 
             this.currentTrack = state.track;
             this.emit('trackchange', state.track);
