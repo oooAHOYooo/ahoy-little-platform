@@ -293,51 +293,6 @@
                 </div>
             </div>
         </section>
-        <!-- Mobile: Videos layout matches Podcasts (episode rows) -->
-        {% from "macros/subpage_header.html" import subpage_hero, subpage_section_header %}
-        {{ subpage_hero(title="Videos", subtitle="Music videos, skate parts, short films, episodes, and more.", icon_class="fas fa-video") }}
-
-        <section class="podcasts-section mobile-only">
-            {{ subpage_section_header("All Videos") }}
-            <div class="episode-list">
-                <template x-for="show in filteredShows" :key="show.id">
-                    <article class="episode-row" @click="playShow(show)">
-                        <img class="episode-art"
-                            :src="show.thumbnail || '/static/img/default-cover.jpg'"
-                            alt=""
-                            loading="lazy"
-                            decoding="async">
-                        <div class="episode-meta">
-                            <div class="episode-title" x-text="show.title"></div>
-                            <div class="episode-subtitle">
-                                <span class="episode-show" x-text="show.host || ''"></span>
-                                <span class="episode-dot" x-show="show.type">•</span>
-                                <span class="episode-time" x-show="show.type" x-text="String(show.type || '').replace(/_/g,' ')"></span>
-                            </div>
-                            <div class="episode-desc" x-text="show.description || ''"></div>
-                        </div>
-                        <div class="episode-actions">
-                            <button type="button" class="episode-btn"
-                                @click.stop="playShow(show)" title="Watch">
-                                <i class="fas fa-play" aria-hidden="true"></i>
-                                <span class="sr-only">Watch</span>
-                            </button>
-                            <button type="button" class="episode-btn view-solo-mini-btn"
-                                @click.stop="viewSoloShow(show)" title="View Solo">
-                                <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-                                <span class="sr-only">View Solo</span>
-                            </button>
-                            <button type="button" class="episode-btn bm-btn"
-                                @click.stop="toggleBookmark({ type: 'show', id: show.id, title: show.title, artwork: show.thumbnail })"
-                                title="Bookmark">
-                                <i class="fas fa-bookmark" aria-hidden="true"></i>
-                                <span class="sr-only">Bookmark</span>
-                            </button>
-                        </div>
-                    </article>
-                </template>
-            </div>
-        </section>
 
         <!-- Loading State -->
         <section x-show="isLoading" class="loading-section">
