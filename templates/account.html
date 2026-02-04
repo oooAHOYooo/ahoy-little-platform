@@ -33,19 +33,35 @@
         <div class="card-header">Your Stats</div>
         <div class="card-body">
           <div class="acct-stats">
-            <div class="acct-stat">
+            <a href="/my-saves" class="acct-stat acct-stat-link">
               <div class="n" x-text="bookmarks"></div>
               <div class="l">Bookmarks</div>
-            </div>
-            <div class="acct-stat">
+            </a>
+            <a href="/my-saves" class="acct-stat acct-stat-link">
               <div class="n" x-text="recentPlays"></div>
               <div class="l">Recently Played</div>
-            </div>
+            </a>
             <div class="acct-stat">
               <div class="n">{{ stats.merch_orders or 0 }}</div>
               <div class="l">Merch Orders</div>
             </div>
           </div>
+          <!-- Type breakdown -->
+          <div class="acct-stats-breakdown" x-show="bookmarks > 0">
+            <div class="acct-breakdown-row">
+              <span class="acct-breakdown-label"><i class="fas fa-music"></i> Tracks</span>
+              <span class="acct-breakdown-val" x-text="trackCount"></span>
+            </div>
+            <div class="acct-breakdown-row">
+              <span class="acct-breakdown-label"><i class="fas fa-video"></i> Shows</span>
+              <span class="acct-breakdown-val" x-text="showCount"></span>
+            </div>
+            <div class="acct-breakdown-row">
+              <span class="acct-breakdown-label"><i class="fas fa-user"></i> Artists</span>
+              <span class="acct-breakdown-val" x-text="artistCount"></span>
+            </div>
+          </div>
+          <a href="/my-saves" class="acct-view-all">View All Saves <i class="fas fa-arrow-right"></i></a>
         </div>
       </div>
 
@@ -388,6 +404,17 @@
   .acct-stat { border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); padding: 10px 10px; }
   .acct-stat .n { font-weight: 900; font-size: 20px; color: rgba(255,255,255,0.95); }
   .acct-stat .l { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin-top: 2px; color: rgba(255,255,255,0.8); }
+  .acct-stat-link { text-decoration: none; color: inherit; cursor: pointer; transition: all 0.2s ease; display: block; }
+  .acct-stat-link:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,0,96,0.3); }
+
+  .acct-stats-breakdown { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 6px; }
+  .acct-breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+  .acct-breakdown-label { font-size: 12px; color: rgba(255,255,255,0.6); display: flex; align-items: center; gap: 6px; }
+  .acct-breakdown-label i { width: 14px; text-align: center; color: rgba(255,255,255,0.4); }
+  .acct-breakdown-val { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.9); }
+
+  .acct-view-all { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 12px; color: #ff0060; text-decoration: none; font-weight: 600; letter-spacing: 0.03em; transition: gap 0.2s ease; }
+  .acct-view-all:hover { gap: 10px; }
 
   .acct-orders { display:flex; flex-direction: column; gap: 10px; }
   .acct-order { display:flex; justify-content:space-between; gap: 12px; padding: 10px 10px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); }
@@ -880,21 +907,32 @@ function acctStats() {
   return {
     bookmarks: {{ stats.bookmarks or 0 }},
     recentPlays: 0,
+    trackCount: 0,
+    showCount: 0,
+    artistCount: 0,
     load() {
-      // Use client-side AhoyBookmarks as master (same source as /my-saves)
-      if (window.AhoyBookmarks) {
-        this.bookmarks = window.AhoyBookmarks.all().length;
-      }
+      this.refresh();
       try {
         const raw = localStorage.getItem('ahoy.recentlyPlayed.v1');
         this.recentPlays = raw ? JSON.parse(raw).length : 0;
       } catch (_) {}
       // Keep in sync if bookmarks change
-      document.addEventListener('bookmarks:changed', () => {
-        if (window.AhoyBookmarks) {
-          this.bookmarks = window.AhoyBookmarks.all().length;
-        }
+      document.addEventListener('bookmarks:changed', () => this.refresh());
+      document.addEventListener('recentlyPlayed:updated', () => {
+        try {
+          const raw = localStorage.getItem('ahoy.recentlyPlayed.v1');
+          this.recentPlays = raw ? JSON.parse(raw).length : 0;
+        } catch (_) {}
       });
+    },
+    refresh() {
+      // Use client-side AhoyBookmarks as master (same source as /my-saves)
+      if (!window.AhoyBookmarks) return;
+      const all = window.AhoyBookmarks.all();
+      this.bookmarks = all.length;
+      this.trackCount = all.filter(b => b.type === 'track').length;
+      this.showCount = all.filter(b => b.type === 'show').length;
+      this.artistCount = all.filter(b => b.type === 'artist').length;
     }
   };
 }

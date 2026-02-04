@@ -25806,3 +25806,39 @@ body.has-player {
         overflow-x: auto;
     }
 }
+
+/* ==============================================
+   Now-playing highlight for video cards
+   ============================================== */
+.show-card.now-playing,
+.list-item.now-playing {
+    border-color: #ff0060 !important;
+    box-shadow: 0 0 12px rgba(255, 0, 96, 0.4), inset 0 0 0 1px rgba(255, 0, 96, 0.2) !important;
+}
+
+.show-card.now-playing::after,
+.list-item.now-playing::after {
+    content: 'NOW PLAYING';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ff0060;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    z-index: 5;
+    animation: nowPlayingPulse 2s ease-in-out infinite;
+}
+
+.list-item.now-playing {
+    position: relative;
+    background: rgba(255, 0, 96, 0.05) !important;
+}
+
+@keyframes nowPlayingPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}

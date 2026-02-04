@@ -17,6 +17,21 @@
             <!-- Video Settings -->
             <div class="settings-section">
                 <h2><i class="fas fa-video"></i> Video Settings</h2>
+
+                <!-- Live Preview -->
+                <div class="settings-preview-wrap">
+                    <div class="settings-preview" x-ref="previewContainer">
+                        <img src="/static/img/default-cover.jpg"
+                             alt="Preview"
+                             class="settings-preview-img"
+                             x-ref="previewImg"
+                             :style="previewFilterStyle()">
+                        <div class="settings-preview-label">
+                            <i class="fas fa-eye"></i> Live Preview
+                        </div>
+                    </div>
+                </div>
+
                 <div class="settings-grid">
                     <div class="setting-item">
                         <label>Brightness</label>
@@ -235,7 +250,45 @@
     </div>
 </div>
 
+<style>
+.settings-preview-wrap {
+    margin-bottom: 20px;
+}
+.settings-preview {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    aspect-ratio: 16/9;
+    max-height: 280px;
+    background: #111;
+}
+.settings-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.15s ease, transform 0.3s ease;
+}
+.settings-preview-label {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(0,0,0,0.6);
+    color: rgba(255,255,255,0.7);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+</style>
+
 <script>
+const VIDEO_PROPS = ['brightness', 'contrast', 'saturation', 'hue'];
+const AUDIO_PROPS = ['masterVolume', 'musicVolume', 'effectsVolume', 'bass', 'treble'];
+
 function settingsPage() {
     return {
         videoSettings: {
@@ -264,6 +317,9 @@ function settingsPage() {
         },
         isDragging: false,
         dragProperty: null,
+        _dragDial: null,
+        _moveHandler: null,
+        _upHandler: null,
 
         init() {
             this.loadSettings();
@@ -272,7 +328,6 @@ function settingsPage() {
         },
 
         loadSettings() {
-            // Load from localStorage
             const saved = localStorage.getItem('ahoySettings');
             if (saved) {
                 const settings = JSON.parse(saved);
@@ -293,32 +348,39 @@ function settingsPage() {
             localStorage.setItem('ahoySettings', JSON.stringify(settings));
             this.applyVideoFilters();
             this.applyAudioSettings();
+            // Fun pulse on the preview when saving
+            if (this.$refs.previewImg) {
+                this.$refs.previewImg.style.transform = 'scale(1.03)';
+                setTimeout(() => { this.$refs.previewImg.style.transform = 'scale(1)'; }, 300);
+            }
             this.showNotification('Settings saved!', 'success');
         },
 
+        // Build the CSS filter string for the preview image
+        previewFilterStyle() {
+            const b = this.videoSettings.brightness * 2; // 0-100 maps to 0%-200%
+            const c = this.videoSettings.contrast * 2;
+            const s = this.videoSettings.saturation * 2;
+            const h = this.videoSettings.hue * 3.6; // 0-100 maps to 0-360deg
+            return `filter: brightness(${b}%) contrast(${c}%) saturate(${s}%) hue-rotate(${h}deg)`;
+        },
+
         applyVideoFilters() {
-            // Apply video filters to all video elements
-            const videos = document.querySelectorAll('video');
-            videos.forEach(video => {
-                const brightness = this.videoSettings.brightness;
-                const contrast = this.videoSettings.contrast;
-                const saturation = this.videoSettings.saturation;
-                const hue = this.videoSettings.hue;
-                
-                video.style.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg)`;
-            });
+            const b = this.videoSettings.brightness * 2;
+            const c = this.videoSettings.contrast * 2;
+            const s = this.videoSettings.saturation * 2;
+            const h = this.videoSettings.hue * 3.6;
+            const filterStr = `brightness(${b}%) contrast(${c}%) saturate(${s}%) hue-rotate(${h}deg)`;
+
+            // Apply to any video elements on the page
+            document.querySelectorAll('video').forEach(v => { v.style.filter = filterStr; });
         },
 
         applyAudioSettings() {
-            // Apply audio settings to all audio elements
-            const audios = document.querySelectorAll('audio');
-            audios.forEach(audio => {
-                audio.volume = this.audioSettings.masterVolume / 100;
-            });
-            
-            // Apply to global player if it exists
+            const vol = this.audioSettings.masterVolume / 100;
+            document.querySelectorAll('audio').forEach(a => { a.volume = vol; });
             if (window.globalPlayer && window.globalPlayer.mediaElement) {
-                window.globalPlayer.mediaElement.volume = this.audioSettings.masterVolume / 100;
+                window.globalPlayer.mediaElement.volume = vol;
             }
         },
 
@@ -327,74 +389,78 @@ function settingsPage() {
             this.audioSettings = { masterVolume: 75, musicVolume: 80, effectsVolume: 70, bass: 50, treble: 50 };
             this.playbackSettings = { autoplay: true, shuffle: false, repeat: false, highQuality: true };
             this.interfaceSettings = { darkMode: true, animations: true, notifications: true };
-            this.applyVideoSettings();
+            this.applyVideoFilters();
             this.applyAudioSettings();
+            // Fun reset bounce on the preview
+            if (this.$refs.previewImg) {
+                this.$refs.previewImg.style.transform = 'scale(0.95)';
+                setTimeout(() => { this.$refs.previewImg.style.transform = 'scale(1)'; }, 200);
+            }
             this.showNotification('Settings reset to defaults', 'info');
         },
 
         startDialDrag(event, property) {
             this.isDragging = true;
             this.dragProperty = property;
+            this._dragDial = event.target.closest('.dial');
             event.preventDefault();
-            
-            const handleMouseMove = (e) => this.handleDialDrag(e);
-            const handleMouseUp = () => this.stopDialDrag();
-            
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-            document.addEventListener('touchmove', handleMouseMove);
-            document.addEventListener('touchend', handleMouseUp);
+
+            this._moveHandler = (e) => this.handleDialDrag(e);
+            this._upHandler = () => this.stopDialDrag();
+
+            document.addEventListener('mousemove', this._moveHandler);
+            document.addEventListener('mouseup', this._upHandler);
+            document.addEventListener('touchmove', this._moveHandler, { passive: false });
+            document.addEventListener('touchend', this._upHandler);
         },
 
         handleDialDrag(event) {
-            if (!this.isDragging) return;
-            
-            const dial = event.target.closest('.dial');
-            const rect = dial.getBoundingClientRect();
+            if (!this.isDragging || !this._dragDial) return;
+
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+            const rect = this._dragDial.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-            
-            const angle = Math.atan2(event.clientY - centerY, event.clientX - centerX);
+
+            const angle = Math.atan2(clientY - centerY, clientX - centerX);
             const degrees = (angle * 180 / Math.PI + 90 + 360) % 360;
-            
+
             let value;
             if (this.dragProperty === 'hue') {
                 value = Math.max(0, Math.min(100, degrees / 3.6));
             } else {
                 value = Math.max(0, Math.min(100, degrees / 1.8));
             }
-            
-            this.videoSettings[this.dragProperty] = value;
-            this.audioSettings[this.dragProperty] = value;
-            this.applyVideoSettings();
-            this.applyAudioSettings();
+
+            // Route to the correct settings object
+            if (VIDEO_PROPS.includes(this.dragProperty)) {
+                this.videoSettings[this.dragProperty] = value;
+                this.applyVideoFilters();
+            } else if (AUDIO_PROPS.includes(this.dragProperty)) {
+                this.audioSettings[this.dragProperty] = value;
+                this.applyAudioSettings();
+            }
         },
 
         stopDialDrag() {
             this.isDragging = false;
             this.dragProperty = null;
-            document.removeEventListener('mousemove', this.handleDialDrag);
-            document.removeEventListener('mouseup', this.stopDialDrag);
-            document.removeEventListener('touchmove', this.handleDialDrag);
-            document.removeEventListener('touchend', this.stopDialDrag);
-        },
-
-        applyVideoSettings() {
-            const video = document.querySelector('video');
-            if (video) {
-                video.style.filter = `brightness(${this.videoSettings.brightness}%) contrast(${this.videoSettings.contrast}%) saturate(${this.videoSettings.saturation}%) hue-rotate(${this.videoSettings.hue * 3.6}deg)`;
+            this._dragDial = null;
+            if (this._moveHandler) {
+                document.removeEventListener('mousemove', this._moveHandler);
+                document.removeEventListener('touchmove', this._moveHandler);
             }
-        },
-
-        applyAudioSettings() {
-            const audio = document.querySelector('audio');
-            if (audio) {
-                audio.volume = this.audioSettings.masterVolume / 100;
+            if (this._upHandler) {
+                document.removeEventListener('mouseup', this._upHandler);
+                document.removeEventListener('touchend', this._upHandler);
             }
+            this._moveHandler = null;
+            this._upHandler = null;
         },
 
         showNotification(message, type = 'info') {
-            // Simple notification system
             const notification = document.createElement('div');
             notification.className = `notification notification-${type}`;
             notification.textContent = message;
@@ -402,11 +468,12 @@ function settingsPage() {
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: var(--primary-color);
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#6366f1'};
                 color: white;
                 padding: 12px 20px;
                 border-radius: 8px;
                 z-index: 1000;
+                font-weight: 500;
                 animation: slideIn 0.3s ease;
             `;
             document.body.appendChild(notification);
