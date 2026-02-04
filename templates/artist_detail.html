@@ -486,9 +486,9 @@ function artistDetail() {
 }
 
 .follow-button {
-    background: rgba(102, 126, 234, 0.9);
-    border: none;
-    color: white;
+    background: rgba(102, 126, 234, 0.15);
+    border: 1px solid rgba(102, 126, 234, 0.4);
+    color: rgba(102, 126, 234, 1);
     padding: 0.75rem 1.5rem;
     border-radius: 0.5rem;
     font-size: 1rem;
@@ -498,20 +498,27 @@ function artistDetail() {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .follow-button:hover {
-    background: rgba(102, 126, 234, 1);
+    background: rgba(102, 126, 234, 0.25);
+    border-color: rgba(102, 126, 234, 0.6);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .follow-button.following {
-    background: rgba(34, 197, 94, 0.9);
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: rgba(34, 197, 94, 1);
 }
 
 .follow-button.following:hover {
-    background: rgba(34, 197, 94, 1);
+    background: rgba(34, 197, 94, 0.25);
+    border-color: rgba(34, 197, 94, 0.6);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 
 /* Merch Section */
