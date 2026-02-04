@@ -73,22 +73,37 @@ endblock %}
         </div>
     </section>
 
-    <!-- Boost (simplified) -->
-    <section class="boost-jar-section">
-        <div class="boost-jar-container">
-            <div class="boost-jar-header">
-                <h2>Boost</h2>
-                <p class="boost-jar-subtitle">Support <span x-text="artist.name"></span> directly</p>
+    <!-- Boost (inline - no popup) -->
+    <section class="boost-inline-section">
+        <div class="boost-inline-container">
+            <div class="boost-inline-header">
+                <h2><i class="fas fa-bolt"></i> Boost</h2>
+                <p class="boost-inline-subtitle">Support <span x-text="artist.name"></span> directly &mdash; 100% goes to the artist</p>
             </div>
-            <button type="button" class="boost-submit-btn"
-                @click="document.dispatchEvent(new CustomEvent('ahoy:boost:open', { detail: { recipientType: 'artist', recipientId: (artist.slug || artist.id || artist.name || ''), recipientName: artist.name, suggestedAmount: 1 } }))">
-                <span>Open Boost</span>
+            <div class="boost-inline-amounts">
+                <button type="button" class="boost-inline-amt" :class="{ active: boostAmount === 1 }" @click="boostAmount = 1">$1</button>
+                <button type="button" class="boost-inline-amt" :class="{ active: boostAmount === 3 }" @click="boostAmount = 3">$3</button>
+                <button type="button" class="boost-inline-amt" :class="{ active: boostAmount === 5 }" @click="boostAmount = 5">$5</button>
+                <button type="button" class="boost-inline-amt" :class="{ active: boostAmount === -1 }" @click="boostAmount = -1">Custom</button>
+            </div>
+            <div class="boost-inline-custom" x-show="boostAmount === -1" x-cloak>
+                <div class="boost-inline-custom-row">
+                    <span class="boost-inline-custom-prefix">$</span>
+                    <input type="number" min="0.50" step="0.01" placeholder="0.50" x-model="boostCustom" class="boost-inline-custom-input">
+                </div>
+            </div>
+            <button type="button" class="boost-inline-confirm" @click="goBoost()">
+                <i class="fas fa-bolt"></i> Boost <span x-text="boostAmount === -1 ? (boostCustom ? '$' + boostCustom : '') : '$' + boostAmount"></span>
             </button>
-            <p class="boost-jar-fee-note" style="margin-top:10px;">
-                Fees are shown on checkout.
-            </p>
+            <p class="boost-inline-note">Fees (Stripe + platform) shown on checkout</p>
         </div>
     </section>
+
+    <!-- Random Artist FAB -->
+    <button class="random-artist-fab" @click="goRandomArtist()" title="Discover another artist">
+        <i class="fas fa-random"></i>
+        <span class="random-artist-fab-label">Next Artist</span>
+    </button>
 
     <!-- Merch Section (Future Feature) -->
     <!--
@@ -170,6 +185,8 @@ function artistDetail() {
         isFollowing: {{ is_following|tojson }},
         mediaItems: [],
         isLoading: true,
+        boostAmount: 1,
+        boostCustom: '',
 
         init() {
             // Prefer client bootstrap artist if provided
@@ -339,11 +356,38 @@ function artistDetail() {
             return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         },
 
+        goBoost() {
+            const artistId = encodeURIComponent(this.artist.slug || this.artist.id || this.artist.name || '');
+            let amount = this.boostAmount === -1 ? parseFloat(this.boostCustom) : this.boostAmount;
+            if (!amount || amount < 0.50) {
+                if (window.ahoyApp?.showNotification) window.ahoyApp.showNotification('Minimum boost is $0.50', 'error');
+                return;
+            }
+            window.location.href = `/checkout?type=boost&artist_id=${artistId}&amount=${amount}`;
+        },
+
+        async goRandomArtist() {
+            try {
+                const res = await fetch('/api/artists');
+                const data = await res.json();
+                const artists = (data.artists || []).filter(a => {
+                    const slug = (a.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                    const currentSlug = (this.artist.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                    return slug !== currentSlug;
+                });
+                if (artists.length > 0) {
+                    const pick = artists[Math.floor(Math.random() * artists.length)];
+                    const slug = (pick.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                    window.location.href = `/artist/${slug}`;
+                }
+            } catch (e) {
+                console.error('Random artist error:', e);
+            }
+        },
+
         lastBookmarkAction: 0
     };
 }
-
-// Boost UI moved to the global Boost modal in templates/base.html.
 
 </script>
 
@@ -516,31 +560,194 @@ function artistDetail() {
     margin: 0;
 }
 
+/* Inline Boost Section */
+.boost-inline-section {
+    margin-bottom: 2rem;
+}
+
+.boost-inline-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+}
+
+.boost-inline-header h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+    color: #fff;
+}
+
+.boost-inline-header h2 i {
+    color: #00d4ff;
+    margin-right: 0.4rem;
+}
+
+.boost-inline-subtitle {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.55);
+    margin: 0 0 1rem 0;
+}
+
+.boost-inline-amounts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 1rem;
+}
+
+.boost-inline-amt {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.boost-inline-amt:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.boost-inline-amt.active {
+    background: rgba(0, 212, 255, 0.15);
+    border-color: rgba(0, 212, 255, 0.4);
+    color: #00d4ff;
+}
+
+.boost-inline-custom {
+    margin-bottom: 1rem;
+}
+
+.boost-inline-custom-row {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 8px 12px;
+}
+
+.boost-inline-custom-prefix {
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.boost-inline-custom-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+}
+
+.boost-inline-confirm {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #00d4ff;
+    color: #000;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.boost-inline-confirm:hover {
+    background: #00e5ff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 212, 255, 0.3);
+}
+
+.boost-inline-note {
+    text-align: center;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.35);
+    margin: 0.75rem 0 0 0;
+}
+
+/* Random Artist FAB */
+.random-artist-fab {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border-radius: 50px;
+    border: none;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    transition: all 0.2s;
+    animation: fab-pulse 3s ease-in-out infinite;
+}
+
+.random-artist-fab:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 6px 28px rgba(102, 126, 234, 0.5);
+}
+
+.random-artist-fab i {
+    font-size: 1rem;
+}
+
+@keyframes fab-pulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4); }
+    50% { box-shadow: 0 4px 28px rgba(102, 126, 234, 0.6); }
+}
+
 @media (max-width: 768px) {
     .hero-content {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .hero-name {
         font-size: 2rem;
     }
-    
+
     .hero-genre {
         font-size: 1rem;
     }
-    
+
     .hero-bio {
         font-size: 0.9rem;
     }
-    
+
     .avatar-image {
         width: 120px;
         height: 120px;
     }
-    
+
     .merch-grid {
         grid-template-columns: 1fr;
+    }
+
+    .boost-inline-amounts {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .random-artist-fab {
+        bottom: 90px;
+        right: 14px;
+        padding: 10px 14px;
+        font-size: 0.82rem;
     }
 }
 </style>

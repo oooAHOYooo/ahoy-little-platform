@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260204a' %}
+        {% set css_version = 'v20260204b' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -4071,23 +4071,9 @@
                 toggleSave() { this.isSaved = !this.isSaved; },
                 addToPlaylist() { },
                 async openBoost() {
-                    try {
-                        const track = this.currentTrack || (window.mediaPlayer && window.mediaPlayer.currentTrack) || {};
-                        const recipientName = (track.artist || track.host || track.creator || '').trim();
-                        const recipientId = String(track.artist_id || track.artistId || track.artist || '').trim();
-                        document.dispatchEvent(new CustomEvent('ahoy:boost:open', {
-                            detail: {
-                                recipientType: (track.type === 'show' ? 'show' : 'artist'),
-                                recipientId,
-                                recipientName,
-                                suggestedAmount: 1
-                            }
-                        }));
-                    } catch (e) {
-                        console.warn('Boost open failed:', e);
-                        // Fallback to legacy checkout routing
-                        try { window.location.href = `/checkout?type=boost&amount=1`; } catch (_) {}
-                    }
+                    const track = this.currentTrack || (window.mediaPlayer && window.mediaPlayer.currentTrack) || {};
+                    const artistId = encodeURIComponent(String(track.artist_id || track.artistId || track.artist || '').trim());
+                    window.location.href = `/checkout?type=boost&artist_id=${artistId}&amount=1`;
                 },
                 toggleShuffle() {
                     this.isShuffled = !this.isShuffled;
