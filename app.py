@@ -1656,6 +1656,18 @@ if _csrf_ext is not None:
         # Log but don't fail - endpoint will still work, just with CSRF check
         print(f"Warning: Could not exempt Stripe webhook from CSRF: {e}")
 
+    # Exempt auth API endpoints - session-based JSON API
+    try:
+        from blueprints.api.auth import login, register, logout, password_reset_request, password_reset_confirm
+        _csrf_ext.exempt(login)
+        _csrf_ext.exempt(register)
+        _csrf_ext.exempt(logout)
+        _csrf_ext.exempt(password_reset_request)
+        _csrf_ext.exempt(password_reset_confirm)
+    except Exception as e:
+        # Log but don't fail
+        print(f"Warning: Could not exempt auth endpoints from CSRF: {e}")
+
 
 @app.route('/success')
 def checkout_success():
