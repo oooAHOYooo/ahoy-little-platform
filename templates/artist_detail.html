@@ -569,9 +569,11 @@ function artistDetail() {
     max-width: 500px;
     margin: 0 auto;
     padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 1rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .boost-inline-header h2 {
@@ -582,8 +584,8 @@ function artistDetail() {
 }
 
 .boost-inline-header h2 i {
-    color: #00d4ff;
-    margin-right: 0.4rem;
+    color: #ff006e;
+    margin-right: 0.5rem;
 }
 
 .boost-inline-subtitle {
@@ -602,24 +604,26 @@ function artistDetail() {
 .boost-inline-amt {
     padding: 10px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
     color: #fff;
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .boost-inline-amt:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
 }
 
 .boost-inline-amt.active {
-    background: rgba(0, 212, 255, 0.15);
-    border-color: rgba(0, 212, 255, 0.4);
-    color: #00d4ff;
+    background: rgba(255, 0, 110, 0.2);
+    border-color: rgba(255, 0, 110, 0.5);
+    color: #ff006e;
 }
 
 .boost-inline-custom {
@@ -630,9 +634,11 @@ function artistDetail() {
     display: flex;
     align-items: center;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 10px;
     padding: 8px 12px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .boost-inline-custom-prefix {
@@ -654,19 +660,22 @@ function artistDetail() {
     width: 100%;
     padding: 12px;
     border-radius: 10px;
-    border: none;
-    background: #00d4ff;
-    color: #000;
+    border: 1px solid rgba(255, 0, 110, 0.3);
+    background: rgba(255, 0, 110, 0.15);
+    color: #ff006e;
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.15s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .boost-inline-confirm:hover {
-    background: #00e5ff;
+    background: rgba(255, 0, 110, 0.25);
+    border-color: rgba(255, 0, 110, 0.6);
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(0, 212, 255, 0.3);
+    box-shadow: 0 4px 16px rgba(255, 0, 110, 0.2);
 }
 
 .boost-inline-note {
@@ -687,29 +696,33 @@ function artistDetail() {
     gap: 8px;
     padding: 12px 18px;
     border-radius: 50px;
-    border: none;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.4);
     color: #fff;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     transition: all 0.2s;
     animation: fab-pulse 3s ease-in-out infinite;
 }
 
 .random-artist-fab:hover {
-    transform: translateY(-2px) scale(1.04);
-    box-shadow: 0 6px 28px rgba(102, 126, 234, 0.5);
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.4);
 }
 
 .random-artist-fab i {
-    font-size: 1rem;
+    color: #00d4ff;
 }
 
 @keyframes fab-pulse {
-    0%, 100% { box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4); }
-    50% { box-shadow: 0 4px 28px rgba(102, 126, 234, 0.6); }
+    0%, 100% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+    50% { box-shadow: 0 4px 28px rgba(0, 212, 255, 0.2); }
 }
 
 @media (max-width: 768px) {
