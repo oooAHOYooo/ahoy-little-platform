@@ -77,7 +77,7 @@ endblock %}
     <section class="boost-inline-section">
         <div class="boost-inline-container">
             <div class="boost-inline-header">
-                <h2><i class="fas fa-bolt"></i> Boost</h2>
+                <h2>Boost</h2>
                 <p class="boost-inline-subtitle">Support <span x-text="artist.name"></span> directly &mdash; 100% goes to the artist</p>
             </div>
             <div class="boost-inline-amounts">
@@ -93,7 +93,7 @@ endblock %}
                 </div>
             </div>
             <button type="button" class="boost-inline-confirm" @click="goBoost()">
-                <i class="fas fa-bolt"></i> Boost <span x-text="boostAmount === -1 ? (boostCustom ? '$' + boostCustom : '') : '$' + boostAmount"></span>
+                Boost <span x-text="boostAmount === -1 ? (boostCustom ? '$' + boostCustom : '') : '$' + boostAmount"></span>
             </button>
             <p class="boost-inline-note">Fees (Stripe + platform) shown on checkout</p>
         </div>
@@ -101,7 +101,6 @@ endblock %}
 
     <!-- Random Artist FAB -->
     <button class="random-artist-fab" @click="goRandomArtist()" title="Discover another artist">
-        <i class="fas fa-random"></i>
         <span class="random-artist-fab-label">Next Artist</span>
     </button>
 
