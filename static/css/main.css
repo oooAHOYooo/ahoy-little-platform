@@ -20992,16 +20992,25 @@ img.loading {
 }
 
 .forgot-link {
-    color: rgba(99, 102, 241, 0.9);
-    text-decoration: none;
-    font-size: 0.8125rem;
+    background: none;
+    border: none;
+    color: rgba(165, 170, 255, 0.95);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-size: 0.9rem;
     font-weight: 500;
+    cursor: pointer;
+    padding: 6px 2px;
     transition: color 0.2s ease;
 }
 
 .forgot-link:hover {
-    color: #6366f1;
+    color: #fff;
     text-decoration: underline;
+}
+
+.auth-fade-in {
+    animation: slideUp 0.4s ease-out both;
 }
 
 /* Submit Button */

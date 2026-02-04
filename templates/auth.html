@@ -90,7 +90,6 @@
                         <span class="checkbox-custom"></span>
                         <span>Remember me</span>
                     </label>
-                    <button type="button" @click="showForgot = true; forgotEmail = authForm.username.includes('@') ? authForm.username : ''" class="forgot-link" style="background:none;border:none;cursor:pointer;">Forgot password?</button>
                 </div>
 
                 <!-- Submit Button -->
@@ -108,6 +107,11 @@
                     </span>
                     <span x-show="loginSuccess" class="auth-submit-success-text">🎉 Welcome back!</span>
                 </button>
+
+                <!-- Forgot Password -->
+                <div style="text-align:center; margin-top:14px; animation-delay:0.5s;" class="auth-fade-in">
+                    <button type="button" @click="showForgot = true; forgotEmail = authForm.username.includes('@') ? authForm.username : ''" class="forgot-link">Forgot password?</button>
+                </div>
             </form>
         </div>
 
