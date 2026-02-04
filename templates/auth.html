@@ -44,7 +44,7 @@
         </div>
 
         <!-- Login Form -->
-        <div x-show="authMode === 'login'" 
+        <div x-show="authMode === 'login' && !showForgot"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 transform translate-y-4"
              x-transition:enter-end="opacity-100 transform translate-y-0"
@@ -52,7 +52,7 @@
             <form @submit.prevent="login()" class="auth-form-content">
                 <!-- Username Field -->
                 <div class="floating-input-group" style="animation-delay: 0.1s">
-                    <input type="text" 
+                    <input type="text"
                         id="login-username"
                         x-model="authForm.username"
                         @focus="focusedField = 'username'"
@@ -90,16 +90,16 @@
                         <span class="checkbox-custom"></span>
                         <span>Remember me</span>
                     </label>
-                    <a href="/auth/forgot" class="forgot-link">Forgot password?</a>
+                    <button type="button" @click="showForgot = true; forgotEmail = authForm.username.includes('@') ? authForm.username : ''" class="forgot-link" style="background:none;border:none;cursor:pointer;">Forgot password?</button>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" 
+                <button type="submit"
                     class="auth-submit-btn"
                     :class="{'auth-submit-loading': isLoading, 'auth-submit-success': loginSuccess}"
                     :disabled="isLoading || loginSuccess"
                     style="animation-delay: 0.4s">
-                    <span x-show="!isLoading && !loginSuccess">Let’s go 🎧</span>
+                    <span x-show="!isLoading && !loginSuccess">Let's go 🎧</span>
                     <span x-show="isLoading" class="auth-submit-loading-text">
                         <span class="loading-dot"></span>
                         <span class="loading-dot"></span>
@@ -109,6 +109,45 @@
                     <span x-show="loginSuccess" class="auth-submit-success-text">🎉 Welcome back!</span>
                 </button>
             </form>
+        </div>
+
+        <!-- Inline Forgot Password Panel -->
+        <div x-show="showForgot"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 transform translate-y-4"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             class="auth-form-modern">
+            <div class="auth-form-content">
+                <h3 style="margin:0 0 6px; font-size:18px;">Forgot your password?</h3>
+                <p style="margin:0 0 14px; color:rgba(255,255,255,0.7); font-size:14px;">Drop your email and we'll send a reset link.</p>
+                <form @submit.prevent="submitForgot()">
+                    <div class="floating-input-group">
+                        <input type="email"
+                            id="forgot-email"
+                            x-model="forgotEmail"
+                            @focus="focusedField = 'forgot-email'"
+                            @blur="focusedField = null"
+                            class="floating-input"
+                            :class="{'floating-input-focused': focusedField === 'forgot-email' || forgotEmail}"
+                            placeholder=" "
+                            required>
+                        <label for="forgot-email" class="floating-label">Email address</label>
+                    </div>
+                    <button type="submit"
+                        class="auth-submit-btn"
+                        :disabled="forgotLoading"
+                        style="margin-top:12px;">
+                        <span x-show="!forgotLoading">Send reset link</span>
+                        <span x-show="forgotLoading">Sending...</span>
+                    </button>
+                </form>
+                <div x-show="forgotMessage" x-text="forgotMessage"
+                     style="margin-top:10px; padding:10px 12px; border-radius:10px; border:1px solid rgba(16,185,129,0.3); background:rgba(16,185,129,0.1); color:rgba(255,255,255,0.9); font-size:14px;"></div>
+                <button type="button" @click="showForgot = false; forgotMessage = ''"
+                    style="margin-top:12px; background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; font-size:14px;">
+                    <i class="fas fa-arrow-left" style="margin-right:4px;"></i> Back to sign in
+                </button>
+            </div>
         </div>
 
         <!-- Register Form -->
@@ -229,7 +268,10 @@ function authPage() {
         showPassword: false,
         loginSuccess: false,
         focusedField: null,
-        // Removed: emailEmoji
+        showForgot: false,
+        forgotEmail: '',
+        forgotLoading: false,
+        forgotMessage: '',
         authForm: {
             username: '',
             email: '',
@@ -238,8 +280,15 @@ function authPage() {
             rememberMe: false,
             agreeTerms: false
         },
-        
+
         init() {
+            // Auto-fill last used identifier for returning users
+            try {
+                const lastId = localStorage.getItem('ahoyLastIdentifier');
+                if (lastId) {
+                    this.authForm.username = lastId;
+                }
+            } catch (_) {}
             // Check if user is already logged in
             this.checkAuthStatus();
         },
@@ -341,6 +390,24 @@ function authPage() {
             }
         },
         
+        async submitForgot() {
+            this.forgotLoading = true;
+            this.forgotMessage = '';
+            try {
+                await fetch('/api/auth/password-reset/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ email: this.forgotEmail })
+                });
+                this.forgotMessage = "If that email exists, we sent a reset link. Check your inbox.";
+            } catch (_) {
+                this.forgotMessage = "If that email exists, we sent a reset link. Check your inbox.";
+            } finally {
+                this.forgotLoading = false;
+            }
+        },
+
         async register() {
             // Validate form
             if (this.authForm.password !== this.authForm.confirmPassword) {

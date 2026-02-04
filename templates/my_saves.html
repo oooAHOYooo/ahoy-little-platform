@@ -23,8 +23,12 @@
                 </template>
             </div>
             <div class="saves-profile-info">
-                <h1 class="saves-username" x-text="userProfile.display_name || 'Explorer'"></h1>
-                <p class="saves-tagline" x-text="userProfile.bio || 'Discovering new sounds'"></p>
+                <h1 class="saves-username" x-text="bookmarkCount >= 3 ? 'My Collection' : (userProfile.display_name || 'Guest')"></h1>
+                <template x-if="window.LOGGED_IN && userProfile.username">
+                    <a :href="'/account'" class="saves-user-handle" style="color:rgba(255,255,255,0.6); text-decoration:none; font-size:14px;">
+                        @<span x-text="userProfile.username"></span>
+                    </a>
+                </template>
                 <div class="saves-stats">
                     <div class="saves-stat">
                         <span class="saves-stat-number" x-text="bookmarkCount"></span>
@@ -199,7 +203,7 @@ function mySavesLibrary() {
 
         // User profile (from global)
         get userProfile() {
-            return window.userProfile || { display_name: 'Explorer', bio: '' };
+            return window.userProfile || { display_name: 'Guest', username: '', bio: '' };
         },
 
         // Computed

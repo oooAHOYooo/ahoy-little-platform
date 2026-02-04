@@ -29,17 +29,17 @@
     </div>
 
     <div class="acct-grid">
-      <div class="card glass">
+      <div class="card glass" x-data="acctStats()" x-init="load()">
         <div class="card-header">Your Stats</div>
         <div class="card-body">
           <div class="acct-stats">
             <div class="acct-stat">
-              <div class="n">{{ stats.bookmarks or 0 }}</div>
+              <div class="n" x-text="bookmarks"></div>
               <div class="l">Bookmarks</div>
             </div>
             <div class="acct-stat">
-              <div class="n">{{ stats.plays or 0 }}</div>
-              <div class="l">Plays</div>
+              <div class="n" x-text="recentPlays"></div>
+              <div class="l">Recently Played</div>
             </div>
             <div class="acct-stat">
               <div class="n">{{ stats.merch_orders or 0 }}</div>
@@ -875,6 +875,30 @@
 </style>
 
 <script>
+// Account Stats - uses client-side bookmarks as source of truth (matches my-saves)
+function acctStats() {
+  return {
+    bookmarks: {{ stats.bookmarks or 0 }},
+    recentPlays: 0,
+    load() {
+      // Use client-side AhoyBookmarks as master (same source as /my-saves)
+      if (window.AhoyBookmarks) {
+        this.bookmarks = window.AhoyBookmarks.all().length;
+      }
+      try {
+        const raw = localStorage.getItem('ahoy.recentlyPlayed.v1');
+        this.recentPlays = raw ? JSON.parse(raw).length : 0;
+      } catch (_) {}
+      // Keep in sync if bookmarks change
+      document.addEventListener('bookmarks:changed', () => {
+        if (window.AhoyBookmarks) {
+          this.bookmarks = window.AhoyBookmarks.all().length;
+        }
+      });
+    }
+  };
+}
+
 // Wallet Widget Alpine.js Component
 function walletWidget(initialBalance) {
   return {

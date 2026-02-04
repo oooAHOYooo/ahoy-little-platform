@@ -2250,6 +2250,16 @@
 
         <!-- JavaScript -->
         <script>window.LOGGED_IN = JSON.parse('{{ LOGGED_IN|tojson|safe }}');</script>
+        {% if current_user.is_authenticated %}
+        <script>
+        window.userProfile = {
+            display_name: {{ (current_user.display_name or current_user.username or 'User')|tojson|safe }},
+            username: {{ (current_user.username or '')|tojson|safe }},
+            email: {{ (current_user.email or '')|tojson|safe }},
+            avatar: {{ (current_user.avatar_url or '/static/img/default-avatar.png')|tojson|safe }}
+        };
+        </script>
+        {% endif %}
         <script>
         // Hard env switch (default to 'development'). Override to 'production' to enable prod-only behaviors.
         window.APP_ENV = window.APP_ENV || 'development';
