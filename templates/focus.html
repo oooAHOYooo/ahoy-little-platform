@@ -3,566 +3,453 @@
 {% block title %}Focus Mode - Ahoy Indie Media{% endblock %}
 
 {% block content %}
-<div class="focus-container" x-data="focusPage()" x-init="init()">
+<div class="focus-container focus-strava" x-data="focusPomodoro()" x-init="init()">
     {% from "macros/subpage_header.html" import subpage_hero %}
-    {{ subpage_hero(title="Focus Mode", subtitle="Ambient Audio", icon_class="fas fa-headphones") }}
+    {{ subpage_hero(title="Focus", subtitle="Timer · Music · Progress", icon_class="fas fa-headphones") }}
 
     <div class="focus-content">
-        <!-- Currently Playing -->
-        <div class="focus-now-playing" x-show="currentMode">
-            <div class="focus-visualizer" :class="{ 'playing': isPlaying }">
-                <div class="visualizer-ring"></div>
-                <div class="visualizer-ring"></div>
-                <div class="visualizer-ring"></div>
-                <div class="focus-mode-icon">
-                    <i :class="currentMode?.icon || 'fas fa-headphones'"></i>
+        <!-- Step 1: Watch dial timer -->
+        <section class="focus-step focus-dial-section">
+            <div class="focus-dial-wrap">
+                <svg class="focus-dial-svg" viewBox="0 0 220 220" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="focus-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#FC4C02"/>
+                            <stop offset="100%" stop-color="#FF6B35"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Track (full circle, dim) -->
+                    <circle class="focus-dial-track" cx="110" cy="110" r="95" fill="none" stroke-width="8"/>
+                    <!-- Tick marks at 12, 3, 6, 9 -->
+                    <line x1="110" y1="22" x2="110" y2="30" class="focus-dial-tick"/>
+                    <line x1="198" y1="110" x2="190" y2="110" class="focus-dial-tick"/>
+                    <line x1="110" y1="198" x2="110" y2="190" class="focus-dial-tick"/>
+                    <line x1="22" y1="110" x2="30" y2="110" class="focus-dial-tick"/>
+                    <!-- Progress ring (drains as time runs out) -->
+                    <circle class="focus-dial-ring"
+                            cx="110" cy="110" r="95" fill="none" stroke="url(#focus-ring-gradient)"
+                            stroke-width="8" stroke-linecap="round"
+                            stroke-dasharray="597"
+                            :stroke-dashoffset="597 - (remainingSeconds / (timerMinutes * 60)) * 597"
+                            transform="rotate(-90 110 110)"/>
+                </svg>
+                <div class="focus-dial-center">
+                    <span class="focus-dial-time" x-text="displayTime"></span>
+                    <span class="focus-dial-label" x-text="timerRunning ? 'remaining' : 'set timer'"></span>
                 </div>
             </div>
-            <h2 class="focus-mode-name" x-text="currentMode?.name || 'Select a mode'"></h2>
-            <p class="focus-mode-desc" x-text="currentMode?.description || ''"></p>
-
-            <!-- Ducking indicator -->
-            <div class="focus-ducked-badge" x-show="isDucked">
-                <i class="fas fa-volume-mute"></i>
-                <span>Volume lowered (main audio playing)</span>
-            </div>
-        </div>
-
-        <!-- Empty State -->
-        <div class="focus-empty" x-show="!currentMode">
-            <div class="focus-empty-icon">
-                <i class="fas fa-headphones"></i>
-            </div>
-            <h2>Choose Your Vibe</h2>
-            <p>Select an ambient mode below to start your focus session</p>
-        </div>
-
-        <!-- Controls -->
-        <div class="focus-controls">
-            <!-- Play/Pause Button -->
-            <button class="focus-play-btn"
-                    :class="{ 'playing': isPlaying }"
-                    :disabled="!currentMode"
-                    @click="togglePlay()">
-                <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
-            </button>
-
-            <!-- Volume -->
-            <div class="focus-volume">
-                <i class="fas fa-volume-down"></i>
-                <input type="range"
-                       class="focus-volume-slider"
-                       min="0" max="100"
-                       :value="volume * 100"
-                       @input="setVolume($event.target.value / 100)">
-                <i class="fas fa-volume-up"></i>
-            </div>
-
-            <!-- Intensity Pills -->
-            <div class="focus-intensity">
-                <span class="focus-intensity-label">Intensity</span>
-                <div class="focus-intensity-pills">
-                    <button :class="{ 'active': intensity === 'low' }" @click="setIntensity('low')">Low</button>
-                    <button :class="{ 'active': intensity === 'medium' }" @click="setIntensity('medium')">Medium</button>
-                    <button :class="{ 'active': intensity === 'high' }" @click="setIntensity('high')">High</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mode Grid -->
-        <div class="focus-modes-section">
-            <h3 class="focus-section-title">Ambient Modes</h3>
-            <div class="focus-modes-grid">
-                <template x-for="mode in modes" :key="mode.id">
-                    <button class="focus-mode-card"
-                            :class="{ 'active': currentMode && currentMode.id === mode.id, 'playing': currentMode && currentMode.id === mode.id && isPlaying }"
-                            @click="selectMode(mode)">
-                        <div class="focus-mode-card-icon">
-                            <i :class="mode.icon"></i>
-                        </div>
-                        <div class="focus-mode-card-info">
-                            <span class="focus-mode-card-name" x-text="mode.name"></span>
-                            <span class="focus-mode-card-category" x-text="mode.category"></span>
-                        </div>
-                        <div class="focus-mode-card-play" x-show="currentMode && currentMode.id === mode.id && isPlaying">
-                            <i class="fas fa-volume-up"></i>
-                        </div>
-                    </button>
+            <div class="focus-presets">
+                <template x-for="mins in [15, 25, 45]" :key="mins">
+                    <button type="button"
+                            class="focus-preset-btn"
+                            :class="{ active: timerMinutes === mins }"
+                            :disabled="timerRunning"
+                            @click="setTimerMinutes(mins)"
+                            x-text="mins"></button>
                 </template>
             </div>
-        </div>
+            <div class="focus-dial-actions">
+                <template x-if="!timerRunning && remainingSeconds > 0">
+                    <button type="button" class="focus-btn focus-btn-start" @click="startTimer">Start</button>
+                </template>
+                <template x-if="timerRunning">
+                    <button type="button" class="focus-btn focus-btn-pause" @click="pauseTimer">Pause</button>
+                </template>
+                <template x-if="!timerRunning && remainingSeconds > 0">
+                    <button type="button" class="focus-btn focus-btn-reset" @click="resetTimer">Reset</button>
+                </template>
+            </div>
+        </section>
+
+        <!-- Step 2: Music -->
+        <section class="focus-step focus-music-section">
+            <span class="focus-step-num">2</span>
+            <select class="focus-music-select"
+                    x-model="selectedMusicId"
+                    @change="onMusicChange()"
+                    aria-label="Choose focus music">
+                <template x-for="opt in musicOptions" :key="opt.id">
+                    <option :value="opt.id" x-text="opt.name"></option>
+                </template>
+            </select>
+        </section>
+
+        <!-- Step 3: Activity rings (Strava-style) -->
+        <section class="focus-step focus-activity-section">
+            <div class="focus-activity-header">
+                <span class="focus-step-num">3</span>
+                <p class="focus-activity-title">Today</p>
+            </div>
+            <div class="focus-activity-rings" role="progressbar" :aria-valuenow="pomodorosToday" :aria-valuemax="pomodoroGoal">
+                <template x-for="i in pomodoroGoal" :key="i">
+                    <div class="focus-ring-dot" :class="{ filled: i <= pomodorosToday }"></div>
+                </template>
+            </div>
+            <p class="focus-activity-count"><span x-text="pomodorosToday"></span> / <span x-text="pomodoroGoal"></span> pomodoros</p>
+        </section>
     </div>
 </div>
 
 <style>
-.focus-container {
+.focus-container.focus-strava {
     min-height: 100vh;
     padding-bottom: 120px;
+    background: #0d0d0d;
 }
 
-.focus-content {
-    max-width: 800px;
+.focus-strava .focus-content {
+    max-width: 400px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 20px 16px;
 }
 
-/* Now Playing Section */
-.focus-now-playing {
+.focus-dial-section {
     text-align: center;
-    padding: 40px 20px;
-}
-
-.focus-visualizer {
-    width: 160px;
-    height: 160px;
-    margin: 0 auto 24px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.visualizer-ring {
-    position: absolute;
-    border-radius: 50%;
-    border: 2px solid rgba(236, 72, 153, 0.3);
-    opacity: 0;
-}
-
-.visualizer-ring:nth-child(1) { width: 100%; height: 100%; }
-.visualizer-ring:nth-child(2) { width: 130%; height: 130%; }
-.visualizer-ring:nth-child(3) { width: 160%; height: 160%; }
-
-.focus-visualizer.playing .visualizer-ring {
-    animation: focus-pulse 2s ease-in-out infinite;
-}
-
-.focus-visualizer.playing .visualizer-ring:nth-child(1) { animation-delay: 0s; }
-.focus-visualizer.playing .visualizer-ring:nth-child(2) { animation-delay: 0.3s; }
-.focus-visualizer.playing .visualizer-ring:nth-child(3) { animation-delay: 0.6s; }
-
-@keyframes focus-pulse {
-    0%, 100% { opacity: 0; transform: scale(0.8); }
-    50% { opacity: 0.6; transform: scale(1); }
-}
-
-.focus-mode-icon {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2));
-    border: 2px solid rgba(236, 72, 153, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    color: #ec4899;
-}
-
-.focus-mode-name {
-    font-size: 24px;
-    font-weight: 700;
-    color: #fff;
-    margin: 0 0 8px;
-}
-
-.focus-mode-desc {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.6);
-    margin: 0;
-}
-
-.focus-ducked-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 16px;
-    padding: 8px 16px;
-    background: rgba(251, 191, 36, 0.15);
-    border-radius: 20px;
-    color: #fbbf24;
-    font-size: 12px;
-}
-
-/* Empty State */
-.focus-empty {
-    text-align: center;
-    padding: 60px 20px;
-}
-
-.focus-empty-icon {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 24px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    color: rgba(255, 255, 255, 0.3);
-}
-
-.focus-empty h2 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #fff;
-    margin: 0 0 8px;
-}
-
-.focus-empty p {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.5);
-    margin: 0;
-}
-
-/* Controls */
-.focus-controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 24px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 16px;
     margin-bottom: 32px;
 }
 
-.focus-play-btn {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    border: none;
-    background: linear-gradient(135deg, #ec4899, #a855f7);
-    color: #fff;
-    font-size: 28px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.focus-dial-wrap {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: 0 auto 20px;
 }
 
-.focus-play-btn:hover:not(:disabled) {
-    transform: scale(1.05);
-    box-shadow: 0 8px 30px rgba(236, 72, 153, 0.4);
-}
-
-.focus-play-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.focus-play-btn.playing {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.focus-volume {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.focus-dial-svg {
     width: 100%;
-    max-width: 300px;
+    height: 100%;
+    transform: rotate(0deg);
 }
 
-.focus-volume i {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 14px;
+.focus-dial-track {
+    stroke: rgba(255, 255, 255, 0.08);
 }
 
-.focus-volume-slider {
-    flex: 1;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 3px;
-    outline: none;
+.focus-dial-tick {
+    stroke: rgba(255, 255, 255, 0.2);
+    stroke-width: 2;
 }
 
-.focus-volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #fff;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+.focus-dial-ring {
+    transition: stroke-dashoffset 1s linear;
 }
 
-.focus-volume-slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #fff;
-    cursor: pointer;
-    border: none;
-}
-
-.focus-intensity {
+.focus-dial-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    pointer-events: none;
 }
 
-.focus-intensity-label {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.focus-intensity-pills {
-    display: flex;
-    gap: 8px;
-}
-
-.focus-intensity-pills button {
-    padding: 8px 20px;
-    border: none;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.focus-intensity-pills button:hover {
-    background: rgba(255, 255, 255, 0.12);
+.focus-dial-time {
+    font-size: 48px;
+    font-weight: 800;
     color: #fff;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
 }
 
-.focus-intensity-pills button.active {
-    background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3));
-    color: #fff;
-    border: 1px solid rgba(236, 72, 153, 0.4);
-}
-
-/* Mode Grid */
-.focus-modes-section {
-    margin-top: 20px;
-}
-
-.focus-section-title {
-    font-size: 16px;
+.focus-dial-label {
+    font-size: 11px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.8);
-    margin: 0 0 16px;
-    padding-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.45);
+    margin-top: 4px;
 }
 
-.focus-modes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 12px;
-}
-
-.focus-mode-card {
+.focus-presets {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: left;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
-.focus-mode-card:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.12);
-}
-
-.focus-mode-card.active {
-    background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(168, 85, 247, 0.15));
-    border-color: rgba(236, 72, 153, 0.3);
-}
-
-.focus-mode-card.playing {
-    box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
-}
-
-.focus-mode-card-icon {
+.focus-preset-btn {
     width: 48px;
     height: 48px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.focus-preset-btn:hover:not(:disabled) {
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+}
+
+.focus-preset-btn.active {
+    border-color: #FC4C02;
+    background: rgba(252, 76, 2, 0.15);
+    color: #FC4C02;
+}
+
+.focus-preset-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.focus-dial-actions {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
-    color: rgba(255, 255, 255, 0.7);
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.focus-btn {
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.focus-btn-start {
+    background: #FC4C02;
+    color: #fff;
+}
+
+.focus-btn-start:hover {
+    background: #ff5c1a;
+    transform: scale(1.02);
+    box-shadow: 0 4px 24px rgba(252, 76, 2, 0.4);
+}
+
+.focus-btn-pause {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.focus-btn-reset {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.focus-btn-reset:hover {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.focus-music-section,
+.focus-activity-section {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.focus-step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
 }
 
-.focus-mode-card.active .focus-mode-card-icon {
-    background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3));
-    color: #fff;
-}
-
-.focus-mode-card-info {
+.focus-music-select {
     flex: 1;
-    min-width: 0;
-}
-
-.focus-mode-card-name {
-    display: block;
-    font-size: 15px;
-    font-weight: 600;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
     color: #fff;
-    margin-bottom: 2px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
 }
 
-.focus-mode-card-category {
-    display: block;
+.focus-music-select:focus {
+    outline: none;
+    border-color: rgba(252, 76, 2, 0.5);
+}
+
+.focus-activity-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+}
+
+.focus-activity-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+}
+
+.focus-activity-title {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
-    text-transform: capitalize;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.45);
+    margin: 0;
 }
 
-.focus-mode-card-play {
-    color: #ec4899;
-    font-size: 16px;
-    animation: focus-card-pulse 1.5s ease-in-out infinite;
+.focus-activity-rings {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
-@keyframes focus-card-pulse {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
+.focus-ring-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.25s ease;
 }
 
-/* Mobile */
+.focus-ring-dot.filled {
+    background: #FC4C02;
+    border-color: #FC4C02;
+    box-shadow: 0 0 12px rgba(252, 76, 2, 0.5);
+}
+
+.focus-activity-count {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
 @media (max-width: 768px) {
-    .focus-content {
-        padding: 16px;
-    }
-
-    .focus-now-playing {
-        padding: 30px 16px;
-    }
-
-    .focus-visualizer {
-        width: 120px;
-        height: 120px;
-    }
-
-    .focus-mode-icon {
-        width: 80px;
-        height: 80px;
-        font-size: 28px;
-    }
-
-    .focus-mode-name {
-        font-size: 20px;
-    }
-
-    .focus-modes-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .focus-play-btn {
-        width: 64px;
-        height: 64px;
-        font-size: 24px;
-    }
+    .focus-dial-wrap { width: 260px; height: 260px; }
+    .focus-dial-time { font-size: 42px; }
 }
 </style>
 
 <script>
-function focusPage() {
+function focusPomodoro() {
+    const POMODORO_KEY = 'focus_pomodoros';
+    const POMODORO_GOAL = 4;
+
+    function todayKey() {
+        const d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
     return {
-        modes: [],
-        currentMode: null,
-        isPlaying: false,
-        volume: 0.5,
-        intensity: 'medium',
-        isDucked: false,
+        timerMinutes: 25,
+        remainingSeconds: 25 * 60,
+        timerRunning: false,
+        timerId: null,
+        musicOptions: [{ id: 'masters-remastered', name: 'Masters Remastered' }],
+        ambientModes: [],
+        selectedMusicId: 'masters-remastered',
+        pomodoroGoal: POMODORO_GOAL,
+        pomodorosTodayCount: 0,
+
+        get pomodorosToday() {
+            return this.pomodorosTodayCount;
+        },
+
+        get displayTime() {
+            const m = Math.floor(this.remainingSeconds / 60);
+            const s = this.remainingSeconds % 60;
+            return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        },
+
+        loadPomodoroCount() {
+            try {
+                const raw = localStorage.getItem(POMODORO_KEY);
+                const data = raw ? JSON.parse(raw) : {};
+                this.pomodorosTodayCount = data[todayKey()] || 0;
+            } catch (_) { this.pomodorosTodayCount = 0; }
+        },
 
         async init() {
-            // Load ambient modes
+            this.remainingSeconds = this.timerMinutes * 60;
+            this.loadPomodoroCount();
             try {
-                const response = await fetch('/static/data/ambient-modes.json');
-                this.modes = await response.json();
-            } catch (e) {
-                console.warn('Failed to load ambient modes:', e);
-                this.modes = [];
-            }
+                const res = await fetch('/static/data/ambient-modes.json');
+                this.ambientModes = await res.json();
+                this.musicOptions = [{ id: 'masters-remastered', name: 'Masters Remastered' }].concat(
+                    (this.ambientModes || []).map(m => ({ id: m.id, name: m.name }))
+                );
+            } catch (_) {}
+        },
 
-            // Connect to controller
-            const ctrl = window.backgroundAudioController;
-            if (!ctrl) {
-                console.warn('BackgroundAudioController not available');
+        setTimerMinutes(mins) {
+            if (this.timerRunning) return;
+            this.timerMinutes = mins;
+            this.remainingSeconds = mins * 60;
+        },
+
+        startTimer() {
+            if (this.timerRunning) return;
+            this.timerRunning = true;
+            this.onMusicChange();
+            this.tick();
+        },
+
+        pauseTimer() {
+            this.timerRunning = false;
+            if (this.timerId) {
+                clearInterval(this.timerId);
+                this.timerId = null;
+            }
+        },
+
+        resetTimer() {
+            this.pauseTimer();
+            this.remainingSeconds = this.timerMinutes * 60;
+        },
+
+        tick() {
+            if (this.remainingSeconds <= 0) {
+                this.pauseTimer();
+                this.completePomodoro();
                 return;
             }
-
-            // Sync initial state
-            this.volume = ctrl.volume;
-            this.intensity = ctrl.intensity;
-            this.isPlaying = ctrl.isPlaying;
-            this.isDucked = ctrl.isDucked;
-
-            // Restore last mode
-            const restoredModeId = ctrl.getRestoredModeId();
-            if (restoredModeId && this.modes.length > 0) {
-                this.currentMode = this.modes.find(m => m.id === restoredModeId) || null;
-            }
-
-            // If already playing, sync current mode
-            if (ctrl.currentMode) {
-                this.currentMode = ctrl.currentMode;
-            }
-
-            // Listen to controller events
-            ctrl.on('play', (mode) => {
-                this.isPlaying = true;
-                if (mode) this.currentMode = mode;
-            });
-
-            ctrl.on('pause', () => this.isPlaying = false);
-            ctrl.on('stop', () => this.isPlaying = false);
-            ctrl.on('volumechange', (vol) => this.volume = vol);
-            ctrl.on('intensitychange', (level) => this.intensity = level);
-            ctrl.on('ducked', (ducked) => this.isDucked = ducked);
+            this.remainingSeconds--;
+            this.timerId = setTimeout(() => this.tick(), 1000);
         },
 
-        selectMode(mode) {
-            this.currentMode = mode;
-            const ctrl = window.backgroundAudioController;
-            if (ctrl) {
-                ctrl.play(mode);
+        completePomodoro() {
+            try {
+                const raw = localStorage.getItem(POMODORO_KEY);
+                const data = raw ? JSON.parse(raw) : {};
+                const key = todayKey();
+                data[key] = (data[key] || 0) + 1;
+                localStorage.setItem(POMODORO_KEY, JSON.stringify(data));
+                this.pomodorosTodayCount = data[key];
+            } catch (_) {}
+            this.remainingSeconds = this.timerMinutes * 60;
+            if (typeof document.dispatchEvent === 'function') {
+                document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Pomodoro done!' }));
             }
         },
 
-        togglePlay() {
+        onMusicChange() {
             const ctrl = window.backgroundAudioController;
-            if (!ctrl || !this.currentMode) return;
-
-            if (this.isPlaying) {
-                ctrl.pause();
-            } else {
-                if (ctrl.currentMode && ctrl.currentMode.id === this.currentMode.id) {
-                    ctrl.resume();
-                } else {
-                    ctrl.play(this.currentMode);
-                }
-            }
-        },
-
-        setVolume(vol) {
-            const ctrl = window.backgroundAudioController;
-            if (ctrl) ctrl.setVolume(vol);
-            this.volume = vol;
-        },
-
-        setIntensity(level) {
-            const ctrl = window.backgroundAudioController;
-            if (ctrl) ctrl.setIntensity(level);
-            this.intensity = level;
+            if (!ctrl) return;
+            const mode = this.selectedMusicId === 'masters-remastered'
+                ? (this.ambientModes && this.ambientModes[0]) || null
+                : (this.ambientModes || []).find(m => m.id === this.selectedMusicId);
+            if (mode) ctrl.play(mode);
         }
     };
 }
