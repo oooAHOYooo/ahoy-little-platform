@@ -1838,6 +1838,13 @@ def music():
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
 
+@app.route('/focus')
+def focus():
+    """Focus/ambient audio page for background music"""
+    response = make_response(render_template('focus.html'))
+    response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
+    return response
+
 @app.route('/shows')
 def shows():
     """Shows/video content page"""

@@ -1,0 +1,570 @@
+{% extends "base.html" %}
+
+{% block title %}Focus Mode - Ahoy Indie Media{% endblock %}
+
+{% block content %}
+<div class="focus-container" x-data="focusPage()" x-init="init()">
+    {% from "macros/subpage_header.html" import subpage_hero %}
+    {{ subpage_hero(title="Focus Mode", subtitle="Ambient Audio", icon_class="fas fa-headphones") }}
+
+    <div class="focus-content">
+        <!-- Currently Playing -->
+        <div class="focus-now-playing" x-show="currentMode">
+            <div class="focus-visualizer" :class="{ 'playing': isPlaying }">
+                <div class="visualizer-ring"></div>
+                <div class="visualizer-ring"></div>
+                <div class="visualizer-ring"></div>
+                <div class="focus-mode-icon">
+                    <i :class="currentMode?.icon || 'fas fa-headphones'"></i>
+                </div>
+            </div>
+            <h2 class="focus-mode-name" x-text="currentMode?.name || 'Select a mode'"></h2>
+            <p class="focus-mode-desc" x-text="currentMode?.description || ''"></p>
+
+            <!-- Ducking indicator -->
+            <div class="focus-ducked-badge" x-show="isDucked">
+                <i class="fas fa-volume-mute"></i>
+                <span>Volume lowered (main audio playing)</span>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="focus-empty" x-show="!currentMode">
+            <div class="focus-empty-icon">
+                <i class="fas fa-headphones"></i>
+            </div>
+            <h2>Choose Your Vibe</h2>
+            <p>Select an ambient mode below to start your focus session</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="focus-controls">
+            <!-- Play/Pause Button -->
+            <button class="focus-play-btn"
+                    :class="{ 'playing': isPlaying }"
+                    :disabled="!currentMode"
+                    @click="togglePlay()">
+                <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+            </button>
+
+            <!-- Volume -->
+            <div class="focus-volume">
+                <i class="fas fa-volume-down"></i>
+                <input type="range"
+                       class="focus-volume-slider"
+                       min="0" max="100"
+                       :value="volume * 100"
+                       @input="setVolume($event.target.value / 100)">
+                <i class="fas fa-volume-up"></i>
+            </div>
+
+            <!-- Intensity Pills -->
+            <div class="focus-intensity">
+                <span class="focus-intensity-label">Intensity</span>
+                <div class="focus-intensity-pills">
+                    <button :class="{ 'active': intensity === 'low' }" @click="setIntensity('low')">Low</button>
+                    <button :class="{ 'active': intensity === 'medium' }" @click="setIntensity('medium')">Medium</button>
+                    <button :class="{ 'active': intensity === 'high' }" @click="setIntensity('high')">High</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode Grid -->
+        <div class="focus-modes-section">
+            <h3 class="focus-section-title">Ambient Modes</h3>
+            <div class="focus-modes-grid">
+                <template x-for="mode in modes" :key="mode.id">
+                    <button class="focus-mode-card"
+                            :class="{ 'active': currentMode && currentMode.id === mode.id, 'playing': currentMode && currentMode.id === mode.id && isPlaying }"
+                            @click="selectMode(mode)">
+                        <div class="focus-mode-card-icon">
+                            <i :class="mode.icon"></i>
+                        </div>
+                        <div class="focus-mode-card-info">
+                            <span class="focus-mode-card-name" x-text="mode.name"></span>
+                            <span class="focus-mode-card-category" x-text="mode.category"></span>
+                        </div>
+                        <div class="focus-mode-card-play" x-show="currentMode && currentMode.id === mode.id && isPlaying">
+                            <i class="fas fa-volume-up"></i>
+                        </div>
+                    </button>
+                </template>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.focus-container {
+    min-height: 100vh;
+    padding-bottom: 120px;
+}
+
+.focus-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Now Playing Section */
+.focus-now-playing {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.focus-visualizer {
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 24px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.visualizer-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(236, 72, 153, 0.3);
+    opacity: 0;
+}
+
+.visualizer-ring:nth-child(1) { width: 100%; height: 100%; }
+.visualizer-ring:nth-child(2) { width: 130%; height: 130%; }
+.visualizer-ring:nth-child(3) { width: 160%; height: 160%; }
+
+.focus-visualizer.playing .visualizer-ring {
+    animation: focus-pulse 2s ease-in-out infinite;
+}
+
+.focus-visualizer.playing .visualizer-ring:nth-child(1) { animation-delay: 0s; }
+.focus-visualizer.playing .visualizer-ring:nth-child(2) { animation-delay: 0.3s; }
+.focus-visualizer.playing .visualizer-ring:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes focus-pulse {
+    0%, 100% { opacity: 0; transform: scale(0.8); }
+    50% { opacity: 0.6; transform: scale(1); }
+}
+
+.focus-mode-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2));
+    border: 2px solid rgba(236, 72, 153, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: #ec4899;
+}
+
+.focus-mode-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 8px;
+}
+
+.focus-mode-desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+}
+
+.focus-ducked-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 8px 16px;
+    background: rgba(251, 191, 36, 0.15);
+    border-radius: 20px;
+    color: #fbbf24;
+    font-size: 12px;
+}
+
+/* Empty State */
+.focus-empty {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.focus-empty-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.focus-empty h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 8px;
+}
+
+.focus-empty p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+}
+
+/* Controls */
+.focus-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    margin-bottom: 32px;
+}
+
+.focus-play-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #ec4899, #a855f7);
+    color: #fff;
+    font-size: 28px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.focus-play-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 8px 30px rgba(236, 72, 153, 0.4);
+}
+
+.focus-play-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.focus-play-btn.playing {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.focus-volume {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.focus-volume i {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+}
+
+.focus-volume-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    outline: none;
+}
+
+.focus-volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.focus-volume-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    border: none;
+}
+
+.focus-intensity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.focus-intensity-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.focus-intensity-pills {
+    display: flex;
+    gap: 8px;
+}
+
+.focus-intensity-pills button {
+    padding: 8px 20px;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.focus-intensity-pills button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.focus-intensity-pills button.active {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3));
+    color: #fff;
+    border: 1px solid rgba(236, 72, 153, 0.4);
+}
+
+/* Mode Grid */
+.focus-modes-section {
+    margin-top: 20px;
+}
+
+.focus-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 0 16px;
+    padding-left: 4px;
+}
+
+.focus-modes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.focus-mode-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.focus-mode-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.focus-mode-card.active {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(168, 85, 247, 0.15));
+    border-color: rgba(236, 72, 153, 0.3);
+}
+
+.focus-mode-card.playing {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
+}
+
+.focus-mode-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    flex-shrink: 0;
+}
+
+.focus-mode-card.active .focus-mode-card-icon {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3));
+    color: #fff;
+}
+
+.focus-mode-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.focus-mode-card-name {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.focus-mode-card-category {
+    display: block;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: capitalize;
+}
+
+.focus-mode-card-play {
+    color: #ec4899;
+    font-size: 16px;
+    animation: focus-card-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes focus-card-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .focus-content {
+        padding: 16px;
+    }
+
+    .focus-now-playing {
+        padding: 30px 16px;
+    }
+
+    .focus-visualizer {
+        width: 120px;
+        height: 120px;
+    }
+
+    .focus-mode-icon {
+        width: 80px;
+        height: 80px;
+        font-size: 28px;
+    }
+
+    .focus-mode-name {
+        font-size: 20px;
+    }
+
+    .focus-modes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .focus-play-btn {
+        width: 64px;
+        height: 64px;
+        font-size: 24px;
+    }
+}
+</style>
+
+<script>
+function focusPage() {
+    return {
+        modes: [],
+        currentMode: null,
+        isPlaying: false,
+        volume: 0.5,
+        intensity: 'medium',
+        isDucked: false,
+
+        async init() {
+            // Load ambient modes
+            try {
+                const response = await fetch('/static/data/ambient-modes.json');
+                this.modes = await response.json();
+            } catch (e) {
+                console.warn('Failed to load ambient modes:', e);
+                this.modes = [];
+            }
+
+            // Connect to controller
+            const ctrl = window.backgroundAudioController;
+            if (!ctrl) {
+                console.warn('BackgroundAudioController not available');
+                return;
+            }
+
+            // Sync initial state
+            this.volume = ctrl.volume;
+            this.intensity = ctrl.intensity;
+            this.isPlaying = ctrl.isPlaying;
+            this.isDucked = ctrl.isDucked;
+
+            // Restore last mode
+            const restoredModeId = ctrl.getRestoredModeId();
+            if (restoredModeId && this.modes.length > 0) {
+                this.currentMode = this.modes.find(m => m.id === restoredModeId) || null;
+            }
+
+            // If already playing, sync current mode
+            if (ctrl.currentMode) {
+                this.currentMode = ctrl.currentMode;
+            }
+
+            // Listen to controller events
+            ctrl.on('play', (mode) => {
+                this.isPlaying = true;
+                if (mode) this.currentMode = mode;
+            });
+
+            ctrl.on('pause', () => this.isPlaying = false);
+            ctrl.on('stop', () => this.isPlaying = false);
+            ctrl.on('volumechange', (vol) => this.volume = vol);
+            ctrl.on('intensitychange', (level) => this.intensity = level);
+            ctrl.on('ducked', (ducked) => this.isDucked = ducked);
+        },
+
+        selectMode(mode) {
+            this.currentMode = mode;
+            const ctrl = window.backgroundAudioController;
+            if (ctrl) {
+                ctrl.play(mode);
+            }
+        },
+
+        togglePlay() {
+            const ctrl = window.backgroundAudioController;
+            if (!ctrl || !this.currentMode) return;
+
+            if (this.isPlaying) {
+                ctrl.pause();
+            } else {
+                if (ctrl.currentMode && ctrl.currentMode.id === this.currentMode.id) {
+                    ctrl.resume();
+                } else {
+                    ctrl.play(this.currentMode);
+                }
+            }
+        },
+
+        setVolume(vol) {
+            const ctrl = window.backgroundAudioController;
+            if (ctrl) ctrl.setVolume(vol);
+            this.volume = vol;
+        },
+
+        setIntensity(level) {
+            const ctrl = window.backgroundAudioController;
+            if (ctrl) ctrl.setIntensity(level);
+            this.intensity = level;
+        }
+    };
+}
+</script>
+{% endblock %}

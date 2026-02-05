@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260204g' %}
+        {% set css_version = 'v20260205a' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -151,6 +151,8 @@
         <!-- Combined: global.css + base.css + mobile.css (reduces HTTP requests) -->
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/combined.css') }}?{{ css_version }}">
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='css/background-audio.css') }}?{{ css_version }}">
         {% block extra_css %}{% endblock %}
 
         <!-- Google Fonts - Inter (optimized loading with font-display: swap) -->
@@ -1523,6 +1525,13 @@
                             <span>Music</span>
                         </a>
                         <a
+                            class="app-sidebar-item {% if request.endpoint == 'focus' %}active{% endif %}"
+                            href="{{ url_for('focus') }}"
+                            data-icon="headphones">
+                            <i class="fas fa-headphones" aria-hidden="true"></i>
+                            <span>Focus</span>
+                        </a>
+                        <a
                             class="app-sidebar-item {% if request.path.startswith('/podcasts') %}active{% endif %}"
                             href="/podcasts"
                             data-icon="podcast">
@@ -1792,6 +1801,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- Background Audio moved to /focus page -->
 
         <!-- Legacy Global Player (hidden, kept for compatibility) -->
         <div class="global-player" x-data="globalPlayer()" x-show="false"
@@ -2074,6 +2085,7 @@
                     <ul>
                         <li><a href="{{ url_for('home') }}">Explore</a></li>
                         <li><a href="{{ url_for('music') }}">Music</a></li>
+                        <li><a href="{{ url_for('focus') }}">Focus</a></li>
                         <li><a href="/podcasts">Podcasts</a></li>
                         <li><a href="/live-tv">Live TV</a></li>
                         <li><a href="{{ url_for('shows') }}">Videos</a></li>
@@ -2406,6 +2418,9 @@
         <!-- Player: kept global (drives the bottom now-playing bar everywhere) -->
         <script defer data-ahoy-player="true"
             src="{{ url_for('static', filename='js/player.js') }}?{{ css_version }}"></script>
+        <!-- Background Audio: ambient/focus music with ducking -->
+        <script defer
+            src="{{ url_for('static', filename='js/background-audio.js') }}?{{ css_version }}"></script>
         <script>
         // Ensure mediaPlayer is available before attempting playback
         window.__ahoyEnsurePlayer = window.__ahoyEnsurePlayer || (() => {

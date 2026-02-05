@@ -1,0 +1,128 @@
+[
+  {
+    "id": "jazz-flow",
+    "name": "Jazz Flow",
+    "category": "focus",
+    "icon": "fas fa-music",
+    "description": "Smooth jazz for deep focus",
+    "audioPool": {
+      "low": [
+        "https://cdn.ahoy.media/bg/jazz/low_1.mp3",
+        "https://cdn.ahoy.media/bg/jazz/low_2.mp3"
+      ],
+      "medium": [
+        "https://cdn.ahoy.media/bg/jazz/med_1.mp3",
+        "https://cdn.ahoy.media/bg/jazz/med_2.mp3"
+      ],
+      "high": [
+        "https://cdn.ahoy.media/bg/jazz/high_1.mp3",
+        "https://cdn.ahoy.media/bg/jazz/high_2.mp3"
+      ]
+    }
+  },
+  {
+    "id": "deep-ambient",
+    "name": "Deep Ambient",
+    "category": "ambient",
+    "icon": "fas fa-leaf",
+    "description": "Ethereal soundscapes for relaxation",
+    "audioPool": {
+      "low": [
+        "https://cdn.ahoy.media/bg/ambient/low_1.mp3",
+        "https://cdn.ahoy.media/bg/ambient/low_2.mp3"
+      ],
+      "medium": [
+        "https://cdn.ahoy.media/bg/ambient/med_1.mp3",
+        "https://cdn.ahoy.media/bg/ambient/med_2.mp3"
+      ],
+      "high": [
+        "https://cdn.ahoy.media/bg/ambient/high_1.mp3",
+        "https://cdn.ahoy.media/bg/ambient/high_2.mp3"
+      ]
+    }
+  },
+  {
+    "id": "lofi-chill",
+    "name": "Lo-Fi Chill",
+    "category": "focus",
+    "icon": "fas fa-coffee",
+    "description": "Lo-fi beats for studying",
+    "audioPool": {
+      "low": [
+        "https://cdn.ahoy.media/bg/lofi/low_1.mp3",
+        "https://cdn.ahoy.media/bg/lofi/low_2.mp3"
+      ],
+      "medium": [
+        "https://cdn.ahoy.media/bg/lofi/med_1.mp3",
+        "https://cdn.ahoy.media/bg/lofi/med_2.mp3"
+      ],
+      "high": [
+        "https://cdn.ahoy.media/bg/lofi/high_1.mp3",
+        "https://cdn.ahoy.media/bg/lofi/high_2.mp3"
+      ]
+    }
+  },
+  {
+    "id": "rain-sounds",
+    "name": "Rain Sounds",
+    "category": "nature",
+    "icon": "fas fa-cloud-rain",
+    "description": "Calming rain for concentration",
+    "audioPool": {
+      "low": [
+        "https://cdn.ahoy.media/bg/rain/low_1.mp3",
+        "https://cdn.ahoy.media/bg/rain/low_2.mp3"
+      ],
+      "medium": [
+        "https://cdn.ahoy.media/bg/rain/med_1.mp3",
+        "https://cdn.ahoy.media/bg/rain/med_2.mp3"
+      ],
+      "high": [
+        "https://cdn.ahoy.media/bg/rain/high_1.mp3",
+        "https://cdn.ahoy.media/bg/rain/high_2.mp3"
+      ]
+    }
+  },
+  {
+    "id": "cosmic-drift",
+    "name": "Cosmic Drift",
+    "category": "ambient",
+    "icon": "fas fa-moon",
+    "description": "Space-inspired ambient textures",
+    "audioPool": {
+      "low": [
+        "https://cdn.ahoy.media/bg/cosmic/low_1.mp3",
+        "https://cdn.ahoy.media/bg/cosmic/low_2.mp3"
+      ],
+      "medium": [
+        "https://cdn.ahoy.media/bg/cosmic/med_1.mp3",
+        "https://cdn.ahoy.media/bg/cosmic/med_2.mp3"
+      ],
+      "high": [
+        "https://cdn.ahoy.media/bg/cosmic/high_1.mp3",
+        "https://cdn.ahoy.media/bg/cosmic/high_2.mp3"
+      ]
+    }
+  },
+  {
+    "id": "piano-focus",
+    "name": "Piano Focus",
+    "category": "focus",
+    "icon": "fas fa-keyboard",
+    "description": "Gentle piano for productivity",
+    "audioPool": {
+      "low": [
+        "https://cdn.ahoy.media/bg/piano/low_1.mp3",
+        "https://cdn.ahoy.media/bg/piano/low_2.mp3"
+      ],
+      "medium": [
+        "https://cdn.ahoy.media/bg/piano/med_1.mp3",
+        "https://cdn.ahoy.media/bg/piano/med_2.mp3"
+      ],
+      "high": [
+        "https://cdn.ahoy.media/bg/piano/high_1.mp3",
+        "https://cdn.ahoy.media/bg/piano/high_2.mp3"
+      ]
+    }
+  }
+]

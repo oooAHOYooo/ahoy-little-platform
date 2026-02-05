@@ -1,0 +1,208 @@
+<!-- Background Audio Panel - Ambient/Focus Music -->
+<div x-data="backgroundAudioPanel()" x-init="init()" class="bg-audio-component">
+    <!-- FAB Button -->
+    <button class="bg-audio-fab"
+            :class="{ 'active': isPlaying }"
+            @click="togglePanel()"
+            title="Background Audio"
+            aria-label="Toggle background audio panel">
+        <i class="fas fa-headphones"></i>
+    </button>
+
+    <!-- Floating Panel -->
+    <div class="bg-audio-panel"
+         x-show="panelOpen"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 transform translate-y-2"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 transform translate-y-0"
+         x-transition:leave-end="opacity-0 transform translate-y-2"
+         @click.away="panelOpen = false">
+
+        <!-- Header -->
+        <div class="bg-audio-panel-header">
+            <span class="bg-audio-panel-title" x-text="currentMode ? currentMode.name : 'Background Audio'"></span>
+            <button class="bg-audio-panel-close" @click="panelOpen = false" aria-label="Close panel">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Mode Selector -->
+        <div class="bg-audio-modes">
+            <template x-for="mode in modes" :key="mode.id">
+                <button class="bg-audio-mode-btn"
+                        :class="{ 'active': currentMode && currentMode.id === mode.id }"
+                        @click="selectMode(mode)"
+                        :title="mode.description">
+                    <i :class="mode.icon"></i>
+                    <span x-text="mode.name"></span>
+                </button>
+            </template>
+        </div>
+
+        <!-- Controls -->
+        <div class="bg-audio-controls">
+            <!-- Play/Pause -->
+            <button class="bg-audio-play-btn"
+                    :class="{ 'playing': isPlaying }"
+                    :disabled="!currentMode"
+                    @click="togglePlay()">
+                <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+                <span x-text="isPlaying ? 'Pause' : 'Play'"></span>
+            </button>
+
+            <!-- Volume -->
+            <div class="bg-audio-volume-row">
+                <i class="fas fa-volume-down"></i>
+                <input type="range"
+                       class="bg-audio-volume-slider"
+                       min="0"
+                       max="100"
+                       :value="volume * 100"
+                       @input="setVolume($event.target.value / 100)">
+                <i class="fas fa-volume-up"></i>
+            </div>
+
+            <!-- Intensity -->
+            <div class="bg-audio-intensity">
+                <button class="bg-audio-intensity-btn"
+                        :class="{ 'active': intensity === 'low' }"
+                        @click="setIntensity('low')">
+                    Low
+                </button>
+                <button class="bg-audio-intensity-btn"
+                        :class="{ 'active': intensity === 'medium' }"
+                        @click="setIntensity('medium')">
+                    Medium
+                </button>
+                <button class="bg-audio-intensity-btn"
+                        :class="{ 'active': intensity === 'high' }"
+                        @click="setIntensity('high')">
+                    High
+                </button>
+            </div>
+
+            <!-- Ducking indicator -->
+            <div class="bg-audio-ducked" x-show="isDucked" x-cloak>
+                <i class="fas fa-volume-mute"></i>
+                <span>Volume ducked (main audio playing)</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function backgroundAudioPanel() {
+    return {
+        panelOpen: false,
+        modes: [],
+        currentMode: null,
+        isPlaying: false,
+        volume: 0.5,
+        intensity: 'medium',
+        isDucked: false,
+
+        async init() {
+            // Load ambient modes data
+            try {
+                const response = await fetch('/static/data/ambient-modes.json');
+                this.modes = await response.json();
+            } catch (e) {
+                console.warn('Failed to load ambient modes:', e);
+                this.modes = [];
+            }
+
+            // Connect to controller
+            const ctrl = window.backgroundAudioController;
+            if (!ctrl) {
+                console.warn('BackgroundAudioController not available');
+                return;
+            }
+
+            // Sync initial state from controller
+            this.volume = ctrl.volume;
+            this.intensity = ctrl.intensity;
+            this.isPlaying = ctrl.isPlaying;
+            this.isDucked = ctrl.isDucked;
+
+            // Restore last used mode (but don't auto-play)
+            const restoredModeId = ctrl.getRestoredModeId();
+            if (restoredModeId && this.modes.length > 0) {
+                this.currentMode = this.modes.find(m => m.id === restoredModeId) || null;
+            }
+
+            // Listen to controller events
+            ctrl.on('play', (mode) => {
+                this.isPlaying = true;
+                if (mode) this.currentMode = mode;
+            });
+
+            ctrl.on('pause', () => {
+                this.isPlaying = false;
+            });
+
+            ctrl.on('stop', () => {
+                this.isPlaying = false;
+            });
+
+            ctrl.on('volumechange', (vol) => {
+                this.volume = vol;
+            });
+
+            ctrl.on('intensitychange', (level) => {
+                this.intensity = level;
+            });
+
+            ctrl.on('ducked', (isDucked) => {
+                this.isDucked = isDucked;
+            });
+        },
+
+        togglePanel() {
+            this.panelOpen = !this.panelOpen;
+        },
+
+        selectMode(mode) {
+            this.currentMode = mode;
+            // Start playing when mode is selected
+            const ctrl = window.backgroundAudioController;
+            if (ctrl) {
+                ctrl.play(mode);
+            }
+        },
+
+        togglePlay() {
+            const ctrl = window.backgroundAudioController;
+            if (!ctrl || !this.currentMode) return;
+
+            if (this.isPlaying) {
+                ctrl.pause();
+            } else {
+                if (ctrl.currentMode && ctrl.currentMode.id === this.currentMode.id) {
+                    ctrl.resume();
+                } else {
+                    ctrl.play(this.currentMode);
+                }
+            }
+        },
+
+        setVolume(vol) {
+            const ctrl = window.backgroundAudioController;
+            if (ctrl) {
+                ctrl.setVolume(vol);
+            }
+            this.volume = vol;
+        },
+
+        setIntensity(level) {
+            const ctrl = window.backgroundAudioController;
+            if (ctrl) {
+                ctrl.setIntensity(level);
+            }
+            this.intensity = level;
+        }
+    };
+}
+</script>
