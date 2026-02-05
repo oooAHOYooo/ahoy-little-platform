@@ -1525,13 +1525,6 @@
                             <span>Music</span>
                         </a>
                         <a
-                            class="app-sidebar-item {% if request.endpoint == 'focus' %}active{% endif %}"
-                            href="{{ url_for('focus') }}"
-                            data-icon="headphones">
-                            <i class="fas fa-headphones" aria-hidden="true"></i>
-                            <span>Focus</span>
-                        </a>
-                        <a
                             class="app-sidebar-item {% if request.path.startswith('/podcasts') %}active{% endif %}"
                             href="/podcasts"
                             data-icon="podcast">
@@ -2085,7 +2078,6 @@
                     <ul>
                         <li><a href="{{ url_for('home') }}">Explore</a></li>
                         <li><a href="{{ url_for('music') }}">Music</a></li>
-                        <li><a href="{{ url_for('focus') }}">Focus</a></li>
                         <li><a href="/podcasts">Podcasts</a></li>
                         <li><a href="/live-tv">Live TV</a></li>
                         <li><a href="{{ url_for('shows') }}">Videos</a></li>
