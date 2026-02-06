@@ -562,8 +562,8 @@ img[src*="default-cover.jpg"] {
    BASE.CSS - Mobile Base Styles
    ====================================================================== */
 
-/* Ahoy Indie Media — Mobile Base (≤800px only) */
-@media (max-width: 800px) {
+/* Ahoy Indie Media — Mobile Base (≤768px only) */
+@media (max-width: 768px) {
     :root {
         --mobile-padding: 14px;
         --mobile-gap: 12px;
@@ -1273,7 +1273,7 @@ img[src*="default-cover.jpg"] {
    CRITICAL: Android/iOS Scroll Fix
    This MUST be at the top to override all other rules
    ======================================== */
-@media (max-width: 800px) {
+@media (max-width: 768px) {
     html {
         height: auto !important;
         min-height: 100%;
@@ -2456,6 +2456,15 @@ img[src*="default-cover.jpg"] {
    - templates/home.html: `.home-page`, `.live-dashboard`, `.dashboard-grid`, `.dashboard-main`, `.dashboard-sidebar`, `.discovery-grid`, `.grid-container`, `.grid-item`
    ========================================================== */
 @media (max-width: 768px) {
+    /* Keep mobile top status bar fixed when scrolling */
+    .mobile-status-bar.mobile-only {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 10025;
+    }
+
     :root {
         --player-h: 70px;
         /* Compact 2-row mobile footer nav */
@@ -3109,13 +3118,13 @@ img[src*="default-cover.jpg"] {
     }
 }
 
-/* Mobile Status Bar (fixed top, compact - 32px) */
+/* Mobile Status Bar (fixed top, compact - 32px) - stays fixed when scrolling */
 @media (max-width: 767px) {
     .mobile-status-bar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
         height: calc(32px + env(safe-area-inset-top));
         max-height: none;
         background: linear-gradient(180deg, rgba(10, 10, 10, 0.98) 0%, rgba(10, 10, 10, 0.92) 100%);
@@ -3802,9 +3811,9 @@ img[src*="default-cover.jpg"] {
 }
 
 /* ============================================================
-   Mobile overrides (≤800px): new topnav + overlays
+   Mobile overrides (≤768px): new topnav + overlays
    ============================================================ */
-@media (max-width: 800px) {
+@media (max-width: 768px) {
 
     /* Left-aligned logo, right text actions; hide desktop-only bits */
     .navbar .nav-container {

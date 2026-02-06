@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260206f' %}
+        {% set css_version = 'v20260206g' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -431,7 +431,7 @@
             src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <!-- Mobile helpers -->
         <script defer
-            src="{{ url_for('static', filename='js/mobile.js') }}"></script>
+            src="{{ url_for('static', filename='js/mobile.js') }}?{{ css_version }}"></script>
 
         <!-- Three.js visualizer removed (perf). -->
 
@@ -655,15 +655,11 @@
         })();
         </script>
 
-        <!-- Mobile Status Bar (fixed top, compact) -->
+        <!-- Mobile Status Bar (fixed top: time, breadcrumbs, search only) -->
         <div class="mobile-status-bar mobile-only" x-data="statusBar()"
             x-init="init()">
             <div class="status-bar-content">
                 <div class="status-left">
-                    <a href="/" class="status-action-btn status-home-btn"
-                        title="Home" aria-label="Home">
-                        <i class="fas fa-home"></i>
-                    </a>
                     <span class="status-time" id="statusTime"></span>
                     <span class="status-breadcrumb" x-text="breadcrumbText"
                         :title="breadcrumbText"
@@ -675,13 +671,6 @@
                         aria-label="Search">
                         <i class="fas fa-search"></i>
                     </button>
-                    <a href="/my-saves" class="status-action-btn"
-                        title="Saved" aria-label="Saved">
-                        <i class="fas fa-bookmark"></i>
-                        <span class="notification-badge"
-                            x-show="hasNewBookmarks"
-                            x-text="newBookmarkCount > 0 ? newBookmarkCount : ''"></span>
-                    </a>
                 </div>
             </div>
         </div>
@@ -1022,9 +1011,14 @@
                 <span>Profile</span>
             </a>
         </nav>
-        <!-- Mobile Bottom Navigation - Media Features (Primary Row) -->
+        <!-- Mobile Bottom Navigation - Home, Media, Saved -->
         <nav class="mobile-bottom-nav mobile-only" role="navigation"
             aria-label="Media Navigation">
+            <a href="{{ url_for('home') }}"
+                class="mobile-tab {% if request.endpoint == 'home' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
             <a href="{{ url_for('music') }}"
                 class="mobile-tab {% if request.endpoint == 'music' %}active{% endif %}">
                 <i class="fas fa-music"></i>
@@ -1049,6 +1043,11 @@
                 class="mobile-tab {% if request.endpoint == 'radio_page' %}active{% endif %}">
                 <i class="fas fa-broadcast-tower"></i>
                 <span>Radio</span>
+            </a>
+            <a href="/my-saves"
+                class="mobile-tab {% if request.endpoint == 'my_saves' %}active{% endif %}">
+                <i class="fas fa-bookmark"></i>
+                <span>Saved</span>
             </a>
         </nav>
         <div class="desktop-only">
