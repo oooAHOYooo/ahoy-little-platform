@@ -65,7 +65,10 @@
       "Bash(adb shell:*)",
       "Bash(git -C /Users/agworkywork/ahoy-little-platform diff)",
       "Bash(git -C /Users/agworkywork/ahoy-little-platform add templates/account.html templates/auth.html templates/base.html templates/my_saves.html templates/reset_password.html)",
-      "Bash(git -C /Users/agworkywork/ahoy-little-platform commit -m \"$\\(cat <<''EOF''\nImprove login UX, clean up my-saves, fix account stats\n\n- Auto-fill last-used identifier on login for returning users\n- Inline forgot-password panel in login card \\(no page navigation\\)\n- Auto-redirect to /auth after successful password reset\n- Inject window.userProfile server-side for logged-in users\n- Remove \"Explorer\"/\"Discovering new sounds\" from my-saves\n- Dynamic title \\(\"My Collection\"\\) when 3+ bookmarks saved\n- Show @username with link to /account on my-saves profile\n- Account stats now use client-side bookmarks as source of truth\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git -C /Users/agworkywork/ahoy-little-platform commit -m \"$\\(cat <<''EOF''\nImprove login UX, clean up my-saves, fix account stats\n\n- Auto-fill last-used identifier on login for returning users\n- Inline forgot-password panel in login card \\(no page navigation\\)\n- Auto-redirect to /auth after successful password reset\n- Inject window.userProfile server-side for logged-in users\n- Remove \"Explorer\"/\"Discovering new sounds\" from my-saves\n- Dynamic title \\(\"My Collection\"\\) when 3+ bookmarks saved\n- Show @username with link to /account on my-saves profile\n- Account stats now use client-side bookmarks as source of truth\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git status:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git rm:*)"
     ]
   }
 }
