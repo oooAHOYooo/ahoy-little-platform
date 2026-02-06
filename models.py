@@ -426,3 +426,166 @@ class ArtistClaim(Base):
     def __repr__(self) -> str:
         return f"<ArtistClaim id={self.id} user_id={self.user_id} artist_id={self.artist_id} status={self.status}>"
 
+
+# ---------------------------------------------------------------------------
+# Content tables (migrated from static/data/*.json)
+# ---------------------------------------------------------------------------
+
+class Track(Base):
+    """Music track — source of truth for /api/music."""
+    __tablename__ = 'content_tracks'
+
+    id = Column(Integer, primary_key=True)
+    track_id = Column(String(50), unique=True, nullable=False, index=True)  # "song_1"
+    title = Column(String(500), nullable=False, default='')
+    artist = Column(String(255), nullable=False, default='')
+    album = Column(String(255), nullable=False, default='')
+    genre = Column(String(100), nullable=False, default='')
+    duration_seconds = Column(Integer, nullable=False, default=0)
+    audio_url = Column(String(1024), nullable=False, default='')
+    preview_url = Column(String(1024), nullable=False, default='')
+    cover_art = Column(String(1024), nullable=False, default='')
+    added_date = Column(String(50), nullable=False, default='')
+    tags = Column(JSON, nullable=False, default=list)
+    artist_slug = Column(String(255), nullable=False, default='', index=True)
+    artist_url = Column(String(1024), nullable=True)
+    background_image = Column(String(1024), nullable=True)
+    featured = Column(Boolean, nullable=False, default=False)
+    is_new = Column(Boolean, nullable=False, default=False)  # JSON field "new"
+    date_added = Column(String(50), nullable=True)  # alternate date format
+    position = Column(Integer, nullable=False, default=0, index=True)
+    extra_fields = Column(JSON, nullable=True)
+
+
+class Show(Base):
+    """Video show/episode — source of truth for /api/shows."""
+    __tablename__ = 'content_shows'
+
+    id = Column(Integer, primary_key=True)
+    show_id = Column(String(100), unique=True, nullable=False, index=True)
+    title = Column(String(500), nullable=False, default='')
+    host = Column(String(255), nullable=False, default='')
+    description = Column(String(5000), nullable=False, default='')
+    duration_seconds = Column(Integer, nullable=True)  # Some shows have null
+    video_url = Column(String(1024), nullable=False, default='')
+    trailer_url = Column(String(1024), nullable=True)
+    thumbnail = Column(String(1024), nullable=False, default='')
+    published_date = Column(String(50), nullable=False, default='')
+    views = Column(Integer, nullable=False, default=0)
+    show_type = Column(String(50), nullable=False, default='')  # JSON "type"
+    is_live = Column(Boolean, nullable=False, default=False)
+    tags = Column(JSON, nullable=False, default=list)
+    host_slug = Column(String(255), nullable=True, index=True)
+    category = Column(String(100), nullable=False, default='')
+    position = Column(Integer, nullable=False, default=0, index=True)
+    extra_fields = Column(JSON, nullable=True)
+
+
+class ContentArtist(Base):
+    """Artist profile — source of truth for /api/artists."""
+    __tablename__ = 'content_artists'
+
+    id = Column(Integer, primary_key=True)
+    artist_id = Column(String(50), unique=True, nullable=False, index=True)  # "artist_17"
+    name = Column(String(255), nullable=False, default='')
+    slug = Column(String(255), unique=True, nullable=False, index=True)
+    artist_type = Column(String(50), nullable=False, default='')  # JSON "type"
+    description = Column(String(5000), nullable=False, default='')
+    image = Column(String(1024), nullable=False, default='')
+    social_links = Column(JSON, nullable=False, default=dict)
+    genres = Column(JSON, nullable=False, default=list)
+    followers = Column(Integer, nullable=False, default=0)
+    verified = Column(Boolean, nullable=False, default=False)
+    featured = Column(Boolean, nullable=False, default=False)
+    created_at_str = Column(String(50), nullable=False, default='')  # JSON "created_at"
+    updated_at_str = Column(String(50), nullable=False, default='')  # JSON "updated_at"
+    position = Column(Integer, nullable=False, default=0, index=True)
+    extra_fields = Column(JSON, nullable=True)  # bio, avatar, cover_image, location, etc.
+
+
+class ContentArtistAlbum(Base):
+    """Album nested inside an artist record."""
+    __tablename__ = 'content_artist_albums'
+
+    id = Column(Integer, primary_key=True)
+    album_id = Column(String(100), unique=True, nullable=False, index=True)
+    artist_id_ref = Column(String(50), nullable=False, index=True)
+    title = Column(String(500), nullable=False, default='')
+    release_date = Column(String(50), nullable=False, default='')
+    cover_art = Column(String(1024), nullable=False, default='')
+    tags = Column(JSON, nullable=False, default=list)
+    is_new = Column(Boolean, nullable=False, default=False)
+    position = Column(Integer, nullable=False, default=0)
+    extra_fields = Column(JSON, nullable=True)
+
+
+class ContentArtistAlbumTrack(Base):
+    """Track reference inside an artist album."""
+    __tablename__ = 'content_artist_album_tracks'
+
+    id = Column(Integer, primary_key=True)
+    album_id_ref = Column(String(100), nullable=False, index=True)
+    track_id_ref = Column(String(50), nullable=False, default='')
+    title = Column(String(500), nullable=False, default='')
+    position = Column(Integer, nullable=False, default=0)
+
+
+class ContentArtistShow(Base):
+    """Show reference nested inside an artist record."""
+    __tablename__ = 'content_artist_shows'
+
+    id = Column(Integer, primary_key=True)
+    artist_id_ref = Column(String(50), nullable=False, index=True)
+    show_ref_id = Column(String(100), nullable=False, default='')
+    title = Column(String(500), nullable=False, default='')
+    show_type = Column(String(50), nullable=False, default='')
+    duration = Column(Integer, nullable=False, default=0)
+    category = Column(String(100), nullable=False, default='')
+    published_date = Column(String(50), nullable=False, default='')
+    position = Column(Integer, nullable=False, default=0)
+
+
+class ContentArtistTrack(Base):
+    """Track reference nested inside an artist record."""
+    __tablename__ = 'content_artist_tracks'
+
+    id = Column(Integer, primary_key=True)
+    artist_id_ref = Column(String(50), nullable=False, index=True)
+    track_ref_id = Column(String(50), nullable=False, default='')
+    title = Column(String(500), nullable=False, default='')
+    album = Column(String(255), nullable=False, default='')
+    duration = Column(Integer, nullable=False, default=0)
+    genre = Column(String(100), nullable=False, default='')
+    added_date = Column(String(50), nullable=False, default='')
+    position = Column(Integer, nullable=False, default=0)
+
+
+class PodcastShow(Base):
+    """Podcast series — source of truth for /api/podcasts."""
+    __tablename__ = 'content_podcast_shows'
+
+    id = Column(Integer, primary_key=True)
+    slug = Column(String(100), unique=True, nullable=False, index=True)
+    title = Column(String(500), nullable=False, default='')
+    description = Column(String(5000), nullable=False, default='')
+    artwork = Column(String(1024), nullable=False, default='')
+    last_updated = Column(String(50), nullable=False, default='')
+    position = Column(Integer, nullable=False, default=0)
+
+
+class PodcastEpisode(Base):
+    """Podcast episode within a show."""
+    __tablename__ = 'content_podcast_episodes'
+
+    id = Column(Integer, primary_key=True)
+    episode_id = Column(String(100), unique=True, nullable=False, index=True)
+    show_slug = Column(String(100), nullable=False, index=True)
+    title = Column(String(500), nullable=False, default='')
+    description = Column(String(5000), nullable=False, default='')
+    date = Column(String(50), nullable=False, default='')
+    duration = Column(String(50), nullable=False, default='')  # "18:42"
+    duration_seconds = Column(Integer, nullable=False, default=0)
+    audio_url = Column(String(1024), nullable=False, default='')
+    artwork = Column(String(1024), nullable=False, default='')
+    position = Column(Integer, nullable=False, default=0)
+
