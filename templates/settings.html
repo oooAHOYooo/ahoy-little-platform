@@ -3,6 +3,7 @@
 {% block title %}Settings{% endblock %}
 
 {% block content %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <div class="settings-page" x-data="settingsPage()" x-init="init()">
     <div class="settings-container">
         {% from "macros/subpage_header.html" import subpage_hero %}
@@ -332,6 +333,8 @@ function settingsPage() {
         audioSettings: {
             masterVolume: 75
         },
+        loggedIn: false,
+        serverPreferences: {},
         isDragging: false,
         dragProperty: null,
         _dragDial: null,
@@ -339,23 +342,50 @@ function settingsPage() {
         _upHandler: null,
 
         init() {
-            this.loadSettings();
-            this.applyAudioSettings();
+            fetch('/api/user/profile', { credentials: 'include' })
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    if (data && data.id) {
+                        this.loggedIn = true;
+                        this.serverPreferences = data.preferences || {};
+                    }
+                    this.loadSettings();
+                    this.applyAudioSettings();
+                })
+                .catch(() => {
+                    this.loadSettings();
+                    this.applyAudioSettings();
+                });
         },
 
         loadSettings() {
+            if (this.loggedIn && this.serverPreferences && this.serverPreferences.audioSettings) {
+                this.audioSettings = { ...this.audioSettings, ...this.serverPreferences.audioSettings };
+                return;
+            }
             const saved = localStorage.getItem('ahoySettings');
             if (saved) {
-                const settings = JSON.parse(saved);
-                this.audioSettings = { ...this.audioSettings, ...settings.audioSettings };
+                try {
+                    const settings = JSON.parse(saved);
+                    this.audioSettings = { ...this.audioSettings, ...settings.audioSettings };
+                } catch (_) {}
             }
         },
 
         saveSettings() {
-            const settings = {
-                audioSettings: this.audioSettings
-            };
+            const settings = { audioSettings: this.audioSettings };
             localStorage.setItem('ahoySettings', JSON.stringify(settings));
+            if (this.loggedIn) {
+                const prefs = { ...this.serverPreferences, audioSettings: this.audioSettings };
+                fetch('/api/user/profile', {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': (document.querySelector('meta[name="csrf-token"]') || {}).content || '' },
+                    body: JSON.stringify({ preferences: prefs })
+                })
+                    .then(r => { if (r.ok) this.serverPreferences = prefs; })
+                    .catch(() => {});
+            }
             this.applyAudioSettings();
             this.showNotification('Settings saved!', 'success');
         },
@@ -370,6 +400,18 @@ function settingsPage() {
 
         resetSettings() {
             this.audioSettings = { masterVolume: 75 };
+            if (this.loggedIn) {
+                const prefs = { ...this.serverPreferences, audioSettings: this.audioSettings };
+                fetch('/api/user/profile', {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': (document.querySelector('meta[name="csrf-token"]') || {}).content || '' },
+                    body: JSON.stringify({ preferences: prefs })
+                })
+                    .then(r => { if (r.ok) this.serverPreferences = prefs; })
+                    .catch(() => {});
+            }
+            localStorage.setItem('ahoySettings', JSON.stringify({ audioSettings: this.audioSettings }));
             this.applyAudioSettings();
             this.showNotification('Settings reset to defaults', 'info');
         },

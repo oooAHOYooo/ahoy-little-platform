@@ -589,3 +589,42 @@ class PodcastEpisode(Base):
     artwork = Column(String(1024), nullable=False, default='')
     position = Column(Integer, nullable=False, default=0)
 
+
+class Event(Base):
+    """Event — source of truth for /events (was events.json)."""
+    __tablename__ = 'content_events'
+
+    id = Column(Integer, primary_key=True)
+    event_id = Column(String(100), unique=True, nullable=False, index=True)
+    title = Column(String(500), nullable=False, default='')
+    date = Column(String(50), nullable=False, default='')
+    time = Column(String(100), nullable=False, default='')
+    venue = Column(String(255), nullable=False, default='')
+    venue_address = Column(String(500), nullable=False, default='')
+    event_type = Column(String(50), nullable=False, default='')
+    status = Column(String(50), nullable=False, default='upcoming')
+    description = Column(String(5000), nullable=False, default='')
+    photos = Column(JSON, nullable=False, default=list)
+    image = Column(String(1024), nullable=False, default='')
+    rsvp_external_url = Column(String(1024), nullable=True)
+    rsvp_enabled = Column(Boolean, nullable=False, default=True)
+    rsvp_limit = Column(String(50), nullable=True)
+    position = Column(Integer, nullable=False, default=0, index=True)
+    extra_fields = Column(JSON, nullable=True)
+
+
+class ContentMerch(Base):
+    """Merch item — source of truth for merch catalog (was data/merch.json)."""
+    __tablename__ = 'content_merch'
+
+    id = Column(Integer, primary_key=True)
+    item_id = Column(String(100), unique=True, nullable=False, index=True)
+    name = Column(String(500), nullable=False, default='')
+    image_url = Column(String(1024), nullable=False, default='')
+    image_url_back = Column(String(1024), nullable=True)
+    price_usd = Column(Float, nullable=False, default=20.0)
+    kind = Column(String(50), nullable=False, default='merch')
+    available = Column(Boolean, nullable=False, default=True)
+    position = Column(Integer, nullable=False, default=0, index=True)
+    extra_fields = Column(JSON, nullable=True)
+

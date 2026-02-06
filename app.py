@@ -29,6 +29,7 @@ from utils.csrf_init import init_csrf
 # Removed: blueprints/auth.py (consolidated into api/auth)
 from services.content_db import (
     get_all_tracks, get_all_shows, get_all_artists, get_all_podcasts,
+    get_all_events, get_all_merch,
     get_tracks_list, get_shows_list, get_artists_list, invalidate_cache as invalidate_content_cache,
 )
 from blueprints.api.auth import bp as api_auth_bp
@@ -426,9 +427,12 @@ def create_app():
             "errors": []
         }
         
-        # Check merch catalog
+        # Check merch catalog (DB first, then JSON fallback)
         try:
-            merch_catalog = read_json("data/merch.json", {"items": []})
+            try:
+                merch_catalog = get_all_merch(ttl=600)
+            except Exception:
+                merch_catalog = read_json("data/merch.json", {"items": []})
             if isinstance(merch_catalog, dict):
                 items = merch_catalog.get("items", [])
                 debug_info["merch_catalog"]["exists"] = True
@@ -446,7 +450,7 @@ def create_app():
                 debug_info["errors"].append("Merch catalog is not a valid dictionary")
         except FileNotFoundError:
             debug_info["merch_catalog"]["exists"] = False
-            debug_info["errors"].append("Merch catalog file not found: data/merch.json")
+            debug_info["errors"].append("Merch catalog (DB and file) not available")
         except Exception as e:
             debug_info["merch_catalog"]["error"] = str(e)
             debug_info["errors"].append(f"Error reading merch catalog: {e}")
@@ -869,7 +873,10 @@ def create_app():
         # Featured event banner: first upcoming event when it's today or tomorrow
         show_featured_banner = False
         featured_event = None
-        events_data = load_json_data('events.json', {'events': []})
+        try:
+            events_data = get_all_events(ttl=600)
+        except Exception:
+            events_data = load_json_data('events.json', {'events': []})
         for e in events_data.get('events', []):
             if e.get('status') != 'upcoming':
                 continue
@@ -1023,8 +1030,11 @@ def checkout_page():
     # For merch, ignore client-provided amount/title and look up from merch catalog.
     if kind == "merch" and item_id:
         try:
-            from storage import read_json
-            merch_catalog = read_json("data/merch.json", {"items": []}) or {}
+            try:
+                merch_catalog = get_all_merch(ttl=600)
+            except Exception:
+                from storage import read_json
+                merch_catalog = read_json("data/merch.json", {"items": []}) or {}
             items = merch_catalog.get("items") if isinstance(merch_catalog, dict) else []
             found = None
             if isinstance(items, list):
@@ -1189,8 +1199,11 @@ def checkout_process():
     # Harden merch checkout: price/title must come from server-side merch catalog.
     if kind == "merch":
         try:
-            from storage import read_json
-            merch_catalog = read_json("data/merch.json", {"items": []}) or {}
+            try:
+                merch_catalog = get_all_merch(ttl=600)
+            except Exception:
+                from storage import read_json
+                merch_catalog = read_json("data/merch.json", {"items": []}) or {}
             items = merch_catalog.get("items") if isinstance(merch_catalog, dict) else []
             found = None
             if isinstance(items, list) and item_id:
@@ -1391,8 +1404,11 @@ def checkout_process():
             safe_title = (request.form.get("title") or "Ahoy Purchase").strip()[:120]
             if kind == "merch" and item_id:
                 try:
-                    from storage import read_json
-                    merch_catalog = read_json("data/merch.json", {"items": []}) or {}
+                    try:
+                        merch_catalog = get_all_merch(ttl=600)
+                    except Exception:
+                        from storage import read_json
+                        merch_catalog = read_json("data/merch.json", {"items": []}) or {}
                     items = merch_catalog.get("items") if isinstance(merch_catalog, dict) else []
                     if isinstance(items, list):
                         for it in items:
@@ -1933,9 +1949,24 @@ def podcasts_page():
 
     def build_podcasts_payload():
         """
-        Build the podcasts payload expected by templates from static/data/podcastCollection.json.
-        Each distinct show gets its own URL slug at /podcasts/<slug>.
+        Build the podcasts payload expected by templates. DB first, then podcastCollection.json.
         """
+        try:
+            data = get_all_podcasts(ttl=600)
+            if data.get('shows'):
+                shows = data['shows']
+                episodes = []
+                for s in shows:
+                    for ep in s.get('episodes', []):
+                        episodes.append({
+                            **ep,
+                            'show_slug': s['slug'],
+                            'show_title': s.get('title', s['slug']),
+                        })
+                return {'shows': shows, 'episodes': episodes}
+        except Exception:
+            pass
+        # Fallback: podcastCollection.json
         collection = load_json_data('podcastCollection.json', {'podcasts': []})
         items = list(collection.get('podcasts', []) or [])
 
@@ -1955,7 +1986,7 @@ def podcasts_page():
                 'title': title,
                 'description': p.get('description') or '',
                 'date': p.get('date') or p.get('releaseDate') or '',
-                'duration': '',  # not provided in collection
+                'duration': '',
                 'duration_seconds': 0,
                 'audio_url': p.get('mp3url') or '',
                 'artwork': p.get('thumbnail') or '/static/img/default-cover.jpg',
@@ -1963,7 +1994,6 @@ def podcasts_page():
                 'show_title': show_name,
             })
 
-        # Group into shows
         shows_by_slug = {}
         for e in episodes:
             s = shows_by_slug.setdefault(e['show_slug'], {
@@ -1985,10 +2015,8 @@ def podcasts_page():
                 'artwork': e['artwork'],
             })
 
-        # Stable ordering in hub: newest-updated first
         shows = list(shows_by_slug.values())
         shows.sort(key=lambda s: str(s.get('last_updated') or ''), reverse=True)
-
         return {'shows': shows, 'episodes': episodes}
 
     data = build_podcasts_payload()
@@ -1997,8 +2025,24 @@ def podcasts_page():
 @app.route('/podcasts/<show_slug>')
 def podcast_show_page(show_slug):
     """Podcast show detail page"""
-    # Build the same payload as the hub, then pick the requested show.
-    # (Kept simple/inline to avoid refactoring outside this feature branch.)
+    # DB first
+    try:
+        data = get_all_podcasts(ttl=600)
+        if data.get('shows'):
+            s = next((x for x in data['shows'] if x.get('slug') == show_slug), None)
+            if s:
+                show = {
+                    'slug': s['slug'],
+                    'title': s.get('title', show_slug.replace('-', ' ').title()),
+                    'description': s.get('description', ''),
+                    'artwork': s.get('artwork') or '/static/img/default-cover.jpg',
+                    'last_updated': s.get('last_updated', ''),
+                    'episodes': s.get('episodes', []),
+                }
+                return render_template('podcast_show.html', show=show)
+    except Exception:
+        pass
+    # Fallback: podcastCollection.json
     collection = load_json_data('podcastCollection.json', {'podcasts': []})
     items = list(collection.get('podcasts', []) or [])
     active_items = [p for p in items if p.get('active', True)]
@@ -2089,7 +2133,10 @@ def podcast_show_page(show_slug):
 @app.route('/events')
 def events_page():
     """Upcoming live Ahoy events (separate from /dashboard and /performances)."""
-    events_data = load_json_data('events.json', {'events': []})
+    try:
+        events_data = get_all_events(ttl=600)
+    except Exception:
+        events_data = load_json_data('events.json', {'events': []})
     videos_data = load_json_data('videos.json', {'videos': []})
     response = make_response(render_template('events.html', events=events_data, videos=videos_data))
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
@@ -2098,7 +2145,10 @@ def events_page():
 @app.route('/events/<event_id>')
 def event_detail(event_id):
     """Event detail page (past or upcoming)."""
-    events_data = load_json_data('events.json', {'events': []})
+    try:
+        events_data = get_all_events(ttl=600)
+    except Exception:
+        events_data = load_json_data('events.json', {'events': []})
     event_key = unquote(event_id or '')
     event = None
     for e in events_data.get('events', []):
@@ -2157,7 +2207,10 @@ def merch():
     """Merch store page"""
     from storage import read_json
     from utils.observability import get_release
-    merch_catalog = read_json('data/merch.json', {"items": []})
+    try:
+        merch_catalog = get_all_merch(ttl=600)
+    except Exception:
+        merch_catalog = read_json('data/merch.json', {"items": []})
     
     # Query database for purchased merch items (any status: pending, paid, fulfilled)
     purchased_item_ids = set()
@@ -3267,14 +3320,16 @@ def manage_playlist_items(playlist_id):
 @app.route('/api/user/profile')
 @login_required
 def user_profile():
-    """Get user profile"""
+    """Get user profile (includes preferences for settings sync)."""
     # Source-of-truth is the DB user row (session['user_data'] may be absent).
+    prefs = getattr(current_user, "preferences", None) or {}
     return jsonify({
         "id": current_user.id,
         "email": getattr(current_user, "email", None),
         "username": getattr(current_user, "username", None),
         "display_name": getattr(current_user, "display_name", None),
         "avatar_url": getattr(current_user, "avatar_url", None),
+        "preferences": prefs,
     })
 
 @app.route('/api/user/profile', methods=['PUT'])

@@ -14,6 +14,7 @@ from db import get_session
 from models import (
     Track, Show, ContentArtist, ContentArtistAlbum, ContentArtistAlbumTrack,
     ContentArtistShow, ContentArtistTrack, PodcastShow, PodcastEpisode,
+    Event, ContentMerch,
 )
 
 logger = logging.getLogger(__name__)
@@ -215,6 +216,47 @@ def _serialize_podcast_show(ps, episodes):
     }
 
 
+def _serialize_event(e):
+    """Convert Event row to dict matching events.json event objects."""
+    d = {
+        'id': e.event_id,
+        'title': e.title,
+        'date': e.date,
+        'time': e.time,
+        'venue': e.venue,
+        'venue_address': e.venue_address,
+        'event_type': e.event_type,
+        'status': e.status,
+        'description': e.description or '',
+        'photos': e.photos if e.photos is not None else [],
+        'image': e.image or '',
+        'rsvp_external_url': e.rsvp_external_url,
+        'rsvp_enabled': bool(e.rsvp_enabled),
+        'rsvp_limit': e.rsvp_limit,
+        'rsvps': [],
+    }
+    if e.extra_fields:
+        d.update(e.extra_fields)
+    return d
+
+
+def _serialize_merch_item(m):
+    """Convert ContentMerch row to dict matching data/merch.json item shape."""
+    d = {
+        'id': m.item_id,
+        'name': m.name,
+        'image_url': m.image_url or '',
+        'price_usd': float(m.price_usd),
+        'kind': m.kind or 'merch',
+        'available': bool(m.available),
+    }
+    if m.image_url_back:
+        d['image_url_back'] = m.image_url_back
+    if m.extra_fields:
+        d.update(m.extra_fields)
+    return d
+
+
 # ---------------------------------------------------------------------------
 # Query functions (return dicts ready for jsonify)
 # ---------------------------------------------------------------------------
@@ -356,3 +398,21 @@ def get_shows_list(ttl=600):
 def get_artists_list(ttl=600):
     """Return just the list of artist dicts."""
     return get_all_artists(ttl).get('artists', [])
+
+
+def get_all_events(ttl=600):
+    """Return {"events": [...]} matching events.json."""
+    def _query():
+        with get_session() as session:
+            rows = session.query(Event).order_by(Event.position, Event.date.desc()).all()
+            return {'events': [_serialize_event(e) for e in rows]}
+    return _cached('all_events', ttl, _query)
+
+
+def get_all_merch(ttl=600):
+    """Return {"items": [...]} matching data/merch.json catalog."""
+    def _query():
+        with get_session() as session:
+            rows = session.query(ContentMerch).order_by(ContentMerch.position).all()
+            return {'items': [_serialize_merch_item(m) for m in rows]}
+    return _cached('all_merch', ttl, _query)
