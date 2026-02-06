@@ -1,6 +1,6 @@
-// Ahoy Indie Media — Mobile interactions (≤800px)
+// Ahoy Indie Media — Mobile interactions (≤768px)
 (function () {
-    const inMobile = () => window.matchMedia && window.matchMedia('(max-width: 800px)').matches;
+    const inMobile = () => window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
 
     const $ = (sel) => document.querySelector(sel);
     const mobileMenu = $('#mobileMenu');
