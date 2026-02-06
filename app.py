@@ -6,6 +6,7 @@ except Exception:  # ImportError or env issues
 from flask_login import current_user, login_required
 import os
 import json
+import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 import random
@@ -26,6 +27,10 @@ from utils.logging_init import init_logging, init_request_logging
 from utils.security_headers import attach_security_headers, create_csp_report_blueprint
 from utils.csrf_init import init_csrf
 # Removed: blueprints/auth.py (consolidated into api/auth)
+from services.content_db import (
+    get_all_tracks, get_all_shows, get_all_artists, get_all_podcasts,
+    get_tracks_list, get_shows_list, get_artists_list, invalidate_cache as invalidate_content_cache,
+)
 from blueprints.api.auth import bp as api_auth_bp
 from blueprints.activity import bp as activity_bp
 # Removed: blueprints/playlists.py and blueprints/bookmarks.py (shadowed by API blueprints)
@@ -925,6 +930,12 @@ def _slugify(s: str) -> str:
 
 def _load_artists_flat():
     try:
+        artists = get_artists_list(ttl=600)
+        if artists:
+            return artists
+    except Exception:
+        pass
+    try:
         data = load_json_data('artists.json', {'artists': []})
         return data.get('artists', [])
     except Exception:
@@ -1733,11 +1744,24 @@ _json_file_mtimes = {}
 # Removed: USERS_FILE, ACTIVITY_FILE, load_users(), save_users() - using database now
 
 def load_json_data(filename, default=None, cache_duration=600):
-    """Load JSON data from file with in-memory caching and file modification time checking"""
+    """Load JSON data from file with in-memory caching.
+
+    For migrated content files (music, shows, artists, podcasts), reads from
+    dev/legacy_json/ as a dev-only safety net. DB should be the primary source.
+    For non-migrated files, reads from static/data/ as before.
+    """
     import os
     from time import time
-    
-    filepath = f'static/data/{filename}'
+
+    # Migrated content files live in dev/legacy_json/ now
+    _MIGRATED = {'music.json', 'shows.json', 'artists.json', 'podcasts.json'}
+    if filename in _MIGRATED:
+        filepath = f'dev/legacy_json/{filename}'
+        # Legacy JSON fallback (dev-only safety net)
+        _log = logging.getLogger('content.fallback')
+        _log.warning('JSON fallback triggered for %s (DB should be primary source)', filename)
+    else:
+        filepath = f'static/data/{filename}'
     cache_key = filepath
     
     # Check if file exists
@@ -1781,24 +1805,22 @@ def load_json_data(filename, default=None, cache_duration=600):
     except FileNotFoundError:
         return default or {}
     except json.JSONDecodeError as e:
-        # Log the error and return default
-        import logging
         logging.error(f'JSON decode error in {filename}: {e}')
         return default or {}
     except Exception as e:
-        # Catch any other errors
-        import logging
         logging.error(f'Error loading {filename}: {e}')
         return default or {}
 
 
 def _etag_for_static_json(filename: str) -> Optional[str]:
-    """Create a weak ETag for static/data JSON files based on mtime + size.
+    """Create a weak ETag for legacy JSON files based on mtime + size.
 
-    This enables 304 Not Modified responses, reducing payload + parse time.
+    Legacy JSON fallback (dev-only safety net).
     """
     try:
-        p = Path("static") / "data" / filename
+        p = Path("dev") / "legacy_json" / filename
+        if not p.exists():
+            p = Path("static") / "data" / filename
         st = p.stat()
         return f'W/"{int(st.st_mtime)}-{int(st.st_size)}"'
     except Exception:
@@ -2175,14 +2197,20 @@ def player():
 @app.route('/artists/featured')
 def featured_artists():
     """Featured artists page"""
-    artists_data = load_json_data('artists.json', {'artists': []})
+    try:
+        artists_data = get_all_artists(ttl=600)
+    except Exception:
+        artists_data = load_json_data('artists.json', {'artists': []})
     featured = [a for a in artists_data.get('artists', []) if a.get('featured', False)]
     return render_template('artists/featured.html', artists=featured)
 
 @app.route('/artist/<artist_slug>')
 def artist_profile(artist_slug):
     """Individual artist profile page (slug or case-insensitive name)"""
-    artists_data = load_json_data('artists.json', {'artists': []})
+    try:
+        artists_data = get_all_artists(ttl=600)
+    except Exception:
+        artists_data = load_json_data('artists.json', {'artists': []})
     artist = None
     
     for a in artists_data.get('artists', []):
@@ -2242,8 +2270,12 @@ def playlists_index():
 def api_now_playing():
     """Get curated now playing feed with 30s previews - randomized on each request"""
     # Use cached data (cache_duration=600 to match other endpoints - data is already cached)
-    music_data = load_json_data('music.json', {'tracks': []}, cache_duration=600)
-    shows_data = load_json_data('shows.json', {'shows': []}, cache_duration=600)
+    try:
+        music_data = get_all_tracks(ttl=600)
+        shows_data = get_all_shows(ttl=600)
+    except Exception:
+        music_data = load_json_data('music.json', {'tracks': []}, cache_duration=600)
+        shows_data = load_json_data('shows.json', {'shows': []}, cache_duration=600)
     
     # Combine and curate content for discovery feed
     feed_items = []
@@ -2420,6 +2452,15 @@ def api_homepage_layout():
 @limiter.exempt
 def api_music():
     """Get all music data"""
+    try:
+        data = get_all_tracks(ttl=600)
+        if data.get('tracks'):
+            resp = jsonify(data)
+            resp.headers['Cache-Control'] = 'public, max-age=600'
+            resp.headers['Vary'] = 'Accept-Encoding'
+            return resp
+    except Exception:
+        logging.getLogger(__name__).exception('DB music query failed, falling back to JSON')
     return _cached_json_response("music.json", {"tracks": []}, max_age_seconds=600)
 
 @app.route('/radio')
@@ -2436,6 +2477,15 @@ def merch_page():
 @limiter.exempt
 def api_shows():
     """Get all shows/video content"""
+    try:
+        data = get_all_shows(ttl=600)
+        if data.get('shows'):
+            resp = jsonify(data)
+            resp.headers['Cache-Control'] = 'public, max-age=600'
+            resp.headers['Vary'] = 'Accept-Encoding'
+            return resp
+    except Exception:
+        logging.getLogger(__name__).exception('DB shows query failed, falling back to JSON')
     return _cached_json_response("shows.json", {"shows": []}, max_age_seconds=600)
 
 @app.route('/api/live-tv/channels')
@@ -2443,7 +2493,10 @@ def api_shows():
 def api_live_tv_channels():
     """Return four Live TV channels built from available media content."""
     try:
-        shows_data = load_json_data('shows.json', {'shows': []})
+        try:
+            shows_data = get_all_shows(ttl=600)
+        except Exception:
+            shows_data = load_json_data('shows.json', {'shows': []})
         # Note: Response caching added below after processing
 
         def normalize_show(item):
@@ -2551,7 +2604,10 @@ def api_live_tv_channels():
 @app.route('/api/show/<show_id>')
 def api_show(show_id):
     """Get individual show by ID"""
-    shows_data = load_json_data('shows.json', {'shows': []})
+    try:
+        shows_data = get_all_shows(ttl=600)
+    except Exception:
+        shows_data = load_json_data('shows.json', {'shows': []})
     show = next((s for s in shows_data.get('shows', []) if s.get('id') == show_id), None)
     
     if not show:
@@ -2563,13 +2619,33 @@ def api_show(show_id):
 @limiter.exempt
 def api_artists():
     """Get artists directory"""
+    try:
+        data = get_all_artists(ttl=600)
+        if data.get('artists'):
+            resp = jsonify(data)
+            resp.headers['Cache-Control'] = 'public, max-age=600'
+            resp.headers['Vary'] = 'Accept-Encoding'
+            return resp
+    except Exception:
+        logging.getLogger(__name__).exception('DB artists query failed, falling back to JSON')
     return _cached_json_response("artists.json", {"artists": []}, max_age_seconds=600)
 
 @app.route('/api/artists/featured')
 @limiter.exempt
 def api_featured_artists():
     """Get featured artists"""
-    # Same backing file as /api/artists, so allow client caching too
+    try:
+        all_artists = get_artists_list(ttl=600)
+        if all_artists:
+            featured = [a for a in all_artists if a.get('featured', False)]
+            resp = jsonify({'artists': featured})
+            resp.headers['Cache-Control'] = 'public, max-age=300'
+            resp.headers['Vary'] = 'Accept-Encoding'
+            return resp
+    except Exception:
+        logging.getLogger(__name__).exception('DB featured artists query failed')
+
+    # Fallback to JSON file
     etag = _etag_for_static_json("artists.json")
     inm = request.headers.get("If-None-Match")
     if etag and inm == etag:
@@ -2891,7 +2967,10 @@ def _get_month_name(month_abbr):
 def _handle_follow_artist(artist_id, user_id):
     """Helper function to handle follow/unfollow logic"""
     # Normalize artist_id (could be slug, id, or name)
-    artists_data = load_json_data('artists.json', {'artists': []})
+    try:
+        artists_data = get_all_artists(ttl=600)
+    except Exception:
+        artists_data = load_json_data('artists.json', {'artists': []})
     artist = None
     for a in artists_data.get('artists', []):
         a_slug = _slugify(a.get('slug') or a.get('name', ''))
@@ -2986,9 +3065,12 @@ def api_unfollow_artist():
 def api_performances():
     """Get performances data"""
     # For now, return shows data as performances
-    shows_data = load_json_data('shows.json', {'shows': []})
+    try:
+        shows_data = get_all_shows(ttl=600)
+    except Exception:
+        shows_data = load_json_data('shows.json', {'shows': []})
     performances = []
-    
+
     for show in shows_data.get('shows', []):
         # Convert shows to performances format
         performance = {
@@ -3011,9 +3093,14 @@ def api_performances():
 @app.route('/api/artist/<artist_name>')
 def api_artist_profile(artist_name):
     """Get specific artist data"""
-    artists_data = load_json_data('artists.json', {'artists': []})
-    music_data = load_json_data('music.json', {'tracks': []})
-    shows_data = load_json_data('shows.json', {'shows': []})
+    try:
+        artists_data = get_all_artists(ttl=600)
+        music_data = get_all_tracks(ttl=600)
+        shows_data = get_all_shows(ttl=600)
+    except Exception:
+        artists_data = load_json_data('artists.json', {'artists': []})
+        music_data = load_json_data('music.json', {'tracks': []})
+        shows_data = load_json_data('shows.json', {'shows': []})
 
     # Normalize
     try:
@@ -3060,8 +3147,12 @@ def api_artist_profile(artist_name):
 @app.route('/api/artists/<int:artist_id>/music')
 def api_artist_music(artist_id):
     """Get artist's music tracks"""
-    music_data = load_json_data('music.json', {'tracks': []})
-    artists_data = load_json_data('artists.json', {'artists': []})
+    try:
+        music_data = get_all_tracks(ttl=600)
+        artists_data = get_all_artists(ttl=600)
+    except Exception:
+        music_data = load_json_data('music.json', {'tracks': []})
+        artists_data = load_json_data('artists.json', {'artists': []})
     
     # Find artist by ID
     artist = None
@@ -3081,8 +3172,12 @@ def api_artist_music(artist_id):
 @app.route('/api/artists/<int:artist_id>/shows')
 def api_artist_shows(artist_id):
     """Get artist's shows"""
-    shows_data = load_json_data('shows.json', {'shows': []})
-    artists_data = load_json_data('artists.json', {'artists': []})
+    try:
+        shows_data = get_all_shows(ttl=600)
+        artists_data = get_all_artists(ttl=600)
+    except Exception:
+        shows_data = load_json_data('shows.json', {'shows': []})
+        artists_data = load_json_data('artists.json', {'artists': []})
     
     # Find artist by ID
     artist = None
@@ -3102,7 +3197,10 @@ def api_artist_shows(artist_id):
 @app.route('/api/daily-playlist')
 def api_daily_playlist():
     """Generate seeded daily playlist"""
-    music_data = load_json_data('music.json', {'tracks': []})
+    try:
+        music_data = get_all_tracks(ttl=600)
+    except Exception:
+        music_data = load_json_data('music.json', {'tracks': []})
     
     # Get today's seed
     today_str = datetime.now().strftime('%Y%m%d')
@@ -3536,14 +3634,20 @@ def debug_data_viewer(data_type):
                 'created_at': u.created_at.isoformat() if u.created_at else None
             } for u in users])
     elif data_type == 'music':
-        music_data = load_json_data('music.json', {'tracks': []})
-        return jsonify(music_data)
+        try:
+            return jsonify(get_all_tracks(ttl=600))
+        except Exception:
+            return jsonify(load_json_data('music.json', {'tracks': []}))
     elif data_type == 'shows':
-        shows_data = load_json_data('shows.json', {'shows': []})
-        return jsonify(shows_data)
+        try:
+            return jsonify(get_all_shows(ttl=600))
+        except Exception:
+            return jsonify(load_json_data('shows.json', {'shows': []}))
     elif data_type == 'artists':
-        artists_data = load_json_data('artists.json', {'artists': []})
-        return jsonify(artists_data)
+        try:
+            return jsonify(get_all_artists(ttl=600))
+        except Exception:
+            return jsonify(load_json_data('artists.json', {'artists': []}))
     else:
         return jsonify({'error': 'Unknown data type'}), 400
 
