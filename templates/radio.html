@@ -592,23 +592,6 @@
                 // placeholder: hook to bookmarks/favorites when available
                 document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Favorites coming soon' }));
             },
-            async shareCurrent() {
-                const title = this.current?.title || this.stationName || 'Ahoy Radio';
-                const text = this.current?.artist ? `${this.current.artist} — ${this.current.title}` : title;
-                const url = window.location.href;
-                try {
-                    if (navigator.share) {
-                        await navigator.share({ title, text, url });
-                        return;
-                    }
-                } catch (_) { /* ignore */ }
-                try {
-                    await navigator.clipboard.writeText(url);
-                    document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Link copied' }));
-                } catch (_) {
-                    document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Copy failed' }));
-                }
-            },
             addToQueue(item) {
                 if (!item || !window.mediaPlayer || typeof window.mediaPlayer.addToPlaylist !== 'function') {
                     document.dispatchEvent(new CustomEvent('ahoy:toast', { detail: 'Queue unavailable' }));

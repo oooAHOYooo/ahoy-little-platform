@@ -524,19 +524,6 @@ function artistsPage() {
             }
         },
         
-        shareArtist(artist) {
-            if (navigator.share) {
-                navigator.share({
-                    title: artist.name,
-                    text: artist.description,
-                    url: window.location.origin + `/artist/${artist.slug || artist.id}`
-                });
-            } else {
-                navigator.clipplaylist.writeText(window.location.origin + `/artist/${artist.slug || artist.id}`);
-                this.showNotification('Artist link copied to clipplaylist!', 'success');
-            }
-        },
-        
         isFollowing(artist) {
             return artist.following || false;
         },

@@ -203,10 +203,6 @@
                             <span
                                 x-text="isSaved(featuredPerformance) ? 'Saved' : 'Save'"></span>
                         </button>
-                        <button @click="sharePerformance(featuredPerformance)"
-                            class="btn btn-outline">
-                            <i class="fas fa-share"></i> Share
-                        </button>
                     </div>
                 </div>
             </div>
@@ -254,11 +250,6 @@
                                         class="action-btn"
                                         :class="{'saved': isSaved(performance)}">
                                         <i class="fas fa-bookmark"></i>
-                                    </button>
-                                    <button
-                                        @click.stop="sharePerformance(performance)"
-                                        class="action-btn">
-                                        <i class="fas fa-share"></i>
                                     </button>
                                 </div>
                             </div>
@@ -437,19 +428,6 @@ function performancesPage() {
 
         isSaved(performance) {
             return this.savedPerformances.some(p => p.id === performance.id);
-        },
-
-        sharePerformance(performance) {
-            if (navigator.share) {
-                navigator.share({
-                    title: performance.title,
-                    text: `Check out this performance: ${performance.title}`,
-                    url: window.location.href
-                });
-            } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert('Link copied to clipboard!');
-            }
         },
 
         // Utility functions

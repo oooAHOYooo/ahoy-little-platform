@@ -6,6 +6,9 @@ if (signPropsFile.exists()) {
     signProps.load(new FileInputStream(signPropsFile))
 }
 
+def buildTimestampCode = (System.currentTimeMillis() / 1000L).toInteger()
+def buildTimestampName = new Date().format("yyyyMMddHHmm", TimeZone.getTimeZone("UTC"))
+
 android {
     namespace "com.ahoy.app"
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -13,8 +16,8 @@ android {
         applicationId "com.ahoy.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "0.2.0"
+        versionCode buildTimestampCode
+        versionName "0.2.0+${buildTimestampName}"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

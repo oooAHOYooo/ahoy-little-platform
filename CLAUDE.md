@@ -11,7 +11,7 @@
 **Current Issues:** None active
 
 **User's current focus (pick up from here):**
-- **Mobile beta builds (Android + iOS)** — Android build is working end-to-end with signed AAB ready for Play Store internal testing. iOS archive builds from terminal but needs Apple Developer team account for signing in Xcode. User has a Google Developer account and wants to get test betas out.
+- **Mobile beta builds (Android + iOS)** — Android build is working end-to-end with signed AAB ready for Play Store internal testing. iOS project configured for TestFlight: Capacitor config updated to production URL, ExportOptions.plist created, build script at `packaging/build-ios.sh`. User needs to complete Apple Developer enrollment ($99/yr) and register bundle ID `com.ahoy.app`, then build+upload via Xcode Organizer or the build script.
 
 **Recent Changes (2026-02-02):**
 - Android: Gradle upgraded 8.0.2→8.11.1, AGP 8.0.0→8.7.3 (Java 21 compat)
@@ -130,14 +130,17 @@ cd android && ./gradlew bundleRelease assembleRelease   # builds signed AAB + AP
 - Keystore is gitignored — back it up somewhere safe; same keystore required for all future uploads
 - Gradle 8.11.1 + AGP 8.7.3 (requires Java 21)
 
-**iOS build (terminal):**
+**iOS build (TestFlight):**
 ```bash
-npx cap sync ios
-cd ios/App && xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -archivePath ./build/App.xcarchive archive CODE_SIGNING_ALLOWED=NO
-open build/App.xcarchive   # opens Xcode Organizer for signing + upload to TestFlight
+./packaging/build-ios.sh          # archive → opens Xcode Organizer for manual upload
+./packaging/build-ios.sh upload   # archive + auto-upload to App Store Connect
 ```
-- Needs Apple Developer team account for signing
+- Requires Apple Developer Program ($99/yr) enrollment
+- Bundle ID `com.ahoy.app` must be registered in Apple Developer portal
+- Xcode must have your Apple ID signed in (Xcode → Settings → Accounts)
+- ExportOptions: `ios/App/ExportOptions.plist` (team ID `Y8654K535L`, automatic signing)
 - In Xcode Organizer: Distribute App → TestFlight & App Store → select team → Upload
+- App icon: `ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png` (needs real 1024x1024)
 
 ## Env Vars (Required in Production)
 `SECRET_KEY`, `DATABASE_URL`, `STRIPE_SECRET_KEY`, `RESEND_API_KEY`, `AHOY_ADMIN_EMAIL`

@@ -3684,6 +3684,11 @@ def robots_txt():
     """Robots.txt for search engines"""
     return send_from_directory('static', 'robots.txt', mimetype='text/plain')
 
+@app.route('/googleb3a3eb3401de50dc.html')
+def google_search_console_verification():
+    """Google Search Console verification file."""
+    return send_from_directory('static', 'googleb3a3eb3401de50dc.html', mimetype='text/html')
+
 @app.route('/cast')
 def cast_page():
     """Casting instructions and sender setup page"""

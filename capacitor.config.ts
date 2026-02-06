@@ -5,15 +5,21 @@ const config: CapacitorConfig = {
   appName: 'Ahoy Indie Media',
   webDir: 'static',
   server: {
-    url: 'http://10.0.2.2:5001',
-    cleartext: true
+    url: 'https://ahoy-indie-media.onrender.com',
+    cleartext: false
   },
   android: {
     allowMixedContent: false
   },
+  ios: {
+    contentInset: 'automatic',
+    allowsLinkPreview: false,
+    scrollEnabled: true
+  },
   plugins: {
     SplashScreen: {
-      launchAutoHide: true
+      launchAutoHide: true,
+      launchShowDuration: 2000
     }
   }
 };

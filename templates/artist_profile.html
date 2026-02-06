@@ -39,10 +39,6 @@
                                 <span
                                     x-text="isFollowing ? 'Following' : 'Follow'"></span>
                             </button>
-                            <button @click="shareArtist()"
-                                class="btn btn-outline">
-                                <i class="fas fa-share"></i> Share
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -280,10 +276,6 @@ function artistProfile() {
         followArtist() {
             this.isFollowing = !this.isFollowing;
             // Implement follow functionality
-        },
-        
-        shareArtist() {
-            // Implement share functionality
         },
         
         likeTrack(track) {
