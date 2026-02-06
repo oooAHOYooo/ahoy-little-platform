@@ -2202,6 +2202,13 @@ def proxy_audio():
     except requests_lib.exceptions.RequestException as e:
         abort(502, f'Failed to fetch audio: {str(e)}')
 
+def _is_local_file_path(s):
+    """True if string looks like a local file path (never use in BUILD or as image URL)."""
+    if not s or not isinstance(s, str):
+        return False
+    s = s.strip()
+    return any(s.startswith(p) or p in s for p in ('/var/', '/Users/', '/tmp/', 'TemporaryItems', 'Screenshot')) or s.endswith(('.png', '.jpg', '.jpeg'))
+
 @app.route('/merch')
 def merch():
     """Merch store page"""
@@ -2211,7 +2218,25 @@ def merch():
         merch_catalog = get_all_merch(ttl=600)
     except Exception:
         merch_catalog = read_json('data/merch.json', {"items": []})
-    
+
+    # Sanitize items so local file paths never render (e.g. bad DB/env data)
+    items = merch_catalog.get('items') if isinstance(merch_catalog, dict) else []
+    if isinstance(items, list):
+        sanitized = []
+        for it in items:
+            if not isinstance(it, dict):
+                continue
+            it = dict(it)
+            if _is_local_file_path(it.get('image_url')):
+                it['image_url'] = '/static/img/default-cover.jpg'
+            if _is_local_file_path(it.get('image_url_back')):
+                it['image_url_back'] = None
+            if _is_local_file_path(it.get('name')):
+                it['name'] = it.get('id') or 'Item'
+            sanitized.append(it)
+        merch_catalog = dict(merch_catalog) if isinstance(merch_catalog, dict) else {}
+        merch_catalog['items'] = sanitized
+
     # Query database for purchased merch items (any status: pending, paid, fulfilled)
     purchased_item_ids = set()
     try:
@@ -2224,10 +2249,10 @@ def merch():
     except Exception as e:
         current_app.logger.warning(f"Error querying purchased merch items: {e}")
         # Continue without purchased items list if query fails
-    
+
     response = make_response(render_template(
-        'merch.html', 
-        merch=merch_catalog, 
+        'merch.html',
+        merch=merch_catalog,
         release=get_release(),
         purchased_item_ids=purchased_item_ids
     ))
@@ -2544,12 +2569,23 @@ def api_shows():
 @app.route('/api/live-tv/channels')
 @limiter.exempt
 def api_live_tv_channels():
-    """Return four Live TV channels built from available media content."""
+    """Return four Live TV channels built from available media content. Works with DB, legacy JSON, or static/data."""
     try:
         try:
             shows_data = get_all_shows(ttl=600)
         except Exception:
             shows_data = load_json_data('shows.json', {'shows': []})
+        # Local dev: if DB and legacy_json are empty, try static/data/shows.json
+        if not shows_data.get('shows'):
+            try:
+                from pathlib import Path
+                static_shows = Path('static/data/shows.json')
+                if static_shows.exists():
+                    import json
+                    with open(static_shows, 'r', encoding='utf-8') as f:
+                        shows_data = json.load(f)
+            except Exception:
+                pass
         # Note: Response caching added below after processing
 
         def normalize_show(item):

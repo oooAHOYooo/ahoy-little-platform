@@ -9,18 +9,30 @@ import subprocess
 import sys
 
 
+def _is_safe_release(s):
+    """Reject local file paths or long strings that shouldn't be shown as BUILD."""
+    if not s or not isinstance(s, str):
+        return False
+    s = s.strip()
+    if len(s) > 24:
+        return False
+    bad = ("/var/", "/Users/", "TemporaryItems", "Screenshot", ".png", ".jpg", "\\")
+    return not any(b in s for b in bad)
+
+
 def get_release():
-    """Get release version from git commit or env var"""
+    """Get release version from git commit or env var. Never returns a file path."""
     # Try APP_RELEASE env var first
     release = os.getenv("APP_RELEASE")
-    if release:
+    if release and _is_safe_release(release):
         return release
-    
-    # Try GIT_COMMIT env var
-    git_commit = os.getenv("GIT_COMMIT")
-    if git_commit:
-        return git_commit
-    
+
+    # Try GIT_COMMIT or RENDER_GIT_COMMIT (Render sets one of these)
+    for env_name in ("GIT_COMMIT", "RENDER_GIT_COMMIT"):
+        git_commit = os.getenv(env_name)
+        if git_commit and _is_safe_release(git_commit):
+            return git_commit[:12] if len(git_commit) > 12 else git_commit
+
     # Try to get git commit hash
     try:
         result = subprocess.run(
@@ -29,10 +41,12 @@ def get_release():
             text=True,
             check=True
         )
-        return result.stdout.strip()
+        out = (result.stdout or "").strip()
+        if out and _is_safe_release(out):
+            return out
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
-    
+
     return "unknown"
 
 
