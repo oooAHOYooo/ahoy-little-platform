@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Ahoy Indie Media',
   webDir: 'static',
   server: {
-    url: 'https://ahoy-indie-media.onrender.com',
+    url: 'https://app.ahoy.ooo',
     cleartext: false
   },
   android: {

@@ -28,7 +28,19 @@
                 </template>
             </div>
         </div>
-        <div class="podcast-shows podcast-shows-preview">
+        <!-- Mobile: dropdown show picker -->
+        <div class="podcast-shows-dropdown-mobile">
+            <select class="podcast-show-select"
+                @change="setActiveShow($event.target.value)">
+                <option value="all" :selected="activeShowSlug === 'all'">All Shows</option>
+                <template x-for="show in featuredShows" :key="show.slug">
+                    <option :value="show.slug" x-text="show.title"
+                        :selected="activeShowSlug === show.slug"></option>
+                </template>
+            </select>
+        </div>
+        <!-- Desktop: show cards grid -->
+        <div class="podcast-shows podcast-shows-preview podcast-shows-desktop">
             <template x-for="show in featuredShows" :key="show.slug">
                 <div class="podcast-show-preview-card"
                     :class="{ 'active': isShowActive(show.slug) }">

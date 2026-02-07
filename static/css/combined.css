@@ -3412,9 +3412,9 @@ img[src*="default-cover.jpg"] {
         background: linear-gradient(180deg, rgba(10, 12, 18, 0.94) 0%, rgba(6, 7, 11, 0.98) 100%);
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-top: 1px solid rgba(255, 255, 255, 0.08);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 16px 36px rgba(0, 0, 0, 0.55);
-        border-radius: var(--mobile-nav-radius, 26px);
+        border-bottom: none;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 -4px 16px rgba(0, 0, 0, 0.3);
+        border-radius: var(--mobile-nav-radius, 26px) var(--mobile-nav-radius, 26px) 0 0;
         backdrop-filter: blur(22px) saturate(135%);
         -webkit-backdrop-filter: blur(22px) saturate(135%);
         height: var(--secondary-nav-h, 40px);
@@ -3426,7 +3426,7 @@ img[src*="default-cover.jpg"] {
         content: "";
         position: absolute;
         inset: 1px;
-        border-radius: calc(var(--mobile-nav-radius, 26px) - 1px);
+        border-radius: calc(var(--mobile-nav-radius, 26px) - 1px) calc(var(--mobile-nav-radius, 26px) - 1px) 0 0;
         background: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 60%);
         opacity: 0.5;
         pointer-events: none;
@@ -3482,16 +3482,16 @@ img[src*="default-cover.jpg"] {
         z-index: 0;
     }
 
-    /* Adjust for 4 tabs (Artists, Merch, Events, Profile) */
+    /* Adjust for 5 tabs (Artists, Merch, Events, Profile, Saved) */
     @media (max-width: 420px) {
         .mobile-secondary-nav .mobile-tab {
-            max-width: 70px;
-            padding: 6px 8px 4px;
-            font-size: 9px;
+            max-width: 60px;
+            padding: 6px 6px 4px;
+            font-size: 8px;
         }
 
         .mobile-secondary-nav .mobile-tab i {
-            font-size: 17px;
+            font-size: 16px;
         }
     }
 
@@ -3579,10 +3579,10 @@ img[src*="default-cover.jpg"] {
         box-sizing: border-box !important;
         background: linear-gradient(180deg, rgba(10, 12, 18, 0.96) 0%, rgba(5, 6, 9, 0.985) 100%);
         border: 1px solid rgba(255, 255, 255, 0.07);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 20px 40px rgba(0, 0, 0, 0.6);
-        border-radius: var(--mobile-nav-radius, 26px);
+        border-radius: 0 0 var(--mobile-nav-radius, 26px) var(--mobile-nav-radius, 26px);
         backdrop-filter: blur(24px) saturate(135%);
         -webkit-backdrop-filter: blur(24px) saturate(135%);
         height: var(--bottom-nav-h, calc(50px + env(safe-area-inset-bottom))) !important;
@@ -3594,7 +3594,7 @@ img[src*="default-cover.jpg"] {
         content: "";
         position: absolute;
         inset: 1px;
-        border-radius: calc(var(--mobile-nav-radius, 26px) - 1px);
+        border-radius: 0 0 calc(var(--mobile-nav-radius, 26px) - 1px) calc(var(--mobile-nav-radius, 26px) - 1px);
         background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 60%);
         opacity: 0.55;
         pointer-events: none;

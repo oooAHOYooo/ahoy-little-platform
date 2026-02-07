@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260206g' %}
+        {% set css_version = 'v20260207a' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -1010,6 +1010,11 @@
                 <i class="fas fa-user-circle"></i>
                 <span>Profile</span>
             </a>
+            <a href="/my-saves"
+                class="mobile-tab {% if request.endpoint == 'my_saves' %}active{% endif %}">
+                <i class="fas fa-bookmark"></i>
+                <span>Saved</span>
+            </a>
         </nav>
         <!-- Mobile Bottom Navigation - Home, Media, Saved -->
         <nav class="mobile-bottom-nav mobile-only" role="navigation"
@@ -1043,11 +1048,6 @@
                 class="mobile-tab {% if request.endpoint == 'radio_page' %}active{% endif %}">
                 <i class="fas fa-broadcast-tower"></i>
                 <span>Radio</span>
-            </a>
-            <a href="/my-saves"
-                class="mobile-tab {% if request.endpoint == 'my_saves' %}active{% endif %}">
-                <i class="fas fa-bookmark"></i>
-                <span>Saved</span>
             </a>
         </nav>
         <div class="desktop-only">

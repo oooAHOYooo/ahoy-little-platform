@@ -1741,6 +1741,53 @@ body.debug-layout .card {
     color: rgba(255, 255, 255, 0.95);
 }
 
+/* Mobile: dropdown for show selection, hide card grid */
+.podcast-shows-dropdown-mobile {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .podcast-shows-dropdown-mobile {
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .podcast-shows-desktop {
+        display: none !important;
+    }
+
+    .podcast-show-select {
+        width: 100%;
+        padding: 12px 40px 12px 14px;
+        font-size: 15px;
+        font-weight: 500;
+        color: #f8fafc;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        appearance: none;
+        -webkit-appearance: none;
+        outline: none;
+        cursor: pointer;
+        font-family: inherit;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.6)' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .podcast-show-select:focus {
+        border-color: rgba(0, 212, 255, 0.5);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .podcast-show-select option {
+        background: #1a1c24;
+        color: #f8fafc;
+        padding: 8px;
+    }
+}
+
 .podcast-show-hero {
     display: grid;
     grid-template-columns: 140px 1fr;
