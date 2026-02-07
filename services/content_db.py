@@ -14,7 +14,7 @@ from db import get_session
 from models import (
     Track, Show, ContentArtist, ContentArtistAlbum, ContentArtistAlbumTrack,
     ContentArtistShow, ContentArtistTrack, PodcastShow, PodcastEpisode,
-    Event, ContentMerch,
+    Event, ContentMerch, ContentVideo, WhatsNewItem,
 )
 
 logger = logging.getLogger(__name__)
@@ -257,6 +257,26 @@ def _serialize_merch_item(m):
     return d
 
 
+def _serialize_video(v):
+    """Convert ContentVideo row to dict matching videos.json video objects."""
+    d = {
+        'id': v.video_id,
+        'event_id': v.event_id,
+        'title': v.title,
+        'description': v.description,
+        'url': v.url,
+        'duration': v.duration,
+        'file_size': v.file_size,
+        'format': v.format,
+        'status': v.status,
+        'upload_date': v.upload_date,
+        'thumbnail': v.thumbnail or '',
+    }
+    if v.extra_fields:
+        d.update(v.extra_fields)
+    return d
+
+
 # ---------------------------------------------------------------------------
 # Query functions (return dicts ready for jsonify)
 # ---------------------------------------------------------------------------
@@ -416,3 +436,53 @@ def get_all_merch(ttl=600):
             rows = session.query(ContentMerch).order_by(ContentMerch.position).all()
             return {'items': [_serialize_merch_item(m) for m in rows]}
     return _cached('all_merch', ttl, _query)
+
+
+def get_all_videos(ttl=600):
+    """Return {"videos": [...]} matching videos.json."""
+    def _query():
+        with get_session() as session:
+            rows = session.query(ContentVideo).order_by(ContentVideo.position).all()
+            return {'videos': [_serialize_video(v) for v in rows]}
+    return _cached('all_videos', ttl, _query)
+
+
+def get_all_whats_new(ttl=600):
+    """Return whats_new data structured as {"updates": {year: {month: {section: ...}}}}."""
+    def _query():
+        with get_session() as session:
+            rows = session.query(WhatsNewItem).order_by(
+                WhatsNewItem.year.desc(), WhatsNewItem.month, WhatsNewItem.section, WhatsNewItem.position
+            ).all()
+            updates = {}
+            for row in rows:
+                yr = updates.setdefault(row.year, {})
+                mn = yr.setdefault(row.month, {})
+                section_titles = {
+                    'music': 'Music Updates', 'videos': 'Video Updates',
+                    'artists': 'Artist Updates', 'platform': 'Platform Updates',
+                    'merch': 'Merch Updates', 'events': 'Events Updates',
+                }
+                if row.section not in mn:
+                    mn[row.section] = {
+                        'title': section_titles.get(row.section, f'{row.section.capitalize()} Updates'),
+                        'items': [],
+                    }
+                item = {
+                    'type': row.item_type,
+                    'title': row.title,
+                    'description': row.description,
+                }
+                if row.date:
+                    item['date'] = row.date
+                if row.link:
+                    item['link'] = row.link
+                if row.link_external:
+                    item['link_external'] = row.link_external
+                if row.features:
+                    item['features'] = row.features
+                if row.extra_fields:
+                    item.update(row.extra_fields)
+                mn[row.section]['items'].append(item)
+            return {'updates': updates}
+    return _cached('all_whats_new', ttl, _query)

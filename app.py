@@ -29,7 +29,7 @@ from utils.csrf_init import init_csrf
 # Removed: blueprints/auth.py (consolidated into api/auth)
 from services.content_db import (
     get_all_tracks, get_all_shows, get_all_artists, get_all_podcasts,
-    get_all_events, get_all_merch,
+    get_all_events, get_all_merch, get_all_videos, get_all_whats_new,
     get_tracks_list, get_shows_list, get_artists_list, invalidate_cache as invalidate_content_cache,
 )
 from blueprints.api.auth import bp as api_auth_bp
@@ -2137,7 +2137,10 @@ def events_page():
         events_data = get_all_events(ttl=600)
     except Exception:
         events_data = load_json_data('events.json', {'events': []})
-    videos_data = load_json_data('videos.json', {'videos': []})
+    try:
+        videos_data = get_all_videos(ttl=600)
+    except Exception:
+        videos_data = load_json_data('videos.json', {'videos': []})
     response = make_response(render_template('events.html', events=events_data, videos=videos_data))
     response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
     return response
@@ -2758,7 +2761,10 @@ def api_featured_artists():
 def api_whats_new():
     """Get 'What's New at Ahoy' updates - returns 4 most recent for home page"""
     try:
-        data = load_json_data("whats_new.json", {"updates": {}})
+        try:
+            data = get_all_whats_new(ttl=600)
+        except Exception:
+            data = load_json_data("whats_new.json", {"updates": {}})
         
         # Ensure we have the updates structure (not the whole file)
         if not isinstance(data, dict) or "updates" not in data:
@@ -2822,12 +2828,15 @@ def api_whats_new():
 def whats_new_archive():
     """Archive page listing all available months"""
     try:
-        data = load_json_data("whats_new.json", {"updates": {}})
+        try:
+            data = get_all_whats_new(ttl=600)
+        except Exception:
+            data = load_json_data("whats_new.json", {"updates": {}})
         updates = data.get("updates", {})
-        
+
         if not isinstance(updates, dict):
             updates = {}
-        
+
         # Build list of available months
         months_list = []
         for year, months in sorted(updates.items(), reverse=True):
@@ -2865,7 +2874,10 @@ def whats_new_month(year, month):
         year_str = str(year)
         month_lower = month.lower()
         
-        data = load_json_data("whats_new.json", {"updates": {}})
+        try:
+            data = get_all_whats_new(ttl=600)
+        except Exception:
+            data = load_json_data("whats_new.json", {"updates": {}})
         updates = data.get("updates", {})
         
         if not isinstance(updates, dict):
@@ -2970,7 +2982,10 @@ def whats_new_section(year, month, section):
             logging.warning(f'whats_new_section: invalid section {section_lower}')
             return render_template('404.html'), 404
         
-        data = load_json_data("whats_new.json", {"updates": {}})
+        try:
+            data = get_all_whats_new(ttl=600)
+        except Exception:
+            data = load_json_data("whats_new.json", {"updates": {}})
         updates = data.get("updates", {})
         
         if not isinstance(updates, dict):

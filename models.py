@@ -628,3 +628,46 @@ class ContentMerch(Base):
     position = Column(Integer, nullable=False, default=0, index=True)
     extra_fields = Column(JSON, nullable=True)
 
+
+class ContentVideo(Base):
+    """Video recording — source of truth for event videos (was videos.json)."""
+    __tablename__ = 'content_videos'
+
+    id = Column(Integer, primary_key=True)
+    video_id = Column(String(100), unique=True, nullable=False, index=True)
+    event_id = Column(String(100), nullable=True, index=True)
+    title = Column(String(500), nullable=False, default='')
+    description = Column(String(5000), nullable=False, default='')
+    url = Column(String(1024), nullable=True)
+    duration = Column(String(100), nullable=True)
+    file_size = Column(String(50), nullable=True)
+    format = Column(String(20), nullable=True)
+    status = Column(String(50), nullable=False, default='coming_soon')
+    upload_date = Column(String(50), nullable=True)
+    thumbnail = Column(String(1024), nullable=False, default='')
+    position = Column(Integer, nullable=False, default=0, index=True)
+    extra_fields = Column(JSON, nullable=True)
+
+
+class WhatsNewItem(Base):
+    """What's New update item — source of truth for /whats-new (was whats_new.json)."""
+    __tablename__ = 'content_whats_new'
+
+    id = Column(Integer, primary_key=True)
+    year = Column(String(10), nullable=False, index=True)
+    month = Column(String(10), nullable=False, index=True)
+    section = Column(String(50), nullable=False, index=True)  # music, videos, artists, platform, merch, events
+    item_type = Column(String(50), nullable=False, default='content')  # content, feature, technical
+    title = Column(String(500), nullable=False, default='')
+    description = Column(String(5000), nullable=False, default='')
+    date = Column(String(50), nullable=True)
+    link = Column(String(1024), nullable=True)
+    link_external = Column(String(1024), nullable=True)
+    features = Column(JSON, nullable=True)  # list of feature bullet points
+    position = Column(Integer, nullable=False, default=0, index=True)
+    extra_fields = Column(JSON, nullable=True)
+
+    __table_args__ = (
+        Index('ix_whats_new_year_month', 'year', 'month'),
+    )
+
