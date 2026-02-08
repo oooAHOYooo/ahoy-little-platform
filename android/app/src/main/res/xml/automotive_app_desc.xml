@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Declares this app supports Android Auto media browsing -->
+<automotiveApp>
+    <uses name="media" />
+</automotiveApp>

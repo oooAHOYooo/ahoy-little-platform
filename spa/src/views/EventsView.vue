@@ -3,22 +3,28 @@
     <div class="unified-header events-subheader">
       <div class="header-content">
         <h1>Events</h1>
+        <span class="header-count">{{ events.length }} events</span>
       </div>
     </div>
 
     <div class="podcasts-section" v-if="events.length">
-      <h2 class="section-title">Upcoming Events</h2>
       <div class="episode-list">
-        <div class="episode-row" v-for="event in events" :key="event.id">
+        <router-link
+          v-for="event in events"
+          :key="event.id"
+          :to="`/events/${event.id}`"
+          class="episode-row"
+          style="text-decoration:none;color:inherit"
+        >
           <div class="episode-art">
             <img :src="event.image || '/static/img/default-cover.jpg'" :alt="event.title" loading="lazy" />
           </div>
           <div class="episode-meta">
             <div class="episode-title">{{ event.title }}</div>
-            <div class="episode-show">{{ event.date }} &middot; {{ event.venue }}</div>
+            <div class="episode-show">{{ event.date }}<span v-if="event.venue"> · {{ event.venue }}</span></div>
             <div class="episode-desc" v-if="event.description">{{ event.description }}</div>
           </div>
-        </div>
+        </router-link>
       </div>
     </div>
 

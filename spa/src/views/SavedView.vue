@@ -16,10 +16,18 @@
           <div class="episode-meta">
             <div class="episode-title">{{ item.title }}</div>
             <div class="episode-show" v-if="item.artist">{{ item.artist }}</div>
-            <div class="episode-show" v-if="item.type">{{ item.type }}</div>
+            <div class="episode-show" v-if="item.type" style="opacity:0.6;font-size:11px">{{ item.type }}</div>
           </div>
           <div class="episode-actions">
-            <button @click="removeBookmark(item)" class="episode-action-btn" title="Remove">
+            <button
+              v-if="item.audio_url || item.url"
+              @click="playItem(item)"
+              class="episode-btn"
+              title="Play"
+            >
+              <i :class="playerStore.currentTrack?.id === item.id && playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+            </button>
+            <button @click="bookmarkHelper.remove(item)" class="episode-btn" title="Remove" style="color:var(--accent-primary,#6ddcff)">
               <i class="fas fa-bookmark"></i>
             </button>
           </div>
@@ -38,37 +46,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed } from 'vue'
+import { useBookmarks } from '../composables/useBookmarks'
+import { usePlayerStore } from '../stores/player'
 
-const savedItems = ref([])
+const bookmarkHelper = useBookmarks()
+const playerStore = usePlayerStore()
 
-function loadBookmarks() {
-  try {
-    const raw = localStorage.getItem('ahoy.bookmarks.v1')
-    if (raw) {
-      const data = JSON.parse(raw)
-      savedItems.value = Object.values(data)
-    }
-  } catch (e) {
-    savedItems.value = []
+const savedItems = computed(() => Object.values(bookmarkHelper.bookmarks.value))
+
+function playItem(item) {
+  if (playerStore.currentTrack?.id === item.id && playerStore.isPlaying) {
+    playerStore.pause()
+  } else {
+    playerStore.play(item)
   }
 }
-
-function removeBookmark(item) {
-  try {
-    const raw = localStorage.getItem('ahoy.bookmarks.v1')
-    if (raw) {
-      const data = JSON.parse(raw)
-      const key = item.id || item.slug
-      delete data[key]
-      localStorage.setItem('ahoy.bookmarks.v1', JSON.stringify(data))
-      savedItems.value = Object.values(data)
-    }
-  } catch (e) { /* ignore */ }
-}
-
-onMounted(() => {
-  loadBookmarks()
-  window.addEventListener('bookmarks:changed', loadBookmarks)
-})
 </script>

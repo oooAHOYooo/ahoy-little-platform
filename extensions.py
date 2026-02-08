@@ -19,11 +19,15 @@ limiter = Limiter(
 
 def init_cors(app):
     # Default allowed origins for Ahoy Indie Media
+    # Capacitor/iOS/Android WebView send capacitor://localhost or ionic://localhost
     default_allowed = [
         "https://app.ahoy.ooo",
         "https://api.ahoy.ooo",
         "http://localhost:5173",
         "http://localhost:5000",
+        "capacitor://localhost",
+        "ionic://localhost",
+        "http://localhost",
     ]
     # Merge with any origins provided via env/config
     extra = app.config.get("CORS_ORIGINS") or []

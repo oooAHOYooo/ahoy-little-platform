@@ -10,7 +10,13 @@
     <div class="artists-container">
       <div class="artists-grid-section">
         <div class="artists-grid" v-if="artists.length">
-          <div class="artist-card" v-for="artist in artists" :key="artist.id">
+          <router-link
+            v-for="artist in artists"
+            :key="artist.id"
+            :to="`/artists/${artist.slug || artist.id}`"
+            class="artist-card"
+            style="text-decoration:none;color:inherit"
+          >
             <div class="artist-cover">
               <img :src="artist.image" :alt="artist.name" loading="lazy" />
             </div>
@@ -18,7 +24,7 @@
             <div class="artist-info">
               <div class="artist-name">{{ artist.name }}</div>
             </div>
-          </div>
+          </router-link>
         </div>
 
         <!-- Loading skeletons -->

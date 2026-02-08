@@ -12,9 +12,19 @@ const routes = [
     component: () => import('./views/MusicView.vue'),
   },
   {
+    path: '/music/:id',
+    name: 'music-detail',
+    component: () => import('./views/MusicDetailView.vue'),
+  },
+  {
     path: '/shows',
     name: 'shows',
     component: () => import('./views/ShowsView.vue'),
+  },
+  {
+    path: '/shows/:id',
+    name: 'show-detail',
+    component: () => import('./views/ShowDetailView.vue'),
   },
   {
     path: '/live-tv',
@@ -27,14 +37,29 @@ const routes = [
     component: () => import('./views/PodcastsView.vue'),
   },
   {
+    path: '/podcasts/:slug',
+    name: 'podcast-detail',
+    component: () => import('./views/PodcastDetailView.vue'),
+  },
+  {
     path: '/artists',
     name: 'artists',
     component: () => import('./views/ArtistsView.vue'),
   },
   {
+    path: '/artists/:slug',
+    name: 'artist-detail',
+    component: () => import('./views/ArtistDetailView.vue'),
+  },
+  {
     path: '/events',
     name: 'events',
     component: () => import('./views/EventsView.vue'),
+  },
+  {
+    path: '/events/:id',
+    name: 'event-detail',
+    component: () => import('./views/EventDetailView.vue'),
   },
   {
     path: '/merch',
@@ -50,6 +75,16 @@ const routes = [
     path: '/my-saves',
     name: 'my-saves',
     component: () => import('./views/SavedView.vue'),
+  },
+  {
+    path: '/now-playing',
+    name: 'now-playing',
+    component: () => import('./views/NowPlayingView.vue'),
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('./views/LoginView.vue'),
   },
   // Catch-all
   {

@@ -10,7 +10,13 @@
     <div class="shows-container">
       <div class="shows-grid-section">
         <div class="shows-grid" v-if="shows.length">
-          <div class="show-card" v-for="show in shows" :key="show.id">
+          <router-link
+            v-for="show in shows"
+            :key="show.id"
+            :to="`/shows/${show.id}`"
+            class="show-card"
+            style="text-decoration:none;color:inherit"
+          >
             <div class="show-thumbnail">
               <img :src="show.thumbnail" :alt="show.title" loading="lazy" />
               <div class="show-overlay">
@@ -21,7 +27,7 @@
               <div class="show-title">{{ show.title }}</div>
               <div class="show-host">{{ show.host }}</div>
             </div>
-          </div>
+          </router-link>
         </div>
 
         <!-- Loading skeletons -->

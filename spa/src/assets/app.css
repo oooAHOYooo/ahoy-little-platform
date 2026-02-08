@@ -12,6 +12,18 @@
 
 /* ── SPA Shell Overrides ───────────────────────────────────────────── */
 
+/* Desktop: match base.html app-shell + left sidebar (no top bar in SPA) */
+.app .main-content {
+  min-height: 100vh;
+}
+.app .app-shell {
+  min-height: 100vh;
+}
+.app .app-sidebar {
+  top: 0;
+  height: 100vh;
+}
+
 /* Offline banner */
 .offline-banner {
   position: fixed;
@@ -158,6 +170,295 @@
   background: var(--accent-primary, #6ddcff);
   border-radius: 2px;
   transition: width 0.3s linear;
+}
+
+/* ── Mini Player Extras ──────────────────────────────────────────── */
+.spa-mini-player .track-time {
+  font-size: 10px;
+  opacity: 0.5;
+  margin-left: 6px;
+}
+.spa-mini-player .progress-bar {
+  cursor: pointer;
+}
+/* Track overlay play button */
+.track-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.4);
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: inherit;
+}
+.track-card:hover .track-overlay,
+.track-card.playing .track-overlay {
+  opacity: 1;
+}
+.track-overlay .play-btn {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+}
+.track-cover {
+  position: relative;
+  cursor: pointer;
+}
+/* Episode row playing state */
+.episode-row.playing {
+  background: rgba(109, 220, 255, 0.08);
+  border-radius: 8px;
+}
+.episode-row .episode-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary, rgba(255,255,255,0.92));
+  font-size: 16px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.episode-row .episode-btn:active {
+  background: rgba(255,255,255,0.1);
+}
+/* Scroll row horizontal */
+.scroll-row {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  padding: 0 16px 16px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll-row::-webkit-scrollbar { display: none; }
+.scroll-row .track-card,
+.scroll-row .show-card,
+.scroll-row .artist-card {
+  flex-shrink: 0;
+  width: 140px;
+}
+/* Section header (Home page) */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 16px 8px;
+}
+.section-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, rgba(255,255,255,0.92));
+}
+.section-header .see-all {
+  color: var(--accent-primary, #6ddcff);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+/* ── Page Transitions ────────────────────────────────────────────── */
+.fade-enter-active { transition: opacity 0.15s ease; }
+.fade-leave-active { transition: opacity 0.1s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.slide-down-enter-active { transition: all 0.3s ease; }
+.slide-down-leave-active { transition: all 0.2s ease; }
+.slide-down-enter-from { transform: translateY(-100%); opacity: 0; }
+.slide-down-leave-to { transform: translateY(-100%); opacity: 0; }
+
+/* ── Now Playing View ────────────────────────────────────────────── */
+.now-playing-page {
+  padding: 20px 24px;
+  padding-top: calc(20px + env(safe-area-inset-top));
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.np-artwork-container {
+  width: 100%;
+  max-width: 340px;
+  margin: 8px auto 24px;
+}
+.np-artwork {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+}
+.np-info {
+  text-align: center;
+  width: 100%;
+  max-width: 340px;
+  margin-bottom: 20px;
+}
+.np-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary, rgba(255,255,255,0.95));
+  margin: 0 0 4px;
+  line-height: 1.3;
+}
+.np-artist {
+  font-size: 16px;
+  color: var(--text-secondary, rgba(255,255,255,0.6));
+  margin: 0;
+}
+/* Seek bar */
+.np-seek {
+  width: 100%;
+  max-width: 340px;
+  margin-bottom: 20px;
+}
+.np-seek-bar {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.np-seek-fill {
+  height: 100%;
+  background: var(--accent-primary, #6ddcff);
+  border-radius: 3px;
+  transition: width 0.2s linear;
+}
+.np-seek-thumb {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transition: left 0.2s linear;
+}
+.np-times {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 6px;
+}
+/* Controls */
+.np-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.np-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary, #fff);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.2s, transform 0.1s;
+}
+.np-btn:active { transform: scale(0.92); }
+.np-btn-secondary {
+  font-size: 28px;
+  padding: 12px;
+}
+.np-btn-play {
+  font-size: 32px;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-primary, #6ddcff);
+  color: #111;
+}
+.np-btn-play:active { background: #5bc8e8; }
+/* Actions */
+.np-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  margin-bottom: 28px;
+}
+.np-action-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: color 0.2s, background 0.2s;
+}
+.np-action-btn:active { background: rgba(255,255,255,0.08); }
+.np-speed-label {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+}
+/* Queue in Now Playing */
+.np-queue {
+  width: 100%;
+  max-width: 400px;
+}
+.np-queue-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px;
+}
+.np-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.np-queue-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.np-queue-item:active { background: rgba(255,255,255,0.06); }
+.np-queue-art {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.np-queue-info { flex: 1; min-width: 0; }
+.np-queue-track {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.np-queue-artist {
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
 /* ── Loading Skeleton ────────────────────────────────────────────── */

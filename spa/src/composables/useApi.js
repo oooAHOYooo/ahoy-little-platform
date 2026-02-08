@@ -20,6 +20,7 @@ export async function apiFetch(path, options = {}) {
 
   const response = await fetch(url, {
     ...options,
+    credentials: 'include', // send/receive session cookies for auth
     headers: {
       'Accept': 'application/json',
       ...options.headers,
