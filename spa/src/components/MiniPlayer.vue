@@ -124,6 +124,16 @@
           >
             <i :class="isBookmarked ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
           </button>
+          <button
+            type="button"
+            class="now-playing-btn"
+            :class="{ disabled: !playerStore.currentTrack }"
+            :disabled="!playerStore.currentTrack"
+            title="Add to playlist"
+            @click="openAddToPlaylist"
+          >
+            <i class="fas fa-plus"></i>
+          </button>
           <div class="now-playing-queue-wrap">
             <button
               type="button"
@@ -209,6 +219,7 @@ import { useRouter } from 'vue-router'
 import { usePlayerStore } from '../stores/player'
 import { useBookmarks } from '../composables/useBookmarks'
 import { useHaptics } from '../composables/useNative'
+import { useAddToPlaylist } from '../composables/useAddToPlaylist'
 
 const router = useRouter()
 const playerStore = usePlayerStore()
@@ -239,6 +250,11 @@ function toggleBookmark() {
     bookmarks.toggle(playerStore.currentTrack)
     haptics.onBookmark?.()
   }
+}
+
+const addToPlaylist = useAddToPlaylist()
+function openAddToPlaylist() {
+  if (playerStore.currentTrack) addToPlaylist.open(playerStore.currentTrack)
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'https://app.ahoy.ooo'

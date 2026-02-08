@@ -1,10 +1,12 @@
 /**
- * Bookmark composable — persists to localStorage and emits a custom event
- * so the SavedView (and any other listener) can react in real time.
+ * Bookmark composable — localStorage + optional server sync when logged in.
+ * Syncs to Flask POST /api/bookmarks (add) and DELETE /api/bookmarks/:id (remove).
  */
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useAuth } from './useAuth'
+import { apiFetch } from './useApi'
 
-const STORAGE_KEY = 'ahoy.bookmarks.v1'
+const STORAGE_KEY = 'ahoy.bookmarks.v2'
 
 function readAll() {
   try {
@@ -20,7 +22,17 @@ function writeAll(data) {
   window.dispatchEvent(new CustomEvent('bookmarks:changed'))
 }
 
+/** Map SPA item type to API media_type (music, show, artist, clip) */
+function toMediaType(item) {
+  const t = (item.type || item._type || 'track').toLowerCase()
+  if (t === 'artist') return 'artist'
+  if (t === 'show' || t === 'video') return 'show'
+  if (t === 'podcast' || t === 'episode') return 'clip'
+  return 'music'
+}
+
 export function useBookmarks() {
+  const auth = useAuth()
   const bookmarks = ref(readAll())
 
   function refresh() {
@@ -32,13 +44,22 @@ export function useBookmarks() {
     return !!bookmarks.value[key]
   }
 
-  function toggle(item) {
+  async function toggle(item) {
     const key = item.id || item.slug
     const all = readAll()
-    if (all[key]) {
+    const existing = all[key]
+
+    if (existing) {
+      if (auth.isLoggedIn.value && existing.serverBookmarkId != null) {
+        try {
+          await apiFetch(`/api/bookmarks/${existing.serverBookmarkId}`, { method: 'DELETE' })
+        } catch {
+          // still remove locally
+        }
+      }
       delete all[key]
     } else {
-      all[key] = {
+      const payload = {
         id: item.id,
         slug: item.slug,
         title: item.title,
@@ -47,6 +68,22 @@ export function useBookmarks() {
         type: item.type || item._type || 'track',
         audio_url: item.audio_url || item.url || '',
       }
+      if (auth.isLoggedIn.value) {
+        try {
+          const res = await apiFetch('/api/bookmarks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              media_id: String(item.id ?? item.slug ?? ''),
+              media_type: toMediaType(item),
+            }),
+          })
+          if (res.id) payload.serverBookmarkId = res.id
+        } catch {
+          // save locally only
+        }
+      }
+      all[key] = payload
     }
     writeAll(all)
     bookmarks.value = all
@@ -55,12 +92,15 @@ export function useBookmarks() {
   function remove(item) {
     const key = item.id || item.slug
     const all = readAll()
+    const existing = all[key]
+    if (auth.isLoggedIn.value && existing?.serverBookmarkId != null) {
+      apiFetch(`/api/bookmarks/${existing.serverBookmarkId}`, { method: 'DELETE' }).catch(() => {})
+    }
     delete all[key]
     writeAll(all)
     bookmarks.value = all
   }
 
-  // Listen for changes from other components
   onMounted(() => {
     window.addEventListener('bookmarks:changed', refresh)
   })

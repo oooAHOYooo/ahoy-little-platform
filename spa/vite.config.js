@@ -15,6 +15,10 @@ export default defineConfig({
         target: 'https://app.ahoy.ooo',
         changeOrigin: true,
       },
+      '/payments': {
+        target: 'https://app.ahoy.ooo',
+        changeOrigin: true,
+      },
     },
   },
 })

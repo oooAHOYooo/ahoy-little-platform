@@ -1,6 +1,6 @@
 <template>
   <header class="app-header">
-    <!-- Mobile status bar (time + breadcrumb + search) -->
+    <!-- 1. Mobile status bar (Flask: mobile-status-bar mobile-only) -->
     <div class="mobile-status-bar mobile-only">
       <div class="status-bar-content">
         <div class="status-left">
@@ -8,15 +8,53 @@
           <span class="status-breadcrumb" :title="breadcrumbText">{{ breadcrumbText }}</span>
         </div>
         <div class="status-right">
-          <router-link to="/" class="status-action-btn" aria-label="Home" title="Home">
-            <i class="fas fa-compass"></i>
+          <router-link to="/search" class="status-action-btn" aria-label="Search" title="Search">
+            <i class="fas fa-search"></i>
           </router-link>
         </div>
       </div>
     </div>
 
-    <!-- Desktop navbar -->
-    <nav class="navbar desktop-nav desktop-only">
+    <!-- 2. Mobile top nav — 8 tabs (Flask: mobile-nav-root > mobile-top-nav mobile-only) -->
+    <div class="mobile-nav-root mobile-only">
+      <nav class="mobile-top-nav mobile-only" role="navigation" aria-label="Primary">
+        <router-link to="/music" class="mobile-tab" :class="{ active: route.path === '/music' }">
+          <i class="fas fa-music" aria-hidden="true"></i>
+          <span>Music</span>
+        </router-link>
+        <router-link to="/shows" class="mobile-tab" :class="{ active: route.path === '/shows' }">
+          <i class="fas fa-video" aria-hidden="true"></i>
+          <span>Videos</span>
+        </router-link>
+        <router-link to="/live-tv" class="mobile-tab" :class="{ active: route.path === '/live-tv' }">
+          <i class="fas fa-tv" aria-hidden="true"></i>
+          <span>Live TV</span>
+        </router-link>
+        <router-link to="/artists" class="mobile-tab" :class="{ active: route.path === '/artists' }">
+          <i class="fas fa-users" aria-hidden="true"></i>
+          <span>Artists</span>
+        </router-link>
+        <router-link to="/podcasts" class="mobile-tab" :class="{ active: route.path.startsWith('/podcasts') }">
+          <i class="fas fa-podcast" aria-hidden="true"></i>
+          <span>Podcasts</span>
+        </router-link>
+        <router-link to="/merch" class="mobile-tab" :class="{ active: route.path === '/merch' }">
+          <i class="fas fa-shopping-bag" aria-hidden="true"></i>
+          <span>Merch</span>
+        </router-link>
+        <router-link to="/radio" class="mobile-tab" :class="{ active: route.path === '/radio' }">
+          <i class="fas fa-broadcast-tower" aria-hidden="true"></i>
+          <span>Radio</span>
+        </router-link>
+        <router-link to="/my-saves" class="mobile-tab" :class="{ active: route.path === '/my-saves' }">
+          <i class="fas fa-bookmark" aria-hidden="true"></i>
+          <span>Saved</span>
+        </router-link>
+      </nav>
+    </div>
+
+    <!-- 3. Navbar (desktop: breadcrumbs + account; mobile: logo + breadcrumbs + Explore + account) -->
+    <nav class="navbar desktop-nav">
       <div class="nav-container ds-statusbar max-w-7xl mx-auto px-4">
         <div class="ds-statusbar__left">
           <div class="nav-history desktop-only" aria-label="History navigation">
@@ -38,10 +76,19 @@
           </nav>
         </div>
         <div class="ds-statusbar__right">
-          <span class="hidden-mobile account-username">{{ auth.isLoggedIn.value ? auth.username.value : 'guest' }}</span>
-          <router-link to="/login" class="hidden-mobile account-icon-btn" aria-label="Account" title="Account">
+          <span class="account-username desktop-only">{{ auth.isLoggedIn.value ? auth.username.value : 'guest' }}</span>
+          <router-link to="/account" class="account-icon-btn desktop-only" aria-label="Account" title="Account">
             <i class="fas fa-user-circle"></i>
           </router-link>
+          <!-- Mobile right: Explore + Account (Flask: mobile-only) -->
+          <div class="mobile-only" style="display:flex; gap:8px; align-items:center;">
+            <router-link to="/" class="nav-item" style="min-width:44px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#e5e7eb;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:13px;">
+              Explore
+            </router-link>
+            <router-link to="/account" class="ds-iconbtn ds-iconbtn--account nav-item" aria-label="Profile" title="Profile" style="min-width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:inherit;text-decoration:none;">
+              <i class="fas fa-user"></i>
+            </router-link>
+          </div>
         </div>
       </div>
     </nav>
@@ -80,6 +127,12 @@ const breadcrumbs = computed(() => {
     'my-saves': [{ label: 'Saved', href: '/my-saves' }, { label: 'Library', href: null }],
     login: [{ label: 'Profile', href: null }],
     'now-playing': [{ label: 'Now Playing', href: null }],
+    account: [{ label: 'Account', href: '/account' }, { label: 'Profile', href: null }],
+    settings: [{ label: 'Settings', href: '/settings' }, { label: 'Preferences', href: null }],
+    search: [{ label: 'Search', href: null }],
+    dashboard: [{ label: 'Dashboard', href: null }],
+    playlists: [{ label: 'Playlists', href: '/playlists' }, { label: 'Browse', href: null }],
+    'playlist-detail': [{ label: 'Playlists', href: '/playlists' }, { label: 'Playlist', href: null }],
   }
   const crumb = map[name]
   if (crumb) return crumb

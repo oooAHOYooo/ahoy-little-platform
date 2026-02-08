@@ -46,17 +46,21 @@
         <i class="fas fa-bookmark" aria-hidden="true"></i>
         <span>Saved</span>
       </router-link>
+      <router-link to="/playlists" class="app-sidebar-item" :class="{ active: route.path.startsWith('/playlists') }" data-icon="list">
+        <i class="fas fa-list-ul" aria-hidden="true"></i>
+        <span>Playlists</span>
+      </router-link>
     </nav>
 
     <div class="app-sidebar-divider"></div>
     <div class="app-sidebar-spacer"></div>
 
     <nav class="app-sidebar-nav app-sidebar-nav--secondary" aria-label="Account">
-      <router-link to="/login" class="app-sidebar-item" :class="{ active: route.path === '/login' }" data-icon="user">
+      <router-link to="/account" class="app-sidebar-item" :class="{ active: route.path === '/account' }" data-icon="user">
         <i class="fas fa-user" aria-hidden="true"></i>
         <span>{{ auth.isLoggedIn.value ? auth.username.value : 'Profile' }}</span>
       </router-link>
-      <router-link to="/login" class="app-sidebar-item" data-icon="cog">
+      <router-link to="/settings" class="app-sidebar-item" :class="{ active: route.path === '/settings' }" data-icon="cog">
         <i class="fas fa-cog" aria-hidden="true"></i>
         <span>Settings</span>
       </router-link>

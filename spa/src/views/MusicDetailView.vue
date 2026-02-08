@@ -23,6 +23,10 @@
             <i :class="bookmarks.isBookmarked(track) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
             {{ bookmarks.isBookmarked(track) ? 'Saved' : 'Save' }}
           </button>
+          <button class="podcast-cta secondary" @click="openAddToPlaylist(track)">
+            <i class="fas fa-plus"></i>
+            Add to playlist
+          </button>
           <button class="podcast-cta secondary" @click="onShareTrack">
             <i class="fas fa-share-alt"></i>
             Share
@@ -50,6 +54,9 @@
             <div class="episode-show">{{ t.artist }}</div>
           </div>
           <div class="episode-actions">
+            <button class="episode-btn" title="Add to playlist" @click.stop="openAddToPlaylist(t)">
+              <i class="fas fa-plus"></i>
+            </button>
             <button class="episode-btn" @click.stop="playRelated(idx)">
               <i :class="playerStore.currentTrack?.id === t.id && playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
             </button>
@@ -79,12 +86,17 @@ import { apiFetchCached } from '../composables/useApi'
 import { useBookmarks } from '../composables/useBookmarks'
 import { usePlayerStore } from '../stores/player'
 import { useShare, useHaptics } from '../composables/useNative'
+import { useAddToPlaylist } from '../composables/useAddToPlaylist'
 
 const route = useRoute()
 const playerStore = usePlayerStore()
 const bookmarks = useBookmarks()
 const { shareTrack } = useShare()
 const haptics = useHaptics()
+const addToPlaylist = useAddToPlaylist()
+function openAddToPlaylist(t) {
+  addToPlaylist.open(t)
+}
 
 const track = ref(null)
 const allTracks = ref([])

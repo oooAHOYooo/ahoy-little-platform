@@ -2,6 +2,8 @@
   <div class="app">
     <!-- Toast notifications -->
     <Toast ref="toastRef" />
+    <!-- Add to playlist modal (global) -->
+    <AddToPlaylistModal />
 
     <!-- Offline banner (matches base.html) -->
     <Transition name="slide-down">
@@ -12,13 +14,13 @@
       </div>
     </Transition>
 
-    <!-- Top bar: mobile status bar + desktop navbar (breadcrumbs, account) -->
+    <!-- Top bar: mobile status bar + mobile-top-nav (8 tabs) + navbar (Flask layout order) -->
     <AppNavbar />
 
-    <!-- Mini player (always visible like Flask; hidden on full Now Playing page) -->
-    <MiniPlayer v-if="route.name !== 'now-playing'" />
+    <!-- Mobile footer logo + secondary nav (5 tabs) + bottom nav (6 tabs) — same class names as base.html -->
+    <NavBar v-if="route.name !== 'now-playing'" />
 
-    <!-- Main content: same structure as base.html (app-shell + left sidebar + app-main) -->
+    <!-- Main content: app-shell + left sidebar + app-main (Flask: main.main-content) -->
     <main class="main-content">
       <div class="app-shell">
         <AppSidebar />
@@ -36,8 +38,8 @@
       </div>
     </main>
 
-    <!-- Bottom navigation — mobile only (desktop uses left sidebar) -->
-    <NavBar v-if="route.name !== 'now-playing'" />
+    <!-- Mini player (always visible like Flask; hidden on full Now Playing page) -->
+    <MiniPlayer v-if="route.name !== 'now-playing'" />
   </div>
 </template>
 
@@ -52,6 +54,7 @@ import AppSidebar from './components/AppSidebar.vue'
 import NavBar from './components/NavBar.vue'
 import MiniPlayer from './components/MiniPlayer.vue'
 import Toast from './components/Toast.vue'
+import AddToPlaylistModal from './components/AddToPlaylistModal.vue'
 
 const playerStore = usePlayerStore()
 const route = useRoute()

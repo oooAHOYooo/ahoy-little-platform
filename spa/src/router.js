@@ -7,6 +7,16 @@ const routes = [
     component: () => import('./views/HomeView.vue'),
   },
   {
+    path: '/search',
+    name: 'search',
+    component: () => import('./views/SearchView.vue'),
+  },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: () => import('./views/DashboardView.vue'),
+  },
+  {
     path: '/music',
     name: 'music',
     component: () => import('./views/MusicView.vue'),
@@ -77,6 +87,16 @@ const routes = [
     component: () => import('./views/SavedView.vue'),
   },
   {
+    path: '/playlists',
+    name: 'playlists',
+    component: () => import('./views/PlaylistsView.vue'),
+  },
+  {
+    path: '/playlists/:id',
+    name: 'playlist-detail',
+    component: () => import('./views/PlaylistDetailView.vue'),
+  },
+  {
     path: '/now-playing',
     name: 'now-playing',
     component: () => import('./views/NowPlayingView.vue'),
@@ -85,6 +105,16 @@ const routes = [
     path: '/login',
     name: 'login',
     component: () => import('./views/LoginView.vue'),
+  },
+  {
+    path: '/account',
+    name: 'account',
+    component: () => import('./views/AccountView.vue'),
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('./views/SettingsView.vue'),
   },
   // Catch-all
   {
