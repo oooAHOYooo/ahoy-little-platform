@@ -17,6 +17,11 @@ const routes = [
     component: () => import('./views/ShowsView.vue'),
   },
   {
+    path: '/live-tv',
+    name: 'live-tv',
+    component: () => import('./views/LiveTVView.vue'),
+  },
+  {
     path: '/podcasts',
     name: 'podcasts',
     component: () => import('./views/PodcastsView.vue'),
@@ -35,6 +40,16 @@ const routes = [
     path: '/merch',
     name: 'merch',
     component: () => import('./views/MerchView.vue'),
+  },
+  {
+    path: '/radio',
+    name: 'radio',
+    component: () => import('./views/RadioView.vue'),
+  },
+  {
+    path: '/my-saves',
+    name: 'my-saves',
+    component: () => import('./views/SavedView.vue'),
   },
   // Catch-all
   {

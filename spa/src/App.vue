@@ -10,7 +10,7 @@
     <MiniPlayer v-if="playerStore.currentTrack" />
 
     <!-- Main content area -->
-    <main class="main-content" :class="{ 'has-player': playerStore.currentTrack }">
+    <main class="spa-main" :class="{ 'has-player': playerStore.currentTrack }">
       <router-view v-slot="{ Component }">
         <keep-alive :include="['HomeView', 'MusicView', 'ShowsView']">
           <component :is="Component" />

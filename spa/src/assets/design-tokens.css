@@ -1,0 +1,52 @@
+/**
+ * Design Tokens - Dark Liquid Glass Aesthetic
+ * Central design system tokens for Ahoy Indie Media
+ */
+
+:root {
+  /* Core dark glass palette */
+  --glass-bg: rgba(12, 14, 18, 0.55);
+  --glass-bg-strong: rgba(12, 14, 18, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  /* Accent colors */
+  --accent-primary: #6ddcff;
+  --accent-secondary: #9b8cff;
+
+  /* Glow effects */
+  --glow-primary: rgba(109, 220, 255, 0.35);
+  --glow-secondary: rgba(155, 140, 255, 0.25);
+
+  /* Text colors */
+  --text-primary: rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(255, 255, 255, 0.65);
+
+  /* Blur values */
+  --blur-strong: 24px;
+  --blur-soft: 14px;
+
+  /* Border radius */
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 16px;
+
+  /* Shadows */
+  --shadow-glass:
+    0 20px 60px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  /* Transitions */
+  --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 0.3s var(--transition-smooth);
+  --transition-normal: 0.6s var(--transition-smooth);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  :root {
+    --blur-strong: 18px;
+    --blur-soft: 12px;
+    --radius-xl: 24px;
+    --radius-lg: 18px;
+  }
+}

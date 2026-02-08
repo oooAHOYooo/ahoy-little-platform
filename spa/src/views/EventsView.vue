@@ -1,23 +1,37 @@
 <template>
-  <div>
-    <div class="page-header">
-      <h1>Events</h1>
+  <div class="events-page">
+    <div class="unified-header events-subheader">
+      <div class="header-content">
+        <h1>Events</h1>
+      </div>
     </div>
 
-    <div class="content-grid" v-if="events.length">
-      <div class="card" v-for="event in events" :key="event.id">
-        <img :src="event.image || '/static/img/default-cover.jpg'" :alt="event.title" class="card-image" loading="lazy" />
-        <div class="card-body">
-          <div class="card-title">{{ event.title }}</div>
-          <div class="card-subtitle">{{ event.date }} &middot; {{ event.venue }}</div>
+    <div class="podcasts-section" v-if="events.length">
+      <h2 class="section-title">Upcoming Events</h2>
+      <div class="episode-list">
+        <div class="episode-row" v-for="event in events" :key="event.id">
+          <div class="episode-art">
+            <img :src="event.image || '/static/img/default-cover.jpg'" :alt="event.title" loading="lazy" />
+          </div>
+          <div class="episode-meta">
+            <div class="episode-title">{{ event.title }}</div>
+            <div class="episode-show">{{ event.date }} &middot; {{ event.venue }}</div>
+            <div class="episode-desc" v-if="event.description">{{ event.description }}</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="content-grid" v-else>
-      <div class="card" v-for="i in 4" :key="i">
-        <div class="card-image skeleton"></div>
-        <div class="card-body"><div class="skeleton" style="height:14px;width:80%"></div></div>
+    <!-- Loading skeletons -->
+    <div class="podcasts-section" v-else>
+      <div class="episode-list">
+        <div class="episode-row" v-for="i in 4" :key="i">
+          <div class="episode-art skeleton" style="width:80px;height:80px"></div>
+          <div class="episode-meta">
+            <div class="skeleton" style="height:14px;width:60%;margin-bottom:6px"></div>
+            <div class="skeleton" style="height:12px;width:40%"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
