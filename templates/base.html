@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260207a' %}
+        {% set css_version = 'v20260207b' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -465,29 +465,36 @@
         {% set show_dashboard_sidebars = show_dashboard_sidebars|default(false)
         %}
 
-        <!-- NUCLEAR SCROLL FIX + FRESH CACHE: clear SW + caches on every load -->
+        <!-- Offline banner (inline styles so it renders even without cached CSS) -->
+        <div id="offline-banner" style="display:none; position:fixed; top:0; left:0; right:0; z-index:99999;
+            background:#ff6b35; color:#fff; text-align:center; padding:6px 12px; font-size:13px; font-family:system-ui,sans-serif;">
+            You're offline &mdash; showing saved content
+            <button onclick="this.parentElement.style.display='none'" style="background:none; border:none; color:#fff; margin-left:12px; font-size:16px; cursor:pointer;">&times;</button>
+        </div>
+
         <script>
+        // Offline banner: show/hide based on connectivity
         (function() {
-            // Unregister ALL service workers first (so they stop intercepting)
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for (var i = 0; i < registrations.length; i++) {
-                        registrations[i].unregister();
-                    }
-                });
+            function updateOnlineStatus() {
+                var banner = document.getElementById('offline-banner');
+                if (!banner) return;
+                banner.style.display = navigator.onLine ? 'none' : 'flex';
             }
-            // Clear ALL Cache API caches (SW caches, etc.)
-            if ('caches' in window) {
-                caches.keys().then(function(names) {
-                    for (var i = 0; i < names.length; i++) {
-                        caches.delete(names[i]);
-                    }
-                });
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', updateOnlineStatus);
+            } else {
+                updateOnlineStatus();
             }
         })();
 
-        // Hard refresh function - clears all caches
+        // Hard refresh function - clears all caches (escape hatch)
         function hardRefresh() {
+            // Tell SW to clear its caches
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({type: 'CLEAR_CACHES'});
+            }
             if ('caches' in window) {
                 caches.keys().then(function(names) {
                     for (let name of names) caches.delete(name);
@@ -4583,21 +4590,21 @@
 
         {% block extra_scripts %}{% endblock %}
 
-        <!-- Service Worker Registration - DISABLED FOR NOW TO FIX CACHE ISSUES -->
+        <!-- Service Worker Registration (v10 - network-first HTML, cache-first versioned assets) -->
         <script>
-        // DISABLED: Service worker was caching old CSS and breaking scroll
-        // if ('serviceWorker' in navigator) {
-        //     window.addEventListener('load', () => {
-        //         navigator.serviceWorker.register('/static/service-worker.js')
-        //             .then((registration) => {
-        //                 console.log('Service Worker registered successfully:', registration.scope);
-        //             })
-        //             .catch((error) => {
-        //                 console.log('Service Worker registration failed:', error);
-        //             });
-        //     });
-        // }
-        console.log('Service Worker registration disabled - clearing old caches');
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/static/service-worker.js', {scope: '/'})
+                    .then(function(registration) {
+                        console.log('SW registered, scope:', registration.scope);
+                        // Check for updates every 30 minutes
+                        setInterval(function() { registration.update(); }, 30 * 60 * 1000);
+                    })
+                    .catch(function(error) {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
     </script>
         <script>
         // Initialize NProgress with enhanced configuration (guarded: CDN may be blocked)

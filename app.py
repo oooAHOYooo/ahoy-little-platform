@@ -844,6 +844,11 @@ def create_app():
         except Exception:
             return jsonify({'error': 'File not found'}), 404
 
+    @app.route('/offline')
+    def offline():
+        """Offline fallback page served by service worker when network is unavailable."""
+        return render_template('offline.html')
+
     @app.route('/refresh')
     def refresh():
         """Escape hatch: clear SW + caches and redirect to /. Use when app won't update or scroll on mobile."""

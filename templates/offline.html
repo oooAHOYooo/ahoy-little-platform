@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Ahoy Indie Media</title>
+    <style>
+        body { background: #111; color: #fff; font-family: system-ui, -apple-system, sans-serif;
+               display: flex; align-items: center; justify-content: center;
+               min-height: 100vh; margin: 0; text-align: center; }
+        .container { max-width: 400px; padding: 2rem; }
+        .logo { width: 80px; height: 80px; margin-bottom: 1.5rem; border-radius: 16px; }
+        h1 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+        p { color: #aaa; line-height: 1.6; font-size: 0.95rem; }
+        button { background: #ff6b35; color: #fff; border: none; padding: 12px 28px;
+                 border-radius: 8px; font-size: 1rem; cursor: pointer; margin-top: 1rem;
+                 font-weight: 600; }
+        button:active { opacity: 0.8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="/static/img/ahoy_logo.png" alt="Ahoy" class="logo" onerror="this.style.display='none'">
+        <h1>You're Offline</h1>
+        <p>Connect to the internet to browse new content. Pages you've visited before will load from cache.</p>
+        <button onclick="window.location.reload()">Try Again</button>
+    </div>
+</body>
+</html>
