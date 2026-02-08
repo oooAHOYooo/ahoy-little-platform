@@ -68,7 +68,20 @@
       "Bash(git -C /Users/agworkywork/ahoy-little-platform commit -m \"$\\(cat <<''EOF''\nImprove login UX, clean up my-saves, fix account stats\n\n- Auto-fill last-used identifier on login for returning users\n- Inline forgot-password panel in login card \\(no page navigation\\)\n- Auto-redirect to /auth after successful password reset\n- Inject window.userProfile server-side for logged-in users\n- Remove \"Explorer\"/\"Discovering new sounds\" from my-saves\n- Dynamic title \\(\"My Collection\"\\) when 3+ bookmarks saved\n- Show @username with link to /account on my-saves profile\n- Account stats now use client-side bookmarks as source of truth\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git status:*)",
       "Bash(git check-ignore:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(for f in music shows artists podcasts)",
+      "Bash(do test -f \"/Users/agworkywork/ahoy-little-platform/static/data/$f.json\")",
+      "Bash(done)",
+      "Bash(alembic upgrade:*)",
+      "Bash(git -C /Users/agworkywork/ahoy-little-platform commit -m \"$\\(cat <<''EOF''\nMigrate videos + what''s new to DB; archive legacy JSON files\n\nContent that was previously served only from static JSON files is now\ndynamic via PostgreSQL on Render, so new videos and platform updates\nno longer require a code deploy or app store update.\n\n**Videos \\(videos.json → content_videos table\\):**\n- New model `ContentVideo` with all fields from videos.json\n- DB query `get_all_videos\\(\\)` with 600s TTL cache\n- `/events` route now tries DB first, falls back to JSON\n\n**What''s New \\(whats_new.json → content_whats_new table\\):**\n- New model `WhatsNewItem` storing year/month/section/items\n- DB query `get_all_whats_new\\(\\)` reconstructs the nested structure\n- All 4 whats-new routes \\(`/api/whats-new`, `/whats-new`,\n  `/whats-new/<year>/<month>`, `/whats-new/<year>/<month>/<section>`\\)\n  now try DB first, fall back to JSON\n\n**Migration & deploy:**\n- Alembic migration 0024 creates both tables\n- Import script `scripts/import_videos_whats_new.py` \\(idempotent upsert\\)\n- Added to `scripts/migrate_and_start.sh` for auto-import on deploy\n\n**Legacy cleanup:**\n- Moved dead JSON files to `archive/legacy-json/`:\n  `users_auth.json`, `collections.json`, `newsletter.json`\n- Copied `videos.json` and `whats_new.json` to archive for reference\n  \\(originals stay in place as fallbacks\\)\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /Users/agworkywork/ahoy-little-platform checkout -b spa-v2)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(git checkout:*)",
+      "WebSearch",
+      "WebFetch(domain:capacitorjs.com)",
+      "WebFetch(domain:capawesome.io)",
+      "Bash(exit)"
     ]
   }
 }

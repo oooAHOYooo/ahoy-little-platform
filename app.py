@@ -2761,6 +2761,36 @@ def api_featured_artists():
         resp.headers["ETag"] = etag
     return resp
 
+@app.route('/api/podcasts')
+@limiter.exempt
+def api_podcasts():
+    """Get all podcast shows with episodes"""
+    try:
+        data = get_all_podcasts(ttl=600)
+        if data.get('shows'):
+            resp = jsonify(data)
+            resp.headers['Cache-Control'] = 'public, max-age=600'
+            resp.headers['Vary'] = 'Accept-Encoding'
+            return resp
+    except Exception:
+        logging.getLogger(__name__).exception('DB podcasts query failed, falling back to JSON')
+    return _cached_json_response("podcastCollection.json", {"shows": []}, max_age_seconds=600)
+
+@app.route('/api/events')
+@limiter.exempt
+def api_events():
+    """Get all events"""
+    try:
+        data = get_all_events(ttl=600)
+        if data.get('events'):
+            resp = jsonify(data)
+            resp.headers['Cache-Control'] = 'public, max-age=600'
+            resp.headers['Vary'] = 'Accept-Encoding'
+            return resp
+    except Exception:
+        logging.getLogger(__name__).exception('DB events query failed, falling back to JSON')
+    return _cached_json_response("events.json", {"events": []}, max_age_seconds=600)
+
 @app.route('/api/whats-new')
 @limiter.exempt
 def api_whats_new():
