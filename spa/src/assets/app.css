@@ -12,16 +12,30 @@
 
 /* ── SPA Shell Overrides ───────────────────────────────────────────── */
 
-/* Desktop: match base.html app-shell + left sidebar (no top bar in SPA) */
+/* Desktop: match base.html app-shell + left sidebar + top navbar */
+.app {
+  --ds-topbar-height: 44px;
+}
+.app .app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(12, 12, 14, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
 .app .main-content {
+  padding-top: var(--ds-topbar-height);
   min-height: 100vh;
 }
 .app .app-shell {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--ds-topbar-height));
 }
 .app .app-sidebar {
-  top: 0;
-  height: 100vh;
+  top: var(--ds-topbar-height);
+  height: calc(100vh - var(--ds-topbar-height));
 }
 
 /* Offline banner */

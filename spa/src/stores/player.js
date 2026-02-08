@@ -9,6 +9,8 @@ export const usePlayerStore = defineStore('player', () => {
   const currentTime = ref(0)
   const duration = ref(0)
   const loading = ref(false)
+  const shuffle = ref(false)
+  const repeat = ref(false) // false = off, true = repeat all (queue)
 
   // Audio element (singleton)
   let audio = null
@@ -149,23 +151,42 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
   function next() {
-    if (!queue.value.length || !currentTrack.value) return
-    const idx = queue.value.findIndex(t => t.id === currentTrack.value.id)
-    const nextIdx = (idx + 1) % queue.value.length
-    play(queue.value[nextIdx])
+    if (!currentTrack.value) return
+    if (!queue.value.length) return
+    const idx = queue.value.findIndex(t => (t.id === currentTrack.value.id) || (t.id === currentTrack.value.slug))
+    if (idx < 0) {
+      play(queue.value[0])
+      return
+    }
+    if (shuffle.value) {
+      const others = queue.value.filter((_, i) => i !== idx)
+      const randomIdx = Math.floor(Math.random() * (others.length || 1))
+      play(others[randomIdx] || queue.value[(idx + 1) % queue.value.length])
+    } else {
+      const nextIdx = (idx + 1) % queue.value.length
+      if (repeat.value && nextIdx === 0) play(queue.value[0])
+      else play(queue.value[nextIdx])
+    }
   }
 
   function previous() {
     if (!queue.value.length || !currentTrack.value) return
     const a = getAudio()
-    // If more than 3 seconds in, restart current track
     if (a.currentTime > 3) {
       a.currentTime = 0
       return
     }
-    const idx = queue.value.findIndex(t => t.id === currentTrack.value.id)
+    const idx = queue.value.findIndex(t => (t.id === currentTrack.value.id) || (t.id === currentTrack.value.slug))
     const prevIdx = idx > 0 ? idx - 1 : queue.value.length - 1
     play(queue.value[prevIdx])
+  }
+
+  function clearQueue() {
+    queue.value = []
+  }
+
+  function removeFromQueue(index) {
+    queue.value = queue.value.filter((_, i) => i !== index)
   }
 
   // Persist last played track to localStorage for session resume
@@ -213,6 +234,8 @@ export const usePlayerStore = defineStore('player', () => {
     duration,
     progress,
     hasQueue,
+    shuffle,
+    repeat,
     play,
     pause,
     togglePlay,
@@ -220,6 +243,8 @@ export const usePlayerStore = defineStore('player', () => {
     setQueue,
     next,
     previous,
+    clearQueue,
+    removeFromQueue,
     restoreLastPlayed,
     getAudioElement,
   }

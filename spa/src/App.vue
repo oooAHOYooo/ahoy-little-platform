@@ -12,15 +12,18 @@
       </div>
     </Transition>
 
-    <!-- Mini player (persistent across pages, hidden on Now Playing) -->
-    <MiniPlayer v-if="playerStore.currentTrack && route.name !== 'now-playing'" />
+    <!-- Top bar: mobile status bar + desktop navbar (breadcrumbs, account) -->
+    <AppNavbar />
+
+    <!-- Mini player (always visible like Flask; hidden on full Now Playing page) -->
+    <MiniPlayer v-if="route.name !== 'now-playing'" />
 
     <!-- Main content: same structure as base.html (app-shell + left sidebar + app-main) -->
     <main class="main-content">
       <div class="app-shell">
         <AppSidebar />
         <div class="app-main">
-          <div class="content-area content-pad-bottom app-content spa-main" :class="{ 'has-player': playerStore.currentTrack && route.name !== 'now-playing' }">
+          <div class="content-area content-pad-bottom app-content spa-main" :class="{ 'has-player': route.name !== 'now-playing' }">
             <router-view v-slot="{ Component, route: viewRoute }">
               <Transition :name="transitionName" mode="out-in">
                 <keep-alive :include="['HomeView', 'MusicView', 'ShowsView', 'ArtistsView', 'PodcastsView']">
@@ -44,6 +47,7 @@ import { useRoute } from 'vue-router'
 import { usePlayerStore } from './stores/player'
 import { useWakeLock } from './composables/useNative'
 import { restoreSession } from './composables/useAuth'
+import AppNavbar from './components/AppNavbar.vue'
 import AppSidebar from './components/AppSidebar.vue'
 import NavBar from './components/NavBar.vue'
 import MiniPlayer from './components/MiniPlayer.vue'
@@ -74,7 +78,12 @@ watch(() => playerStore.isPlaying, async (playing) => {
   }
 })
 
-// Re-acquire wake lock if tab returns to foreground while playing
+// Body class for Flask-style padding when mini player bar is visible
+watch(() => route.name, (name) => {
+  if (name === 'now-playing') document.body.classList.remove('has-player')
+  else document.body.classList.add('has-player')
+}, { immediate: true })
+
 onMounted(() => {
   restoreSession()
   window.addEventListener('online', onOnline)
@@ -83,6 +92,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  document.body.classList.remove('has-player')
   window.removeEventListener('online', onOnline)
   window.removeEventListener('offline', onOffline)
 })
