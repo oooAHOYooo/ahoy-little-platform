@@ -38,6 +38,22 @@
   height: calc(100vh - var(--ds-topbar-height));
 }
 
+/* Mobile: account for status bar + mobile-top-nav + navbar + safe area (match Flask combined.css) */
+@media (max-width: 768px) {
+  .app {
+    --ds-topbar-height: calc(32px + 48px + 44px + env(safe-area-inset-top));
+  }
+  .app .main-content {
+    padding-top: var(--ds-topbar-height);
+  }
+
+  /* Now-playing bar rests right above the dock (compact footer) on mobile */
+  .now-playing-wrapper,
+  .now-playing-sticky {
+    bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+  }
+}
+
 /* Offline banner */
 .offline-banner {
   position: fixed;
@@ -485,4 +501,37 @@
 @keyframes skeleton-shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* ── Grid items: typography & line spacing (Flask source of truth) ── */
+.track-card .track-info,
+.show-card .show-info,
+.artist-card .artist-info {
+  padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem);
+}
+.track-card .track-info h3,
+.track-card .track-info h4,
+.show-card .show-info h3,
+.show-card .show-info h4,
+.artist-card .artist-info h3,
+.artist-card .artist-info h4 {
+  margin: 0 0 var(--spacing-1, 0.25rem) 0;
+  font-size: var(--font-size-base, 0.9rem);
+  font-weight: 600;
+  line-height: 1.25;
+}
+.track-card .track-info p,
+.show-card .show-info p,
+.artist-card .artist-info p {
+  margin: 0;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+  line-height: 1.35;
+}
+.artist-card .artist-info .artist-name,
+.artist-card .artist-info h4 {
+  font-size: var(--font-size-base, 0.9rem);
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0;
 }

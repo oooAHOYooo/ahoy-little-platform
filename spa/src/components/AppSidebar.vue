@@ -46,10 +46,6 @@
         <i class="fas fa-bookmark" aria-hidden="true"></i>
         <span>Saved</span>
       </router-link>
-      <router-link to="/playlists" class="app-sidebar-item" :class="{ active: route.path.startsWith('/playlists') }" data-icon="list">
-        <i class="fas fa-list-ul" aria-hidden="true"></i>
-        <span>Playlists</span>
-      </router-link>
     </nav>
 
     <div class="app-sidebar-divider"></div>

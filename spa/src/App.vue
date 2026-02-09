@@ -15,7 +15,9 @@
     </Transition>
 
     <!-- Top bar: mobile status bar + mobile-top-nav (8 tabs) + navbar (Flask layout order) -->
-    <AppNavbar />
+    <AppNavbar :mobile-menu-open="mobileMenuOpen" @toggle-mobile-menu="mobileMenuOpen = !mobileMenuOpen" />
+    <!-- Mobile hamburger menu (offcanvas drawer, same as Flask _nav_main.html) -->
+    <MobileMenuDrawer :open="mobileMenuOpen" @close="mobileMenuOpen = false" />
 
     <!-- Mobile footer logo + secondary nav (5 tabs) + bottom nav (6 tabs) — same class names as base.html -->
     <NavBar v-if="route.name !== 'now-playing'" />
@@ -38,8 +40,14 @@
       </div>
     </main>
 
+    <!-- Footer (same structure as Flask base.html app-footer) -->
+    <AppFooter />
+
     <!-- Mini player (always visible like Flask; hidden on full Now Playing page) -->
     <MiniPlayer v-if="route.name !== 'now-playing'" />
+
+    <!-- Compact fixed footer (time, ticker, quicklinks — same as Flask base.html) -->
+    <CompactFooter />
   </div>
 </template>
 
@@ -55,8 +63,12 @@ import NavBar from './components/NavBar.vue'
 import MiniPlayer from './components/MiniPlayer.vue'
 import Toast from './components/Toast.vue'
 import AddToPlaylistModal from './components/AddToPlaylistModal.vue'
+import AppFooter from './components/AppFooter.vue'
+import CompactFooter from './components/CompactFooter.vue'
+import MobileMenuDrawer from './components/MobileMenuDrawer.vue'
 
 const playerStore = usePlayerStore()
+const mobileMenuOpen = ref(false)
 const route = useRoute()
 const wakeLock = useWakeLock()
 

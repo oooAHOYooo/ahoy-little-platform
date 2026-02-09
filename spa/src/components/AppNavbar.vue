@@ -53,9 +53,25 @@
       </nav>
     </div>
 
-    <!-- 3. Navbar (desktop: breadcrumbs + account; mobile: logo + breadcrumbs + Explore + account) -->
+    <!-- 3. Navbar (desktop: breadcrumbs + account; mobile: logo + hamburger + breadcrumbs + Explore + account) -->
     <nav class="navbar desktop-nav">
       <div class="nav-container ds-statusbar max-w-7xl mx-auto px-4">
+        <!-- Mobile logo (Flask: nav-logo mobile-only) -->
+        <div class="nav-logo mobile-only" style="display: flex;">
+          <router-link to="/" aria-label="Ahoy Home">
+            <img :src="logoUrl" alt="Ahoy Indie Media" />
+          </router-link>
+        </div>
+        <!-- Mobile hamburger (opens offcanvas drawer) -->
+        <button
+          type="button"
+          class="mobile-hamburger mobile-only"
+          title="Menu"
+          aria-label="Open Menu"
+          @click="$emit('toggle-mobile-menu')"
+        >
+          <i class="fas fa-bars"></i>
+        </button>
         <div class="ds-statusbar__left">
           <div class="nav-history desktop-only" aria-label="History navigation">
             <button type="button" class="nav-history-btn" title="Back" aria-label="Back" @click="goBack">
@@ -100,9 +116,15 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 
+defineProps({
+  mobileMenuOpen: { type: Boolean, default: false },
+})
+defineEmits(['toggle-mobile-menu'])
+
 const route = useRoute()
 const auth = useAuth()
 
+const logoUrl = '/static/img/ahoy_logo.png'
 const statusTime = ref('')
 
 const breadcrumbs = computed(() => {
