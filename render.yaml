@@ -7,6 +7,8 @@ services:
     env: python
     plan: free
     # Builds Python deps + Vue SPA (spa-dist) so web serves one UI. Requires Node on Render.
+    # Routing: Flask app serves SPA index.html for most paths; /checkout, /success, /payments/*,
+    # /api/*, etc. stay as Flask routes (Stripe, wallet, checkout). See app.py _maybe_serve_spa + spa_fallback.
     buildCommand: ./scripts/build_with_spa.sh
     startCommand: ./scripts/migrate_and_start.sh
     healthCheckPath: /ops/selftest
