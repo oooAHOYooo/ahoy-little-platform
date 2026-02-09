@@ -33,6 +33,8 @@ build/
 # Flask / runtime data
 instance/
 flask_session/
+local.db
+db_backup/
 
 # Env files (keep .env.example tracked)
 .env
@@ -77,3 +79,12 @@ start_browser.sh
 
 # Local data snapshots (ignore by default)
 data/*.json
+
+# Not for production / app store (dev-only, secrets, local builds)
+.env.local
+.claude/settings.local.json
+packaging/*.env
+android/keystore/
+ios/ExportOptions.local.plist
+*.mobileprovision
+*.p12
