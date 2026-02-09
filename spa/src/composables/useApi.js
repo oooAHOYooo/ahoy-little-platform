@@ -1,11 +1,12 @@
 /**
  * API client for the Ahoy backend.
  *
- * In dev mode, Vite proxies /api/* to https://app.ahoy.ooo.
- * In production (Capacitor), the app makes requests directly to the API_BASE.
+ * - Dev: Vite proxies /api/* to VITE_API_BASE (default https://app.ahoy.ooo).
+ * - Production (web): same origin or VITE_API_BASE. Set VITE_API_BASE="" for same-origin.
+ * - Production (Capacitor): VITE_API_BASE or default https://app.ahoy.ooo.
  */
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'https://app.ahoy.ooo'
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://app.ahoy.ooo'
 
 /**
  * Fetch JSON from an API endpoint with caching support.
@@ -14,9 +15,8 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'https://app.ahoy.ooo'
  * @returns {Promise<any>} parsed JSON
  */
 export async function apiFetch(path, options = {}) {
-  // In dev, use relative path (Vite proxy handles it)
-  // In production, use full URL
-  const url = import.meta.env.DEV ? path : `${API_BASE}${path}`
+  const base = (API_BASE === '' || API_BASE === undefined) ? '' : API_BASE.replace(/\/$/, '')
+  const url = import.meta.env.DEV ? path : `${base}${path}`
 
   const response = await fetch(url, {
     ...options,

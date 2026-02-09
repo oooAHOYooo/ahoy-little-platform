@@ -58,7 +58,7 @@ export function useAuth() {
       const data = await apiFetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier: email, password }),
       })
       if (data.success && data.user) {
         user.value = data.user

@@ -1,7 +1,8 @@
 <template>
-  <div class="music-container" v-if="track">
-    <!-- Hero -->
-    <section class="podcast-show-hero">
+  <div class="music-detail-view">
+    <div class="music-container" v-if="track">
+      <!-- Hero -->
+      <section class="podcast-show-hero">
       <img
         class="podcast-show-hero-art"
         :src="track.cover_art || '/static/img/default-cover.jpg'"
@@ -64,18 +65,19 @@
         </article>
       </div>
     </section>
-  </div>
+    </div>
 
-  <!-- Loading -->
-  <div class="music-container" v-else>
-    <section class="podcast-show-hero">
-      <div class="podcast-show-hero-art skeleton" style="aspect-ratio:1;width:100%"></div>
-      <div class="podcast-show-hero-meta">
-        <div class="skeleton" style="height:14px;width:40%;margin-bottom:8px"></div>
-        <div class="skeleton" style="height:24px;width:70%;margin-bottom:8px"></div>
-        <div class="skeleton" style="height:14px;width:50%"></div>
-      </div>
-    </section>
+    <!-- Loading -->
+    <div class="music-container" v-else>
+      <section class="podcast-show-hero">
+        <div class="podcast-show-hero-art skeleton" style="aspect-ratio:1;width:100%"></div>
+        <div class="podcast-show-hero-meta">
+          <div class="skeleton" style="height:14px;width:40%;margin-bottom:8px"></div>
+          <div class="skeleton" style="height:24px;width:70%;margin-bottom:8px"></div>
+          <div class="skeleton" style="height:14px;width:50%"></div>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 

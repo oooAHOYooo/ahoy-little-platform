@@ -18,13 +18,21 @@
           <input id="username" v-model="username" type="text" placeholder="your name" autocomplete="username" />
         </div>
         <div class="auth-field">
-          <label for="email">Email</label>
-          <input id="email" v-model="email" type="email" placeholder="you@example.com" autocomplete="email" required />
+          <label for="email">{{ mode === 'login' ? 'Email or username' : 'Email' }}</label>
+          <input
+            id="email"
+            v-model="email"
+            :type="mode === 'login' ? 'text' : 'email'"
+            :placeholder="mode === 'login' ? 'e.g. alexadmin' : 'you@example.com'"
+            :autocomplete="mode === 'login' ? 'username' : 'email'"
+            required
+          />
         </div>
         <div class="auth-field">
           <label for="password">Password</label>
-          <input id="password" v-model="password" type="password" placeholder="••••••••" autocomplete="current-password" required />
+          <input id="password" v-model="password" type="password" :placeholder="mode === 'login' ? 'e.g. alexadmin' : '••••••••'" autocomplete="current-password" required />
         </div>
+        <p v-if="mode === 'login'" class="auth-hint">Test account: alexadmin / alexadmin</p>
 
         <div class="auth-error" v-if="auth.error.value">{{ auth.error.value }}</div>
 
@@ -149,6 +157,12 @@ async function onSubmit() {
   border-color: var(--accent-primary, #6ddcff);
 }
 .auth-field input::placeholder { color: rgba(255,255,255,0.25); }
+.auth-hint {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  text-align: center;
+  margin: -4px 0 0;
+}
 .auth-error {
   color: #f87171;
   font-size: 13px;

@@ -347,9 +347,10 @@ def logout():
 
 
 @bp.get("/me")
-@login_required
 def me():
-    """Get current user info"""
+    """Get current user info. Returns 401 when not authenticated (no redirect)."""
+    if not current_user.is_authenticated:
+        return jsonify({"error": "not_authenticated"}), 401
     return jsonify({
         "user": {
             "id": current_user.id,

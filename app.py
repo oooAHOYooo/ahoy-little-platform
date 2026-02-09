@@ -214,7 +214,16 @@ def create_app():
     limiter.init_app(app)
     init_cors(app)
     login_manager.login_view = "auth_page"
-    
+
+    @login_manager.unauthorized_handler
+    def api_unauthorized():
+        """Return 401 JSON for API requests instead of redirecting to /auth."""
+        from flask import request
+        if request.path.startswith("/api/") or "application/json" in request.accept_mimetypes:
+            return jsonify({"error": "not_authenticated"}), 401
+        from flask import redirect, url_for
+        return redirect(url_for("auth_page", next=request.url))
+
     # Initialize observability
     init_sentry(app)
     
@@ -1867,6 +1876,92 @@ def _etag_for_static_json(filename: str) -> Optional[str]:
         return None
 
 
+def _build_podcasts_from_collection():
+    """Build { shows, episodes } from static/data/podcastCollection.json for API fallback.
+    Same shape as get_all_podcasts() so /api/podcasts returns consistent data to the Vue SPA.
+    """
+    def _slugify(s: str) -> str:
+        s = (s or '').strip().lower()
+        s = re.sub(r"['']", '', s)
+        s = re.sub(r'[^a-z0-9]+', '-', s)
+        s = re.sub(r'-{2,}', '-', s).strip('-')
+        return s or 'show'
+
+    def _extract_show_name(title: str) -> str:
+        t = (title or '').strip()
+        lower = t.lower()
+        if lower.startswith('the rob show'):
+            return 'The Rob Show'
+        if lower.startswith('my friend'):
+            return 'My Friend'
+        if lower.startswith('found cassettes'):
+            return 'Found Cassettes'
+        if lower.startswith("tyler's show"):
+            return "Tyler's Show"
+        head = re.split(r'\s*[-–—]\s*', t, maxsplit=1)[0].strip()
+        head = re.sub(r'\s*#\s*\d+.*$', '', head).strip()
+        return head or 'Podcast'
+
+    slug_aliases = {
+        'The Rob Show': 'rob',
+        'Rob Meglio Show': 'rob',
+        'Poets & Friends': 'poets-and-friends',
+        "Tyler's New Broadcast": 'tyler-broadcast',
+        "Tyler's Show": 'tylers-show',
+    }
+
+    collection = load_json_data('podcastCollection.json', {'podcasts': []})
+    items = list(collection.get('podcasts', []) or [])
+    active_items = [p for p in items if p.get('active', True)]
+    active_items.sort(
+        key=lambda p: (str(p.get('date') or p.get('releaseDate') or ''), int(p.get('id') or 0)),
+        reverse=True
+    )
+
+    episodes = []
+    for p in active_items:
+        title = p.get('title') or 'Untitled Episode'
+        show_name = _extract_show_name(title)
+        show_slug = slug_aliases.get(show_name) or _slugify(show_name)
+        episodes.append({
+            'id': str(p.get('id') or title),
+            'title': title,
+            'description': p.get('description') or '',
+            'date': p.get('date') or p.get('releaseDate') or '',
+            'duration': '',
+            'duration_seconds': 0,
+            'audio_url': p.get('mp3url') or '',
+            'artwork': p.get('thumbnail') or '/static/img/default-cover.jpg',
+            'show_slug': show_slug,
+            'show_title': show_name,
+        })
+
+    shows_by_slug = {}
+    for e in episodes:
+        s = shows_by_slug.setdefault(e['show_slug'], {
+            'slug': e['show_slug'],
+            'title': e.get('show_title') or e['show_slug'],
+            'description': '',
+            'artwork': e.get('artwork') or '/static/img/default-cover.jpg',
+            'last_updated': e.get('date') or '',
+            'episodes': [],
+        })
+        s['episodes'].append({
+            'id': e['id'],
+            'title': e['title'],
+            'description': e['description'],
+            'date': e['date'],
+            'duration': e['duration'],
+            'duration_seconds': e['duration_seconds'],
+            'audio_url': e['audio_url'],
+            'artwork': e['artwork'],
+        })
+
+    shows = list(shows_by_slug.values())
+    shows.sort(key=lambda s: str(s.get('last_updated') or ''), reverse=True)
+    return {'shows': shows, 'episodes': episodes}
+
+
 def _cached_json_response(filename: str, default: dict, max_age_seconds: int = 300):
     """Return a JSON response with Cache-Control + ETag (conditional GET)."""
     etag = _etag_for_static_json(filename)
@@ -2239,14 +2334,26 @@ def _is_local_file_path(s):
 @app.route('/merch')
 def merch():
     """Merch store page"""
-    from storage import read_json
     from utils.observability import get_release
+    merch_catalog, purchased_item_ids = _merch_catalog_and_purchased()
+    response = make_response(render_template(
+        'merch.html',
+        merch=merch_catalog,
+        release=get_release(),
+        purchased_item_ids=purchased_item_ids
+    ))
+    # Merch changes frequently; avoid serving stale HTML that can "stick" in app/webview caches.
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+
+def _merch_catalog_and_purchased():
+    """Shared: load merch catalog (sanitized) and set of purchased item ids. Used by /merch and /api/merch."""
+    from storage import read_json
     try:
         merch_catalog = get_all_merch(ttl=600)
     except Exception:
-        merch_catalog = read_json('data/merch.json', {"items": []})
-
-    # Sanitize items so local file paths never render (e.g. bad DB/env data)
+        merch_catalog = read_json('data/merch.json', {"items": []}) or {}
     items = merch_catalog.get('items') if isinstance(merch_catalog, dict) else []
     if isinstance(items, list):
         sanitized = []
@@ -2263,8 +2370,6 @@ def merch():
             sanitized.append(it)
         merch_catalog = dict(merch_catalog) if isinstance(merch_catalog, dict) else {}
         merch_catalog['items'] = sanitized
-
-    # Query database for purchased merch items (any status: pending, paid, fulfilled)
     purchased_item_ids = set()
     try:
         with get_session() as s:
@@ -2275,17 +2380,19 @@ def merch():
             purchased_item_ids = {str(p.item_id) for p in purchases if p.item_id}
     except Exception as e:
         current_app.logger.warning(f"Error querying purchased merch items: {e}")
-        # Continue without purchased items list if query fails
+    return merch_catalog, purchased_item_ids
 
-    response = make_response(render_template(
-        'merch.html',
-        merch=merch_catalog,
-        release=get_release(),
-        purchased_item_ids=purchased_item_ids
-    ))
-    # Merch changes frequently; avoid serving stale HTML that can "stick" in app/webview caches.
-    response.headers['Cache-Control'] = 'no-store'
-    return response
+
+@app.route('/api/merch')
+@limiter.exempt
+def api_merch():
+    """Get merch catalog and purchased item ids for SPA (same data as /merch page)."""
+    merch_catalog, purchased_item_ids = _merch_catalog_and_purchased()
+    return jsonify({
+        'items': merch_catalog.get('items', []),
+        'purchased_item_ids': list(purchased_item_ids),
+    })
+
 
 @app.route('/player')
 def player():
@@ -2783,7 +2890,7 @@ def api_featured_artists():
 @app.route('/api/podcasts')
 @limiter.exempt
 def api_podcasts():
-    """Get all podcast shows with episodes"""
+    """Get all podcast shows with episodes. DB first, then podcastCollection.json (same shape)."""
     try:
         data = get_all_podcasts(ttl=600)
         if data.get('shows'):
@@ -2793,22 +2900,33 @@ def api_podcasts():
             return resp
     except Exception:
         logging.getLogger(__name__).exception('DB podcasts query failed, falling back to JSON')
-    return _cached_json_response("podcastCollection.json", {"shows": []}, max_age_seconds=600)
+    # Fallback: build { shows, episodes } from podcastCollection.json so Vue SPA gets same shape
+    data = _build_podcasts_from_collection()
+    resp = jsonify(data)
+    resp.headers['Cache-Control'] = 'public, max-age=600'
+    resp.headers['Vary'] = 'Accept-Encoding'
+    return resp
 
 @app.route('/api/events')
 @limiter.exempt
 def api_events():
-    """Get all events"""
+    """Get all events and videos (same data as events page for SPA)."""
     try:
-        data = get_all_events(ttl=600)
-        if data.get('events'):
-            resp = jsonify(data)
-            resp.headers['Cache-Control'] = 'public, max-age=600'
-            resp.headers['Vary'] = 'Accept-Encoding'
-            return resp
+        events_data = get_all_events(ttl=600)
     except Exception:
-        logging.getLogger(__name__).exception('DB events query failed, falling back to JSON')
-    return _cached_json_response("events.json", {"events": []}, max_age_seconds=600)
+        events_data = load_json_data('events.json', {'events': []})
+    try:
+        videos_data = get_all_videos(ttl=600)
+    except Exception:
+        videos_data = load_json_data('videos.json', {'videos': []})
+    payload = {
+        'events': events_data.get('events', []) if isinstance(events_data, dict) else [],
+        'videos': videos_data.get('videos', []) if isinstance(videos_data, dict) else [],
+    }
+    resp = jsonify(payload)
+    resp.headers['Cache-Control'] = 'public, max-age=600'
+    resp.headers['Vary'] = 'Accept-Encoding'
+    return resp
 
 @app.route('/api/whats-new')
 @limiter.exempt

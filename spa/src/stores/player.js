@@ -189,6 +189,16 @@ export const usePlayerStore = defineStore('player', () => {
     queue.value = queue.value.filter((_, i) => i !== index)
   }
 
+  function addToQueue(track) {
+    queue.value = [...queue.value, track]
+  }
+
+  function isInQueue(track) {
+    if (!track) return false
+    const id = track.id ?? track.key
+    return queue.value.some(t => (t.id ?? t.key) === id)
+  }
+
   // Persist last played track to localStorage for session resume
   function saveLastPlayed(track) {
     try {
@@ -245,6 +255,8 @@ export const usePlayerStore = defineStore('player', () => {
     previous,
     clearQueue,
     removeFromQueue,
+    addToQueue,
+    isInQueue,
     restoreLastPlayed,
     getAudioElement,
   }
