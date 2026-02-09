@@ -294,6 +294,21 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
                                     title = optString(ep, "title");
                                     artist = optString(show, "title");
                                     artUrl = optString(show, "artwork");
+                                    // Set queue to this show's episodes so next/prev work in-car
+                                    currentQueue = new ArrayList<>();
+                                    String showTitle = optString(show, "title");
+                                    for (int j = 0; j < episodes.length(); j++) {
+                                        JSONObject e = episodes.getJSONObject(j);
+                                        try {
+                                            JSONObject copy = new JSONObject(e.toString());
+                                            copy.put("artist", showTitle);
+                                            copy.put("artwork", artUrl.isEmpty() ? optString(e, "artwork") : artUrl);
+                                            currentQueue.add(copy);
+                                        } catch (Exception e2) {
+                                            currentQueue.add(e);
+                                        }
+                                    }
+                                    currentIndex = i;
                                     break;
                                 }
                             } catch (Exception e) { /* ignore */ }

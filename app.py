@@ -930,6 +930,25 @@ def create_app():
         response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
         return response
 
+    # When spa-dist exists, serve SPA for all document GETs (one UI on web)
+    _spa_dist_dir = Path(__file__).resolve().parent / "spa-dist"
+    _server_path_prefixes = (
+        "api/", "static/", "ops/", "downloads/", "admin", "checkout", "success",
+        "healthz", "readyz", "refresh", "offline", "payments/", "sitemap", "robots.txt",
+        "googleb3a3eb3401de50dc.html", "auth", "feedback", "contact", "cast", "debug",
+    )
+
+    @app.before_request
+    def _maybe_serve_spa():
+        if request.method != "GET":
+            return
+        if not _spa_dist_dir.exists() or not (_spa_dist_dir / "index.html").is_file():
+            return
+        path = (request.path or "").strip().strip("/")
+        if any(path.startswith(p) or path == p.rstrip("/") for p in _server_path_prefixes):
+            return
+        return send_from_directory(str(_spa_dist_dir), "index.html", mimetype="text/html")
+
     return app
 
 # Create the app instance for backward compatibility
@@ -4786,6 +4805,66 @@ def trending_content():
     except Exception as e:
         print(f"Error in trending content: {e}")
         return jsonify({'error': 'Trending failed'}), 500
+
+
+# --- SPA (Vue) fallback: serve index.html for client routes; assets from spa-dist ---
+# Registered last so they only match when no other route does.
+_SPA_DIST = Path(__file__).resolve().parent / "spa-dist"
+
+
+def _spa_dist_ready():
+    return _SPA_DIST.exists() and (_SPA_DIST / "index.html").is_file()
+
+
+@app.route("/assets/<path:filename>")
+def spa_assets(filename):
+    """Serve Vue SPA assets (JS/CSS) from spa-dist when SPA is built."""
+    if not _spa_dist_ready():
+        abort(404)
+    assets_dir = _SPA_DIST / "assets"
+    if not assets_dir.is_dir():
+        abort(404)
+    return send_from_directory(str(assets_dir), filename)
+
+@app.route("/favicon.ico")
+def spa_favicon():
+    """Serve favicon from spa-dist when SPA is built."""
+    if not _spa_dist_ready():
+        abort(404)
+    try:
+        return send_from_directory(str(_SPA_DIST), "favicon.ico", mimetype="image/x-icon")
+    except Exception:
+        abort(404)
+
+@app.route("/manifest.webmanifest")
+def spa_manifest():
+    """Serve PWA manifest from spa-dist when SPA is built."""
+    if not _spa_dist_ready():
+        abort(404)
+    try:
+        return send_from_directory(str(_SPA_DIST), "manifest.webmanifest", mimetype="application/manifest+json")
+    except Exception:
+        abort(404)
+
+
+@app.route("/<path:path>")
+def spa_fallback(path):
+    """Serve SPA index.html for any unclaimed GET so client-side router can handle it."""
+    if request.method != "GET":
+        abort(404)
+    if not _spa_dist_ready():
+        abort(404)
+    # Don't serve SPA for paths that are strictly server-handled (API, static, ops, etc.)
+    server_prefixes = (
+        "api/", "static/", "ops/", "downloads/", "admin", "checkout", "success",
+        "healthz", "readyz", "refresh", "offline", "payments/", "sitemap", "robots.txt",
+        "googleb3a3eb3401de50dc.html", "auth", "feedback", "contact", "cast", "debug",
+    )
+    path_lower = (path or "").strip().lower()
+    if any(path_lower.startswith(p) or path_lower == p.rstrip("/") for p in server_prefixes):
+        abort(404)
+    return send_from_directory(str(_SPA_DIST), "index.html", mimetype="text/html")
+
 
 # Allow `python -m app` locally if needed
 if __name__ == "__main__":

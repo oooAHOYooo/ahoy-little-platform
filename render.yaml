@@ -6,7 +6,8 @@ services:
     name: ahoy-little-platform
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt
+    # Builds Python deps + Vue SPA (spa-dist) so web serves one UI. Requires Node on Render.
+    buildCommand: ./scripts/build_with_spa.sh
     startCommand: ./scripts/migrate_and_start.sh
     healthCheckPath: /ops/selftest
     autoDeploy: true
