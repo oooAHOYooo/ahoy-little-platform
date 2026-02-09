@@ -35,6 +35,11 @@ services:
           name: ahoy-redis
           type: redis
           property: connectionString
+      # Stripe (required for checkout / boosts)
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
       # Email (set one provider path)
       - key: RESEND_API_KEY
         sync: false
