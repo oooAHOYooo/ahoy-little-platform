@@ -1,7 +1,11 @@
 package com.ahoy.app;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaDescriptionCompat;
@@ -16,6 +20,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 import androidx.media.MediaBrowserServiceCompat;
 
 import org.json.JSONArray;
@@ -51,6 +56,8 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
 
     private static final String TAG = "AhoyMediaService";
     private static final String API_BASE = "https://app.ahoy.ooo";
+    private static final String NOTIFICATION_CHANNEL_ID = "ahoy_playback";
+    private static final int NOTIFICATION_ID = 1001;
 
     // Media tree IDs
     private static final String ROOT_ID = "ROOT";
@@ -105,8 +112,45 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
         // Audio manager for focus
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
+        createNotificationChannel();
+
         // Fetch content in background
         executor.execute(this::fetchAllContent);
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                "Ahoy Playback",
+                NotificationManager.IMPORTANCE_LOW
+            );
+            channel.setDescription("Now playing in Ahoy");
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if (nm != null) nm.createNotificationChannel(channel);
+        }
+    }
+
+    private android.app.Notification buildPlaybackNotification(String title, String artist) {
+        Intent openApp = getPackageManager().getLaunchIntentForPackage(getPackageName());
+        PendingIntent pending = PendingIntent.getActivity(this, 0,
+            openApp != null ? openApp : new Intent(this, MainActivity.class),
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+            .setContentTitle(title != null && !title.isEmpty() ? title : "Ahoy Indie Media")
+            .setContentText(artist != null && !artist.isEmpty() ? artist : "Now playing")
+            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setContentIntent(pending)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setOngoing(true);
+
+        androidx.media.app.NotificationCompat.MediaStyle style =
+            new androidx.media.app.NotificationCompat.MediaStyle()
+                .setMediaSession(mediaSession.getSessionToken());
+        builder.setStyle(style);
+
+        return builder.build();
     }
 
     @Override
@@ -160,7 +204,9 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
 
             case ARTISTS_ROOT:
                 for (JSONObject artist : artists) {
-                    String id = "ARTIST:" + optString(artist, "id");
+                    String aid = optString(artist, "id");
+                    if (aid.isEmpty()) aid = optString(artist, "slug");
+                    String id = "ARTIST:" + aid;
                     String name = optString(artist, "name");
                     String image = optString(artist, "image");
                     items.add(makeBrowsable(id, name, optString(artist, "type"), parseUri(image)));
@@ -180,18 +226,17 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
             default:
                 if (parentId.startsWith("ARTIST:")) {
                     String artistId = parentId.substring(7);
-                    // Find artist name
                     String artistName = "";
                     for (JSONObject a : artists) {
-                        if (optString(a, "id").equals(artistId)) {
+                        if (optString(a, "id").equals(artistId) || optString(a, "slug").equals(artistId)) {
                             artistName = optString(a, "name");
                             break;
                         }
                     }
-                    // Filter tracks by artist
                     for (JSONObject track : tracks) {
                         if (optString(track, "artist").equals(artistName) ||
-                            optString(track, "artist_id").equals(artistId)) {
+                            optString(track, "artist_id").equals(artistId) ||
+                            optString(track, "artist_slug").equals(artistId)) {
                             items.add(makePlayable(track, "track"));
                         }
                     }
@@ -241,10 +286,11 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
             .setSubtitle(artist);
         if (!art.isEmpty()) desc.setIconUri(parseUri(art));
 
-        // Store audio URL in extras
+        // Store audio URL in extras (for optional use)
         Bundle extras = new Bundle();
         String audioUrl = optString(item, "audio_url");
         if (audioUrl.isEmpty()) audioUrl = optString(item, "url");
+        if (audioUrl.isEmpty()) audioUrl = optString(item, "preview_url");
         extras.putString("audio_url", audioUrl);
         desc.setExtras(extras);
 
@@ -269,6 +315,7 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
                 if (trackId.equals(mediaId)) {
                     audioUrl = optString(track, "audio_url");
                     if (audioUrl.isEmpty()) audioUrl = optString(track, "url");
+                    if (audioUrl.isEmpty()) audioUrl = optString(track, "preview_url");
                     title = optString(track, "title");
                     artist = optString(track, "artist");
                     artUrl = optString(track, "cover_art");
@@ -291,6 +338,7 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
                                 if (epId.equals(mediaId)) {
                                     audioUrl = optString(ep, "audio_url");
                                     if (audioUrl.isEmpty()) audioUrl = optString(ep, "url");
+                                    if (audioUrl.isEmpty()) audioUrl = optString(ep, "preview_url");
                                     title = optString(ep, "title");
                                     artist = optString(show, "title");
                                     artUrl = optString(show, "artwork");
@@ -346,6 +394,7 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
                 mediaPlayer.release();
                 mediaPlayer = null;
             }
+            stopForeground(true);
             abandonAudioFocus();
             updatePlaybackState(PlaybackStateCompat.STATE_STOPPED);
         }
@@ -384,6 +433,7 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
         JSONObject item = currentQueue.get(index);
         String audioUrl = optString(item, "audio_url");
         if (audioUrl.isEmpty()) audioUrl = optString(item, "url");
+        if (audioUrl.isEmpty()) audioUrl = optString(item, "preview_url");
         String title = optString(item, "title");
         String artist = optString(item, "artist");
         String artUrl = optString(item, "cover_art");
@@ -394,6 +444,9 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
     }
 
     private void playUrl(String url, String title, String artist, String artUrl) {
+        if (url == null || url.isEmpty()) return;
+        if (url.startsWith("/")) url = API_BASE + url;
+        final String resolvedUrl = url;
         executor.execute(() -> {
             try {
                 if (mediaPlayer != null) {
@@ -406,9 +459,10 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
                         .setUsage(AudioAttributes.USAGE_MEDIA)
                         .build()
                 );
-                mediaPlayer.setDataSource(url);
+                mediaPlayer.setDataSource(resolvedUrl);
                 mediaPlayer.setOnPreparedListener(mp -> {
                     requestAudioFocus();
+                    startForeground(NOTIFICATION_ID, buildPlaybackNotification(title, artist));
                     mp.start();
                     updatePlaybackState(PlaybackStateCompat.STATE_PLAYING);
                 });
@@ -418,6 +472,7 @@ public class AhoyMediaService extends MediaBrowserServiceCompat {
                         currentIndex = (currentIndex + 1) % currentQueue.size();
                         playQueueItem(currentIndex);
                     } else {
+                        stopForeground(true);
                         updatePlaybackState(PlaybackStateCompat.STATE_STOPPED);
                     }
                 });
