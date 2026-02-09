@@ -7,6 +7,7 @@
     "test": "tests"
   },
   "scripts": {
+    "start": "bash scripts/start_ahoy.sh",
     "start:dev": "python dev.py",
     "dev": "python dev.py",
     "electron:dev": "electron .",

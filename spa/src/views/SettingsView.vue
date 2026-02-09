@@ -78,7 +78,7 @@
           <h2><i class="fas fa-flask"></i> Experimental</h2>
           <p class="experimental-disclaimer">These features are still in development and may change or be removed.</p>
           <div class="experimental-grid">
-            <a href="/focus" class="experimental-card neu-card-inset">
+            <router-link to="/focus" class="experimental-card neu-card-inset">
               <div class="experimental-card-icon">
                 <i class="fas fa-headphones"></i>
               </div>
@@ -87,7 +87,7 @@
                 <p>Ambient audio for deep focus and relaxation</p>
               </div>
               <i class="fas fa-chevron-right experimental-card-arrow"></i>
-            </a>
+            </router-link>
           </div>
         </div>
 

@@ -942,9 +942,10 @@ def create_app():
     # When spa-dist exists, serve SPA for all document GETs (one UI on web)
     _spa_dist_dir = Path(__file__).resolve().parent / "spa-dist"
     _server_path_prefixes = (
-        "api/", "static/", "ops/", "downloads/", "admin", "checkout", "success",
+        "api/", "static/", "assets/", "ops/", "downloads/", "admin", "checkout", "success",
         "healthz", "readyz", "refresh", "offline", "payments/", "sitemap", "robots.txt",
-        "googleb3a3eb3401de50dc.html", "auth", "feedback", "contact", "cast", "debug",
+        "favicon.ico", "manifest.webmanifest", "googleb3a3eb3401de50dc.html",
+        "auth", "feedback", "contact", "cast", "debug",
     )
 
     @app.before_request
@@ -4974,9 +4975,10 @@ def spa_fallback(path):
         abort(404)
     # Don't serve SPA for paths that are strictly server-handled (API, static, ops, etc.)
     server_prefixes = (
-        "api/", "static/", "ops/", "downloads/", "admin", "checkout", "success",
+        "api/", "static/", "assets/", "ops/", "downloads/", "admin", "checkout", "success",
         "healthz", "readyz", "refresh", "offline", "payments/", "sitemap", "robots.txt",
-        "googleb3a3eb3401de50dc.html", "auth", "feedback", "contact", "cast", "debug",
+        "favicon.ico", "manifest.webmanifest", "googleb3a3eb3401de50dc.html",
+        "auth", "feedback", "contact", "cast", "debug",
     )
     path_lower = (path or "").strip().lower()
     if any(path_lower.startswith(p) or path_lower == p.rstrip("/") for p in server_prefixes):

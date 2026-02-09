@@ -22,15 +22,22 @@
           <span class="wallet-amount">${{ (walletBalance ?? 0).toFixed(2) }}</span>
         </div>
         <p class="wallet-note">Use your wallet for boosts and merch checkout.</p>
-        <button type="button" class="account-btn primary" :disabled="walletLoading" @click="addFunds">
-          <i v-if="walletLoading" class="fas fa-spinner fa-spin"></i>
-          <i v-else class="fas fa-wallet"></i>
-          Add funds
-        </button>
+        <div class="account-wallet-actions">
+          <button type="button" class="account-btn primary" :disabled="walletLoading" @click="addFunds">
+            <i v-if="walletLoading" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-wallet"></i>
+            Add funds
+          </button>
+          <router-link to="/wallet" class="account-btn secondary">Transaction history</router-link>
+        </div>
       </section>
 
       <section class="account-section">
         <h2 class="account-section-title">Links</h2>
+        <router-link to="/tip-artist" class="account-link">
+          <i class="fas fa-heart"></i>
+          Boost artists
+        </router-link>
         <router-link to="/my-saves" class="account-link">
           <i class="fas fa-bookmark"></i>
           Saved
@@ -166,6 +173,19 @@ async function onLogout() {
   font-size: 12px;
   color: var(--text-secondary);
   margin: 0 0 12px;
+}
+.account-wallet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.account-btn.secondary {
+  background: rgba(255,255,255,0.08);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.account-btn.secondary:hover {
+  background: rgba(255,255,255,0.12);
 }
 .account-btn {
   display: inline-flex;

@@ -1,12 +1,27 @@
 /**
  * API client for the Ahoy backend.
  *
- * - Dev: Vite proxies /api/* to VITE_API_BASE (default https://app.ahoy.ooo).
- * - Production (web): same origin or VITE_API_BASE. Set VITE_API_BASE="" for same-origin.
- * - Production (Capacitor): VITE_API_BASE or default https://app.ahoy.ooo.
+ * Resolution order:
+ * - VITE_API_BASE (explicit override, can be "" for same-origin)
+ * - Dev on Vite port: use local Flask (same host, port VITE_API_PORT or 5002)
+ * - Otherwise: same-origin (production/Flask-served SPA)
  */
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://app.ahoy.ooo'
+const ENV_API_BASE = import.meta.env.VITE_API_BASE
+const ENV_API_PORT = import.meta.env.VITE_API_PORT
+
+function resolveApiBase() {
+  if (ENV_API_BASE !== undefined) return ENV_API_BASE
+  if (typeof window === 'undefined') return ''
+  const { hostname, port, protocol } = window.location
+  if (import.meta.env.DEV && (port === '5173' || port === '4173')) {
+    const apiPort = ENV_API_PORT || '5002'
+    return `${protocol}//${hostname}:${apiPort}`
+  }
+  return ''
+}
+
+const API_BASE = resolveApiBase()
 
 /**
  * Fetch JSON from an API endpoint with caching support.
@@ -16,7 +31,7 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'https://app.ahoy.ooo'
  */
 export async function apiFetch(path, options = {}) {
   const base = (API_BASE === '' || API_BASE === undefined) ? '' : API_BASE.replace(/\/$/, '')
-  const url = import.meta.env.DEV ? path : `${base}${path}`
+  const url = base ? `${base}${path}` : path
 
   const response = await fetch(url, {
     ...options,

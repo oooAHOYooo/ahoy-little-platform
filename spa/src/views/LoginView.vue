@@ -33,6 +33,9 @@
           <input id="password" v-model="password" type="password" :placeholder="mode === 'login' ? 'e.g. alexadmin' : '••••••••'" autocomplete="current-password" required />
         </div>
         <p v-if="mode === 'login'" class="auth-hint">Test account: alexadmin / alexadmin</p>
+        <p v-if="mode === 'login'" class="auth-forgot">
+          <router-link to="/auth/forgot">Forgot password?</router-link>
+        </p>
 
         <div class="auth-error" v-if="auth.error.value">{{ auth.error.value }}</div>
 
@@ -163,6 +166,16 @@ async function onSubmit() {
   text-align: center;
   margin: -4px 0 0;
 }
+.auth-forgot {
+  text-align: center;
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+.auth-forgot a {
+  color: var(--accent-primary, #6ddcff);
+  text-decoration: none;
+}
+.auth-forgot a:hover { text-decoration: underline; }
 .auth-error {
   color: #f87171;
   font-size: 13px;

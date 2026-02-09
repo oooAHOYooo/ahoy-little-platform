@@ -116,10 +116,116 @@ const routes = [
     name: 'settings',
     component: () => import('./views/SettingsView.vue'),
   },
-  // Catch-all
+  {
+    path: '/focus',
+    name: 'focus',
+    component: () => import('./views/FocusView.vue'),
+  },
+  {
+    path: '/auth/forgot',
+    name: 'forgot-password',
+    component: () => import('./views/ForgotPasswordView.vue'),
+  },
+  {
+    path: '/auth/reset',
+    name: 'reset-password',
+    component: () => import('./views/ResetPasswordView.vue'),
+  },
+  {
+    path: '/checkout',
+    name: 'checkout',
+    component: () => import('./views/CheckoutView.vue'),
+  },
+  {
+    path: '/success',
+    name: 'success',
+    component: () => import('./views/SuccessView.vue'),
+  },
+  {
+    path: '/downloads',
+    name: 'downloads',
+    component: () => import('./views/DownloadsView.vue'),
+  },
+  {
+    path: '/offline',
+    name: 'offline',
+    component: () => import('./views/OfflineView.vue'),
+  },
+  {
+    path: '/privacy',
+    name: 'privacy',
+    component: () => import('./views/PrivacyView.vue'),
+  },
+  {
+    path: '/terms',
+    name: 'terms',
+    component: () => import('./views/TermsView.vue'),
+  },
+  {
+    path: '/security',
+    name: 'security',
+    component: () => import('./views/SecurityView.vue'),
+  },
+  {
+    path: '/performances',
+    name: 'performances',
+    component: () => import('./views/PerformancesView.vue'),
+  },
+  {
+    path: '/feedback',
+    name: 'feedback',
+    component: () => import('./views/FeedbackView.vue'),
+  },
+  {
+    path: '/contact',
+    name: 'contact',
+    component: () => import('./views/ContactView.vue'),
+  },
+  {
+    path: '/cast',
+    name: 'cast',
+    component: () => import('./views/CastView.vue'),
+  },
+  {
+    path: '/whats-new',
+    name: 'whats-new',
+    component: () => import('./views/WhatsNewView.vue'),
+  },
+  {
+    path: '/whats-new/:year/:month/:section?',
+    name: 'whats-new-archive',
+    component: () => import('./views/WhatsNewView.vue'),
+  },
+  {
+    path: '/beta-testers',
+    name: 'beta-testers',
+    component: () => import('./views/BetaTestersView.vue'),
+  },
+  {
+    path: '/sitemap',
+    name: 'sitemap',
+    component: () => import('./views/SitemapView.vue'),
+  },
+  {
+    path: '/tip-artist',
+    name: 'tip-artist',
+    component: () => import('./views/TipArtistView.vue'),
+  },
+  {
+    path: '/wallet',
+    name: 'wallet',
+    component: () => import('./views/WalletView.vue'),
+  },
+  // Legacy URL redirects (Flask used these; SPA uses different paths)
+  { path: '/bookmarks', redirect: '/my-saves' },
+  { path: '/auth', redirect: '/login' },
+  { path: '/player', redirect: '/now-playing' },
+  { path: '/artist/:slug', redirect: to => `/artists/${to.params.slug}` },
+  // 404 – dedicated page with “Oops” / funny graphic
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/',
+    name: 'not-found',
+    component: () => import('./views/NotFoundView.vue'),
   },
 ]
 
