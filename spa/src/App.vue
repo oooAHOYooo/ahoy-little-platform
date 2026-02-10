@@ -4,6 +4,8 @@
     <Toast ref="toastRef" />
     <!-- Add to playlist modal (global) -->
     <AddToPlaylistModal />
+    <!-- Guest save prompt: "Create account to sync" when guest bookmarks -->
+    <GuestSavePrompt />
 
     <!-- Offline banner (matches base.html) -->
     <Transition name="slide-down">
@@ -30,7 +32,7 @@
           <div class="content-area content-pad-bottom app-content spa-main" :class="{ 'has-player': route.name !== 'now-playing' }">
             <router-view v-slot="{ Component, route: viewRoute }">
               <Transition :name="transitionName" mode="out-in">
-                <keep-alive :include="['HomeView', 'MusicView', 'ShowsView', 'ArtistsView', 'PodcastsView']">
+                <keep-alive :include="['HomeView', 'MusicView', 'ShowsView', 'ArtistsView', 'PodcastsView', 'LiveTVView']">
                   <component :is="Component" :key="viewRoute.path" />
                 </keep-alive>
               </Transition>
@@ -63,6 +65,7 @@ import NavBar from './components/NavBar.vue'
 import MiniPlayer from './components/MiniPlayer.vue'
 import Toast from './components/Toast.vue'
 import AddToPlaylistModal from './components/AddToPlaylistModal.vue'
+import GuestSavePrompt from './components/GuestSavePrompt.vue'
 import AppFooter from './components/AppFooter.vue'
 import CompactFooter from './components/CompactFooter.vue'
 import MobileMenuDrawer from './components/MobileMenuDrawer.vue'

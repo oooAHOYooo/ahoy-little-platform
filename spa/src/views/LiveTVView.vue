@@ -97,6 +97,15 @@
           <div class="skeleton" style="height:14px;width:50%"></div>
         </div>
       </template>
+      <template v-else-if="channels.length === 0">
+        <div class="channel-selector-empty">
+          <p class="channel-selector-empty-text">{{ loadError ? 'Couldn\'t load channels' : 'No channels available' }}</p>
+          <p v-if="loadError" class="channel-selector-empty-hint">Check your connection and try again.</p>
+          <button type="button" class="channel-selector-retry" @click="loadChannels">
+            <i class="fas fa-sync-alt"></i> Retry
+          </button>
+        </div>
+      </template>
       <button
         v-else
         v-for="(ch, idx) in channels"
@@ -227,7 +236,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { apiFetchCached } from '../composables/useApi'
+import { apiFetch, apiFetchCached } from '../composables/useApi'
 
 // --- Refs ---
 const videoEl = ref(null)
@@ -236,6 +245,7 @@ const guideRef = ref(null)
 const channels = ref([])
 const selectedRow = ref(0)
 const loading = ref(true)
+const loadError = ref(false)
 const isPlaying = ref(false)
 const isMuted = ref(true)
 const nowTitle = ref('Select a program')
@@ -640,25 +650,43 @@ function onGlobalKeydown(e) {
   }
 }
 
-// --- Lifecycle ---
-onMounted(async () => {
+// --- Load channels (network first, then cache fallback; used on mount and retry) ---
+async function loadChannels() {
   loading.value = true
+  loadError.value = false
+  if (engineTimer) {
+    clearInterval(engineTimer)
+    engineTimer = null
+  }
+  let data = null
   try {
-    const data = await apiFetchCached('/api/live-tv/channels')
-    channels.value = (data.channels || []).map(c => {
-      if (!Array.isArray(c.items)) c.items = []
-      return c
-    })
-    if (channels.value.length) {
-      buildSchedule()
-      tick()
-      engineTimer = setInterval(tick, 1000)
-    }
+    data = await apiFetch('/api/live-tv/channels')
   } catch {
-    channels.value = []
+    try {
+      data = await apiFetchCached('/api/live-tv/channels')
+    } catch {
+      loadError.value = true
+      channels.value = []
+      loading.value = false
+      return
+    }
+  }
+  channels.value = (data?.channels || []).map(c => {
+    if (!Array.isArray(c.items)) c.items = []
+    return c
+  })
+  if (channels.value.length) {
+    buildSchedule()
+    tick()
+    engineTimer = setInterval(tick, 1000)
   }
   loading.value = false
+}
+
+// --- Lifecycle ---
+onMounted(async () => {
   document.addEventListener('keydown', onGlobalKeydown)
+  await loadChannels()
 })
 
 onUnmounted(() => {
@@ -882,6 +910,51 @@ onUnmounted(() => {
   font-size: 13px;
   color: #999;
   margin-top: 8px;
+}
+
+/* ===== Channel selector empty / retry (mobile-friendly) ===== */
+.channel-selector-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 16px;
+  text-align: center;
+  min-height: 120px;
+}
+.channel-selector-empty-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e5e7eb;
+  margin: 0;
+}
+.channel-selector-empty-hint {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+.channel-selector-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  background: #3b82f6;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 4px;
+}
+.channel-selector-retry:hover {
+  background: #2563eb;
+}
+.channel-selector-retry:active {
+  transform: scale(0.98);
 }
 
 /* ===== Hover Preview ===== */
@@ -1255,6 +1328,14 @@ onUnmounted(() => {
   }
   .channel-button-name { font-size: 16px; }
   .channel-button-next { font-size: 12px; }
+  .channel-selector-empty {
+    min-width: 100%;
+    padding: 20px 12px;
+  }
+  .channel-selector-retry {
+    min-height: 48px;
+    padding: 14px 24px;
+  }
   .player-frame {
     min-height: 40vh;
     border-radius: 10px;

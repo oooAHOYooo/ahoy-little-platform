@@ -1,5 +1,10 @@
 <template>
   <div class="my-saves-container saved-page">
+    <!-- Guest banner: prompt to create account to sync -->
+    <div v-if="!auth.isLoggedIn.value" class="saves-guest-banner">
+      <p>Saves are stored on this device. <router-link to="/login?signup=1">Create an account</router-link> to sync across devices.</p>
+    </div>
+
     <!-- Dark liquid glass profile hero (same as Flask my_saves) -->
     <div class="saves-profile-hero">
       <div class="saves-profile-glow"></div>
@@ -301,5 +306,25 @@ onUnmounted(() => {
   .saved-page {
     padding: 1rem 1rem 2.5rem;
   }
+}
+.saves-guest-banner {
+  background: rgba(109, 220, 255, 0.08);
+  border: 1px solid rgba(109, 220, 255, 0.2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 1rem;
+}
+.saves-guest-banner p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+.saves-guest-banner a {
+  color: var(--accent-primary, #6ddcff);
+  font-weight: 600;
+  text-decoration: none;
+}
+.saves-guest-banner a:hover {
+  text-decoration: underline;
 }
 </style>

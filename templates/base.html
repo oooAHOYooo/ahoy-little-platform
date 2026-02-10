@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260207b' %}
+        {% set css_version = 'v20260210purple' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -989,74 +989,73 @@
             </nav>
         </header>
         <!-- Mobile Explore replaced by overlay -->
-        <!-- Mobile Footer Logo (centered above nav) -->
+        <!-- Mobile Footer Logo (centered above nav) - HIDDEN -->
         <div class="mobile-footer-logo mobile-only">
             <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
                 alt="Ahoy" class="mobile-footer-logo-img">
         </div>
-        <!-- Mobile Secondary Navigation - Secondary Features (above primary nav) -->
-        <nav class="mobile-secondary-nav mobile-only" role="navigation"
-            aria-label="Secondary Navigation">
-            <a href="{{ url_for('artists') }}"
-                class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
-                <i class="fas fa-users"></i>
-                <span>Artists</span>
-            </a>
-            <a href="/merch"
-                class="mobile-tab {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}">
-                <i class="fas fa-shopping-bag"></i>
-                <span>Merch</span>
-            </a>
-            <a href="/events"
-                class="mobile-tab {% if request.endpoint == 'events_page' or request.path.startswith('/events') %}active{% endif %}">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Events</span>
-            </a>
-            <a href="/account"
-                class="mobile-tab {% if request.endpoint == 'account' or request.endpoint == 'account_page' %}active{% endif %}">
-                <i class="fas fa-user-circle"></i>
-                <span>Profile</span>
-            </a>
-            <a href="/my-saves"
-                class="mobile-tab {% if request.endpoint == 'my_saves' %}active{% endif %}">
-                <i class="fas fa-bookmark"></i>
-                <span>Saved</span>
-            </a>
-        </nav>
-        <!-- Mobile Bottom Navigation - Home, Media, Saved -->
-        <nav class="mobile-bottom-nav mobile-only" role="navigation"
-            aria-label="Media Navigation">
-            <a href="{{ url_for('home') }}"
-                class="mobile-tab {% if request.endpoint == 'home' %}active{% endif %}">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
-            <a href="{{ url_for('music') }}"
-                class="mobile-tab {% if request.endpoint == 'music' %}active{% endif %}">
-                <i class="fas fa-music"></i>
-                <span>Music</span>
-            </a>
-            <a href="/podcasts"
-                class="mobile-tab {% if request.endpoint == 'podcasts_page' or request.path.startswith('/podcasts') %}active{% endif %}">
-                <i class="fas fa-podcast"></i>
-                <span>Podcasts</span>
-            </a>
-            <a href="{{ url_for('live_tv_page') }}"
-                class="mobile-tab {% if request.endpoint == 'live_tv_page' %}active{% endif %}">
-                <i class="fas fa-tv"></i>
-                <span>Live TV</span>
-            </a>
-            <a href="{{ url_for('shows') }}"
-                class="mobile-tab {% if request.endpoint == 'shows' %}active{% endif %}">
-                <i class="fas fa-video"></i>
-                <span>Videos</span>
-            </a>
-            <a href="/radio"
-                class="mobile-tab {% if request.endpoint == 'radio_page' %}active{% endif %}">
-                <i class="fas fa-broadcast-tower"></i>
-                <span>Radio</span>
-            </a>
-        </nav>
+        <!-- Mobile Dock: single unified bar (two rows, all icons visible, no scroll) -->
+        <div class="mobile-dock mobile-only" role="navigation" aria-label="Mobile Navigation">
+            <nav class="mobile-dock-row mobile-dock-row-secondary" aria-label="Secondary Navigation">
+                <a href="{{ url_for('artists') }}"
+                    class="mobile-tab {% if request.endpoint == 'artists' %}active{% endif %}">
+                    <i class="fas fa-users"></i>
+                    <span>Artists</span>
+                </a>
+                <a href="/merch"
+                    class="mobile-tab {% if request.endpoint == 'merch' or request.endpoint == 'merch_page' %}active{% endif %}">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Merch</span>
+                </a>
+                <a href="/events"
+                    class="mobile-tab {% if request.endpoint == 'events_page' or request.path.startswith('/events') %}active{% endif %}">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Events</span>
+                </a>
+                <a href="/account"
+                    class="mobile-tab {% if request.endpoint == 'account' or request.endpoint == 'account_page' %}active{% endif %}">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="/my-saves"
+                    class="mobile-tab {% if request.endpoint == 'my_saves' %}active{% endif %}">
+                    <i class="fas fa-bookmark"></i>
+                    <span>Saved</span>
+                </a>
+            </nav>
+            <nav class="mobile-dock-row mobile-dock-row-primary" aria-label="Media Navigation">
+                <a href="{{ url_for('home') }}"
+                    class="mobile-tab {% if request.endpoint == 'home' %}active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="{{ url_for('music') }}"
+                    class="mobile-tab {% if request.endpoint == 'music' %}active{% endif %}">
+                    <i class="fas fa-music"></i>
+                    <span>Music</span>
+                </a>
+                <a href="/podcasts"
+                    class="mobile-tab {% if request.endpoint == 'podcasts_page' or request.path.startswith('/podcasts') %}active{% endif %}">
+                    <i class="fas fa-podcast"></i>
+                    <span>Podcasts</span>
+                </a>
+                <a href="{{ url_for('live_tv_page') }}"
+                    class="mobile-tab {% if request.endpoint == 'live_tv_page' %}active{% endif %}">
+                    <i class="fas fa-tv"></i>
+                    <span>Live TV</span>
+                </a>
+                <a href="{{ url_for('shows') }}"
+                    class="mobile-tab {% if request.endpoint == 'shows' %}active{% endif %}">
+                    <i class="fas fa-video"></i>
+                    <span>Videos</span>
+                </a>
+                <a href="/radio"
+                    class="mobile-tab {% if request.endpoint == 'radio_page' %}active{% endif %}">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span>Radio</span>
+                </a>
+            </nav>
+        </div>
         <div class="desktop-only">
             {% include '_nav_main.html' %}
             {% include '_nav_user.html' %}

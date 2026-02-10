@@ -53,14 +53,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 
 const router = useRouter()
+const route = useRoute()
 const auth = useAuth()
 
-const mode = ref('login')
+const mode = ref(route.query.signup ? 'signup' : 'login')
+watch(() => route.query.signup, (signup) => {
+  if (signup) mode.value = 'signup'
+})
 const email = ref('')
 const password = ref('')
 const username = ref('')

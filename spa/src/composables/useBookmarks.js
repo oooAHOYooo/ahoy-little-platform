@@ -82,6 +82,9 @@ export function useBookmarks() {
         } catch {
           // save locally only
         }
+      } else {
+        // Guest: saved to local only — prompt to create account
+        window.dispatchEvent(new CustomEvent('ahoy:guest-saved'))
       }
       all[key] = payload
     }

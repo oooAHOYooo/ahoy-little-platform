@@ -1,0 +1,50 @@
+# Ahoy Indie Media – Internal beta release notes
+
+Use the text below in **Play Console → Internal testing → Release notes** (or paste the short version).
+
+---
+
+## Short version (for Play Console – ~500 chars)
+
+```
+• Full app: music, podcasts, shows, radio, saved—all in one place
+• Persistent mini player: play/pause, prev/next, boost, bookmark, queue (Spotify-style)
+• Instant audio: tracks and podcasts start playing right away; play/pause stays in sync
+• Android Auto: browse and play music and podcasts from your car
+• Account & wallet: sign in, add funds, boost artists, transaction history
+• Mobile fixes: smooth scrolling, no freeze after load; use /refresh if you need the latest
+• Focus mode, forgot password, checkout flows, 404 and offline handling
+• Bug fixes and performance improvements
+```
+
+---
+
+## Longer version (optional)
+
+```
+What’s new in this build
+
+• Refreshed experience: Ahoy gives you music, podcasts, shows, radio, and saved items in one modern interface.
+
+• Persistent mini player: A compact player stays at the bottom so you can control playback from anywhere. Play/pause, previous/next, boost, bookmark, and queue—with a layout tuned for phones.
+
+• Instant playback: Tracks and podcasts start playing immediately when you tap them. Play/pause state stays in sync across the app.
+
+• Android Auto: Use Ahoy in the car. Browse “All Music,” “Artists,” and “Podcasts” from your Android Auto screen and control playback with the in-car UI.
+
+• Account and wallet: Sign in, see your balance, add funds, and view transaction history. Boost artists directly from the app.
+
+• Mobile reliability: Fixed a bug that could freeze the screen after load. Scrolling is smooth; if you ever don’t see the latest update, open the in-app refresh option or visit /refresh.
+
+• Also in this build: Focus mode timer, forgot/reset password, checkout and success flows, tip artist and wallet pages, 404 and offline handling, and cache improvements so you get the latest content.
+
+Thanks for testing. Please send feedback via the in-app Feedback option or to your usual contact.
+```
+
+---
+
+## One-line (if Play Console has a tiny field)
+
+```
+Music, podcasts, mini player, Android Auto, account & wallet, and mobile reliability fixes.
+```

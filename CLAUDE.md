@@ -53,6 +53,12 @@ Flask-based media platform (music, shows, artists) with Stripe payments, auth, p
 
 ## Commands
 ```bash
+python help.py                   # Dev helper: status + help (start, status, todos)
+python help.py start             # Start dev server (runs dev.py)
+python help.py status            # Check server, git, env
+python help.py todos             # List TODOS.md
+python help.py todos add "task"  # Add todo (auto-updates TODOS.md)
+python help.py todos done 1      # Mark item 1 done
 python app.py                    # Run (auto-finds port 5001-5010)
 pytest tests/                    # All tests
 pytest tests/test_smoke.py -v    # Single file

@@ -67,10 +67,13 @@
     }
 
     /* Reduce repaints */
-    .app-header,
-    .mobile-bottom-nav {
+    .app-header {
         transform: translateZ(0);
         will-change: transform;
+    }
+    .mobile-dock {
+        will-change: transform;
+        /* translateX(-50%) is set in dock block; add translateZ(0) for GPU layer */
     }
 }
 
@@ -627,8 +630,7 @@ img[src*="default-cover.jpg"] {
     /* Fixed elements - allow touch interactions but don't block page scroll */
     .mobile-status-bar,
     .app-header,
-    .mobile-bottom-nav,
-    .mobile-secondary-nav,
+    .mobile-dock,
     .now-playing-wrapper {
         touch-action: manipulation;
         pointer-events: auto;
@@ -702,9 +704,9 @@ img[src*="default-cover.jpg"] {
         display: none !important;
     }
 
-    /* Ensure mobile bottom nav is visible */
-    .mobile-bottom-nav {
-        display: grid !important;
+    /* Ensure mobile dock is visible */
+    .mobile-dock {
+        display: flex !important;
     }
 
     /* Optimize mobile performance */
@@ -1455,8 +1457,8 @@ img[src*="default-cover.jpg"] {
         top: calc(32px + 48px + env(safe-area-inset-top)) !important;
     }
 
-    /* Ensure secondary nav accounts for auth bar */
-    .mobile-secondary-nav {
+    /* Ensure dock sits above auth bar when present */
+    .mobile-dock {
         bottom: calc(70px + 48px + env(safe-area-inset-bottom)) !important;
     }
 }
@@ -1511,12 +1513,12 @@ img[src*="default-cover.jpg"] {
     }
 }
 
-/* Ensure mobile bottom nav is always visible on mobile - override any conflicting rules */
+/* Ensure mobile dock is always visible on mobile - override any conflicting rules */
 @media (max-width: 768px) {
 
-    .mobile-bottom-nav.mobile-only,
-    .mobile-bottom-nav {
-        display: grid !important;
+    .mobile-dock.mobile-only,
+    .mobile-dock {
+        display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
     }
@@ -2231,6 +2233,7 @@ img[src*="default-cover.jpg"] {
 
     /* Shared footer glass so player + nav read as one strip */
     :root {
+        --mobile-dock-height: 140px;
         --footer-glass-bg: rgba(10, 10, 12, 0.98);
         --footer-glass-gradient: linear-gradient(180deg, rgba(20, 20, 26, 0.98) 0%, rgba(10, 10, 12, 0.98) 100%);
         --footer-glass-border: 1px solid rgba(255, 255, 255, 0.06);
@@ -2243,7 +2246,7 @@ img[src*="default-cover.jpg"] {
         position: fixed;
         left: 0;
         right: 0;
-        bottom: 0;
+        bottom: calc(var(--mobile-dock-height, 140px) + env(safe-area-inset-bottom));
         z-index: 10005;
         background: var(--footer-glass-bg);
         backdrop-filter: var(--footer-glass-blur);
@@ -2269,7 +2272,7 @@ img[src*="default-cover.jpg"] {
     }
 
     body.has-player {
-        padding-bottom: 70px !important;
+        padding-bottom: calc(var(--mobile-dock-height, 140px) + 70px + env(safe-area-inset-bottom)) !important;
     }
 
     /* Prevent any full-screen player on mobile */
@@ -2424,9 +2427,9 @@ img[src*="default-cover.jpg"] {
         padding-bottom: calc(var(--bottom-nav-h, 60px) + var(--secondary-nav-h, 48px) + env(safe-area-inset-bottom) + 80px + var(--section-gap, 20px));
     }
 
-    /* Reserve bottom space so footer scrolls above the now-playing bar (mobile bar height 70px) */
+    /* Reserve bottom space so footer scrolls above dock + now-playing bar */
     body.has-player {
-        padding-bottom: 70px;
+        padding-bottom: calc(var(--mobile-dock-height, 140px) + 70px + env(safe-area-inset-bottom));
     }
 
     /* Mobile empty state styles */
@@ -2452,7 +2455,7 @@ img[src*="default-cover.jpg"] {
    - Section/card rhythm
    - Fix bottom-nav overlap
    Structure map (templates/classes)
-   - templates/base.html: `.content-area.app-content.content-pad-bottom`, `.mobile-auth-bar` (`.auth-login-btn`, `.auth-signup-btn`), `.mobile-bottom-nav`
+   - templates/base.html: `.content-area.app-content.content-pad-bottom`, `.mobile-auth-bar`, `.mobile-dock`
    - templates/home.html: `.home-page`, `.live-dashboard`, `.dashboard-grid`, `.dashboard-main`, `.dashboard-sidebar`, `.discovery-grid`, `.grid-container`, `.grid-item`
    ========================================================== */
 @media (max-width: 768px) {
@@ -2887,9 +2890,9 @@ img[src*="default-cover.jpg"] {
         display: block;
     }
 
-    /* Ensure mobile bottom nav is visible */
-    .mobile-bottom-nav.mobile-only {
-        display: grid !important;
+    /* Ensure mobile dock is visible */
+    .mobile-dock.mobile-only {
+        display: flex !important;
     }
 
     .nav-container {
@@ -3380,7 +3383,7 @@ img[src*="default-cover.jpg"] {
     }
 }
 
-/* Mobile fixed bottom navigation (Spotify-like) */
+/* Mobile fixed bottom navigation — single unified dock (two rows, one bar) */
 @media (max-width: 767px) {
 
     /* Mobile footer logo (centered above nav rows) - HIDDEN */
@@ -3392,289 +3395,112 @@ img[src*="default-cover.jpg"] {
         display: none !important;
     }
 
-    /* Secondary navigation row (above primary nav) - unified footer glass */
-    .mobile-secondary-nav {
+    /* Single unified dock: flush to bottom, two rows, all icons visible */
+    .mobile-dock {
         position: fixed !important;
-        left: 50% !important;
-        right: auto !important;
-        bottom: calc(var(--bottom-nav-h, calc(50px + env(safe-area-inset-bottom))) + var(--mobile-nav-offset, 8px)) !important;
-        transform: translateX(-50%) !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        transform: none !important;
+        z-index: 10006 !important;
+        width: 100% !important;
+        max-width: none !important;
+        box-sizing: border-box !important;
         display: flex !important;
-        justify-content: space-around !important;
-        align-items: center !important;
-        gap: 0 !important;
-        padding: 4px 8px !important;
+        flex-direction: column !important;
         visibility: visible !important;
         opacity: 1 !important;
-        z-index: 10002 !important;
-        width: min(96vw, var(--mobile-nav-max-w, 520px)) !important;
-        box-sizing: border-box !important;
-        background: linear-gradient(180deg, rgba(10, 12, 18, 0.94) 0%, rgba(6, 7, 11, 0.98) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        border-bottom: none;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 -4px 16px rgba(0, 0, 0, 0.3);
-        border-radius: var(--mobile-nav-radius, 26px) var(--mobile-nav-radius, 26px) 0 0;
-        backdrop-filter: blur(22px) saturate(135%);
-        -webkit-backdrop-filter: blur(22px) saturate(135%);
-        height: var(--secondary-nav-h, 40px);
-        overflow: hidden;
-        animation: mobileNavFloat 8s ease-in-out infinite;
-    }
-
-    .mobile-secondary-nav::before {
-        content: "";
-        position: absolute;
-        inset: 1px;
-        border-radius: calc(var(--mobile-nav-radius, 26px) - 1px) calc(var(--mobile-nav-radius, 26px) - 1px) 0 0;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 60%);
-        opacity: 0.5;
-        pointer-events: none;
-    }
-
-    .mobile-secondary-nav::after {
-        content: "";
-        position: absolute;
-        left: -30%;
-        top: -45%;
-        width: 160%;
-        height: 190%;
-        background: radial-gradient(55% 45% at 30% 40%, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 60%);
-        opacity: 0.5;
-        pointer-events: none;
-        transform: translate3d(0, 0, 0);
-        animation: mobileNavWater 10s ease-in-out infinite;
-    }
-
-    .mobile-secondary-nav .mobile-tab {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 1px;
-        padding: 6px 8px 4px;
-        flex: 1;
-        max-width: 65px;
-        color: rgba(255, 255, 255, 0.62);
-        text-decoration: none;
+        /* Darker glass – keeps blur, darker tint */
+        background: rgba(4, 4, 6, 0.82);
         border: none;
-        background: transparent;
-        font-size: 8px;
-        line-height: 1.05;
-        border-radius: 14px;
-        transition: transform 0.16s ease, color 0.22s ease, filter 0.22s ease;
-        will-change: transform, color, filter;
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: blur(32px) saturate(150%);
+        -webkit-backdrop-filter: blur(32px) saturate(150%);
+        overflow: visible;
+        padding: 12px 8px calc(14px + env(safe-area-inset-bottom)) 8px;
     }
 
-    .mobile-secondary-nav .mobile-tab::after {
+    .mobile-dock::before {
         content: "";
         position: absolute;
-        inset: -2px;
-        border-radius: 16px;
-        background: radial-gradient(80% 80% at 50% 20%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 60%);
-        opacity: 0;
-        transform: scale(0.98);
-        transition: opacity 0.35s ease, transform 0.35s ease;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, transparent 50%);
         pointer-events: none;
         z-index: 0;
     }
 
-    /* Adjust for 5 tabs (Artists, Merch, Events, Profile, Saved) */
-    @media (max-width: 420px) {
-        .mobile-secondary-nav .mobile-tab {
-            max-width: 60px;
-            padding: 6px 6px 4px;
-            font-size: 8px;
-        }
-
-        .mobile-secondary-nav .mobile-tab i {
-            font-size: 16px;
-        }
+    /* Rows must sit above dock ::before so links are clickable */
+    .mobile-dock-row {
+        display: flex !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        gap: 4px !important;
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+        position: relative !important;
+        z-index: 1 !important;
     }
 
-    .mobile-secondary-nav .mobile-tab i {
-        font-size: 17px;
-        line-height: 1;
+    .mobile-dock-row-secondary {
+        padding: 10px 6px 8px !important;
+        min-height: 44px;
+    }
+
+    .mobile-dock-row-primary {
+        padding: 8px 6px 4px !important;
+        min-height: 52px;
+    }
+
+    /* Shared tab styling – tap target and link on top */
+    .mobile-dock .mobile-tab {
         position: relative;
         z-index: 2;
-        transition: color 0.3s ease;
-    }
-
-    .mobile-secondary-nav .mobile-tab span {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 10px 8px 8px;
+        flex: 1;
+        min-width: 0;
+        max-width: 88px;
+        min-height: 44px;
+        color: rgba(255, 255, 255, 0.88);
+        text-decoration: none;
+        border: none;
+        background: transparent;
         font-size: 9px;
-        font-weight: 500;
-        position: relative;
-        z-index: 2;
-        transition: color 0.3s ease;
-    }
-
-    .mobile-secondary-nav .mobile-tab:active {
-        transform: translateY(1px) scale(0.96);
-        filter: brightness(1.08);
-    }
-
-    .mobile-secondary-nav .mobile-tab.active {
-        /* Mobile active state: prefer color-fill over big shapes */
-        color: #f8fafc;
-        background: transparent;
-        border: none;
-    }
-
-    .mobile-secondary-nav .mobile-tab.active::before {
-        content: "";
-        position: absolute;
-        inset: 2px;
-        border-radius: 14px;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.1) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
-        z-index: 1;
-    }
-
-    .mobile-secondary-nav .mobile-tab.active::after {
-        opacity: 0.6;
-        transform: scale(1);
-    }
-
-    .mobile-secondary-nav .mobile-tab.active i {
-        color: #f8fafc;
-        transform: none;
-    }
-
-    .mobile-secondary-nav .mobile-tab.active span {
-        color: #f8fafc;
-        transform: none;
-        font-weight: 600;
-    }
-
-    .mobile-secondary-nav .mobile-tab.active span::after {
-        content: none;
-    }
-
-    /* Force mobile bottom nav to be visible - unified footer glass */
-    nav.mobile-bottom-nav.mobile-only,
-    .mobile-bottom-nav.mobile-only,
-    .mobile-bottom-nav {
-        position: fixed !important;
-        left: 50% !important;
-        right: auto !important;
-        bottom: var(--mobile-nav-offset, 8px) !important;
-        transform: translateX(-50%) !important;
-        display: flex !important;
-        justify-content: space-around !important;
-        align-items: center !important;
-        gap: 0 !important;
-        padding: 6px 10px calc(env(safe-area-inset-bottom) + 4px) !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        z-index: 10003 !important;
-        width: min(96vw, var(--mobile-nav-max-w, 520px)) !important;
-        box-sizing: border-box !important;
-        background: linear-gradient(180deg, rgba(10, 12, 18, 0.96) 0%, rgba(5, 6, 9, 0.985) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 20px 40px rgba(0, 0, 0, 0.6);
-        border-radius: 0 0 var(--mobile-nav-radius, 26px) var(--mobile-nav-radius, 26px);
-        backdrop-filter: blur(24px) saturate(135%);
-        -webkit-backdrop-filter: blur(24px) saturate(135%);
-        height: var(--bottom-nav-h, calc(50px + env(safe-area-inset-bottom))) !important;
-        overflow: hidden;
-        animation: mobileNavFloat 7s ease-in-out infinite;
-    }
-
-    .mobile-bottom-nav::before {
-        content: "";
-        position: absolute;
-        inset: 1px;
-        border-radius: 0 0 calc(var(--mobile-nav-radius, 26px) - 1px) calc(var(--mobile-nav-radius, 26px) - 1px);
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 60%);
-        opacity: 0.55;
-        pointer-events: none;
-    }
-
-    .mobile-bottom-nav::after {
-        content: "";
-        position: absolute;
-        left: -30%;
-        top: -45%;
-        width: 160%;
-        height: 190%;
-        background: radial-gradient(55% 45% at 30% 40%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 60%);
-        opacity: 0.6;
-        pointer-events: none;
-        transform: translate3d(0, 0, 0);
-        animation: mobileNavWater 9s ease-in-out infinite;
-    }
-
-    .mobile-bottom-nav .mobile-tab {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 1px;
-        padding: 4px 8px 3px;
-        flex: 1;
-        max-width: 76px;
-        color: rgba(255, 255, 255, 0.65);
-        text-decoration: none;
-        border: none;
-        background: transparent;
-        font-size: 8px;
-        line-height: 1;
-        border-radius: 18px;
-        transition: transform 0.16s ease, color 0.22s ease, filter 0.22s ease;
+        line-height: 1.1;
+        border-radius: 12px;
+        transition: color 0.2s ease;
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
+        cursor: pointer;
     }
 
-    .mobile-bottom-nav .mobile-tab::after {
+    .mobile-dock .mobile-tab::after {
         content: "";
         position: absolute;
         inset: -2px;
-        border-radius: 18px;
-        background: radial-gradient(80% 80% at 50% 20%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 60%);
+        border-radius: 14px;
+        background: radial-gradient(80% 80% at 50% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
         opacity: 0;
-        transform: scale(0.98);
-        transition: opacity 0.35s ease, transform 0.35s ease;
+        transition: opacity 0.2s ease;
         pointer-events: none;
-        z-index: 0;
+        z-index: -1;
     }
 
-    /* Adjust for 5 tabs on small screens */
-    @media (max-width: 420px) {
-        .mobile-bottom-nav .mobile-tab {
-            max-width: 60px;
-            padding: 4px 4px 2px;
-        }
-
-        .mobile-bottom-nav .mobile-tab i {
-            font-size: 17px;
-        }
-
-        .mobile-bottom-nav .mobile-tab span {
-            font-size: 8px;
-        }
-    }
-
-    .mobile-bottom-nav .mobile-tab i {
+    .mobile-dock .mobile-tab i {
         font-size: 18px;
         line-height: 1;
         position: relative;
-        z-index: 2;
-        transition: color 0.2s ease;
-        color: inherit;
+        z-index: 1;
+        pointer-events: none;
     }
 
-    .mobile-bottom-nav .mobile-tab span {
+    .mobile-dock .mobile-tab span {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -3682,75 +3508,47 @@ img[src*="default-cover.jpg"] {
         font-size: 9px;
         font-weight: 500;
         position: relative;
-        z-index: 2;
-        transition: color 0.3s ease;
-        color: inherit;
+        z-index: 1;
+        pointer-events: none;
     }
 
-    .mobile-bottom-nav .mobile-tab:active {
-        transform: translateY(1px) scale(0.97);
-        filter: brightness(1.12);
+    .mobile-dock .mobile-tab:active::after {
+        opacity: 0.4;
     }
 
-    /* Prominent active pill - glassy highlight */
-    .mobile-bottom-nav .mobile-tab.active {
+    .mobile-dock .mobile-tab.active {
         color: #f8fafc;
     }
 
-    .mobile-bottom-nav .mobile-tab.active::before {
+    .mobile-dock .mobile-tab.active::before {
         content: "";
         position: absolute;
-        inset: 2px;
+        inset: 4px;
         border-radius: 14px;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.12) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), 0 6px 12px rgba(0, 0, 0, 0.35);
+        background: rgba(0, 0, 0, 0.52);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
         z-index: 1;
     }
 
-    .mobile-bottom-nav .mobile-tab.active::after {
-        opacity: 0.7;
-        transform: scale(1);
+    .mobile-dock .mobile-tab.active::after {
+        opacity: 0;
     }
 
-    .mobile-bottom-nav .mobile-tab.active::after {
-        content: none;
-    }
-
-    .mobile-bottom-nav .mobile-tab.active i {
-        color: #f8fafc;
-        position: relative;
-        z-index: 2;
-    }
-
-    .mobile-bottom-nav .mobile-tab.active span {
+    .mobile-dock .mobile-tab.active i,
+    .mobile-dock .mobile-tab.active span {
         color: #f8fafc;
         font-weight: 600;
-        position: relative;
-        z-index: 2;
     }
 
-    @keyframes mobileNavFloat {
-        0% {
-            transform: translate3d(-50%, 0, 0);
+    @media (max-width: 420px) {
+        .mobile-dock .mobile-tab {
+            max-width: 64px;
+            padding: 8px 6px 6px;
+            font-size: 8px;
         }
-        50% {
-            transform: translate3d(-50%, -1px, 0);
-        }
-        100% {
-            transform: translate3d(-50%, 0, 0);
-        }
-    }
-
-    @keyframes mobileNavWater {
-        0% {
-            transform: translate3d(-4%, -2%, 0) rotate(0.2deg);
-        }
-        50% {
-            transform: translate3d(4%, 3%, 0) rotate(-0.2deg);
-        }
-        100% {
-            transform: translate3d(-4%, -2%, 0) rotate(0.2deg);
+        .mobile-dock .mobile-tab i {
+            font-size: 17px;
         }
     }
 }
@@ -4428,8 +4226,7 @@ img[src*="default-cover.jpg"] {
     /* Ensure fixed elements don't block touch */
     .mobile-status-bar,
     .app-header,
-    .mobile-bottom-nav,
-    .mobile-secondary-nav,
+    .mobile-dock,
     .now-playing-wrapper,
     .now-playing-sticky {
         touch-action: manipulation !important;

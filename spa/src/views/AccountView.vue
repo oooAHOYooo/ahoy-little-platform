@@ -55,8 +55,38 @@
     </div>
 
     <div v-else class="account-guest">
-      <p>Sign in to see your account, wallet, and saved items.</p>
-      <router-link to="/login" class="account-btn primary">Sign in</router-link>
+      <div class="account-guest-profile">
+        <div class="account-avatar">
+          <i class="fas fa-user-circle"></i>
+        </div>
+        <h2 class="account-guest-title">Profile</h2>
+        <p class="account-guest-sub">You're browsing as a guest. Save to this device and explore — create an account to sync everywhere.</p>
+      </div>
+
+      <section class="account-section">
+        <h2 class="account-section-title">Features</h2>
+        <router-link to="/my-saves" class="account-link">
+          <i class="fas fa-bookmark"></i>
+          <span><strong>Saved</strong> — Bookmarks and recently played</span>
+        </router-link>
+        <router-link to="/playlists" class="account-link">
+          <i class="fas fa-list-ul"></i>
+          <span><strong>Playlists</strong> — Create and manage (sign in to save)</span>
+        </router-link>
+        <router-link to="/settings" class="account-link">
+          <i class="fas fa-cog"></i>
+          <span><strong>Settings</strong> — Audio and preferences</span>
+        </router-link>
+        <router-link to="/wallet" class="account-link">
+          <i class="fas fa-wallet"></i>
+          <span><strong>Wallet</strong> — Add funds for boosts and merch (sign in)</span>
+        </router-link>
+      </section>
+
+      <div class="account-guest-cta">
+        <p>Create a free account to sync your saves across devices and unlock wallet, playlists, and more.</p>
+        <router-link to="/login?signup=1" class="account-btn primary">Create account</router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -228,11 +258,59 @@ async function onLogout() {
 .account-link:last-of-type { border-bottom: none; }
 .account-link:hover { color: var(--accent-primary); }
 .account-guest {
-  text-align: center;
-  padding: 40px 20px;
+  max-width: 420px;
+  margin: 0 auto;
+  background: rgba(20, 20, 28, 0.85);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 24px;
 }
-.account-guest p {
+.account-guest-profile {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.account-guest-profile .account-avatar {
+  font-size: 48px;
+  color: rgba(255,255,255,0.5);
+}
+.account-guest-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+  margin: 12px 0 8px;
+}
+.account-guest-sub {
+  font-size: 14px;
   color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+.account-guest .account-section {
   margin-bottom: 20px;
+}
+.account-guest .account-link span {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: normal;
+  margin-top: 2px;
+}
+.account-guest .account-link strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.account-guest-cta {
+  text-align: center;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.account-guest-cta p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0 0 16px;
+  line-height: 1.4;
+}
+.account-guest-cta .account-btn.primary {
+  display: inline-flex;
 }
 </style>
