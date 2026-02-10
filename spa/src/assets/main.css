@@ -25121,6 +25121,37 @@ body.has-player {
     box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
 }
 
+/* Action buttons (boost, bookmark, playlist, queue) — distinct from playback controls */
+.now-playing-action-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.55);
+    border-radius: 8px;
+    font-size: 13px;
+    width: 32px;
+    height: 32px;
+}
+
+.now-playing-action-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+}
+
+.now-playing-action-btn.active {
+    background: rgba(236, 72, 153, 0.12);
+    border-color: rgba(236, 72, 153, 0.35);
+    color: #ec4899;
+    box-shadow: none;
+}
+
+.now-playing-action-btn.disabled,
+.now-playing-action-btn:disabled {
+    opacity: 0.3;
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
 .now-playing-play-btn {
     width: 40px;
     height: 40px;
@@ -25646,6 +25677,12 @@ body.has-player {
         font-size: 13px;
     }
 
+    .now-playing-action-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+
     .now-playing-play-btn {
         width: 40px;
         height: 40px;
@@ -25711,6 +25748,13 @@ body.has-player {
         width: 28px;
         height: 28px;
         font-size: 11px;
+        border-radius: 6px;
+    }
+
+    .now-playing-action-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
         border-radius: 6px;
     }
 

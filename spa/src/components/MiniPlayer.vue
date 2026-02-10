@@ -106,7 +106,7 @@
           </button>
           <button
             type="button"
-            class="now-playing-btn"
+            class="now-playing-btn now-playing-action-btn"
             :class="{ disabled: !playerStore.currentTrack }"
             :disabled="!playerStore.currentTrack"
             title="Boost artist"
@@ -116,7 +116,7 @@
           </button>
           <button
             type="button"
-            class="now-playing-btn"
+            class="now-playing-btn now-playing-action-btn"
             :class="{ active: isBookmarked, disabled: !playerStore.currentTrack }"
             :disabled="!playerStore.currentTrack"
             title="Bookmark"
@@ -126,7 +126,7 @@
           </button>
           <button
             type="button"
-            class="now-playing-btn"
+            class="now-playing-btn now-playing-action-btn"
             :class="{ disabled: !playerStore.currentTrack }"
             :disabled="!playerStore.currentTrack"
             title="Add to playlist"
@@ -137,7 +137,7 @@
           <div class="now-playing-queue-wrap">
             <button
               type="button"
-              class="now-playing-btn now-playing-queue-btn"
+              class="now-playing-btn now-playing-action-btn now-playing-queue-btn"
               :class="{ active: showQueue }"
               title="Queue"
               @click="showQueue = !showQueue"
