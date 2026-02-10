@@ -290,15 +290,32 @@ function getUpdateUrl(update) {
   return '/whats-new'
 }
 
+// Parse live-tv API response (same shape as Flask: { channels: [ { id, name, items }, ... ] })
+function parseLiveTvChannels(data) {
+  const raw = data?.channels ?? data?.data?.channels ?? []
+  if (!Array.isArray(raw)) return []
+  return raw.map((c) => ({
+    ...c,
+    id: c?.id ?? 'misc',
+    name: c?.name ?? 'Channel',
+    items: Array.isArray(c?.items) ? c.items : [],
+  }))
+}
+
 onMounted(async () => {
-  // Live TV channels
+  // Live TV channels — network first with cache-bust to avoid stale empty response, then cache fallback
   try {
-    const data = await apiFetchCached('/api/live-tv/channels').catch(() => ({ channels: [] }))
-    const channels = data.channels || []
+    let data = null
+    try {
+      data = await apiFetch('/api/live-tv/channels?_=' + Date.now())
+    } catch {
+      data = await apiFetchCached('/api/live-tv/channels').catch(() => null)
+    }
+    const channels = data ? parseLiveTvChannels(data) : []
     tvChannels.value = channels
     if (channels.length) {
-      const ch = channels.find(c => c.id === 'misc') || channels[0]
-      tvChannelIndex.value = channels.findIndex(c => c.id === ch.id)
+      const ch = channels.find((c) => c.id === 'misc') || channels[0]
+      tvChannelIndex.value = channels.findIndex((c) => c.id === ch.id)
       computeTVSchedule()
       selectTVChannel(tvChannelIndex.value)
     } else {

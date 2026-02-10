@@ -650,7 +650,19 @@ function onGlobalKeydown(e) {
   }
 }
 
-// --- Load channels (network first, then cache fallback; used on mount and retry) ---
+// Parse live-tv API response (same shape as Flask: { channels: [ { id, name, items }, ... ] })
+function parseLiveTvChannels(data) {
+  const raw = data?.channels ?? data?.data?.channels ?? []
+  if (!Array.isArray(raw)) return []
+  return raw.map((c) => ({
+    ...c,
+    id: c?.id ?? 'misc',
+    name: c?.name ?? 'Channel',
+    items: Array.isArray(c?.items) ? c.items : [],
+  }))
+}
+
+// --- Load channels (network first with cache-bust, then cache fallback; used on mount and retry) ---
 async function loadChannels() {
   loading.value = true
   loadError.value = false
@@ -660,7 +672,7 @@ async function loadChannels() {
   }
   let data = null
   try {
-    data = await apiFetch('/api/live-tv/channels')
+    data = await apiFetch('/api/live-tv/channels?_=' + Date.now())
   } catch {
     try {
       data = await apiFetchCached('/api/live-tv/channels')
@@ -671,10 +683,7 @@ async function loadChannels() {
       return
     }
   }
-  channels.value = (data?.channels || []).map(c => {
-    if (!Array.isArray(c.items)) c.items = []
-    return c
-  })
+  channels.value = parseLiveTvChannels(data || {})
   if (channels.value.length) {
     buildSchedule()
     tick()
