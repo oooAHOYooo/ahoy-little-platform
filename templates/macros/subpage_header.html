@@ -16,11 +16,13 @@ Usage (section header + right-side actions):
   </section>
 #}
 
-{% macro subpage_hero(title, subtitle='', icon_class='', scope_class='mobile-only') -%}
+{% macro subpage_hero(title, subtitle='', icon_class='', logo_src='', scope_class='mobile-only') -%}
 <section class="podcasts-hero {{ scope_class }}">
     <div class="podcasts-hero-inner">
         <h1>
-            {% if icon_class %}
+            {% if logo_src %}
+            <img src="{{ logo_src }}" alt="" class="subpage-hero-logo" aria-hidden="true">
+            {% elif icon_class %}
             <i class="{{ icon_class }}" aria-hidden="true"></i>
             {% endif %}
             {{ title }}

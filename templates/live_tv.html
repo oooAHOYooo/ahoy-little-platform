@@ -407,7 +407,7 @@
 
 				<!-- PLAYING NOW THIN BAR WITH PROGRESS -->
 				<div id="playing-now" class="playing-now glass">
-					<img id="playingNowThumb" alt />
+					<img id="playingNowThumb" alt onerror="if(window.ahoyThumbGen)ahoyThumbGen(this,'Now Playing','')" />
 					<div class="now-col">
 						<div class="np-title" id="playingNowTitle">Select a program</div>
 						<div class="np-sub" id="playingNowMeta">—</div>
@@ -422,7 +422,7 @@
 			</div>
 			<aside class="right-dashboard glass hidden-mobile" id="rightDashboard"
 				aria-label="Channel Dashboard">
-				<img id="rd-thumb" alt class="rd-thumb" />
+				<img id="rd-thumb" alt class="rd-thumb" onerror="if(window.ahoyThumbGen)ahoyThumbGen(this,'Now Playing','')" />
 				<div class="rd-now">
 					<div class="rd-label">Playing Now</div>
 					<div class="rd-title" id="rd-now-title">—</div>

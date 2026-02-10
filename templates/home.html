@@ -17,6 +17,7 @@
                 <div class="dash-preview">
                     <img
                         :src="tvCurrent?.thumbnail || '/static/img/default-cover.jpg'"
+                        @error="generateThumb($event, tvCurrent)"
                         alt="Live TV" class="dash-bg">
                     <div class="dash-overlay">
                         <div class="dash-badges">
@@ -1517,6 +1518,11 @@ function homePage() {
             if (this.tvChannels.length === 0) return;
             const delta = direction === 'next' ? 1 : -1;
             this.selectTVChannel(this.tvChannelIndex + delta);
+        },
+
+        // Generate a branded canvas thumbnail when image fails to load
+        generateThumb(event, item) {
+            ahoyThumbGen(event.target, item?.title || 'Live TV', item?.category || '');
         },
 
         // Hero navigation

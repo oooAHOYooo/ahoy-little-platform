@@ -250,6 +250,7 @@
         const img = document.createElement('img');
         img.className = 'program-thumb';
         img.alt = item?.title || '';
+        img.onerror = function () { if (window.ahoyThumbGen) ahoyThumbGen(img, item?.title || '', item?.category || ''); };
         img.src = item?.thumbnail || '/static/img/default-cover.jpg';
 
         const title = document.createElement('div');

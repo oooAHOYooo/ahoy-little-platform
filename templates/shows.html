@@ -69,6 +69,7 @@
                     <div class="hero-media" x-show="featuredShow">
                         <img
                             :src="featuredShow.thumbnail || '/static/img/default-cover.jpg'"
+                            @error="ahoyThumbGen($event.target, featuredShow.title, featuredShow.category)"
                             :alt="featuredShow.title"
                             class="hero-thumbnail image-placeholder">
                         <div class="hero-media-overlay">
@@ -183,6 +184,7 @@
                         <div class="show-thumbnail">
                             <img
                                 :src="show.thumbnail || '/static/img/default-cover.jpg'"
+                                @error="ahoyThumbGen($event.target, show.title, show.category)"
                                 :alt="show.title"
                                 loading="lazy"
                                 decoding="async"
@@ -240,6 +242,7 @@
                             <div class="col-thumbnail">
                                 <img
                                     :src="show.thumbnail || '/static/img/default-cover.jpg'"
+                                    @error="ahoyThumbGen($event.target, show.title, show.category)"
                                     :alt="show.title"
                                     loading="lazy"
                                     decoding="async"

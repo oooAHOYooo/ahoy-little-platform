@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260210purple' %}
+        {% set css_version = 'v20260210thumbs' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -429,6 +429,8 @@
         <!-- Alpine.js for reactive components -->
         <script defer
             src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <!-- Thumbnail fallback generator (canvas-based, ~1KB) -->
+        <script src="{{ url_for('static', filename='js/thumb-gen.js') }}?{{ css_version }}"></script>
         <!-- Mobile helpers -->
         <script defer
             src="{{ url_for('static', filename='js/mobile.js') }}?{{ css_version }}"></script>

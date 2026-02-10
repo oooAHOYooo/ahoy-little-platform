@@ -247,14 +247,22 @@
     const next = getNextSlot(engine.schedule, engine.selectedRow);
     if (slot) {
       if (engine.els.nowTitle) engine.els.nowTitle.textContent = slot.title || 'Now Playing';
-      if (engine.els.nowThumb && slot.thumb) engine.els.nowThumb.src = slot.thumb;
+      if (engine.els.nowThumb && slot.thumb) {
+        engine.els.nowThumb.dataset.thumbGenerated = '';
+        engine.els.nowThumb.onerror = function () { if (window.ahoyThumbGen) ahoyThumbGen(engine.els.nowThumb, slot.title || 'Now Playing', slot.category || ''); };
+        engine.els.nowThumb.src = slot.thumb;
+      }
       const npMeta = document.getElementById('playingNowMeta');
       if (npMeta) npMeta.textContent = slot.category || '';
       // Right dashboard
       const rdThumb = document.getElementById('rd-thumb');
       const rdNow = document.getElementById('rd-now-title');
       const rdCat = document.getElementById('rd-category');
-      if (rdThumb && slot.thumb) rdThumb.src = slot.thumb;
+      if (rdThumb && slot.thumb) {
+        rdThumb.dataset.thumbGenerated = '';
+        rdThumb.onerror = function () { if (window.ahoyThumbGen) ahoyThumbGen(rdThumb, slot.title || 'Now Playing', slot.category || ''); };
+        rdThumb.src = slot.thumb;
+      }
       if (rdNow) rdNow.textContent = slot.title || '—';
       if (rdCat) rdCat.textContent = slot.category || '—';
     }

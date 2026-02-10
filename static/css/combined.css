@@ -1523,9 +1523,17 @@ img[src*="default-cover.jpg"] {
         opacity: 1 !important;
     }
 
-    /* Mobile subpage hero: title-only (hide FA icons) */
+    /* Mobile subpage hero: hide FA icons, show logo */
     .podcasts-hero h1 i {
         display: none !important;
+    }
+    .subpage-hero-logo {
+        display: inline-block !important;
+        height: 28px;
+        width: auto;
+        vertical-align: middle;
+        margin-right: 8px;
+        filter: brightness(0) invert(1);
     }
 
     /* Add top margin so subheader is not flush with status bar */
@@ -3517,7 +3525,7 @@ img[src*="default-cover.jpg"] {
     }
 
     .mobile-dock .mobile-tab.active {
-        color: #f8fafc;
+        color: #f472b6;
     }
 
     .mobile-dock .mobile-tab.active::before {
@@ -3525,9 +3533,9 @@ img[src*="default-cover.jpg"] {
         position: absolute;
         inset: 4px;
         border-radius: 14px;
-        background: rgba(0, 0, 0, 0.52);
-        border: 1px solid rgba(255, 255, 255, 0.04);
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        background: rgba(244, 114, 182, 0.12);
+        border: 1px solid rgba(244, 114, 182, 0.2);
+        box-shadow: 0 2px 12px rgba(244, 114, 182, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.04);
         z-index: 1;
     }
 
@@ -3535,9 +3543,14 @@ img[src*="default-cover.jpg"] {
         opacity: 0;
     }
 
-    .mobile-dock .mobile-tab.active i,
+    .mobile-dock .mobile-tab.active i {
+        color: #f472b6;
+        font-weight: 600;
+        filter: drop-shadow(0 0 6px rgba(244, 114, 182, 0.4));
+    }
+
     .mobile-dock .mobile-tab.active span {
-        color: #f8fafc;
+        color: #f9a8d4;
         font-weight: 600;
     }
 

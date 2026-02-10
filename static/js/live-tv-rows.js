@@ -120,7 +120,11 @@
     const img = el.querySelector('img');
     const titleEl = el.querySelector('.live-tv-channel-preview-title');
     const metaEl = el.querySelector('.live-tv-channel-preview-meta');
-    if (img) img.src = data.thumb;
+    if (img) {
+      img.dataset.thumbGenerated = ''; // reset flag for new src
+      img.onerror = function () { if (window.ahoyThumbGen) ahoyThumbGen(img, data.title, data.meta); };
+      img.src = data.thumb;
+    }
     if (titleEl) titleEl.textContent = data.title;
     if (metaEl) metaEl.textContent = data.meta;
     const rect = button.getBoundingClientRect();
@@ -224,7 +228,12 @@
           // Update preview
           const thumb = scheduleNow?.thumb || ch.items?.[0]?.thumbnail || '/static/img/default-cover.jpg';
           const title = scheduleNow?.title || ch.items?.[0]?.title || '—';
-          if (state.nowThumb) state.nowThumb.src = thumb;
+          const category = scheduleNow?.category || ch.items?.[0]?.category || ch.name || '';
+          if (state.nowThumb) {
+            state.nowThumb.dataset.thumbGenerated = '';
+            state.nowThumb.onerror = function () { if (window.ahoyThumbGen) ahoyThumbGen(state.nowThumb, cleanTitle(title), category); };
+            state.nowThumb.src = thumb;
+          }
           if (state.nowTitle) state.nowTitle.textContent = cleanTitle(title);
 
           // Update "Up next" line if the schedule engine can find it.

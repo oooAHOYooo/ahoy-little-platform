@@ -5,7 +5,7 @@
 {% block content %}
 <div class="acct">
   {% from "macros/subpage_header.html" import subpage_hero %}
-  {{ subpage_hero(title="Profile", subtitle="Your account and saves.", icon_class="fas fa-user-circle") }}
+  {{ subpage_hero(title="Profile", subtitle="Your account and saves.", logo_src=url_for('static', filename='img/ahoy_logo.png')) }}
 
   {% if current_user.is_authenticated %}
     <div class="acct-head">
