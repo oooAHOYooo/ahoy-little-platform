@@ -19133,34 +19133,81 @@ img.loading {
     background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
 }
 
-/* Column widths: fixed layout so headers align with cells */
-.music-table th.col-index,
-.music-table td.col-index {
-    width: 48px;
-    min-width: 48px;
-    text-align: center;
-    padding: 10px 6px;
+/* Column order: 1. Album art  2. Title  3. Artist  4. Duration  5. Plays  6. Actions — all left-aligned */
+.music-table th.col-art,
+.music-table td.col-art {
+    width: 56px;
+    min-width: 56px;
+    padding: 10px 12px;
+    text-align: left;
     vertical-align: middle;
 }
 
 .music-table th.col-title,
 .music-table td.col-title {
-    min-width: 0;
+    min-width: 140px;
     padding: 10px 12px;
+    text-align: left;
 }
 
 .music-table th.col-artist,
 .music-table td.col-artist {
-    min-width: 0;
+    min-width: 120px;
     padding: 10px 12px;
+    text-align: left;
+}
+
+/* Combined title + artist column (Spotify-style list) */
+.music-table th.col-title-artist,
+.music-table td.col-title-artist {
+    min-width: 140px;
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.music-table .music-track-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.music-table .music-track-meta .title-link {
+    display: block;
+    min-width: 0;
+    text-decoration: none;
+}
+
+.music-table .music-track-meta .title-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 1.3;
+}
+
+.music-table .music-track-meta .title-link:hover .title-text {
+    color: #fff;
+}
+
+.music-table .music-track-artist {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 12px;
+    line-height: 1.3;
 }
 
 .music-table th.col-duration,
 .music-table td.col-duration {
-    width: 58px;
-    min-width: 58px;
+    width: 64px;
+    min-width: 64px;
     padding: 10px 12px;
-    text-align: right;
+    text-align: left;
 }
 
 .music-table th.col-plays,
@@ -19168,22 +19215,15 @@ img.loading {
     width: 56px;
     min-width: 56px;
     padding: 10px 12px;
-    text-align: right;
-    cursor: pointer;
-    user-select: none;
-    transition: color 0.2s ease;
-}
-
-.music-table th.col-plays:hover {
-    color: rgba(255, 255, 255, 0.9);
+    text-align: left;
 }
 
 .music-table th.col-action,
 .music-table td.col-action {
-    width: 132px;
-    min-width: 132px;
-    padding: 10px 8px;
-    text-align: center;
+    width: 120px;
+    min-width: 120px;
+    padding: 10px 12px;
+    text-align: left;
     vertical-align: middle;
 }
 
@@ -19235,102 +19275,79 @@ img.loading {
     color: rgba(255, 255, 255, 0.85);
 }
 
-.music-table .music-table-thumb {
-    width: 34px;
-    height: 34px;
+/* Album art column: square art + play overlay */
+.music-table .music-table-art-wrap {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.music-table .music-table-art {
+    width: 40px;
+    height: 40px;
     border-radius: 6px;
     object-fit: cover;
     display: block;
-    margin: 0 auto;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.music-table td.col-index {
-    position: relative;
-    font-variant-numeric: tabular-nums;
-}
-
-.music-table td.col-index .track-index {
-    color: rgba(255, 255, 255, 0.52);
-    font-size: 12px;
-    font-weight: 500;
-    transition: opacity 0.18s ease;
-}
-
-.music-table td.col-index .play-btn {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.78);
-    padding: 0;
-    border-radius: 8px;
-    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.18s ease;
-    width: 30px;
-    height: 30px;
-    display: inline-flex;
+.music-table .music-table-art-play {
+    position: absolute;
+    inset: 0;
+    border: none;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 10px;
     opacity: 0;
-    pointer-events: none;
+    transition: opacity 0.2s ease, background 0.2s ease;
+    font-size: 14px;
 }
 
-.music-table tbody tr:hover td.col-index .play-btn,
-.music-table tbody tr.playing td.col-index .play-btn {
+.music-table tbody tr:hover .music-table-art-play,
+.music-table tbody tr.playing .music-table-art-play {
     opacity: 1;
-    pointer-events: auto;
 }
 
-.music-table tbody tr:hover td.col-index .track-index,
-.music-table tbody tr.playing td.col-index .track-index {
-    opacity: 0;
+.music-table .music-table-art-play:hover {
+    background: rgba(0, 0, 0, 0.65);
 }
 
-.music-table td.col-index .play-btn:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.25);
-    color: rgba(255, 255, 255, 1);
+.music-table tbody tr.playing .music-table-art-play {
+    background: rgba(99, 102, 241, 0.75);
 }
 
-.music-table td.col-index .play-btn:focus-visible {
+.music-table .music-table-art-play:focus-visible {
     opacity: 1;
-    pointer-events: auto;
     outline: none;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
 }
 
-.music-table tbody tr.playing td.col-index .play-btn {
-    background: rgba(99, 102, 241, 0.18);
-    border-color: rgba(99, 102, 241, 0.45);
-    color: rgba(255, 255, 255, 1);
-}
-
-.music-table td.col-index .play-btn i {
+/* Title column (legacy; title now in .col-title-artist .music-track-meta) */
+.music-table td.col-title .title-link,
+.music-table td.col-title-artist .title-link {
     display: block;
-    line-height: 1;
-}
-
-.music-table td.col-title .title-cell {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
     min-width: 0;
     text-decoration: none;
 }
 
-.music-table td.col-title .title-meta {
-    min-width: 0;
-    display: flex;
-}
-
-.music-table td.col-title .title-text {
+.music-table td.col-title .title-text,
+.music-table td.col-title-artist .title-text {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     color: rgba(255, 255, 255, 0.95);
     font-weight: 500;
     display: block;
+}
+
+.music-table td.col-title .title-link:hover .title-text,
+.music-table td.col-title-artist .title-link:hover .title-text {
+    color: #fff;
 }
 
 .music-table td.col-artist {
@@ -19350,84 +19367,43 @@ img.loading {
     font-variant-numeric: tabular-nums;
 }
 
+/* Music table action bar: square buttons, left-aligned */
 .music-table td.col-action {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
+    justify-content: flex-start;
+    gap: 8px;
 }
 
-.music-table td.col-action .queue-btn,
-.music-table td.col-action .boost-btn,
-.music-table td.col-action .bm-btn {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.58);
-    padding: 0;
-    border-radius: 8px;
-    transition: all 0.2s ease;
+.music-table td.col-action .episode-btn {
     width: 32px;
     height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 12px;
+    border-radius: 6px;
+    flex-shrink: 0;
 }
 
-.music-table td.col-action .queue-btn:hover,
-.music-table td.col-action .boost-btn:hover,
-.music-table td.col-action .bm-btn:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.25);
+.music-table td.col-action .episode-btn.queue-btn.in-queue {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.3);
     color: rgba(255, 255, 255, 0.95);
-    transform: translateY(-1px);
 }
 
-.music-table td.col-action .boost-btn:hover {
+.music-table td.col-action .episode-btn.boost-btn:hover {
     color: rgba(236, 72, 153, 0.95);
 }
 
-.music-table td.col-action .bm-btn.bookmarked,
-.music-table td.col-action .bm-btn[aria-pressed="true"] {
-    background: rgba(0, 212, 255, 0.12);
-    border-color: rgba(0, 212, 255, 0.35);
-    color: rgba(255, 255, 255, 0.96);
-}
-
-.music-table td.col-action .bm-btn.bookmarked:hover,
-.music-table td.col-action .bm-btn[aria-pressed="true"]:hover {
-    background: rgba(0, 212, 255, 0.18);
-    border-color: rgba(0, 212, 255, 0.5);
-}
-
-/* Queue button in music list view */
-.music-table td.col-action .queue-container {
-    display: inline-flex;
-}
-
-.music-table td.col-action .queue-btn {
-    font-size: 11px;
-}
-
-.music-table td.col-action .queue-btn.in-queue {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: rgba(255, 255, 255, 0.95);
-    box-shadow: none;
-}
-
-/* Tablet: horizontal scroll when needed, aligned columns */
+/* Tablet: no horizontal scroll, same column structure as mobile */
 @media (max-width: 900px) {
     .music-table-wrap {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        margin: 0 -8px;
-        padding: 0 8px;
+        overflow: visible;
+        margin: 0;
+        padding: 0;
     }
 
     .music-table {
-        min-width: 560px;
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
     }
 
     .music-table th,
@@ -19436,16 +19412,22 @@ img.loading {
         font-size: 12px;
     }
 
-    .music-table th.col-index,
-    .music-table td.col-index {
-        width: 46px;
-        min-width: 46px;
-        padding: 8px 6px;
+    .music-table th.col-art,
+    .music-table td.col-art {
+        width: 48px;
+        min-width: 48px;
     }
 
-    .music-table .music-table-thumb {
-        width: 32px;
-        height: 32px;
+    .music-table th.col-title-artist,
+    .music-table td.col-title-artist {
+        width: 1%;
+        min-width: 0;
+    }
+
+    .music-table .music-table-art-wrap,
+    .music-table .music-table-art {
+        width: 36px;
+        height: 36px;
     }
 
     .music-table th.col-duration,
@@ -19462,13 +19444,104 @@ img.loading {
 
     .music-table th.col-action,
     .music-table td.col-action {
-        width: 124px;
-        min-width: 124px;
-        padding: 8px 6px;
+        width: 110px;
+        min-width: 110px;
     }
 }
 
-/* Mobile: horizontal scroll, sticky header, aligned columns */
+/* Mobile: no horizontal scroll — Spotify-style list, all info visible */
+@media (max-width: 768px) {
+    .music-table-wrap {
+        overflow: visible;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .music-table {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
+        font-size: 13px;
+    }
+
+    .music-table th.col-art,
+    .music-table td.col-art {
+        width: 48px;
+        min-width: 48px;
+        max-width: 48px;
+        padding: 10px 8px 10px 12px;
+    }
+
+    .music-table th.col-title-artist,
+    .music-table td.col-title-artist {
+        width: 1%;
+        min-width: 0;
+        padding: 10px 8px;
+        overflow: hidden;
+    }
+
+    .music-table .music-track-meta {
+        gap: 2px;
+    }
+
+    .music-table .music-track-meta .title-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .music-table .music-track-artist {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .music-table th.col-duration,
+    .music-table td.col-duration {
+        width: 44px;
+        min-width: 44px;
+        max-width: 44px;
+        padding: 10px 4px;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.6);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .music-table th.col-plays-header,
+    .music-table th.col-plays,
+    .music-table td.col-plays {
+        display: none;
+    }
+
+    .music-table th.col-action,
+    .music-table td.col-action {
+        width: 100px;
+        min-width: 100px;
+        max-width: 100px;
+        padding: 10px 8px 10px 4px;
+    }
+
+    .music-table .music-table-art-wrap,
+    .music-table .music-table-art {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+    }
+
+    .music-table td.col-action .episode-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+        border-radius: 8px;
+        margin: 0 2px;
+    }
+}
+
 @media (max-width: 640px) {
     .music-list {
         margin: 0 -12px;
@@ -19476,102 +19549,63 @@ img.loading {
         overflow: hidden;
     }
 
-    .music-table-wrap {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-    }
-
-    .music-table {
-        min-width: 520px;
-        width: 100%;
-        font-size: 12px;
-    }
-
-    .music-table thead {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-
-    .music-table th {
-        font-size: 10px;
-        padding: 8px 10px;
-    }
-
+    .music-table th,
     .music-table td {
+        padding: 8px 6px;
         font-size: 12px;
-        padding: 8px 10px;
     }
 
-    .music-table th.col-index,
-    .music-table td.col-index {
-        width: 44px;
-        min-width: 44px;
-        padding: 6px 8px;
+    .music-table th.col-art,
+    .music-table td.col-art {
+        width: 42px;
+        min-width: 42px;
+        max-width: 42px;
+        padding: 8px 6px 8px 10px;
     }
 
-    .music-table .music-table-thumb {
-        width: 30px;
-        height: 30px;
+    .music-table .music-table-art-wrap,
+    .music-table .music-table-art {
+        width: 40px;
+        height: 40px;
     }
 
-    .music-table th.col-title,
-    .music-table td.col-title {
-        padding: 8px 10px;
+    .music-table .music-track-meta .title-text {
+        font-size: 13px;
     }
 
-    .music-table th.col-artist,
-    .music-table td.col-artist {
-        padding: 8px 10px;
+    .music-table .music-track-artist {
+        font-size: 12px;
     }
 
     .music-table th.col-duration,
     .music-table td.col-duration {
-        width: 52px;
-        min-width: 52px;
-        padding: 8px 10px;
-    }
-
-    .music-table th.col-plays,
-    .music-table td.col-plays {
-        width: 48px;
-        min-width: 48px;
-        padding: 8px 10px;
+        width: 40px;
+        min-width: 40px;
+        max-width: 40px;
+        padding: 8px 2px;
+        font-size: 11px;
     }
 
     .music-table th.col-action,
     .music-table td.col-action {
-        width: 112px;
-        min-width: 112px;
-        padding: 8px 6px;
+        width: 88px;
+        min-width: 88px;
+        max-width: 88px;
+        padding: 8px 6px 8px 2px;
+    }
+
+    .music-table td.col-action .episode-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
     }
 
     .music-table tbody tr:hover {
         transform: none;
     }
 
-    .music-table td.col-index .play-btn {
-        width: 26px;
-        height: 26px;
-        font-size: 10px;
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    .music-table td.col-index .track-index {
-        display: none;
-    }
-
-    .music-table td.col-action .bm-btn,
-    .music-table td.col-action .queue-btn,
-    .music-table td.col-action .boost-btn {
-        width: 26px;
-        height: 26px;
-        font-size: 10px;
-        border-radius: 7px;
+    .music-table .music-table-art-play {
+        font-size: 12px;
     }
 
     .music-table tbody td:before {
@@ -25097,13 +25131,15 @@ body.has-player {
     position: relative;
 }
 
-/* Left: album + track info */
+/* Left: album + track info — ensure title and artist are always visible */
 .now-playing-left {
     display: flex;
     align-items: center;
     gap: 12px;
     min-width: 0;
     grid-column: 1;
+    /* Reserve space so track title and artist are never squeezed to zero */
+    min-width: 140px;
 }
 
 /* Center: transport (prev, play, next) + ±5s seek */
@@ -25253,6 +25289,8 @@ body.has-player {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    /* Ensure at least two lines (title + artist) have room */
+    min-width: 80px;
 }
 
 .now-playing-title {
@@ -25263,15 +25301,17 @@ body.has-player {
     overflow: hidden;
     text-overflow: ellipsis;
     transition: color 0.3s ease;
+    line-height: 1.25;
 }
 
 .now-playing-artist {
     font-size: 12px;
-    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+    color: var(--text-secondary, rgba(255, 255, 255, 0.85));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     transition: color 0.3s ease;
+    line-height: 1.25;
 }
 
 .now-playing-secondary {

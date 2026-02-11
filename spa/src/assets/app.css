@@ -16,15 +16,40 @@
 .app {
   --ds-topbar-height: 44px;
 }
+/* Top nav: dark liquid glass (glassmorphism) */
 .app .app-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  background: rgba(12, 12, 14, 0.85);
-  backdrop-filter: blur(12px);
+  background: linear-gradient(
+    180deg,
+    rgba(8, 8, 12, 0.82) 0%,
+    rgba(6, 6, 10, 0.78) 50%,
+    rgba(5, 5, 8, 0.75) 100%
+  );
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset,
+    0 4px 24px rgba(0, 0, 0, 0.35);
+}
+/* Let header glass show through inner bars */
+.app .app-header .navbar {
+  background: transparent;
+  border-bottom: none;
+  box-shadow: none;
+}
+.app .app-header .mobile-status-bar {
+  background: transparent;
+}
+.app .app-header .mobile-nav-root {
+  background: transparent;
+}
+.app .app-header .mobile-top-nav {
+  background: transparent;
 }
 .app .main-content {
   padding-top: var(--ds-topbar-height);
@@ -32,6 +57,17 @@
 }
 .app .app-shell {
   min-height: calc(100vh - var(--ds-topbar-height));
+}
+.app .app-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.app .content-area.app-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 .app .app-sidebar {
   top: var(--ds-topbar-height);
@@ -47,10 +83,15 @@
     padding-top: var(--ds-topbar-height);
   }
 
-  /* Now-playing bar sits above the bottom nav (nav ~50px + safe-area; bar above with 8px gap) */
-  .now-playing-wrapper,
-  .now-playing-sticky {
-    bottom: calc(58px + env(safe-area-inset-bottom)) !important;
+  /* Keep mini player above the full two-row mobile dock */
+  .app .now-playing-wrapper,
+  .app .now-playing-sticky {
+    bottom: calc(var(--mobile-dock-height, 140px) + env(safe-area-inset-bottom) + 8px) !important;
+  }
+
+  /* Reserve enough content space for dock + mini player stack */
+  .app .spa-main.has-player {
+    padding-bottom: calc(var(--mobile-dock-height, 140px) + 88px + env(safe-area-inset-bottom)) !important;
   }
 }
 

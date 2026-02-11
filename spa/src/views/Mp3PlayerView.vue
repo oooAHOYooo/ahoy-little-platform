@@ -7,7 +7,7 @@
       </div>
     </section>
 
-    <!-- Winamp-style player window -->
+    <!-- Winamp-style player window (fills remaining space) -->
     <div class="winamp-window">
       <!-- Title bar -->
       <div class="winamp-titlebar">
@@ -268,29 +268,66 @@ onUnmounted(() => {
 
 <style scoped>
 .mp3-page {
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
   background: #0e0e10;
-  padding: 24px 16px 80px;
+  padding: 12px 12px 80px;
 }
 
+@media (min-width: 640px) {
+  .mp3-page {
+    padding: 20px 20px 80px;
+  }
+}
+
+.mp3-hero.podcasts-hero {
+  flex-shrink: 0;
+}
 .mp3-hero.podcasts-hero .podcasts-hero-inner h1 {
   margin: 0 0 6px 0;
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
+}
+@media (min-width: 640px) {
+  .mp3-hero.podcasts-hero .podcasts-hero-inner h1 {
+    font-size: 28px;
+  }
 }
 .mp3-hero.podcasts-hero .podcasts-hero-inner p {
   margin: 0;
   color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+}
+@media (min-width: 640px) {
+  .mp3-hero.podcasts-hero .podcasts-hero-inner p {
+    font-size: inherit;
+  }
 }
 
-/* Winamp-style window */
+/* Winamp-style window — responsive, fills parent */
 .winamp-window {
-  max-width: 420px;
-  margin: 0 auto 24px;
-  border-radius: 8px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: min(520px, 100%);
+  margin: 0 auto 16px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 0 0 2px #1a1a1a, 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 153, 0, 0.08);
   font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+@media (min-width: 640px) {
+  .winamp-window {
+    max-width: min(560px, 100%);
+    margin-bottom: 24px;
+    border-radius: 8px;
+  }
 }
 
 .winamp-titlebar {
@@ -469,13 +506,20 @@ onUnmounted(() => {
   border: none;
 }
 
-/* Playlist panel */
+/* Playlist panel — fills remaining space, scrolls */
 .winamp-playlist-panel {
   background: linear-gradient(180deg, #141418 0%, #0c0c0e 100%);
   border-top: 1px solid rgba(255, 153, 0, 0.12);
-  max-height: 320px;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .winamp-playlist-panel {
+    max-height: 360px;
+  }
 }
 
 .winamp-playlist-header {
@@ -559,9 +603,17 @@ onUnmounted(() => {
 }
 
 .mp3-disclaimer {
+  flex-shrink: 0;
   text-align: center;
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(255, 255, 255, 0.35);
-  margin: 0;
+  margin: 0 0 8px;
+}
+
+@media (min-width: 640px) {
+  .mp3-disclaimer {
+    font-size: 12px;
+    margin-bottom: 0;
+  }
 }
 </style>

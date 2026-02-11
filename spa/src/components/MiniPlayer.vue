@@ -30,11 +30,9 @@
           </div>
           <div class="now-playing-info">
             <template v-if="playerStore.currentTrack">
-              <div class="now-playing-title">{{ playerStore.currentTrack.title }}</div>
+              <div class="now-playing-title" :title="displayTitle">{{ displayTitle }}</div>
               <div class="now-playing-secondary">
-                <span class="now-playing-artist">{{
-                  playerStore.currentTrack.artist || playerStore.currentTrack.host || 'Unknown'
-                }}</span>
+                <span class="now-playing-artist" :title="displayArtist">{{ displayArtist }}</span>
                 <span class="category-pill">
                   <i class="fas fa-music"></i> {{ trackTypeLabel }}
                 </span>
@@ -253,6 +251,75 @@
             />
           </div>
         </div>
+
+        <!-- Mobile-only compact controls (Spotify-like) -->
+        <div class="now-playing-mobile-shell">
+          <div class="now-playing-mobile-controls">
+            <button
+              type="button"
+              class="now-playing-btn"
+              :class="{ active: playerStore.shuffle, disabled: !playerStore.currentTrack }"
+              :disabled="!playerStore.currentTrack"
+              title="Shuffle"
+              @click="playerStore.shuffle = !playerStore.shuffle"
+            >
+              <i class="fas fa-random"></i>
+            </button>
+            <button
+              type="button"
+              class="now-playing-btn"
+              :class="{ disabled: !playerStore.currentTrack }"
+              :disabled="!playerStore.currentTrack"
+              title="Previous"
+              @click="playerStore.previous()"
+            >
+              <i class="fas fa-step-backward"></i>
+            </button>
+            <button
+              type="button"
+              class="now-playing-btn now-playing-play-btn"
+              :class="{ disabled: !playerStore.currentTrack, loading: playerStore.loading }"
+              :disabled="!playerStore.currentTrack"
+              :title="playerStore.loading ? 'Loading...' : (playerStore.isPlaying ? 'Pause' : 'Play')"
+              @click="onTogglePlay"
+            >
+              <i v-if="playerStore.loading" class="fas fa-spinner fa-spin"></i>
+              <i v-else :class="playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+            </button>
+            <button
+              type="button"
+              class="now-playing-btn"
+              :class="{ disabled: !playerStore.currentTrack }"
+              :disabled="!playerStore.currentTrack"
+              title="Next"
+              @click="playerStore.next()"
+            >
+              <i class="fas fa-step-forward"></i>
+            </button>
+            <button
+              type="button"
+              class="now-playing-btn"
+              :class="{ active: playerStore.repeat, disabled: !playerStore.currentTrack }"
+              :disabled="!playerStore.currentTrack"
+              title="Repeat"
+              @click="playerStore.repeat = !playerStore.repeat"
+            >
+              <i class="fas fa-redo"></i>
+            </button>
+          </div>
+
+          <div class="now-playing-mobile-progress">
+            <span class="now-playing-mobile-time">{{ mobileCurrentTimeLabel }}</span>
+            <div
+              class="now-playing-mobile-progress-track"
+              ref="mobileSeekRef"
+              @click="onMobileSeek"
+            >
+              <div class="now-playing-mobile-progress-fill" :style="{ width: playerStore.progress + '%' }"></div>
+            </div>
+            <span class="now-playing-mobile-time">{{ mobileDurationLabel }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -272,6 +339,19 @@ const bookmarks = useBookmarks()
 const haptics = useHaptics()
 
 const showQueue = ref(false)
+const mobileSeekRef = ref(null)
+
+const displayTitle = computed(() => {
+  const t = playerStore.currentTrack
+  if (!t) return ''
+  return t.title || t.name || 'Unknown track'
+})
+
+const displayArtist = computed(() => {
+  const t = playerStore.currentTrack
+  if (!t) return ''
+  return t.artist || t.artist_name || t.host || t.artistName || 'Unknown artist'
+})
 
 const trackTypeLabel = computed(() => {
   const t = playerStore.currentTrack
@@ -291,6 +371,33 @@ const volumeIconClass = computed(() => {
   if (playerStore.volume > 0) return 'fas fa-volume-down'
   return 'fas fa-volume-off'
 })
+
+const mobileCurrentTimeLabel = computed(() => {
+  if (!playerStore.currentTrack) return '-:--'
+  return formatMiniTime(playerStore.currentTime)
+})
+
+const mobileDurationLabel = computed(() => {
+  if (!playerStore.currentTrack) return '-:--'
+  return formatMiniTime(playerStore.duration)
+})
+
+function formatMiniTime(seconds) {
+  const value = Number(seconds)
+  if (!isFinite(value) || value < 0) return '-:--'
+  const m = Math.floor(value / 60)
+  const s = Math.floor(value % 60)
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
+function onMobileSeek(event) {
+  const el = mobileSeekRef.value
+  if (!el || !playerStore.duration) return
+  const rect = el.getBoundingClientRect()
+  const x = Math.max(0, Math.min(rect.width, event.clientX - rect.left))
+  const percent = (x / rect.width) * 100
+  playerStore.seek(percent)
+}
 
 function onTogglePlay() {
   haptics.onPlay()
@@ -342,5 +449,64 @@ function playFromQueue(index) {
 }
 .now-playing-queue-panel {
   z-index: 1000;
+}
+
+.now-playing-mobile-shell {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .now-playing-container {
+    display: none;
+  }
+
+  .now-playing-mobile-shell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    height: 100%;
+    padding: 10px 16px 12px;
+  }
+
+  .now-playing-mobile-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .now-playing-mobile-progress {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .now-playing-mobile-time {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.65);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .now-playing-mobile-progress-track {
+    position: relative;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.24);
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .now-playing-mobile-progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 999px;
+    width: 0%;
+  }
 }
 </style>

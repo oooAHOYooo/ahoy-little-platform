@@ -2228,15 +2228,22 @@ img[src*="default-cover.jpg"] {
 /* Sticky Now Playing footer (mobile) - unified with bottom nav bars */
 @media (max-width: 768px) {
 
-    /* Shared footer glass so player + nav read as one strip */
+    /* Dark glass footer – blur-through, subtle sheen, reads as one strip with dock */
     :root {
         --mobile-dock-height: 140px;
-        --footer-glass-bg: rgba(10, 10, 12, 0.98);
-        --footer-glass-gradient: linear-gradient(180deg, rgba(20, 20, 26, 0.98) 0%, rgba(10, 10, 12, 0.98) 100%);
+        --footer-glass-blur: blur(28px) saturate(140%);
+        --footer-glass-bg: rgba(6, 6, 12, 0.78);
+        --footer-glass-gradient: linear-gradient(180deg, rgba(14, 12, 22, 0.92) 0%, rgba(6, 6, 12, 0.85) 50%, rgba(4, 4, 10, 0.88) 100%);
         --footer-glass-border: 1px solid rgba(255, 255, 255, 0.06);
         --footer-glass-divider: rgba(255, 255, 255, 0.04);
-        --footer-glass-sheen: rgba(255, 255, 255, 0.05);
-        --footer-glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.45), 0 -6px 18px rgba(0, 0, 0, 0.45);
+        --footer-glass-sheen: rgba(255, 255, 255, 0.04);
+        --footer-glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.5), 0 -8px 24px rgba(0, 0, 0, 0.55);
+    }
+
+    /* Mini player above bottom nav so it’s visible when playing (music/radio/podcasts) */
+    .now-playing-wrapper,
+    .now-playing-sticky {
+        z-index: 10007 !important;
     }
 
     .now-playing-sticky {
@@ -2244,15 +2251,14 @@ img[src*="default-cover.jpg"] {
         left: 0;
         right: 0;
         bottom: calc(var(--mobile-dock-height, 140px) + env(safe-area-inset-bottom));
-        z-index: 10005;
-        background: var(--footer-glass-bg);
+        background: var(--footer-glass-gradient);
         backdrop-filter: var(--footer-glass-blur);
         -webkit-backdrop-filter: var(--footer-glass-blur);
         color: #e5e7eb;
         border-top: none;
         border-bottom: var(--footer-glass-border);
         padding-bottom: 0;
-        box-shadow: none;
+        box-shadow: var(--footer-glass-shadow);
         border-radius: 0;
     }
 
@@ -3399,7 +3405,7 @@ img[src*="default-cover.jpg"] {
         display: none !important;
     }
 
-    /* Single unified dock: flush to bottom, two rows, all icons visible */
+    /* Single unified dock: dark glass strip, matches now-playing bar above */
     .mobile-dock {
         position: fixed !important;
         left: 0 !important;
@@ -3414,13 +3420,13 @@ img[src*="default-cover.jpg"] {
         flex-direction: column !important;
         visibility: visible !important;
         opacity: 1 !important;
-        /* Darker glass – keeps blur, darker tint */
-        background: rgba(4, 4, 6, 0.82);
+        background: linear-gradient(180deg, rgba(10, 8, 16, 0.88) 0%, rgba(4, 4, 8, 0.82) 50%, rgba(2, 2, 6, 0.88) 100%);
         border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 0;
-        box-shadow: none;
-        backdrop-filter: blur(32px) saturate(150%);
-        -webkit-backdrop-filter: blur(32px) saturate(150%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 -4px 20px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(28px) saturate(140%);
+        -webkit-backdrop-filter: blur(28px) saturate(140%);
         overflow: visible;
         padding: 12px 8px calc(14px + env(safe-area-inset-bottom)) 8px;
     }
@@ -3430,7 +3436,7 @@ img[src*="default-cover.jpg"] {
         position: absolute;
         inset: 0;
         border-radius: inherit;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, transparent 50%);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 45%);
         pointer-events: none;
         z-index: 0;
     }

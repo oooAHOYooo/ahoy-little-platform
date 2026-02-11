@@ -174,6 +174,11 @@ export const usePlayerStore = defineStore('player', () => {
     }
   }
 
+  /** Resume current track (no-op if nothing loaded). Used by Home radio card. */
+  function resume() {
+    play()
+  }
+
   function seek(percent) {
     const a = getAudio()
     if (a.duration && isFinite(a.duration)) {
@@ -288,6 +293,7 @@ export const usePlayerStore = defineStore('player', () => {
     isMuted,
     play,
     pause,
+    resume,
     togglePlay,
     seek,
     setVolume,

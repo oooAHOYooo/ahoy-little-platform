@@ -2,7 +2,7 @@
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-logo">
-        <i class="fas fa-anchor" style="font-size:36px;color:var(--accent-primary,#6ddcff)"></i>
+        <img src="/ahoy_logo.png" alt="Ahoy" class="auth-logo-img" />
         <h1>Ahoy</h1>
       </div>
 
@@ -106,6 +106,13 @@ async function onSubmit() {
 .auth-logo {
   text-align: center;
   margin-bottom: 24px;
+}
+.auth-logo-img {
+  display: block;
+  margin: 0 auto;
+  height: 48px;
+  width: auto;
+  object-fit: contain;
 }
 .auth-logo h1 {
   font-size: 24px;

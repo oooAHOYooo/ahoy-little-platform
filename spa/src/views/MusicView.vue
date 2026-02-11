@@ -106,14 +106,10 @@
           <table class="music-table">
             <thead>
               <tr>
-                <th class="col-index">#</th>
-                <th class="col-title">Title</th>
-                <th class="col-artist">Artist</th>
-                <th class="col-plays">Plays</th>
-                <th class="col-duration" aria-label="Duration">
-                  <i class="far fa-clock" aria-hidden="true"></i>
-                  <span class="sr-only">Duration</span>
-                </th>
+                <th class="col-art">Album</th>
+                <th class="col-title-artist">Track</th>
+                <th class="col-duration">Duration</th>
+                <th class="col-plays col-plays-header">Plays</th>
                 <th class="col-action" aria-label="Actions"></th>
               </tr>
             </thead>
@@ -125,70 +121,148 @@
                 :class="{ playing: playerStore.currentTrack?.id === track.id }"
                 @click="playTrackAtFilteredIndex(idx)"
               >
-                <td class="col-index">
-                  <button
-                    type="button"
-                    class="play-btn"
-                    :aria-label="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'Pause' : 'Play'"
-                    @click.stop="playTrackAtFilteredIndex(idx)"
-                  >
-                    <i :class="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
-                  </button>
-                  <span class="track-index">{{ idx + 1 }}</span>
-                </td>
-                <td class="col-title">
-                  <router-link :to="`/music/${track.id}`" class="title-cell" @click.stop>
+                <td class="col-art">
+                  <div class="music-table-art-wrap">
                     <img
-                      class="music-table-thumb"
+                      class="music-table-art"
                       :src="getTrackCover(track)"
                       :alt="track.title"
                       loading="lazy"
                       @error="($event.target).src = '/static/img/default-cover.jpg'"
                     />
-                    <span class="title-meta">
-                      <span class="title-text">{{ track.title }}</span>
-                    </span>
-                  </router-link>
+                    <button
+                      type="button"
+                      class="music-table-art-play"
+                      :aria-label="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'Pause' : 'Play'"
+                      @click.stop="playTrackAtFilteredIndex(idx)"
+                    >
+                      <i :class="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'" aria-hidden="true"></i>
+                    </button>
+                  </div>
                 </td>
-                <td class="col-artist">{{ track.artist }}</td>
-                <td class="col-plays">{{ track.play_count || 0 }}</td>
+                <td class="col-title-artist">
+                  <div class="music-track-meta">
+                    <router-link :to="`/music/${track.id}`" class="title-link" @click.stop>
+                      <span class="title-text">{{ track.title }}</span>
+                    </router-link>
+                    <span class="music-track-artist">{{ track.artist }}</span>
+                  </div>
+                </td>
                 <td class="col-duration">{{ formatDuration(track.duration_seconds) }}</td>
+                <td class="col-plays">{{ track.play_count || 0 }}</td>
                 <td class="col-action">
                   <button
                     type="button"
-                    class="action-btn queue-btn"
-                    :class="{ 'in-queue': playerStore.isInQueue({ id: track.id }) }"
+                    class="episode-btn queue-btn"
                     title="Add to queue"
-                    :aria-label="playerStore.isInQueue({ id: track.id }) ? 'In queue' : 'Add to queue'"
+                    aria-label="Add to queue"
                     @click.stop="addToQueue(track)"
                   >
-                    <i :class="playerStore.isInQueue({ id: track.id }) ? 'fas fa-check' : 'fas fa-plus'"></i>
+                    <i class="fas fa-plus" aria-hidden="true"></i>
                     <span class="sr-only">Add to queue</span>
                   </button>
                   <button
                     type="button"
-                    class="action-btn boost-btn"
+                    class="episode-btn boost-btn"
                     :title="'Boost ' + (track.artist || 'artist')"
                     aria-label="Boost artist"
                     @click.stop="openBoost(track)"
                   >
-                    <i class="fas fa-heart"></i>
+                    <i class="fas fa-bolt" aria-hidden="true"></i>
                     <span class="sr-only">Boost</span>
                   </button>
                   <button
                     type="button"
-                    class="action-btn bm-btn"
+                    class="episode-btn bm-btn"
                     :class="{ bookmarked: bookmarks.isBookmarked({ id: track.id }) }"
                     :aria-pressed="bookmarks.isBookmarked({ id: track.id })"
                     title="Save"
                     @click.stop="toggleBookmark(track)"
                   >
-                    <i :class="bookmarks.isBookmarked({ id: track.id }) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+                    <i :class="bookmarks.isBookmarked({ id: track.id }) ? 'fas fa-bookmark' : 'far fa-bookmark'" aria-hidden="true"></i>
+                    <span class="sr-only">Save</span>
                   </button>
                 </td>
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="music-mobile-list">
+          <div
+            v-for="(track, idx) in filteredTracks"
+            :key="'mobile-' + track.id"
+            class="music-mobile-row"
+            :class="{ playing: playerStore.currentTrack?.id === track.id }"
+            @click="playTrackAtFilteredIndex(idx)"
+          >
+            <div class="music-mobile-art">
+              <img
+                class="music-mobile-art-img"
+                :src="getTrackCover(track)"
+                :alt="track.title"
+                loading="lazy"
+                @error="($event.target).src = '/static/img/default-cover.jpg'"
+              />
+              <button
+                type="button"
+                class="music-mobile-art-play"
+                :aria-label="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'Pause' : 'Play'"
+                @click.stop="playTrackAtFilteredIndex(idx)"
+              >
+                <i :class="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'" aria-hidden="true"></i>
+              </button>
+            </div>
+
+            <div class="music-mobile-meta">
+              <router-link :to="`/music/${track.id}`" class="music-mobile-title-link" @click.stop>
+                <span class="music-mobile-title">{{ track.title }}</span>
+              </router-link>
+              <span class="music-mobile-artist">{{ track.artist }}</span>
+            </div>
+
+            <div class="music-mobile-right">
+              <div class="music-mobile-duration">{{ formatDuration(track.duration_seconds) }}</div>
+              <div class="music-mobile-actions">
+                <button
+                  type="button"
+                  class="episode-btn music-mobile-btn music-mobile-play-btn"
+                  :title="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'Pause' : 'Play'"
+                  :aria-label="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'Pause' : 'Play'"
+                  @click.stop="playTrackAtFilteredIndex(idx)"
+                >
+                  <i :class="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="episode-btn queue-btn music-mobile-btn"
+                  title="Add to queue"
+                  aria-label="Add to queue"
+                  @click.stop="addToQueue(track)"
+                >
+                  <i class="fas fa-plus" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="episode-btn boost-btn music-mobile-btn"
+                  :title="'Boost ' + (track.artist || 'artist')"
+                  aria-label="Boost artist"
+                  @click.stop="openBoost(track)"
+                >
+                  <i class="fas fa-bolt" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="episode-btn bm-btn music-mobile-btn"
+                  :class="{ bookmarked: bookmarks.isBookmarked({ id: track.id }) }"
+                  :aria-pressed="bookmarks.isBookmarked({ id: track.id })"
+                  title="Save"
+                  @click.stop="toggleBookmark(track)"
+                >
+                  <i :class="bookmarks.isBookmarked({ id: track.id }) ? 'fas fa-bookmark' : 'far fa-bookmark'" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -225,7 +299,7 @@
                 title="Boost artist"
                 @click.stop="openBoost(track)"
               >
-                <i class="fas fa-heart"></i>
+                <i class="fas fa-bolt" aria-hidden="true"></i>
               </button>
               <button
                 type="button"
@@ -233,7 +307,7 @@
                 :title="bookmarks.isBookmarked({ id: track.id }) ? 'Unsave' : 'Save'"
                 @click.stop="toggleBookmark(track)"
               >
-                <i :class="bookmarks.isBookmarked({ id: track.id }) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+                <i :class="bookmarks.isBookmarked({ id: track.id }) ? 'fas fa-bookmark' : 'far fa-bookmark'" aria-hidden="true"></i>
               </button>
             </div>
           </div>
@@ -269,12 +343,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { apiFetch } from '../composables/useApi'
 import { usePlayerStore } from '../stores/player'
 import { useAddToPlaylist } from '../composables/useAddToPlaylist'
 import { useBookmarks } from '../composables/useBookmarks'
 import PullRefresh from '../components/PullRefresh.vue'
 
+const router = useRouter()
 const playerStore = usePlayerStore()
 const addToPlaylist = useAddToPlaylist()
 const bookmarks = useBookmarks()
@@ -296,17 +372,9 @@ function getTrackCover(track) {
 
 function openBoost(track) {
   if (!track || !track.artist) return
-  const detail = {
-    recipientType: 'artist',
-    recipientId: track.artist_slug || track.artist,
-    recipientName: track.artist,
-  }
-  if (typeof document !== 'undefined' && document.dispatchEvent) {
-    document.dispatchEvent(new CustomEvent('ahoy:boost:open', { detail }))
-  } else {
-    const params = new URLSearchParams({ type: 'boost', artist_id: detail.recipientId || detail.recipientName, amount: '1' })
-    window.location.href = `/checkout?${params.toString()}`
-  }
+  const artistId = track.artist_slug || track.artist
+  const params = new URLSearchParams({ type: 'boost', artist_id: artistId, amount: '1' })
+  router.push('/checkout?' + params.toString())
 }
 
 function openAddToPlaylist(track) {
@@ -464,5 +532,130 @@ onMounted(loadTracks)
 .empty-state p {
   margin: 0;
   font-size: 0.9rem;
+}
+
+.music-mobile-list {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .music-table-wrap {
+    display: none;
+  }
+
+  .music-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 6px 4px 0;
+  }
+
+  .music-mobile-row {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 8px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .music-mobile-row.playing {
+    background: rgba(99, 102, 241, 0.14);
+    border-color: rgba(99, 102, 241, 0.35);
+  }
+
+  .music-mobile-art {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .music-mobile-art-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .music-mobile-art-play {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: rgba(0, 0, 0, 0.42);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .music-mobile-meta {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .music-mobile-title-link {
+    color: inherit;
+    text-decoration: none;
+    min-width: 0;
+  }
+
+  .music-mobile-title {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .music-mobile-artist {
+    display: block;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.72);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .music-mobile-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .music-mobile-duration {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.62);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .music-mobile-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .music-mobile-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    font-size: 11px;
+    padding: 0;
+  }
+
+  .music-mobile-play-btn {
+    background: linear-gradient(180deg, rgba(109, 220, 255, 0.28), rgba(109, 220, 255, 0.16));
+    border: 1px solid rgba(109, 220, 255, 0.35);
+    color: rgba(255, 255, 255, 0.95);
+  }
 }
 </style>
