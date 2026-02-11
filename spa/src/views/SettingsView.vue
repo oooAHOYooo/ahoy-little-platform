@@ -109,6 +109,31 @@
               <i class="fas fa-chevron-right experimental-card-arrow"></i>
             </router-link>
           </div>
+          <p class="downloads-table-intro">Latest macOS desktop build — also at <a href="/downloads" target="_blank" rel="noopener">app.ahoy.ooo/downloads</a>.</p>
+          <div class="downloads-table-wrap">
+            <table class="downloads-table" v-if="latestMacRelease.version">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Version</th>
+                  <th>Download</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{{ todayDate }}</td>
+                  <td>{{ latestMacRelease.version }}</td>
+                  <td>
+                    <a :href="latestMacRelease.download_url" target="_blank" rel="noopener" class="download-table-link">
+                      {{ latestMacRelease.name || 'ZIP' }} <i class="fas fa-external-link-alt"></i>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p v-else-if="latestMacRelease.loading" class="downloads-table-loading">Loading…</p>
+            <p v-else-if="latestMacRelease.error" class="downloads-table-error">{{ latestMacRelease.error }}</p>
+          </div>
         </div>
 
         <!-- Actions -->
@@ -140,6 +165,20 @@ const playerStore = usePlayerStore()
 const dialEl = ref(null)
 
 const audioSettings = reactive({ masterVolume: 75 })
+
+const latestMacRelease = reactive({
+  version: '',
+  date: '',
+  download_url: '',
+  name: '',
+  loading: true,
+  error: '',
+})
+const todayDate = ref('')
+function setTodayDate() {
+  const d = new Date()
+  todayDate.value = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+}
 let isDragging = false
 let dragProperty = null
 let moveHandler = null
@@ -262,6 +301,19 @@ async function onLogout() {
 
 onMounted(() => {
   loadSettings()
+  setTodayDate()
+  apiFetch('/api/downloads/latest', { credentials: 'include' })
+    .then((data) => {
+      latestMacRelease.version = data?.version ?? ''
+      latestMacRelease.date = data?.date ?? ''
+      latestMacRelease.download_url = data?.download_url ?? ''
+      latestMacRelease.name = data?.name ?? ''
+      latestMacRelease.loading = false
+    })
+    .catch(() => {
+      latestMacRelease.error = 'No macOS release available'
+      latestMacRelease.loading = false
+    })
 })
 onUnmounted(() => {
   stopDialDrag()
@@ -499,6 +551,50 @@ onUnmounted(() => {
 .experimental-card-arrow {
   color: rgba(255, 255, 255, 0.2);
   font-size: 13px;
+}
+.downloads-table-intro {
+  margin: 1rem 0 0.75rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+.downloads-table-intro a {
+  color: rgba(99, 102, 241, 1);
+  text-decoration: none;
+}
+.downloads-table-wrap {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+.downloads-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.downloads-table th,
+.downloads-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.downloads-table th {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+.downloads-table td {
+  color: rgba(255, 255, 255, 0.9);
+}
+.download-table-link {
+  color: rgba(99, 102, 241, 1);
+  text-decoration: none;
+}
+.download-table-link:hover {
+  text-decoration: underline;
+}
+.downloads-table-loading,
+.downloads-table-error {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
   flex-shrink: 0;
 }
 

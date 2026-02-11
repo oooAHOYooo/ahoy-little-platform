@@ -122,7 +122,8 @@
           "services/**",
           "utils/**",
           "commands/**",
-          "alembic/**"
+          "alembic/**",
+          "spa-dist/**"
         ]
       }
     ]

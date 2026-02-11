@@ -54,7 +54,18 @@ pip install -r requirements.txt pyinstaller pywebview
 ```bash
 ./packaging/electron-build-mac.sh
 ```
-Builds the `.app` and `.dmg`; copies DMG to `dist/` for /downloads. Then run: `open dist-electron/mac/Ahoy\ Indie\ Media.app` or install from the DMG.
+Builds the `.app`, `.dmg`, and `.zip`; copies DMG and ZIP to `dist/` for /downloads. Then run: `open dist-electron/mac/Ahoy\ Indie\ Media.app` or install from the DMG.
+
+### Publish so others can download (app.ahoy.ooo/downloads)
+To make the zip and DMG available at **https://app.ahoy.ooo/downloads**, create a GitHub release and upload the assets:
+
+1. Install [GitHub CLI](https://cli.github.com/): `brew install gh` then `gh auth login`
+2. Build and create release (uploads zip + DMG to GitHub):
+   ```bash
+   ./packaging/release-desktop.sh --build
+   ```
+   Or upload existing build: `./packaging/release-desktop.sh`
+3. The site’s /downloads page pulls the latest release from GitHub, so the new assets will appear there automatically.
 
 ### macOS (PyInstaller)
 ```bash

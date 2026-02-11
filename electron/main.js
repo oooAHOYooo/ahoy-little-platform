@@ -39,6 +39,10 @@ function isPortAvailable(port) {
   });
 }
 
+// Production URL — load by default so the app is never blank (no Python/Flask required)
+const PRODUCTION_URL = 'https://app.ahoy.ooo';
+const USE_LOCAL_SERVER = process.env.AHOY_DESKTOP_LOCAL === '1' || process.env.AHOY_DESKTOP_LOCAL === 'true';
+
 // Find an available port
 async function findAvailablePort(startPort = DEFAULT_PORT, maxAttempts = 10) {
   for (let i = 0; i < maxAttempts; i++) {
@@ -211,10 +215,13 @@ function createWindow() {
     return { action: 'deny' };
   });
 
-  // Prevent navigation away from localhost
+  // Keep app.ahoy.ooo and localhost in-window; open other links in system browser
   mainWindow.webContents.on('will-navigate', (event, navigationUrl) => {
     const parsedUrl = new URL(navigationUrl);
-    if (parsedUrl.hostname !== '127.0.0.1' && parsedUrl.hostname !== 'localhost') {
+    const keepInApp = parsedUrl.hostname === '127.0.0.1' ||
+      parsedUrl.hostname === 'localhost' ||
+      parsedUrl.hostname === 'app.ahoy.ooo';
+    if (!keepInApp) {
       event.preventDefault();
       shell.openExternal(navigationUrl);
     }
@@ -224,19 +231,18 @@ function createWindow() {
 // Initialize app
 async function initialize() {
   try {
-    // Find available port
-    const port = await findAvailablePort();
-    console.log(`Using port: ${port}`);
+    let url;
+    if (USE_LOCAL_SERVER) {
+      const port = await findAvailablePort();
+      console.log(`Using local server on port: ${port}`);
+      await startFlaskServer(port);
+      url = `http://127.0.0.1:${port}`;
+    } else {
+      url = PRODUCTION_URL;
+      console.log(`Loading production: ${url}`);
+    }
 
-    // Start Flask server
-    await startFlaskServer(port);
-
-    // Create window
     createWindow();
-
-    // Load the app
-    const url = `http://127.0.0.1:${port}`;
-    console.log(`Loading: ${url}`);
     await mainWindow.loadURL(url);
   } catch (error) {
     console.error('Failed to initialize:', error);

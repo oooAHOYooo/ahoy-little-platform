@@ -674,6 +674,10 @@ def create_app():
                 return {'type': 'installer', 'platform': 'macOS', 'icon': '🍎', 'description': 'DMG Installer (Recommended)'}
             elif filename_lower.endswith('.app'):
                 return {'type': 'standalone', 'platform': 'macOS', 'icon': '🍎', 'description': 'App Bundle (Standalone)'}
+            elif filename_lower.endswith('.zip') and ('mac' in filename_lower or 'arm64' in filename_lower or 'darwin' in filename_lower):
+                return {'type': 'archive', 'platform': 'macOS', 'icon': '🍎', 'description': 'macOS App (ZIP)'}
+            elif filename_lower.endswith('.zip'):
+                return {'type': 'archive', 'platform': 'Unknown', 'icon': '📦', 'description': 'ZIP Archive'}
             elif 'setup.exe' in filename_lower or filename_lower.endswith('-setup.exe'):
                 return {'type': 'installer', 'platform': 'Windows', 'icon': '🪟', 'description': 'Setup Installer (Recommended)'}
             elif filename_lower.endswith('.exe'):
@@ -712,8 +716,8 @@ def create_app():
                     asset_size = asset['size']
                     size_mb = asset_size / (1024 * 1024)
                     
-                    # Only include desktop/Android assets
-                    if any(platform in asset_name for platform in ['macOS', 'Windows', 'Linux', 'Android', 'dmg', 'exe', 'Setup', '.app']):
+                    # Only include desktop/Android assets (include .zip for macOS app zip)
+                    if any(platform in asset_name.lower() for platform in ['macos', 'windows', 'linux', 'android', 'dmg', 'exe', 'setup', '.app', '-mac.zip', 'arm64', 'x64']):
                         file_info = _get_file_type(asset_name)
                         release_assets.append({
                             'name': asset_name,
@@ -852,6 +856,52 @@ def create_app():
             return send_from_directory(str(DIST_DIR), filename, as_attachment=True)
         except Exception:
             return jsonify({'error': 'File not found'}), 404
+
+    @app.route('/api/downloads/latest')
+    def api_downloads_latest():
+        """Return latest macOS release zip for Settings / downloads table (version, date, download link)."""
+        import requests as requests_lib
+        repo_owner = "oooAHOYooo"
+        repo_name = "ahoy-little-platform"
+        github_token = os.getenv('GITHUB_TOKEN')
+        headers = {}
+        if github_token:
+            headers['Authorization'] = f'token {github_token}'
+        try:
+            url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
+            response = requests_lib.get(url, headers=headers, timeout=10)
+            if response.status_code != 200:
+                return jsonify({'error': 'No release found'}), 404
+            data = response.json()
+            version = data.get('tag_name', '').lstrip('v')
+            published = data.get('published_at') or data.get('created_at') or ''
+            # Prefer macOS zip: *-mac.zip or *arm64*.zip (arm64 first), then any .zip for mac
+            assets = data.get('assets', [])
+            mac_zip = None
+            for a in assets:
+                name = (a.get('name') or '').lower()
+                if not name.endswith('.zip') or '.blockmap' in name:
+                    continue
+                if 'mac' in name or 'arm64' in name or 'darwin' in name:
+                    mac_zip = a
+                    if 'arm64' in name:
+                        break
+            if not mac_zip and assets:
+                for a in assets:
+                    if (a.get('name') or '').lower().endswith('.zip') and '.blockmap' not in (a.get('name') or ''):
+                        mac_zip = a
+                        break
+            if not mac_zip:
+                return jsonify({'error': 'No macOS zip in latest release'}), 404
+            return jsonify({
+                'version': version,
+                'date': published[:10] if published else '',
+                'download_url': mac_zip.get('browser_download_url'),
+                'name': mac_zip.get('name'),
+            })
+        except Exception as e:
+            print(f"Error in /api/downloads/latest: {e}")
+            return jsonify({'error': 'Could not fetch latest release'}), 500
 
     @app.route('/offline')
     def offline():
