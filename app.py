@@ -939,7 +939,7 @@ def create_app():
         response.headers['Cache-Control'] = f'public, max-age={CACHE_TIMEOUT}'
         return response
 
-    # When spa-dist exists, serve SPA for all document GETs (one UI on web)
+    # When spa-dist exists, serve SPA for all document GETs (Vue is the main web UI).
     _spa_dist_dir = Path(__file__).resolve().parent / "spa-dist"
     _server_path_prefixes = (
         "api/", "static/", "assets/", "ops/", "downloads/", "admin", "checkout", "success",
@@ -2722,6 +2722,37 @@ def api_live_tv_channels():
                     import json
                     with open(static_shows, 'r', encoding='utf-8') as f:
                         shows_data = json.load(f)
+            except Exception:
+                pass
+        # If still no shows, try static/data/videos.json so Live TV has content
+        if not shows_data.get('shows'):
+            try:
+                videos_data = load_json_data('videos.json', {'videos': []})
+                videos = videos_data.get('videos') or []
+                # Map to same shape as shows: id, title, video_url, thumbnail, duration_seconds, category, tags
+                def _parse_duration_seconds(d):
+                    if d is None:
+                        return 300
+                    if isinstance(d, (int, float)) and d > 0:
+                        return int(d)
+                    s = str(d).strip().lower()
+                    import re
+                    m = re.match(r'(\d+)\s*(?:min|minute|minutes?)?', s)
+                    if m:
+                        return int(m.group(1)) * 60
+                    return 300
+                for v in videos:
+                    if not v.get('url'):
+                        continue
+                    shows_data.setdefault('shows', []).append({
+                        'id': v.get('id') or str(uuid.uuid4()),
+                        'title': v.get('title') or 'Untitled',
+                        'video_url': v.get('url'),
+                        'thumbnail': v.get('thumbnail'),
+                        'duration_seconds': _parse_duration_seconds(v.get('duration')),
+                        'category': 'live show' if 'live' in (v.get('title') or '').lower() else 'misc',
+                        'tags': [],
+                    })
             except Exception:
                 pass
         # Note: Response caching added below after processing

@@ -82,6 +82,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { apiFetchCached } from '../composables/useApi'
 import { useBookmarks } from '../composables/useBookmarks'
+import { trackRecentPlay } from '../composables/useRecentlyPlayed'
 
 const route = useRoute()
 const bookmarks = useBookmarks()
@@ -109,6 +110,16 @@ const embedUrl = computed(() => {
 })
 
 function playVideo() {
+  if (show.value) {
+    trackRecentPlay({
+      id: show.value.id,
+      type: 'show',
+      title: show.value.title,
+      host: show.value.host,
+      thumbnail: show.value.thumbnail,
+      url: show.value.video_url || show.value.url,
+    })
+  }
   const url = show.value?.video_url || show.value?.url || ''
   if (url && !embedUrl.value) {
     window.open(url, '_blank')

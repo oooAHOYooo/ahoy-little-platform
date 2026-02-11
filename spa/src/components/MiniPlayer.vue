@@ -5,54 +5,64 @@
       :class="{ 'now-playing-is-playing': playerStore.currentTrack && playerStore.isPlaying }"
     >
       <div class="now-playing-container">
-        <!-- Left: Album art -->
-        <div
-          class="now-playing-album-art"
-          @click="playerStore.currentTrack ? (goToNowPlaying(), playerStore.togglePlay()) : null"
-        >
-          <template v-if="playerStore.currentTrack">
-            <img
-              :src="playerStore.currentTrack.cover_art || playerStore.currentTrack.thumbnail || playerStore.currentTrack.artwork || '/static/img/default-cover.jpg'"
-              :alt="playerStore.currentTrack.title"
-              class="now-playing-album-img"
-              :class="{ spinning: playerStore.isPlaying }"
-            />
-            <div v-if="!playerStore.isPlaying" class="now-playing-album-overlay">
-              <i class="fas fa-play"></i>
-            </div>
-          </template>
-          <template v-else>
-            <div class="now-playing-empty-art">
-              <i class="fas fa-music"></i>
-            </div>
-          </template>
+        <!-- Left: Album art + track info -->
+        <div class="now-playing-left">
+          <div
+            class="now-playing-album-art"
+            @click="playerStore.currentTrack ? (goToNowPlaying(), playerStore.togglePlay()) : null"
+          >
+            <template v-if="playerStore.currentTrack">
+              <img
+                :src="playerStore.currentTrack.cover_art || playerStore.currentTrack.thumbnail || playerStore.currentTrack.artwork || '/static/img/default-cover.jpg'"
+                :alt="playerStore.currentTrack.title"
+                class="now-playing-album-img"
+                :class="{ spinning: playerStore.isPlaying }"
+              />
+              <div v-if="!playerStore.isPlaying" class="now-playing-album-overlay">
+                <i class="fas fa-play"></i>
+              </div>
+            </template>
+            <template v-else>
+              <div class="now-playing-empty-art">
+                <i class="fas fa-music"></i>
+              </div>
+            </template>
+          </div>
+          <div class="now-playing-info">
+            <template v-if="playerStore.currentTrack">
+              <div class="now-playing-title">{{ playerStore.currentTrack.title }}</div>
+              <div class="now-playing-secondary">
+                <span class="now-playing-artist">{{
+                  playerStore.currentTrack.artist || playerStore.currentTrack.host || 'Unknown'
+                }}</span>
+                <span class="category-pill">
+                  <i class="fas fa-music"></i> {{ trackTypeLabel }}
+                </span>
+              </div>
+            </template>
+            <template v-else>
+              <div class="now-playing-title now-playing-empty-title">Select a track</div>
+              <div class="now-playing-artist now-playing-empty-artist">
+                Browse <router-link to="/music" class="now-playing-empty-link">music</router-link>,
+                <router-link to="/podcasts" class="now-playing-empty-link">podcasts</router-link>, or
+                <router-link to="/radio" class="now-playing-empty-link">radio</router-link>
+              </div>
+            </template>
+          </div>
         </div>
 
-        <!-- Center: Track info -->
-        <div class="now-playing-info">
-          <template v-if="playerStore.currentTrack">
-            <div class="now-playing-title">{{ playerStore.currentTrack.title }}</div>
-            <div class="now-playing-secondary">
-              <span class="now-playing-artist">{{
-                playerStore.currentTrack.artist || playerStore.currentTrack.host || 'Unknown'
-              }}</span>
-              <span class="category-pill">
-                <i class="fas fa-music"></i> {{ trackTypeLabel }}
-              </span>
-            </div>
-          </template>
-          <template v-else>
-            <div class="now-playing-title now-playing-empty-title">Select a track</div>
-            <div class="now-playing-artist now-playing-empty-artist">
-              Browse <router-link to="/music" class="now-playing-empty-link">music</router-link>,
-              <router-link to="/podcasts" class="now-playing-empty-link">podcasts</router-link>, or
-              <router-link to="/radio" class="now-playing-empty-link">radio</router-link>
-            </div>
-          </template>
-        </div>
-
-        <!-- Right: Controls -->
-        <div class="now-playing-controls">
+        <!-- Center: Transport (Spotify-style) + ±5s seek -->
+        <div class="now-playing-transport">
+          <button
+            type="button"
+            class="now-playing-btn now-playing-seek-btn"
+            :class="{ disabled: !playerStore.currentTrack }"
+            :disabled="!playerStore.currentTrack"
+            title="Back 5 seconds"
+            @click="playerStore.seekBackward5()"
+          >
+            <span class="seek-5-label">−5</span>
+          </button>
           <button
             type="button"
             class="now-playing-btn"
@@ -86,55 +96,70 @@
           </button>
           <button
             type="button"
-            class="now-playing-btn"
-            :class="{ active: playerStore.shuffle, disabled: !playerStore.currentTrack }"
-            :disabled="!playerStore.currentTrack"
-            title="Shuffle"
-            @click="playerStore.shuffle = !playerStore.shuffle"
-          >
-            <i class="fas fa-random"></i>
-          </button>
-          <button
-            type="button"
-            class="now-playing-btn"
-            :class="{ active: playerStore.repeat, disabled: !playerStore.currentTrack }"
-            :disabled="!playerStore.currentTrack"
-            title="Repeat"
-            @click="playerStore.repeat = !playerStore.repeat"
-          >
-            <i class="fas fa-redo"></i>
-          </button>
-          <button
-            type="button"
-            class="now-playing-btn now-playing-action-btn"
+            class="now-playing-btn now-playing-seek-btn"
             :class="{ disabled: !playerStore.currentTrack }"
             :disabled="!playerStore.currentTrack"
-            title="Boost artist"
-            @click="openBoost"
+            title="Forward 5 seconds"
+            @click="playerStore.seekForward5()"
           >
-            <i class="fas fa-bolt"></i>
+            <span class="seek-5-label">+5</span>
           </button>
-          <button
-            type="button"
-            class="now-playing-btn now-playing-action-btn"
-            :class="{ active: isBookmarked, disabled: !playerStore.currentTrack }"
-            :disabled="!playerStore.currentTrack"
-            title="Bookmark"
-            @click="toggleBookmark"
-          >
-            <i :class="isBookmarked ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
-          </button>
-          <button
-            type="button"
-            class="now-playing-btn now-playing-action-btn"
-            :class="{ disabled: !playerStore.currentTrack }"
-            :disabled="!playerStore.currentTrack"
-            title="Add to playlist"
-            @click="openAddToPlaylist"
-          >
-            <i class="fas fa-plus"></i>
-          </button>
-          <div class="now-playing-queue-wrap">
+        </div>
+
+        <!-- Right: Action buttons + master volume -->
+        <div class="now-playing-actions-wrap">
+          <div class="now-playing-actions">
+            <button
+              type="button"
+              class="now-playing-btn"
+              :class="{ active: playerStore.shuffle, disabled: !playerStore.currentTrack }"
+              :disabled="!playerStore.currentTrack"
+              title="Shuffle"
+              @click="playerStore.shuffle = !playerStore.shuffle"
+            >
+              <i class="fas fa-random"></i>
+            </button>
+            <button
+              type="button"
+              class="now-playing-btn"
+              :class="{ active: playerStore.repeat, disabled: !playerStore.currentTrack }"
+              :disabled="!playerStore.currentTrack"
+              title="Repeat"
+              @click="playerStore.repeat = !playerStore.repeat"
+            >
+              <i class="fas fa-redo"></i>
+            </button>
+            <button
+              type="button"
+              class="now-playing-btn now-playing-action-btn"
+              :class="{ disabled: !playerStore.currentTrack }"
+              :disabled="!playerStore.currentTrack"
+              title="Boost artist"
+              @click="openBoost"
+            >
+              <i class="fas fa-bolt"></i>
+            </button>
+            <button
+              type="button"
+              class="now-playing-btn now-playing-action-btn"
+              :class="{ active: isBookmarked, disabled: !playerStore.currentTrack }"
+              :disabled="!playerStore.currentTrack"
+              title="Bookmark"
+              @click="toggleBookmark"
+            >
+              <i :class="isBookmarked ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+            </button>
+            <button
+              type="button"
+              class="now-playing-btn now-playing-action-btn"
+              :class="{ disabled: !playerStore.currentTrack }"
+              :disabled="!playerStore.currentTrack"
+              title="Add to playlist"
+              @click="openAddToPlaylist"
+            >
+              <i class="fas fa-plus"></i>
+            </button>
+            <div class="now-playing-queue-wrap">
             <button
               type="button"
               class="now-playing-btn now-playing-action-btn now-playing-queue-btn"
@@ -208,6 +233,26 @@
             </div>
           </div>
         </div>
+          <div class="now-playing-volume-wrap">
+            <button
+              type="button"
+              class="now-playing-btn now-playing-volume-btn"
+              :title="playerStore.isMuted ? 'Unmute' : 'Mute'"
+              @click="playerStore.toggleMute()"
+            >
+              <i :class="volumeIconClass"></i>
+            </button>
+            <input
+              type="range"
+              class="now-playing-volume"
+              min="0"
+              max="100"
+              :value="playerStore.volume"
+              @input="playerStore.setVolume(parseInt($event.target.value, 10))"
+              title="Volume"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -239,6 +284,13 @@ const trackTypeLabel = computed(() => {
 const isBookmarked = computed(() =>
   playerStore.currentTrack ? bookmarks.isBookmarked(playerStore.currentTrack) : false
 )
+
+const volumeIconClass = computed(() => {
+  if (playerStore.isMuted) return 'fas fa-volume-mute'
+  if (playerStore.volume > 50) return 'fas fa-volume-up'
+  if (playerStore.volume > 0) return 'fas fa-volume-down'
+  return 'fas fa-volume-off'
+})
 
 function onTogglePlay() {
   haptics.onPlay()

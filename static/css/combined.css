@@ -2335,7 +2335,11 @@ img[src*="default-cover.jpg"] {
     }
 
     /* Compact controls - show only essential */
-    .now-playing-controls {
+    .now-playing-transport {
+        gap: 6px !important;
+    }
+
+    .now-playing-actions {
         gap: 6px !important;
         flex-shrink: 0;
     }
@@ -2353,8 +2357,8 @@ img[src*="default-cover.jpg"] {
     }
 
     /* Hide shuffle and repeat on mobile */
-    .now-playing-controls .now-playing-btn:nth-child(4),
-    .now-playing-controls .now-playing-btn:nth-child(5) {
+    .now-playing-actions .now-playing-btn:nth-child(1),
+    .now-playing-actions .now-playing-btn:nth-child(2) {
         display: none !important;
     }
 
@@ -2365,6 +2369,11 @@ img[src*="default-cover.jpg"] {
         font-size: 9px !important;
         top: -2px !important;
         right: -2px !important;
+    }
+
+    .now-playing-volume {
+        width: 64px !important;
+        min-width: 48px !important;
     }
 
     /* Queue panel full-width on mobile */

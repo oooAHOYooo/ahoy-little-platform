@@ -2323,8 +2323,11 @@ img[src*="default-cover.jpg"] {
         display: none;
     }
 
-    /* Compact controls - show only essential */
-    .now-playing-controls {
+    .now-playing-transport {
+        gap: 6px !important;
+    }
+
+    .now-playing-actions {
         gap: 6px !important;
         flex-shrink: 0;
     }
@@ -2341,10 +2344,14 @@ img[src*="default-cover.jpg"] {
         font-size: 16px !important;
     }
 
-    /* Hide shuffle and repeat on mobile */
-    .now-playing-controls .now-playing-btn:nth-child(4),
-    .now-playing-controls .now-playing-btn:nth-child(5) {
+    .now-playing-actions .now-playing-btn:nth-child(1),
+    .now-playing-actions .now-playing-btn:nth-child(2) {
         display: none !important;
+    }
+
+    .now-playing-volume {
+        width: 64px !important;
+        min-width: 48px !important;
     }
 
     /* Queue badge smaller on mobile */

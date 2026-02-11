@@ -2,7 +2,7 @@
   <div class="my-saves-container saved-page">
     <!-- Guest banner: prompt to create account to sync -->
     <div v-if="!auth.isLoggedIn.value" class="saves-guest-banner">
-      <p>Saves are stored on this device. <router-link to="/login?signup=1">Create an account</router-link> to sync across devices.</p>
+      <p>Bookmarks and recently played are stored on this device. <router-link to="/login?signup=1">Create an account</router-link> to sync across devices.</p>
     </div>
 
     <!-- Dark liquid glass profile hero (same as Flask my_saves) -->
@@ -145,7 +145,10 @@
           <div class="saves-recent-info">
             <h3>{{ item.title || item.name || '—' }}</h3>
             <p>{{ item.artist || item.host || '' }}</p>
-            <span class="saves-recent-time">{{ formatRelativeTime(item.played_at) }}</span>
+            <span class="saves-recent-meta">
+              <span class="saves-recent-type">{{ recentTypeLabel(item.type) }}</span>
+              <span class="saves-recent-time">{{ formatRelativeTime(item.played_at) }}</span>
+            </span>
           </div>
           <div class="saves-recent-actions">
             <button
@@ -174,6 +177,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useBookmarks } from '../composables/useBookmarks'
 import { usePlayerStore } from '../stores/player'
 import { useAuth } from '../composables/useAuth'
@@ -181,6 +185,7 @@ import { useAuth } from '../composables/useAuth'
 const RECENT_STORAGE_KEY = 'ahoy.recentlyPlayed.v1'
 const MAX_RECENT_ITEMS = 50
 
+const router = useRouter()
 const bookmarkHelper = useBookmarks()
 const playerStore = usePlayerStore()
 const auth = useAuth()
@@ -220,6 +225,14 @@ function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString()
 }
 
+function recentTypeLabel(type) {
+  const t = type || 'track'
+  if (t === 'live_tv') return 'Live TV'
+  if (t === 'show') return 'Video'
+  if (t === 'podcast' || t === 'episode') return 'Podcast'
+  return 'Music'
+}
+
 function formatRelativeTime(dateString) {
   if (!dateString) return ''
   const date = new Date(dateString)
@@ -244,32 +257,16 @@ function loadRecentlyPlayed() {
   }
 }
 
-function trackRecentPlay(item) {
-  if (!item || (item.id == null && item.slug == null)) return
-  try {
-    const playRecord = {
-      id: item.id ?? item.slug,
-      type: item.type || 'track',
-      title: item.title || item.name,
-      artist: item.artist || item.host || '',
-      artwork: item.artwork || item.cover_art || item.thumbnail,
-      audio_url: item.audio_url || item.url,
-      url: item.url || item.audio_url,
-      key: `${item.type || 'track'}:${item.id ?? item.slug}`,
-      played_at: new Date().toISOString(),
-    }
-    let recent = recentlyPlayed.value.filter((r) => r.key !== playRecord.key)
-    recent.unshift(playRecord)
-    recent = recent.slice(0, MAX_RECENT_ITEMS)
-    recentlyPlayed.value = recent
-    localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(recent))
-  } catch (e) {
-    console.warn('trackRecentPlay failed', e)
-  }
-}
-
 function playContent(item) {
-  trackRecentPlay(item)
+  const type = item.type || 'track'
+  if (type === 'show') {
+    router.push({ path: '/shows', query: { play: item.id } })
+    return
+  }
+  if (type === 'live_tv') {
+    router.push('/live-tv')
+    return
+  }
   if (playerStore.currentTrack?.id === item.id && playerStore.isPlaying) {
     playerStore.pause()
   } else {
@@ -326,5 +323,21 @@ onUnmounted(() => {
 }
 .saves-guest-banner a:hover {
   text-decoration: underline;
+}
+.saves-recent-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+}
+.saves-recent-type {
+  text-transform: capitalize;
+}
+.saves-recent-type::after {
+  content: '·';
+  margin-left: 0.5rem;
+  margin-right: 0.25rem;
 }
 </style>

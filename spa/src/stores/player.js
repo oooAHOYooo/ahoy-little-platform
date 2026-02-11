@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { trackRecentPlay } from '../composables/useRecentlyPlayed'
 
 export const usePlayerStore = defineStore('player', () => {
   // State
@@ -11,6 +12,8 @@ export const usePlayerStore = defineStore('player', () => {
   const loading = ref(false)
   const shuffle = ref(false)
   const repeat = ref(false) // false = off, true = repeat all (queue)
+  const volume = ref(100) // 0–100
+  const isMuted = ref(false)
 
   // Audio element (singleton)
   let audio = null
@@ -50,6 +53,10 @@ export const usePlayerStore = defineStore('player', () => {
         isPlaying.value = false
       })
 
+      // Initial volume from store
+      audio.volume = Math.max(0, Math.min(1, volume.value / 100))
+      audio.muted = isMuted.value
+
       // Set up Media Session action handlers (lock screen / steering wheel controls)
       if ('mediaSession' in navigator) {
         navigator.mediaSession.setActionHandler('play', () => play())
@@ -61,9 +68,39 @@ export const usePlayerStore = defineStore('player', () => {
             audio.currentTime = details.seekTime
           }
         })
+        navigator.mediaSession.setActionHandler('seekbackward', () => seekBackward5())
+        navigator.mediaSession.setActionHandler('seekforward', () => seekForward5())
       }
     }
     return audio
+  }
+
+  function setVolume(value) {
+    const v = Math.max(0, Math.min(100, Number(value)))
+    volume.value = Math.round(v)
+    const a = getAudio()
+    a.volume = v / 100
+    if (isMuted.value && v > 0) isMuted.value = false
+    a.muted = isMuted.value
+  }
+
+  function toggleMute() {
+    isMuted.value = !isMuted.value
+    getAudio().muted = isMuted.value
+  }
+
+  function seekBackward5() {
+    const a = getAudio()
+    if (!a.src) return
+    a.currentTime = Math.max(0, (a.currentTime || 0) - 5)
+  }
+
+  function seekForward5() {
+    const a = getAudio()
+    if (!a.src) return
+    const dur = duration.value || a.duration
+    const now = a.currentTime || 0
+    a.currentTime = Math.min(dur && isFinite(dur) ? dur : now + 5, now + 5)
   }
 
   // Media Session metadata (lock screen, notification, steering wheel)
@@ -117,6 +154,7 @@ export const usePlayerStore = defineStore('player', () => {
         })
         updateMediaSession(track)
         saveLastPlayed(track)
+        trackRecentPlay(track)
       }
     } else if (a.src) {
       a.play().catch(() => {})
@@ -246,10 +284,16 @@ export const usePlayerStore = defineStore('player', () => {
     hasQueue,
     shuffle,
     repeat,
+    volume,
+    isMuted,
     play,
     pause,
     togglePlay,
     seek,
+    setVolume,
+    toggleMute,
+    seekBackward5,
+    seekForward5,
     setQueue,
     next,
     previous,

@@ -153,10 +153,11 @@
             <router-link
               :to="`/podcasts/${ep.showSlug}`"
               class="episode-open"
+              title="Go to podcast"
               @click.stop
             >
-              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-              <span class="sr-only">Open</span>
+              <i class="fas fa-podcast" aria-hidden="true"></i>
+              <span class="sr-only">Go to podcast</span>
             </router-link>
           </div>
         </article>

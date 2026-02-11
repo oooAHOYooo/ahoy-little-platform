@@ -4,23 +4,45 @@
 
 {% block content %}
 <div class="music-container" x-data="musicLibrary()" x-init="loadMusic()">
-    {% from "macros/subpage_header.html" import subpage_hero,
-    subpage_section_header %}
+    {% from "macros/subpage_header.html" import subpage_hero %}
     {{ subpage_hero(title="Music Library", subtitle="Explore",
     icon_class="fas fa-music") }}
 
-    <!-- Mobile: match Podcasts header + compact controls before the list -->
-    <section class="podcasts-section mobile-only">
-        {% call subpage_section_header("Browse") %}
-        <button type="button" class="episode-btn"
-            @click="playRandomTrack()" title="Play Random">
-            <i class="fas fa-random" aria-hidden="true"></i>
-            <span class="sr-only">Play Random</span>
-        </button>
-        {% endcall %}
-
-        <div class="music-mobile-controls">
-            <div class="search-bar">
+    <!-- Music header: same UI pattern as Podcasts (section header + filter chips + toolbar) -->
+    <section class="podcasts-section podcasts-featured-section">
+        <div class="podcasts-section-header podcasts-featured-header">
+            <div>
+                <h2>Tracks</h2>
+                <p class="podcasts-section-subtitle">Filter by artist or search. Sort and switch between list and grid.</p>
+            </div>
+            <div class="podcast-filter-chips">
+                <button type="button" class="podcast-filter-chip"
+                    @click="selectedArtist = ''; filterMusic()"
+                    :class="{ 'active': !selectedArtist }">All</button>
+                <template x-for="artist in artists.slice(0, 14)" :key="artist">
+                    <button type="button" class="podcast-filter-chip"
+                        @click="selectedArtist = artist; filterMusic()"
+                        :class="{ 'active': selectedArtist === artist }"
+                        x-text="artist"></button>
+                </template>
+            </div>
+        </div>
+        <!-- Mobile: dropdown artist picker (like Podcasts show picker) -->
+        <div class="podcast-shows-dropdown-mobile">
+            <select class="podcast-show-select"
+                x-model="selectedArtist"
+                @change="filterMusic()"
+                aria-label="Filter by artist">
+                <option value>All Artists</option>
+                <template x-for="artist in artists" :key="artist">
+                    <option :value="artist" x-text="artist"
+                        :selected="selectedArtist === artist"></option>
+                </template>
+            </select>
+        </div>
+        <!-- Toolbar: search, sort, view, play random -->
+        <div class="music-header-toolbar">
+            <div class="search-bar music-toolbar-search">
                 <i class="fas fa-search" aria-hidden="true"></i>
                 <input type="text"
                     x-model="searchQuery"
@@ -33,159 +55,30 @@
                     <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
             </div>
-
-            <div class="music-mobile-row">
-                <select x-model="selectedArtist" @change="filterMusic()"
-                    aria-label="Filter by artist">
-                    <option value>All Artists</option>
-                    <template x-for="artist in artists" :key="artist">
-                        <option :value="artist" x-text="artist"></option>
-                    </template>
-                </select>
-
-                <select x-model="sortBy" @change="sortMusic()"
-                    aria-label="Sort music">
-                    <option value="title">Sort: Title</option>
-                    <option value="artist">Sort: Artist</option>
-                    <option value="plays">Sort: Plays</option>
-                    <option value="added_date">Sort: Date Added</option>
-                </select>
-            </div>
-
-            <div class="music-mobile-row">
-                <div class="view-options" aria-label="View options">
-                    <button @click="viewMode = 'grid'"
-                        :class="{'active': viewMode === 'grid'}"
-                        class="view-btn" type="button" aria-label="Grid view">
-                        <i class="fas fa-th" aria-hidden="true"></i>
-                    </button>
-                    <button @click="viewMode = 'list'"
-                        :class="{'active': viewMode === 'list'}"
-                        class="view-btn" type="button" aria-label="List view">
-                        <i class="fas fa-list" aria-hidden="true"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Unified Rotating Hero -->
-    <section class="unified-hero tv-hero"
-        x-data="createUnifiedHero({ pageType: 'music', rotationSpeed: 14000 })"
-        x-init="init()"
-        @touchstart="handleTouchStart" @touchmove="handleTouchMove"
-        @touchend="handleTouchEnd">
-        <div class="unified-hero-feed hero-feed"
-            :style="`transform: translateX(${heroOffset}px)`">
-            <template x-for="(item, index) in heroItems" :key="item.id">
-                <div class="hero-item" x-show="getItemImage(item)"
-                    :class="{'active': currentHeroIndex === index}"
-                    :style="`background-image: url(${getItemImage(item)})`"
-                    @click="playHeroItem(item)">
-                    <div class="hero-overlay">
-                        <div class="hero-content">
-                            <div class="hero-badge ahoy-subheader"
-                                x-text="getPageBadge()"></div>
-                            <h1 x-text="getItemTitle(item)"></h1>
-                            <p x-text="getItemSubtitle(item)"></p>
-                            <button @click.stop="playHeroItem(item)"
-                                class="hero-play-btn">
-                                <i class="fas fa-play"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </template>
-        </div>
-        <div class="hero-controls">
-            <button @click="prevHero()" class="hero-nav">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button @click="nextHero()" class="hero-nav">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-        <div class="hero-indicators">
-            <template x-for="(item, index) in heroItems" :key="item.id">
-                <button @click="setHeroIndex(index)"
-                    :class="{'active': currentHeroIndex === index}"
-                    class="hero-dot"></button>
-            </template>
-        </div>
-    </section>
-    <!-- Unified Header Section -->
-    <section class="unified-header music-subheader">
-        <div class="header-content">
-            <div class="header-title">
-                <div class="title-text">
-                    <h1>Music Library</h1>
-                    <p>Discover tracks, albums, and artists</p>
-                    <div class="header-stats" x-show="bookmarkCount() > 0">
-                        <a href="/my-saves" class="bookmark-count-badge">
-                            <i class="fas fa-bookmark"></i>
-                            <span x-text="bookmarkCount()"></span>
-                            <span
-                                x-text="bookmarkCount() === 1 ? 'saved' : 'saved'"></span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="header-search desktop-only">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text"
-                        x-model="searchQuery"
-                        @input="filterMusic()"
-                        placeholder="Search music, artists, or genres..."
-                        class="search-input">
-                    <button @click="clearSearch()" class="search-clear"
-                        x-show="searchQuery">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="header-filters">
-                <div class="filter-group">
-                    <label>Artist:</label>
-                    <select x-model="selectedArtist" @change="filterMusic()">
-                        <option value>All Artists</option>
-                        <template x-for="artist in artists" :key="artist">
-                            <option :value="artist" x-text="artist"></option>
-                        </template>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label>Sort by:</label>
-                    <select x-model="sortBy" @change="sortMusic()">
-                        <option value="title">Title</option>
-                        <option value="artist">Artist</option>
-                        <option value="plays">Plays</option>
-                        <option value="added_date">Date Added</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="header-actions">
-                <div class="view-options">
-                    <button @click="viewMode = 'grid'"
-                        :class="{'active': viewMode === 'grid'}"
-                        class="view-btn">
-                        <i class="fas fa-th"></i>
-                    </button>
-                    <button @click="viewMode = 'list'"
-                        :class="{'active': viewMode === 'list'}"
-                        class="view-btn">
-                        <i class="fas fa-list"></i>
-                    </button>
-                </div>
-                <button @click="playRandomTrack()"
-                    class="btn btn-primary btn-large">
-                    <i class="fas fa-play"></i> Play Random
+            <select class="music-toolbar-sort" x-model="sortBy" @change="sortMusic()"
+                aria-label="Sort music">
+                <option value="title">Title</option>
+                <option value="artist">Artist</option>
+                <option value="plays">Plays</option>
+                <option value="added_date">Date Added</option>
+            </select>
+            <div class="view-options">
+                <button @click="viewMode = 'grid'"
+                    :class="{'active': viewMode === 'grid'}"
+                    class="view-btn" type="button" aria-label="Grid view">
+                    <i class="fas fa-th" aria-hidden="true"></i>
+                </button>
+                <button @click="viewMode = 'list'"
+                    :class="{'active': viewMode === 'list'}"
+                    class="view-btn" type="button" aria-label="List view">
+                    <i class="fas fa-list" aria-hidden="true"></i>
                 </button>
             </div>
+            <button type="button" class="episode-btn music-toolbar-play"
+                @click="playRandomTrack()" title="Play Random">
+                <i class="fas fa-random" aria-hidden="true"></i>
+                <span class="sr-only">Play Random</span>
+            </button>
         </div>
     </section>
 
@@ -237,11 +130,11 @@
 
                 <div class="track-cover">
                     <img
-                        :src="track.cover_art || '/static/img/default-cover.jpg'"
+                        :src="getTrackCover(track)"
                         :alt="track.title"
                         class="image-placeholder"
                         loading="lazy"
-                        @error="handleImageError($event, track)">
+                        @error="$event.target.src='/static/img/default-cover.jpg'">
                     <div class="track-overlay"
                         :class="{'track-overlay-visible': currentTrack?.id === track.id && isPlaying}">
                         <button
@@ -261,13 +154,21 @@
                                 <button class="action-btn queue-btn"
                                     @click.stop="addToQueue('track', track.id, track.title, track.cover_art, track)"
                                     :class="{ 'in-queue': isInQueue('track', track.id) }"
-                                    title="Add to queue">
+                                    title="Add to queue"
+                                    :aria-label="isInQueue('track', track.id) ? 'In queue' : 'Add to queue'">
                                     <i
                                         :class="isInQueue('track', track.id) ? 'fas fa-check' : 'fas fa-plus'"
                                         aria-hidden="true"></i>
                                     <span class="sr-only">Add to queue</span>
                                 </button>
                             </div>
+                            <button class="action-btn boost-btn"
+                                @click.stop="openBoost(track)"
+                                title="Boost artist"
+                                :aria-label="'Boost ' + (track.artist || 'artist')">
+                                <i class="fas fa-heart" aria-hidden="true"></i>
+                                <span class="sr-only">Boost</span>
+                            </button>
                             <button class="action-btn save-btn bm-btn"
                                 @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art }); $el.classList.add('sparkle'); setTimeout(() => $el.classList.remove('sparkle'), 600)"
                                 :aria-pressed="isBookmarked('track', track.id)"
@@ -304,6 +205,7 @@
             <table class="music-table">
                 <thead>
                     <tr>
+                        <th class="col-cover"></th>
                         <th class="col-play"></th>
                         <th class="col-title">Title</th>
                         <th class="col-artist">Artist</th>
@@ -312,7 +214,7 @@
                             Plays <i class="fas fa-sort-down"
                                 x-show="sortBy === 'plays'"></i>
                         </th>
-                        <th class="col-action">Action</th>
+                        <th class="col-action">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -321,6 +223,13 @@
                         <tr class="music-table-row"
                             @click="playTrack(track)"
                             :class="{'playing': currentTrack?.id === track.id}">
+                            <td class="col-cover" data-label>
+                                <img class="music-table-thumb"
+                                    :src="getTrackCover(track)"
+                                    :alt="track.title"
+                                    loading="lazy"
+                                    @error="$event.target.src='/static/img/default-cover.jpg'">
+                            </td>
                             <td class="col-play" data-label>
                                 <button class="play-btn"
                                     @click.stop="playTrack(track)"
@@ -343,24 +252,34 @@
                                 x-text="formatTime(track.duration_seconds || 0)"></td>
                             <td class="col-plays" data-label="Plays"
                                 x-text="track.play_count || 0"></td>
-                            <td class="col-action" data-label="Action">
+                            <td class="col-action" data-label="Actions">
                                 <div class="queue-container"
                                     x-data="globalQueueHandler()"
                                     x-init="init()">
                                     <button class="action-btn queue-btn"
                                         @click.stop="addToQueue('track', track.id, track.title, track.cover_art, track)"
                                         :class="{ 'in-queue': isInQueue('track', track.id) }"
-                                        title="Add to queue">
+                                        title="Add to queue"
+                                        :aria-label="isInQueue('track', track.id) ? 'In queue' : 'Add to queue'">
                                         <i
                                             :class="isInQueue('track', track.id) ? 'fas fa-check' : 'fas fa-plus'"
                                             aria-hidden="true"></i>
+                                        <span class="sr-only">Add to queue</span>
                                     </button>
                                 </div>
+                                <button class="action-btn boost-btn"
+                                    @click.stop="openBoost(track)"
+                                    title="Boost artist"
+                                    :aria-label="'Boost ' + (track.artist || 'artist')">
+                                    <i class="fas fa-heart" aria-hidden="true"></i>
+                                    <span class="sr-only">Boost</span>
+                                </button>
                                 <button class="action-btn bm-btn"
                                     @click.stop="toggleBookmark({ type: 'track', id: track.id, title: track.title, artwork: track.cover_art })"
                                     :aria-pressed="isBookmarked('track', track.id)"
                                     :class="{ 'bookmarked': isBookmarked('track', track.id) }"
-                                    :aria-label="isBookmarked('track', track.id) ? 'Remove bookmark' : 'Add bookmark'">
+                                    :aria-label="isBookmarked('track', track.id) ? 'Remove bookmark' : 'Save'"
+                                    title="Save">
                                     <i x-show="isBookmarked('track', track.id)"
                                         class="fas fa-bookmark"></i>
                                     <i x-show="!isBookmarked('track', track.id)"
@@ -506,7 +425,7 @@ function musicLibrary() {
         filteredTracks: [],
         artists: [],
         artistCoverMap: {},
-        viewMode: 'grid',
+        viewMode: 'list',
         searchQuery: '',
         selectedArtist: '',
         sortBy: 'plays',
@@ -558,7 +477,7 @@ function musicLibrary() {
             
             try {
                 this.isLoading = true;
-                const response = await fetch('/api/music');
+                const response = await fetch('/api/music?t=' + Date.now());
                 const data = await response.json();
                 this.tracks = data.tracks || [];
                 this.filteredTracks = [...this.tracks];
@@ -995,6 +914,23 @@ function musicLibrary() {
         },
         
         // Utility functions
+        getTrackCover(track) {
+            const url = track && (track.cover_art || track.artwork);
+            if (typeof url === 'string' && url.trim()) return url;
+            return '/static/img/default-cover.jpg';
+        },
+
+        openBoost(track) {
+            if (!track || !track.artist) return;
+            document.dispatchEvent(new CustomEvent('ahoy:boost:open', {
+                detail: {
+                    recipientType: 'artist',
+                    recipientId: track.artist_slug || track.artist,
+                    recipientName: track.artist
+                }
+            }));
+        },
+
         formatTime(seconds) {
             if (!seconds || seconds === 0 || isNaN(seconds)) return '00:00';
             const mins = Math.floor(seconds / 60);
@@ -1055,7 +991,6 @@ function recentQueueSection() {
 {% endblock %}
 
 {% block extra_head %}
-<script src="{{ url_for('static', filename='js/unified-hero.js') }}"></script>
 <style>
 </style>
 {% endblock %}

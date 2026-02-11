@@ -34,6 +34,8 @@
 
 **Cache Busting:** Increment `css_version` in `templates/base.html` (~line 141) when changing CSS/JS
 
+**Web UI: SPA is the main app.** The **Vue SPA** (`spa/` → `spa-dist/`) is the primary web UI. When you run `npm start`, Flask builds the SPA and then serves it for `/`, `/music`, `/podcasts`, etc. **Edit the SPA** (`spa/src/`) for UI changes (e.g. `MiniPlayer.vue`, `NowPlayingView.vue`, views, components). The **Flask templates** (`templates/`, e.g. `base.html`, `music.html`) are legacy server-rendered pages; they are only used for routes in `_server_path_prefixes` (e.g. API, static, auth) or when `spa-dist` is missing.
+
 **Cache strategy (always fresh):**
 - **HTML:** `no-cache, no-store` via `utils/security_headers.py` and meta tags in `base.html`. Never cached by service worker.
 - **On every load:** First script in body unregisters all service workers and clears all Cache API caches.

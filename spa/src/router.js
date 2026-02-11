@@ -122,6 +122,16 @@ const routes = [
     component: () => import('./views/FocusView.vue'),
   },
   {
+    path: '/download',
+    name: 'download',
+    component: () => import('./views/DownloadView.vue'),
+  },
+  {
+    path: '/mp3-player',
+    name: 'mp3-player',
+    component: () => import('./views/Mp3PlayerView.vue'),
+  },
+  {
     path: '/auth/forgot',
     name: 'forgot-password',
     component: () => import('./views/ForgotPasswordView.vue'),

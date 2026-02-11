@@ -349,6 +349,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { apiFetchCached } from '../composables/useApi'
 import { useBookmarks } from '../composables/useBookmarks'
+import { trackRecentPlay } from '../composables/useRecentlyPlayed'
 
 const route = useRoute()
 const router = useRouter()
@@ -442,6 +443,14 @@ function clearFilters() {
 
 function playShow(show) {
   currentVideo.value = show
+  trackRecentPlay({
+    id: show.id,
+    type: 'show',
+    title: show.title,
+    host: show.host,
+    thumbnail: show.thumbnail,
+    url: show.video_url || show.mp4_link || show.trailer_url || show.url,
+  })
   router.replace({ path: '/shows', query: { ...route.query, play: show.id } })
   nextTickPlay()
   window.scrollTo({ top: 0, behavior: 'smooth' })

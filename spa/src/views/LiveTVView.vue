@@ -162,24 +162,6 @@
           </button>
         </div>
 
-        <div class="player-frame" aria-live="polite">
-          <video
-            ref="guideVideoEl"
-            playsinline
-            webkit-playsinline
-            controls
-            preload="metadata"
-          ></video>
-          <div class="now-playing-overlay">
-            <div class="now-title">{{ guideFocusTitle }}</div>
-            <div class="now-meta">{{ guideFocusMeta }}</div>
-          </div>
-          <div class="player-actions">
-            <button class="btn btn-primary" @click="openFocusedProgram">Watch</button>
-            <button class="btn" @click="bookmarkFocusedProgram">Watch later</button>
-          </div>
-        </div>
-
         <div class="guide">
           <div class="guide-header">
             <div>Guide</div>
@@ -187,7 +169,7 @@
               <span>Navigate</span>
               <span class="kbd">&uarr;</span><span class="kbd">&darr;</span>
               <span class="kbd">&larr;</span><span class="kbd">&rarr;</span>
-              <span>Open</span>
+              <span>Tune to channel</span>
               <span class="kbd">Enter</span>
             </div>
           </div>
@@ -214,8 +196,8 @@
                     tabindex="0"
                     role="gridcell"
                     :aria-label="prog.title + ' • ' + prog.durMin + ' min'"
-                    @click="setGuideFocus(rowIdx, colIdx)"
-                    @keydown.enter="setGuideFocus(rowIdx, colIdx); openFocusedProgram()"
+                    @click="setGuideFocus(rowIdx, colIdx); selectChannel(rowIdx)"
+                    @keydown.enter="setGuideFocus(rowIdx, colIdx); selectChannel(rowIdx)"
                   >
                     <img class="program-thumb" :src="prog.thumbnail" :alt="prog.title" loading="lazy" />
                     <div class="program-title">{{ prog.title }}</div>
@@ -237,10 +219,12 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { apiFetch, apiFetchCached } from '../composables/useApi'
+import { trackRecentPlay } from '../composables/useRecentlyPlayed'
+
+const DEFAULT_COVER = '/static/img/default-cover.jpg'
 
 // --- Refs ---
 const videoEl = ref(null)
-const guideVideoEl = ref(null)
 const guideRef = ref(null)
 const channels = ref([])
 const selectedRow = ref(0)
@@ -248,17 +232,18 @@ const loading = ref(true)
 const loadError = ref(false)
 const isPlaying = ref(false)
 const isMuted = ref(true)
-const nowTitle = ref('Select a program')
+const nowTitle = ref('Live')
 const nowMeta = ref('—')
-const nowThumb = ref('/static/img/default-cover.jpg')
+const nowThumb = ref(DEFAULT_COVER)
 const upNextTitle = ref('—')
 const progressPct = ref(0)
 const mobileDrawerOpen = ref(false)
 
-// Guide focus
+// Generated thumbnails from video frames (videoUrl -> data URL) when item has no thumbnail
+const generatedThumbs = ref({})
+
+// Guide focus (for keyboard nav and highlight; Enter = tune to channel)
 const guideFocus = ref({ row: 0, col: 0 })
-const guideFocusTitle = ref('Select a program')
-const guideFocusMeta = ref('Use arrow keys and press Enter to play')
 
 // Hover preview
 const hoverPreview = ref({ visible: false, x: 0, y: 0, thumb: '', title: '', meta: '' })
@@ -306,8 +291,9 @@ const timeMarkers = computed(() => {
   return markers
 })
 
-// Guide programs grid
+// Guide programs grid (thumbnail uses getThumbnail so generatedThumbs reactivity applies)
 const guidePrograms = computed(() => {
+  void generatedThumbs.value // dependency for reactivity
   const result = {}
   const now = new Date()
   channels.value.forEach((ch, rowIdx) => {
@@ -318,18 +304,19 @@ const guidePrograms = computed(() => {
     if (!items.length) { result[rowIdx] = progs; return }
     while (diffMinutes(now, cursor) < horizonMinutes) {
       const item = items[col % items.length]
+      const src = item?.video_url || item?.mp4_link || item?.trailer_url || ''
       const durMin = Math.max(5, Math.round((item?.duration_seconds || 300) / 60))
       const end = new Date(cursor.getTime() + durMin * 60000)
       progs.push({
         title: item?.title || 'Untitled',
-        thumbnail: item?.thumbnail || '/static/img/default-cover.jpg',
+        thumbnail: getThumbnail(item, src),
         category: item?.category || ch.name || 'Show',
         durMin,
         widthPx: durMin * pxPerMinute,
         timeLabel: `${fmtTime(cursor)} – ${fmtTime(end)}`,
         startUTC: cursor.getTime(),
         endUTC: end.getTime(),
-        src: item?.video_url || item?.mp4_link || item?.trailer_url || '',
+        src,
         item,
       })
       cursor = end
@@ -356,6 +343,98 @@ function cleanTitle(title) {
 
 function getVideoUrl(item) {
   return item?.video_url || item?.mp4_link || item?.trailer_url || ''
+}
+
+// Resolve thumbnail: use item's thumbnail, or generated frame from video, or default
+function getThumbnail(item, videoUrl) {
+  if (item?.thumbnail) return item.thumbnail
+  const url = videoUrl || getVideoUrl(item)
+  if (url && generatedThumbs.value[url]) return generatedThumbs.value[url]
+  return DEFAULT_COVER
+}
+
+// Capture a single frame from a video URL (for thumbnail generation)
+const _thumbQueue = []
+let _thumbInFlight = 0
+const MAX_CONCURRENT_THUMBS = 2
+
+function captureVideoFrame(videoUrl) {
+  return new Promise((resolve, reject) => {
+    if (!videoUrl || typeof videoUrl !== 'string') {
+      reject(new Error('Invalid video URL'))
+      return
+    }
+    const video = document.createElement('video')
+    video.muted = true
+    video.playsInline = true
+    video.crossOrigin = 'anonymous'
+    video.preload = 'metadata'
+    const timeout = setTimeout(() => {
+      video.src = ''
+      video.load()
+      reject(new Error('Timeout'))
+    }, 15000)
+    video.onerror = () => {
+      clearTimeout(timeout)
+      reject(new Error('Video load failed'))
+    }
+    video.onloadeddata = () => {
+      const t = Math.min(1, Math.max(0, video.duration ? video.duration * 0.05 : 1))
+      video.currentTime = t
+    }
+    video.onseeked = () => {
+      clearTimeout(timeout)
+      try {
+        const canvas = document.createElement('canvas')
+        const w = 320
+        const h = Math.round((video.videoHeight / video.videoWidth) * w) || 180
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          resolve(null)
+          return
+        }
+        ctx.drawImage(video, 0, 0, w, h)
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
+        video.src = ''
+        video.load()
+        resolve(dataUrl)
+      } catch (e) {
+        reject(e)
+      }
+    }
+    video.src = videoUrl
+    video.load().catch(() => reject(new Error('Load failed')))
+  })
+}
+
+function processThumbQueue() {
+  if (_thumbInFlight >= MAX_CONCURRENT_THUMBS || _thumbQueue.length === 0) return
+  const videoUrl = _thumbQueue.shift()
+  if (generatedThumbs.value[videoUrl]) {
+    processThumbQueue()
+    return
+  }
+  _thumbInFlight++
+  captureVideoFrame(videoUrl)
+    .then((dataUrl) => {
+      if (dataUrl) {
+        generatedThumbs.value = { ...generatedThumbs.value, [videoUrl]: dataUrl }
+      }
+    })
+    .catch(() => {})
+    .finally(() => {
+      _thumbInFlight--
+      processThumbQueue()
+    })
+}
+
+function ensureVideoThumb(videoUrl) {
+  if (!videoUrl || generatedThumbs.value[videoUrl]) return
+  if (_thumbQueue.includes(videoUrl)) return
+  _thumbQueue.push(videoUrl)
+  processThumbQueue()
 }
 
 // --- Schedule engine ---
@@ -432,6 +511,15 @@ function playCurrentSlot() {
     video.muted = true
     isMuted.value = true
     video.play().catch(() => {})
+    const ch = channels.value[selectedRow.value]
+    trackRecentPlay({
+      id: `live_tv-${ch?.id ?? selectedRow.value}-${slot.startUTC}`,
+      type: 'live_tv',
+      title: slot.title || 'Live TV',
+      host: ch?.name || channelLabel.value,
+      thumbnail: slot.thumb,
+      url: slot.src,
+    })
   } else {
     if (Math.abs((video.currentTime || 0) - seekSec) > 3) {
       try { video.currentTime = seekSec } catch (_) {}
@@ -445,7 +533,7 @@ function updateNowNext() {
   if (slot) {
     nowTitle.value = cleanTitle(slot.title)
     nowMeta.value = slot.category || ''
-    if (slot.thumb) nowThumb.value = slot.thumb
+    nowThumb.value = slot.thumb || generatedThumbs.value[slot.src] || DEFAULT_COVER
   }
   upNextTitle.value = next ? cleanTitle(next.title) : '—'
 }
@@ -554,7 +642,10 @@ function startHoverPreview(event, idx) {
     const ch = channels.value[idx]
     if (!ch) return
     const slot = getCurrentSlot(idx)
-    const thumb = slot?.thumb || ch.items?.[0]?.thumbnail || '/static/img/default-cover.jpg'
+    const videoUrl = slot?.src || getVideoUrl(ch.items?.[0])
+    const thumb = slot
+      ? (slot.thumb || generatedThumbs.value[slot.src] || DEFAULT_COVER)
+      : getThumbnail(ch.items?.[0], videoUrl)
     const title = slot ? cleanTitle(slot.title) : cleanTitle(ch.items?.[0]?.title)
     const meta = slot?.category || ch.items?.[0]?.category || ch.name || ''
     const rect = event.target.closest('.channel-button').getBoundingClientRect()
@@ -576,48 +667,6 @@ function hideHoverPreview() {
 // --- Guide ---
 function setGuideFocus(row, col) {
   guideFocus.value = { row, col }
-  const progs = guidePrograms.value[row]
-  const prog = progs?.[col]
-  if (prog) {
-    guideFocusTitle.value = prog.title
-    guideFocusMeta.value = `${prog.category} • ${prog.durMin} min`
-  }
-}
-
-function openFocusedProgram() {
-  const progs = guidePrograms.value[guideFocus.value.row]
-  const prog = progs?.[guideFocus.value.col]
-  if (!prog?.src) return
-  const video = guideVideoEl.value
-  if (!video) return
-  try { video.pause() } catch (_) {}
-  video.src = prog.src
-  try { video.load() } catch (_) {}
-  video.play().catch(() => {})
-  guideFocusTitle.value = prog.title
-  guideFocusMeta.value = `${prog.category} • ${prog.durMin} min`
-}
-
-async function bookmarkFocusedProgram() {
-  const progs = guidePrograms.value[guideFocus.value.row]
-  const prog = progs?.[guideFocus.value.col]
-  if (!prog?.item?.id) return
-  try {
-    await fetch('/api/bookmarks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ media_id: prog.item.id, media_type: 'show' })
-    })
-  } catch (_) {
-    // Fallback to localStorage
-    try {
-      const key = 'ahoy_watch_later'
-      const curr = JSON.parse(localStorage.getItem(key) || '[]')
-      if (!curr.find(x => x.id === prog.item.id)) curr.push({ id: prog.item.id, type: 'show', t: Date.now() })
-      localStorage.setItem(key, JSON.stringify(curr))
-    } catch (e) {}
-  }
 }
 
 // Keyboard navigation for guide
@@ -646,7 +695,7 @@ function onGlobalKeydown(e) {
     setGuideFocus(row, Math.max(0, col - 1))
   } else if (e.key === 'Enter') {
     e.preventDefault()
-    openFocusedProgram()
+    selectChannel(guideFocus.value.row)
   }
 }
 
@@ -688,6 +737,15 @@ async function loadChannels() {
     buildSchedule()
     tick()
     engineTimer = setInterval(tick, 1000)
+    // Queue thumbnail generation for items that have video but no thumbnail
+    nextTick(() => {
+      channels.value.forEach((ch) => {
+        (ch.items || []).forEach((item) => {
+          const url = getVideoUrl(item)
+          if (url && !item?.thumbnail) ensureVideoThumb(url)
+        })
+      })
+    })
   }
   loading.value = false
 }
@@ -1047,60 +1105,7 @@ onUnmounted(() => {
 }
 
 .live-tv-main {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  align-items: start;
-}
-.player-frame {
-  position: relative;
-  background: #000;
-  border-radius: 12px;
-  overflow: hidden;
-  min-height: 48vh;
-}
-.player-frame video {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.now-playing-overlay {
-  position: absolute;
-  left: 12px;
-  bottom: 12px;
-  background: rgba(0,0,0,0.55);
-  padding: 10px 12px;
-  border-radius: 8px;
-}
-.now-title {
-  font-weight: 800;
-  font-size: 16px;
-}
-.now-meta {
-  font-size: 12px;
-  opacity: 0.9;
-}
-.player-actions {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  display: flex;
-  gap: 8px;
-}
-.btn {
-  background: #1d1d1f;
-  border: 1px solid #2a2a2a;
-  color: #e5e7eb;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-}
-.btn-primary {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: white;
+  min-width: 0;
 }
 
 .guide {
@@ -1344,27 +1349,6 @@ onUnmounted(() => {
   .channel-selector-retry {
     min-height: 48px;
     padding: 14px 24px;
-  }
-  .player-frame {
-    min-height: 40vh;
-    border-radius: 10px;
-  }
-  .now-playing-overlay {
-    left: 8px;
-    bottom: 8px;
-    padding: 8px 10px;
-  }
-  .now-title { font-size: 14px; }
-  .now-meta { font-size: 11px; }
-  .player-actions {
-    right: 8px;
-    bottom: 8px;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .btn {
-    padding: 8px 12px;
-    font-size: 12px;
   }
   .guide {
     min-height: auto;

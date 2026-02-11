@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260210mobile' %}
+        {% set css_version = 'v20260211np' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -1629,7 +1629,8 @@
             <!-- Glassy Now Playing Bar -->
             <div class="now-playing-glass now-playing-sticky" :class="{'now-playing-is-playing': currentTrack && isPlaying}">
                 <div class="now-playing-container">
-                    <!-- Left: Album Artwork -->
+                    <!-- Left: Album Artwork + Track Info -->
+                    <div class="now-playing-left">
                     <div class="now-playing-album-art"
                         @click="currentTrack ? togglePlay() : null">
                         <!-- Show album art when track is loaded -->
@@ -1652,7 +1653,6 @@
                         </div>
                     </div>
 
-                    <!-- Center: Track Info -->
                     <div class="now-playing-info">
                         <!-- When track is playing -->
                         <template x-if="currentTrack">
@@ -1690,9 +1690,16 @@
                             </div>
                         </template>
                     </div>
+                    </div>
 
-                    <!-- Right: Controls -->
-                    <div class="now-playing-controls">
+                    <!-- Center: Transport (Spotify-style) + ±5s seek -->
+                    <div class="now-playing-transport">
+                        <button @click="seekBackward5()" class="now-playing-btn now-playing-seek-btn"
+                            :disabled="!currentTrack"
+                            :class="{'disabled': !currentTrack}"
+                            title="Back 5 seconds">
+                            <span class="seek-5-label">−5</span>
+                        </button>
                         <button @click="previousTrack()" class="now-playing-btn"
                             :disabled="!currentTrack"
                             :class="{'disabled': !currentTrack}"
@@ -1714,40 +1721,61 @@
                             title="Next">
                             <i class="fas fa-step-forward"></i>
                         </button>
-                        <button @click="toggleShuffle()" class="now-playing-btn"
-                            :class="{'active': isShuffled, 'disabled': !currentTrack}"
-                            :disabled="!currentTrack"
-                            title="Shuffle">
-                            <i class="fas fa-random"></i>
-                        </button>
-                        <button @click="toggleRepeat()" class="now-playing-btn"
-                            :class="{'active': isRepeated, 'disabled': !currentTrack}"
-                            :disabled="!currentTrack"
-                            title="Repeat">
-                            <i class="fas fa-redo"></i>
-                        </button>
-                        <button @click="openBoost()" class="now-playing-btn"
+                        <button @click="seekForward5()" class="now-playing-btn now-playing-seek-btn"
                             :disabled="!currentTrack"
                             :class="{'disabled': !currentTrack}"
-                            title="Boost">
-                            <i class="fas fa-bolt"></i>
+                            title="Forward 5 seconds">
+                            <span class="seek-5-label">+5</span>
                         </button>
-                        <button @click="toggleBookmarkCurrent()"
-                            class="now-playing-btn"
-                            :class="{'active': isSaved, 'disabled': !currentTrack}"
-                            :disabled="!currentTrack"
-                            title="Bookmark">
-                            <i
-                                :class="isSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"
-                                :style="isSaved ? 'color: var(--accent-color);' : ''"></i>
-                        </button>
-                        <button @click.stop="toggleQueue()"
-                            class="now-playing-btn now-playing-queue-btn"
-                            :class="{'active': showQueue}"
-                            title="Queue">
-                            <i class="fas fa-list"></i>
-                            <span x-show="queueLength > 0" class="queue-badge" x-text="queueLength"></span>
-                        </button>
+                    </div>
+
+                    <!-- Right: Action buttons + master volume -->
+                    <div class="now-playing-actions-wrap">
+                        <div class="now-playing-actions">
+                            <button @click="toggleShuffle()" class="now-playing-btn"
+                                :class="{'active': isShuffled, 'disabled': !currentTrack}"
+                                :disabled="!currentTrack"
+                                title="Shuffle">
+                                <i class="fas fa-random"></i>
+                            </button>
+                            <button @click="toggleRepeat()" class="now-playing-btn"
+                                :class="{'active': isRepeated, 'disabled': !currentTrack}"
+                                :disabled="!currentTrack"
+                                title="Repeat">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                            <button @click="openBoost()" class="now-playing-btn"
+                                :disabled="!currentTrack"
+                                :class="{'disabled': !currentTrack}"
+                                title="Boost">
+                                <i class="fas fa-bolt"></i>
+                            </button>
+                            <button @click="toggleBookmarkCurrent()"
+                                class="now-playing-btn"
+                                :class="{'active': isSaved, 'disabled': !currentTrack}"
+                                :disabled="!currentTrack"
+                                title="Bookmark">
+                                <i
+                                    :class="isSaved ? 'fas fa-bookmark' : 'far fa-bookmark'"
+                                    :style="isSaved ? 'color: var(--accent-color);' : ''"></i>
+                            </button>
+                            <button @click.stop="toggleQueue()"
+                                class="now-playing-btn now-playing-queue-btn"
+                                :class="{'active': showQueue}"
+                                title="Queue">
+                                <i class="fas fa-list"></i>
+                                <span x-show="queueLength > 0" class="queue-badge" x-text="queueLength"></span>
+                            </button>
+                        </div>
+                        <div class="now-playing-volume-wrap">
+                            <button @click="toggleMute()" class="now-playing-btn now-playing-volume-btn"
+                                :title="isMuted ? 'Unmute' : 'Mute'">
+                                <i :class="isMuted ? 'fas fa-volume-mute' : (volume > 50 ? 'fas fa-volume-up' : (volume > 0 ? 'fas fa-volume-down' : 'fas fa-volume-off'))"></i>
+                            </button>
+                            <input type="range" class="now-playing-volume" min="0" max="100" :value="volume"
+                                @input="setVolume(parseInt($event.target.value, 10))"
+                                title="Volume">
+                        </div>
                     </div>
 
                     <!-- Queue Panel -->
@@ -3924,6 +3952,31 @@
                         }
                     } catch (e) {
                         console.warn('Error in seekForward:', e);
+                    }
+                },
+
+                seekBackward5() {
+                    try {
+                        if (!window.mediaPlayer) return;
+                        const t = Math.max(0, (window.mediaPlayer.currentTime || 0) - 5);
+                        if (typeof window.mediaPlayer.seekTo === 'function') {
+                            window.mediaPlayer.seekTo(t);
+                        }
+                    } catch (e) {
+                        console.warn('Error in seekBackward5:', e);
+                    }
+                },
+
+                seekForward5() {
+                    try {
+                        if (!window.mediaPlayer) return;
+                        const dur = this.duration || (window.mediaPlayer.duration || 0);
+                        const t = Math.min(dur, (window.mediaPlayer.currentTime || 0) + 5);
+                        if (typeof window.mediaPlayer.seekTo === 'function') {
+                            window.mediaPlayer.seekTo(t);
+                        }
+                    } catch (e) {
+                        console.warn('Error in seekForward5:', e);
                     }
                 },
 

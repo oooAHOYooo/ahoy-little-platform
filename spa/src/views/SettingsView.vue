@@ -88,6 +88,26 @@
               </div>
               <i class="fas fa-chevron-right experimental-card-arrow"></i>
             </router-link>
+            <router-link to="/mp3-player" class="experimental-card neu-card-inset">
+              <div class="experimental-card-icon">
+                <i class="fas fa-compact-disc"></i>
+              </div>
+              <div class="experimental-card-info">
+                <h3>MP3 Player</h3>
+                <p>Import and play MP3s from your computer — Winamp style</p>
+              </div>
+              <i class="fas fa-chevron-right experimental-card-arrow"></i>
+            </router-link>
+            <router-link to="/download" class="experimental-card neu-card-inset">
+              <div class="experimental-card-icon">
+                <i class="fas fa-download"></i>
+              </div>
+              <div class="experimental-card-info">
+                <h3>Download</h3>
+                <p>Get Ahoy on web, Android, iOS, or desktop</p>
+              </div>
+              <i class="fas fa-chevron-right experimental-card-arrow"></i>
+            </router-link>
           </div>
         </div>
 
