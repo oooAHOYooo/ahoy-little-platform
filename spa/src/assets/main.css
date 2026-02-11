@@ -19099,9 +19099,10 @@ img.loading {
 
 .music-table {
     width: 100%;
-    border-collapse: separate;
+    border-collapse: collapse;
     border-spacing: 0;
-    font-size: 10px;
+    font-size: 13px;
+    table-layout: fixed;
 }
 
 .music-table thead {
@@ -19117,16 +19118,17 @@ img.loading {
 }
 
 .music-table th {
-    padding: 12px 16px;
+    padding: 10px 12px;
     text-align: left;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 10px;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.05em;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     white-space: nowrap;
     position: relative;
+    vertical-align: middle;
 }
 
 .music-table th::after {
@@ -19142,41 +19144,67 @@ img.loading {
             transparent 100%);
 }
 
-.music-table th.col-cover {
-    width: 48px;
-    padding: 8px 6px;
+/* Column widths: fixed layout so headers align with cells */
+.music-table th.col-cover,
+.music-table td.col-cover {
+    width: 52px;
+    min-width: 52px;
+    padding: 8px 10px;
     text-align: center;
     vertical-align: middle;
 }
 
-.music-table th.col-play {
-    width: 50px;
+.music-table th.col-play,
+.music-table td.col-play {
+    width: 52px;
+    min-width: 52px;
     text-align: center;
-    padding: 12px 8px;
+    padding: 10px 8px;
+    vertical-align: middle;
 }
 
-.music-table th.col-plays {
+.music-table th.col-title,
+.music-table td.col-title {
+    min-width: 0;
+    padding: 10px 12px;
+}
+
+.music-table th.col-artist,
+.music-table td.col-artist {
+    min-width: 0;
+    padding: 10px 12px;
+}
+
+.music-table th.col-duration,
+.music-table td.col-duration {
+    width: 64px;
+    min-width: 64px;
+    padding: 10px 12px;
+    text-align: right;
+}
+
+.music-table th.col-plays,
+.music-table td.col-plays {
+    width: 56px;
+    min-width: 56px;
+    padding: 10px 12px;
     text-align: right;
     cursor: pointer;
     user-select: none;
     transition: color 0.2s ease;
-    padding-right: 20px;
-}
-
-.music-table th.col-duration {
-    text-align: right;
-    width: 70px;
-    padding-right: 20px;
 }
 
 .music-table th.col-plays:hover {
     color: rgba(255, 255, 255, 0.9);
 }
 
-.music-table th.col-action {
-    text-align: center;
+.music-table th.col-action,
+.music-table td.col-action {
     width: 120px;
-    padding: 12px 8px;
+    min-width: 120px;
+    padding: 10px 8px;
+    text-align: center;
+    vertical-align: middle;
 }
 
 .music-table tbody tr {
@@ -19232,18 +19260,11 @@ img.loading {
 }
 
 .music-table td {
-    padding: 10px 16px;
+    padding: 10px 12px;
     vertical-align: middle;
-    font-size: 10px;
+    font-size: 13px;
     line-height: 1.4;
     color: rgba(255, 255, 255, 0.85);
-}
-
-.music-table td.col-cover {
-    width: 48px;
-    padding: 6px 8px;
-    text-align: center;
-    vertical-align: middle;
 }
 
 .music-table .music-table-thumb {
@@ -19252,13 +19273,8 @@ img.loading {
     border-radius: 6px;
     object-fit: cover;
     display: block;
+    margin: 0 auto;
     border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.music-table td.col-play {
-    text-align: center;
-    padding: 10px 8px;
-    width: 50px;
 }
 
 .music-table td.col-play .play-btn {
@@ -19302,11 +19318,6 @@ img.loading {
     line-height: 1;
 }
 
-.music-table td.col-title {
-    min-width: 0;
-    max-width: 0;
-}
-
 .music-table td.col-title .title-text {
     white-space: nowrap;
     overflow: hidden;
@@ -19324,23 +19335,16 @@ img.loading {
 }
 
 .music-table td.col-plays {
-    text-align: right;
     color: rgba(255, 255, 255, 0.5);
     font-variant-numeric: tabular-nums;
-    padding-right: 20px;
 }
 
 .music-table td.col-duration {
-    text-align: right;
     color: rgba(255, 255, 255, 0.6);
     font-variant-numeric: tabular-nums;
-    padding-right: 20px;
 }
 
 .music-table td.col-action {
-    text-align: center;
-    width: 120px;
-    padding: 10px 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -19460,70 +19464,30 @@ img.loading {
     box-shadow: none;
 }
 
-/* Mobile: Keep table structure, make it responsive with horizontal scroll */
-@media (max-width: 640px) {
-    .music-list {
-        border-radius: 12px;
-        margin: 0 -16px;
-        border-left: none;
-        border-right: none;
-        border-radius: 0;
-    }
-
+/* Tablet: horizontal scroll when needed, aligned columns */
+@media (max-width: 900px) {
     .music-table-wrap {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        width: 100%;
+        margin: 0 -8px;
+        padding: 0 8px;
     }
 
-    /* Keep table structure - don't convert to cards */
     .music-table {
-        min-width: 600px;
-        /* Ensure table doesn't get too cramped */
-        width: 100%;
+        min-width: 560px;
     }
 
-    .music-table thead {
-        display: table-header-group;
-        /* Keep header visible */
+    .music-table th,
+    .music-table td {
+        padding: 8px 10px;
+        font-size: 12px;
     }
 
-    .music-table tbody tr {
-        display: table-row;
-        /* Keep table row structure */
-        margin-bottom: 0;
-        padding: 0;
-        border-radius: 0;
-        box-shadow: none;
-    }
-
-    .music-table tbody tr:hover {
-        transform: none;
-        /* Remove card-style transform */
-        box-shadow: -4px 0 12px rgba(99, 102, 241, 0.15);
-    }
-
-    .music-table tbody tr.playing {
-        box-shadow:
-            inset 0 0 20px rgba(99, 102, 241, 0.1),
-            0 0 30px rgba(99, 102, 241, 0.2);
-    }
-
-    /* Keep table cell structure */
-    .music-table tbody td {
-        display: table-cell;
-        /* Keep table cell structure */
-        padding: 8px 12px;
-        text-align: left;
-        border: none;
-        gap: 0;
-    }
-
-    /* Adjust column widths for mobile */
     .music-table th.col-cover,
     .music-table td.col-cover {
-        width: 42px;
-        padding: 6px 4px;
+        width: 46px;
+        min-width: 46px;
+        padding: 6px 8px;
     }
 
     .music-table .music-table-thumb {
@@ -19533,65 +19497,137 @@ img.loading {
 
     .music-table th.col-play,
     .music-table td.col-play {
-        width: 45px;
+        width: 46px;
+        min-width: 46px;
         padding: 8px 6px;
-    }
-
-    .music-table th.col-title,
-    .music-table td.col-title {
-        min-width: 150px;
-        max-width: 200px;
-    }
-
-    .music-table th.col-artist,
-    .music-table td.col-artist {
-        min-width: 120px;
-        max-width: 150px;
     }
 
     .music-table th.col-duration,
     .music-table td.col-duration {
-        width: 55px;
-        padding-right: 12px;
+        width: 56px;
+        min-width: 56px;
     }
 
     .music-table th.col-plays,
     .music-table td.col-plays {
-        width: 60px;
-        padding-right: 12px;
+        width: 50px;
+        min-width: 50px;
     }
 
     .music-table th.col-action,
     .music-table td.col-action {
         width: 110px;
+        min-width: 110px;
         padding: 8px 6px;
     }
+}
 
-    /* Smaller font sizes on mobile */
+/* Mobile: horizontal scroll, sticky header, aligned columns */
+@media (max-width: 640px) {
+    .music-list {
+        margin: 0 -12px;
+        border-radius: 0;
+        overflow: hidden;
+    }
+
+    .music-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .music-table {
+        min-width: 520px;
+        width: 100%;
+        font-size: 12px;
+    }
+
+    .music-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
     .music-table th {
-        font-size: 9px;
-        padding: 8px 12px;
+        font-size: 10px;
+        padding: 8px 10px;
     }
 
     .music-table td {
-        font-size: 9px;
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+
+    .music-table th.col-cover,
+    .music-table td.col-cover {
+        width: 44px;
+        min-width: 44px;
+        padding: 6px 8px;
+    }
+
+    .music-table .music-table-thumb {
+        width: 30px;
+        height: 30px;
+    }
+
+    .music-table th.col-play,
+    .music-table td.col-play {
+        width: 44px;
+        min-width: 44px;
+        padding: 8px 6px;
+    }
+
+    .music-table th.col-title,
+    .music-table td.col-title {
+        padding: 8px 10px;
+    }
+
+    .music-table th.col-artist,
+    .music-table td.col-artist {
+        padding: 8px 10px;
+    }
+
+    .music-table th.col-duration,
+    .music-table td.col-duration {
+        width: 52px;
+        min-width: 52px;
+        padding: 8px 10px;
+    }
+
+    .music-table th.col-plays,
+    .music-table td.col-plays {
+        width: 48px;
+        min-width: 48px;
+        padding: 8px 10px;
+    }
+
+    .music-table th.col-action,
+    .music-table td.col-action {
+        width: 100px;
+        min-width: 100px;
+        padding: 8px 6px;
+    }
+
+    .music-table tbody tr:hover {
+        transform: none;
     }
 
     .music-table td.col-play .play-btn {
-        width: 24px;
-        height: 24px;
-        font-size: 9px;
+        width: 26px;
+        height: 26px;
+        font-size: 10px;
     }
 
     .music-table td.col-action .bm-btn,
     .music-table td.col-action .queue-btn,
     .music-table td.col-action .boost-btn {
-        width: 24px;
-        height: 24px;
+        width: 26px;
+        height: 26px;
         font-size: 10px;
     }
 
-    /* Remove data-label pseudo-elements since we're keeping table structure */
     .music-table tbody td:before {
         display: none;
     }
