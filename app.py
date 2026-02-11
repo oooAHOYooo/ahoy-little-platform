@@ -735,6 +735,15 @@ def create_app():
                     platform_order.get(x.get('platform', 'Other'), 99),
                     type_order.get(x.get('type', 'other'), 99)
                 ))
+                # Keep only the latest one per (platform, type) so we show one DMG, one ZIP, etc.
+                seen_pt = set()
+                deduped = []
+                for a in release_assets:
+                    key = (a.get('platform'), a.get('type'))
+                    if key not in seen_pt:
+                        seen_pt.add(key)
+                        deduped.append(a)
+                release_assets = deduped
         
         except Exception as e:
             print(f"Error fetching GitHub release: {e}")
@@ -830,6 +839,15 @@ def create_app():
                 platform_order.get(x.get('platform', 'Other'), 99),
                 type_order.get(x.get('type', 'other'), 99)
             ))
+            # Keep only the latest one per (platform, type)
+            seen_pt = set()
+            deduped = []
+            for a in local_files:
+                key = (a.get('platform'), a.get('type'))
+                if key not in seen_pt:
+                    seen_pt.add(key)
+                    deduped.append(a)
+            local_files = deduped
         
         # Use GitHub assets if available, otherwise use local files
         if release_assets:
