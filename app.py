@@ -2326,10 +2326,13 @@ def proxy_audio():
         abort(502, f'Failed to fetch audio: {str(e)}')
 
 def _is_local_file_path(s):
-    """True if string looks like a local file path (never use in BUILD or as image URL)."""
+    """True if string looks like a local filesystem path (do not use as public image URL). URLs and /static/ are safe."""
     if not s or not isinstance(s, str):
         return False
     s = s.strip()
+    # Public URLs and same-origin static paths are valid image URLs; do not replace
+    if s.startswith(('http://', 'https://', '/static/')):
+        return False
     return any(s.startswith(p) or p in s for p in ('/var/', '/Users/', '/tmp/', 'TemporaryItems', 'Screenshot')) or s.endswith(('.png', '.jpg', '.jpeg'))
 
 @app.route('/merch')

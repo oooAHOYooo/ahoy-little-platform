@@ -81,7 +81,17 @@
       "WebSearch",
       "WebFetch(domain:capacitorjs.com)",
       "WebFetch(domain:capawesome.io)",
-      "Bash(exit)"
+      "Bash(exit)",
+      "Bash(ffmpeg:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nProfile logo, pink active dock tabs, auto-generated thumbnails\n\n- Profile page: use Ahoy logo instead of FA icon via new logo_src param on subpage_hero macro\n- Mobile dock: active tab now glows pink \\(#f472b6\\) with tinted background instead of plain white\n- Auto-thumbnail: shared thumb-gen.js generates branded canvas fallback when thumbnail URLs are broken/missing\n- Applied to home page \\(Live TV card\\), shows page \\(hero, grid, list\\), and Live TV page \\(engine, rows, guide, dashboard\\)\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(node --version:*)",
+      "Bash(npm --version:*)",
+      "Bash(npm ls:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(python -c:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nMobile fixes: narrow container margins, add sample music data\n\n- Reduce container padding from 18px to 5px for .music-container, .bookmarks-container, .performances-page \\(only 5px margins on mobile\\)\n- Create static/data/music.json with sample music data for API fallback\n- Update CSS cache version to bust mobile browsers\n- Mini player \\(now-playing-wrapper\\) already positioned correctly above dock at 70px height\n\nCo-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git reset:*)",
+      "Bash(git restore:*)"
     ]
   }
 }

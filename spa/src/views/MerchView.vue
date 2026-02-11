@@ -58,6 +58,7 @@
             loading="lazy"
             decoding="async"
             :title="hoverBack[i.id] ? 'Back view' : 'Front view'"
+            @error="onMerchImageError($event, i)"
           />
           <div v-if="i.image_url_back" class="image-toggle-hint">
             <i class="fas fa-sync-alt"></i>
@@ -179,6 +180,19 @@ function checkout(i) {
   const qtyEl = document.getElementById('qty_' + (i.id || ''))
   const qty = encodeURIComponent((qtyEl && qtyEl.value) ? qtyEl.value : '1')
   window.location.assign(`/checkout?type=merch&item_id=${id}&qty=${qty}&amount=${amount}&title=${title}`)
+}
+
+const defaultCover = '/static/img/default-cover.jpg'
+function onMerchImageError(event, item) {
+  const el = event?.target
+  if (!el || el.dataset.merchFallback) return
+  el.dataset.merchFallback = '1'
+  const back = hoverBack.value[item?.id] && item?.image_url_back
+  if (back && el.src === item?.image_url_back) {
+    el.src = item?.image_url || defaultCover
+  } else {
+    el.src = defaultCover
+  }
 }
 
 onMounted(async () => {

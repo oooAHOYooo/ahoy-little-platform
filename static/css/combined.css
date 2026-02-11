@@ -2254,7 +2254,7 @@ img[src*="default-cover.jpg"] {
         position: fixed;
         left: 0;
         right: 0;
-        bottom: calc(var(--mobile-dock-height, 140px) + env(safe-area-inset-bottom));
+        bottom: calc(140px + max(0px, env(safe-area-inset-bottom, 0px)));
         z-index: 10005;
         background: var(--footer-glass-bg);
         backdrop-filter: var(--footer-glass-blur);
@@ -2280,7 +2280,7 @@ img[src*="default-cover.jpg"] {
     }
 
     body.has-player {
-        padding-bottom: calc(var(--mobile-dock-height, 140px) + 70px + env(safe-area-inset-bottom)) !important;
+        padding-bottom: calc(140px + 70px + max(0px, env(safe-area-inset-bottom, 0px))) !important;
     }
 
     /* Prevent any full-screen player on mobile */
