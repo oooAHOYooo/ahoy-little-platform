@@ -34,7 +34,23 @@ python -c "import webview" 2>/dev/null || {
 }
 
 # Build the app using PyInstaller with simplified configuration
+# Note: omit --icon if ahoy.icns is invalid for Pillow; app will use default icon
 echo "🔨 Building .app bundle with PyInstaller..."
+ICON_ARG=""
+if [ -f "$SCRIPT_DIR/icons/ahoy.icns" ] && python3 -c "
+from PIL import Image
+import sys
+try:
+    with Image.open('$SCRIPT_DIR/icons/ahoy.icns') as im:
+        pass
+except Exception:
+    sys.exit(1)
+" 2>/dev/null; then
+    ICON_ARG="--icon=$SCRIPT_DIR/icons/ahoy.icns"
+else
+    # Remove spec so PyInstaller regenerates without icon (avoids BUNDLE icon error)
+    rm -f "$PROJECT_ROOT/AhoyIndieMedia.spec"
+fi
 pyinstaller \
     --clean \
     --noconfirm \
@@ -42,7 +58,7 @@ pyinstaller \
     --workpath "$PROJECT_ROOT/build" \
     --onedir \
     --windowed \
-    --icon="$SCRIPT_DIR/icons/ahoy.icns" \
+    $ICON_ARG \
     --name="AhoyIndieMedia" \
     --add-data="templates:templates" \
     --add-data="static:static" \

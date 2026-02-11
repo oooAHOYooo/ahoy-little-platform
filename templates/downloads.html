@@ -13,26 +13,48 @@
 
     <div class="downloads-section" style="margin-top:2rem;">
         <h2 style="color:#fff;font-size:1.5rem;font-weight:700;margin-bottom:1.5rem;">Desktop Applications</h2>
+        {% set assets = release_assets or files or [] %}
+        {% set assets_macos = assets | selectattr('platform', 'equalto', 'macOS') | list %}
+        {% set assets_windows = assets | selectattr('platform', 'equalto', 'Windows') | list %}
+        {% set assets_linux = assets | selectattr('platform', 'equalto', 'Linux') | list %}
         <div class="download-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:1rem;">
             <!-- Windows -->
             <div class="download-item" style="background:rgba(20,20,20,0.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;text-align:center;position:relative;transition:all 0.2s;">
                 <div class="platform-name" style="font-weight:600;margin-bottom:0.5rem;font-size:1.25rem;color:#fff;">Windows</div>
                 <div class="file-type" style="font-size:0.9rem;color:rgba(255,255,255,0.6);margin-bottom:1.5rem;">Setup Installer</div>
+                {% if assets_windows %}
+                {% for f in assets_windows %}
+                <a href="{{ f.download_url or f.url }}" class="download-btn" style="display:inline-block;margin:0.35rem 0;background:rgba(99,102,241,0.9);color:#fff;padding:0.5rem 1.25rem;border-radius:8px;font-size:0.9rem;font-weight:500;text-decoration:none;border:1px solid rgba(99,102,241,0.5);" download>{{ f.description }} ({{ f.size_label }})</a>
+                {% endfor %}
+                {% else %}
                 <div class="coming-soon-badge" style="display:inline-block;background:rgba(99,102,241,0.2);color:rgba(99,102,241,1);padding:0.5rem 1.25rem;border-radius:8px;font-size:0.9rem;font-weight:500;border:1px solid rgba(99,102,241,0.3);">Coming Soon</div>
+                {% endif %}
             </div>
 
             <!-- macOS -->
             <div class="download-item" style="background:rgba(20,20,20,0.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;text-align:center;position:relative;transition:all 0.2s;">
                 <div class="platform-name" style="font-weight:600;margin-bottom:0.5rem;font-size:1.25rem;color:#fff;">macOS</div>
                 <div class="file-type" style="font-size:0.9rem;color:rgba(255,255,255,0.6);margin-bottom:1.5rem;">DMG Installer</div>
+                {% if assets_macos %}
+                {% for f in assets_macos %}
+                <a href="{{ f.download_url or f.url }}" class="download-btn" style="display:inline-block;margin:0.35rem 0;background:rgba(99,102,241,0.9);color:#fff;padding:0.5rem 1.25rem;border-radius:8px;font-size:0.9rem;font-weight:500;text-decoration:none;border:1px solid rgba(99,102,241,0.5);" download>{{ f.description }} ({{ f.size_label }})</a>
+                {% endfor %}
+                {% else %}
                 <div class="coming-soon-badge" style="display:inline-block;background:rgba(99,102,241,0.2);color:rgba(99,102,241,1);padding:0.5rem 1.25rem;border-radius:8px;font-size:0.9rem;font-weight:500;border:1px solid rgba(99,102,241,0.3);">Coming Soon</div>
+                {% endif %}
             </div>
 
             <!-- Linux -->
             <div class="download-item" style="background:rgba(20,20,20,0.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2rem;text-align:center;position:relative;transition:all 0.2s;">
                 <div class="platform-name" style="font-weight:600;margin-bottom:0.5rem;font-size:1.25rem;color:#fff;">Linux</div>
                 <div class="file-type" style="font-size:0.9rem;color:rgba(255,255,255,0.6);margin-bottom:1.5rem;">AppImage / DEB / RPM</div>
+                {% if assets_linux %}
+                {% for f in assets_linux %}
+                <a href="{{ f.download_url or f.url }}" class="download-btn" style="display:inline-block;margin:0.35rem 0;background:rgba(99,102,241,0.9);color:#fff;padding:0.5rem 1.25rem;border-radius:8px;font-size:0.9rem;font-weight:500;text-decoration:none;border:1px solid rgba(99,102,241,0.5);" download>{{ f.description }} ({{ f.size_label }})</a>
+                {% endfor %}
+                {% else %}
                 <div class="coming-soon-badge" style="display:inline-block;background:rgba(99,102,241,0.2);color:rgba(99,102,241,1);padding:0.5rem 1.25rem;border-radius:8px;font-size:0.9rem;font-weight:500;border:1px solid rgba(99,102,241,0.3);">Coming Soon</div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -64,6 +86,10 @@
     border-color:rgba(255,255,255,0.15) !important;
     transform:translateY(-2px);
     box-shadow:0 4px 16px rgba(0,0,0,0.3);
+}
+.download-btn:hover {
+    background:rgba(99,102,241,1) !important;
+    color:#fff;
 }
 
 .mobile-improvements-link a:hover {

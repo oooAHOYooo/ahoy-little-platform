@@ -43,11 +43,10 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-# Check Python dependencies
+# Check Python dependencies (optional; use venv if you hit externally-managed-environment)
 echo "🐍 Checking Python dependencies..."
 python3 -c "import flask" 2>/dev/null || {
-    echo "📦 Installing Python dependencies..."
-    pip3 install -r requirements.txt
+    echo "⚠️  Flask not found. Install with: pip install -r requirements.txt (or use a venv)"
 }
 
 # Ensure desktop_main.py exists
@@ -61,14 +60,20 @@ echo "🔨 Building macOS app with Electron..."
 npm run electron:build:mac:dmg
 
 # Check if build was successful
-DIST_DIR="$PROJECT_ROOT/dist-electron"
-if [ -d "$DIST_DIR" ]; then
+DIST_ELECTRON="$PROJECT_ROOT/dist-electron"
+DIST_DOWNLOADS="$PROJECT_ROOT/dist"
+if [ -d "$DIST_ELECTRON" ]; then
     echo ""
     echo "✅ Electron build complete!"
-    echo "📁 Build artifacts in: $DIST_DIR"
-    ls -lh "$DIST_DIR"/*.dmg "$DIST_DIR"/*.app 2>/dev/null || ls -lh "$DIST_DIR"/* 2>/dev/null || true
+    echo "📁 Build artifacts in: $DIST_ELECTRON"
+    ls -lh "$DIST_ELECTRON"/*.dmg "$DIST_ELECTRON"/*.app 2>/dev/null || ls -lh "$DIST_ELECTRON"/* 2>/dev/null || true
+    # Copy DMG (and .zip) to dist/ so /downloads page can serve them
+    mkdir -p "$DIST_DOWNLOADS"
+    for f in "$DIST_ELECTRON"/*.dmg "$DIST_ELECTRON"/*.zip 2>/dev/null; do
+        [ -e "$f" ] && cp "$f" "$DIST_DOWNLOADS/" && echo "📎 Linked to downloads: $DIST_DOWNLOADS/$(basename "$f")"
+    done
     echo ""
-    echo "🎉 macOS Electron build successful!"
+    echo "🎉 macOS Electron build successful! DMG is in dist/ and linked from /downloads"
 else
     echo "❌ Build directory not found. Build may have failed."
     exit 1

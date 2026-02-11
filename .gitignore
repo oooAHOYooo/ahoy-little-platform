@@ -50,8 +50,9 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Electron / desktop builds
+# Electron / desktop builds (build-info.json is generated at build time)
 dist-electron/
+electron/build-info.json
 out/
 release/
 *.map

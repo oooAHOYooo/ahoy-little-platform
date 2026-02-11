@@ -4,35 +4,30 @@ This guide explains how to build standalone desktop applications for macOS and W
 
 ## 🎯 Overview
 
-This project supports **two build approaches**:
+**Electron is the primary distribution method** for desktop builds. PyInstaller is kept for optional offline/legacy builds.
 
-### Option 1: Electron (Recommended for macOS)
-- **Electron**: Modern cross-platform desktop framework
-- **electron-builder**: Creates macOS DMG installers
-- Better macOS integration and native feel
-- See [ELECTRON_BUILD.md](../ELECTRON_BUILD.md) for detailed Electron guide
+### Electron (primary)
+- **Electron** + **electron-builder**: macOS DMG, Windows installer, Linux.
+- Runs the bundled Flask app in a native window; DMG is linked to `/downloads` after build.
+- **Quick build:** `./packaging/electron-build-mac.sh` (then open the app or install from DMG).
 
-### Option 2: PyInstaller (Original)
-- **PyInstaller**: Packages Python app into standalone executables
-- **PyWebview**: Creates native desktop windows
-- **NSIS** (Windows): Creates Windows installer EXE
-- **DMG** (macOS): Creates macOS disk image installer
-
-Both approaches run a local Flask server and display it in a native desktop window.
+### PyInstaller (optional)
+- **PyInstaller** + **PyWebview**: Single-binary style; more packaging quirks (icons, deps).
+- Use only if you need a non-Electron path or hit Electron limits.
 
 ## 🚀 Quick Start
 
-### macOS with Electron (Recommended)
+### macOS (Electron — recommended)
 ```bash
-cd packaging
-./electron-build-mac.sh
+./packaging/electron-build-mac.sh
 ```
+Output: `dist-electron/*.dmg` and `dist-electron/mac/*.app`; DMG is also copied to `dist/` for the /downloads page.
 
-### macOS with PyInstaller
+### macOS (PyInstaller)
 ```bash
-cd packaging
-./build-all.sh
+./packaging/build-all.sh
 ```
+Output: `dist/AhoyIndieMedia.app` and `dist/AhoyIndieMedia.dmg`
 
 ## 📋 Prerequisites
 
@@ -55,16 +50,16 @@ pip install -r requirements.txt pyinstaller pywebview
 
 ## 🚀 Quick Build
 
-### macOS
+### macOS (Electron)
 ```bash
-cd packaging
-./build-all.sh
+./packaging/electron-build-mac.sh
 ```
+Builds the `.app` and `.dmg`; copies DMG to `dist/` for /downloads. Then run: `open dist-electron/mac/Ahoy\ Indie\ Media.app` or install from the DMG.
 
-This will:
-1. Build the macOS `.app` bundle
-2. Create a `.dmg` installer
-
+### macOS (PyInstaller)
+```bash
+./packaging/build-all.sh
+```
 Output: `dist/AhoyIndieMedia.app` and `dist/AhoyIndieMedia.dmg`
 
 ### Windows

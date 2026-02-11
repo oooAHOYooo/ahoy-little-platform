@@ -1,5 +1,6 @@
 const { app, BrowserWindow, shell, Menu } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const { spawn } = require('child_process');
 const net = require('net');
 
@@ -7,6 +8,24 @@ const net = require('net');
 let mainWindow = null;
 let flaskProcess = null;
 const DEFAULT_PORT = 17600;
+
+// Build version (compile date/time) — loaded from electron/build-info.json
+function loadBuildInfo() {
+  const buildInfoPath = path.join(__dirname, 'build-info.json');
+  try {
+    if (fs.existsSync(buildInfoPath)) {
+      return JSON.parse(fs.readFileSync(buildInfoPath, 'utf8'));
+    }
+  } catch (_) {}
+  return {
+    version: app.getVersion(),
+    buildDate: '',
+    buildTime: '',
+    buildTimestamp: '',
+    buildLabel: app.getVersion(),
+  };
+}
+const BUILD_INFO = loadBuildInfo();
 
 // Check if a port is available
 function isPortAvailable(port) {
@@ -34,8 +53,7 @@ async function findAvailablePort(startPort = DEFAULT_PORT, maxAttempts = 10) {
 // Start Flask server
 async function startFlaskServer(port) {
   const isDev = !app.isPackaged;
-  const fs = require('fs');
-  
+
   // Try to find Python - prefer system Python for now
   // In future, we can bundle Python runtime
   let pythonExecutable = 'python3';
@@ -153,14 +171,16 @@ function waitForServer(port, maxWait = 30000) {
 
 // Create the application window
 function createWindow() {
-  // Create the browser window
+  const title = `Ahoy Indie Media — ${BUILD_INFO.buildLabel || BUILD_INFO.version}`;
+  // Create the browser window (native title bar so version is visible in top bar)
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     minWidth: 800,
     minHeight: 600,
     backgroundColor: '#1a1a1a',
-    titleBarStyle: 'hiddenInset',
+    title,
+    titleBarStyle: 'default', // native bar so version/title is visible
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -173,6 +193,7 @@ function createWindow() {
 
   // Show window when ready to prevent visual flash
   mainWindow.once('ready-to-show', () => {
+    mainWindow.setTitle(title);
     mainWindow.show();
     if (process.env.NODE_ENV === 'development') {
       mainWindow.webContents.openDevTools();
@@ -223,8 +244,18 @@ async function initialize() {
   }
 }
 
-// Create application menu
+// Create application menu (native top bar)
 function createMenu() {
+  const versionLine = BUILD_INFO.buildDate && BUILD_INFO.buildTime
+    ? `Version ${BUILD_INFO.version} — Built ${BUILD_INFO.buildDate} ${BUILD_INFO.buildTime}`
+    : `Version ${BUILD_INFO.version}`;
+  app.setAboutPanelOptions({
+    applicationName: 'Ahoy Indie Media',
+    applicationVersion: versionLine,
+    copyright: '© Ahoy Indie Media',
+    credits: 'Independent music and media platform.',
+  });
+
   const template = [
     {
       label: 'Ahoy Indie Media',
@@ -277,9 +308,18 @@ function createMenu() {
       ],
     },
     {
+      label: 'Go',
+      submenu: [
+        { label: 'Back', accelerator: 'CmdOrCtrl+[', click: () => mainWindow?.webContents?.goBack() },
+        { label: 'Forward', accelerator: 'CmdOrCtrl+]', click: () => mainWindow?.webContents?.goForward() },
+      ],
+    },
+    {
       label: 'Window',
       submenu: [
         { role: 'minimize', label: 'Minimize' },
+        { role: 'zoom', label: 'Zoom' },
+        { type: 'separator' },
         { role: 'close', label: 'Close' },
       ],
     },
