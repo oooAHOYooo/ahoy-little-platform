@@ -19045,16 +19045,13 @@ img.loading {
 
 /* Music List View - Dark Glass Table Style */
 .music-list {
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(20, 20, 30, 0.3) 100%);
-    backdrop-filter: blur(30px) saturate(200%);
-    -webkit-backdrop-filter: blur(30px) saturate(200%);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(10, 14, 24, 0.52);
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     overflow: hidden;
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1),
-        0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
     position: relative;
 }
 
@@ -19065,10 +19062,7 @@ img.loading {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.2) 50%,
-            transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.14) 50%, transparent 100%);
     pointer-events: none;
 }
 
@@ -19106,26 +19100,24 @@ img.loading {
 }
 
 .music-table thead {
-    background: linear-gradient(180deg,
-            rgba(0, 0, 0, 0.5) 0%,
-            rgba(0, 0, 0, 0.3) 100%);
-    backdrop-filter: blur(25px) saturate(200%);
-    -webkit-backdrop-filter: blur(25px) saturate(200%);
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     position: sticky;
     top: 0;
     z-index: 10;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .music-table th {
-    padding: 10px 12px;
+    padding: 11px 12px;
     text-align: left;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.64);
     font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     white-space: nowrap;
     position: relative;
     vertical-align: middle;
@@ -19138,28 +19130,16 @@ img.loading {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.15) 50%,
-            transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
 }
 
 /* Column widths: fixed layout so headers align with cells */
-.music-table th.col-cover,
-.music-table td.col-cover {
-    width: 52px;
-    min-width: 52px;
-    padding: 8px 10px;
+.music-table th.col-index,
+.music-table td.col-index {
+    width: 48px;
+    min-width: 48px;
     text-align: center;
-    vertical-align: middle;
-}
-
-.music-table th.col-play,
-.music-table td.col-play {
-    width: 52px;
-    min-width: 52px;
-    text-align: center;
-    padding: 10px 8px;
+    padding: 10px 6px;
     vertical-align: middle;
 }
 
@@ -19177,8 +19157,8 @@ img.loading {
 
 .music-table th.col-duration,
 .music-table td.col-duration {
-    width: 64px;
-    min-width: 64px;
+    width: 58px;
+    min-width: 58px;
     padding: 10px 12px;
     text-align: right;
 }
@@ -19200,8 +19180,8 @@ img.loading {
 
 .music-table th.col-action,
 .music-table td.col-action {
-    width: 120px;
-    min-width: 120px;
+    width: 132px;
+    min-width: 132px;
     padding: 10px 8px;
     text-align: center;
     vertical-align: middle;
@@ -19209,11 +19189,9 @@ img.loading {
 
 .music-table tbody tr {
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(15px) saturate(180%);
-    -webkit-backdrop-filter: blur(15px) saturate(180%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    background: rgba(255, 255, 255, 0.01);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     position: relative;
 }
 
@@ -19223,40 +19201,30 @@ img.loading {
     left: 0;
     top: 0;
     bottom: 0;
-    width: 3px;
+    width: 2px;
     background: transparent;
     transition: background 0.25s ease;
 }
 
 .music-table tbody tr:nth-child(even) {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.015);
 }
 
 .music-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
-    transform: translateX(2px);
-    box-shadow: -4px 0 12px rgba(99, 102, 241, 0.15);
+    background: rgba(255, 255, 255, 0.05) !important;
 }
 
 .music-table tbody tr:hover::before {
-    background: linear-gradient(180deg,
-            rgba(99, 102, 241, 0.6) 0%,
-            rgba(99, 102, 241, 0.3) 100%);
+    background: rgba(124, 58, 237, 0.65);
 }
 
 .music-table tbody tr.playing {
-    background: linear-gradient(90deg,
-            rgba(99, 102, 241, 0.15) 0%,
-            rgba(99, 102, 241, 0.08) 100%) !important;
-    box-shadow:
-        inset 0 0 20px rgba(99, 102, 241, 0.1),
-        0 0 30px rgba(99, 102, 241, 0.2);
+    background: rgba(99, 102, 241, 0.14) !important;
+    box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.18);
 }
 
 .music-table tbody tr.playing::before {
-    background: linear-gradient(180deg,
-            rgba(99, 102, 241, 1) 0%,
-            rgba(99, 102, 241, 0.6) 100%);
+    background: rgba(99, 102, 241, 0.9);
 }
 
 .music-table td {
@@ -19268,54 +19236,92 @@ img.loading {
 }
 
 .music-table .music-table-thumb {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 6px;
     object-fit: cover;
     display: block;
     margin: 0 auto;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.music-table td.col-play .play-btn {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.8);
+.music-table td.col-index {
+    position: relative;
+    font-variant-numeric: tabular-nums;
+}
+
+.music-table td.col-index .track-index {
+    color: rgba(255, 255, 255, 0.52);
+    font-size: 12px;
+    font-weight: 500;
+    transition: opacity 0.18s ease;
+}
+
+.music-table td.col-index .play-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.78);
     padding: 0;
-    border-radius: 50%;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 28px;
-    height: 28px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.18s ease;
+    width: 30px;
+    height: 30px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     font-size: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    pointer-events: none;
 }
 
-.music-table td.col-play .play-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+.music-table tbody tr:hover td.col-index .play-btn,
+.music-table tbody tr.playing td.col-index .play-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.music-table tbody tr:hover td.col-index .track-index,
+.music-table tbody tr.playing td.col-index .track-index {
+    opacity: 0;
+}
+
+.music-table td.col-index .play-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.25);
     color: rgba(255, 255, 255, 1);
-    transform: scale(1.15);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.music-table tbody tr.playing td.col-play .play-btn {
-    background: linear-gradient(135deg,
-            rgba(99, 102, 241, 0.3) 0%,
-            rgba(99, 102, 241, 0.2) 100%);
-    border-color: rgba(99, 102, 241, 0.5);
+.music-table td.col-index .play-btn:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+
+.music-table tbody tr.playing td.col-index .play-btn {
+    background: rgba(99, 102, 241, 0.18);
+    border-color: rgba(99, 102, 241, 0.45);
     color: rgba(255, 255, 255, 1);
-    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
 }
 
-.music-table td.col-play .play-btn i {
+.music-table td.col-index .play-btn i {
     display: block;
     line-height: 1;
+}
+
+.music-table td.col-title .title-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    text-decoration: none;
+}
+
+.music-table td.col-title .title-meta {
+    min-width: 0;
+    display: flex;
 }
 
 .music-table td.col-title .title-text {
@@ -19351,78 +19357,48 @@ img.loading {
     gap: 6px;
 }
 
-.music-table td.col-action .boost-btn {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.7);
+.music-table td.col-action .queue-btn,
+.music-table td.col-action .boost-btn,
+.music-table td.col-action .bm-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.58);
     padding: 0;
-    border-radius: 50%;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 28px;
-    height: 28px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    width: 32px;
+    height: 32px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 11px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    font-size: 12px;
+}
+
+.music-table td.col-action .queue-btn:hover,
+.music-table td.col-action .boost-btn:hover,
+.music-table td.col-action .bm-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.95);
+    transform: translateY(-1px);
 }
 
 .music-table td.col-action .boost-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.25);
     color: rgba(236, 72, 153, 0.95);
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.music-table td.col-action .bm-btn {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.7);
-    padding: 0;
-    border-radius: 50%;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 28px;
-    height: 28px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 11px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.music-table td.col-action .bm-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.25);
-    color: rgba(255, 255, 255, 0.95);
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .music-table td.col-action .bm-btn.bookmarked,
 .music-table td.col-action .bm-btn[aria-pressed="true"] {
-    background: linear-gradient(135deg,
-            rgba(0, 212, 255, 0.25) 0%,
-            rgba(0, 150, 200, 0.2) 100%);
-    border-color: rgba(0, 212, 255, 0.5);
-    color: rgba(255, 255, 255, 1);
-    box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+    background: rgba(0, 212, 255, 0.12);
+    border-color: rgba(0, 212, 255, 0.35);
+    color: rgba(255, 255, 255, 0.96);
 }
 
 .music-table td.col-action .bm-btn.bookmarked:hover,
 .music-table td.col-action .bm-btn[aria-pressed="true"]:hover {
-    background: linear-gradient(135deg,
-            rgba(0, 212, 255, 0.35) 0%,
-            rgba(0, 150, 200, 0.3) 100%);
-    border-color: rgba(0, 212, 255, 0.7);
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
-    transform: scale(1.15);
+    background: rgba(0, 212, 255, 0.18);
+    border-color: rgba(0, 212, 255, 0.5);
 }
 
 /* Queue button in music list view */
@@ -19431,36 +19407,13 @@ img.loading {
 }
 
 .music-table td.col-action .queue-btn {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.7);
-    padding: 0;
-    border-radius: 50%;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 28px;
-    height: 28px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
     font-size: 11px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.music-table td.col-action .queue-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.25);
-    color: rgba(255, 255, 255, 0.95);
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .music-table td.col-action .queue-btn.in-queue {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.25);
-    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.95);
     box-shadow: none;
 }
 
@@ -19483,23 +19436,16 @@ img.loading {
         font-size: 12px;
     }
 
-    .music-table th.col-cover,
-    .music-table td.col-cover {
+    .music-table th.col-index,
+    .music-table td.col-index {
         width: 46px;
         min-width: 46px;
-        padding: 6px 8px;
+        padding: 8px 6px;
     }
 
     .music-table .music-table-thumb {
         width: 32px;
         height: 32px;
-    }
-
-    .music-table th.col-play,
-    .music-table td.col-play {
-        width: 46px;
-        min-width: 46px;
-        padding: 8px 6px;
     }
 
     .music-table th.col-duration,
@@ -19516,8 +19462,8 @@ img.loading {
 
     .music-table th.col-action,
     .music-table td.col-action {
-        width: 110px;
-        min-width: 110px;
+        width: 124px;
+        min-width: 124px;
         padding: 8px 6px;
     }
 }
@@ -19560,8 +19506,8 @@ img.loading {
         padding: 8px 10px;
     }
 
-    .music-table th.col-cover,
-    .music-table td.col-cover {
+    .music-table th.col-index,
+    .music-table td.col-index {
         width: 44px;
         min-width: 44px;
         padding: 6px 8px;
@@ -19570,13 +19516,6 @@ img.loading {
     .music-table .music-table-thumb {
         width: 30px;
         height: 30px;
-    }
-
-    .music-table th.col-play,
-    .music-table td.col-play {
-        width: 44px;
-        min-width: 44px;
-        padding: 8px 6px;
     }
 
     .music-table th.col-title,
@@ -19605,8 +19544,8 @@ img.loading {
 
     .music-table th.col-action,
     .music-table td.col-action {
-        width: 100px;
-        min-width: 100px;
+        width: 112px;
+        min-width: 112px;
         padding: 8px 6px;
     }
 
@@ -19614,10 +19553,16 @@ img.loading {
         transform: none;
     }
 
-    .music-table td.col-play .play-btn {
+    .music-table td.col-index .play-btn {
         width: 26px;
         height: 26px;
         font-size: 10px;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .music-table td.col-index .track-index {
+        display: none;
     }
 
     .music-table td.col-action .bm-btn,
@@ -19626,24 +19571,12 @@ img.loading {
         width: 26px;
         height: 26px;
         font-size: 10px;
+        border-radius: 7px;
     }
 
     .music-table tbody td:before {
         display: none;
     }
-}
-
-.music-list .col-cover {
-    width: 50px;
-    height: 50px;
-    border-radius: var(--border-radius-sm);
-    overflow: hidden;
-}
-
-.music-list .col-cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
 }
 
 .music-list .col-duration {

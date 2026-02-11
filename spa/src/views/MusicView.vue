@@ -106,13 +106,15 @@
           <table class="music-table">
             <thead>
               <tr>
-                <th class="col-cover"></th>
-                <th class="col-play"></th>
+                <th class="col-index">#</th>
                 <th class="col-title">Title</th>
                 <th class="col-artist">Artist</th>
-                <th class="col-duration">Time</th>
                 <th class="col-plays">Plays</th>
-                <th class="col-action">Actions</th>
+                <th class="col-duration" aria-label="Duration">
+                  <i class="far fa-clock" aria-hidden="true"></i>
+                  <span class="sr-only">Duration</span>
+                </th>
+                <th class="col-action" aria-label="Actions"></th>
               </tr>
             </thead>
             <tbody>
@@ -123,16 +125,7 @@
                 :class="{ playing: playerStore.currentTrack?.id === track.id }"
                 @click="playTrackAtFilteredIndex(idx)"
               >
-                <td class="col-cover">
-                  <img
-                    class="music-table-thumb"
-                    :src="getTrackCover(track)"
-                    :alt="track.title"
-                    loading="lazy"
-                    @error="($event.target).src = '/static/img/default-cover.jpg'"
-                  />
-                </td>
-                <td class="col-play">
+                <td class="col-index">
                   <button
                     type="button"
                     class="play-btn"
@@ -141,13 +134,25 @@
                   >
                     <i :class="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
                   </button>
+                  <span class="track-index">{{ idx + 1 }}</span>
                 </td>
                 <td class="col-title">
-                  <router-link :to="`/music/${track.id}`" class="title-text" @click.stop>{{ track.title }}</router-link>
+                  <router-link :to="`/music/${track.id}`" class="title-cell" @click.stop>
+                    <img
+                      class="music-table-thumb"
+                      :src="getTrackCover(track)"
+                      :alt="track.title"
+                      loading="lazy"
+                      @error="($event.target).src = '/static/img/default-cover.jpg'"
+                    />
+                    <span class="title-meta">
+                      <span class="title-text">{{ track.title }}</span>
+                    </span>
+                  </router-link>
                 </td>
                 <td class="col-artist">{{ track.artist }}</td>
-                <td class="col-duration">{{ formatDuration(track.duration_seconds) }}</td>
                 <td class="col-plays">{{ track.play_count || 0 }}</td>
+                <td class="col-duration">{{ formatDuration(track.duration_seconds) }}</td>
                 <td class="col-action">
                   <button
                     type="button"
