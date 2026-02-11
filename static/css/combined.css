@@ -1909,7 +1909,7 @@ img[src*="default-cover.jpg"] {
 
     /* Music: hide large desktop hero/header, use Podcasts-style mobile header */
     .music-container {
-        padding: 18px 18px calc(40px + env(safe-area-inset-bottom)) 18px;
+        padding: 5px 5px calc(40px + env(safe-area-inset-bottom)) 5px;
     }
 
     .music-container .unified-hero.tv-hero,
@@ -2021,7 +2021,7 @@ img[src*="default-cover.jpg"] {
 
     /* Bookmarks: hide unified header, use Podcasts-style mobile header */
     .bookmarks-container {
-        padding: 18px 18px calc(40px + env(safe-area-inset-bottom)) 18px;
+        padding: 5px 5px calc(40px + env(safe-area-inset-bottom)) 5px;
         min-height: auto;
     }
 
@@ -2042,7 +2042,7 @@ img[src*="default-cover.jpg"] {
 
     /* Performances: use Podcasts-style mobile header; hide large hero on mobile */
     .performances-page {
-        padding: 18px 18px calc(40px + env(safe-area-inset-bottom)) 18px;
+        padding: 5px 5px calc(40px + env(safe-area-inset-bottom)) 5px;
     }
 
     .performances-mobile-controls {

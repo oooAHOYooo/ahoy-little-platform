@@ -141,7 +141,7 @@
 
         <!-- CSS - Load design tokens first, then loader for instant display -->
         <!-- Cache buster: Change this version to force CSS reload -->
-        {% set css_version = 'v20260210thumbs' %}
+        {% set css_version = 'v20260210mobile' %}
         <link rel="stylesheet"
             href="{{ url_for('static', filename='css/design-tokens.css') }}?{{ css_version }}">
         <link rel="stylesheet"
@@ -2226,29 +2226,6 @@
             </div>
         </div>
 
-        <!-- Simple Paywall Modal -->
-        <div id="paywall"
-            class="hidden fixed inset-0 z-50 grid place-items-center bg-black/40">
-            <div class="bg-white rounded-2xl p-6 w-[28rem] shadow-xl">
-                <h3 class="text-xl font-semibold">Go Plus to unlock more</h3>
-                <p class="text-sm text-gray-600 mt-2">Free plan allows up to 3
-                    Collections & 3 Playlists.</p>
-                <ul class="text-sm text-gray-700 mt-3 list-disc ml-5">
-                    <li>Unlimited Collections & Playlists</li>
-                    <li>Reorder with drag & drop</li>
-                    <li>Public share links</li>
-                </ul>
-                <div class="flex gap-2 mt-4">
-                    <button id="paywall-upgrade"
-                        class="px-4 py-2 rounded-xl bg-blue-600 text-white">Upgrade
-                        – $3/mo</button>
-                    <button class="px-3 py-2 rounded-xl border"
-                        onclick="document.getElementById('paywall').classList.add('hidden')">Not
-                        now</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Loading Progress Tracker -->
         <script defer
             src="{{ url_for('static', filename='js/loader.js') }}?{{ css_version }}"></script>
@@ -2552,26 +2529,10 @@
         </script>
 
         <script type="module">
-        import { showToast } from "{{ url_for('static', filename='js/toast.js') }}";
-
-        // Listen for 402 responses globally and open paywall
-        async function fetchWithPaywall(input, init) {
-            const r = await fetch(input, init);
-            if (r.status === 402) {
-                document.getElementById('paywall').classList.remove('hidden');
-                const data = await r.json().catch(() => ({}));
-                if (data && data.message) showToast(data.message, 3000);
-            }
-            return r;
-        }
-        // Optional: attach to window to use in your API clients
-        window.fetchWithPaywall = fetchWithPaywall;
-
-        // Fake upgrade action (tonight stub)
-        document.getElementById('paywall-upgrade')?.addEventListener('click', () => {
-            showToast("Pretend checkout → set plan=plus", 2500);
-            document.getElementById('paywall').classList.add('hidden');
-        });
+        // Pass-through fetch (no paywall). Use for API clients that previously used fetchWithPaywall.
+        window.fetchWithPaywall = function fetchWithPaywall(input, init) {
+            return fetch(input, init);
+        };
     </script>
 
         <!-- Status Bar JavaScript -->
