@@ -91,7 +91,11 @@
       "Bash(python -c:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nMobile fixes: narrow container margins, add sample music data\n\n- Reduce container padding from 18px to 5px for .music-container, .bookmarks-container, .performances-page \\(only 5px margins on mobile\\)\n- Create static/data/music.json with sample music data for API fallback\n- Update CSS cache version to bust mobile browsers\n- Mini player \\(now-playing-wrapper\\) already positioned correctly above dock at 70px height\n\nCo-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git reset:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(npm run:*)",
+      "Bash(npm start)",
+      "Bash(bash:*)",
+      "Bash(python dev.py:*)"
     ]
   }
 }

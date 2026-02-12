@@ -2269,19 +2269,19 @@ img[src*="default-cover.jpg"] {
 
     /* Compact mobile now-playing wrapper */
     .now-playing-wrapper {
-        height: 70px !important;
-        max-height: 70px !important;
-        overflow: hidden !important;
+        height: 112px !important;
+        max-height: 112px !important;
+        overflow: visible !important;
     }
 
     body.has-player {
-        padding-bottom: calc(var(--mobile-dock-height, 140px) + 70px + env(safe-area-inset-bottom)) !important;
+        padding-bottom: calc(var(--mobile-dock-height, 140px) + 112px + env(safe-area-inset-bottom)) !important;
     }
 
     /* Prevent any full-screen player on mobile */
     .now-playing-sticky {
-        max-height: 70px !important;
-        overflow: hidden !important;
+        max-height: none !important;
+        overflow: visible !important;
     }
 
     /* Hide any expanded player views on mobile */

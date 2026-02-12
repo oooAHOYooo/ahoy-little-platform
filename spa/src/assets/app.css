@@ -89,9 +89,33 @@
     bottom: calc(var(--mobile-dock-height, 140px) + env(safe-area-inset-bottom) + 8px) !important;
   }
 
+  /* Override legacy compact cap so the new mobile controls are visible */
+  .app .now-playing-wrapper {
+    height: 112px !important;
+    max-height: 112px !important;
+    overflow: visible !important;
+    z-index: 10020 !important;
+  }
+
+  .app .now-playing-sticky,
+  .app .now-playing-glass.now-playing-sticky {
+    min-height: 112px !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Show mobile shell on mobile */
+  .app .now-playing-mobile-shell {
+    display: flex !important;
+  }
+
+  .app .now-playing-container {
+    display: none !important;
+  }
+
   /* Reserve enough content space for dock + mini player stack */
   .app .spa-main.has-player {
-    padding-bottom: calc(var(--mobile-dock-height, 140px) + 88px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(var(--mobile-dock-height, 140px) + 124px + env(safe-area-inset-bottom)) !important;
   }
 }
 

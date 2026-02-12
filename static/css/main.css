@@ -25886,6 +25886,10 @@ body.has-player {
 /* Mobile styles for now-playing mini player */
 
 @media (max-width: 768px) {
+    body.has-player {
+        padding-bottom: 80px;
+    }
+
     .now-playing-wrapper {
         position: fixed !important;
         left: 0;
@@ -25899,7 +25903,7 @@ body.has-player {
     }
 
     .now-playing-container {
-        padding: 10px 16px 24px;
+        padding: 10px 16px 8px;
         gap: 12px;
     }
 
@@ -25971,12 +25975,16 @@ body.has-player {
 }
 
 @media (max-width: 480px) {
+    body.has-player {
+        padding-bottom: 72px;
+    }
+
     .now-playing-wrapper {
         height: 72px;
     }
 
     .now-playing-container {
-        padding: 6px 10px 18px;
+        padding: 6px 10px 6px;
         gap: 8px;
     }
 
