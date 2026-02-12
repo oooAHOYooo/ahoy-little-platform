@@ -2254,7 +2254,7 @@ img[src*="default-cover.jpg"] {
         position: fixed;
         left: 0;
         right: 0;
-        bottom: calc(140px + max(0px, env(safe-area-inset-bottom, 0px)));
+        bottom: 0;
         z-index: 10005;
         background: var(--footer-glass-bg);
         backdrop-filter: var(--footer-glass-blur);

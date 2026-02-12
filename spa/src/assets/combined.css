@@ -2250,7 +2250,7 @@ img[src*="default-cover.jpg"] {
         position: fixed;
         left: 0;
         right: 0;
-        bottom: calc(var(--mobile-dock-height, 140px) + env(safe-area-inset-bottom));
+        bottom: 0;
         background: var(--footer-glass-gradient);
         backdrop-filter: var(--footer-glass-blur);
         -webkit-backdrop-filter: var(--footer-glass-blur);

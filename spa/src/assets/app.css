@@ -9,6 +9,7 @@
 @import './design-tokens.css';
 @import './main.css';
 @import './combined.css';
+@import './mini-player-tune.css';
 
 /* ── SPA Shell Overrides ───────────────────────────────────────────── */
 
@@ -83,39 +84,74 @@
     padding-top: var(--ds-topbar-height);
   }
 
-  /* Keep mini player above the full two-row mobile dock */
+  /* Mini player sits 75px from bottom so it doesn’t overlap the bottom menu */
   .app .now-playing-wrapper,
   .app .now-playing-sticky {
-    bottom: calc(var(--mobile-dock-height, 140px) + env(safe-area-inset-bottom) + 8px) !important;
+    bottom: 75px !important;
   }
 
-  /* Override legacy compact cap so the new mobile controls are visible */
+  /* Two-row mobile layout: row 1 = title/artist, row 2 = buttons; no volume */
   .app .now-playing-wrapper {
-    height: 112px !important;
-    max-height: 112px !important;
+    height: auto !important;
+    min-height: 120px !important;
+    max-height: none !important;
     overflow: visible !important;
     z-index: 10020 !important;
   }
 
   .app .now-playing-sticky,
   .app .now-playing-glass.now-playing-sticky {
-    min-height: 112px !important;
+    min-height: 120px !important;
     max-height: none !important;
     overflow: visible !important;
   }
 
-  /* Show mobile shell on mobile */
-  .app .now-playing-mobile-shell {
-    display: flex !important;
+  .app .now-playing-container {
+    display: grid !important;
+    grid-template-rows: auto auto !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 10px 12px !important;
+    padding: 10px 12px 12px !important;
+    align-items: center !important;
   }
 
-  .app .now-playing-container {
+  /* Row 1: album art + title/artist only (full width) */
+  .app .now-playing-left {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+  }
+
+  /* Row 2 left: transport (−5, prev, play, next, +5) */
+  .app .now-playing-transport {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    justify-self: start !important;
+    gap: 6px !important;
+  }
+
+  /* Row 2 right: action buttons (no volume) */
+  .app .now-playing-actions-wrap {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    justify-self: end !important;
+    min-width: 0 !important;
+  }
+
+  /* Hide volume on mobile */
+  .app .now-playing-volume-wrap {
     display: none !important;
   }
 
-  /* Reserve enough content space for dock + mini player stack */
+  .app .now-playing-actions {
+    flex-wrap: nowrap !important;
+    min-width: 0 !important;
+    gap: 4px !important;
+  }
+
+  /* Reserve content space so it doesn’t sit under bar + bottom menu (75px) */
   .app .spa-main.has-player {
-    padding-bottom: calc(var(--mobile-dock-height, 140px) + 124px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(75px + 120px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 

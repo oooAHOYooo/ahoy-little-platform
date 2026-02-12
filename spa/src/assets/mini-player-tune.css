@@ -1,0 +1,349 @@
+/**
+ * Mini Player Tune Sheet
+ * ─────────────────────────────────────────────────────────────────────────
+ * Edit spacing, padding, and colors here. Overrides apply to the
+ * now-playing bar (desktop + mobile) and mobile dock secondary row spacing.
+ *
+ * To change the bar’s HTML or copy (e.g. "Select a track", links), edit:
+ *   spa/src/components/MiniPlayer.vue  |  Dock: spa/src/components/NavBar.vue
+ */
+
+/* ── Tweak these variables (desktop bar) ─────────────────────────────────── */
+.now-playing-wrapper {
+  /* Bar size & position */
+  --np-height: 90px;
+  --np-bar-radius: 20px 20px 0 0;
+
+  /* Inner container: padding and gaps */
+  --np-container-padding: 10px 16px 28px;
+  --np-container-gap-row: 12px;
+  --np-container-gap-col: 24px;
+
+  /* Left block: album art + title/artist */
+  --np-left-gap: 12px;
+  --np-album-size: 48px;
+  --np-album-radius: 10px;
+  --np-info-gap: 4px;
+  --np-title-size: 14px;
+  --np-artist-size: 12px;
+
+  /* Transport (prev/play/next ±5s) */
+  --np-transport-gap: 8px;
+  --np-btn-size: 32px;
+  --np-play-btn-size: 40px;
+
+  /* Action buttons (shuffle, repeat, boost, bookmark, etc.) */
+  --np-actions-gap: 6px;
+  --np-action-btn-size: 32px;
+  --np-action-btn-radius: 8px;
+
+  /* Volume strip */
+  --np-volume-wrap-gap: 8px;
+  --np-volume-width: 84px;
+
+  /* Bar background & border (glass + neumorphic depth) */
+  --np-bar-bg: linear-gradient(
+    145deg,
+    rgba(18, 18, 28, 0.88) 0%,
+    rgba(12, 12, 22, 0.92) 45%,
+    rgba(8, 8, 18, 0.9) 100%
+  );
+  --np-bar-border: 1px solid rgba(255, 255, 255, 0.06);
+  /* Neumorphic: soft light top-left, deeper shadow bottom-right + ambient */
+  --np-bar-shadow:
+    0 -4px 24px rgba(0, 0, 0, 0.55),
+    2px -2px 12px rgba(255, 255, 255, 0.03),
+    -2px 2px 16px rgba(0, 0, 0, 0.4),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.04),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.2);
+  --np-bar-blur: 24px;
+
+  /* “Playing” state (subtle glow) */
+  --np-playing-border: 1px solid rgba(79, 70, 229, 0.35);
+  --np-playing-shadow:
+    0 -4px 24px rgba(0, 0, 0, 0.5),
+    2px -2px 12px rgba(255, 255, 255, 0.05),
+    -2px 2px 14px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(79, 70, 229, 0.2),
+    0 -2px 20px rgba(67, 56, 202, 0.1),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.06),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.15);
+
+  /* Text */
+  --np-title-color: var(--text-primary, #ffffff);
+  --np-artist-color: var(--text-secondary, rgba(255, 255, 255, 0.85));
+
+  /* Empty state (no track) */
+  --np-empty-art-bg: linear-gradient(
+    135deg,
+    rgba(67, 56, 202, 0.22) 0%,
+    rgba(79, 70, 229, 0.16) 100%
+  );
+  --np-empty-title-color: rgba(255, 255, 255, 0.6);
+  --np-empty-artist-color: rgba(255, 255, 255, 0.4);
+  --np-empty-link-color: rgba(255, 255, 255, 0.5);
+  --np-empty-link-hover: rgba(255, 255, 255, 0.85);
+  --np-empty-art-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.25),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.03);
+
+  /* Buttons: default, hover, active, play button */
+  --np-btn-bg: rgba(255, 255, 255, 0.1);
+  --np-btn-color: rgba(255, 255, 255, 0.9);
+  --np-btn-hover-bg: rgba(255, 255, 255, 0.2);
+  --np-btn-active-bg: rgba(79, 70, 229, 0.35);
+  --np-btn-active-color: #4f46e5;
+  --np-play-btn-bg: linear-gradient(135deg, #5b21b6, #4f46e5);
+  --np-play-btn-hover-bg: linear-gradient(135deg, #6d28d9, #6366f1);
+  /* Neumorphic button shadows (raised) */
+  --np-btn-shadow: 2px 2px 6px rgba(0, 0, 0, 0.35),
+    -1px -1px 4px rgba(255, 255, 255, 0.06);
+  --np-btn-shadow-active: inset 1px 1px 3px rgba(0, 0, 0, 0.25),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.03);
+  --np-play-btn-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4),
+    -1px -1px 5px rgba(255, 255, 255, 0.08),
+    0 2px 12px rgba(79, 70, 229, 0.25);
+  --np-play-btn-shadow-active: inset 1px 1px 4px rgba(0, 0, 0, 0.3);
+  /* Album art: soft 3D lift */
+  --np-album-shadow: 3px 3px 10px rgba(0, 0, 0, 0.4),
+    -1px -1px 5px rgba(255, 255, 255, 0.04);
+
+  /* Action buttons (outline style + neumorphic) */
+  --np-action-btn-border: 1px solid rgba(255, 255, 255, 0.1);
+  --np-action-btn-color: rgba(255, 255, 255, 0.55);
+  --np-action-btn-hover-bg: rgba(255, 255, 255, 0.06);
+  --np-action-btn-hover-border: rgba(255, 255, 255, 0.25);
+  --np-action-btn-hover-color: rgba(255, 255, 255, 0.9);
+  --np-action-btn-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3),
+    -1px -1px 3px rgba(255, 255, 255, 0.04);
+  --np-action-btn-shadow-active: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Mobile now-playing bar (same bar, compact layout) ───────────────────── */
+.now-playing-wrapper {
+  --np-mobile-height: 112px;
+  --np-mobile-container-padding: 8px 12px;
+  --np-mobile-container-gap: 10px;
+  --np-mobile-album-size: 50px;
+  --np-mobile-title-size: 13px;
+  --np-mobile-artist-size: 11px;
+  --np-mobile-transport-gap: 6px;
+  --np-mobile-actions-gap: 6px;
+  --np-mobile-btn-size: 36px;
+  --np-mobile-play-btn-size: 40px;
+  --np-mobile-volume-width: 64px;
+}
+
+/* ── Mobile dock: secondary row (Artists, Merch, Events, Profile, Saved) ─────
+   Edit these to change spacing of the top row of the bottom nav. */
+:root {
+  --mobile-dock-secondary-padding: 10px 6px 8px;
+  --mobile-dock-secondary-gap: 4px;
+  --mobile-dock-secondary-min-height: 44px;
+}
+
+/* ── Apply variables (do not edit below unless you know what you’re doing) ─── */
+
+.now-playing-wrapper {
+  height: var(--np-height);
+}
+
+body.has-player {
+  padding-bottom: var(--np-height);
+}
+
+.now-playing-glass {
+  border-radius: var(--np-bar-radius);
+  border-top: var(--np-bar-border);
+  box-shadow: var(--np-bar-shadow);
+  background: var(--np-bar-bg);
+  backdrop-filter: blur(var(--np-bar-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--np-bar-blur)) saturate(1.4);
+}
+
+.now-playing-glass.now-playing-is-playing {
+  border-top: var(--np-playing-border);
+  box-shadow: var(--np-playing-shadow);
+}
+
+.now-playing-container {
+  padding: var(--np-container-padding);
+  gap: var(--np-container-gap-row) var(--np-container-gap-col);
+}
+
+.now-playing-left {
+  gap: var(--np-left-gap);
+}
+
+.now-playing-transport {
+  gap: var(--np-transport-gap);
+}
+
+.now-playing-actions-wrap {
+  gap: var(--np-volume-wrap-gap);
+}
+
+.now-playing-actions {
+  gap: var(--np-actions-gap);
+}
+
+.now-playing-volume {
+  width: var(--np-volume-width);
+}
+
+.now-playing-album-art {
+  width: var(--np-album-size);
+  height: var(--np-album-size);
+  border-radius: var(--np-album-radius);
+  box-shadow: var(--np-album-shadow);
+}
+
+.now-playing-empty-art {
+  border-radius: var(--np-album-radius);
+  background: var(--np-empty-art-bg);
+  box-shadow: var(--np-empty-art-shadow);
+}
+
+.now-playing-info {
+  gap: var(--np-info-gap);
+}
+
+.now-playing-title {
+  font-size: var(--np-title-size);
+  color: var(--np-title-color);
+}
+
+.now-playing-artist {
+  font-size: var(--np-artist-size);
+  color: var(--np-artist-color);
+}
+
+.now-playing-empty-title {
+  color: var(--np-empty-title-color) !important;
+}
+
+.now-playing-empty-artist {
+  color: var(--np-empty-artist-color) !important;
+}
+
+.now-playing-empty-link {
+  color: var(--np-empty-link-color);
+}
+
+.now-playing-empty-link:hover {
+  color: var(--np-empty-link-hover);
+}
+
+.now-playing-btn {
+  width: var(--np-btn-size);
+  height: var(--np-btn-size);
+  background: var(--np-btn-bg);
+  color: var(--np-btn-color);
+  box-shadow: var(--np-btn-shadow);
+}
+
+.now-playing-btn:hover {
+  background: var(--np-btn-hover-bg);
+}
+
+.now-playing-btn:active {
+  box-shadow: var(--np-btn-shadow-active);
+}
+
+.now-playing-btn.active {
+  background: var(--np-btn-active-bg);
+  color: var(--np-btn-active-color);
+  box-shadow: var(--np-btn-shadow-active);
+}
+
+.now-playing-play-btn {
+  width: var(--np-play-btn-size);
+  height: var(--np-play-btn-size);
+  background: var(--np-play-btn-bg);
+  box-shadow: var(--np-play-btn-shadow);
+}
+
+.now-playing-play-btn:hover {
+  background: var(--np-play-btn-hover-bg);
+}
+
+.now-playing-play-btn:active {
+  box-shadow: var(--np-play-btn-shadow-active);
+}
+
+.now-playing-action-btn {
+  width: var(--np-action-btn-size);
+  height: var(--np-action-btn-size);
+  border-radius: var(--np-action-btn-radius);
+  border: var(--np-action-btn-border);
+  color: var(--np-action-btn-color);
+  box-shadow: var(--np-action-btn-shadow);
+}
+
+.now-playing-action-btn:hover {
+  background: var(--np-action-btn-hover-bg);
+  border-color: var(--np-action-btn-hover-border);
+  color: var(--np-action-btn-hover-color);
+}
+
+.now-playing-action-btn:active {
+  box-shadow: var(--np-action-btn-shadow-active);
+}
+
+/* ── Apply mobile now-playing variables (overrides combined.css at ≤768px) ───── */
+@media (max-width: 768px) {
+  .now-playing-wrapper {
+    height: var(--np-mobile-height) !important;
+    max-height: var(--np-mobile-height) !important;
+  }
+  body.has-player {
+    padding-bottom: calc(var(--mobile-dock-height, 140px) + var(--np-mobile-height) + env(safe-area-inset-bottom)) !important;
+  }
+  .now-playing-container {
+    padding: var(--np-mobile-container-padding) !important;
+    gap: var(--np-mobile-container-gap) !important;
+  }
+  .now-playing-album-art,
+  .now-playing-empty-art {
+    width: var(--np-mobile-album-size) !important;
+    height: var(--np-mobile-album-size) !important;
+  }
+  .now-playing-title {
+    font-size: var(--np-mobile-title-size) !important;
+  }
+  .now-playing-artist {
+    font-size: var(--np-mobile-artist-size) !important;
+  }
+  .now-playing-empty-title {
+    font-size: var(--np-mobile-title-size) !important;
+  }
+  .now-playing-empty-artist {
+    font-size: var(--np-mobile-artist-size) !important;
+  }
+  .now-playing-transport {
+    gap: var(--np-mobile-transport-gap) !important;
+  }
+  .now-playing-actions {
+    gap: var(--np-mobile-actions-gap) !important;
+  }
+  .now-playing-btn {
+    width: var(--np-mobile-btn-size) !important;
+    height: var(--np-mobile-btn-size) !important;
+  }
+  .now-playing-play-btn {
+    width: var(--np-mobile-play-btn-size) !important;
+    height: var(--np-mobile-play-btn-size) !important;
+  }
+  .now-playing-volume {
+    width: var(--np-mobile-volume-width) !important;
+    min-width: 48px !important;
+  }
+}
+
+/* ── Apply mobile dock secondary row spacing (overrides combined.css at ≤767px) ─ */
+@media (max-width: 767px) {
+  .mobile-dock-row-secondary {
+    padding: var(--mobile-dock-secondary-padding) !important;
+    gap: var(--mobile-dock-secondary-gap) !important;
+    min-height: var(--mobile-dock-secondary-min-height) !important;
+  }
+}
