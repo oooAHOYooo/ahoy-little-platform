@@ -149,13 +149,11 @@
             </button>
             <button
               type="button"
-              class="now-playing-btn now-playing-action-btn"
-              :class="{ disabled: !playerStore.currentTrack }"
-              :disabled="!playerStore.currentTrack"
-              title="Add to playlist"
-              @click="openAddToPlaylist"
+              class="now-playing-btn now-playing-action-btn now-playing-volume-mobile-btn"
+              :title="playerStore.isMuted ? 'Unmute' : 'Volume'"
+              @click="playerStore.toggleMute()"
             >
-              <i class="fas fa-plus"></i>
+              <i :class="volumeIconClass"></i>
             </button>
             <div class="now-playing-queue-wrap">
               <button
@@ -178,10 +176,6 @@
               <div class="queue-header">
                 <div class="queue-header-left">
                   <h4>Up Next</h4>
-                  <div class="queue-header-actions">
-                    <router-link to="/music" class="queue-add-btn" @click="showQueue = false">Add Tracks</router-link>
-                    <router-link to="/podcasts" class="queue-add-btn" @click="showQueue = false">Add Podcasts</router-link>
-                  </div>
                 </div>
                 <button
                   v-if="playerStore.queue.length"
@@ -222,11 +216,6 @@
               <div v-else class="queue-empty">
                 <i class="fas fa-music"></i>
                 <p>Queue is empty</p>
-                <span>Add tracks to play next</span>
-                <div class="queue-empty-actions">
-                  <router-link to="/music" class="queue-add-btn" @click="showQueue = false">Add Tracks</router-link>
-                  <router-link to="/podcasts" class="queue-add-btn" @click="showQueue = false">Add Podcasts</router-link>
-                </div>
               </div>
             </div>
           </div>
@@ -262,8 +251,6 @@ import { useRouter } from 'vue-router'
 import { usePlayerStore } from '../stores/player'
 import { useBookmarks } from '../composables/useBookmarks'
 import { useHaptics } from '../composables/useNative'
-import { useAddToPlaylist } from '../composables/useAddToPlaylist'
-
 const router = useRouter()
 const playerStore = usePlayerStore()
 const bookmarks = useBookmarks()
@@ -312,11 +299,6 @@ function toggleBookmark() {
     bookmarks.toggle(playerStore.currentTrack)
     haptics.onBookmark?.()
   }
-}
-
-const addToPlaylist = useAddToPlaylist()
-function openAddToPlaylist() {
-  if (playerStore.currentTrack) addToPlaylist.open(playerStore.currentTrack)
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'https://app.ahoy.ooo'

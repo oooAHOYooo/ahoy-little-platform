@@ -163,16 +163,6 @@
                   </button>
                   <button
                     type="button"
-                    class="episode-btn boost-btn"
-                    :title="'Boost ' + (track.artist || 'artist')"
-                    aria-label="Boost artist"
-                    @click.stop="openBoost(track)"
-                  >
-                    <i class="fas fa-bolt" aria-hidden="true"></i>
-                    <span class="sr-only">Boost</span>
-                  </button>
-                  <button
-                    type="button"
                     class="episode-btn bm-btn"
                     :class="{ bookmarked: bookmarks.isBookmarked({ id: track.id }) }"
                     :aria-pressed="bookmarks.isBookmarked({ id: track.id })"
@@ -243,15 +233,6 @@
                 </button>
                 <button
                   type="button"
-                  class="episode-btn boost-btn music-mobile-btn"
-                  :title="'Boost ' + (track.artist || 'artist')"
-                  aria-label="Boost artist"
-                  @click.stop="openBoost(track)"
-                >
-                  <i class="fas fa-bolt" aria-hidden="true"></i>
-                </button>
-                <button
-                  type="button"
                   class="episode-btn bm-btn music-mobile-btn"
                   :class="{ bookmarked: bookmarks.isBookmarked({ id: track.id }) }"
                   :aria-pressed="bookmarks.isBookmarked({ id: track.id })"
@@ -292,14 +273,6 @@
                 @click.stop="addToQueue(track)"
               >
                 <i class="fas fa-plus"></i>
-              </button>
-              <button
-                type="button"
-                class="track-overlay-btn boost-btn"
-                title="Boost artist"
-                @click.stop="openBoost(track)"
-              >
-                <i class="fas fa-bolt" aria-hidden="true"></i>
               </button>
               <button
                 type="button"
@@ -368,13 +341,6 @@ function getTrackCover(track) {
   const url = track && (track.cover_art || track.artwork)
   if (typeof url === 'string' && url.trim()) return url
   return '/static/img/default-cover.jpg'
-}
-
-function openBoost(track) {
-  if (!track || !track.artist) return
-  const artistId = track.artist_slug || track.artist
-  const params = new URLSearchParams({ type: 'boost', artist_id: artistId, amount: '1' })
-  router.push('/checkout?' + params.toString())
 }
 
 function openAddToPlaylist(track) {
@@ -546,17 +512,17 @@ onMounted(loadTracks)
   .music-mobile-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 6px 4px 0;
+    gap: 4px;
+    padding: 2px 0 0;
   }
 
   .music-mobile-row {
     display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
     align-items: center;
-    gap: 10px;
-    padding: 8px 8px;
-    border-radius: 12px;
+    gap: 6px;
+    padding: 6px 6px;
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.05);
   }
@@ -568,9 +534,9 @@ onMounted(loadTracks)
 
   .music-mobile-art {
     position: relative;
-    width: 44px;
-    height: 44px;
-    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
     overflow: hidden;
     flex-shrink: 0;
   }
@@ -628,8 +594,8 @@ onMounted(loadTracks)
 
   .music-mobile-right {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    flex-direction: row;
+    align-items: center;
     gap: 4px;
   }
 
@@ -637,17 +603,18 @@ onMounted(loadTracks)
     font-size: 11px;
     color: rgba(255, 255, 255, 0.62);
     font-variant-numeric: tabular-nums;
+    margin-right: 2px;
   }
 
   .music-mobile-actions {
     display: flex;
-    gap: 4px;
+    gap: 2px;
   }
 
   .music-mobile-btn {
-    width: 26px;
-    height: 26px;
-    border-radius: 7px;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     font-size: 11px;
     padding: 0;
   }

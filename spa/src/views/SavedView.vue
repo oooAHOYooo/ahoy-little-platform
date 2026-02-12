@@ -309,7 +309,7 @@ onUnmounted(() => {
   border: 1px solid rgba(109, 220, 255, 0.2);
   border-radius: 12px;
   padding: 12px 16px;
-  margin-bottom: 1rem;
+  margin: 15px;
 }
 .saves-guest-banner p {
   margin: 0;

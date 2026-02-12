@@ -1,10 +1,14 @@
 <template>
   <div class="account-page">
-    <div class="unified-header">
-      <div class="header-content">
-        <h1>Account</h1>
+    <section class="podcasts-hero account-page-header">
+      <div class="podcasts-hero-inner account-hero-inner">
+        <img src="/ahoy_logo.png" alt="Ahoy" class="account-hero-logo" />
+        <div>
+          <h1>Account</h1>
+          <p>Wallet & profile</p>
+        </div>
       </div>
-    </div>
+    </section>
 
     <div v-if="auth.isLoggedIn.value" class="account-card">
       <div class="account-profile">
@@ -149,6 +153,40 @@ async function onLogout() {
 <style scoped>
 .account-page {
   padding: 16px 20px 100px;
+}
+/* Compact podcast-style header: logo + title row */
+.account-page-header.podcasts-hero {
+  margin-top: 18px;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.account-hero-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.account-hero-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.account-page-header.podcasts-hero h1 {
+  margin: 0 0 2px 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+.account-page-header.podcasts-hero p {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.68);
+}
+@media (min-width: 769px) {
+  .account-page-header.podcasts-hero h1 { font-size: 28px; }
+  .account-hero-logo { width: 48px; height: 48px; }
 }
 .account-card {
   max-width: 420px;

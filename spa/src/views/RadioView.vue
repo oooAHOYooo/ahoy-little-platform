@@ -65,7 +65,7 @@
             <button type="button" class="radio-icon-btn" title="Boost" @click="boostArtist(current)">
               <i class="fas fa-bolt"></i>
             </button>
-            <button type="button" class="radio-icon-btn" title="Add to queue" @click="addToQueue(current)">
+            <button type="button" class="radio-icon-btn queue-btn" title="Add to queue" @click="addToQueue(current)">
               <i class="fas fa-plus"></i>
             </button>
           </div>
