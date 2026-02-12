@@ -136,7 +136,7 @@
 /* ── Mobile dock: secondary row (Artists, Merch, Events, Profile, Saved) ─────
    Edit these to change spacing of the top row of the bottom nav. */
 :root {
-  --mobile-dock-secondary-padding: 10px 6px 8px;
+  --mobile-dock-secondary-padding: 6px 6px 8px;
   --mobile-dock-secondary-gap: 4px;
   --mobile-dock-secondary-min-height: 44px;
 }
