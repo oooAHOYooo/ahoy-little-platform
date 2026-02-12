@@ -16,6 +16,9 @@ services:
     branch: main
     rootDir: .
     envVars:
+      # Vite 5 requires Node 18+ (used during build via build_with_spa.sh)
+      - key: NODE_VERSION
+        value: "20"
       - key: AHOY_ENV
         value: production
       # Set this to your custom domain after provisioning (or keep the onrender.com origin).
