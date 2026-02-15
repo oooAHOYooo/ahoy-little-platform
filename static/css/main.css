@@ -1864,6 +1864,72 @@ body.debug-layout .card {
         display: none;
     }
 
+    /* Music: compact filter row — max 52px height, single row */
+    .music-container .podcasts-section.podcasts-featured-section {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 6px;
+        min-height: 52px;
+        max-height: 52px;
+        margin-top: 0;
+        margin-bottom: 12px;
+        overflow: hidden;
+    }
+
+    .music-container .podcasts-section.podcasts-featured-section .podcasts-section-header {
+        display: none;
+    }
+
+    .music-container .podcasts-section .podcast-shows-dropdown-mobile {
+        margin-bottom: 0;
+        flex: 0 0 auto;
+        min-width: 0;
+        width: 100px;
+        max-width: 26%;
+    }
+
+    .music-container .podcasts-section .podcast-show-select {
+        height: 40px;
+        min-height: 40px;
+        padding: 6px 28px 6px 10px;
+        font-size: 12px;
+        border-radius: 8px;
+        background-position: right 8px center;
+    }
+
+    .music-container .podcasts-section .music-header-toolbar {
+        margin-top: 0;
+        flex: 1;
+        min-width: 0;
+        gap: 6px;
+    }
+
+    .music-container .music-header-toolbar .music-toolbar-search {
+        padding: 6px 10px;
+        min-height: 40px;
+    }
+
+    .music-container .music-header-toolbar .music-toolbar-search i {
+        font-size: 12px;
+    }
+
+    .music-container .music-header-toolbar .music-toolbar-sort {
+        padding: 6px 8px;
+        height: 40px;
+        min-height: 40px;
+        font-size: 12px;
+    }
+
+    .music-container .music-header-toolbar .view-btn {
+        padding: 6px 10px;
+    }
+
+    .music-container .music-header-toolbar .music-toolbar-play {
+        padding: 6px 10px;
+    }
+
     .podcast-shows-desktop {
         display: none !important;
     }

@@ -564,13 +564,18 @@ onMounted(loadTracks)
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0;
+    line-height: 1.2;
   }
 
   .music-mobile-title-link {
     color: inherit;
     text-decoration: none;
     min-width: 0;
+    display: block;
+    line-height: 1.2;
+    margin: 0;
+    padding: 0;
   }
 
   .music-mobile-title {
@@ -581,6 +586,8 @@ onMounted(loadTracks)
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin: 0;
+    line-height: 1.2;
   }
 
   .music-mobile-artist {
@@ -590,6 +597,8 @@ onMounted(loadTracks)
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin: 0;
+    line-height: 1.2;
   }
 
   .music-mobile-right {

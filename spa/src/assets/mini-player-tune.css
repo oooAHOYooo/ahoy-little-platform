@@ -334,7 +334,8 @@ body.has-player {
   }
 
   /* Hide all "Add to queue" buttons on mobile */
-  .queue-btn {
+  .queue-btn,
+  .add-to-playlist-btn {
     display: none !important;
   }
 
