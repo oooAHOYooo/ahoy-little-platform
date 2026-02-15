@@ -26431,3 +26431,28 @@ body.has-player {
         opacity: 0.7;
     }
 }
+
+/* ============================================================
+   MOBILE COLLAPSE FEATURE
+   ============================================================ */
+
+/* Adjust body padding when mobile UI is collapsed */
+@media (max-width: 768px) {
+    body.has-player.player-collapsed {
+        padding-bottom: 24px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    body.has-player.player-collapsed {
+        padding-bottom: 20px !important;
+    }
+}
+
+/* Hide collapse handle on desktop */
+@media (min-width: 769px) {
+    .collapse-handle,
+    .dock-collapse-handle {
+        display: none !important;
+    }
+}

@@ -1,5 +1,14 @@
 <template>
-  <div class="now-playing-wrapper" :class="{ 'has-player': !!playerStore.currentTrack }">
+  <div class="now-playing-wrapper" :class="{ 'has-player': !!playerStore.currentTrack, 'collapsed': collapse.isPlayerCollapsed.value }">
+    <!-- Collapse handle bar (only visible on mobile when collapsed) -->
+    <div
+      class="collapse-handle mobile-only"
+      @click="collapse.togglePlayer"
+      @touchstart="(e) => collapse.handleTouchStart(e, collapse.collapseAll, collapse.expandAll)"
+      @touchmove="(e) => collapse.handleTouchMove(e, collapse.isPlayerCollapsed.value, collapse.collapseAll, collapse.expandAll)"
+    >
+      <div class="collapse-handle-bar"></div>
+    </div>
     <div
       class="now-playing-glass now-playing-sticky"
       :class="{ 'now-playing-is-playing': playerStore.currentTrack && playerStore.isPlaying }"
@@ -251,10 +260,12 @@ import { useRouter } from 'vue-router'
 import { usePlayerStore } from '../stores/player'
 import { useBookmarks } from '../composables/useBookmarks'
 import { useHaptics } from '../composables/useNative'
+import { useMobileCollapse } from '../composables/useMobileCollapse'
 const router = useRouter()
 const playerStore = usePlayerStore()
 const bookmarks = useBookmarks()
 const haptics = useHaptics()
+const collapse = useMobileCollapse()
 
 const showQueue = ref(false)
 
@@ -334,5 +345,51 @@ function playFromQueue(index) {
 }
 .now-playing-queue-panel {
   z-index: 1000;
+}
+
+/* Collapse handle */
+.collapse-handle {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.collapse-handle-bar {
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  transition: background 0.2s ease;
+}
+
+.collapse-handle:active .collapse-handle-bar {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Collapsed state */
+.now-playing-wrapper.collapsed {
+  transform: translateY(calc(100% - 20px)) !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.now-playing-wrapper:not(.collapsed) {
+  transform: translateY(0) !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hide handle on desktop */
+@media (min-width: 769px) {
+  .collapse-handle {
+    display: none;
+  }
 }
 </style>

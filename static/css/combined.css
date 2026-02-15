@@ -3573,6 +3573,27 @@ img[src*="default-cover.jpg"] {
             font-size: 17px;
         }
     }
+
+    /* Mobile collapse feature support */
+    .mobile-only.dock-collapsed {
+        transform: translateY(calc(100% - 20px)) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mobile-only:not(.dock-collapsed) {
+        transform: translateY(0) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.has-player.player-collapsed {
+        padding-bottom: 24px !important;
+    }
+
+    @media (max-width: 480px) {
+        body.has-player.player-collapsed {
+            padding-bottom: 20px !important;
+        }
+    }
 }
 
 /* Mobile glassy top bar */

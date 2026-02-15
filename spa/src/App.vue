@@ -59,6 +59,7 @@ import { useRoute } from 'vue-router'
 import { usePlayerStore } from './stores/player'
 import { useWakeLock } from './composables/useNative'
 import { restoreSession } from './composables/useAuth'
+import { useMobileCollapse } from './composables/useMobileCollapse'
 import AppNavbar from './components/AppNavbar.vue'
 import AppSidebar from './components/AppSidebar.vue'
 import NavBar from './components/NavBar.vue'
@@ -74,6 +75,7 @@ const playerStore = usePlayerStore()
 const mobileMenuOpen = ref(false)
 const route = useRoute()
 const wakeLock = useWakeLock()
+const collapse = useMobileCollapse()
 
 const toastRef = ref(null)
 const online = ref(navigator.onLine)
@@ -100,6 +102,15 @@ watch(() => playerStore.isPlaying, async (playing) => {
 watch(() => route.name, (name) => {
   if (name === 'now-playing') document.body.classList.remove('has-player')
   else document.body.classList.add('has-player')
+}, { immediate: true })
+
+// Adjust body padding when UI is collapsed
+watch([collapse.isPlayerCollapsed, collapse.isDockCollapsed], ([playerCollapsed, dockCollapsed]) => {
+  if (playerCollapsed) document.body.classList.add('player-collapsed')
+  else document.body.classList.remove('player-collapsed')
+
+  if (dockCollapsed) document.body.classList.add('dock-collapsed')
+  else document.body.classList.remove('dock-collapsed')
 }, { immediate: true })
 
 onMounted(() => {

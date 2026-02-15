@@ -11,9 +11,17 @@
 **Current Issues:** None active
 
 **User's current focus (pick up from here):**
-- **Mobile beta builds (Android + iOS)** — Android build is working end-to-end with signed AAB ready for Play Store internal testing. iOS project configured for TestFlight: Capacitor config updated to production URL, ExportOptions.plist created, build script at `packaging/build-ios.sh`. User needs to complete Apple Developer enrollment ($99/yr) and register bundle ID `com.ahoy.app`, then build+upload via Xcode Organizer or the build script.
+- **Mobile UX improvements** — Added collapsible mobile dock and now-playing bar with swipe gestures for a cleaner, more immersive experience. SPA built successfully.
 
-**Recent Changes (2026-02-02):**
+**Recent Changes (2026-02-15):**
+- **Mobile collapse feature:** Added collapsible functionality to mobile dock and now-playing bar
+- **Swipe gestures:** Swipe down/up or tap handle bar to collapse/expand both components
+- **Persistent state:** Collapse preferences saved to localStorage (survives page reloads)
+- **Smooth animations:** 300ms cubic-bezier transitions with adaptive body padding
+- **Files:** Created `spa/src/composables/useMobileCollapse.js`, updated `MiniPlayer.vue`, `NavBar.vue`, `App.vue`, and CSS files
+- **Docs:** Added `.claude/MOBILE_COLLAPSE_FEATURE.md` for implementation details
+
+**Previous (2026-02-02):**
 - Android: Gradle upgraded 8.0.2→8.11.1, AGP 8.0.0→8.7.3 (Java 21 compat)
 - Android: Signing config wired into `build.gradle` via `keystore/sign.properties`
 - Android: Signed AAB + APK built and ready for Play Store upload
@@ -156,6 +164,25 @@ cd android && ./gradlew bundleRelease assembleRelease   # builds signed AAB + AP
 ---
 
 ## Session Log
+
+### 2026-02-15: Mobile Collapse Feature
+- **Request:** Make mobile dock and now-playing bar collapsible for cleaner UX
+- **Implementation:**
+  - Created `spa/src/composables/useMobileCollapse.js` - shared state management with localStorage persistence
+  - Updated `MiniPlayer.vue` - added collapse handle bar with swipe/tap gestures
+  - Updated `NavBar.vue` - added collapse handle bar with swipe/tap gestures
+  - Updated `App.vue` - added body class watchers to adjust padding when collapsed
+  - Updated `spa/src/assets/main.css` - added collapse animations and responsive padding
+  - Updated `static/css/combined.css` - added legacy support for Flask templates
+- **Features:**
+  - Swipe down/up (>50px in <300ms) or tap handle to collapse/expand
+  - Independent collapse state for dock and player
+  - Smooth 300ms cubic-bezier animations
+  - Persistent state in localStorage (`ahoy.ui.playerCollapsed`, `ahoy.ui.dockCollapsed`)
+  - Adaptive body padding based on collapsed state
+  - Desktop-hidden (handles only visible <769px)
+- **Docs:** Created `.claude/MOBILE_COLLAPSE_FEATURE.md` with full implementation details and testing checklist
+- **Build:** SPA builds successfully with no errors (140 modules, 4.39s)
 
 ### 2026-02-02: Android & iOS beta build setup
 - **Goal:** Set up native builds for Play Store internal testing and TestFlight
