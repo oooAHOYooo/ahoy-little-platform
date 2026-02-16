@@ -1432,6 +1432,7 @@ body.debug-layout .card {
     padding: 18px 18px 40px 18px;
 }
 
+/* Global mobile subpage hero: same look on every subpage (Home, Music, Podcasts, Settings, etc.) */
 .podcasts-hero {
     margin-top: 18px;
     border-radius: 16px;
@@ -1449,6 +1450,34 @@ body.debug-layout .card {
 .podcasts-hero p {
     margin: 0;
     color: rgba(255, 255, 255, 0.68);
+}
+
+/* Mobile: two-line hero, compact (title + description) */
+@media (max-width: 768px) {
+    .podcasts-hero {
+        padding: 12px 18px 14px;
+        margin-bottom: 14px;
+    }
+    .podcasts-hero-inner h1 {
+        margin: 0 0 4px 0;
+        font-size: 22px;
+    }
+    .podcasts-hero-inner p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.35;
+        color: rgba(255, 255, 255, 0.68);
+    }
+    /* Account (wrapped h1+p in a div): same compact two-line */
+    .podcasts-hero-inner > div:has(h1):has(p) h1 {
+        margin: 0 0 4px 0;
+        font-size: 22px;
+    }
+    .podcasts-hero-inner > div:has(h1):has(p) p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.35;
+    }
 }
 
 .podcasts-section {
@@ -5653,12 +5682,12 @@ body.debug-layout .card {
    ======================================== */
 @media (max-width: 768px) {
 
-    /* Make Videos page match Podcasts mobile layout:
-       use the podcasts hero + episode rows and hide the heavy hero/grid UI. */
-    .shows-page .unified-hero,
-    .shows-page .unified-header,
-    .shows-page .shows-grid-section {
+    /* Videos page: use global subpage hero (podcasts-hero) for title; keep header search/filters and grid visible */
+    .shows-page .unified-hero {
         display: none !important;
+    }
+    .shows-page .unified-header .header-title {
+        display: none !important; /* hero shows "Videos" + tagline on mobile */
     }
 
     .shows-page .shows-container {
@@ -5688,6 +5717,32 @@ body.debug-layout .card {
     .shows-page .section-header {
         padding: 0 var(--spacing-md);
         margin-top: var(--spacing-md);
+    }
+
+    /* Mobile: always show play overlay on video cards (no hover on touch) so videos are tappable */
+    .shows-page .show-card .show-overlay {
+        opacity: 1 !important;
+    }
+
+    /* Ensure embedded player and grid are visible on mobile */
+    .shows-page .embedded-video-section {
+        display: block !important;
+        visibility: visible !important;
+    }
+    .shows-page .shows-grid-section,
+    .shows-page .shows-grid {
+        display: block;
+        visibility: visible;
+    }
+    .shows-page .shows-grid {
+        display: grid !important;
+    }
+}
+
+/* Desktop: Videos page uses unified-header for title; hide the duplicate hero strip */
+@media (min-width: 769px) {
+    .shows-page .shows-page-hero.podcasts-hero {
+        display: none !important;
     }
 }
 
@@ -26451,8 +26506,8 @@ body.has-player {
 
 /* Hide collapse handle on desktop */
 @media (min-width: 769px) {
-    .collapse-handle,
-    .dock-collapse-handle {
+    .minimize-btn.mobile-only,
+    .dock-minimize-btn.mobile-only {
         display: none !important;
     }
 }

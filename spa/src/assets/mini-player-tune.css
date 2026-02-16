@@ -17,6 +17,14 @@
   --ui-glass-opacity: 0.85;
   /* Transparency of the dock */
 
+  /* Liquid glass: bar tint (low = more see-through; dark = a hint darker) */
+  --np-bar-tint: 0.08;
+  --np-bar-darken: 0.14;
+  /* Bottom dock: same liquid glass */
+  --dock-bar-blur: 28px;
+  --dock-bar-tint: 0.08;
+  --dock-bar-darken: 0.14;
+
   /* ── 2. MOBILE DOCK (Primary & Secondary Rows) ────────────────────────── */
   --mobile-dock-secondary-padding: 4px 8px;
   --mobile-dock-secondary-gap: 2px;
@@ -24,6 +32,7 @@
   /* Reduced from 44px */
   /* Distance from viewport bottom to the now-playing bar’s bottom edge (dock height). Tweak to move bar: increase = bar up, decrease = bar down; set to match dock height for flush. */
   --np-mobile-dock-height: 118px;
+  --np-collapsed-strip-height: 40px;
 
   /* ── 3. NOW PLAYING WRAPPER (The Player Bar) ─────────────────────────── */
   /* Change these to adjust bar height; mobile needs room for 2 rows (info + transport). */
@@ -31,7 +40,7 @@
   /* Desktop bar height */
   --np-mobile-height: 135px;
   /* Mobile: min height so transport row is visible (tweak here) */
-  --np-bar-radius: 16px 16px 0 0;
+  --np-bar-radius: 0;
 
   /* Container Tightening */
   --np-container-padding: 8px 12px;
@@ -58,14 +67,13 @@
   --np-volume-wrap-gap: 8px;
   --np-volume-width: 84px;
 
-  /* ── 4. COLORS & EFFECTS (Glossy metallic border + prismatic fringes) ──── */
-  --np-bar-bg: rgba(10, 10, 15, var(--ui-glass-opacity));
-  --np-bar-blur: 20px;
-  /* Thin light silver border with glossy sheen + subtle chromatic fringes */
-  --np-bar-border: 1px solid rgba(220, 222, 235, 0.45);
-  --np-bar-border-gloss: inset 0 1px 0 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 0 rgba(0, 0, 0, 0.2), inset 1px 0 0 0 rgba(255, 255, 255, 0.08), inset -1px 0 0 0 rgba(0, 0, 0, 0.12);
-  --np-bar-chromatic: inset 1px 0 0 0 rgba(255, 180, 190, 0.12), inset -1px 0 0 0 rgba(160, 200, 255, 0.12), inset 0 1px 0 0 rgba(200, 255, 210, 0.08), inset 0 -1px 0 0 rgba(255, 200, 220, 0.08);
-  --np-playing-glow: 0 -2px 15px rgba(79, 70, 229, 0.15);
+  /* ── 4. COLORS & EFFECTS (liquid glass: translucent, a hint darker, blends with background) ──── */
+  --np-bar-bg: rgba(0, 0, 0, var(--np-bar-darken));
+  --np-bar-blur: 28px;
+  --np-bar-border: none;
+  --np-bar-border-gloss: none;
+  --np-bar-chromatic: none;
+  --np-playing-glow: none;
 
   /* Text */
   --np-title-color: var(--text-primary, #ffffff);
@@ -97,6 +105,11 @@
   --np-action-btn-shadow-active: none;
   --np-album-shadow: none;
   --np-empty-art-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2);
+
+  /* Bottom dock tab colors (match now-player: subtle inactive, brand active) */
+  --dock-tab-inactive: rgba(255, 255, 255, 0.52);
+  --dock-tab-active: rgba(129, 140, 248, 0.95);
+  --dock-tab-active-bg: rgba(79, 70, 229, 0.14);
 }
 
 /* ── Ghost / collapsed state (for future "zero row" or scroll-to-hide) ──── */
@@ -118,19 +131,16 @@ body.has-player {
   height: 100%;
   min-height: 100%;
   border-radius: var(--np-bar-radius);
-  border: var(--np-bar-border);
-  border-bottom: none;
-  box-shadow: var(--np-bar-border-gloss), var(--np-bar-chromatic);
+  border: none;
+  box-shadow: none;
   background: var(--np-bar-bg);
-  backdrop-filter: blur(var(--np-bar-blur)) saturate(1.4);
-  -webkit-backdrop-filter: blur(var(--np-bar-blur)) saturate(1.4);
+  backdrop-filter: blur(var(--np-bar-blur)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--np-bar-blur)) saturate(1.5);
 }
 
 .now-playing-glass.now-playing-is-playing {
-  border-top: var(--np-bar-border);
-  border-left: var(--np-bar-border);
-  border-right: var(--np-bar-border);
-  box-shadow: var(--np-bar-border-gloss), var(--np-bar-chromatic), var(--np-playing-glow);
+  border: none;
+  box-shadow: none;
 }
 
 .now-playing-container {
@@ -275,7 +285,7 @@ body.has-player {
   }
 
   body.has-player {
-    padding-bottom: calc(100px + var(--np-mobile-height) + var(--np-mobile-dock-height) + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(var(--np-mobile-height) + var(--np-mobile-dock-height) + env(safe-area-inset-bottom)) !important;
   }
 
   .now-playing-title,
@@ -288,8 +298,8 @@ body.has-player {
 
   .now-playing-container {
     padding: var(--np-container-padding) !important;
-    border: var(--np-bar-border) !important;
-    box-shadow: var(--np-bar-border-gloss), var(--np-bar-chromatic) !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   .now-playing-album-art,
@@ -319,6 +329,45 @@ body.has-player {
   .now-playing-volume {
     width: 64px !important;
     min-width: 48px !important;
+  }
+
+  /* Bottom dock: same liquid glass as now-playing bar (translucent, a hint darker) */
+  .mobile-dock {
+    background: rgba(0, 0, 0, var(--dock-bar-darken)) !important;
+    backdrop-filter: blur(var(--dock-bar-blur)) saturate(1.5) !important;
+    -webkit-backdrop-filter: blur(var(--dock-bar-blur)) saturate(1.5) !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .mobile-dock::before {
+    display: none !important;
+  }
+
+  /* Dock tabs: inactive = subtle/translucent (like now-player buttons); active = brand color */
+  .mobile-dock .mobile-tab {
+    color: var(--dock-tab-inactive) !important;
+  }
+
+  .mobile-dock .mobile-tab i,
+  .mobile-dock .mobile-tab span {
+    color: var(--dock-tab-inactive) !important;
+  }
+
+  .mobile-dock .mobile-tab.active {
+    color: var(--dock-tab-active) !important;
+  }
+
+  .mobile-dock .mobile-tab.active::before {
+    background: var(--dock-tab-active-bg) !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .mobile-dock .mobile-tab.active i,
+  .mobile-dock .mobile-tab.active span {
+    color: var(--dock-tab-active) !important;
+    font-weight: 600;
   }
 
   /* Pull the secondary row (Artists, Merch) tight against the player */

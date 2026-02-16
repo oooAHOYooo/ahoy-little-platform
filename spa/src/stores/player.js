@@ -228,6 +228,22 @@ export const usePlayerStore = defineStore('player', () => {
     queue.value = []
   }
 
+  /** Eject: stop playback and clear current track (like popping out a cartridge). */
+  function eject() {
+    pause()
+    const a = getAudio()
+    a.src = ''
+    a.load()
+    currentTime.value = 0
+    duration.value = 0
+    loading.value = false
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = null
+    }
+    currentTrack.value = null
+  }
+
+
   function removeFromQueue(index) {
     queue.value = queue.value.filter((_, i) => i !== index)
   }
@@ -307,6 +323,7 @@ export const usePlayerStore = defineStore('player', () => {
     removeFromQueue,
     addToQueue,
     isInQueue,
+    eject,
     restoreLastPlayed,
     getAudioElement,
   }

@@ -1,6 +1,6 @@
 <template>
   <div class="home-page">
-    <!-- Hero (same as Flask: subpage_hero Home / Explore) -->
+    <!-- Global subpage hero (one line on mobile: Home · Explore) -->
     <section class="podcasts-hero">
       <div class="podcasts-hero-inner">
         <h1><i class="fas fa-home" aria-hidden="true"></i> Home</h1>

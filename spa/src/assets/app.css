@@ -100,19 +100,62 @@
 }
 
 @media (max-width: 768px) {
+  /* Flush: mini player sits directly on top of the dock (no gap) */
   .app .now-playing-wrapper {
-    bottom: 135px !important;
-  }
-
-  /* Two-row mobile layout: row 1 = title/artist, row 2 = buttons; no volume */
-  /* Mini player sits 100px above the bottom of the viewport */
-  .app .now-playing-wrapper {
+    bottom: calc(var(--np-mobile-dock-height, 118px) + env(safe-area-inset-bottom)) !important;
     height: auto !important;
     min-height: var(--np-mobile-height, 92px) !important;
     max-height: none !important;
     overflow: visible !important;
     z-index: 10020 !important;
-    bottom: calc(135px + env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Collapsed: thin strip directly above the dock (no overlap) */
+  .app .now-playing-wrapper.collapsed {
+    bottom: calc(var(--np-mobile-dock-height, 118px) + env(safe-area-inset-bottom)) !important;
+    min-height: 0 !important;
+    height: var(--np-collapsed-strip-height, 40px) !important;
+    overflow: hidden !important;
+    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .app .now-playing-wrapper {
+    transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .app .now-playing-wrapper.collapsed .now-playing-container {
+    display: none !important;
+  }
+
+  /* Strip: no borders, translucent — just the button */
+  .app .now-playing-wrapper.collapsed .now-playing-glass {
+    min-height: var(--np-collapsed-strip-height, 40px) !important;
+    height: var(--np-collapsed-strip-height, 40px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding-right: 12px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .app .now-playing-wrapper.collapsed .minimize-btn {
+    position: static !important;
+    margin: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 9px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: rgba(255, 255, 255, 0.3) !important;
+  }
+
+  .app .now-playing-wrapper.collapsed .minimize-btn:hover,
+  .app .now-playing-wrapper.collapsed .minimize-btn:active {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.45) !important;
   }
 
   .app .now-playing-sticky,
@@ -176,7 +219,12 @@
 
   /* Reserve content space so it doesn’t sit under bar (100px up) + bar height + bottom menu */
   .app .spa-main.has-player {
-    padding-bottom: calc(100px + var(--np-mobile-height, 92px) + var(--np-mobile-dock-height, 118px) + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(var(--np-mobile-height, 92px) + var(--np-mobile-dock-height, 118px) + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Collapsed: strip sits above dock so reserve dock + strip height */
+  body.player-collapsed .app .spa-main.has-player {
+    padding-bottom: calc(var(--np-mobile-dock-height, 118px) + var(--np-collapsed-strip-height, 40px) + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 

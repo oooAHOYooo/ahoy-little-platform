@@ -1,18 +1,30 @@
 <template>
-  <div class="now-playing-wrapper" :class="{ 'has-player': !!playerStore.currentTrack, 'collapsed': collapse.isPlayerCollapsed.value }">
-    <!-- Collapse handle bar (only visible on mobile when collapsed) -->
-    <div
-      class="collapse-handle mobile-only"
-      @click="collapse.togglePlayer"
-      @touchstart="(e) => collapse.handleTouchStart(e, collapse.collapseAll, collapse.expandAll)"
-      @touchmove="(e) => collapse.handleTouchMove(e, collapse.isPlayerCollapsed.value, collapse.collapseAll, collapse.expandAll)"
-    >
-      <div class="collapse-handle-bar"></div>
-    </div>
+  <div class="now-playing-wrapper" :class="{ 'has-player': !!playerStore.currentTrack, 'collapsed': collapse.isPlayerCollapsed.value, 'ejecting': ejecting }">
     <div
       class="now-playing-glass now-playing-sticky"
       :class="{ 'now-playing-is-playing': playerStore.currentTrack && playerStore.isPlaying }"
     >
+      <!-- Eject (when track loaded) — left of collapse button -->
+      <button
+        v-if="playerStore.currentTrack"
+        type="button"
+        class="eject-btn-top"
+        title="Eject"
+        aria-label="Eject track"
+        @click="onEject"
+      >
+        <i class="fas fa-eject"></i>
+      </button>
+      <!-- Minimize built into the bar (mobile only) -->
+      <button
+        type="button"
+        class="minimize-btn mobile-only"
+        :title="collapse.isPlayerCollapsed.value ? 'Expand player' : 'Minimize player'"
+        aria-label="Minimize player"
+        @click="collapse.togglePlayer"
+      >
+        <i :class="collapse.isPlayerCollapsed.value ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+      </button>
       <div class="now-playing-container">
         <!-- Left: Album art + track info -->
         <div class="now-playing-left">
@@ -39,9 +51,17 @@
           </div>
           <div class="now-playing-info">
             <template v-if="playerStore.currentTrack">
-              <div class="now-playing-title" :title="displayTitle">{{ displayTitle }}</div>
+              <div
+                class="now-playing-title now-playing-title-link"
+                :title="displayTitle"
+                @click="goToNowPlaying"
+              >{{ displayTitle }}</div>
               <div class="now-playing-secondary">
-                <span class="now-playing-artist" :title="displayArtist">{{ displayArtist }}</span>
+                <span
+                  class="now-playing-artist now-playing-artist-link"
+                  :title="displayArtist"
+                  @click="goToNowPlaying"
+                >{{ displayArtist }}</span>
                 <span class="category-pill">
                   <i class="fas fa-music"></i> {{ trackTypeLabel }}
                 </span>
@@ -268,6 +288,7 @@ const haptics = useHaptics()
 const collapse = useMobileCollapse()
 
 const showQueue = ref(false)
+const ejecting = ref(false)
 
 const displayTitle = computed(() => {
   const t = playerStore.currentTrack
@@ -325,6 +346,16 @@ function goToNowPlaying() {
   router.push('/now-playing')
 }
 
+function onEject() {
+  if (!playerStore.currentTrack || ejecting.value) return
+  haptics.onPlay?.()
+  ejecting.value = true
+  setTimeout(() => {
+    playerStore.eject()
+    ejecting.value = false
+  }, 280)
+}
+
 function playFromQueue(index) {
   const list = playerStore.queue
   if (list[index]) playerStore.play(list[index])
@@ -347,48 +378,111 @@ function playFromQueue(index) {
   z-index: 1000;
 }
 
-/* Collapse handle */
-.collapse-handle {
+/* Minimize button built into the now-playing bar */
+.now-playing-glass {
+  position: relative;
+}
+
+/* Eject: top-right, left of minimize */
+.eject-btn-top {
   position: absolute;
-  top: -16px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 20px;
+  top: 6px;
+  right: 46px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 10;
+  z-index: 5;
   -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-.collapse-handle-bar {
-  width: 40px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-  transition: background 0.2s ease;
+.eject-btn-top:hover,
+.eject-btn-top:active {
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.85);
 }
 
-.collapse-handle:active .collapse-handle-bar {
-  background: rgba(255, 255, 255, 0.5);
+.minimize-btn {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-/* Collapsed state */
-.now-playing-wrapper.collapsed {
-  transform: translateY(calc(100% - 20px)) !important;
+.minimize-btn:hover,
+.minimize-btn:active {
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Title / artist: click to open Now Playing */
+.now-playing-title-link,
+.now-playing-artist-link {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.now-playing-title-link:hover,
+.now-playing-artist-link:hover {
+  opacity: 0.9;
+}
+
+/* Eject: Nintendo cartridge pop — track “pops out” then clears */
+.now-playing-wrapper.ejecting .now-playing-left {
+  animation: cartridge-eject 0.28s ease-out forwards;
+}
+
+@keyframes cartridge-eject {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  40% {
+    transform: translateY(2px) scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(14px) scale(0.92);
+    opacity: 0.5;
+  }
+}
+
+/* Collapsed state: handled in app.css on mobile (strip on top of dock). Desktop never collapsed. */
+.now-playing-wrapper {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.now-playing-wrapper:not(.collapsed) {
-  transform: translateY(0) !important;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Hide handle on desktop */
 @media (min-width: 769px) {
-  .collapse-handle {
+  .minimize-btn.mobile-only {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .now-playing-wrapper.collapsed .eject-btn-top {
     display: none;
   }
 }

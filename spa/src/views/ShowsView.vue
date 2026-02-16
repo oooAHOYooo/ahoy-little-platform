@@ -1,8 +1,16 @@
 <template>
   <div class="shows-page">
     <div class="shows-container">
+      <!-- Global subpage hero (mobile: compact two-line like other pages) -->
+      <section class="podcasts-hero shows-page-hero">
+        <div class="podcasts-hero-inner">
+          <h1><i class="fas fa-video" aria-hidden="true"></i> Videos</h1>
+          <p>Music videos, skate parts, short films, episodes, and more</p>
+        </div>
+      </section>
+
       <!-- Embedded Video Player Section (same as Flask) -->
-      <section class="embedded-video-section">
+      <section ref="playerSectionRef" class="embedded-video-section">
         <div class="video-player-wrapper">
           <!-- Video Player -->
           <div v-show="currentVideo" class="embedded-video-player">
@@ -14,6 +22,7 @@
               :poster="currentVideo.thumbnail || ''"
               controls
               class="embedded-video"
+              playsinline
               @loadedmetadata="onVideoLoaded"
               @play="isPlaying = true"
               @pause="isPlaying = false"
@@ -21,19 +30,40 @@
             >
               Your browser does not support the video tag.
             </video>
-            <!-- Embed for YouTube/Vimeo -->
-            <div
-              v-else-if="currentVideo && embedUrlFor(currentVideo)"
-              class="video-embed-wrap"
-              style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000"
-            >
-              <iframe
-                :src="embedUrlFor(currentVideo)"
-                style="position:absolute;top:0;left:0;width:100%;height:100%;border:0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              />
-            </div>
+            <!-- Embed for YouTube/Vimeo: click-to-load (YouTube-style) so embed loads on user gesture (fixes mobile) -->
+            <template v-else-if="currentVideo && embedUrlFor(currentVideo)">
+              <div
+                v-if="!embedLoaded"
+                class="video-embed-poster"
+                role="button"
+                tabindex="0"
+                :aria-label="'Play ' + (currentVideo?.title || 'video')"
+                @click="loadEmbed"
+                @keydown.enter.prevent="loadEmbed"
+                @keydown.space.prevent="loadEmbed"
+              >
+                <img
+                  :src="currentVideo.thumbnail || ''"
+                  :alt="currentVideo?.title || ''"
+                  class="video-embed-poster-img"
+                />
+                <div class="video-embed-poster-play">
+                  <i class="fas fa-play"></i>
+                </div>
+              </div>
+              <div
+                v-else
+                class="video-embed-wrap"
+                style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000"
+              >
+                <iframe
+                  :src="embedSrc"
+                  style="position:absolute;top:0;left:0;width:100%;height:100%;border:0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                />
+              </div>
+            </template>
             <div class="video-info-overlay">
               <div class="video-info-content">
                 <h2 class="video-title">{{ currentVideo?.title || 'Untitled' }}</h2>
@@ -365,6 +395,10 @@ const isLoading = ref(true)
 const currentVideo = ref(null)
 const isPlaying = ref(false)
 const videoEl = ref(null)
+const playerSectionRef = ref(null)
+// YouTube-style click-to-load: embed iframe only after user tap (fixes mobile)
+const embedLoaded = ref(false)
+const embedSrc = ref('')
 
 // Sync URL ?play=id with current video and auto-play on load
 function applyPlayFromUrl() {
@@ -443,6 +477,9 @@ function clearFilters() {
 
 function playShow(show) {
   currentVideo.value = show
+  // Reset embed state when switching video; embeds load on first tap (loadEmbed)
+  embedLoaded.value = false
+  embedSrc.value = ''
   trackRecentPlay({
     id: show.id,
     type: 'show',
@@ -453,7 +490,19 @@ function playShow(show) {
   })
   router.replace({ path: '/shows', query: { ...route.query, play: show.id } })
   nextTickPlay()
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  // Scroll player into view (especially on mobile) so user sees the video load
+  setTimeout(() => {
+    playerSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, 100)
+}
+
+function loadEmbed() {
+  if (!currentVideo.value) return
+  const url = embedUrlFor(currentVideo.value)
+  if (url) {
+    embedSrc.value = url
+    embedLoaded.value = true
+  }
 }
 
 function viewSolo() {
@@ -537,5 +586,46 @@ watch(
 .video-embed-wrap {
   border-radius: 20px;
   overflow: hidden;
+}
+/* YouTube-style click-to-load poster */
+.video-embed-poster {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  background: #000;
+  border-radius: 20px;
+  cursor: pointer;
+}
+.video-embed-poster-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.video-embed-poster-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(255, 0, 96, 0.9);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 4px 24px rgba(255, 0, 96, 0.5);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.video-embed-poster:hover .video-embed-poster-play,
+.video-embed-poster:focus .video-embed-poster-play {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: rgba(255, 0, 96, 1);
 }
 </style>
