@@ -228,7 +228,7 @@ function switchTVChannel(direction) {
 
 function playShow(show) {
   if (!show?.id || show.id === 'placeholder' || show.id === 'error') return
-  router.push({ path: '/shows', query: { play: show.id } })
+  router.push({ path: '/videos', query: { play: show.id } })
 }
 
 // Live Radio (sync with player store)

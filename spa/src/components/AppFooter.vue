@@ -17,7 +17,7 @@
           <li><router-link to="/music">Music</router-link></li>
           <li><router-link to="/podcasts">Podcasts</router-link></li>
           <li><router-link to="/live-tv">Live TV</router-link></li>
-          <li><router-link to="/shows">Videos</router-link></li>
+          <li><router-link to="/videos">Videos</router-link></li>
           <li><router-link to="/artists">Artists</router-link></li>
           <li><router-link to="/radio">Radio</router-link></li>
           <li><router-link to="/events">Events</router-link></li>

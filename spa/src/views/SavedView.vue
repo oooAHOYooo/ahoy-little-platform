@@ -1,12 +1,31 @@
 <template>
-  <div class="my-saves-container saved-page">
+  <div class="my-saves-container saved-page" :class="{ 'saved-page--recent': isRecentPage }">
     <!-- Guest banner: prompt to create account to sync -->
     <div v-if="!auth.isLoggedIn.value" class="saves-guest-banner">
       <p>Bookmarks and recently played are stored on this device. <router-link to="/login?signup=1">Create an account</router-link> to sync across devices.</p>
     </div>
 
-    <!-- Dark liquid glass profile hero (same as Flask my_saves) -->
-    <div class="saves-profile-hero">
+    <!-- Hero: full on /my-saves, compact on /recently-played -->
+    <div v-if="isRecentPage" class="saves-profile-hero saves-hero--recent">
+      <div class="saves-profile-glow"></div>
+      <div class="saves-profile-content saves-hero-content--recent">
+        <div class="saves-avatar-wrapper">
+          <div class="saves-avatar-guest saves-avatar--history">
+            <i class="fas fa-history"></i>
+          </div>
+        </div>
+        <div class="saves-profile-info">
+          <h1 class="saves-username">Recently Played</h1>
+          <div class="saves-stats">
+            <div class="saves-stat">
+              <span class="saves-stat-number">{{ recentlyPlayed.length }}</span>
+              <span class="saves-stat-label">tracks & shows</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-else class="saves-profile-hero">
       <div class="saves-profile-glow"></div>
       <div class="saves-profile-content">
         <div class="saves-avatar-wrapper">
@@ -21,41 +40,39 @@
               <span class="saves-stat-number">{{ savedItems.length }}</span>
               <span class="saves-stat-label">Bookmarks</span>
             </div>
-            <div class="saves-stat">
+            <router-link to="/recently-played" class="saves-stat saves-stat-link">
               <span class="saves-stat-number">{{ recentlyPlayed.length }}</span>
               <span class="saves-stat-label">Recently Played</span>
-            </div>
+            </router-link>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Tabs: Bookmarks | Recently Played -->
+    <!-- Tabs: Bookmarks (→ /my-saves) | Recently Played (→ /recently-played) -->
     <div class="saves-tabs-glass">
-      <button
-        type="button"
-        :class="{ active: activeTab === 'saved' }"
+      <router-link
+        :to="{ path: '/my-saves' }"
         class="saves-tab-btn"
-        @click="activeTab = 'saved'"
+        :class="{ active: !isRecentPage }"
       >
         <i class="fas fa-bookmark"></i>
         <span>Bookmarks</span>
         <span class="saves-tab-count">{{ savedItems.length }}</span>
-      </button>
-      <button
-        type="button"
-        :class="{ active: activeTab === 'recent' }"
+      </router-link>
+      <router-link
+        :to="{ path: '/recently-played' }"
         class="saves-tab-btn"
-        @click="activeTab = 'recent'"
+        :class="{ active: isRecentPage }"
       >
         <i class="fas fa-history"></i>
         <span>Recently Played</span>
         <span class="saves-tab-count">{{ recentlyPlayed.length }}</span>
-      </button>
+      </router-link>
     </div>
 
-    <!-- Bookmarks tab -->
-    <div v-show="activeTab === 'saved'" class="saves-content-glass">
+    <!-- Bookmarks tab (visible on /my-saves) -->
+    <div v-show="!isRecentPage" class="saves-content-glass">
       <div v-if="savedItems.length" class="saves-bookmarks-tab">
         <div class="saves-filter-pills">
           <button
@@ -119,12 +136,12 @@
         </div>
         <h3>No bookmarks yet</h3>
         <p>Tap the bookmark icon on any track, show, or artist to save it here for easy access.</p>
-        <router-link to="/shows" class="saves-cta-btn">Discover Shows</router-link>
+        <router-link to="/videos" class="saves-cta-btn">Discover Videos</router-link>
       </div>
     </div>
 
-    <!-- Recently Played tab -->
-    <div v-show="activeTab === 'recent'" class="saves-content-glass">
+    <!-- Recently Played (visible on /recently-played) -->
+    <div v-show="isRecentPage" class="saves-content-glass saves-content--recent">
       <div v-if="recentlyPlayed.length" class="saves-recent-list">
         <div
           v-for="item in recentlyPlayed"
@@ -177,7 +194,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useBookmarks } from '../composables/useBookmarks'
 import { usePlayerStore } from '../stores/player'
 import { useAuth } from '../composables/useAuth'
@@ -186,13 +203,15 @@ const RECENT_STORAGE_KEY = 'ahoy.recentlyPlayed.v1'
 const MAX_RECENT_ITEMS = 50
 
 const router = useRouter()
+const route = useRoute()
 const bookmarkHelper = useBookmarks()
 const playerStore = usePlayerStore()
 const auth = useAuth()
 
-const activeTab = ref('saved')
 const savedFilter = ref('all')
 const recentlyPlayed = ref([])
+
+const isRecentPage = computed(() => route.path === '/recently-played')
 
 const savedItems = computed(() => Object.values(bookmarkHelper.bookmarks.value))
 
@@ -260,7 +279,7 @@ function loadRecentlyPlayed() {
 function playContent(item) {
   const type = item.type || 'track'
   if (type === 'show') {
-    router.push({ path: '/shows', query: { play: item.id } })
+    router.push({ path: '/videos', query: { play: item.id } })
     return
   }
   if (type === 'live_tv') {
@@ -299,14 +318,33 @@ onUnmounted(() => {
   margin: 0 auto;
   padding: 1.25rem 1.25rem 3rem;
 }
+.saved-page--recent .saves-content--recent {
+  min-height: 200px;
+}
 @media (max-width: 768px) {
   .saved-page {
-    padding: 1rem 1rem 2.5rem;
+    padding: 0;
+  }
+}
+.saves-tabs-glass :deep(a.saves-tab-btn) {
+  text-decoration: none;
+  color: inherit;
+}
+.saves-hero--recent .saves-hero-content--recent {
+  gap: var(--spacing-lg);
+}
+.saves-avatar--history {
+  background: linear-gradient(135deg, rgba(123, 237, 159, 0.3) 0%, rgba(107, 203, 255, 0.25) 100%);
+  color: rgba(255, 255, 255, 0.9);
+}
+@media (max-width: 768px) {
+  .saves-hero--recent .saves-profile-content {
+    padding: 10px 8px;
   }
 }
 .saves-guest-banner {
-  background: rgba(109, 220, 255, 0.08);
-  border: 1px solid rgba(109, 220, 255, 0.2);
+  background: rgba(123, 237, 159, 0.08);
+  border: 1px solid rgba(123, 237, 159, 0.2);
   border-radius: 12px;
   padding: 12px 16px;
   margin: 15px;
@@ -317,7 +355,7 @@ onUnmounted(() => {
   color: var(--text-primary);
 }
 .saves-guest-banner a {
-  color: var(--accent-primary, #6ddcff);
+  color: var(--saves-accent, #7bed9f);
   font-weight: 600;
   text-decoration: none;
 }

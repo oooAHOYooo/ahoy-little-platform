@@ -37,27 +37,27 @@
       </div>
     </section>
 
-    <!-- More videos -->
-    <section class="podcasts-section" v-if="relatedShows.length" style="margin-top:16px">
-      <div class="podcasts-section-header">
-        <h2>More Videos</h2>
+    <!-- More videos (same style as main Videos page grid) -->
+    <section class="shows-grid-section more-videos-section" v-if="relatedShows.length">
+      <div class="section-header">
+        <h2><i class="fas fa-th"></i> More Videos</h2>
       </div>
-      <div class="shows-grid">
+      <div class="shows-grid shows-grid-16x9">
         <router-link
           v-for="s in relatedShows"
           :key="s.id"
-          :to="`/shows/${s.id}`"
-          class="show-card"
+          :to="`/videos/${s.id}`"
+          class="show-card more-videos-card"
         >
           <div class="show-thumbnail">
-            <img :src="s.thumbnail || '/static/img/default-cover.jpg'" :alt="s.title" loading="lazy" />
+            <img :src="s.thumbnail || '/static/img/default-cover.jpg'" :alt="s.title" loading="lazy" class="image-placeholder" />
             <div class="show-overlay">
-              <button class="play-btn"><i class="fas fa-play"></i></button>
+              <span class="play-btn"><i class="fas fa-play"></i></span>
             </div>
           </div>
           <div class="show-info">
-            <div class="show-title">{{ s.title }}</div>
-            <div class="show-host">{{ s.host }}</div>
+            <h4>{{ s.title }}</h4>
+            <p class="show-host">{{ s.host }}</p>
           </div>
         </router-link>
       </div>
@@ -134,3 +134,71 @@ onMounted(async () => {
   show.value = allShows.value.find(s => String(s.id) === String(id)) || null
 })
 </script>
+
+<style scoped>
+/* More videos: same style as main Videos page (red/accent, no share buttons) */
+.more-videos-section {
+  margin-top: 24px;
+}
+.more-videos-section .section-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.more-videos-section .section-header h2 i {
+  color: var(--primary-color, #ec4899);
+}
+.more-videos-section .shows-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+.more-videos-card {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: var(--border-radius-lg, 12px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 0.2s, transform 0.2s;
+}
+.more-videos-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+.more-videos-card .show-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+}
+.more-videos-card .show-info .show-host {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+.more-videos-card .play-btn {
+  background: var(--primary-color, #ec4899);
+  color: white;
+  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(236, 72, 153, 0.4);
+}
+@media (max-width: 768px) {
+  .more-videos-section .shows-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+</style>

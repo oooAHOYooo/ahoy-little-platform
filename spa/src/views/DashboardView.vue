@@ -114,7 +114,7 @@ function bookmarkToRoute(item) {
   const t = (item.type || item._type || 'track').toLowerCase()
   const id = item.id || item.slug
   if (t === 'artist') return `/artists/${item.slug || id}`
-  if (t === 'show') return `/shows/${id}`
+  if (t === 'show') return `/videos/${id}`
   if (t === 'podcast' || t === 'clip') return `/podcasts/${item.slug || id}`
   return `/music/${id}`
 }

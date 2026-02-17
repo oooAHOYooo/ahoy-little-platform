@@ -78,7 +78,7 @@
             <router-link
               v-for="s in results.shows"
               :key="s.id"
-              :to="`/shows/${s.id}`"
+              :to="`/videos/${s.id}`"
               class="search-item"
               @click="query = ''"
             >

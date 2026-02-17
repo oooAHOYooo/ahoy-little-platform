@@ -76,6 +76,20 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Videos page: let content grow so all grid items are visible when scrolling */
+.app .content-area .videos-page,
+.app .content-area .videos-page .shows-container {
+  flex: none;
+  min-height: min-content;
+}
+.app .content-area .videos-page .shows-grid-section {
+  flex: none;
+  min-height: min-content; /* was 0 — caused only first row (2 videos) to show */
 }
 
 .app .app-sidebar {
@@ -100,9 +114,9 @@
 }
 
 @media (max-width: 768px) {
-  /* Flush: mini player sits directly on top of the dock (no gap) */
+  /* Flush: mini player sits directly on top of the dock (no gap; -1px closes sub-pixel gap) */
   .app .now-playing-wrapper {
-    bottom: calc(var(--np-mobile-dock-height, 118px) + env(safe-area-inset-bottom)) !important;
+    bottom: calc(var(--np-mobile-dock-height, 118px) - 1px + env(safe-area-inset-bottom)) !important;
     height: auto !important;
     min-height: var(--np-mobile-height, 92px) !important;
     max-height: none !important;

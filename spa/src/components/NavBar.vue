@@ -23,7 +23,7 @@
           <i class="fas fa-user-circle"></i>
           <span>Profile</span>
         </router-link>
-        <router-link to="/my-saves" class="mobile-tab" :class="{ active: route.path === '/my-saves' }">
+        <router-link to="/my-saves" class="mobile-tab" :class="{ active: route.path === '/my-saves' || route.path === '/recently-played' }">
           <i class="fas fa-bookmark"></i>
           <span>Saved</span>
         </router-link>
@@ -45,7 +45,7 @@
           <i class="fas fa-tv"></i>
           <span>Live TV</span>
         </router-link>
-        <router-link to="/shows" class="mobile-tab" :class="{ active: route.path === '/shows' }">
+        <router-link to="/videos" class="mobile-tab" :class="{ active: route.path === '/shows' || route.path === '/videos' }">
           <i class="fas fa-video"></i>
           <span>Videos</span>
         </router-link>

@@ -347,6 +347,16 @@ body.has-player {
   /* Dock tabs: inactive = subtle/translucent (like now-player buttons); active = brand color */
   .mobile-dock .mobile-tab {
     color: var(--dock-tab-inactive) !important;
+    transition: color 0.2s ease, transform 0.12s ease !important;
+  }
+
+  /* No glow on tap (override combined.css radial ::after); playful press instead */
+  .mobile-dock .mobile-tab:active::after {
+    opacity: 0 !important;
+  }
+
+  .mobile-dock .mobile-tab:active {
+    transform: scale(0.94) !important;
   }
 
   .mobile-dock .mobile-tab i,
@@ -403,5 +413,135 @@ body.has-player {
     padding: var(--mobile-dock-secondary-padding) !important;
     gap: var(--mobile-dock-secondary-gap) !important;
     min-height: var(--mobile-dock-secondary-min-height) !important;
+  }
+}
+
+/* ── SNES-inspired fun (controller / console feel) ────────────────────────
+ * Chunky shapes, purple/gray palette, tactile “button” feel.
+ * Toggle: remove or comment this block to revert to default.
+ */
+:root {
+  --snes-purple: #6b5b95;
+  --snes-purple-bright: #8b7ba8;
+  --snes-purple-dark: #5a4a7a;
+  --snes-gray: #4a4550;
+  --snes-gray-dark: #3a3540;
+  --snes-radius: 16px;
+  --snes-radius-sm: 12px;
+}
+
+/* Now-playing bar: rounded “console” top, purple glow when playing */
+.now-playing-glass {
+  border-radius: var(--snes-radius) var(--snes-radius) 0 0 !important;
+}
+
+.now-playing-glass.now-playing-is-playing {
+  border-top: 0.8px solid var(--snes-purple-bright) !important;
+  box-shadow: 0 -2px 16px rgba(107, 91, 149, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Play button = chunky “A button” (convex, satisfying press) */
+.now-playing-play-btn {
+  border-radius: 50% !important;
+  box-shadow:
+    0 3px 0 var(--snes-purple-dark),
+    0 4px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  border: 0.8px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.now-playing-play-btn:hover {
+  box-shadow:
+    0 4px 0 var(--snes-purple-dark),
+    0 5px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+.now-playing-play-btn:active {
+  box-shadow:
+    0 0 0 var(--snes-purple-dark),
+    0 1px 4px rgba(0, 0, 0, 0.4),
+    inset 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+  transform: translateY(2px);
+}
+
+/* When playing: soft “power on” glow on the A button */
+.now-playing-glass.now-playing-is-playing .now-playing-play-btn:not(.loading) {
+  box-shadow:
+    0 3px 0 var(--snes-purple-dark),
+    0 4px 8px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(139, 123, 168, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Prev/next = smaller “shoulder” style buttons */
+.now-playing-transport .now-playing-btn:not(.now-playing-play-btn) {
+  border-radius: var(--snes-radius-sm) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Collapsed strip: controller “seam” groove + center pull-handle line */
+.app .now-playing-wrapper.collapsed .now-playing-glass {
+  border-radius: 14px 14px 0 0 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+}
+
+.app .now-playing-wrapper.collapsed .now-playing-glass::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(255, 255, 255, 0.06) 100%);
+  pointer-events: none;
+}
+
+/* Album art: subtle “cartridge slot” ridge when playing */
+.now-playing-wrapper.has-player .now-playing-album-art {
+  box-shadow: 0 0 0 2px var(--snes-gray), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.now-playing-wrapper.has-player .now-playing-album-img.spinning {
+  box-shadow: 0 0 0 2px var(--snes-purple-bright), 0 0 20px rgba(107, 91, 149, 0.4) !important;
+}
+
+/* Mobile dock: controller bar (rounded top, purple band, button-like tabs) */
+@media (max-width: 768px) {
+  .app .mobile-dock,
+  .mobile-dock {
+    border-radius: var(--snes-radius) var(--snes-radius) 0 0 !important;
+    border-top: 0.8px solid var(--snes-purple) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 -4px 20px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  .app .mobile-dock .mobile-tab,
+  .mobile-dock .mobile-tab {
+    border-radius: var(--snes-radius-sm) !important;
+  }
+
+  .app .mobile-dock .mobile-tab.active::before,
+  .mobile-dock .mobile-tab.active::before {
+    border-radius: 10px !important;
+    background: linear-gradient(180deg, rgba(139, 123, 168, 0.2) 0%, rgba(90, 74, 122, 0.25) 100%) !important;
+    border: 1px solid rgba(139, 123, 168, 0.35) !important;
+    /* No diffuse glow — just a subtle “pressed” edge for the same look, more playful feel */
+    box-shadow:
+      0 2px 0 rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .app .mobile-dock .mobile-tab.active i,
+  .app .mobile-dock .mobile-tab.active span,
+  .mobile-dock .mobile-tab.active i,
+  .mobile-dock .mobile-tab.active span {
+    color: var(--snes-purple-bright) !important;
   }
 }

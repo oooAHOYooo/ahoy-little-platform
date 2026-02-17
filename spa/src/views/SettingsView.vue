@@ -54,6 +54,36 @@
         <!-- Audio Settings -->
         <div class="settings-section neu-card">
           <h2><i class="fas fa-volume-up"></i> Audio</h2>
+          <div class="settings-row setting-toggle-row">
+            <div class="setting-toggle-label">
+              <span class="setting-toggle-title">Save chime</span>
+              <span class="setting-toggle-desc">Play a short sound when you save a track or show</span>
+            </div>
+            <button
+              type="button"
+              class="setting-toggle-btn"
+              :class="{ on: saveChimeEnabled }"
+              :aria-pressed="saveChimeEnabled"
+              @click="toggleSaveChime"
+            >
+              <span class="setting-toggle-thumb"></span>
+            </button>
+          </div>
+          <div class="settings-row setting-toggle-row">
+            <div class="setting-toggle-label">
+              <span class="setting-toggle-title">Tap sound</span>
+              <span class="setting-toggle-desc">A tiny chime when you tap buttons and links</span>
+            </div>
+            <button
+              type="button"
+              class="setting-toggle-btn"
+              :class="{ on: tapChimeEnabled }"
+              :aria-pressed="tapChimeEnabled"
+              @click="toggleTapChime"
+            >
+              <span class="setting-toggle-thumb"></span>
+            </button>
+          </div>
           <div class="settings-grid">
             <div class="setting-item">
               <label>Master Volume</label>
@@ -158,6 +188,7 @@ import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { apiFetch } from '../composables/useApi'
 import { usePlayerStore } from '../stores/player'
+import { isSaveChimeEnabled, setSaveChimeEnabled, playSaveChime, isTapChimeEnabled, setTapChimeEnabled, playTapChime } from '../composables/useSaveChime'
 
 const router = useRouter()
 const auth = useAuth()
@@ -165,6 +196,20 @@ const playerStore = usePlayerStore()
 const dialEl = ref(null)
 
 const audioSettings = reactive({ masterVolume: 75 })
+const saveChimeEnabled = ref(isSaveChimeEnabled())
+const tapChimeEnabled = ref(isTapChimeEnabled())
+
+function toggleSaveChime() {
+  saveChimeEnabled.value = !saveChimeEnabled.value
+  setSaveChimeEnabled(saveChimeEnabled.value)
+  if (saveChimeEnabled.value) playSaveChime()
+}
+
+function toggleTapChime() {
+  tapChimeEnabled.value = !tapChimeEnabled.value
+  setTapChimeEnabled(tapChimeEnabled.value)
+  if (tapChimeEnabled.value) playTapChime()
+}
 
 const latestMacRelease = reactive({
   version: '',
@@ -300,6 +345,8 @@ async function onLogout() {
 }
 
 onMounted(() => {
+  saveChimeEnabled.value = isSaveChimeEnabled()
+  tapChimeEnabled.value = isTapChimeEnabled()
   loadSettings()
   setTodayDate()
   apiFetch('/api/downloads/latest', { credentials: 'include' })
@@ -432,6 +479,67 @@ onUnmounted(() => {
   color: rgba(255, 255, 255, 0.5);
   margin: 0 0 16px;
   font-size: 0.95rem;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.setting-toggle-row {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.setting-toggle-label {
+  flex: 1;
+  min-width: 0;
+}
+.setting-toggle-title {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 2px;
+}
+.setting-toggle-desc {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+.setting-toggle-btn {
+  flex-shrink: 0;
+  width: 48px;
+  height: 26px;
+  border-radius: 13px;
+  border: none;
+  background: #0e0e10;
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.5), inset -1px -1px 3px rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.setting-toggle-btn:hover {
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.5), inset -1px -1px 3px rgba(255, 255, 255, 0.05), 0 0 12px rgba(99, 102, 241, 0.08);
+}
+.setting-toggle-btn.on {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(139, 92, 246, 0.3));
+  box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.25), 0 0 12px rgba(99, 102, 241, 0.15);
+}
+.setting-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease;
+}
+.setting-toggle-btn.on .setting-toggle-thumb {
+  transform: translateX(22px);
 }
 
 .settings-grid {

@@ -5,6 +5,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useAuth } from './useAuth'
 import { apiFetch } from './useApi'
+import { playSaveChime } from './useSaveChime'
 
 const STORAGE_KEY = 'ahoy.bookmarks.v2'
 
@@ -87,6 +88,7 @@ export function useBookmarks() {
         window.dispatchEvent(new CustomEvent('ahoy:guest-saved'))
       }
       all[key] = payload
+      playSaveChime()
     }
     writeAll(all)
     bookmarks.value = all

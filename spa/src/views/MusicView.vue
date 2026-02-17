@@ -12,92 +12,30 @@
         </div>
       </section>
 
-      <!-- Music header: same UI pattern as Podcasts (section header + filter chips + toolbar) -->
-      <section class="podcasts-section podcasts-featured-section">
-        <div class="podcasts-section-header podcasts-featured-header">
-          <div>
-            <h2>Tracks</h2>
-            <p class="podcasts-section-subtitle">Filter by artist or search. Sort and switch between list and grid.</p>
-          </div>
-          <div class="podcast-filter-chips">
-            <button
-              type="button"
-              class="podcast-filter-chip"
-              :class="{ active: !selectedArtist }"
-              @click="selectedArtist = ''"
-            >
-              All
-            </button>
-            <button
-              v-for="artist in artists.slice(0, 14)"
-              :key="artist"
-              type="button"
-              class="podcast-filter-chip"
-              :class="{ active: selectedArtist === artist }"
-              @click="selectedArtist = artist"
-            >
-              {{ artist }}
-            </button>
-          </div>
-        </div>
-        <!-- Mobile: dropdown artist picker -->
-        <div class="podcast-shows-dropdown-mobile">
-          <select v-model="selectedArtist" class="podcast-show-select" aria-label="Filter by artist">
-            <option value="">All Artists</option>
-            <option v-for="artist in artists" :key="artist" :value="artist">{{ artist }}</option>
-          </select>
-        </div>
-        <!-- Toolbar: search, sort, view, play random -->
-        <div class="music-header-toolbar">
-          <div class="search-bar music-toolbar-search">
-            <i class="fas fa-search" aria-hidden="true"></i>
-            <input
-              v-model="searchQuery"
-              type="text"
-              class="search-input"
-              placeholder="Search music..."
-              aria-label="Search music"
-            />
-            <button v-show="searchQuery" type="button" class="search-clear" aria-label="Clear search" @click="searchQuery = ''">
-              <i class="fas fa-times" aria-hidden="true"></i>
-            </button>
-          </div>
-          <select v-model="sortBy" class="music-toolbar-sort" aria-label="Sort music">
-            <option value="title">Title</option>
-            <option value="artist">Artist</option>
-            <option value="plays">Plays</option>
-            <option value="added_date">Date Added</option>
-          </select>
-          <div class="view-options">
-            <button
-              type="button"
-              class="view-btn"
-              :class="{ active: viewMode === 'grid' }"
-              aria-label="Grid view"
-              @click="viewMode = 'grid'"
-            >
-              <i class="fas fa-th" aria-hidden="true"></i>
-            </button>
-            <button
-              type="button"
-              class="view-btn"
-              :class="{ active: viewMode === 'list' }"
-              aria-label="List view"
-              @click="viewMode = 'list'"
-            >
-              <i class="fas fa-list" aria-hidden="true"></i>
-            </button>
-          </div>
-          <button
-            type="button"
-            class="episode-btn music-toolbar-play"
-            title="Play Random"
-            @click="playRandomTrack"
-          >
+      <!-- Sub-menu filter (all screen sizes) -->
+      <section class="music-library-section">
+        <SubMenuFilter
+          v-model="selectedArtist"
+          :filters="artistFilters"
+          all-value=""
+          filter-all-label="All Artists"
+          :show-search="true"
+          search-placeholder="Search music…"
+          :search-query="searchQuery"
+          @update:searchQuery="searchQuery = $event"
+          :sort-options="sortOptions"
+          sort-label="Sort"
+          :sort-by="sortBy"
+          @update:sortBy="sortBy = $event"
+          :show-view-toggle="true"
+          :view-mode="viewMode"
+          @update:viewMode="viewMode = $event"
+          @action="playRandomTrack"
+        >
+          <template #action>
             <i class="fas fa-random" aria-hidden="true"></i>
-            <span class="sr-only">Play Random</span>
-          </button>
-        </div>
+          </template>
+        </SubMenuFilter>
       </section>
 
       <!-- List view (default) -->
@@ -322,6 +260,7 @@ import { usePlayerStore } from '../stores/player'
 import { useAddToPlaylist } from '../composables/useAddToPlaylist'
 import { useBookmarks } from '../composables/useBookmarks'
 import PullRefresh from '../components/PullRefresh.vue'
+import SubMenuFilter from '../components/SubMenuFilter.vue'
 
 const router = useRouter()
 const playerStore = usePlayerStore()
@@ -361,6 +300,29 @@ const artists = computed(() => {
   }
   return Array.from(set).sort()
 })
+
+// For SubMenuFilter: { value, label, image }
+const artistFilters = computed(() => {
+  const byName = new Map()
+  for (const t of tracks.value) {
+    if (!t.artist) continue
+    if (!byName.has(t.artist)) {
+      byName.set(t.artist, {
+        value: t.artist,
+        label: t.artist,
+        image: t.cover_art || t.artwork || null
+      })
+    }
+  }
+  return Array.from(byName.values()).sort((a, b) => (a.label || '').localeCompare(b.label || ''))
+})
+
+const sortOptions = [
+  { value: 'title', label: 'Title' },
+  { value: 'artist', label: 'Artist' },
+  { value: 'plays', label: 'Plays' },
+  { value: 'added_date', label: 'Date Added' }
+]
 
 const filteredTracks = computed(() => {
   let list = [...tracks.value]

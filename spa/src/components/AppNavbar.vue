@@ -22,7 +22,7 @@
           <i class="fas fa-music" aria-hidden="true"></i>
           <span>Music</span>
         </router-link>
-        <router-link to="/shows" class="mobile-tab" :class="{ active: route.path === '/shows' }">
+        <router-link to="/videos" class="mobile-tab" :class="{ active: route.path === '/shows' || route.path === '/videos' }">
           <i class="fas fa-video" aria-hidden="true"></i>
           <span>Videos</span>
         </router-link>
@@ -46,7 +46,7 @@
           <i class="fas fa-broadcast-tower" aria-hidden="true"></i>
           <span>Radio</span>
         </router-link>
-        <router-link to="/my-saves" class="mobile-tab" :class="{ active: route.path === '/my-saves' }">
+        <router-link to="/my-saves" class="mobile-tab" :class="{ active: route.path === '/my-saves' || route.path === '/recently-played' }">
           <i class="fas fa-bookmark" aria-hidden="true"></i>
           <span>Saved</span>
         </router-link>
@@ -135,8 +135,10 @@ const breadcrumbs = computed(() => {
     home: [{ label: 'Explore', href: '/' }, { label: 'Home', href: null }],
     music: [{ label: 'Music', href: '/music' }, { label: 'Browse', href: null }],
     'music-detail': [{ label: 'Music', href: '/music' }, { label: 'Track', href: null }],
-    shows: [{ label: 'Videos', href: '/shows' }, { label: 'Browse', href: null }],
-    'show-detail': [{ label: 'Videos', href: '/shows' }, { label: slugLabel || 'Show', href: null }],
+    shows: [{ label: 'Videos', href: '/videos' }, { label: 'Browse', href: null }],
+    videos: [{ label: 'Videos', href: '/videos' }, { label: 'Browse', href: null }],
+    'show-detail': [{ label: 'Videos', href: '/videos' }, { label: slugLabel || 'Video', href: null }],
+    'video-detail': [{ label: 'Videos', href: '/videos' }, { label: slugLabel || 'Video', href: null }],
     'live-tv': [{ label: 'Live TV', href: '/live-tv' }, { label: 'Watch', href: null }],
     artists: [{ label: 'Artists', href: '/artists' }, { label: 'Browse', href: null }],
     'artist-detail': [{ label: 'Artists', href: '/artists' }, { label: slugLabel || 'Artist', href: null }],
@@ -147,6 +149,7 @@ const breadcrumbs = computed(() => {
     merch: [{ label: 'Merch', href: '/merch' }, { label: 'Shop', href: null }],
     radio: [{ label: 'Radio', href: '/radio' }, { label: 'Live', href: null }],
     'my-saves': [{ label: 'Saved', href: '/my-saves' }, { label: 'Library', href: null }],
+    'recently-played': [{ label: 'Saved', href: '/my-saves' }, { label: 'Recently Played', href: null }],
     login: [{ label: 'Profile', href: null }],
     'now-playing': [{ label: 'Now Playing', href: null }],
     account: [{ label: 'Account', href: '/account' }, { label: 'Profile', href: null }],

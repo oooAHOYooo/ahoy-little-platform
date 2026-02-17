@@ -387,7 +387,7 @@ function playFromQueue(index) {
 .eject-btn-top {
   position: absolute;
   top: 6px;
-  right: 46px;
+  right: 58px;
   width: 24px;
   height: 24px;
   padding: 0;

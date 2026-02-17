@@ -1,5 +1,5 @@
 <template>
-  <div class="shows-page">
+  <div class="shows-page videos-page">
     <div class="shows-container">
       <!-- Global subpage hero (mobile: compact two-line like other pages) -->
       <section class="podcasts-hero shows-page-hero">
@@ -101,151 +101,17 @@
               <i class="fas fa-play-circle"></i>
               <h3>Select a video to play</h3>
               <p>Click on any video below to start watching</p>
+              <button type="button" class="btn btn-primary placeholder-watch-random" @click="playRandomShow">
+                <i class="fas fa-play"></i> Watch Random
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Unified Header Section (same as Flask) -->
-      <section class="unified-header shows-subheader">
-        <div class="header-content">
-          <div class="header-title">
-            <div v-if="featuredShow" class="hero-media">
-              <img
-                :src="featuredShow.thumbnail || '/static/img/default-cover.jpg'"
-                :alt="featuredShow.title"
-                class="hero-thumbnail image-placeholder"
-              />
-              <div class="hero-media-overlay">
-                <button type="button" class="hero-play-btn" @click="playShow(featuredShow)">
-                  <i class="fas fa-play"></i>
-                </button>
-              </div>
-            </div>
-            <div class="title-text">
-              <h1>Videos</h1>
-              <p>Music videos, skate parts, short films, episodes, and more</p>
-            </div>
-          </div>
-
-          <div class="header-search desktop-only">
-            <div class="search-bar">
-              <i class="fas fa-search"></i>
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search shows, hosts, or descriptions..."
-                class="search-input"
-                @input="filterShows"
-              />
-              <button v-show="searchQuery" type="button" class="search-clear" @click="clearSearch">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          </div>
-          <div class="header-search mobile-only">
-            <div class="search-bar">
-              <i class="fas fa-search"></i>
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search shows..."
-                class="search-input"
-                @input="filterShows"
-              />
-              <button v-show="searchQuery" type="button" class="search-clear" @click="clearSearch">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          </div>
-
-          <div class="header-filters">
-            <div class="filter-tabs">
-              <button
-                type="button"
-                class="filter-tab"
-                :class="{ active: selectedCategory === 'all' }"
-                @click="setCategory('all')"
-              >
-                All Videos
-              </button>
-              <button
-                type="button"
-                class="filter-tab"
-                :class="{ active: selectedCategory === 'video_podcast' }"
-                @click="setCategory('video_podcast')"
-              >
-                Video Podcast
-              </button>
-              <button
-                type="button"
-                class="filter-tab"
-                :class="{ active: selectedCategory === 'episode' }"
-                @click="setCategory('episode')"
-              >
-                Episodes
-              </button>
-              <button
-                type="button"
-                class="filter-tab"
-                :class="{ active: selectedCategory === 'clip' }"
-                @click="setCategory('clip')"
-              >
-                Clips
-              </button>
-              <button
-                type="button"
-                class="filter-tab"
-                :class="{ active: selectedCategory === 'music_video' }"
-                @click="setCategory('music_video')"
-              >
-                Music Videos
-              </button>
-              <button
-                type="button"
-                class="filter-tab"
-                :class="{ active: selectedCategory === 'broadcast' }"
-                @click="setCategory('broadcast')"
-              >
-                Live Broadcasts
-              </button>
-            </div>
-          </div>
-
-          <div class="header-actions">
-            <div class="view-options">
-              <button
-                type="button"
-                class="view-btn"
-                :class="{ active: viewMode === 'grid' }"
-                @click="viewMode = 'grid'"
-              >
-                <i class="fas fa-th"></i>
-              </button>
-              <button
-                type="button"
-                class="view-btn"
-                :class="{ active: viewMode === 'list' }"
-                @click="viewMode = 'list'"
-              >
-                <i class="fas fa-list"></i>
-              </button>
-            </div>
-            <button type="button" class="btn btn-primary btn-large" @click="playRandomShow">
-              <i class="fas fa-play"></i> Watch Random Show
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Shows Grid / List -->
+      <!-- Videos grid (16:9 thumbnails) -->
       <section class="shows-grid-section">
-        <div class="section-header">
-          <h2><i class="fas fa-th"></i> All Videos</h2>
-        </div>
-
-        <!-- Grid View -->
-        <div v-show="viewMode === 'grid'" class="shows-grid">
+        <div class="shows-grid shows-grid-16x9">
           <div
             v-for="show in filteredShows"
             :key="show.id"
@@ -261,86 +127,13 @@
                 decoding="async"
                 class="image-placeholder"
               />
-              <div class="show-overlay">
-                <button type="button" class="play-btn" @click.stop="playShow(show)">
-                  <i class="fas fa-play"></i>
-                </button>
-                <div class="show-actions">
-                  <button
-                    type="button"
-                    class="action-btn view-solo-mini-btn"
-                    title="View Solo"
-                    @click.stop="viewSoloShow(show)"
-                  >
-                    <i class="fas fa-external-link-alt"></i>
-                  </button>
-                  <button
-                    type="button"
-                    class="action-btn bm-btn"
-                    :aria-pressed="isShowBookmarked(show)"
-                    :class="{ bookmarked: isShowBookmarked(show) }"
-                    title="Bookmark"
-                    @click.stop="toggleShowBookmark(show)"
-                  >
-                    <i :class="isShowBookmarked(show) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
-                    <span class="sr-only">{{ isShowBookmarked(show) ? 'Remove bookmark' : 'Add bookmark' }}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="show-info">
-              <h4>{{ show.title }}</h4>
-              <p class="show-host">{{ show.host }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- List View -->
-        <div v-show="viewMode === 'list'" class="shows-list">
-          <div class="list-header">
-            <span class="col-thumbnail">Thumbnail</span>
-            <span class="col-title">Title</span>
-            <span class="col-host">Host</span>
-            <span class="col-actions">Actions</span>
-          </div>
-          <div class="list-items">
-            <div
-              v-for="show in filteredShows"
-              :key="show.id"
-              class="list-item"
-              :class="{ 'now-playing': currentVideo && currentVideo.id === show.id }"
-              @click="playShow(show)"
-            >
-              <div class="col-thumbnail">
-                <img
-                  :src="show.thumbnail || '/static/img/default-cover.jpg'"
-                  :alt="show.title"
-                  loading="lazy"
-                  decoding="async"
-                  class="image-placeholder"
-                />
-                <div class="play-overlay">
-                  <i class="fas fa-play"></i>
-                </div>
-              </div>
-              <div class="col-title">
-                <h4>{{ show.title }}</h4>
-                <p>{{ (show.description || '').substring(0, 100) }}{{ (show.description || '').length > 100 ? '...' : '' }}</p>
-              </div>
-              <span class="col-host">{{ show.host }}</span>
-              <div class="col-actions">
-                <button
-                  type="button"
-                  class="action-btn view-solo-mini-btn"
-                  title="View Solo"
-                  @click.stop="viewSoloShow(show)"
-                >
-                  <i class="fas fa-external-link-alt"></i>
-                  <span class="sr-only">View Solo</span>
+              <div class="show-overlay video-card-overlay">
+                <button type="button" class="show-overlay-open action-btn open-btn" title="Open" @click.stop="viewSoloShow(show)">
+                  Open
                 </button>
                 <button
                   type="button"
-                  class="action-btn bm-btn"
+                  class="show-overlay-save action-btn bm-btn"
                   :aria-pressed="isShowBookmarked(show)"
                   :class="{ bookmarked: isShowBookmarked(show) }"
                   title="Bookmark"
@@ -349,7 +142,14 @@
                   <i :class="isShowBookmarked(show) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
                   <span class="sr-only">{{ isShowBookmarked(show) ? 'Remove bookmark' : 'Add bookmark' }}</span>
                 </button>
+                <button type="button" class="play-btn" @click.stop="playShow(show)">
+                  <i class="fas fa-play"></i>
+                </button>
               </div>
+            </div>
+            <div class="show-info">
+              <h4>{{ show.title }}</h4>
+              <p class="show-host">{{ show.host }}</p>
             </div>
           </div>
         </div>
@@ -366,8 +166,8 @@
         <div class="empty-content">
           <i class="fas fa-play-circle"></i>
           <h3>No videos found</h3>
-          <p>Try adjusting your search or filters</p>
-          <button type="button" class="btn btn-primary" @click="clearFilters">Clear Filters</button>
+          <p>Try a different search or check back later.</p>
+          <button type="button" class="btn btn-primary" @click="clearFilters">Clear search</button>
         </div>
       </section>
     </div>
@@ -389,8 +189,6 @@ const shows = ref([])
 const filteredShows = ref([])
 const featuredShow = ref(null)
 const searchQuery = ref('')
-const selectedCategory = ref('all')
-const viewMode = ref('grid')
 const isLoading = ref(true)
 const currentVideo = ref(null)
 const isPlaying = ref(false)
@@ -451,17 +249,7 @@ function filterShows() {
         (s.description || '').toLowerCase().includes(q)
     )
   }
-  if (selectedCategory.value === 'video_podcast') {
-    list = list.filter(s => (s.tags || []).includes('video-podcast'))
-  } else if (selectedCategory.value !== 'all') {
-    list = list.filter(s => (s.type || s.category || '') === selectedCategory.value)
-  }
   filteredShows.value = list
-}
-
-function setCategory(cat) {
-  selectedCategory.value = cat
-  filterShows()
 }
 
 function clearSearch() {
@@ -471,7 +259,6 @@ function clearSearch() {
 
 function clearFilters() {
   searchQuery.value = ''
-  selectedCategory.value = 'all'
   filterShows()
 }
 
@@ -488,7 +275,8 @@ function playShow(show) {
     thumbnail: show.thumbnail,
     url: show.video_url || show.mp4_link || show.trailer_url || show.url,
   })
-  router.replace({ path: '/shows', query: { ...route.query, play: show.id } })
+  const base = (route.path.startsWith('/videos') ? '/videos' : '/shows')
+  router.replace({ path: base, query: { ...route.query, play: show.id } })
   nextTickPlay()
   // Scroll player into view (especially on mobile) so user sees the video load
   setTimeout(() => {
@@ -510,7 +298,7 @@ function viewSolo() {
 }
 
 function viewSoloShow(show) {
-  router.push({ name: 'show-detail', params: { id: show.id } })
+  router.push({ name: 'video-detail', params: { id: show.id } })
 }
 
 function onVideoLoaded() {}
@@ -627,5 +415,79 @@ watch(
 .video-embed-poster:focus .video-embed-poster-play {
   transform: translate(-50%, -50%) scale(1.08);
   background: rgba(255, 0, 96, 1);
+}
+
+.placeholder-watch-random {
+  margin-top: 14px;
+}
+
+/* Video card overlay: Open top-left, Save top-right, Play center */
+.video-card-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.video-card-overlay .show-overlay-open {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.95);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.video-card-overlay .show-overlay-open:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.video-card-overlay .show-overlay-save {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.video-card-overlay .show-overlay-save:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+.video-card-overlay .show-overlay-save.bookmarked {
+  color: var(--accent-color, #00d4ff);
+  border-color: rgba(0, 212, 255, 0.5);
+}
+.video-card-overlay .play-btn {
+  position: relative;
+  z-index: 1;
+}
+
+/* 16:9 video grid – enforce ratio on all videos page cards */
+.videos-page .shows-grid .show-thumbnail,
+.shows-grid-16x9 .show-thumbnail {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+.videos-page .shows-grid .show-thumbnail img,
+.shows-grid-16x9 .show-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 </style>

@@ -60,6 +60,7 @@ import { usePlayerStore } from './stores/player'
 import { useWakeLock } from './composables/useNative'
 import { restoreSession } from './composables/useAuth'
 import { useMobileCollapse } from './composables/useMobileCollapse'
+import { playTapChime } from './composables/useSaveChime'
 import AppNavbar from './components/AppNavbar.vue'
 import AppSidebar from './components/AppSidebar.vue'
 import NavBar from './components/NavBar.vue'
@@ -113,15 +114,44 @@ watch([collapse.isPlayerCollapsed, collapse.isDockCollapsed], ([playerCollapsed,
   else document.body.classList.remove('dock-collapsed')
 }, { immediate: true })
 
+// Tiny tap chime on button/link click (optional: add data-no-tap-chime to opt out)
+const TAP_CHIME_SELECTOR = [
+  'button:not([disabled])',
+  '[role="button"]:not([disabled])',
+  'a[href]',
+  'input[type="submit"]:not([disabled])',
+  'input[type="button"]:not([disabled])',
+  '.mobile-tab',
+  '.neu-btn',
+  '.episode-btn',
+  '.bm-btn',
+  '.action-btn',
+  '.podcast-cta',
+  '.settings-link',
+  '.app-sidebar-item',
+  '.experimental-card',
+  '.download-table-link',
+  '.quicklink',
+  '.dismiss',
+].join(', ')
+
+function onGlobalClick(e) {
+  const el = e.target?.closest?.(TAP_CHIME_SELECTOR)
+  if (!el || el.closest('[data-no-tap-chime]')) return
+  playTapChime()
+}
+
 onMounted(() => {
   restoreSession()
   window.addEventListener('online', onOnline)
   window.addEventListener('offline', onOffline)
+  document.addEventListener('click', onGlobalClick, true)
   wakeLock.autoReacquire()
 })
 
 onUnmounted(() => {
   document.body.classList.remove('has-player')
+  document.removeEventListener('click', onGlobalClick, true)
   window.removeEventListener('online', onOnline)
   window.removeEventListener('offline', onOffline)
 })

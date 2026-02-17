@@ -11,13 +11,14 @@
         <router-link to="/">Home</router-link>
         <router-link to="/music">Music</router-link>
         <router-link to="/podcasts">Podcasts</router-link>
-        <router-link to="/shows">Shows</router-link>
+        <router-link to="/videos">Videos</router-link>
         <router-link to="/artists">Artists</router-link>
         <router-link to="/events">Events</router-link>
         <router-link to="/radio">Radio</router-link>
         <router-link to="/live-tv">Live TV</router-link>
         <router-link to="/merch">Merch</router-link>
         <router-link to="/my-saves">Saved</router-link>
+        <router-link to="/recently-played">Recently Played</router-link>
         <router-link to="/playlists">Playlists</router-link>
         <router-link to="/search">Search</router-link>
         <router-link to="/account">Account</router-link>

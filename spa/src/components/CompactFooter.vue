@@ -28,7 +28,7 @@
       <div class="compact-footer-quicklinks">
         <router-link to="/music" class="quicklink">Music</router-link>
         <span class="quicklink-sep">•</span>
-        <router-link to="/shows" class="quicklink">Videos</router-link>
+        <router-link to="/videos" class="quicklink">Videos</router-link>
         <span class="quicklink-sep">•</span>
         <router-link to="/artists" class="quicklink">Artists</router-link>
         <span class="quicklink-sep">•</span>

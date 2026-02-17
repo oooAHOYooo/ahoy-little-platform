@@ -22,7 +22,7 @@
         <i class="fas fa-tv" aria-hidden="true"></i>
         <span>Live TV</span>
       </router-link>
-      <router-link to="/shows" class="app-sidebar-item" :class="{ active: route.path === '/shows' }" data-icon="video">
+      <router-link to="/videos" class="app-sidebar-item" :class="{ active: route.path === '/shows' || route.path === '/videos' }" data-icon="video">
         <i class="fas fa-video" aria-hidden="true"></i>
         <span>Videos</span>
       </router-link>
@@ -42,7 +42,7 @@
         <i class="fas fa-shopping-bag" aria-hidden="true"></i>
         <span>Merch</span>
       </router-link>
-      <router-link to="/my-saves" class="app-sidebar-item" :class="{ active: route.path === '/my-saves' }" data-icon="bookmark">
+      <router-link to="/my-saves" class="app-sidebar-item" :class="{ active: route.path === '/my-saves' || route.path === '/recently-played' }" data-icon="bookmark">
         <i class="fas fa-bookmark" aria-hidden="true"></i>
         <span>Saved</span>
       </router-link>

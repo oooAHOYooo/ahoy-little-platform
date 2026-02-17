@@ -30,10 +30,22 @@ const routes = [
     path: '/shows',
     name: 'shows',
     component: () => import('./views/ShowsView.vue'),
+    meta: { title: 'Videos' },
+  },
+  {
+    path: '/videos',
+    name: 'videos',
+    component: () => import('./views/ShowsView.vue'),
+    meta: { title: 'Videos' },
   },
   {
     path: '/shows/:id',
     name: 'show-detail',
+    component: () => import('./views/ShowDetailView.vue'),
+  },
+  {
+    path: '/videos/:id',
+    name: 'video-detail',
     component: () => import('./views/ShowDetailView.vue'),
   },
   {
@@ -84,6 +96,11 @@ const routes = [
   {
     path: '/my-saves',
     name: 'my-saves',
+    component: () => import('./views/SavedView.vue'),
+  },
+  {
+    path: '/recently-played',
+    name: 'recently-played',
     component: () => import('./views/SavedView.vue'),
   },
   {
@@ -228,6 +245,7 @@ const routes = [
   },
   // Legacy URL redirects (Flask used these; SPA uses different paths)
   { path: '/bookmarks', redirect: '/my-saves' },
+  { path: '/recent', redirect: '/recently-played' },
   { path: '/auth', redirect: '/login' },
   { path: '/player', redirect: '/now-playing' },
   { path: '/artist/:slug', redirect: to => `/artists/${to.params.slug}` },

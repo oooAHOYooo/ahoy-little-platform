@@ -69,7 +69,7 @@
         <router-link
           v-for="show in artistShows"
           :key="show.id"
-          :to="`/shows/${show.id}`"
+          :to="`/videos/${show.id}`"
           class="show-card"
         >
           <div class="show-thumbnail">
