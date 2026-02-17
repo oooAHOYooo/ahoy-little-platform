@@ -2861,10 +2861,26 @@ def api_live_tv_channels():
                 return ''
             return ' '.join(str(t) for t in tags if t is not None)
         
-        music_videos = [s for s in shows if (s.get('category') == 'music video' or 'music-video' in s.get('tags', []) or 'musicvideos' in safe_join_tags(s.get('tags', [])))]
-        films = [s for s in shows if (s.get('category') == 'short film' or s.get('category') == 'film' or 'short-film' in s.get('tags', []))]
+        music_videos = [s for s in shows if (
+            s.get('category') in ('music video', 'music-video') or 
+            'music' in s.get('title', '').lower() or 
+            'music-video' in s.get('tags', []) or 
+            'musicvideos' in safe_join_tags(s.get('tags', []))
+        )]
+        
+        films = [s for s in shows if (
+            s.get('category') in ('short film', 'film') or 
+            'film' in s.get('tags', []) or 
+            'movie' in s.get('tags', []) or
+            'short' in s.get('title', '').lower()
+        )]
+        
         # Live Shows: broadcast/live/episodes, but exclude video-podcast so those go to Misc
-        live_shows = [s for s in shows if (s.get('category') == 'broadcast' or 'live' in safe_join_tags(s.get('tags', [])) or 'episode' in s.get('category', '')) and 'video-podcast' not in s.get('tags', [])]
+        live_shows = [s for s in shows if (
+            s.get('category') in ('broadcast', 'live show', 'live-show', 'episode') or 
+            'live' in s.get('title', '').lower() or
+            'live' in safe_join_tags(s.get('tags', []))
+        ) and 'video-podcast' not in s.get('tags', [])]
 
         # Misc: everything not already in the other channels (video only), including video-podcast clips
         # Use .get() to safely access id, filter out None values

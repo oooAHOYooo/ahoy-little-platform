@@ -1303,88 +1303,113 @@ onUnmounted(() => {
   .hero-player video {
     width: 100%;
     height: auto;
-    min-height: 200px;
-    max-height: 50vh;
+    aspect-ratio: 16/9;
   }
+  /* Nintendo-style Glassy Vertical UI */
   .channel-remote.remote-below {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    padding: 12px;
-    max-width: 100%;
+    display: none !important;
   }
-  .remote-btn {
-    width: auto;
-    min-height: 48px;
-    border-radius: 10px;
+  .live-tv-container { /* The Guide */
+    display: none !important;
   }
-  .remote-btn i {
-    font-size: 16px;
-  }
-  .playing-now {
-    flex-direction: column;
-    gap: 8px;
-    padding: 12px;
-  }
-  .playing-now img {
-    width: 60px;
-    height: 40px;
-  }
-  .np-title, .np-next { font-size: 14px; }
-  .np-sub, .np-label { font-size: 11px; }
-  #channel-selector {
-    padding: 16px 8px;
-    gap: 12px;
-  }
-  .channel-button {
-    padding: 16px;
-    border-radius: 10px;
-  }
-  .channel-button-name { font-size: 16px; }
-  .channel-button-next { font-size: 12px; }
-  .channel-selector-empty {
-    min-width: 100%;
-    padding: 20px 12px;
-  }
-  .channel-selector-retry {
-    min-height: 48px;
-    padding: 14px 24px;
-  }
-  .guide {
-    min-height: auto;
-    border-radius: 10px;
-  }
-  .guide-header { padding: 8px; }
-  .guide-timebar { padding: 6px 8px; gap: 16px; }
-  .time-marker { font-size: 10px; min-width: 50px; }
-  .guide-row { padding: 8px; }
-  .guide-channel-label { width: 100px; font-size: 12px; }
-  .program { padding: 6px; min-width: 100px; }
-  .program-title { font-size: 11px; }
-  .program-meta { font-size: 10px; }
 
-  /* Mobile sidebar drawer */
-  .live-tv-sidebar {
-    position: fixed;
+  /* Vertical Glassy Channel List */
+  #channel-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 16px;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
+  }
+  
+  .channel-button {
+    width: 100%;
+    min-height: 80px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 16px 20px;
+    text-align: left;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .channel-button::before {
+    content: '';
+    position: absolute;
     top: 0;
-    left: -100%;
-    width: 86vw;
-    max-width: 360px;
-    height: 100vh;
-    z-index: 100;
-    transition: left 0.3s ease;
-    overflow-y: auto;
-  }
-  .live-tv-sidebar.open {
     left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary);
+    opacity: 0;
+    transition: opacity 0.2s;
   }
-  .channel-item {
-    padding: 12px;
-    font-size: 14px;
+  
+  .channel-button.active {
+    transform: scale(1.02);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(var(--primary-rgb), 0.5);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+  }
+  
+  .channel-button.active::before {
+    opacity: 1;
+  }
+
+  .channel-button-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-1);
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+  
+  .channel-button-next {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-2);
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+
+  /* Preview Bar */
+  .playing-now {
+    margin: 0 16px 20px 16px;
+    border-radius: 24px;
+    background: rgba(var(--primary-rgb), 0.15);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .hero-player video {
+    aspect-ratio: 16/9;
+    border-radius: 24px;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+  }
+  
+  .tv-container {
+    padding-bottom: 100px;
   }
 }
 
 @media (max-width: 480px) {
-  .remote-btn { font-size: 12px; }
+  .channel-button-name { font-size: 16px; }
+  .channel-button-next { font-size: 12px; }
 }
 </style>
