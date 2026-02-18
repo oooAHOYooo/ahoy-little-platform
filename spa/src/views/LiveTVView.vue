@@ -117,8 +117,40 @@
         @mouseenter="startHoverPreview($event, idx)"
         @mouseleave="hideHoverPreview"
       >
-        <div class="channel-button-name">{{ rowLabels[idx] || ch.name }}</div>
-        <div class="channel-button-next">{{ channelNowTitle(idx) }}</div>
+        <!-- Left Strip (Rotated Identity) -->
+        <div class="channel-strip" :style="{ '--strip-color': pillColors[idx % 4] }">
+          <div class="channel-sideways-text">
+            CH {{ String(idx + 1).padStart(2, '0') }} <span class="bullet">•</span> {{ ch.name }}
+          </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="channel-content">
+          <div class="cc-header">
+            <div class="cc-status" v-if="selectedRow === idx">
+              <span class="pulsing-dot"></span> WATCHING
+            </div>
+            <div class="cc-time" v-if="getCurrentSlot(idx)">
+               {{ fmtTime(new Date(getCurrentSlot(idx).startUTC)) }}
+            </div>
+          </div>
+          
+          <div class="cc-program">
+            <div class="cc-title">{{ channelNowTitle(idx) }}</div>
+            <div class="cc-meta" v-if="getCurrentSlot(idx)">
+               {{ getCurrentSlot(idx).category || ch.name }}
+            </div>
+          </div>
+
+          <!-- Progress Bar at bottom of content -->
+          <div class="cc-progress-track" v-if="getCurrentSlot(idx)">
+             <div class="cc-progress-fill" :style="{ width: getChannelProgress(idx) + '%', background: pillColors[idx % 4] }"></div>
+          </div>
+        </div>
+
+        <!-- Background Image (blurred/faded) or Gradient Fallback -->
+        <div class="channel-bg-image" :style="getChannelBg(idx)"></div>
+        <div class="channel-bg-overlay"></div>
       </button>
     </div>
 
@@ -220,8 +252,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { apiFetch, apiFetchCached } from '../composables/useApi'
 import { trackRecentPlay } from '../composables/useRecentlyPlayed'
-
-const DEFAULT_COVER = '/static/img/default-cover.jpg'
+const DEFAULT_COVER = '' // Use empty string to trigger fallback logic
 
 // --- Refs ---
 const videoEl = ref(null)
@@ -632,7 +663,37 @@ function channelNowTitle(idx) {
   if (slot) return cleanTitle(slot.title)
   const ch = channels.value[idx]
   if (ch?.items?.length) return cleanTitle(ch.items[0].title)
-  return '—'
+  return 'Off Air'
+}
+
+function getChannelProgress(idx) {
+  const slot = getCurrentSlot(idx)
+  if (!slot) return 0
+  const now = Date.now()
+  const pct = Math.max(0, Math.min(100, ((now - slot.startUTC) / (slot.endUTC - slot.startUTC)) * 100))
+  return pct
+}
+
+function getChannelThumb(idx) {
+  const slot = getCurrentSlot(idx)
+  const ch = channels.value[idx]
+  // Return slot thumb, or generated thumb, or item thumb, or default
+  if (slot) return slot.thumb || generatedThumbs.value[slot.src] || null
+  if (ch?.items?.length) return getThumbnail(ch.items[0], getVideoUrl(ch.items[0]))
+  return null
+}
+
+function getChannelBg(idx) {
+  const thumb = getChannelThumb(idx)
+  if (thumb && thumb !== DEFAULT_COVER) {
+     return { backgroundImage: `url(${thumb})` }
+  }
+  // Fallback gradient based on index color
+  const color = pillColors[idx % 4]
+  return {
+    background: `linear-gradient(135deg, ${color}22 0%, #111 60%)`,
+    opacity: 0.8
+  }
 }
 
 // --- Hover preview ---
@@ -985,6 +1046,62 @@ onUnmounted(() => {
   font-size: 13px;
   color: #999;
   margin-top: 8px;
+}
+
+.channel-info-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+}
+.channel-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: rgba(255,255,255,0.9);
+  flex-shrink: 0;
+}
+.channel-text {
+  flex: 1;
+  min-width: 0;
+}
+.channel-button-current {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cb-now {
+  color: #3b82f6;
+  font-weight: 600;
+  margin-right: 4px;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.channel-meta {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 2px;
+}
+
+.channel-progress-track {
+  margin-top: 12px;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  width: 100%;
+}
+.channel-progress-fill {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 2px;
 }
 
 /* ===== Channel selector empty / retry (mobile-friendly) ===== */
@@ -1424,6 +1541,7 @@ onUnmounted(() => {
   .tv-container {
     padding-bottom: 80px; /* Space for bottom dock */
   }
+}
   .spotlight-grid {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -1447,8 +1565,173 @@ onUnmounted(() => {
     padding: 12px;
     grid-template-columns: 1fr; /* Stack channels */
   }
+/* ===== Mobile Channel List (Killer Experience) ===== */
+
+/* Base overrides for Mobile Channel Button */
+@media (max-width: 768px) {
   .channel-button {
-    height: 50px;
+    height: 120px;
+    min-height: 120px;
+    padding: 0;
+    display: flex; /* Flex row for Strip + Content */
+    flex-direction: row;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: #111; /* Fallback */
+    /* Glassmorphism */
+    background: rgba(30, 30, 30, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  /* Active state scaling */
+  .channel-button.active {
+    transform: scale(1.02);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    border-color: rgba(255,255,255,0.2);
+    z-index: 2; /* Pop above others */
+  }
+
+  /* 1. Left Strip (Rotated) */
+  .channel-strip {
+    width: 32px;
+    background: rgba(0,0,0,0.3);
+    border-right: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+  /* Color line indicator */
+  .channel-strip::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--strip-color);
+  }
+
+  .channel-sideways-text {
+    /* Rotate 90 deg counter-clockwise */
+    transform: rotate(-90deg);
+    white-space: nowrap;
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.8);
+    /* Width logic for rotated element is tricky, ensure it centers */
+    width: 120px; /* Match container height roughly */
+    text-align: center;
+  }
+  .bullet {
+    margin: 0 6px;
+    opacity: 0.5;
+    font-size: 8px;
+  }
+
+  /* 2. Main Content */
+  .channel-content {
+    flex: 1;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2; /* Above bg */
+  }
+
+  .cc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .cc-status {
+    color: #3b82f6;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pulsing-dot {
+    width: 6px;
+    height: 6px;
+    background: currentColor;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .cc-program {
+    margin-bottom: 8px;
+  }
+  .cc-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 4px;
+    /* Limit lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .cc-meta {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* Progress Bar */
+  .cc-progress-track {
+    height: 3px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    width: 100%;
+  }
+  .cc-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s linear;
+  }
+
+  /* 3. Background Image */
+  .channel-bg-image {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.3; /* Subtle */
+    filter: blur(2px) grayscale(0.5);
+    z-index: 0;
+    transition: all 0.5s ease;
+  }
+  .channel-button.active .channel-bg-image {
+    opacity: 0.5;
+    filter: blur(0) grayscale(0);
+  }
+  .channel-bg-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to right, #000 30px, rgba(0,0,0,0.6) 100%);
+    z-index: 1;
   }
 }
 </style>
