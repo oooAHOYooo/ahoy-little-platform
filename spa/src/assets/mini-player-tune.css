@@ -282,6 +282,9 @@ body.has-player {
     min-height: var(--np-mobile-height) !important;
     height: auto !important;
     max-height: none !important;
+    /* Flush with edges */
+    left: 0 !important;
+    right: 0 !important;
   }
 
   body.has-player {
@@ -430,9 +433,16 @@ body.has-player {
   --snes-radius-sm: 12px;
 }
 
-/* Now-playing bar: rounded “console” top, purple glow when playing */
+/* Now-playing bar: flush with dock on mobile (no bottom radius) */
 .now-playing-glass {
   border-radius: var(--snes-radius) var(--snes-radius) 0 0 !important;
+}
+
+@media (max-width: 768px) {
+  .now-playing-glass {
+    border-radius: 0 !important; /* Square corners for flush look */
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
 }
 
 .now-playing-glass.now-playing-is-playing {
@@ -515,8 +525,8 @@ body.has-player {
 @media (max-width: 768px) {
   .app .mobile-dock,
   .mobile-dock {
-    border-radius: var(--snes-radius) var(--snes-radius) 0 0 !important;
-    border-top: 0.8px solid var(--snes-purple) !important;
+    border-radius: 0 !important; /* Flush with edges and player */
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.05),
       0 -4px 20px rgba(0, 0, 0, 0.35) !important;

@@ -467,6 +467,19 @@ onMounted(loadTracks)
 }
 
 @media (max-width: 768px) {
+  .music-container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Force content area to be flush for this view */
+  :deep(.content-area) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin: 0 !important;
+  }
+
   .music-table-wrap {
     display: none;
   }
@@ -474,31 +487,36 @@ onMounted(loadTracks)
   .music-mobile-list {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 2px 0 0;
+    gap: 0;
+    padding: 0 !important;
+    margin: 0 !important; /* Vital for flush look */
+    width: 100% !important;
   }
 
   .music-mobile-row {
     display: grid;
-    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
     align-items: center;
-    gap: 6px;
-    padding: 6px 6px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    width: 100% !important;
+    margin: 0 !important;
+    box-shadow: none !important;
   }
 
   .music-mobile-row.playing {
-    background: rgba(99, 102, 241, 0.14);
-    border-color: rgba(99, 102, 241, 0.35);
+    background: rgba(99, 102, 241, 0.1) !important;
   }
 
   .music-mobile-art {
     position: relative;
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
     overflow: hidden;
     flex-shrink: 0;
   }
@@ -519,81 +537,88 @@ onMounted(loadTracks)
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .music-mobile-meta {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 0;
-    line-height: 1.2;
+    justify-content: center;
+    gap: 0 !important;
   }
 
   .music-mobile-title-link {
     color: inherit;
     text-decoration: none;
-    min-width: 0;
+    min-width: 0 !important;
+    min-height: 0 !important; /* Override global mobile touch target size */
     display: block;
-    line-height: 1.2;
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.1 !important;
   }
 
   .music-mobile-title {
     display: block;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.95);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin: 0;
-    line-height: 1.2;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.1 !important;
   }
 
   .music-mobile-artist {
     display: block;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin: 0;
-    line-height: 1.2;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.1 !important;
+    margin-top: 1px !important; /* Tiny optical separation */
   }
 
   .music-mobile-right {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
   }
 
   .music-mobile-duration {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.62);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
     font-variant-numeric: tabular-nums;
-    margin-right: 2px;
+    margin-right: 4px;
   }
 
   .music-mobile-actions {
     display: flex;
-    gap: 2px;
+    gap: 4px;
   }
 
   .music-mobile-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    font-size: 11px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 12px;
     padding: 0;
+    background: rgba(255, 255, 255, 0.05);
   }
 
   .music-mobile-play-btn {
-    background: linear-gradient(180deg, rgba(109, 220, 255, 0.28), rgba(109, 220, 255, 0.16));
-    border: 1px solid rgba(109, 220, 255, 0.35);
-    color: rgba(255, 255, 255, 0.95);
+    background: linear-gradient(180deg, rgba(109, 220, 255, 0.15), rgba(109, 220, 255, 0.08));
+    border: 1px solid rgba(109, 220, 255, 0.15);
+    color: rgba(255, 255, 255, 0.85);
   }
 }
+
+
 </style>

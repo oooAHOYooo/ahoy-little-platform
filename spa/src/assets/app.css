@@ -87,9 +87,11 @@
   flex: none;
   min-height: min-content;
 }
+
 .app .content-area .videos-page .shows-grid-section {
   flex: none;
-  min-height: min-content; /* was 0 — caused only first row (2 videos) to show */
+  min-height: min-content;
+  /* was 0 — caused only first row (2 videos) to show */
 }
 
 .app .app-sidebar {
@@ -114,6 +116,7 @@
 }
 
 @media (max-width: 768px) {
+
   /* Flush: mini player sits directly on top of the dock (no gap; -1px closes sub-pixel gap) */
   .app .now-playing-wrapper {
     bottom: calc(var(--np-mobile-dock-height, 118px) - 1px + env(safe-area-inset-bottom)) !important;
@@ -239,6 +242,12 @@
   /* Collapsed: strip sits above dock so reserve dock + strip height */
   body.player-collapsed .app .spa-main.has-player {
     padding-bottom: calc(var(--np-mobile-dock-height, 118px) + var(--np-collapsed-strip-height, 40px) + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Flush list utility: removes side padding from the shell on mobile */
+  .content-area.flush-content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 }
 
@@ -1125,4 +1134,39 @@
   background: rgba(255, 255, 255, 0.03);
   padding: 16px;
   color: rgba(255, 255, 255, 0.75);
+}
+
+/* --- AGGRESSIVE MOBILE FLUSH OVERRIDES --- */
+@media (max-width: 768px) {
+
+  /* Flush Music List */
+  .content-area.flush-content,
+  .music-container.flush-content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Flush Mini Player and Dock wrappers */
+  .now-playing-wrapper,
+  .now-playing-glass,
+  .now-playing-container,
+  .dock-wrapper,
+  .mobile-dock {
+    width: 100% !important;
+    max-width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: none !important;
+  }
+
+  .now-playing-glass {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
 }

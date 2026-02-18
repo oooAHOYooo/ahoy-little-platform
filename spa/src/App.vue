@@ -29,7 +29,7 @@
       <div class="app-shell">
         <AppSidebar />
         <div class="app-main">
-          <div class="content-area content-pad-bottom app-content spa-main" :class="{ 'has-player': route.name !== 'now-playing' }">
+          <div class="content-area content-pad-bottom app-content spa-main" :class="{ 'has-player': route.name !== 'now-playing', 'flush-content': route.name === 'music' }">
             <router-view v-slot="{ Component, route: viewRoute }">
               <Transition :name="transitionName" mode="out-in">
                 <keep-alive :include="['HomeView', 'MusicView', 'ShowsView', 'ArtistsView', 'PodcastsView', 'LiveTVView']">
