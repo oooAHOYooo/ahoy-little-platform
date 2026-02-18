@@ -113,6 +113,10 @@
   .app .main-content {
     padding-top: var(--ds-topbar-height);
   }
+
+  .app .app-sidebar {
+    display: none !important;
+  }
 }
 
 @media (max-width: 768px) {

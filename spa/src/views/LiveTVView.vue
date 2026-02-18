@@ -142,6 +142,11 @@
             </div>
           </div>
 
+          <!-- Up Next (Mobile Optimized) -->
+          <div class="cc-up-next" v-if="getNextSlot(idx)">
+            <span class="un-label">Next:</span> {{ cleanTitle(getNextSlot(idx).title) }}
+          </div>
+
           <!-- Progress Bar at bottom of content -->
           <div class="cc-progress-track" v-if="getCurrentSlot(idx)">
              <div class="cc-progress-fill" :style="{ width: getChannelProgress(idx) + '%', background: pillColors[idx % 4] }"></div>
@@ -210,11 +215,11 @@
           </div>
           <div class="guide-scroller">
             <div class="guide-rows" role="grid" aria-label="Channel Guide">
-              <div class="now-line" :style="{ left: '150px' }"></div>
+              <div class="now-line" :style="nowLineStyle"></div>
               <div v-for="(ch, rowIdx) in channels" :key="ch.id" class="guide-row" role="row">
                 <div class="guide-channel-label">
-                  <span class="guide-channel-icon" :style="{ background: pillColors[rowIdx % 4] }"></span>
-                  <span>{{ ch.name }}</span>
+                  <div class="guide-channel-icon" :style="{ background: pillColors[rowIdx % 4] }"></div>
+                  <div class="guide-channel-name">{{ ch.name }}</div>
                 </div>
                 <div class="guide-track">
                   <div
@@ -276,7 +281,12 @@ const generatedThumbs = ref({})
 // Guide focus (for keyboard nav and highlight; Enter = tune to channel)
 const guideFocus = ref({ row: 0, col: 0 })
 
-// Hover preview
+// Calculated "now" line position
+const nowLineStyle = computed(() => {
+  // Since our guide starts exactly at 'now', the line is at the edge of the labels.
+  // Padding (10px) + Label (140px) + Gap (8px) = 158px
+  return { left: '158px' }
+})
 const hoverPreview = ref({ visible: false, x: 0, y: 0, thumb: '', title: '', meta: '' })
 let hoverTimer = null
 
@@ -971,12 +981,15 @@ onUnmounted(() => {
 
 /* ===== Right Dashboard ===== */
 .right-dashboard {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 16px;
-  display: grid;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   position: sticky;
   top: 12px;
   align-self: start;
@@ -1234,19 +1247,25 @@ onUnmounted(() => {
 }
 
 .guide {
-  background: #0f0f0f;
-  border-radius: 8px;
-  padding: 8px;
+  background: rgba(15, 15, 15, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 0;
   overflow: hidden;
   min-height: 48vh;
 }
 .guide-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-bottom: 1px solid #222;
-  font-weight: 600;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.5px;
 }
 .kbd-hint {
   font-size: 12px;
@@ -1266,14 +1285,15 @@ onUnmounted(() => {
 .guide-timebar {
   position: sticky;
   top: 0;
-  background: #0f0f0f;
-  z-index: 2;
-  padding: 6px 10px;
+  background: rgba(15, 15, 15, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 10;
+  padding: 10px 16px;
   display: flex;
   gap: 24px;
-  border-bottom: 1px solid #1d1d1d;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   flex-wrap: nowrap;
-  overflow-x: auto;
 }
 .time-marker {
   color: #bbb;
@@ -1318,15 +1338,22 @@ onUnmounted(() => {
   min-width: 1200px;
 }
 .program {
-  background: #141414;
-  border: 1px solid #1f1f1f;
-  border-radius: 8px;
-  padding: 8px;
-  display: grid;
-  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   color: #e5e7eb;
   cursor: pointer;
   flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.program:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 .program:focus {
   outline: 2px solid #4f46e5;
@@ -1359,7 +1386,21 @@ onUnmounted(() => {
   bottom: 0;
   width: 2px;
   background: #3b82f6;
-  opacity: 0.85;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+  z-index: 5;
+  pointer-events: none;
+}
+.now-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 1);
 }
 
 /* ===== Mobile ===== */
@@ -1407,129 +1448,64 @@ onUnmounted(() => {
   }
   #channel-selector {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
   }
 }
 
 @media (max-width: 768px) {
-  .hidden-mobile {
-    display: none !important;
-  }
-  .mobile-only {
-    display: block;
-  }
   .tv-container {
-    padding-bottom: 80px;
+    padding-bottom: 20px;
   }
-  .hero-player {
-    border-radius: 12px;
-    overflow: hidden;
+  .podcasts-hero {
+    padding: 20px 0;
   }
+  .podcasts-hero h1 {
+    font-size: 24px;
+  }
+  
+  .spotlight-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 0 10px;
+  }
+
+  .video-header {
+    top: 8px;
+    left: 8px;
+  }
+  .now-playing-label {
+    padding: 2px 6px;
+    font-size: 10px;
+  }
+  .channel-name-label {
+    font-size: 11px;
+  }
+
   .hero-player video {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16/9;
-  }
-  /* Nintendo-style Glassy Vertical UI */
-  .channel-remote.remote-below {
-    display: none !important;
-  }
-  .live-tv-container { /* The Guide */
-    display: none !important;
+    border-radius: 8px;
   }
 
-  /* Vertical Glassy Channel List */
-  #channel-selector {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding: 20px 16px;
-    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
-  }
-  
-  .channel-button {
-    width: 100%;
-    min-height: 80px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 16px 20px;
-    text-align: left;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .channel-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--primary);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  
-  .channel-button.active {
-    transform: scale(1.02);
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(var(--primary-rgb), 0.5);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.4);
-  }
-  
-  .channel-button.active::before {
-    opacity: 1;
+  .remote-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
   }
 
-  .channel-button-name {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--text-1);
-    margin-bottom: 4px;
-    letter-spacing: -0.5px;
-  }
-  
-  .channel-button-next {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-2);
-    opacity: 0.7;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-  }
-
-  /* Preview Bar */
   .playing-now {
-    margin: 0 16px 20px 16px;
-    border-radius: 24px;
-    background: rgba(var(--primary-rgb), 0.15);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    padding: 20px;
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    padding: 8px;
+    gap: 8px;
   }
+  .playing-now img {
+    width: 40px;
+    height: 28px;
+  }
+  .np-title { font-size: 13px; }
+  .np-sub { font-size: 10px; }
+  .np-next { font-size: 12px; }
 
-  .hero-player video {
-    aspect-ratio: 16/9;
-    border-radius: 24px;
-    margin-bottom: 8px;
-    box-shadow: 0 4px 30px rgba(0,0,0,0.5);
-  }
-  
-  .tv-container {
-    padding-bottom: 100px;
+  /* Guide Responsive */
+  .live-tv-container {
+    display: none !important; /* Re-hide the guide on mobile as per user preference */
   }
 }
 
@@ -1537,11 +1513,11 @@ onUnmounted(() => {
   .channel-button-name { font-size: 16px; }
   .channel-button-next { font-size: 12px; }
 }
+
 @media (max-width: 768px) {
   .tv-container {
     padding-bottom: 80px; /* Space for bottom dock */
   }
-}
   .spotlight-grid {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -1565,6 +1541,7 @@ onUnmounted(() => {
     padding: 12px;
     grid-template-columns: 1fr; /* Stack channels */
   }
+}
 /* ===== Mobile Channel List (Killer Experience) ===== */
 
 /* Base overrides for Mobile Channel Button */
@@ -1696,6 +1673,23 @@ onUnmounted(() => {
   .cc-meta {
     font-size: 12px;
     color: rgba(255,255,255,0.7);
+    margin-bottom: 8px;
+  }
+
+  .cc-up-next {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 4px; /* Added spacing */
+  }
+  .un-label {
+    font-weight: 700;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    font-size: 9px;
+    margin-right: 4px;
   }
 
   /* Progress Bar */
