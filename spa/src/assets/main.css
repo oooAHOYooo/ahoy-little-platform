@@ -19532,204 +19532,126 @@ img.loading {
     background: rgba(255, 255, 255, 0.3);
 }
 
+/* Unified Grid Layout for Desktop Music Table */
 .music-table {
+    display: table;
+    /* Fallback */
     width: 100%;
     border-collapse: collapse;
-    border-spacing: 0;
-    font-size: 13px;
-    table-layout: fixed;
 }
 
+/* Remove old sticky header background from thead, apply to th */
 .music-table thead {
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    display: contents;
+    /* Allows th to be part of the grid if we were using a pure grid parent, 
+                          but since we have tbody, we'll make rows grid containers */
+    background: transparent;
+    box-shadow: none;
+    position: static;
+}
+
+.music-table tbody {
+    display: contents;
+}
+
+.music-table tr {
+    display: grid;
+    grid-template-columns:
+        [art] 64px [title-artist] minmax(200px, 1fr) [duration] 80px [plays] 80px [actions] 120px;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+    /* Horizontal padding for the whole row */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Header specific styling */
+.music-table thead tr {
     position: sticky;
     top: 0;
     z-index: 10;
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: #000;
+    /* Solid background for sticky header */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    height: 44px;
+    /* Fixed header height */
 }
 
 .music-table th {
-    padding: 11px 12px;
+    padding: 0;
     text-align: left;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.64);
+    color: rgba(255, 255, 255, 0.5);
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     white-space: nowrap;
-    position: relative;
-    vertical-align: middle;
-}
-
-.music-table th::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
-}
-
-/* Column order: 1. Album art  2. Title  3. Artist  4. Duration  5. Plays  6. Actions — all left-aligned */
-.music-table th.col-art,
-.music-table td.col-art {
-    width: 64px;
-    min-width: 64px;
-    padding: 10px 12px;
-    text-align: left;
-    vertical-align: middle;
-}
-
-.music-table th.col-title,
-.music-table td.col-title {
-    min-width: 140px;
-    padding: 10px 12px;
-    text-align: left;
-}
-
-.music-table th.col-artist,
-.music-table td.col-artist {
-    min-width: 120px;
-    padding: 10px 12px;
-    text-align: left;
-}
-
-/* Combined title + artist column (Spotify-style list) */
-.music-table th.col-title-artist,
-.music-table td.col-title-artist {
-    min-width: 140px;
-    padding: 10px 12px;
-    text-align: left;
-    vertical-align: middle;
-}
-
-.music-table .music-track-meta {
+    border: none;
+    background: transparent;
     display: flex;
-    flex-direction: column;
-    gap: 1px;
-    min-width: 0;
-}
-
-.music-table .music-track-meta .title-link {
-    display: block;
-    min-width: 0;
-    text-decoration: none;
-}
-
-.music-table .music-track-meta .title-text {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: rgba(255, 255, 255, 0.95);
-    font-weight: 500;
-    font-size: 13px;
-    line-height: 1.3;
-}
-
-.music-table .music-track-meta .title-link:hover .title-text {
-    color: #fff;
-}
-
-.music-table .music-track-artist {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: rgba(255, 255, 255, 0.65);
-    font-size: 12px;
-    line-height: 1.3;
+    /* alignment */
+    align-items: center;
+    height: 100%;
 }
 
 .music-table th.col-duration,
-.music-table td.col-duration {
-    width: 80px;
-    min-width: 80px;
-    padding: 10px 12px;
-    text-align: right;
+.music-table th.col-plays {
+    justify-content: flex-end;
 }
 
+/* Cell specific styling to match grid */
+.music-table td {
+    padding: 8px 0;
+    /* Vertical padding only, gap handles horizontal */
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    /* Allow flex children to shrink */
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+    height: 100%;
+}
+
+/* Column Overrides - we use grid-template-columns now, so widths on cells are removed */
+.music-table th.col-art,
+.music-table td.col-art,
+.music-table th.col-title,
+.music-table td.col-title,
+.music-table th.col-artist,
+.music-table td.col-artist,
+.music-table th.col-title-artist,
+.music-table td.col-title-artist,
+.music-table th.col-duration,
+.music-table td.col-duration,
 .music-table th.col-plays,
-.music-table td.col-plays {
-    width: 80px;
-    min-width: 80px;
-    padding: 10px 12px;
-    text-align: right;
-}
-
+.music-table td.col-plays,
 .music-table th.col-action,
 .music-table td.col-action {
-    width: 120px;
-    min-width: 120px;
-    padding: 10px 12px;
-    text-align: left;
-    vertical-align: middle;
+    width: auto;
+    min-width: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.music-table tbody tr {
-    cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-    background: rgba(255, 255, 255, 0.01);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    position: relative;
+/* Adjustments for specific content */
+.music-table td.col-duration,
+.music-table td.col-plays {
+    justify-content: flex-end;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.5);
 }
 
-.music-table tbody tr::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: transparent;
-    transition: background 0.25s ease;
-}
-
-.music-table tbody tr:nth-child(even) {
-    background: rgba(255, 255, 255, 0.015);
-}
-
-.music-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
-}
-
-.music-table tbody tr:hover::before {
-    background: rgba(124, 58, 237, 0.65);
-}
-
-.music-table tbody tr.playing {
-    background: rgba(99, 102, 241, 0.14) !important;
-    box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.18);
-}
-
-.music-table tbody tr.playing::before {
-    background: rgba(99, 102, 241, 0.9);
-}
-
-.music-table td {
-    padding: 10px 12px;
-    vertical-align: middle;
-    font-size: 13px;
-    line-height: 1.4;
-    color: rgba(255, 255, 255, 0.85);
-}
-
-/* Album art column: square art + play overlay */
+/* Art Column */
 .music-table .music-table-art-wrap {
-    position: relative;
     width: 48px;
     height: 48px;
-    flex-shrink: 0;
 }
 
 .music-table .music-table-art {
-    width: 48px;
-    height: 48px;
-    border-radius: 6px;
-    object-fit: cover;
-    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    /* Slightly sharper */
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
