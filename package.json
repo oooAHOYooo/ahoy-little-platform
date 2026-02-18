@@ -1,7 +1,9 @@
 {
   "name": "ahoy-indie-media",
-  "version": "0.2.0",
-  "engines": { "node": ">=18.0.0" },
+  "version": "0.2.1-beta",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "description": "A comprehensive Flask-based media platform for discovering and organizing independent music, shows, and content.",
   "main": "electron/main.js",
   "scripts": {

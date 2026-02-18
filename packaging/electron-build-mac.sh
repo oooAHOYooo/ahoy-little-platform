@@ -57,6 +57,10 @@ fi
 
 # Build with electron-builder
 echo "🔨 Building macOS app with Electron..."
+# Generate icon first
+chmod +x scripts/generate-icon.sh
+./scripts/generate-icon.sh
+
 npm run electron:build:mac:dmg
 
 # Check if build was successful
@@ -69,8 +73,11 @@ if [ -d "$DIST_ELECTRON" ]; then
     ls -lh "$DIST_ELECTRON"/*.dmg "$DIST_ELECTRON"/*.app 2>/dev/null || ls -lh "$DIST_ELECTRON"/* 2>/dev/null || true
     # Copy DMG (and .zip) to dist/ so /downloads page can serve them
     mkdir -p "$DIST_DOWNLOADS"
-    for f in "$DIST_ELECTRON"/*.dmg "$DIST_ELECTRON"/*.zip 2>/dev/null; do
-        [ -e "$f" ] && cp "$f" "$DIST_DOWNLOADS/" && echo "📎 Linked to downloads: $DIST_DOWNLOADS/$(basename "$f")"
+    # Fix: remove redirections inside glob expansion for loop
+    for f in "$DIST_ELECTRON"/*.dmg "$DIST_ELECTRON"/*.zip; do
+        if [ -f "$f" ]; then
+            cp "$f" "$DIST_DOWNLOADS/" && echo "📎 Linked to downloads: $DIST_DOWNLOADS/$(basename "$f")"
+        fi
     done
     echo ""
     echo "🎉 macOS Electron build successful! DMG is in dist/ and linked from /downloads"
