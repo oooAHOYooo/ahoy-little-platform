@@ -1458,22 +1458,26 @@ body.debug-layout .card {
         padding: 12px 18px 14px;
         margin-bottom: 14px;
     }
+
     .podcasts-hero-inner h1 {
         margin: 0 0 4px 0;
         font-size: 22px;
     }
+
     .podcasts-hero-inner p {
         margin: 0;
         font-size: 14px;
         line-height: 1.35;
         color: rgba(255, 255, 255, 0.68);
     }
+
     /* Account (wrapped h1+p in a div): same compact two-line */
-    .podcasts-hero-inner > div:has(h1):has(p) h1 {
+    .podcasts-hero-inner>div:has(h1):has(p) h1 {
         margin: 0 0 4px 0;
         font-size: 22px;
     }
-    .podcasts-hero-inner > div:has(h1):has(p) p {
+
+    .podcasts-hero-inner>div:has(h1):has(p) p {
         margin: 0;
         font-size: 14px;
         line-height: 1.35;
@@ -5686,8 +5690,10 @@ body.debug-layout .card {
     .shows-page .unified-hero {
         display: none !important;
     }
+
     .shows-page .unified-header .header-title {
-        display: none !important; /* hero shows "Videos" + tagline on mobile */
+        display: none !important;
+        /* hero shows "Videos" + tagline on mobile */
     }
 
     .shows-page .shows-container {
@@ -5729,15 +5735,18 @@ body.debug-layout .card {
         display: block !important;
         visibility: visible !important;
     }
+
     .shows-page .shows-grid-section,
     .shows-page .shows-grid {
         display: block;
         visibility: visible;
     }
+
     .shows-page .shows-grid-section {
         max-height: none !important;
         overflow: visible !important;
     }
+
     .shows-page .shows-grid {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -5745,9 +5754,11 @@ body.debug-layout .card {
         max-height: none !important;
         overflow: visible !important;
     }
+
     .shows-page .show-card {
         min-height: 0 !important;
     }
+
     .shows-page .show-thumbnail {
         aspect-ratio: 16 / 9;
     }
@@ -13941,6 +13952,7 @@ img.loading {
     padding-right: 12px;
     margin-top: 12px;
 }
+
 .music-container .music-list {
     padding-left: 0;
     padding-right: 0;
@@ -15607,12 +15619,15 @@ img.loading {
     margin: -6px -12px;
     transition: background 0.2s ease, transform 0.15s ease;
 }
+
 .saves-stat-link:hover {
     background: rgba(255, 255, 255, 0.08);
 }
+
 .saves-stat-link:active {
     transform: scale(0.98);
 }
+
 .saves-stat-link .saves-stat-number {
     color: var(--saves-highlight);
 }
@@ -17103,6 +17118,7 @@ img.loading {
     .music-grid {
         grid-template-columns: 1fr;
     }
+
     /* Videos page: keep 2 columns so all items visible when scrolling */
     .shows-page .shows-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -19561,8 +19577,8 @@ img.loading {
 /* Column order: 1. Album art  2. Title  3. Artist  4. Duration  5. Plays  6. Actions — all left-aligned */
 .music-table th.col-art,
 .music-table td.col-art {
-    width: 56px;
-    min-width: 56px;
+    width: 64px;
+    min-width: 64px;
     padding: 10px 12px;
     text-align: left;
     vertical-align: middle;
@@ -19629,18 +19645,18 @@ img.loading {
 
 .music-table th.col-duration,
 .music-table td.col-duration {
-    width: 64px;
-    min-width: 64px;
+    width: 80px;
+    min-width: 80px;
     padding: 10px 12px;
-    text-align: left;
+    text-align: right;
 }
 
 .music-table th.col-plays,
 .music-table td.col-plays {
-    width: 56px;
-    min-width: 56px;
+    width: 80px;
+    min-width: 80px;
     padding: 10px 12px;
-    text-align: left;
+    text-align: right;
 }
 
 .music-table th.col-action,
@@ -19703,14 +19719,14 @@ img.loading {
 /* Album art column: square art + play overlay */
 .music-table .music-table-art-wrap {
     position: relative;
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     flex-shrink: 0;
 }
 
 .music-table .music-table-art {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     border-radius: 6px;
     object-fit: cover;
     display: block;
@@ -26783,6 +26799,7 @@ body.has-player {
 
 /* Hide collapse handle on desktop */
 @media (min-width: 769px) {
+
     .minimize-btn.mobile-only,
     .dock-minimize-btn.mobile-only {
         display: none !important;

@@ -790,7 +790,15 @@ onUnmounted(() => {
   background: #000;
   border-radius: 12px;
   overflow: hidden;
+  /* Desktop default */
   min-height: 48vh;
+  aspect-ratio: 16/9;
+}
+@media (max-width: 768px) {
+  .panelstream-player.hero-player {
+    min-height: auto; /* Let aspect ratio drive height */
+    width: 100%;
+  }
 }
 .hero-player video {
   width: 100%;
@@ -1411,5 +1419,36 @@ onUnmounted(() => {
 @media (max-width: 480px) {
   .channel-button-name { font-size: 16px; }
   .channel-button-next { font-size: 12px; }
+}
+@media (max-width: 768px) {
+  .tv-container {
+    padding-bottom: 80px; /* Space for bottom dock */
+  }
+  .spotlight-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .video-spotlight {
+    padding: 0; /* Full width player */
+  }
+  .panelstream-player.hero-player {
+    border-radius: 0; /* Edge to edge */
+  }
+  .channel-remote {
+    padding: 0 12px;
+    justify-content: space-between;
+  }
+  .remote-btn {
+    width: 44px;
+    height: 44px; /* Larger touch target */
+    font-size: 16px;
+  }
+  #channel-selector {
+    padding: 12px;
+    grid-template-columns: 1fr; /* Stack channels */
+  }
+  .channel-button {
+    height: 50px;
+  }
 }
 </style>

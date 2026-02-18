@@ -30,6 +30,12 @@
           :show-view-toggle="true"
           :view-mode="viewMode"
           @update:viewMode="viewMode = $event"
+          :albums="availableAlbums"
+          :selected-album="selectedAlbum"
+          @update:selectedAlbum="selectedAlbum = $event"
+          :show-favorites-toggle="true"
+          :favorites-only="favoritesOnly"
+          @update:favoritesOnly="favoritesOnly = $event"
           @action="playRandomTrack"
         >
           <template #action>
@@ -253,7 +259,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiFetch } from '../composables/useApi'
 import { usePlayerStore } from '../stores/player'
@@ -290,8 +296,15 @@ const tracks = ref([])
 const loading = ref(true)
 const searchQuery = ref('')
 const selectedArtist = ref('')
+const favoritesOnly = ref(false)
+const selectedAlbum = ref('')
 const sortBy = ref('plays')
 const viewMode = ref('list') // default table/list like Flask
+
+// Reset album when artist changes/clears
+watch(selectedArtist, () => {
+  selectedAlbum.value = ''
+})
 
 const artists = computed(() => {
   const set = new Set()
@@ -299,6 +312,24 @@ const artists = computed(() => {
     if (t.artist) set.add(t.artist)
   }
   return Array.from(set).sort()
+})
+
+const availableAlbums = computed(() => {
+  const map = new Map() // Use map to dedupe by name
+  let source = tracks.value
+  
+  // If an artist is selected, only show albums for that artist
+  if (selectedArtist.value) {
+    source = source.filter(t => t.artist === selectedArtist.value)
+  }
+
+  for (const t of source) {
+    if (t.album) {
+      map.set(t.album, { value: t.album, label: t.album })
+    }
+  }
+  // Sort alphabetically
+  return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label))
 })
 
 // For SubMenuFilter: { value, label, image }
@@ -326,6 +357,8 @@ const sortOptions = [
 
 const filteredTracks = computed(() => {
   let list = [...tracks.value]
+
+  // 1. Filter: Search
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
     list = list.filter(
@@ -335,9 +368,23 @@ const filteredTracks = computed(() => {
         (t.album || '').toLowerCase().includes(q)
     )
   }
+
+  // 2. Filter: Artist (Chip)
   if (selectedArtist.value) {
     list = list.filter((t) => t.artist === selectedArtist.value)
   }
+
+  // 3. Filter: Album (Dropdown)
+  if (selectedAlbum.value) {
+    list = list.filter((t) => t.album === selectedAlbum.value)
+  }
+
+  // 4. Filter: Favorites (Toggle)
+  if (favoritesOnly.value) {
+    list = list.filter((t) => bookmarks.isBookmarked({ id: t.id }))
+  }
+
+  // 5. Sort
   list.sort((a, b) => {
     switch (sortBy.value) {
       case 'title':

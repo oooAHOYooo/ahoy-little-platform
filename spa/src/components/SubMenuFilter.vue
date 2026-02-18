@@ -2,42 +2,21 @@
   <div class="sub-menu-filter" :class="{ 'has-toolbar': hasToolbar }">
     <div class="sub-menu-filter-glass">
       <!-- Single row: filter strip (scroll) + toolbar -->
-      <div class="sub-menu-filter-strip">
-        <button
-          type="button"
-          class="sub-menu-filter-chip"
-          :class="{ active: selectedValue === allValue }"
-          :aria-pressed="selectedValue === allValue"
-          @click="select(allValue)"
+      <!-- Compact Filter Bar -->
+      <div class="sub-menu-filter-row">
+        <!-- Artist Filter (Compact Dropdown) -->
+        <select
+          :value="modelValue"
+          class="sub-menu-filter-sort main-filter"
+          aria-label="Filter by Artist"
+          @change="$emit('update:modelValue', ($event.target).value)"
         >
-          <span v-if="filterAllLabel" class="sub-menu-filter-chip-label">{{ filterAllLabel }}</span>
-          <slot v-else name="all-label">All</slot>
-        </button>
-        <button
-          v-for="item in filters"
-          :key="String(item.value)"
-          type="button"
-          class="sub-menu-filter-chip"
-          :class="{ active: selectedValue === item.value }"
-          :aria-pressed="selectedValue === item.value"
-          :aria-label="item.label"
-          @click="select(item.value)"
-        >
-          <img
-            v-if="item.image"
-            :src="item.image"
-            :alt="item.label"
-            class="sub-menu-filter-chip-avatar"
-            loading="lazy"
-            @error="($event.target).style.display = 'none'"
-          />
-          <span v-else class="sub-menu-filter-chip-avatar sub-menu-filter-chip-avatar-placeholder">
-            {{ (item.label || '').charAt(0).toUpperCase() }}
-          </span>
-          <span class="sub-menu-filter-chip-label">{{ item.label }}</span>
-        </button>
+          <option :value="allValue">{{ filterAllLabel || 'All Artists' }}</option>
+          <option v-for="item in filters" :key="String(item.value)" :value="item.value">
+            {{ item.label }}
+          </option>
+        </select>
       </div>
-      <template v-if="hasToolbar">
         <div v-if="showSearch" class="sub-menu-filter-search">
           <i class="fas fa-search" aria-hidden="true"></i>
           <input
@@ -67,6 +46,29 @@
         >
           <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
+        <select
+          v-if="albums && albums.length"
+          :value="selectedAlbum"
+          class="sub-menu-filter-sort"
+          aria-label="Filter by Album"
+          @change="$emit('update:selectedAlbum', ($event.target).value)"
+        >
+          <option value="">All Albums</option>
+          <option v-for="alb in albums" :key="alb.value" :value="alb.value">{{ alb.label }}</option>
+        </select>
+
+        <button
+          v-if="showFavoritesToggle"
+          type="button"
+          class="sub-menu-filter-view-btn"
+          :class="{ active: favoritesOnly }"
+          title="Show Favorites Only"
+          aria-label="Top Favorites Only"
+          @click="$emit('update:favoritesOnly', !favoritesOnly)"
+        >
+          <i :class="favoritesOnly ? 'fas fa-heart' : 'far fa-heart'" aria-hidden="true"></i>
+        </button>
+
         <div v-if="showViewToggle" class="sub-menu-filter-view">
           <button
             type="button"
@@ -99,7 +101,6 @@
             <span>{{ actionLabel }}</span>
           </slot>
         </button>
-      </template>
     </div>
   </div>
 </template>
@@ -130,9 +131,15 @@ const props = defineProps({
   /** Primary action button */
   actionLabel: { type: String, default: '' },
   actionIcon: { type: String, default: '' },
+  /** Favorites Toggle */
+  showFavoritesToggle: { type: Boolean, default: false },
+  favoritesOnly: { type: Boolean, default: false },
+  /** Album Filter */
+  albums: { type: Array, default: () => [] },
+  selectedAlbum: { type: String, default: '' },
 })
 
-const emit = defineEmits(['update:modelValue', 'update:searchQuery', 'update:sortBy', 'update:viewMode', 'action'])
+const emit = defineEmits(['update:modelValue', 'update:searchQuery', 'update:sortBy', 'update:viewMode', 'update:favoritesOnly', 'update:selectedAlbum', 'action'])
 
 const selectedValue = computed({
   get: () => props.modelValue,
@@ -165,87 +172,38 @@ function select(value) {
   -webkit-backdrop-filter: blur(28px);
   border-radius: 12px 12px 0 0;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 8px 12px 10px;
+  padding: 8px 12px;
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 10px;
-  flex-wrap: nowrap;
+  gap: 8px;
+  flex-wrap: wrap; /* Allow wrapping on very small screens */
 }
 
-.sub-menu-filter-strip {
+.sub-menu-filter-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  flex: 1;
+  flex: 1; /* Take up available space */
   min-width: 0;
 }
 
-.sub-menu-filter-strip::-webkit-scrollbar {
-  display: none;
-}
-
-.sub-menu-filter-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.sub-menu-filter-chip:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.sub-menu-filter-chip.active {
-  background: rgba(255, 255, 255, 0.12);
+/* Make the main artist filter prominent */
+.sub-menu-filter-sort.main-filter {
+  background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
   color: #fff;
-}
-
-.sub-menu-filter-chip-avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.sub-menu-filter-chip-avatar-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 11px;
   font-weight: 600;
+  flex: 1; /* Expand to fill space on mobile */
+  min-width: 120px;
 }
 
-.sub-menu-filter-chip-label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
-}
-
-/* Toolbar items (same row, right side) */
+/* Toolbar items */
 .sub-menu-filter-search {
-  flex-shrink: 0;
-  width: 160px;
+  flex-shrink: 1;
+  width: auto;
+  min-width: 100px;
+  max-width: 160px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -285,6 +243,33 @@ function select(value) {
 
 .sub-menu-filter-search-clear:hover {
   color: rgba(255, 255, 255, 0.9);
+}
+
+.sub-menu-filter-sort {
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 0;
+  flex-shrink: 0;
+  appearance: none; /* Let's normalize it slightly, or use custom arrow if desired */
+  /* Add custom chevron if needed, for now standard select is native and accessible */
+}
+
+/* On mobile, ensure things fit */
+@media (max-width: 768px) {
+  .sub-menu-filter-glass {
+    gap: 6px;
+    padding: 8px 10px;
+  }
+  .sub-menu-filter-sort {
+    font-size: 13px;
+    padding: 6px 8px;
+    max-width: 140px; /* Constrain width */
+  }
 }
 
 .sub-menu-filter-sort {
@@ -354,19 +339,6 @@ function select(value) {
 @media (max-width: 768px) {
   .sub-menu-filter-glass {
     padding: 8px 12px 10px;
-  }
-  .sub-menu-filter-chip {
-    padding: 5px 10px;
-    font-size: 14px;
-  }
-  .sub-menu-filter-chip-avatar,
-  .sub-menu-filter-chip-avatar-placeholder {
-    width: 20px;
-    height: 20px;
-    font-size: 10px;
-  }
-  .sub-menu-filter-chip-label {
-    max-width: 90px;
   }
   .sub-menu-filter-search {
     width: 100px;
