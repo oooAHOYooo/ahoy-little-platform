@@ -3,7 +3,7 @@
 {% block title %}Admin - Orders & Stats{% endblock %}
 
 {% block content %}
-<div class="admin-ro" x-data="adminDashboard({{ current_user.id|default('null') }})" x-init="init()">
+<div class="admin-ro admin-neon" x-data="adminDashboard({{ current_user.id|default('null') }})" x-init="init()">
   <div class="admin-ro-header">
     <div>
       <h1>Admin</h1>
@@ -432,35 +432,51 @@ function adminDashboard(currentUserId) {
 </script>
 
 <style>
-  .admin-ro { max-width: 1100px; margin: 0 auto; padding: 18px 18px 40px; }
+  /* Dark neon liquid glow – admin only */
+  .admin-neon { background: linear-gradient(160deg, #06050a 0%, #0c0a12 25%, #0a0814 50%, #080610 75%, #050408 100%); min-height: 100vh; position: relative; }
+  .admin-neon::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 212, 255, 0.08) 0%, transparent 50%), radial-gradient(ellipse 60% 40% at 100% 80%, rgba(176, 38, 255, 0.06) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+  .admin-ro { max-width: 1100px; margin: 0 auto; padding: 18px 18px 40px; position: relative; z-index: 1; }
   .admin-ro-header { display:flex; align-items:flex-end; justify-content:space-between; gap: 12px; margin-bottom: 14px; }
-  .admin-ro-header h1 { margin: 0; }
-  .admin-ro-header .muted { margin: 4px 0 0; color: rgba(255,255,255,0.65); }
+  .admin-ro-header h1 { margin: 0; color: #e8e6f0; text-shadow: 0 0 20px rgba(0, 212, 255, 0.4), 0 0 40px rgba(176, 38, 255, 0.2); font-weight: 700; }
+  .admin-ro-header .muted { margin: 4px 0 0; color: rgba(0, 212, 255, 0.7); }
+  .admin-neon .muted { color: rgba(0, 212, 255, 0.6); }
   .admin-ro-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 12px; }
   @media (max-width: 768px){ .admin-ro-grid{ grid-template-columns: 1fr; } }
+  .admin-neon .card.glass { background: linear-gradient(145deg, rgba(12, 10, 22, 0.85) 0%, rgba(8, 6, 18, 0.9) 100%); border: 1px solid rgba(0, 212, 255, 0.15); border-radius: 16px; box-shadow: 0 0 24px rgba(0, 212, 255, 0.06), inset 0 1px 0 rgba(255,255,255,0.03); }
+  .admin-neon .card-header { color: rgba(0, 212, 255, 0.9); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; border-bottom: 1px solid rgba(0, 212, 255, 0.1); padding-bottom: 8px; margin-bottom: 8px; }
+  .admin-neon .stat-lg { color: #fff; font-weight: 800; text-shadow: 0 0 16px rgba(0, 212, 255, 0.5), 0 0 32px rgba(176, 38, 255, 0.2); }
+  .admin-neon .card-body .muted { color: rgba(0, 212, 255, 0.65); }
+  .admin-neon .card-body .muted strong { color: rgba(176, 38, 255, 0.9); text-shadow: 0 0 10px rgba(176, 38, 255, 0.3); }
   .admin-ro-analytics-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-top: 12px; }
   .daily-plays-chart { display:flex; align-items:flex-end; gap: 8px; height: 120px; padding: 8px 0; }
   .chart-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; height:100%; }
-  .chart-bar { width:100%; background: linear-gradient(180deg, rgba(82,136,255,0.85) 0%, rgba(82,136,255,0.55) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.3s; }
-  .chart-label { margin-top: 6px; font-size: 10px; color: rgba(255,255,255,0.55); text-align:center; }
+  .admin-neon .chart-bar { width:100%; background: linear-gradient(180deg, rgba(0, 212, 255, 0.9) 0%, rgba(176, 38, 255, 0.5) 100%); border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.3s; box-shadow: 0 0 12px rgba(0, 212, 255, 0.4); }
+  .chart-label { margin-top: 6px; font-size: 10px; color: rgba(0, 212, 255, 0.6); text-align:center; }
   .source-stats { display:flex; gap: 24px; }
   .source-item { flex:1; }
-  .source-label { font-size: 12px; color: rgba(255,255,255,0.65); margin-bottom: 4px; }
-  .source-value { font-size: 24px; font-weight: 900; color: rgba(255,255,255,0.95); }
+  .admin-neon .source-label { font-size: 12px; color: rgba(0, 212, 255, 0.65); margin-bottom: 4px; }
+  .admin-neon .source-value { font-size: 24px; font-weight: 900; color: #fff; text-shadow: 0 0 14px rgba(176, 38, 255, 0.4); }
   .admin-ro-section { margin-top: 18px; }
   .admin-ro-section-head { display:flex; align-items:baseline; justify-content:space-between; gap: 12px; margin: 8px 2px; }
-  .admin-ro-table-wrap { border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; }
+  .admin-neon .admin-ro-section-head h2, .admin-neon .admin-ro-section-head h3 { color: rgba(0, 212, 255, 0.95); text-shadow: 0 0 12px rgba(0, 212, 255, 0.2); }
+  .admin-neon .admin-ro-section-head .muted { color: rgba(0, 212, 255, 0.6); }
+  .admin-ro-table-wrap { border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 16px; overflow: hidden; box-shadow: 0 0 20px rgba(0, 212, 255, 0.05), inset 0 0 40px rgba(0, 0, 0, 0.3); }
   .admin-ro-table { width:100%; border-collapse: collapse; }
-  .admin-ro-table th, .admin-ro-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align:left; font-size: 12px; }
-  .admin-ro-table th { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,0.65); }
+  .admin-ro-table th, .admin-ro-table td { padding: 10px 12px; border-bottom: 1px solid rgba(0, 212, 255, 0.08); text-align:left; font-size: 12px; color: rgba(232, 230, 240, 0.95); }
+  .admin-ro-table th { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(0, 212, 255, 0.8); }
   .admin-ro-table tr:last-child td { border-bottom: 0; }
-  .pill { display:inline-flex; align-items:center; padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); text-transform: uppercase; letter-spacing:.10em; font-size:10px; }
-  .pill.st-paid { border-color: rgba(16,185,129,0.35); background: rgba(16,185,129,0.10); }
-  .pill.st-pending { border-color: rgba(245,158,11,0.30); background: rgba(245,158,11,0.10); }
-  .pill.st-fulfilled { border-color: rgba(59,130,246,0.28); background: rgba(59,130,246,0.10); }
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:1000; }
-  .modal-content { background:rgba(30,30,40,0.95); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:24px; min-width:340px; max-width:90vw; }
-  .modal-content h3 { margin:0 0 8px 0; }
-  .btn-small { padding:6px 12px; font-size:11px; }
+  .admin-ro-table tbody tr:hover { background: rgba(0, 212, 255, 0.04); }
+  .pill { display:inline-flex; align-items:center; padding: 4px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing:.10em; font-size:10px; }
+  .admin-neon .pill { border: 1px solid; background: rgba(0,0,0,0.25); }
+  .admin-neon .pill.st-paid { border-color: rgba(0, 255, 170, 0.6); color: #00ffaa; box-shadow: 0 0 10px rgba(0, 255, 170, 0.3); }
+  .admin-neon .pill.st-pending { border-color: rgba(255, 200, 50, 0.6); color: #ffc832; box-shadow: 0 0 10px rgba(255, 200, 50, 0.25); }
+  .admin-neon .pill.st-fulfilled { border-color: rgba(0, 212, 255, 0.6); color: #00d4ff; box-shadow: 0 0 10px rgba(0, 212, 255, 0.25); }
+  .admin-neon .btn { border: 1px solid rgba(0, 212, 255, 0.35); color: rgba(0, 212, 255, 0.95); background: rgba(0, 212, 255, 0.08); }
+  .admin-neon .btn:hover { background: rgba(0, 212, 255, 0.15); box-shadow: 0 0 16px rgba(0, 212, 255, 0.3); }
+  .admin-neon .btn-small { padding:6px 12px; font-size:11px; border-color: rgba(176, 38, 255, 0.4); color: rgba(232, 230, 240, 0.95); background: rgba(176, 38, 255, 0.1); }
+  .admin-neon .btn-small:hover { box-shadow: 0 0 12px rgba(176, 38, 255, 0.35); }
+  .modal-overlay { position:fixed; inset:0; background: rgba(4, 2, 10, 0.9); display:flex; align-items:center; justify-content:center; z-index:1000; }
+  .modal-content { background: linear-gradient(145deg, #0c0a14 0%, #080610 100%); border: 1px solid rgba(0, 212, 255, 0.25); border-radius:16px; padding:24px; min-width:340px; max-width:90vw; box-shadow: 0 0 40px rgba(0, 212, 255, 0.1), 0 0 80px rgba(176, 38, 255, 0.05); }
+  .modal-content h3 { margin:0 0 8px 0; color: rgba(0, 212, 255, 0.95); }
 </style>
 {% endblock %}
