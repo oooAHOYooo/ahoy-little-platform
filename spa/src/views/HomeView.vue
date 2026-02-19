@@ -119,6 +119,10 @@
       </div>
     </section>
 
+    <!-- Explore Widgets (Podcasts, Videos, Radio, Music, Artists) -->
+    <!-- Priority: Habits (Recent/Saves) First -->
+    <ExploreWidgets />
+
     <!-- What's New at Ahoy (same as Flask) -->
     <section class="whats-new-section">
       <div class="whats-new-container">
@@ -163,6 +167,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiFetchCached } from '../composables/useApi'
 import { usePlayerStore } from '../stores/player'
+import ExploreWidgets from '../components/ExploreWidgets.vue'
 
 const router = useRouter()
 const playerStore = usePlayerStore()

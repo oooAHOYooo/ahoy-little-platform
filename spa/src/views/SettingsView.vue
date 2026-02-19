@@ -103,6 +103,35 @@
           </div>
         </div>
 
+        <!-- Appearance Settings -->
+        <div class="settings-section neu-card">
+          <h2><i class="fas fa-palette"></i> Appearance</h2>
+          <div class="settings-row">
+            <div class="setting-toggle-label">
+              <span class="setting-toggle-title">Theme</span>
+              <span class="setting-toggle-desc">Choose your preferred look</span>
+            </div>
+            <div class="theme-options" style="display: flex; gap: 10px;">
+               <button 
+                 type="button"
+                 class="neu-btn" 
+                 :class="theme.currentTheme.value === 'default' ? 'neu-btn-primary' : 'neu-btn-secondary'"
+                 @click="theme.setTheme('default')"
+               >
+                 Default
+               </button>
+               <button 
+                 type="button"
+                 class="neu-btn" 
+                 :class="theme.currentTheme.value === 'after-dark' ? 'neu-btn-primary' : 'neu-btn-secondary'"
+                 @click="theme.setTheme('after-dark')"
+               >
+                 After Dark
+               </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Experimental Features -->
         <div class="settings-section neu-card experimental-section">
           <h2><i class="fas fa-flask"></i> Experimental</h2>
@@ -188,11 +217,13 @@ import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { apiFetch } from '../composables/useApi'
 import { usePlayerStore } from '../stores/player'
+import { useTheme } from '../composables/useTheme'
 import { isSaveChimeEnabled, setSaveChimeEnabled, playSaveChime, isTapChimeEnabled, setTapChimeEnabled, playTapChime } from '../composables/useSaveChime'
 
 const router = useRouter()
 const auth = useAuth()
 const playerStore = usePlayerStore()
+const theme = useTheme()
 const dialEl = ref(null)
 
 const audioSettings = reactive({ masterVolume: 75 })

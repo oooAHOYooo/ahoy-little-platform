@@ -875,6 +875,70 @@ html::-webkit-scrollbar-thumb:hover {
     --bottombar-h: 70px;
 }
 
+/* After Dark Theme */
+body.theme-after-dark {
+    /* Based on Cloudflare After Dark: Deep Purples, Vibrants Oranges/Reds */
+    --primary-color: #ff4d00;
+    /* Bright Orange-Red */
+    --secondary-color: #9d00ff;
+    /* Vivid Purple */
+    --accent-color: #ff9100;
+    /* Amber/Gold */
+
+    --background-dark: #120b1f;
+    /* Deep Purple-Black */
+    --background-medium: #1f1235;
+    /* Dark Purple */
+    --background-light: #2d1b4e;
+    /* Medium Purple */
+
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 230, 255, 0.85);
+    --text-muted: rgba(255, 200, 255, 0.6);
+
+    --border-color: rgba(255, 100, 255, 0.15);
+    --success-color: #00ff9d;
+    --warning-color: #ffaa00;
+    --error-color: #ff3366;
+
+    /* Override specific component backgrounds if needed */
+    background: linear-gradient(135deg, #120b1f 0%, #2a0e36 100%);
+    background-attachment: fixed;
+}
+
+/* Specific overrides for After Dark to ensure contrast */
+body.theme-after-dark .neu-card,
+body.theme-after-dark .settings-page,
+body.theme-after-dark .app-sidebar,
+body.theme-after-dark .app-navbar,
+body.theme-after-dark .mobile-menu-drawer,
+body.theme-after-dark .mini-player,
+body.theme-after-dark .compact-footer {
+    background-color: transparent !important;
+    /* Let gradient show through or use semi-transparent */
+    background: rgba(31, 18, 53, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.theme-after-dark .neu-btn-primary {
+    background: linear-gradient(135deg, #ff4d00, #ff0055);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255, 77, 0, 0.4);
+}
+
+body.theme-after-dark .neu-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+body.theme-after-dark .nav-link.active,
+body.theme-after-dark .router-link-active {
+    color: var(--primary-color);
+}
+
+
 @media (max-width: 768px) {
     :root {
         --gutter: 16px;

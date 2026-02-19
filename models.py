@@ -671,3 +671,28 @@ class WhatsNewItem(Base):
         Index('ix_whats_new_year_month', 'year', 'month'),
     )
 
+
+class AnalyticsEvent(Base):
+    """
+    Tracks user analytics events (page views, clicks, etc.)
+    Used for generating heatmaps and usage reports.
+    """
+    __tablename__ = 'analytics_events'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True, index=True)
+    event_type = Column(String(50), nullable=False, index=True)  # page_view, click, feature_use
+    path = Column(String(255), nullable=True, index=True)  # URL path or screen name
+    metadata_json = Column(JSON, nullable=True)  # Additional data (browser, device, etc.)
+    ip_address = Column(String(45), nullable=True) # Anonymized or hashed IP
+    session_id = Column(String(100), nullable=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    __table_args__ = (
+        Index('ix_analytics_events_type_created_at', 'event_type', 'created_at'),
+    )
+
+    def __repr__(self) -> str:
+        return f"<AnalyticsEvent id={self.id} type={self.event_type} path={self.path}>"
+
+

@@ -255,6 +255,12 @@ const routes = [
     name: 'not-found',
     component: () => import('./views/NotFoundView.vue'),
   },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: () => import('./views/AdminDashboardView.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true } // Logic handled in component or global guard
+  },
 ]
 
 const router = createRouter({
@@ -263,6 +269,23 @@ const router = createRouter({
   scrollBehavior() {
     return { top: 0 }
   },
+})
+
+// Analytics tracking
+router.afterEach((to) => {
+  try {
+    fetch('/api/admin/analytics/event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'page_view',
+        path: to.path,
+        metadata: { name: to.name, params: to.params }
+      })
+    }).catch(err => console.error('Analytics error', err))
+  } catch (e) {
+    // ignore
+  }
 })
 
 export default router

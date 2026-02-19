@@ -57,6 +57,7 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePlayerStore } from './stores/player'
+import { useTheme } from './composables/useTheme'
 import { useWakeLock } from './composables/useNative'
 import { restoreSession } from './composables/useAuth'
 import { useMobileCollapse } from './composables/useMobileCollapse'
@@ -143,6 +144,7 @@ function onGlobalClick(e) {
 
 onMounted(() => {
   restoreSession()
+  useTheme().initTheme()
   window.addEventListener('online', onOnline)
   window.addEventListener('offline', onOffline)
   document.addEventListener('click', onGlobalClick, true)

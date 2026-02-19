@@ -43,6 +43,12 @@ export async function apiFetch(path, options = {}) {
   })
 
   if (!response.ok) {
+    if (response.status === 401) {
+      // Session expired or invalid
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login'
+      }
+    }
     throw new Error(`API ${path}: ${response.status}`)
   }
 

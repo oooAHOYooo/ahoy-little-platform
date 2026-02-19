@@ -262,6 +262,9 @@ def create_app():
     app.register_blueprint(boost_api_bp)
     app.register_blueprint(stripe_webhooks_bp)
     
+    from blueprints.admin import bp as admin_bp
+    app.register_blueprint(admin_bp)
+    
     # Initialize search index
     with app.app_context():
         initialize_search_index()
