@@ -19,6 +19,10 @@ def init_csrf(app):
     @csrf.exempt
     def exempt_json_requests():
         """Exempt JSON requests from CSRF if they have the token in header"""
+        # Hotfix: Analytics endpoint used by client without session causes 502 loop
+        if request.path == '/api/admin/analytics/event':
+            return True
+
         if request.is_json and request.headers.get('X-CSRFToken'):
             return False  # Don't exempt - validate the header token
         return request.is_json  # Exempt other JSON requests

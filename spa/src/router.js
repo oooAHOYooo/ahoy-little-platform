@@ -271,6 +271,36 @@ const router = createRouter({
   },
 })
 
+// Circuit Breaker: Prevent infinite redirect loops (flashing)
+const historyStack = []
+router.beforeEach((to, from, next) => {
+  const now = Date.now()
+  historyStack.push({ path: to.path, time: now })
+
+  // Keep history manageable
+  if (historyStack.length > 10) historyStack.shift()
+
+  // Check for rapid oscillation pattern: A -> B -> A -> B within 2 seconds
+  if (historyStack.length >= 4) {
+    const [a, b, c, d] = historyStack.slice(-4)
+    // Same paths alternating?
+    if (a.path === c.path && b.path === d.path && a.path !== b.path) {
+      // Is it happening fast?
+      if (d.time - a.time < 2000) {
+        console.error(`[Router] Redirect loop detected: ${a.path} <-> ${b.path}. Aborting navigation to /${to.name || 'path'}`)
+        return next(false)
+      }
+    }
+  }
+
+  // Debug logging for troubleshooting
+  if (import.meta.env.DEV || window.location.search.includes('debug=1')) {
+    console.log(`[Router] ${from.path} -> ${to.path}`)
+  }
+
+  next()
+})
+
 // Analytics tracking
 router.afterEach((to) => {
   try {
