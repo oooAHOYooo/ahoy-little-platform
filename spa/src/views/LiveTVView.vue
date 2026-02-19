@@ -37,7 +37,11 @@
           </div>
 
           <!-- Remote controls below video -->
-          <div class="channel-remote remote-below" aria-label="Channel Controls">
+          <div 
+            class="channel-remote remote-below" 
+            :class="{ 'vibes-hidden': !showControls }"
+            aria-label="Channel Controls"
+          >
             <button type="button" class="remote-btn" title="Play/Pause" @click="togglePlay">
               <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
             </button>
@@ -56,21 +60,13 @@
             <button type="button" class="remote-btn" title="Channel Down" @click="channelDown">
               <i class="fas fa-chevron-down"></i>
             </button>
+            <!-- Manual hide button -->
+            <button type="button" class="remote-btn hide-vibes-btn" title="Hide Controls" @click="showControls = false">
+              <i class="fas fa-eye-slash"></i>
+            </button>
           </div>
 
           <!-- Playing now bar with progress -->
-          <div class="playing-now glass">
-            <img :src="nowThumb" alt="" />
-            <div class="now-col">
-              <div class="np-title">{{ nowTitle }}</div>
-              <div class="np-sub">{{ nowMeta }}</div>
-            </div>
-            <div class="next-col">
-              <div class="np-label">Up Next</div>
-              <div class="np-next">{{ upNextTitle }}</div>
-            </div>
-            <div class="ltv-progress-wrap"><div class="ltv-progress" :style="{ width: progressPct + '%' }"></div></div>
-          </div>
         </div>
 
         <!-- Right dashboard (hidden on mobile) -->
@@ -89,90 +85,8 @@
       </div>
     </div>
 
-    <!-- Channel selector -->
-    <div id="channel-selector">
-      <template v-if="loading">
-        <div v-for="i in 4" :key="'skeleton-' + i" class="channel-button" style="pointer-events:none">
-          <div class="skeleton" style="height:20px;width:70%;margin-bottom:8px"></div>
-          <div class="skeleton" style="height:14px;width:50%"></div>
-        </div>
-      </template>
-      <template v-else-if="channels.length === 0">
-        <div class="channel-selector-empty">
-          <p class="channel-selector-empty-text">{{ loadError ? 'Couldn\'t load channels' : 'No channels available' }}</p>
-          <p v-if="loadError" class="channel-selector-empty-hint">Check your connection and try again.</p>
-          <button type="button" class="channel-selector-retry" @click="loadChannels">
-            <i class="fas fa-sync-alt"></i> Retry
-          </button>
-        </div>
-      </template>
-      <button
-        v-else
-        v-for="(ch, idx) in channels"
-        :key="ch.id"
-        type="button"
-        class="channel-button"
-        :class="{ active: selectedRow === idx }"
-        @click="selectChannel(idx)"
-        @mouseenter="startHoverPreview($event, idx)"
-        @mouseleave="hideHoverPreview"
-      >
-        <!-- Left Strip (Rotated Identity) -->
-        <div class="channel-strip" :style="{ '--strip-color': pillColors[idx % 4] }">
-          <div class="channel-sideways-text">
-            CH {{ String(idx + 1).padStart(2, '0') }} <span class="bullet">•</span> {{ ch.name }}
-          </div>
-        </div>
-
-        <!-- Main Content Area -->
-        <div class="channel-content">
-          <div class="cc-header">
-            <div class="cc-status" v-if="selectedRow === idx">
-              <span class="pulsing-dot"></span> WATCHING
-            </div>
-            <div class="cc-time" v-if="getCurrentSlot(idx)">
-               {{ fmtTime(new Date(getCurrentSlot(idx).startUTC)) }}
-            </div>
-          </div>
-          
-          <div class="cc-program">
-            <div class="cc-title">{{ channelNowTitle(idx) }}</div>
-            <div class="cc-meta" v-if="getCurrentSlot(idx)">
-               {{ getCurrentSlot(idx).category || ch.name }}
-            </div>
-          </div>
-
-          <!-- Up Next (Mobile Optimized) -->
-          <div class="cc-up-next" v-if="getNextSlot(idx)">
-            <span class="un-label">Next:</span> {{ cleanTitle(getNextSlot(idx).title) }}
-          </div>
-
-          <!-- Progress Bar at bottom of content -->
-          <div class="cc-progress-track" v-if="getCurrentSlot(idx)">
-             <div class="cc-progress-fill" :style="{ width: getChannelProgress(idx) + '%', background: pillColors[idx % 4] }"></div>
-          </div>
-        </div>
-
-        <!-- Background Image (blurred/faded) or Gradient Fallback -->
-        <div class="channel-bg-image" :style="getChannelBg(idx)"></div>
-        <div class="channel-bg-overlay"></div>
-      </button>
-    </div>
-
-    <!-- Hover preview tooltip -->
-    <div
-      v-if="hoverPreview.visible"
-      class="live-tv-channel-preview visible"
-      :style="{ left: hoverPreview.x + 'px', top: hoverPreview.y + 'px' }"
-      aria-hidden="true"
-    >
-      <img :src="hoverPreview.thumb" alt="" />
-      <div class="live-tv-channel-preview-title">{{ hoverPreview.title }}</div>
-      <div class="live-tv-channel-preview-meta">{{ hoverPreview.meta }}</div>
-    </div>
-
-    <!-- TV Guide section -->
-    <div ref="guideRef" class="live-tv-container" aria-label="TV Guide">
+    <!-- TV Guide section (Moved flush under controls) -->
+    <div ref="guideRef" class="live-tv-container guide-flush" aria-label="TV Guide">
       <aside class="live-tv-sidebar" :class="{ open: mobileDrawerOpen }" aria-label="Channels">
         <ul class="channel-list" role="listbox" aria-label="Live TV Channels">
           <li
@@ -206,8 +120,6 @@
               <span>Navigate</span>
               <span class="kbd">&uarr;</span><span class="kbd">&darr;</span>
               <span class="kbd">&larr;</span><span class="kbd">&rarr;</span>
-              <span>Tune to channel</span>
-              <span class="kbd">Enter</span>
             </div>
           </div>
           <div class="guide-timebar">
@@ -227,18 +139,19 @@
                     :key="rowIdx + '-' + colIdx"
                     class="program"
                     :class="{ selected: guideFocus.row === rowIdx && guideFocus.col === colIdx }"
-                    :style="{ width: prog.widthPx + 'px' }"
                     :data-row="rowIdx"
                     :data-col="colIdx"
                     tabindex="0"
                     role="gridcell"
                     :aria-label="prog.title + ' • ' + prog.durMin + ' min'"
-                    @click="setGuideFocus(rowIdx, colIdx); selectChannel(rowIdx)"
-                    @keydown.enter="setGuideFocus(rowIdx, colIdx); selectChannel(rowIdx)"
+                    :style="{
+                       width: prog.widthPx + 'px',
+                       background: pillColors[rowIdx % 4],
+                       boxShadow: '0 0 10px ' + pillColors[rowIdx % 4] + '66, inset 0 0 5px rgba(255,255,255,0.2)'
+                    }"
                   >
-                    <img class="program-thumb" :src="prog.thumbnail" :alt="prog.title" loading="lazy" />
-                    <div class="program-title">{{ prog.title }}</div>
-                    <div class="program-meta">{{ prog.timeLabel }} &bull; {{ prog.category }}</div>
+                    <!-- No Thumbnail -->
+                    <div class="program-title" style="font-size:11px; opacity:0.9">{{ prog.title }}</div>
                   </div>
                 </div>
               </div>
@@ -268,12 +181,17 @@ const loading = ref(true)
 const loadError = ref(false)
 const isPlaying = ref(false)
 const isMuted = ref(true)
-const nowTitle = ref('Live')
-const nowMeta = ref('—')
-const nowThumb = ref(DEFAULT_COVER)
-const upNextTitle = ref('—')
-const progressPct = ref(0)
 const mobileDrawerOpen = ref(false)
+const showControls = ref(true)
+let controlsTimer = null
+
+function resetControlsTimer() {
+  showControls.value = true
+  if (controlsTimer) clearTimeout(controlsTimer)
+  controlsTimer = setTimeout(() => {
+    showControls.value = false
+  }, 5000)
+}
 
 // Generated thumbnails from video frames (videoUrl -> data URL) when item has no thumbnail
 const generatedThumbs = ref({})
@@ -804,6 +722,24 @@ async function loadChannels() {
     }
   }
   channels.value = parseLiveTvChannels(data || {})
+  
+  // FALLBACK: If a channel has no items, generate placeholders so it looks like a timeline
+  channels.value.forEach((ch, idx) => {
+    if (!ch.items || ch.items.length === 0) {
+      // Generate 24 hours of placeholder content
+      const placeholders = []
+      const titles = ['Broadcast', 'Live Segment', 'Commercial Break', 'Station ID']
+      for (let i = 0; i < 24; i++) {
+         placeholders.push({
+           title: titles[i % titles.length] + ' #' + (i+1),
+           duration_seconds: 3600, // 1 hour blocks
+           category: ch.name
+         })
+      }
+      ch.items = placeholders
+    }
+  })
+
   if (channels.value.length) {
     buildSchedule()
     tick()
@@ -824,12 +760,18 @@ async function loadChannels() {
 // --- Lifecycle ---
 onMounted(async () => {
   document.addEventListener('keydown', onGlobalKeydown)
+  window.addEventListener('mousemove', resetControlsTimer)
+  window.addEventListener('touchstart', resetControlsTimer)
+  resetControlsTimer()
   await loadChannels()
 })
 
 onUnmounted(() => {
   if (engineTimer) clearInterval(engineTimer)
   if (hoverTimer) clearTimeout(hoverTimer)
+  if (controlsTimer) clearTimeout(controlsTimer)
+  window.removeEventListener('mousemove', resetControlsTimer)
+  window.removeEventListener('touchstart', resetControlsTimer)
   document.removeEventListener('keydown', onGlobalKeydown)
 })
 </script>
@@ -840,17 +782,18 @@ onUnmounted(() => {
   background: #000;
   min-height: 100vh;
   color: #e5e7eb;
+  padding-bottom: 0; /* Remove bottom padded space if any */
 }
 
 /* ===== Hero Player ===== */
 .video-spotlight {
-  padding: 0 12px;
+  padding: 0; /* FLUSH */
 }
 .spotlight-grid {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 16px;
-  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* FLUSH */
+  max-width: 100%;
   margin: 0 auto;
 }
 .spotlight-left {
@@ -859,11 +802,13 @@ onUnmounted(() => {
 .panelstream-player.hero-player {
   position: relative;
   background: #000;
-  border-radius: 12px;
+  border-radius: 0; /* Flush edges */
   overflow: hidden;
-  /* Desktop default */
-  min-height: 48vh;
-  aspect-ratio: 16/9;
+  /* Revert strict height, just ensure it doesn't go crazy */
+  width: 100%;
+  aspect-ratio: 2.39/1; /* Spaghetti Western / Cinemascope */
+  max-height: 70vh;
+  margin: 0 auto;
 }
 @media (max-width: 768px) {
   .panelstream-player.hero-player {
@@ -913,8 +858,10 @@ onUnmounted(() => {
 .channel-remote.remote-below {
   display: flex;
   gap: 8px;
-  padding: 12px 0;
+  padding: 8px 12px; /* Slight padding for touch, but bg connects */
   justify-content: center;
+  background: #000; /* Match player bg for flush look */
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
 .remote-btn {
   display: flex;
@@ -939,44 +886,20 @@ onUnmounted(() => {
   background: rgba(255,255,255,0.15);
 }
 
-/* ===== Playing Now Bar ===== */
-.playing-now {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 10px;
-  position: relative;
-  overflow: hidden;
-}
-.playing-now img {
-  width: 50px;
-  height: 34px;
-  object-fit: cover;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-.now-col { flex: 1; min-width: 0; }
-.np-title { font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.np-sub { font-size: 11px; opacity: 0.7; }
-.next-col { flex-shrink: 0; text-align: right; }
-.np-label { font-size: 10px; text-transform: uppercase; opacity: 0.5; letter-spacing: 0.5px; }
-.np-next { font-size: 13px; opacity: 0.85; }
 
-.ltv-progress-wrap {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: rgba(255,255,255,0.08);
+.vibes-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.5s ease;
 }
-.ltv-progress {
-  height: 100%;
-  background: #3b82f6;
-  transition: width 1s linear;
+
+.channel-remote {
+  transition: opacity 0.5s ease;
+}
+
+.guide-flush {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 /* ===== Right Dashboard ===== */
@@ -1015,106 +938,6 @@ onUnmounted(() => {
 .rd-meta {
   font-size: 12px;
   opacity: 0.7;
-}
-
-/* ===== Channel Selector ===== */
-#channel-selector {
-  padding: 32px 16px;
-  background: #000;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-.channel-button {
-  background: #111;
-  border: 2px solid #222;
-  border-radius: 12px;
-  padding: 24px;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: center;
-  color: #fff;
-  font-family: inherit;
-  font-size: inherit;
-}
-.channel-button:hover {
-  background: #1a1a1a;
-  border-color: #444;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-}
-.channel-button.active {
-  background: #1a1a1a;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
-}
-.channel-button-name {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-.channel-button-next {
-  font-size: 13px;
-  color: #999;
-  margin-top: 8px;
-}
-
-.channel-info-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  text-align: left;
-}
-.channel-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: rgba(255,255,255,0.9);
-  flex-shrink: 0;
-}
-.channel-text {
-  flex: 1;
-  min-width: 0;
-}
-.channel-button-current {
-  font-size: 13px;
-  color: rgba(255,255,255,0.7);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.cb-now {
-  color: #3b82f6;
-  font-weight: 600;
-  margin-right: 4px;
-  text-transform: uppercase;
-  font-size: 11px;
-}
-.channel-meta {
-  font-size: 11px;
-  color: rgba(255,255,255,0.4);
-  margin-top: 2px;
-}
-
-.channel-progress-track {
-  margin-top: 12px;
-  height: 4px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 2px;
-  overflow: hidden;
-  width: 100%;
-}
-.channel-progress-fill {
-  height: 100%;
-  background: #3b82f6;
-  border-radius: 2px;
 }
 
 /* ===== Channel selector empty / retry (mobile-friendly) ===== */
@@ -1203,15 +1026,17 @@ onUnmounted(() => {
 .live-tv-container {
   display: grid;
   grid-template-columns: 260px 1fr;
-  gap: 16px;
-  padding: 12px;
-  max-width: 1200px;
+  gap: 0; /* FLUSH */
+  padding: 0; /* FLUSH */
+  max-width: 100%;
   margin: 0 auto;
+  background: #000;
 }
 .live-tv-sidebar {
   background: #0f0f0f;
-  border-radius: 8px;
+  border-radius: 0;
   padding: 8px;
+  border-right: 1px solid rgba(255,255,255,0.05);
 }
 .channel-list {
   list-style: none;
@@ -1247,11 +1072,10 @@ onUnmounted(() => {
 }
 
 .guide {
-  background: rgba(15, 15, 15, 0.4);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  background: #000;
+  backdrop-filter: none;
+  border: none;
+  border-radius: 0;
   padding: 0;
   overflow: hidden;
   min-height: 48vh;
@@ -1338,22 +1162,31 @@ onUnmounted(() => {
   min-width: 1200px;
 }
 .program {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 10px;
+  /* Neuromorphic block style */
+  border-radius: 6px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  color: #e5e7eb;
-  cursor: pointer;
+  justify-content: center;
+  gap: 4px;
+  color: #fff;
+  cursor: default; /* Not interactive per request */
   flex-shrink: 0;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
 }
 .program:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.1);
   transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+.program-title {
+  font-weight: 600;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.9;
 }
 .program:focus {
   outline: 2px solid #4f46e5;
@@ -1361,24 +1194,6 @@ onUnmounted(() => {
 .program.selected {
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59,130,246,0.35) inset;
-}
-.program-thumb {
-  width: 100%;
-  aspect-ratio: 16/9;
-  border-radius: 6px;
-  object-fit: cover;
-  background: #222;
-}
-.program-title {
-  font-weight: 600;
-  font-size: 13px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.program-meta {
-  font-size: 11px;
-  opacity: 0.85;
 }
 .now-line {
   position: absolute;
@@ -1454,7 +1269,7 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .tv-container {
-    padding-bottom: 20px;
+    padding-bottom: 0;
   }
   .podcasts-hero {
     padding: 20px 0;
@@ -1464,9 +1279,9 @@ onUnmounted(() => {
   }
   
   .spotlight-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 0 10px;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
   }
 
   .video-header {
@@ -1519,8 +1334,8 @@ onUnmounted(() => {
     padding-bottom: 80px; /* Space for bottom dock */
   }
   .spotlight-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    flex-direction: column;
+    gap: 0;
   }
   .video-spotlight {
     padding: 0; /* Full width player */
@@ -1540,192 +1355,6 @@ onUnmounted(() => {
   #channel-selector {
     padding: 12px;
     grid-template-columns: 1fr; /* Stack channels */
-  }
-}
-/* ===== Mobile Channel List (Killer Experience) ===== */
-
-/* Base overrides for Mobile Channel Button */
-@media (max-width: 768px) {
-  .channel-button {
-    height: 120px;
-    min-height: 120px;
-    padding: 0;
-    display: flex; /* Flex row for Strip + Content */
-    flex-direction: row;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: #111; /* Fallback */
-    /* Glassmorphism */
-    background: rgba(30, 30, 30, 0.6);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  }
-
-  /* Active state scaling */
-  .channel-button.active {
-    transform: scale(1.02);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-    border-color: rgba(255,255,255,0.2);
-    z-index: 2; /* Pop above others */
-  }
-
-  /* 1. Left Strip (Rotated) */
-  .channel-strip {
-    width: 32px;
-    background: rgba(0,0,0,0.3);
-    border-right: 1px solid rgba(255,255,255,0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    flex-shrink: 0;
-  }
-  /* Color line indicator */
-  .channel-strip::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--strip-color);
-  }
-
-  .channel-sideways-text {
-    /* Rotate 90 deg counter-clockwise */
-    transform: rotate(-90deg);
-    white-space: nowrap;
-    text-transform: uppercase;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: rgba(255,255,255,0.8);
-    /* Width logic for rotated element is tricky, ensure it centers */
-    width: 120px; /* Match container height roughly */
-    text-align: center;
-  }
-  .bullet {
-    margin: 0 6px;
-    opacity: 0.5;
-    font-size: 8px;
-  }
-
-  /* 2. Main Content */
-  .channel-content {
-    flex: 1;
-    padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-    z-index: 2; /* Above bg */
-  }
-
-  .cc-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.5);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .cc-status {
-    color: #3b82f6;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .pulsing-dot {
-    width: 6px;
-    height: 6px;
-    background: currentColor;
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.5); opacity: 0.5; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
-  .cc-program {
-    margin-bottom: 8px;
-  }
-  .cc-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.2;
-    margin-bottom: 4px;
-    /* Limit lines */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-  }
-  .cc-meta {
-    font-size: 12px;
-    color: rgba(255,255,255,0.7);
-    margin-bottom: 8px;
-  }
-
-  .cc-up-next {
-    font-size: 11px;
-    color: rgba(255,255,255,0.5);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 4px; /* Added spacing */
-  }
-  .un-label {
-    font-weight: 700;
-    color: rgba(255,255,255,0.3);
-    text-transform: uppercase;
-    font-size: 9px;
-    margin-right: 4px;
-  }
-
-  /* Progress Bar */
-  .cc-progress-track {
-    height: 3px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 2px;
-    overflow: hidden;
-    width: 100%;
-  }
-  .cc-progress-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 1s linear;
-  }
-
-  /* 3. Background Image */
-  .channel-bg-image {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-size: cover;
-    background-position: center;
-    opacity: 0.3; /* Subtle */
-    filter: blur(2px) grayscale(0.5);
-    z-index: 0;
-    transition: all 0.5s ease;
-  }
-  .channel-button.active .channel-bg-image {
-    opacity: 0.5;
-    filter: blur(0) grayscale(0);
-  }
-  .channel-bg-overlay {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(to right, #000 30px, rgba(0,0,0,0.6) 100%);
-    z-index: 1;
   }
 }
 </style>

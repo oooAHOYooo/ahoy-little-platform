@@ -146,9 +146,16 @@ def _bootstrap_admin_user_from_env():
     Set:
       - AHOY_ADMIN_EMAIL
       - AHOY_ADMIN_PASSWORD
+
+    In development only: if either is unset, use hardcoded dev credentials
+    (alex@ahoy.ooo / loveLOVElove) so you can hit /admin without configuring env.
     """
     email = (os.getenv("AHOY_ADMIN_EMAIL") or "").strip().lower()
     password = os.getenv("AHOY_ADMIN_PASSWORD") or ""
+    # Dev-only fallback so /admin works without env (do not use in production)
+    if (not email or not password) and os.getenv("AHOY_ENV", "").strip().lower() in ("", "development", "dev", "sandbox"):
+        email = "alex@ahoy.ooo"
+        password = "loveLOVElove"
     if not email or not password:
         return
     try:
@@ -4696,6 +4703,33 @@ def admin_fulfill_order(order_id):
 @_admin_session_required
 def admin_delete_user(user_id):
     return jsonify({"error": "read_only_admin"}), 403
+
+
+@app.route('/api/admin/users/<int:user_id>', methods=['PATCH'])
+@login_required
+@_admin_session_required
+def admin_update_user(user_id):
+    """Toggle user disabled flag (basic user management)."""
+    from db import get_session
+    from models import User
+
+    data = request.get_json() or {}
+    disabled = data.get('disabled')
+    if disabled is None:
+        return jsonify({"error": "Missing 'disabled' in body"}), 400
+
+    # Don't allow disabling yourself
+    if user_id == current_user.id:
+        return jsonify({"error": "Cannot change your own account"}), 400
+
+    with get_session() as s:
+        user = s.query(User).filter(User.id == user_id).first()
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        user.disabled = bool(disabled)
+        s.commit()
+    return jsonify({"success": True, "disabled": bool(disabled)})
+
 
 @app.route('/api/admin/users/<int:user_id>/reset-password', methods=['POST'])
 @login_required

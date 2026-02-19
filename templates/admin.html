@@ -3,7 +3,7 @@
 {% block title %}Admin - Orders & Stats{% endblock %}
 
 {% block content %}
-<div class="admin-ro" x-data="adminDashboard()" x-init="init()">
+<div class="admin-ro" x-data="adminDashboard({{ current_user.id|default('null') }})" x-init="init()">
   <div class="admin-ro-header">
     <div>
       <h1>Admin</h1>
@@ -185,6 +185,7 @@
             <th>Last Active</th>
             <th>Plays</th>
             <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -200,10 +201,14 @@
                 <span class="pill" :class="user.is_admin ? 'st-paid' : ''" x-show="user.is_admin">Admin</span>
                 <span class="pill" :class="user.disabled ? 'st-pending' : 'st-fulfilled'" x-text="user.disabled ? 'Disabled' : 'Active'"></span>
               </td>
+              <td>
+                <button type="button" class="btn btn-small" x-show="user.id !== currentUserId" @click="toggleUserDisabled(user)" x-text="user.disabled ? 'Enable' : 'Disable'"></button>
+                <span class="muted text-sm" x-show="user.id === currentUserId">(you)</span>
+              </td>
             </tr>
           </template>
           <tr x-show="!users.length">
-            <td colspan="7" class="muted" style="padding:14px;">No users yet.</td>
+            <td colspan="8" class="muted" style="padding:14px;">No users yet.</td>
           </tr>
         </tbody>
       </table>
@@ -308,8 +313,9 @@
 <script>
 const CSRF_TOKEN = '{{ csrf_token }}';
 
-function adminDashboard() {
+function adminDashboard(currentUserId) {
   return {
+    currentUserId: currentUserId || null,
     stats: { users: {}, orders: {}, plays: {}, listening: {}, engagement: {} },
     analytics: null,
     users: [],
@@ -338,6 +344,23 @@ function adminDashboard() {
         if (o.ok) this.orders = (await o.json()).orders || [];
       } catch (e) {
         console.error('Failed to load admin data', e);
+      }
+    },
+    async toggleUserDisabled(user) {
+      if (user.id === this.currentUserId) return;
+      const disabled = !user.disabled;
+      try {
+        const res = await fetch(`/api/admin/users/${user.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+          body: JSON.stringify({ disabled })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        user.disabled = data.disabled;
+      } catch (e) {
+        console.error('Toggle user failed', e);
+        alert(e.message || 'Failed to update user');
       }
     },
     openFulfillModal(order) {
