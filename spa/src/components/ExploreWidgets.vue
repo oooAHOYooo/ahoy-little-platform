@@ -20,7 +20,7 @@
           :key="item.key || item.id"
           :to="`/${item.type === 'show' ? 'shows' : 'music'}/${item.id}`"
           class="widget-card"
-          v-tilt="canTilt"
+          v-tilt="{ target: '.card-image img', scale: 1.1, speed: 600, max: 10 }"
           @mouseenter="playHoverSound"
           @click="playClickSound"
         >
@@ -55,7 +55,7 @@
           :key="item.id || item.slug"
           :to="item.type === 'artist' ? `/artists/${item.slug}` : `/${item.type === 'show' ? 'shows' : 'music'}/${item.id}`"
           class="widget-card"
-          v-tilt="canTilt"
+          v-tilt="{ target: '.card-image img', scale: 1.1, speed: 600, max: 10 }"
           @mouseenter="playHoverSound"
           @click="playClickSound"
         >
@@ -85,7 +85,7 @@
           :key="video.id"
           :to="`/videos?play=${video.id}`"
           class="widget-card video-card"
-          v-tilt="canTilt"
+          v-tilt="{ target: '.card-image img', scale: 1.1, speed: 600, max: 10 }"
           @mouseenter="playHoverSound"
           @click="playClickSound"
         >
@@ -116,7 +116,7 @@
           :key="show.slug"
           :to="`/podcasts/${show.slug}`"
           class="widget-card"
-          v-tilt="canTilt"
+          v-tilt="{ target: '.card-image img', scale: 1.1, speed: 600, max: 10 }"
           @mouseenter="playHoverSound"
           @click="playClickSound"
         >
@@ -146,7 +146,7 @@
           :key="item.id || item.title"
           :to="item.type === 'album' ? { path: '/music', query: { q: item.title } } : `/music/${item.id}`"
           class="widget-card"
-          v-tilt="canTilt"
+          v-tilt="{ target: '.card-image img', scale: 1.1, speed: 600, max: 10 }"
           @mouseenter="playHoverSound"
           @click="playClickSound"
         >
@@ -176,7 +176,7 @@
           :key="artist.slug"
           :to="`/artists/${artist.slug}`"
           class="widget-card artist-card-shape"
-          v-tilt="canTilt"
+          v-tilt="{ target: '.card-image img', scale: 1.1, speed: 600, max: 10 }"
           @mouseenter="playHoverSound"
           @click="playClickSound"
         >
@@ -447,9 +447,13 @@ onUnmounted(() => {
   group: card;
 }
 
-.widget-card:hover {
-  transform: translateY(-8px) scale(1.05) rotate(1deg); /* Slight angled lift */
-}
+/* 
+   REMOVED: .widget-card:hover transform 
+   Reason: We want the frame to be static while the content moves in 3D 
+*/
+/*.widget-card:hover {
+  transform: translateY(-8px) scale(1.05) rotate(1deg);
+}*/
 
 .card-image {
   aspect-ratio: 1;
@@ -460,6 +464,14 @@ onUnmounted(() => {
   background: #000;
   position: relative;
   border: 0;
+  /* 3D Context for inner image tilt */
+  transform-style: preserve-3d;
+  perspective: 1000px; 
+}
+
+/* Video Widget Override: 16:9 */
+.video-card .card-image {
+    aspect-ratio: 16 / 9;
 }
 
 .card-image.circle {
@@ -472,11 +484,20 @@ onUnmounted(() => {
   height: 100%;
   object-fit: cover;
   transition: transform 0.6s ease;
+  /* Ensure image can be tilted */
+  transform-origin: center center;
+  will-change: transform;
 }
 
+/* 
+   REMOVED: .widget-card:hover .card-image img transform
+   Reason: Handled by v-tilt directive now 
+*/
+/*
 .widget-card:hover .card-image img {
     transform: scale(1.1);
 }
+*/
 
 .card-title {
   font-weight: 700;

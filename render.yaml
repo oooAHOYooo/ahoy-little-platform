@@ -65,6 +65,9 @@ services:
         value: "true"
       - key: SESSION_COOKIE_SAMESITE
         value: "Lax"
+      # Rate limit: higher default so normal page loads + API don't hit 429 (SPA assets are exempt in app)
+      - key: RATE_LIMIT_DEFAULT
+        value: "300 per minute"
 
   # Render "Key Value" (Redis/Valkey)
   - type: redis

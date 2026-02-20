@@ -15,20 +15,12 @@
       <div class="spotlight-grid">
         <div class="spotlight-left">
           <!-- Hero video player with glass gradient -->
-          <div class="panelstream-player hero-player">
-            <video
-              ref="videoEl"
-              controls
-              autoplay
-              muted
-              playsinline
-              webkit-playsinline
-              @play="isPlaying = true"
-              @pause="isPlaying = false"
-              @ended="onVideoEnded"
-              @error="resyncVideo"
-              @stalled="resyncVideo"
-            ></video>
+          <div ref="heroPlaceholder" class="panelstream-player hero-player">
+            <div v-if="!playerStore.currentTrack || playerStore.mode !== 'video'" class="placeholder-content">
+               <i class="fas fa-tv fa-3x" style="opacity:0.2; margin-bottom: 20px;"></i>
+               <span>Select a channel to start watching</span>
+            </div>
+            
             <div class="video-header">
               <span class="now-playing-label">Now Playing</span>
               <span class="channel-name-label" aria-live="polite">{{ channelLabel }}</span>
@@ -42,11 +34,11 @@
             :class="{ 'vibes-hidden': !showControls }"
             aria-label="Channel Controls"
           >
-            <button type="button" class="remote-btn" title="Play/Pause" @click="togglePlay">
-              <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+            <button type="button" class="remote-btn" title="Play/Pause" @click="playerStore.togglePlay()">
+              <i :class="playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
             </button>
-            <button type="button" class="remote-btn" title="Mute" @click="toggleMute">
-              <i :class="isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
+            <button type="button" class="remote-btn" title="Mute" @click="playerStore.toggleMute()">
+              <i :class="playerStore.isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
             </button>
             <button type="button" class="remote-btn" title="Fullscreen" @click="toggleFullscreen">
               <i class="fas fa-expand"></i>
@@ -80,6 +72,15 @@
           <div class="rd-next">
             <div class="rd-label">Up Next</div>
             <div class="rd-title">{{ upNextTitle }}</div>
+          </div>
+          
+          <div class="rd-suggested">
+             <div class="rd-suggested-title">Suggested for You</div>
+             <div v-for="(ch, idx) in channels.slice(0, 4)" :key="ch.id" class="rd-suggested-item" @click="selectChannel(idx)">
+                <span class="rd-suggested-dot" :style="{ background: pillColors[idx % 4] }"></span>
+                <span class="rd-suggested-name">{{ ch.name }}</span>
+                <span class="rd-suggested-meta">Live</span>
+             </div>
           </div>
         </aside>
       </div>
@@ -125,7 +126,7 @@
           <div class="guide-timebar">
             <div v-for="t in timeMarkers" :key="t" class="time-marker" :style="{ minWidth: (30 * pxPerMinute) + 'px' }">{{ t }}</div>
           </div>
-          <div class="guide-scroller">
+          <div class="guide-scroller" ref="scrollerRef" @mousedown="onMouseDown" @mousemove="onMouseMove" @mouseup="onMouseUp" @mouseleave="onMouseUp">
             <div class="guide-rows" role="grid" aria-label="Channel Guide">
               <div class="now-line" :style="nowLineStyle"></div>
               <div v-for="(ch, rowIdx) in channels" :key="ch.id" class="guide-row" role="row">
@@ -139,6 +140,8 @@
                     :key="rowIdx + '-' + colIdx"
                     class="program"
                     :class="{ selected: guideFocus.row === rowIdx && guideFocus.col === colIdx }"
+                    @click="openProgramDetails(prog)"
+                    @keydown.enter="openProgramDetails(prog)"
                     :data-row="rowIdx"
                     :data-col="colIdx"
                     tabindex="0"
@@ -162,6 +165,38 @@
 
       <!-- Mobile overlay for channel drawer -->
       <div v-if="mobileDrawerOpen" class="ltv-overlay" @click="mobileDrawerOpen = false"></div>
+
+      <!-- Program Details Modal -->
+      <div v-if="selectedProgram" class="program-modal-overlay" @click.self="closeProgramDetails">
+        <div class="program-modal">
+          <button class="close-btn" @click="closeProgramDetails" aria-label="Close">
+            <i class="fas fa-times"></i>
+          </button>
+          
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2 class="modal-title">{{ cleanTitle(selectedProgram.title) }}</h2>
+              <div class="modal-meta">
+                <span class="modal-badge">{{ selectedProgram.category }}</span>
+                <span>{{ selectedProgram.durMin }} min</span>
+              </div>
+            </div>
+            
+            <div class="modal-body">
+              <p class="modal-desc">
+                {{ selectedProgram.item?.description || "No description available for this program." }}
+              </p>
+              
+              <div class="modal-actions">
+                <button class="action-btn primary" @click="addToSaved(selectedProgram)">
+                  <i class="fas fa-plus"></i> Add to Saved
+                </button>
+                <!-- Watch Now button if it's currently playing or capable of VOD (future enhancement) -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -170,20 +205,52 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { apiFetch, apiFetchCached } from '../composables/useApi'
 import { trackRecentPlay } from '../composables/useRecentlyPlayed'
+import { useRoute } from 'vue-router'
+import { usePlayerStore } from '../stores/player'
+import MiniPlayer from '../components/MiniPlayer.vue'
+import GlobalTvPlayer from '../components/GlobalTvPlayer.vue'
+import CompactFooter from '../components/CompactFooter.vue'
+
+const route = useRoute()
 const DEFAULT_COVER = '' // Use empty string to trigger fallback logic
 
 // --- Refs ---
-const videoEl = ref(null)
-const guideRef = ref(null)
+const heroPlaceholder = ref(null)
+const scrollerRef = ref(null)
+const playerStore = usePlayerStore()
 const channels = ref([])
 const selectedRow = ref(0)
 const loading = ref(true)
 const loadError = ref(false)
-const isPlaying = ref(false)
-const isMuted = ref(true)
 const mobileDrawerOpen = ref(false)
 const showControls = ref(true)
 let controlsTimer = null
+
+// Guide Drag-Scroll Logic
+const isDragging = ref(false)
+const startX = ref(0)
+const scrollLeft = ref(0)
+
+function onMouseDown(e) {
+  isDragging.value = true
+  startX.value = e.pageX - scrollerRef.value.offsetLeft
+  scrollLeft.value = scrollerRef.value.scrollLeft
+  scrollerRef.value.style.cursor = 'grabbing'
+}
+
+function onMouseMove(e) {
+  if (!isDragging.value) return
+  e.preventDefault()
+  const x = e.pageX - scrollerRef.value.offsetLeft
+  const walk = (x - startX.value) * 1.5
+  scrollerRef.value.scrollLeft = scrollLeft.value - walk
+}
+
+function onMouseUp() {
+  isDragging.value = false
+  if (scrollerRef.value) scrollerRef.value.style.cursor = 'grab'
+}
+
 
 function resetControlsTimer() {
   showControls.value = true
@@ -199,15 +266,61 @@ const generatedThumbs = ref({})
 // Guide focus (for keyboard nav and highlight; Enter = tune to channel)
 const guideFocus = ref({ row: 0, col: 0 })
 
+// Guide Anchoring
+const gridStart = ref(getAnchorTime())
+
+function getAnchorTime() {
+  // Round down to nearest 30 minutes
+  const now = new Date()
+  const ms = 1000 * 60 * 30
+  return new Date(Math.floor(now.getTime() / ms) * ms)
+}
+
 // Calculated "now" line position
 const nowLineStyle = computed(() => {
-  // Since our guide starts exactly at 'now', the line is at the edge of the labels.
-  // Padding (10px) + Label (140px) + Gap (8px) = 158px
-  return { left: '158px' }
+  const now = Date.now()
+  const start = gridStart.value.getTime()
+  const minutesElapsed = (now - start) / 60000
+  const px = minutesElapsed * pxPerMinute
+  
+  // Pivot is 158px (Label width + gaps)
+  // But we need to ensure it doesn't drift if we scroll? 
+  // Actually the guide-rows is inside guide-scroller. 
+  // The line is inside guide-rows (relative). 
+  // So 'left' should be label_width + px.
+  
+  // constant 140px label + 8px gap + 10px padding = 158px?
+  // Let's check styles: guide-channel-label is 140px, gap 8px. padding 10px to row.
+  // Actually guide-row has padding 10px. 
+  // guide-track is flex. 
+  
+  // The '.now-line' is absolute in '.guide-rows'.
+  // .guide-row has padding: 10px. 
+  // .guide-channel-label width 140px. Gap 8px.
+  // So track starts at 10px + 140px + 8px = 158px.
+  
+  return { left: (158 + px) + 'px' }
 })
 const hoverPreview = ref({ visible: false, x: 0, y: 0, thumb: '', title: '', meta: '' })
 let hoverTimer = null
 
+// Program Details
+const selectedProgram = ref(null)
+
+function openProgramDetails(prog) {
+  selectedProgram.value = prog
+}
+
+function closeProgramDetails() {
+  selectedProgram.value = null
+}
+
+function addToSaved(prog) {
+  // Mock functionality
+  console.log('Added to saved:', prog.title)
+  // Could show a toast here
+  closeProgramDetails()
+}
 // Schedule engine
 const schedule = ref([])
 let lastSrc = ''
@@ -242,9 +355,9 @@ const channelLabel = computed(() => {
 
 const timeMarkers = computed(() => {
   const markers = []
-  const now = new Date()
+  const start = gridStart.value
   for (let m = 0; m <= horizonMinutes; m += 30) {
-    const t = new Date(now.getTime() + m * 60000)
+    const t = new Date(start.getTime() + m * 60000)
     markers.push(t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }))
   }
   return markers
@@ -254,31 +367,53 @@ const timeMarkers = computed(() => {
 const guidePrograms = computed(() => {
   void generatedThumbs.value // dependency for reactivity
   const result = {}
-  const now = new Date()
+  const start = gridStart.value
+  const endLimit = new Date(start.getTime() + horizonMinutes * 60000)
+  
   channels.value.forEach((ch, rowIdx) => {
     const progs = []
-    let cursor = new Date(now)
-    let col = 0
     const items = ch.items || []
     if (!items.length) { result[rowIdx] = progs; return }
-    while (diffMinutes(now, cursor) < horizonMinutes) {
+    
+    // We need to find programs that overlap with [start, endLimit]
+    // Since items loop, we need to map the canonical schedule to our window
+    
+    // Simplification: Just tile placeholders starting from 'start'
+    // In a real app with absolute ISO times, we'd filter.
+    // Here we assume the channel loops continuously? 
+    // actually buildSchedule() creates a schedule relative to 'now' called 'schedule'.
+    // That schedule is for playback logic.
+    // For visualisation, let's just tile items starting from gridStart.
+    
+    let cursor = new Date(start) // Pivot from grid start
+    let col = 0
+    
+    // To generate consistent patterns, maybe we should seed 'col' based on time?
+    // For now, let's just start t=0 at gridStart.
+    
+    while (diffMinutes(start, cursor) < horizonMinutes) {
       const item = items[col % items.length]
       const src = item?.video_url || item?.mp4_link || item?.trailer_url || ''
-      const durMin = Math.max(5, Math.round((item?.duration_seconds || 300) / 60))
-      const end = new Date(cursor.getTime() + durMin * 60000)
+      
+      // Duration
+      let durMin = Math.max(5, Math.round((item?.duration_seconds || 300) / 60))
+      
+      const itemEnd = new Date(cursor.getTime() + durMin * 60000)
+      
+      // If we are tiling, we just add it.
       progs.push({
         title: item?.title || 'Untitled',
         thumbnail: getThumbnail(item, src),
         category: item?.category || ch.name || 'Show',
         durMin,
         widthPx: durMin * pxPerMinute,
-        timeLabel: `${fmtTime(cursor)} – ${fmtTime(end)}`,
+        timeLabel: `${fmtTime(cursor)} – ${fmtTime(itemEnd)}`,
         startUTC: cursor.getTime(),
-        endUTC: end.getTime(),
+        endUTC: itemEnd.getTime(),
         src,
         item,
       })
-      cursor = end
+      cursor = itemEnd
       col++
     }
     result[rowIdx] = progs
@@ -455,34 +590,22 @@ function getSeekTime(slot) {
 }
 
 function playCurrentSlot() {
-  const video = videoEl.value
-  if (!video || !schedule.value.length) return
   const slot = getCurrentSlot(selectedRow.value)
   if (!slot || !slot.src) return
-  const needSrc = slot.src !== lastSrc
-  const seekSec = getSeekTime(slot)
-  if (needSrc) {
-    lastSrc = slot.src
-    try { video.pause() } catch (_) {}
-    video.src = slot.src
-    try { video.load() } catch (_) {}
-    video.currentTime = seekSec
-    video.muted = true
-    isMuted.value = true
-    video.play().catch(() => {})
-    const ch = channels.value[selectedRow.value]
-    trackRecentPlay({
-      id: `live_tv-${ch?.id ?? selectedRow.value}-${slot.startUTC}`,
-      type: 'live_tv',
-      title: slot.title || 'Live TV',
-      host: ch?.name || channelLabel.value,
-      thumbnail: slot.thumb,
-      url: slot.src,
-    })
-  } else {
-    if (Math.abs((video.currentTime || 0) - seekSec) > 3) {
-      try { video.currentTime = seekSec } catch (_) {}
-    }
+  
+  const ch = channels.value[selectedRow.value]
+  const track = {
+    type: 'live_tv',
+    id: `live_tv-${ch?.id ?? selectedRow.value}`,
+    title: slot.title || 'Live TV',
+    host: ch?.name || 'Live TV',
+    thumbnail: slot.thumb,
+    video_url: slot.src,
+    duration_seconds: slot.durationSec,
+  }
+
+  if (playerStore.currentTrack?.video_url !== slot.src) {
+    playerStore.play(track)
   }
 }
 
@@ -512,13 +635,11 @@ function tick() {
 
 function resyncVideo() {
   const slot = getCurrentSlot(selectedRow.value)
-  if (!slot) return
-  const video = videoEl.value
-  if (!video) return
+  if (!slot || !playerStore.videoElement) return
   const seek = getSeekTime(slot)
   try {
-    if (Math.abs((video.currentTime || 0) - seek) > 2) {
-      video.currentTime = seek
+    if (Math.abs((playerStore.videoElement.currentTime || 0) - seek) > 2) {
+      playerStore.videoElement.currentTime = seek
     }
   } catch (_) {}
 }
@@ -742,6 +863,10 @@ async function loadChannels() {
 
   if (channels.value.length) {
     buildSchedule()
+    // Update gridStart occasionally? 
+    // Logic: if now > gridStart + 30mins, we could shift.
+    // But for now let's keep it fixed.
+    
     tick()
     engineTimer = setInterval(tick, 1000)
     // Queue thumbnail generation for items that have video but no thumbnail
@@ -758,12 +883,35 @@ async function loadChannels() {
 }
 
 // --- Lifecycle ---
+let resizeObserver = null
+
+function updateBounds() {
+  if (heroPlaceholder.value) {
+    const rect = heroPlaceholder.value.getBoundingClientRect()
+    playerStore.setHeroBounds({
+      top: rect.top + window.scrollY,
+      left: rect.left + window.scrollX,
+      width: rect.width,
+      height: rect.height
+    })
+  }
+}
+
 onMounted(async () => {
   document.addEventListener('keydown', onGlobalKeydown)
   window.addEventListener('mousemove', resetControlsTimer)
   window.addEventListener('touchstart', resetControlsTimer)
   resetControlsTimer()
+  
   await loadChannels()
+
+  // Sync Global Player position
+  updateBounds()
+  if (window.ResizeObserver) {
+    resizeObserver = new ResizeObserver(updateBounds)
+    resizeObserver.observe(heroPlaceholder.value)
+  }
+  window.addEventListener('resize', updateBounds)
 })
 
 onUnmounted(() => {
@@ -773,6 +921,11 @@ onUnmounted(() => {
   window.removeEventListener('mousemove', resetControlsTimer)
   window.removeEventListener('touchstart', resetControlsTimer)
   document.removeEventListener('keydown', onGlobalKeydown)
+  window.removeEventListener('resize', updateBounds)
+  if (resizeObserver) resizeObserver.disconnect()
+  
+  // Detach Global Player from Hero position -> goes Mini
+  playerStore.setHeroBounds(null)
 })
 </script>
 
@@ -1170,15 +1323,11 @@ onUnmounted(() => {
   justify-content: center;
   gap: 4px;
   color: #fff;
-  cursor: default; /* Not interactive per request */
-  flex-shrink: 0;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.1);
 }
 .program:hover {
   transform: translateY(-1px);
   filter: brightness(1.1);
+  cursor: pointer; /* Now interactive */
 }
 .program-title {
   font-weight: 600;
@@ -1216,6 +1365,118 @@ onUnmounted(() => {
   background: #3b82f6;
   border-radius: 50%;
   box-shadow: 0 0 10px rgba(59, 130, 246, 1);
+}
+
+/* ===== Program Pop-up Modal ===== */
+.program-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(5px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.program-modal {
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+  animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes modalPop {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  z-index: 2;
+}
+.close-btn:hover { background: rgba(255,255,255,0.2); }
+
+.modal-content {
+  padding: 24px;
+}
+.modal-header {
+  margin-bottom: 16px;
+}
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+.modal-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+  color: #9ca3af;
+  align-items: center;
+}
+.modal-badge {
+  background: #3b82f6;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.modal-body {
+  color: #d1d5db;
+}
+.modal-desc {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  opacity: 0.9;
+}
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.action-btn.primary {
+  background: #fff;
+  color: #000;
+}
+.action-btn.primary:hover {
+  background: #f3f4f6;
+}
+.action-btn.primary:active {
+  transform: scale(0.97);
 }
 
 /* ===== Mobile ===== */
@@ -1342,7 +1603,72 @@ onUnmounted(() => {
   }
   .panelstream-player.hero-player {
     border-radius: 0; /* Edge to edge */
+    background: #0a0a0a; /* Darker harmonized bg */
   }
+  .placeholder-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #444;
+    font-weight: 600;
+  }
+  .guide-scroller {
+    cursor: grab;
+    user-select: none;
+  }
+  .guide-scroller::-webkit-scrollbar {
+    height: 6px;
+  }
+  .guide-scroller::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .guide-scroller::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+  }
+  .guide-scroller::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.1);
+  }
+  .tv-container, .live-tv-container, .live-tv-sidebar, .guide {
+    background: #050505; /* Blacker harmonize */
+  }
+  .live-tv-sidebar {
+    background: #080808;
+    border-right-color: rgba(255,255,255,0.04);
+  }
+  .rd-suggested-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #555;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+  .rd-suggested-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    cursor: pointer;
+  }
+  .rd-suggested-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .rd-suggested-name {
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .rd-suggested-meta {
+    font-size: 10px;
+    opacity: 0.4;
+    margin-left: auto;
+  }
+
   .channel-remote {
     padding: 0 12px;
     justify-content: space-between;

@@ -297,6 +297,17 @@ function authPage() {
             this.checkAuthStatus();
         },
 
+        getNextRedirect() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const nextUrl = params.get('next');
+                if (!nextUrl) return '/';
+                const u = new URL(nextUrl, window.location.origin);
+                if (u.origin !== window.location.origin || !u.pathname.startsWith('/')) return '/';
+                return u.pathname + u.search;
+            } catch (_) { return '/'; }
+        },
+
         maybeAutofillUsername() {
             // If username is empty, derive a simple default from the email local-part.
             if (this.authMode !== 'register') return;
@@ -316,7 +327,7 @@ function authPage() {
             try {
                 const response = await fetch('/api/user/profile', { credentials: 'include' });
                 if (response.ok) {
-                    window.location.href = '/';
+                    window.location.href = this.getNextRedirect();
                 }
             } catch (error) {}
         },
@@ -364,6 +375,7 @@ function authPage() {
                         }
                     } catch (_) {}
                     this.loginSuccess = true;
+                    const redirectTo = this.getNextRedirect();
                     // Animate success, then redirect
                     setTimeout(() => {
                         const card = document.querySelector('.auth-card');
@@ -371,10 +383,10 @@ function authPage() {
                             card.style.transform = 'scale(0.95)';
                             card.style.opacity = '0';
                             setTimeout(() => {
-                                window.location.href = '/';
+                                window.location.href = redirectTo;
                             }, 300);
                         } else {
-                            window.location.href = '/';
+                            window.location.href = redirectTo;
                         }
                     }, 1500);
                 } else {
@@ -442,17 +454,17 @@ function authPage() {
                 if (response.ok) {
                     const data = await response.json();
                     this.loginSuccess = true;
-                    // Animate success, then redirect
+                    const redirectTo = this.getNextRedirect();
                     setTimeout(() => {
                         const card = document.querySelector('.auth-card');
                         if (card) {
                             card.style.transform = 'scale(0.95)';
                             card.style.opacity = '0';
                             setTimeout(() => {
-                                window.location.href = '/';
+                                window.location.href = redirectTo;
                             }, 300);
                         } else {
-                            window.location.href = '/';
+                            window.location.href = redirectTo;
                         }
                     }, 1500);
                 } else {

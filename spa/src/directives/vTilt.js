@@ -26,23 +26,39 @@ export default {
             const rotateX = ((y - centerY) / centerY) * -options.max
             const rotateY = ((x - centerX) / centerX) * options.max
 
-            el.style.transition = 'none' // remove transition for instant follow
-            el.style.transform = `
-        perspective(${options.perspective}px)
-        rotateX(${rotateX}deg)
-        rotateY(${rotateY}deg)
-        scale3d(${options.scale}, ${options.scale}, ${options.scale})
-      `
+            // Determine target element(s)
+            const targets = options.target ? el.querySelectorAll(options.target) : [el]
+
+            targets.forEach(target => {
+                target.style.transition = 'none' // remove transition for instant follow
+                target.style.transform = `
+                    perspective(${options.perspective}px)
+                    rotateX(${rotateX}deg)
+                    rotateY(${rotateY}deg)
+                    scale3d(${options.scale}, ${options.scale}, ${options.scale})
+                 `
+            })
+
+            if (options.target) {
+                // If targeting children, we might want to reset the container's transform or keep it static
+                // For "static frame", we don't transform 'el' itself here.
+            } else {
+                // Standard behavior (transform self) is handled by targets=[el] above
+            }
         }
 
         const handleMouseLeave = () => {
-            el.style.transition = `transform ${options.speed}ms cubic-bezier(.03,.98,.52,.99)`
-            el.style.transform = `
-        perspective(${options.perspective}px)
-        rotateX(0deg)
-        rotateY(0deg)
-        scale3d(1, 1, 1)
-      `
+            const targets = options.target ? el.querySelectorAll(options.target) : [el]
+
+            targets.forEach(target => {
+                target.style.transition = `transform ${options.speed}ms cubic-bezier(.03,.98,.52,.99)`
+                target.style.transform = `
+                    perspective(${options.perspective}px)
+                    rotateX(0deg)
+                    rotateY(0deg)
+                    scale3d(1, 1, 1)
+                `
+            })
         }
 
         el.addEventListener('mousemove', handleMouseMove)

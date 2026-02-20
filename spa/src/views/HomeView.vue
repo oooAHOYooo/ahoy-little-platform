@@ -5,6 +5,18 @@
       <div class="podcasts-hero-inner">
         <h1><i class="fas fa-home" aria-hidden="true"></i> Home</h1>
         <p>Explore</p>
+        
+        <!-- Search Bar -->
+        <div class="hero-search-wrapper">
+          <i class="fas fa-search search-icon"></i>
+          <input 
+            type="text" 
+            class="hero-search-input" 
+            placeholder="Search artists, tracks, or shows..." 
+            v-model="searchQuery"
+            @keydown.enter="handleSearch"
+          />
+        </div>
       </div>
     </section>
 
@@ -171,6 +183,13 @@ import ExploreWidgets from '../components/ExploreWidgets.vue'
 
 const router = useRouter()
 const playerStore = usePlayerStore()
+
+// Search
+const searchQuery = ref('')
+function handleSearch() {
+  if (!searchQuery.value.trim()) return
+  router.push({ path: '/search', query: { q: searchQuery.value } })
+}
 
 // Live TV
 const tvChannels = ref([])
@@ -413,6 +432,60 @@ watch(
   height: 420px;
   min-height: 420px;
 }
+/*.podcasts-hero-inner needs flex column for search bar*/
+.home-page .podcasts-hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.hero-search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin-top: 1rem;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.1rem;
+  pointer-events: none;
+}
+
+.hero-search-input {
+  width: 100%;
+  padding: 1rem 1rem 1rem 3.5rem;
+  border-radius: 99px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.hero-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.hero-search-input:focus {
+  background: rgba(30, 30, 30, 0.8);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
 .home-page .dashboard-main {
   position: relative;
   border-radius: 24px;

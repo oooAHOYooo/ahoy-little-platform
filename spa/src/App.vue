@@ -46,7 +46,10 @@
     <AppFooter />
 
     <!-- Mini player (always visible like Flask; hidden on full Now Playing page) -->
-    <MiniPlayer v-if="route.name !== 'now-playing'" />
+    <MiniPlayer v-if="route.name !== 'now-playing' && playerStore.mode === 'audio'" />
+
+    <!-- Global Video Player (TV / Shows) -->
+    <GlobalTvPlayer />
 
     <!-- Compact fixed footer (time, ticker, quicklinks — same as Flask base.html) -->
     <CompactFooter />
@@ -66,6 +69,7 @@ import AppNavbar from './components/AppNavbar.vue'
 import AppSidebar from './components/AppSidebar.vue'
 import NavBar from './components/NavBar.vue'
 import MiniPlayer from './components/MiniPlayer.vue'
+import GlobalTvPlayer from './components/GlobalTvPlayer.vue'
 import Toast from './components/Toast.vue'
 import AddToPlaylistModal from './components/AddToPlaylistModal.vue'
 import GuestSavePrompt from './components/GuestSavePrompt.vue'

@@ -224,9 +224,9 @@ def create_app():
 
     @login_manager.unauthorized_handler
     def api_unauthorized():
-        """Return 401 JSON for API requests instead of redirecting to /auth."""
+        """Return 401 JSON only for /api/* requests; redirect all other (e.g. /admin) to login."""
         from flask import request
-        if request.path.startswith("/api/") or "application/json" in request.accept_mimetypes:
+        if request.path.startswith("/api/"):
             return jsonify({"error": "not_authenticated"}), 401
         from flask import redirect, url_for
         return redirect(url_for("auth_page", next=request.url))
@@ -958,6 +958,7 @@ def create_app():
         return r
 
     @app.route('/')
+    @limiter.exempt
     def home():
         """Main discovery page with Now Playing feed"""
         from datetime import date, timedelta
@@ -5091,6 +5092,7 @@ def _spa_dist_ready():
 
 
 @app.route("/assets/<path:filename>")
+@limiter.exempt
 def spa_assets(filename):
     """Serve Vue SPA assets (JS/CSS) from spa-dist when SPA is built."""
     if not _spa_dist_ready():
@@ -5101,6 +5103,7 @@ def spa_assets(filename):
     return send_from_directory(str(assets_dir), filename)
 
 @app.route("/favicon.ico")
+@limiter.exempt
 def spa_favicon():
     """Serve favicon from spa-dist when SPA is built."""
     if not _spa_dist_ready():
@@ -5111,6 +5114,7 @@ def spa_favicon():
         abort(404)
 
 @app.route("/manifest.webmanifest")
+@limiter.exempt
 def spa_manifest():
     """Serve PWA manifest from spa-dist when SPA is built."""
     if not _spa_dist_ready():
@@ -5122,6 +5126,7 @@ def spa_manifest():
 
 
 @app.route("/<path:path>")
+@limiter.exempt
 def spa_fallback(path):
     """Serve SPA index.html for any unclaimed GET so client-side router can handle it."""
     if request.method != "GET":

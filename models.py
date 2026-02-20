@@ -179,6 +179,10 @@ class Feedback(Base):
         Index('ix_feedback_user_id_created_at', 'user_id', 'created_at'),
     )
 
+    # Added for poetry event feedback
+    type = Column(String(50), nullable=False, default='general')  # bug|feature|artist|general
+    claim_code = Column(String(20), nullable=True)  # generated upon submission
+
     def __repr__(self) -> str:
         return f"<Feedback id={self.id} user_id={self.user_id} created_at={self.created_at}>"
 
