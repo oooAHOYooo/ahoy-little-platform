@@ -29,6 +29,7 @@
           <router-link to="/my-saves" @click="close"><i class="fas fa-bookmark"></i><span>Saved</span></router-link>
           <router-link to="/recently-played" @click="close"><i class="fas fa-history"></i><span>Recently Played</span></router-link>
           <router-link to="/settings" @click="close"><i class="fas fa-cog"></i><span>Settings</span></router-link>
+          <router-link to="/feedback" @click="close"><i class="fas fa-comment"></i><span>Feedback</span></router-link>
           <router-link to="/account" @click="close"><i class="fas fa-user-circle"></i><span>Account</span></router-link>
         </nav>
       </aside>

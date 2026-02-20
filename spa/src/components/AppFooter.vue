@@ -33,6 +33,7 @@
           <li><a href="/privacy" rel="nofollow">Privacy Policy</a></li>
           <li><a href="/terms" rel="nofollow">Terms of Service</a></li>
           <li><a href="/security">Security</a></li>
+          <li><router-link to="/feedback">Feedback</router-link></li>
           <li><a href="/beta-testers">Beta Testers</a></li>
           <li><a href="/sitemap">Sitemap</a></li>
         </ul>

@@ -436,17 +436,17 @@ watch(
 .home-page .podcasts-hero-inner {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     gap: 1rem;
-    padding: 3rem 1rem;
-    text-align: center;
+    padding: 3rem 0;
+    text-align: left;
 }
 
 .hero-search-wrapper {
   position: relative;
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
   margin-top: 1rem;
 }
 
@@ -615,6 +615,7 @@ watch(
 .home-page .whats-new-container {
   background: rgba(20,20,20,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); padding: 2rem;
+  max-width: 1800px; margin: 0;
 }
 .home-page .whats-new-header {
   margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem;

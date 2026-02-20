@@ -60,6 +60,10 @@
         <i class="fas fa-cog" aria-hidden="true"></i>
         <span>Settings</span>
       </router-link>
+      <router-link to="/feedback" class="app-sidebar-item" :class="{ active: route.path === '/feedback' }" data-icon="comment">
+        <i class="fas fa-comment" aria-hidden="true"></i>
+        <span>Feedback</span>
+      </router-link>
     </nav>
   </aside>
 </template>
@@ -78,6 +82,10 @@ const logoError = ref(false)
 </script>
 
 <style scoped>
+.app-sidebar {
+  display: flex;
+  flex-direction: column;
+}
 .app-sidebar-logo-text {
   font-size: 1.25rem;
   font-weight: 700;

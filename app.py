@@ -254,11 +254,13 @@ def create_app():
     from blueprints.api.playlists import bp as api_playlists_bp
     from blueprints.api.bookmarks import bp as api_bookmarks_bp
     from blueprints.api.tips import bp as api_tips_bp
+    from blueprints.api.feedback import bp as api_feedback_bp
     
     app.register_blueprint(api_auth_bp)  # Session-based API auth
     app.register_blueprint(api_playlists_bp)  # Database-based playlists API (takes precedence)
     app.register_blueprint(api_bookmarks_bp)  # Database-based bookmarks API (takes precedence)
     app.register_blueprint(api_tips_bp)  # Tips/boost API
+    app.register_blueprint(api_feedback_bp)  # Feedback API
     app.register_blueprint(activity_bp)
     # Removed: playlists_bp and bookmarks_bp - shadowed by API blueprints, never reached
     # Use blueprints/api/playlists.py and blueprints/api/bookmarks.py instead

@@ -47,7 +47,11 @@
       </div>
       <div class="widget-grid">
         <div v-if="mySaves.length === 0" class="empty-placeholder">
-          Nothing saved yet
+          Nothing### Video Widget Unification
+- Verified that Videos now appear square (1:1), matching the Podcasts and Music sections.
+- Verified that the grid items align perfectly across different widgets.
+
+### Backend API Test
         </div>
         <router-link
           v-else
@@ -225,7 +229,7 @@ function loadRecentlyPlayed() {
   try {
     const raw = localStorage.getItem('ahoy.recentlyPlayed.v1')
     if (raw) {
-      recentlyPlayed.value = JSON.parse(raw).slice(0, 3)
+      recentlyPlayed.value = JSON.parse(raw).slice(0, 6)
     }
   } catch (e) {
     console.error('Failed to load recently played', e)
@@ -234,7 +238,7 @@ function loadRecentlyPlayed() {
 
 function updateMySaves() {
     const all = Object.values(bookmarks.bookmarks.value || {})
-    mySaves.value = all.reverse().slice(0, 3)
+    mySaves.value = all.reverse().slice(0, 6)
 }
 
 onMounted(async () => {
@@ -248,10 +252,10 @@ onMounted(async () => {
     ])
 
     // Process Podcasts
-    randomPodcasts.value = getRandomItems(podData.shows || [], 3)
+    randomPodcasts.value = getRandomItems(podData.shows || [], 6)
 
     // Process Videos
-    randomVideos.value = getRandomItems(videoData.shows || [], 3)
+    randomVideos.value = getRandomItems(videoData.shows || [], 6)
 
     // Process Music
     const allTracks = musicData.tracks || []
@@ -301,14 +305,14 @@ onMounted(async () => {
        musicItems = [...musicItems, ...randomMore]
     }
     
-    randomMusic.value = musicItems.slice(0, 3)
+    randomMusic.value = musicItems.slice(0, 6)
 
     // Process Artists
     const artists = (artistData.artists || []).map(a => ({
        ...a,
        slug: a.slug || a.id || (a.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
     }))
-    randomArtists.value = getRandomItems(artists, 3)
+    randomArtists.value = getRandomItems(artists, 6)
 
     // Load Local Data
     loadRecentlyPlayed()
@@ -317,7 +321,7 @@ onMounted(async () => {
     // Listen for updates
     window.addEventListener('recentlyPlayed:updated', (e) => {
         if (e.detail && e.detail.recent) {
-            recentlyPlayed.value = e.detail.recent.slice(0, 3)
+            recentlyPlayed.value = e.detail.recent.slice(0, 6)
         }
     })
     
@@ -342,8 +346,8 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 3rem;
   padding: 2rem 0;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 1800px;
+  margin: 0;
 }
 
 /* Base Widget Style */
@@ -370,6 +374,12 @@ onUnmounted(() => {
 }
 
 .explore-widget::before {
+   - **Mobile**: Maintains 3 items per widget as requested, hiding the extra items via CSS.
+
+#### Video Widget Unification
+- Removed the 16:9 aspect ratio override for the Videos widget.
+- Videos now use the same square (1:1) aspect ratio as Podcasts, Music, and Recent items.
+- This ensures a consistent grid layout and "unified" aesthetic across all Explore widgets.s */
     /* Subtle noise/texture overlay could go here, but keeping clean glass */
     content: '';
     position: absolute;
@@ -431,7 +441,7 @@ onUnmounted(() => {
 /* Grid */
 .widget-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 1.5rem;
   position: relative;
   z-index: 1;
@@ -469,10 +479,7 @@ onUnmounted(() => {
   perspective: 1000px; 
 }
 
-/* Video Widget Override: 16:9 */
-.video-card .card-image {
-    aspect-ratio: 16 / 9;
-}
+/* removed video-card 16:9 override for unification */
 
 .card-image.circle {
     border-radius: 50%;
@@ -615,6 +622,9 @@ onUnmounted(() => {
   .widget-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
+  }
+  .widget-grid .widget-card:nth-child(n+4) {
+    display: none;
   }
   .explore-widget {
     padding: 1.5rem;

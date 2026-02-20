@@ -48,6 +48,19 @@
               <i class="fas fa-bolt"></i> Boost
             </a>
           </div>
+          <div class="sidebar-panel sidebar-item">
+            <div class="section-title">App</div>
+            <div class="sidebar-list">
+              <router-link to="/settings" class="sidebar-list-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+              </router-link>
+              <router-link to="/feedback" class="sidebar-list-item">
+                <i class="fas fa-comment"></i>
+                <span>Feedback</span>
+              </router-link>
+            </div>
+          </div>
         </div>
       </aside>
 
