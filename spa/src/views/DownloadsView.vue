@@ -10,6 +10,13 @@
     <section class="downloads-container">
       <div class="downloads-intro">
         <p>Get Ahoy Indie Media as a standalone desktop application. Desktop apps are coming soon as part of our <router-link to="/whats-new/2026/jan/platform">mobile improvements initiative</router-link>.</p>
+        <p class="secondary-links">
+          <a href="https://github.com/oooAHOYooo/ahoy-little-platform/releases" target="_blank" rel="noopener">GitHub Releases</a>
+          <span class="sep">•</span>
+          <router-link to="/ape">Ape</router-link>
+          <span class="sep">•</span>
+          <router-link to="/silverback">Silverback</router-link>
+        </p>
       </div>
 
       <div class="downloads-section">
@@ -63,6 +70,10 @@
 .downloads-intro { margin-bottom: 2rem; }
 .downloads-intro p { color: rgba(255,255,255,0.7); font-size: 1rem; line-height: 1.6; }
 .downloads-intro a { color: rgba(99,102,241,1); text-decoration: none; }
+.secondary-links { font-size: 0.9rem; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.75rem; }
+.secondary-links a { font-weight: 500; opacity: 0.9; }
+.secondary-links a:hover { text-decoration: underline; opacity: 1; }
+.secondary-links .sep { color: rgba(255,255,255,0.3); }
 
 .downloads-section { margin-top: 2rem; }
 .downloads-section h2 { color: #fff; font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }

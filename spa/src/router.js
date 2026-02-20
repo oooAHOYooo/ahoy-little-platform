@@ -261,6 +261,16 @@ const routes = [
     component: () => import('./views/AdminDashboardView.vue'),
     meta: { requiresAuth: true, requiresAdmin: true } // Logic handled in component or global guard
   },
+  {
+    path: '/ape',
+    name: 'ape',
+    component: () => import('./views/ApeView.vue'),
+  },
+  {
+    path: '/silverback',
+    name: 'silverback',
+    component: () => import('./views/SilverbackView.vue'),
+  },
 ]
 
 const router = createRouter({

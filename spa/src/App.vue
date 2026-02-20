@@ -148,6 +148,13 @@ onMounted(() => {
   window.addEventListener('online', onOnline)
   window.addEventListener('offline', onOffline)
   document.addEventListener('click', onGlobalClick, true)
+  window.addEventListener('ahoy:session-expired', () => {
+    // Prevent redirect loop if already on login page
+    if (route.path !== '/login') {
+      router.push('/login')
+      window.dispatchEvent(new CustomEvent('ahoy:toast', { detail: { message: 'Session expired', type: 'error' } }))
+    }
+  })
   wakeLock.autoReacquire()
 })
 

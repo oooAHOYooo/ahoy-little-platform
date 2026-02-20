@@ -46,7 +46,7 @@ export async function apiFetch(path, options = {}) {
     if (response.status === 401) {
       // Session expired or invalid
       if (typeof window !== 'undefined') {
-        window.location.href = '/login'
+        window.dispatchEvent(new CustomEvent('ahoy:session-expired'))
       }
     }
     throw new Error(`API ${path}: ${response.status}`)
