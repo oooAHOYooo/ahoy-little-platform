@@ -27,7 +27,7 @@
                <div class="hero-bio" v-if="artist.bio">{{ artist.bio }}</div>
                <div class="hero-actions">
                   <button class="action-btn btn-white" @click="onFollow">
-                    <i :class="bookmarks.isBookmarked(artist) ? 'fas fa-check' : 'fas fa-plus'"></i>
+                    <i :class="bookmarks.isBookmarked(artist) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
                     {{ bookmarks.isBookmarked(artist) ? 'Following' : 'Follow' }}
                   </button>
                   <button class="action-btn btn-glass" @click="onShareArtist">

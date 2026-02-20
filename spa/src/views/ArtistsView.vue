@@ -164,11 +164,6 @@
                   class="artist-image image-placeholder"
                   loading="lazy"
                 />
-                <div class="artist-overlay">
-                  <button type="button" class="view-btn" @click.prevent="viewArtist(artist)">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                </div>
                 <div v-if="artist.type" class="artist-type-badge ahoy-subheader">{{ (artist.type || '').toUpperCase() }}</div>
               </div>
               <div class="artist-info">

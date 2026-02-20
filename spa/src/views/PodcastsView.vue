@@ -1,7 +1,7 @@
 <template>
   <div class="podcasts-page">
-    <!-- Subpage hero (same as Flask subpage_hero) -->
-    <section class="podcasts-hero">
+    <!-- Mobile: subpage hero (same as Flask macros/subpage_header) -->
+    <section class="podcasts-hero mobile-only">
       <div class="podcasts-hero-inner">
         <h1>
           <i class="fas fa-podcast" aria-hidden="true"></i>
@@ -11,8 +11,102 @@
       </div>
     </section>
 
+    <!-- Desktop: full unified subheader with search, filters, actions -->
+    <section class="unified-header podcasts-subheader desktop-only">
+      <div class="header-content">
+        <div class="header-title">
+          <div class="title-text">
+            <h1>Podcasts</h1>
+            <p>Fresh episodes and shows from independent creators.</p>
+          </div>
+        </div>
+        <div class="header-search">
+          <div class="search-bar">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="search-input"
+              placeholder="Search shows or episodes..."
+            />
+            <button v-if="searchQuery" type="button" class="search-clear" aria-label="Clear search" @click="searchQuery = ''">
+              <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <div class="header-filters">
+          <div class="filter-tabs">
+            <button
+              type="button"
+              class="filter-tab"
+              :class="{ active: activeShowSlug === 'all' }"
+              @click="activeShowSlug = 'all'"
+            >
+              <i class="fas fa-th-large" style="margin-right: 6px;"></i>
+              <span>All Shows</span>
+            </button>
+            <button
+              v-for="show in featuredShows"
+              :key="show.slug"
+              type="button"
+              class="filter-tab"
+              :class="{ active: activeShowSlug === show.slug }"
+              @click="activeShowSlug = show.slug"
+            >
+              <i class="fas fa-microphone" style="margin-right: 6px;"></i>
+              <span>{{ show.title }}</span>
+            </button>
+          </div>
+        </div>
+        <div class="header-actions">
+           <button type="button" class="btn btn-primary btn-large" @click="goRandomEpisode">
+            <i class="fas fa-random"></i> Random Episode
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- Featured section: Shows + filter chips + show cards -->
-    <section class="podcasts-section podcasts-featured-section">
+    <!-- Mobile: search + filter strip then episode list -->
+    <section class="podcasts-section mobile-only" style="margin-top:0">
+      <div class="artists-mobile-controls">
+        <div class="search-bar">
+          <i class="fas fa-search" aria-hidden="true"></i>
+          <input
+            v-model="searchQuery"
+            type="text"
+            class="search-input"
+            placeholder="Search shows or episodes..."
+          />
+          <button v-if="searchQuery" type="button" class="search-clear" aria-label="Clear search" @click="searchQuery = ''">
+            <i class="fas fa-times" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="filter-tabs-mobile">
+          <button
+            type="button"
+            class="filter-tab-mobile"
+            :class="{ active: activeShowSlug === 'all' }"
+            @click="activeShowSlug = 'all'"
+          >
+            <span>All</span>
+          </button>
+          <button
+            v-for="show in featuredShows"
+            :key="show.slug"
+            type="button"
+            class="filter-tab-mobile"
+            :class="{ active: activeShowSlug === show.slug }"
+            @click="activeShowSlug = show.slug"
+          >
+            <span>{{ show.title }}</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured section: Shows + show cards (Desktop Only) -->
+    <section class="podcasts-section podcasts-featured-section desktop-only">
       <div class="podcasts-section-header podcasts-featured-header">
         <div>
           <h2>Shows</h2>
@@ -189,9 +283,20 @@ const bookmarks = useBookmarks()
 
 const shows = ref([])
 const loading = ref(true)
+const searchQuery = ref('')
 const activeShowSlug = ref('all')
 
-const featuredShows = computed(() => (shows.value || []).slice(0, 4))
+const featuredShows = computed(() => {
+  let list = shows.value || []
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    list = list.filter(s => 
+      s.title.toLowerCase().includes(q) || 
+      (s.description && s.description.toLowerCase().includes(q))
+    )
+  }
+  return list.slice(0, 4)
+})
 
 const episodes = computed(() => {
   const featured = new Set(featuredShows.value.map(s => s.slug))
@@ -222,9 +327,26 @@ const episodes = computed(() => {
 })
 
 const filteredEpisodes = computed(() => {
-  if (activeShowSlug.value === 'all') return episodes.value
-  return episodes.value.filter(ep => ep.showSlug === activeShowSlug.value)
+  let list = episodes.value
+  if (activeShowSlug.value !== 'all') {
+    list = list.filter(ep => ep.showSlug === activeShowSlug.value)
+  }
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    list = list.filter(ep => 
+      ep.title.toLowerCase().includes(q) || 
+      ep.description.toLowerCase().includes(q) ||
+      ep.showTitle.toLowerCase().includes(q)
+    )
+  }
+  return list
 })
+
+function goRandomEpisode() {
+  if (episodes.value.length === 0) return
+  const pick = episodes.value[Math.floor(Math.random() * episodes.value.length)]
+  playEpisode(pick)
+}
 
 function formatDuration(seconds) {
   if (!seconds) return ''

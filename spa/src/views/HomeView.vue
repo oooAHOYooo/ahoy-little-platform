@@ -2,7 +2,7 @@
   <div class="home-page">
     <!-- Global subpage hero (one line on mobile: Home · Explore) -->
     <section class="podcasts-hero">
-      <div class="podcasts-hero-inner">
+      <div class="podcasts-hero-inner" :style="{ backgroundImage: `url(${selectedGif})` }">
         <h1><i class="fas fa-home" aria-hidden="true"></i> Home</h1>
         <p>Explore</p>
         
@@ -184,6 +184,17 @@ import ExploreWidgets from '../components/ExploreWidgets.vue'
 const router = useRouter()
 const playerStore = usePlayerStore()
 
+// Search GIF background
+const searchGifs = [
+  'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExeGlreWRqaHZxc295NHNvZWs4MWJoeTIwdXk1NnNuN2syOTE4Z3JleSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/14hS1ZEmSfKdTW/giphy.gif',
+  'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExdnI2M2VxZmhkeTM1bHVoZmV0NmdmYzVjeWt3eHc1eGZtOWk4N3c0YyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/AS9LIFttYzkc0/giphy.gif',
+  'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjB3cjhjNXEwMXhrcTFvYnF4Zm5xamduNm8ycjB4ZnJneDhyb2IzNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wSYE7n6pk9dqRXzitR/giphy.gif',
+  'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExMWVkeG1sY3hvYTlwMjl0bWZrbTI3bXlqOGQ2cmYyZXVmZ2RuZWIwcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xWC0BCZtkDxE869erD/giphy.gif',
+  'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjJ4Mml1ajMzNGh1ODVrN3J3cnVtbjZkeXZnN29wNmQ2aHhncTJ0OCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l1J9BYe5eZccC4Nck/giphy.gif',
+  'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOWZnNnhxbjgzM3B1NXdzOWJwZjJnM3hveTJwNnE1bjZrb3ZicXU3bSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oGRFs7yHPDlB8JYsg/giphy.gif'
+]
+const selectedGif = ref('')
+
 // Search
 const searchQuery = ref('')
 function handleSearch() {
@@ -327,6 +338,9 @@ function parseLiveTvChannels(data) {
 }
 
 onMounted(async () => {
+  // Randomly select search background GIF
+  selectedGif.value = searchGifs[Math.floor(Math.random() * searchGifs.length)]
+
   // Live TV channels — network first with cache-bust to avoid stale empty response, then cache fallback
   try {
     let data = null
@@ -438,16 +452,50 @@ watch(
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    gap: 1rem;
-    padding: 3rem 0;
+    gap: 0.75rem;
+    padding: 2.5rem;
     text-align: left;
+    border-radius: 28px;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Dark overlay to ensure text readability */
+.home-page .podcasts-hero-inner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 100%);
+    z-index: 0;
+}
+
+.home-page .podcasts-hero-inner > * {
+    position: relative;
+    z-index: 1;
+}
+
+.home-page .podcasts-hero-inner h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.home-page .podcasts-hero-inner p {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 0 0.5rem 0;
+    font-weight: 500;
 }
 
 .hero-search-wrapper {
   position: relative;
   width: 100%;
   max-width: 600px;
-  margin-top: 1rem;
 }
 
 .search-icon {
@@ -455,35 +503,37 @@ watch(
   left: 1.25rem;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 1.1rem;
   pointer-events: none;
+  z-index: 2;
 }
 
 .hero-search-input {
   width: 100%;
-  padding: 1rem 1rem 1rem 3.5rem;
+  padding: 0.75rem 1rem 0.75rem 3.5rem;
   border-radius: 99px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(20, 20, 20, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   color: #fff;
   font-size: 1rem;
   font-weight: 500;
   outline: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .hero-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .hero-search-input:focus {
-  background: rgba(30, 30, 30, 0.8);
-  border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(99, 102, 241, 0.2);
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  transform: scale(1.01);
 }
 
 .home-page .dashboard-main {
