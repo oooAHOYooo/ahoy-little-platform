@@ -2,20 +2,97 @@
   <div class="home-page">
     <!-- Global subpage hero (one line on mobile: Home · Explore) -->
     <section class="podcasts-hero">
-      <div class="podcasts-hero-inner" :style="{ backgroundImage: `url(${selectedGif})` }">
+      <div
+        class="podcasts-hero-inner"
+        :style="{
+          backgroundImage: `url(${selectedGif})`,
+          backgroundPosition: `${parallaxX}% ${parallaxY}%`
+        }"
+        @mouseenter="enableParallax = true"
+        @mouseleave="resetParallax"
+        @mousemove="handleParallaxMove"
+      >
         <h1><i class="fas fa-home" aria-hidden="true"></i> Home</h1>
         <p>Explore</p>
         
         <!-- Search Bar -->
-        <div class="hero-search-wrapper">
-          <i class="fas fa-search search-icon"></i>
-          <input 
-            type="text" 
-            class="hero-search-input" 
-            placeholder="Search artists, tracks, or shows..." 
+        <div class="hero-search-wrapper" :class="{ 'has-results': showResults && searchResults.length > 0, 'expanded': searchExpanded }">
+          <input
+            type="text"
+            class="hero-search-input"
+            placeholder="Search artists, tracks, or shows..."
             v-model="searchQuery"
+            @input="handleSearchInput"
             @keydown.enter="handleSearch"
           />
+
+          <!-- Search Results -->
+          <div v-if="showResults && searchResults.length > 0" class="search-results-container">
+            <div class="search-results-header">
+              <span class="results-count">{{ searchResults.length }} {{ searchResults.length === 1 ? 'result' : 'results' }}</span>
+              <div class="search-actions">
+                <button
+                  type="button"
+                  class="search-action-btn"
+                  :class="{ active: searchExpanded }"
+                  @click="searchExpanded = !searchExpanded"
+                  :title="searchExpanded ? 'Collapse' : 'Expand'"
+                >
+                  <i :class="searchExpanded ? 'fas fa-compress-alt' : 'fas fa-expand-alt'"></i>
+                </button>
+                <button
+                  type="button"
+                  class="search-action-btn"
+                  @click="ejectSearch"
+                  title="Open in Search Page"
+                >
+                  <i class="fas fa-external-link-alt"></i>
+                </button>
+                <button
+                  type="button"
+                  class="search-action-btn"
+                  @click="saveSearch"
+                  title="Save Search"
+                >
+                  <i class="fas fa-bookmark"></i>
+                </button>
+                <button
+                  type="button"
+                  class="search-action-btn close-btn"
+                  @click="clearSearch"
+                  title="Clear"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="search-results-list">
+              <a
+                v-for="result in displayedResults"
+                :key="result.id"
+                :href="getResultUrl(result)"
+                class="search-result-item"
+                @click.prevent="navigateToResult(result)"
+              >
+                <div class="result-image">
+                  <img
+                    :src="result.image || result.cover_art || result.artwork || result.thumbnail || '/static/img/default-cover.jpg'"
+                    :alt="result.title || result.name"
+                    loading="lazy"
+                  />
+                  <div class="result-type-badge">{{ result.type }}</div>
+                </div>
+                <div class="result-info">
+                  <div class="result-title">{{ result.title || result.name }}</div>
+                  <div class="result-subtitle">{{ result.artist || result.host || result.description || '' }}</div>
+                </div>
+                <div class="result-arrow">
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -195,11 +272,223 @@ const searchGifs = [
 ]
 const selectedGif = ref('')
 
+// Parallax effect
+const enableParallax = ref(false)
+const parallaxX = ref(50)
+const parallaxY = ref(50)
+
+function handleParallaxMove(event) {
+  if (!enableParallax.value) return
+
+  const rect = event.currentTarget.getBoundingClientRect()
+  const x = event.clientX - rect.left
+  const y = event.clientY - rect.top
+
+  // Calculate percentage position (with subtle movement range)
+  const xPercent = (x / rect.width) * 100
+  const yPercent = (y / rect.height) * 100
+
+  // Smoothly interpolate (40-60% range for subtle effect)
+  parallaxX.value = 40 + (xPercent / 100) * 20
+  parallaxY.value = 40 + (yPercent / 100) * 20
+}
+
+function resetParallax() {
+  enableParallax.value = false
+  parallaxX.value = 50
+  parallaxY.value = 50
+}
+
 // Search
 const searchQuery = ref('')
+const searchResults = ref([])
+const searchExpanded = ref(false)
+const showResults = ref(false)
+const searchDebounceTimer = ref(null)
+let allSearchableData = {
+  tracks: [],
+  albums: [],
+  shows: [],
+  podcasts: [],
+  artists: []
+}
+
+const displayedResults = computed(() => {
+  return searchExpanded.value ? searchResults.value : searchResults.value.slice(0, 6)
+})
+
+async function loadSearchableData() {
+  try {
+    const [musicData, showsData, podcastsData, artistsData] = await Promise.all([
+      apiFetchCached('/api/music').catch(() => ({ tracks: [], albums: [] })),
+      apiFetchCached('/api/shows').catch(() => ({ shows: [] })),
+      apiFetchCached('/api/podcasts').catch(() => ({ shows: [] })),
+      apiFetchCached('/api/artists').catch(() => ({ artists: [] }))
+    ])
+
+    allSearchableData.tracks = (musicData.tracks || []).map(t => ({ ...t, type: 'track' }))
+
+    // Extract albums from tracks
+    const albumMap = new Map()
+    for (const track of musicData.tracks || []) {
+      if (track.album && track.album !== 'Single' && !albumMap.has(track.album)) {
+        albumMap.set(track.album, {
+          id: track.album,
+          title: track.album,
+          name: track.album,
+          artist: track.artist,
+          cover_art: track.cover_art || track.artwork,
+          type: 'album'
+        })
+      }
+    }
+    allSearchableData.albums = Array.from(albumMap.values())
+
+    allSearchableData.shows = (showsData.shows || []).map(s => ({ ...s, type: 'video' }))
+    allSearchableData.podcasts = (podcastsData.shows || []).map(p => ({ ...p, type: 'podcast' }))
+    allSearchableData.artists = (artistsData.artists || []).map(a => ({ ...a, type: 'artist' }))
+  } catch (e) {
+    console.error('Error loading searchable data', e)
+  }
+}
+
+function performSearch(query) {
+  if (!query || query.trim().length < 2) {
+    searchResults.value = []
+    showResults.value = false
+    return
+  }
+
+  showResults.value = true
+  const q = query.toLowerCase().trim()
+  const results = []
+
+  // Search tracks
+  for (const track of allSearchableData.tracks) {
+    if (
+      track.title?.toLowerCase().includes(q) ||
+      track.artist?.toLowerCase().includes(q) ||
+      track.album?.toLowerCase().includes(q)
+    ) {
+      results.push(track)
+    }
+  }
+
+  // Search albums
+  for (const album of allSearchableData.albums) {
+    if (
+      album.title?.toLowerCase().includes(q) ||
+      album.artist?.toLowerCase().includes(q)
+    ) {
+      results.push(album)
+    }
+  }
+
+  // Search shows/videos
+  for (const show of allSearchableData.shows) {
+    if (
+      show.title?.toLowerCase().includes(q) ||
+      show.artist?.toLowerCase().includes(q) ||
+      show.host?.toLowerCase().includes(q)
+    ) {
+      results.push(show)
+    }
+  }
+
+  // Search podcasts
+  for (const podcast of allSearchableData.podcasts) {
+    if (
+      podcast.title?.toLowerCase().includes(q) ||
+      podcast.host?.toLowerCase().includes(q) ||
+      podcast.description?.toLowerCase().includes(q)
+    ) {
+      results.push(podcast)
+    }
+  }
+
+  // Search artists
+  for (const artist of allSearchableData.artists) {
+    if (artist.name?.toLowerCase().includes(q)) {
+      results.push(artist)
+    }
+  }
+
+  searchResults.value = results.slice(0, 50) // Limit to 50 results
+}
+
+function handleSearchInput() {
+  if (searchDebounceTimer.value) {
+    clearTimeout(searchDebounceTimer.value)
+  }
+
+  searchDebounceTimer.value = setTimeout(() => {
+    performSearch(searchQuery.value)
+  }, 300)
+}
+
 function handleSearch() {
   if (!searchQuery.value.trim()) return
   router.push({ path: '/search', query: { q: searchQuery.value } })
+}
+
+function clearSearch() {
+  searchQuery.value = ''
+  searchResults.value = []
+  searchExpanded.value = false
+  showResults.value = false
+}
+
+function ejectSearch() {
+  if (!searchQuery.value.trim()) return
+  router.push({ path: '/search', query: { q: searchQuery.value } })
+  clearSearch()
+}
+
+function saveSearch() {
+  if (!searchQuery.value.trim()) return
+
+  try {
+    const savedSearches = JSON.parse(localStorage.getItem('ahoy.savedSearches') || '[]')
+    const newSearch = {
+      query: searchQuery.value,
+      timestamp: new Date().toISOString(),
+      resultsCount: searchResults.value.length
+    }
+
+    // Don't save duplicates
+    const exists = savedSearches.find(s => s.query === searchQuery.value)
+    if (!exists) {
+      savedSearches.unshift(newSearch)
+      localStorage.setItem('ahoy.savedSearches', JSON.stringify(savedSearches.slice(0, 20)))
+
+      // Show feedback (you could add a toast notification here)
+      alert(`Search saved: "${searchQuery.value}"`)
+    }
+  } catch (e) {
+    console.error('Failed to save search', e)
+  }
+}
+
+function getResultUrl(result) {
+  switch (result.type) {
+    case 'track':
+      return `/music/${result.id}`
+    case 'album':
+      return `/music?q=${encodeURIComponent(result.title)}`
+    case 'video':
+      return `/videos?play=${result.id}`
+    case 'podcast':
+      return `/podcasts/${result.slug || result.id}`
+    case 'artist':
+      return `/artists/${result.slug || result.id}`
+    default:
+      return '#'
+  }
+}
+
+function navigateToResult(result) {
+  router.push(getResultUrl(result))
+  clearSearch()
 }
 
 // Live TV
@@ -341,11 +630,15 @@ onMounted(async () => {
   // Randomly select search background GIF
   selectedGif.value = searchGifs[Math.floor(Math.random() * searchGifs.length)]
 
+  // Load searchable data for instant search
+  loadSearchableData()
+
   // Live TV channels — network first with cache-bust to avoid stale empty response, then cache fallback
   try {
     let data = null
     try {
-      data = await apiFetch('/api/live-tv/channels?_=' + Date.now())
+      const response = await fetch('/api/live-tv/channels?_=' + Date.now())
+      data = await response.json()
     } catch {
       data = await apiFetchCached('/api/live-tv/channels').catch(() => null)
     }
@@ -453,15 +746,17 @@ watch(
     align-items: flex-start;
     justify-content: center;
     gap: 0.75rem;
-    padding: 2.5rem;
+    padding: 3rem 2.5rem;
+    min-height: 420px;
     text-align: left;
     border-radius: 28px;
-    background-size: cover;
+    background-size: 110%;
     background-position: center;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-position 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Dark overlay to ensure text readability */
@@ -496,22 +791,20 @@ watch(
   position: relative;
   width: 100%;
   max-width: 600px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.search-icon {
-  position: absolute;
-  left: 1.25rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 1.1rem;
-  pointer-events: none;
-  z-index: 2;
+.hero-search-wrapper.has-results {
+  max-width: 900px;
+}
+
+.hero-search-wrapper.expanded {
+  max-width: 100%;
 }
 
 .hero-search-input {
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 3.5rem;
+  padding: 0.9rem 1.5rem;
   border-radius: 99px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(0, 0, 0, 0.3);
@@ -523,10 +816,12 @@ watch(
   outline: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
 }
 
 .hero-search-input::placeholder {
   color: rgba(255, 255, 255, 0.6);
+  text-align: center;
 }
 
 .hero-search-input:focus {
@@ -534,6 +829,243 @@ watch(
   border-color: rgba(255, 255, 255, 0.5);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
   transform: scale(1.01);
+}
+
+.hero-search-wrapper.has-results .hero-search-input {
+  border-radius: 20px 20px 0 0;
+  border-bottom: none;
+}
+
+/* Search Results Container - Glass Neumorphism */
+.search-results-container {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: none;
+  border-radius: 0 0 24px 24px;
+  box-shadow:
+    0 20px 60px -10px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 40px rgba(0, 0, 0, 0.2);
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+}
+
+.results-count {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.search-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.search-action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.85rem;
+}
+
+.search-action-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.search-action-btn.active {
+  background: rgba(99, 102, 241, 0.3);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: #fff;
+}
+
+.search-action-btn.close-btn:hover {
+  background: rgba(255, 0, 0, 0.2);
+  border-color: rgba(255, 0, 0, 0.4);
+  color: #ff6b6b;
+}
+
+.search-results-list {
+  max-height: 480px;
+  overflow-y: auto;
+  padding: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
+.hero-search-wrapper.expanded .search-results-list {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  max-height: 600px;
+}
+
+.search-results-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.search-results-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.search-results-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.search-results-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.search-result-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.result-image {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.result-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.result-type-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.result-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-subtitle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-arrow {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.search-result-item:hover .result-arrow {
+  color: rgba(255, 255, 255, 0.8);
+  transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+  .home-page .podcasts-hero-inner {
+    min-height: 360px;
+    padding: 2rem 1.5rem;
+  }
+
+  .hero-search-wrapper {
+    max-width: 100%;
+  }
+
+  .search-results-list {
+    grid-template-columns: 1fr;
+    max-height: 360px;
+  }
+
+  .hero-search-wrapper.expanded .search-results-list {
+    grid-template-columns: 1fr;
+    max-height: 480px;
+  }
+
+  .search-action-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.75rem;
+  }
 }
 
 .home-page .dashboard-main {
