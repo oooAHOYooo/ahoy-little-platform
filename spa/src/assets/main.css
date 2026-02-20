@@ -19620,6 +19620,7 @@ img.loading {
 
 .music-table tr {
     display: grid;
+    position: relative;
     grid-template-columns:
         [art] 64px [title-artist] minmax(200px, 1fr) [duration] 80px [plays] 80px [actions] 120px;
     align-items: center;
@@ -19707,6 +19708,7 @@ img.loading {
 
 /* Art Column */
 .music-table .music-table-art-wrap {
+    position: relative;
     width: 48px;
     height: 48px;
 }

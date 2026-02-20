@@ -374,12 +374,6 @@ onUnmounted(() => {
 }
 
 .explore-widget::before {
-   - **Mobile**: Maintains 3 items per widget as requested, hiding the extra items via CSS.
-
-#### Video Widget Unification
-- Removed the 16:9 aspect ratio override for the Videos widget.
-- Videos now use the same square (1:1) aspect ratio as Podcasts, Music, and Recent items.
-- This ensures a consistent grid layout and "unified" aesthetic across all Explore widgets.s */
     /* Subtle noise/texture overlay could go here, but keeping clean glass */
     content: '';
     position: absolute;
