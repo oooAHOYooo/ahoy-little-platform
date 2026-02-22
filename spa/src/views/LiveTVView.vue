@@ -327,7 +327,7 @@ let lastSrc = ''
 let engineTimer = null
 
 // Constants
-const pillColors = ['#7c66ff', '#ff6b6b', '#22c55e', '#f59e0b']
+const pillColors = ['#00a2ff', '#00ffff', '#0066ff', '#5b21b6'] // Electric Blue, Cyan, Deep Blue, Deep Indigo
 const pxPerMinute = 6
 const horizonMinutes = 180
 
@@ -1341,16 +1341,16 @@ onUnmounted(() => {
   outline: 2px solid #4f46e5;
 }
 .program.selected {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59,130,246,0.35) inset;
+  border-color: #00a2ff;
+  box-shadow: 0 0 0 2px rgba(0,162,255,0.35) inset;
 }
 .now-line {
   position: absolute;
   top: 0;
   bottom: 0;
   width: 2px;
-  background: #3b82f6;
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+  background: #00a2ff;
+  box-shadow: 0 0 15px rgba(0, 162, 255, 0.8);
   z-index: 5;
   pointer-events: none;
 }
@@ -1362,9 +1362,9 @@ onUnmounted(() => {
   transform: translateX(-50%);
   width: 8px;
   height: 8px;
-  background: #3b82f6;
+  background: #00a2ff;
   border-radius: 50%;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 1);
+  box-shadow: 0 0 10px rgba(0, 162, 255, 1);
 }
 
 /* ===== Program Pop-up Modal ===== */
@@ -1433,7 +1433,7 @@ onUnmounted(() => {
   align-items: center;
 }
 .modal-badge {
-  background: #3b82f6;
+  background: #0066ff;
   color: #fff;
   padding: 2px 6px;
   border-radius: 4px;

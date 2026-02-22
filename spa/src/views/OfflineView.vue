@@ -1,7 +1,7 @@
 <template>
   <div class="offline-page">
     <div class="offline-container">
-      <img src="/ahoy_logo.png" alt="Ahoy" class="offline-logo" @error="logoError = true" />
+      <img src="/static/img/ahoy_logo.png" alt="Ahoy" class="offline-logo" @error="logoError = true" />
       <span v-if="logoError" class="offline-logo-text">Ahoy</span>
       <h1>You're Offline</h1>
       <p>Connect to the internet to browse new content. Pages you've visited before will load from cache.</p>

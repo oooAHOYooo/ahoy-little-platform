@@ -2,7 +2,7 @@
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-logo">
-        <img src="/ahoy_logo.png" alt="Ahoy" class="auth-logo-img" />
+        <img src="/static/img/ahoy_logo.png" alt="Ahoy" class="auth-logo-img" />
         <h1>Ahoy</h1>
       </div>
 

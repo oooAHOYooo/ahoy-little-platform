@@ -77,7 +77,7 @@ const route = useRoute()
 const auth = useAuth()
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'https://app.ahoy.ooo'
-const logoUrl = `${API_BASE}/static/img/ahoy_logo.png`
+const logoUrl = '/static/img/ahoy_logo.png'
 const logoError = ref(false)
 </script>
 

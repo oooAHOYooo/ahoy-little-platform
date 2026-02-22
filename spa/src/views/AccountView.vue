@@ -2,7 +2,7 @@
   <div class="account-page">
     <section class="podcasts-hero account-page-header">
       <div class="podcasts-hero-inner account-hero-inner">
-        <img src="/ahoy_logo.png" alt="Ahoy" class="account-hero-logo" />
+        <img src="/static/img/ahoy_logo.png" alt="Ahoy" class="account-hero-logo" />
         <div>
           <h1>Account</h1>
           <p>Wallet & profile</p>

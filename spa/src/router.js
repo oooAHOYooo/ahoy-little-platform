@@ -271,6 +271,11 @@ const routes = [
     name: 'silverback',
     component: () => import('./views/SilverbackView.vue'),
   },
+  {
+    path: '/about',
+    name: 'about',
+    component: () => import('./views/AboutView.vue'),
+  },
 ]
 
 const router = createRouter({

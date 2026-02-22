@@ -938,6 +938,74 @@ body.theme-after-dark .router-link-active {
     color: var(--primary-color);
 }
 
+/* Deep Blue Theme */
+body.theme-deep-blue {
+    /* Inspired by the user image: Deep Sea Blues, Cyan Glows, Dark Glass */
+    --primary-color: #00a2ff;
+    /* Electric Blue */
+    --secondary-color: #0066ff;
+    /* Deep Blue */
+    --accent-color: #00ffff;
+    /* Cyan Glow */
+
+    --background-dark: #040810;
+    /* Near Black Blue */
+    --background-medium: #081224;
+    /* Deep Navy */
+    --background-light: #0d1b35;
+    /* Dark Navy */
+
+    --text-primary: #ffffff;
+    --text-secondary: rgba(210, 235, 255, 0.85);
+    --text-muted: rgba(180, 210, 255, 0.6);
+
+    --border-color: rgba(0, 162, 255, 0.15);
+    --success-color: #00ffcc;
+    --warning-color: #ffcc00;
+    --error-color: #ff4d4d;
+
+    background: radial-gradient(circle at top center, #0a1f44 0%, #040810 100%);
+    background-attachment: fixed;
+}
+
+/* Specific overrides for Deep Blue to match the sleek futuristic dock look */
+body.theme-deep-blue .neu-card,
+body.theme-deep-blue .settings-page,
+body.theme-deep-blue .app-sidebar,
+body.theme-deep-blue .app-navbar,
+body.theme-deep-blue .mobile-menu-drawer,
+body.theme-deep-blue .mini-player,
+body.theme-deep-blue .compact-footer {
+    background: rgba(8, 18, 36, 0.7) !important;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(0, 162, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+body.theme-deep-blue .neu-btn-primary {
+    background: linear-gradient(135deg, #00a2ff, #0066ff);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 162, 255, 0.4);
+}
+
+body.theme-deep-blue .neu-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 162, 255, 0.1);
+}
+
+body.theme-deep-blue .nav-link.active,
+body.theme-deep-blue .router-link-active {
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(0, 162, 255, 0.5);
+}
+
+body.theme-deep-blue .app-sidebar-item.active {
+    background: rgba(0, 162, 255, 0.1);
+    border-left: 3px solid var(--primary-color);
+}
+
 
 @media (max-width: 768px) {
     :root {

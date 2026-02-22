@@ -12,8 +12,9 @@
         @mouseleave="resetParallax"
         @mousemove="handleParallaxMove"
       >
-        <h1><i class="fas fa-home" aria-hidden="true"></i> Home</h1>
-        <p>Explore</p>
+        <router-link to="/about" class="hero-logo-container">
+          <img src="/static/img/ahoy_logo.png" alt="Ahoy Logo" class="hero-logo" />
+        </router-link>
         
         <!-- Search Bar -->
         <div class="hero-search-wrapper" :class="{ 'has-results': showResults && searchResults.length > 0, 'expanded': searchExpanded }">
@@ -743,12 +744,12 @@ watch(
 .home-page .podcasts-hero-inner {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 1.5rem;
     padding: 3rem 2.5rem;
     min-height: 420px;
-    text-align: left;
+    text-align: center;
     border-radius: 28px;
     background-size: 110%;
     background-position: center;
@@ -756,7 +757,13 @@ watch(
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: background-position 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-position 2s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: hero-drift 60s infinite alternate ease-in-out;
+}
+
+@keyframes hero-drift {
+    0% { background-size: 110%; }
+    100% { background-size: 130%; }
 }
 
 /* Dark overlay to ensure text readability */
@@ -764,7 +771,8 @@ watch(
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 100%);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.5) 100%);
+    backdrop-filter: blur(8px); /* Increased blur for more 'prominent' background suppression */
     z-index: 0;
 }
 
@@ -773,18 +781,23 @@ watch(
     z-index: 1;
 }
 
-.home-page .podcasts-hero-inner h1 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin: 0;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+.hero-logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    width: 100%;
 }
 
-.home-page .podcasts-hero-inner p {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.8);
-    margin: 0 0 0.5rem 0;
-    font-weight: 500;
+.hero-logo {
+    height: 100px; /* 25% bigger than 80px */
+    width: auto;
+    filter: drop-shadow(0 0 30px rgba(0, 162, 255, 0.6));
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.hero-logo:hover {
+    transform: scale(1.05);
 }
 
 .hero-search-wrapper {

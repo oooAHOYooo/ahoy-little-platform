@@ -111,23 +111,16 @@
               <span class="setting-toggle-title">Theme</span>
               <span class="setting-toggle-desc">Choose your preferred look</span>
             </div>
-            <div class="theme-options" style="display: flex; gap: 10px;">
-               <button 
-                 type="button"
-                 class="neu-btn" 
-                 :class="theme.currentTheme.value === 'default' ? 'neu-btn-primary' : 'neu-btn-secondary'"
-                 @click="theme.setTheme('default')"
+            <div class="theme-options">
+               <select 
+                 class="settings-select"
+                 :value="theme.currentTheme.value"
+                 @change="theme.setTheme($event.target.value)"
                >
-                 Default
-               </button>
-               <button 
-                 type="button"
-                 class="neu-btn" 
-                 :class="theme.currentTheme.value === 'after-dark' ? 'neu-btn-primary' : 'neu-btn-secondary'"
-                 @click="theme.setTheme('after-dark')"
-               >
-                 After Dark
-               </button>
+                 <option value="deep-blue">Deep Blue</option>
+                 <option value="after-dark">After Dark</option>
+                 <option value="default">Default</option>
+               </select>
             </div>
           </div>
         </div>
@@ -571,6 +564,29 @@ onUnmounted(() => {
 }
 .setting-toggle-btn.on .setting-toggle-thumb {
   transform: translateX(22px);
+}
+
+.theme-options {
+  flex-shrink: 0;
+}
+
+.settings-select {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+  width: 140px;
+}
+.settings-select:focus {
+  border-color: rgba(139, 92, 246, 0.5);
+}
+.settings-select option {
+  background: #18181b;
+  color: #fff;
 }
 
 .settings-grid {

@@ -179,7 +179,7 @@
           v-for="artist in randomArtists"
           :key="artist.slug"
           :to="`/artists/${artist.slug}`"
-          class="widget-card artist-card-shape"
+          class="widget-card"
           v-tilt="{ target: '.card-image img', scale: 1.1, speed: 600, max: 10 }"
           @mouseenter="playHoverSound"
           @click="playClickSound"
@@ -229,7 +229,7 @@ function loadRecentlyPlayed() {
   try {
     const raw = localStorage.getItem('ahoy.recentlyPlayed.v1')
     if (raw) {
-      recentlyPlayed.value = JSON.parse(raw).slice(0, 6)
+      recentlyPlayed.value = JSON.parse(raw).slice(0, 12)
     }
   } catch (e) {
     console.error('Failed to load recently played', e)
@@ -238,7 +238,7 @@ function loadRecentlyPlayed() {
 
 function updateMySaves() {
     const all = Object.values(bookmarks.bookmarks.value || {})
-    mySaves.value = all.reverse().slice(0, 6)
+    mySaves.value = all.reverse().slice(0, 12)
 }
 
 onMounted(async () => {
@@ -252,10 +252,10 @@ onMounted(async () => {
     ])
 
     // Process Podcasts
-    randomPodcasts.value = getRandomItems(podData.shows || [], 6)
+    randomPodcasts.value = getRandomItems(podData.shows || [], 12)
 
     // Process Videos
-    randomVideos.value = getRandomItems(videoData.shows || [], 6)
+    randomVideos.value = getRandomItems(videoData.shows || [], 12)
 
     // Process Music
     const allTracks = musicData.tracks || []
@@ -305,14 +305,14 @@ onMounted(async () => {
        musicItems = [...musicItems, ...randomMore]
     }
     
-    randomMusic.value = musicItems.slice(0, 6)
+    randomMusic.value = musicItems.slice(0, 12)
 
     // Process Artists
     const artists = (artistData.artists || []).map(a => ({
        ...a,
        slug: a.slug || a.id || (a.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
     }))
-    randomArtists.value = getRandomItems(artists, 6)
+    randomArtists.value = getRandomItems(artists, 12)
 
     // Load Local Data
     loadRecentlyPlayed()
@@ -321,7 +321,7 @@ onMounted(async () => {
     // Listen for updates
     window.addEventListener('recentlyPlayed:updated', (e) => {
         if (e.detail && e.detail.recent) {
-            recentlyPlayed.value = e.detail.recent.slice(0, 6)
+            recentlyPlayed.value = e.detail.recent.slice(0, 12)
         }
     })
     
@@ -460,7 +460,8 @@ onUnmounted(() => {
 }*/
 
 .card-image {
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 1;
+  width: 100%;
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 0.85rem;
@@ -582,34 +583,33 @@ onUnmounted(() => {
 /* Theme Colors - Affects Icons and Button Borders/Glows */
 
 /* CYAN (Podcasts) */
-.podcast-widget .header-icon { background: #00FFFF; box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); }
-.cta-purple { border-color: rgba(0, 255, 255, 0.5); color: #00FFFF; }
-.cta-purple:hover { border-color: #00FFFF; box-shadow: 0 0 20px rgba(0, 255, 255, 0.4); text-shadow: 0 0 10px rgba(0, 255, 255, 0.8); color: #fff; }
+.podcast-widget .header-icon { background: #00ffff; box-shadow: 0 0 25px rgba(0, 255, 255, 0.4); }
+.cta-purple { border-color: rgba(0, 255, 255, 0.3); color: #00ffff; }
+.cta-purple:hover { border-color: #00ffff; box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); color: #fff; }
 
-/* MAGENTA (Videos) */
-.video-widget .header-icon { background: #FF00FF; box-shadow: 0 0 25px rgba(255, 0, 255, 0.5); }
-.cta-red { border-color: rgba(255, 0, 255, 0.5); color: #FF00FF; }
-.cta-red:hover { border-color: #FF00FF; box-shadow: 0 0 20px rgba(255, 0, 255, 0.4); text-shadow: 0 0 10px rgba(255, 0, 255, 0.8); color: #fff; }
+/* ELECTRIC BLUE (Videos) */
+.video-widget .header-icon { background: #00a2ff; box-shadow: 0 0 25px rgba(0, 162, 255, 0.4); }
+.cta-red { border-color: rgba(0, 162, 255, 0.3); color: #00a2ff; }
+.cta-red:hover { border-color: #00a2ff; box-shadow: 0 0 30px rgba(0, 162, 255, 0.3); color: #fff; }
 
-/* GREEN (Music) */
-.music-widget .header-icon { background: #00FF00; box-shadow: 0 0 25px rgba(0, 255, 0, 0.5); }
-.cta-blue { border-color: rgba(0, 255, 0, 0.5); color: #00FF00; }
-.cta-blue:hover { border-color: #00FF00; box-shadow: 0 0 20px rgba(0, 255, 0, 0.4); text-shadow: 0 0 10px rgba(0, 255, 0, 0.8); color: #fff; }
+/* DEEP BLUE (Music) */
+.music-widget .header-icon { background: #0066ff; box-shadow: 0 0 25px rgba(0, 102, 255, 0.4); }
+.cta-blue { border-color: rgba(0, 102, 255, 0.3); color: #0066ff; }
+.cta-blue:hover { border-color: #0066ff; box-shadow: 0 0 30px rgba(0, 102, 255, 0.3); color: #fff; }
 
-/* WHITE/GREY (Artists) */
-.artist-widget .header-icon { background: #FFFFFF; color: #000; box-shadow: 0 0 25px rgba(255, 255, 255, 0.5); }
-.cta-green { border-color: rgba(255, 255, 255, 0.5); color: #FFFFFF; }
-.cta-green:hover { border-color: #FFFFFF; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); color: #000; background: #fff; }
+/* SILVER (Artists) */
+.artist-widget .header-icon { background: #e5e7eb; color: #111; box-shadow: 0 0 25px rgba(255, 255, 255, 0.2); }
+.cta-green { border-color: rgba(255, 255, 255, 0.2); color: #e5e7eb; }
+.cta-green:hover { border-color: #fff; box-shadow: 0 0 30px rgba(255, 255, 255, 0.2); color: #000; background: #fff; }
 
-/* ORANGE/GOLD (My Saves) */
-.saves-widget .header-icon { background: #FFD700; box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); }
-.cta-gold { border-color: rgba(255, 215, 0, 0.5); color: #FFD700; }
-.cta-gold:hover { border-color: #FFD700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); text-shadow: 0 0 10px rgba(255, 215, 0, 0.8); color: #fff; }
+/* INDIGO (My Saves / Recent) */
+.saves-widget .header-icon { background: #5b21b6; box-shadow: 0 0 25px rgba(91, 33, 182, 0.4); }
+.cta-gold { border-color: rgba(91, 33, 182, 0.3); color: #a78bfa; }
+.cta-gold:hover { border-color: #a78bfa; box-shadow: 0 0 30px rgba(91, 33, 182, 0.3); color: #fff; }
 
-/* PURPLE (Recently Played) */
-.recent-widget .header-icon { background: #9D00FF; box-shadow: 0 0 25px rgba(157, 0, 255, 0.5); }
-.cta-indigo { border-color: rgba(157, 0, 255, 0.5); color: #D580FF; }
-.cta-indigo:hover { border-color: #D580FF; box-shadow: 0 0 20px rgba(157, 0, 255, 0.4); text-shadow: 0 0 10px rgba(157, 0, 255, 0.8); color: #fff; }
+.recent-widget .header-icon { background: #4c1d95; box-shadow: 0 0 25px rgba(76, 29, 149, 0.4); }
+.cta-indigo { border-color: rgba(76, 29, 149, 0.3); color: #c4b5fd; }
+.cta-indigo:hover { border-color: #c4b5fd; box-shadow: 0 0 30px rgba(76, 29, 149, 0.3); color: #fff; }
 
 
 @media (max-width: 768px) {
