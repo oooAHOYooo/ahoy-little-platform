@@ -229,7 +229,7 @@ function loadRecentlyPlayed() {
   try {
     const raw = localStorage.getItem('ahoy.recentlyPlayed.v1')
     if (raw) {
-      recentlyPlayed.value = JSON.parse(raw).slice(0, 12)
+      recentlyPlayed.value = JSON.parse(raw).slice(0, 6)
     }
   } catch (e) {
     console.error('Failed to load recently played', e)
@@ -238,7 +238,7 @@ function loadRecentlyPlayed() {
 
 function updateMySaves() {
     const all = Object.values(bookmarks.bookmarks.value || {})
-    mySaves.value = all.reverse().slice(0, 12)
+    mySaves.value = all.reverse().slice(0, 6)
 }
 
 onMounted(async () => {
@@ -252,10 +252,10 @@ onMounted(async () => {
     ])
 
     // Process Podcasts
-    randomPodcasts.value = getRandomItems(podData.shows || [], 12)
+    randomPodcasts.value = getRandomItems(podData.shows || [], 6)
 
     // Process Videos
-    randomVideos.value = getRandomItems(videoData.shows || [], 12)
+    randomVideos.value = getRandomItems(videoData.shows || [], 6)
 
     // Process Music
     const allTracks = musicData.tracks || []
@@ -305,14 +305,14 @@ onMounted(async () => {
        musicItems = [...musicItems, ...randomMore]
     }
     
-    randomMusic.value = musicItems.slice(0, 12)
+    randomMusic.value = musicItems.slice(0, 6)
 
     // Process Artists
     const artists = (artistData.artists || []).map(a => ({
        ...a,
        slug: a.slug || a.id || (a.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
     }))
-    randomArtists.value = getRandomItems(artists, 12)
+    randomArtists.value = getRandomItems(artists, 6)
 
     // Load Local Data
     loadRecentlyPlayed()
@@ -573,11 +573,14 @@ onUnmounted(() => {
 }
 
 .widget-cta:hover {
-  background: rgba(255, 255, 255, 0.15); /* Brighter glass on hover */
-  border-color: rgba(255, 255, 255, 0.6); /* Brighter edge on hover */
-  transform: scale(1.02);
-  box-shadow: 0 0 20px rgba(255,255,255,0.1);
-  text-shadow: 0 0 10px rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.1); 
+  border-color: rgba(255, 255, 255, 0.4);
+  /* do not scale as requested */
+  transform: none;
+  box-shadow: 
+    0 0 30px rgba(0, 0, 0, 0.8),
+    0 10px 40px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 10px rgba(255,255,255,0.3);
 }
 
 /* Theme Colors - Affects Icons and Button Borders/Glows */
@@ -585,31 +588,31 @@ onUnmounted(() => {
 /* CYAN (Podcasts) */
 .podcast-widget .header-icon { background: #00ffff; box-shadow: 0 0 25px rgba(0, 255, 255, 0.4); }
 .cta-purple { border-color: rgba(0, 255, 255, 0.3); color: #00ffff; }
-.cta-purple:hover { border-color: #00ffff; box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); color: #fff; }
+.cta-purple:hover { border-color: #00ffff; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); color: #fff; }
 
 /* ELECTRIC BLUE (Videos) */
 .video-widget .header-icon { background: #00a2ff; box-shadow: 0 0 25px rgba(0, 162, 255, 0.4); }
 .cta-red { border-color: rgba(0, 162, 255, 0.3); color: #00a2ff; }
-.cta-red:hover { border-color: #00a2ff; box-shadow: 0 0 30px rgba(0, 162, 255, 0.3); color: #fff; }
+.cta-red:hover { border-color: #00a2ff; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); color: #fff; }
 
 /* DEEP BLUE (Music) */
 .music-widget .header-icon { background: #0066ff; box-shadow: 0 0 25px rgba(0, 102, 255, 0.4); }
 .cta-blue { border-color: rgba(0, 102, 255, 0.3); color: #0066ff; }
-.cta-blue:hover { border-color: #0066ff; box-shadow: 0 0 30px rgba(0, 102, 255, 0.3); color: #fff; }
+.cta-blue:hover { border-color: #0066ff; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); color: #fff; }
 
 /* SILVER (Artists) */
 .artist-widget .header-icon { background: #e5e7eb; color: #111; box-shadow: 0 0 25px rgba(255, 255, 255, 0.2); }
 .cta-green { border-color: rgba(255, 255, 255, 0.2); color: #e5e7eb; }
-.cta-green:hover { border-color: #fff; box-shadow: 0 0 30px rgba(255, 255, 255, 0.2); color: #000; background: #fff; }
+.cta-green:hover { border-color: #fff; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); color: #000; background: #fff; }
 
 /* INDIGO (My Saves / Recent) */
 .saves-widget .header-icon { background: #5b21b6; box-shadow: 0 0 25px rgba(91, 33, 182, 0.4); }
 .cta-gold { border-color: rgba(91, 33, 182, 0.3); color: #a78bfa; }
-.cta-gold:hover { border-color: #a78bfa; box-shadow: 0 0 30px rgba(91, 33, 182, 0.3); color: #fff; }
+.cta-gold:hover { border-color: #a78bfa; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); color: #fff; }
 
 .recent-widget .header-icon { background: #4c1d95; box-shadow: 0 0 25px rgba(76, 29, 149, 0.4); }
 .cta-indigo { border-color: rgba(76, 29, 149, 0.3); color: #c4b5fd; }
-.cta-indigo:hover { border-color: #c4b5fd; box-shadow: 0 0 30px rgba(76, 29, 149, 0.3); color: #fff; }
+.cta-indigo:hover { border-color: #c4b5fd; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); color: #fff; }
 
 
 @media (max-width: 768px) {

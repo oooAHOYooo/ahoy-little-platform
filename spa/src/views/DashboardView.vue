@@ -5,7 +5,7 @@
         <div class="sidebar-content">
           <div class="sidebar-panel sidebar-item">
             <div class="section-title">Search</div>
-            <router-link to="/search" class="sidebar-search-link">
+            <router-link to="/" class="sidebar-search-link">
               <i class="fas fa-search"></i>
               <span>Search music, artists, podcasts...</span>
             </router-link>

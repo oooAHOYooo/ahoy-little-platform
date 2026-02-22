@@ -8,9 +8,7 @@
           <span class="status-breadcrumb" :title="breadcrumbText">{{ breadcrumbText }}</span>
         </div>
         <div class="status-right">
-          <router-link to="/search" class="status-action-btn" aria-label="Search" title="Search">
-            <i class="fas fa-search"></i>
-          </router-link>
+
         </div>
       </div>
     </div>

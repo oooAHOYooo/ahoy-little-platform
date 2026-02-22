@@ -44,14 +44,6 @@
                 <button
                   type="button"
                   class="search-action-btn"
-                  @click="ejectSearch"
-                  title="Open in Search Page"
-                >
-                  <i class="fas fa-external-link-alt"></i>
-                </button>
-                <button
-                  type="button"
-                  class="search-action-btn"
                   @click="saveSearch"
                   title="Save Search"
                 >
@@ -429,7 +421,10 @@ function handleSearchInput() {
 
 function handleSearch() {
   if (!searchQuery.value.trim()) return
-  router.push({ path: '/search', query: { q: searchQuery.value } })
+  if (searchResults.value.length > 0) {
+    showResults.value = true
+    searchExpanded.value = true
+  }
 }
 
 function clearSearch() {
@@ -439,11 +434,7 @@ function clearSearch() {
   showResults.value = false
 }
 
-function ejectSearch() {
-  if (!searchQuery.value.trim()) return
-  router.push({ path: '/search', query: { q: searchQuery.value } })
-  clearSearch()
-}
+
 
 function saveSearch() {
   if (!searchQuery.value.trim()) return

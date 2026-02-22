@@ -131,7 +131,10 @@
               <div class="now-line" :style="nowLineStyle"></div>
               <div v-for="(ch, rowIdx) in channels" :key="ch.id" class="guide-row" role="row">
                 <div class="guide-channel-label">
-                  <div class="guide-channel-icon" :style="{ background: pillColors[rowIdx % 4] }"></div>
+                  <div class="guide-channel-icon" :style="{ 
+                    background: 'linear-gradient(135deg, ' + pillColors[rowIdx % 4] + ', ' + pillColors[rowIdx % 4] + 'dd)',
+                    boxShadow: '0 0 15px ' + pillColors[rowIdx % 4] + '44'
+                  }"></div>
                   <div class="guide-channel-name">{{ ch.name }}</div>
                 </div>
                 <div class="guide-track">
@@ -149,8 +152,10 @@
                     :aria-label="prog.title + ' • ' + prog.durMin + ' min'"
                     :style="{
                        width: prog.widthPx + 'px',
-                       background: pillColors[rowIdx % 4],
-                       boxShadow: '0 0 10px ' + pillColors[rowIdx % 4] + '66, inset 0 0 5px rgba(255,255,255,0.2)'
+                       background: 'linear-gradient(165deg, ' + pillColors[rowIdx % 4] + 'bb 0%, ' + pillColors[rowIdx % 4] + '22 100%)',
+                       border: '1px solid ' + pillColors[rowIdx % 4] + 'cc', /* crisper borders */
+                       backdropFilter: 'blur(16px)',
+                       boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 0 15px ' + pillColors[rowIdx % 4] + '22'
                     }"
                   >
                     <!-- No Thumbnail -->
@@ -1225,24 +1230,26 @@ onUnmounted(() => {
 }
 
 .guide {
-  background: #000;
-  backdrop-filter: none;
-  border: none;
-  border-radius: 0;
+  background: var(--background-dark, #040810);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color, rgba(0, 162, 255, 0.1));
+  border-radius: 20px;
   padding: 0;
   overflow: hidden;
   min-height: 48vh;
+  margin-top: 1rem;
 }
 .guide-header {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
   background: rgba(255, 255, 255, 0.03);
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 800;
+  font-size: 1.1rem;
   letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 .kbd-hint {
   font-size: 12px;
@@ -1262,14 +1269,14 @@ onUnmounted(() => {
 .guide-timebar {
   position: sticky;
   top: 0;
-  background: rgba(15, 15, 15, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(8, 18, 36, 0.9);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   z-index: 10;
-  padding: 10px 16px;
+  padding: 12px 20px;
   display: flex;
   gap: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border-color);
   flex-wrap: nowrap;
 }
 .time-marker {
@@ -1289,8 +1296,8 @@ onUnmounted(() => {
   display: flex;
   gap: 8px;
   align-items: stretch;
-  padding: 10px;
-  border-bottom: 1px solid #141414;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
 }
 .guide-channel-label {
   width: 140px;
@@ -1316,13 +1323,26 @@ onUnmounted(() => {
 }
 .program {
   /* Neuromorphic block style */
-  border-radius: 6px;
-  padding: 8px;
+  border-radius: 12px; /* Smoother, more liquid corners */
+  padding: 8px 12px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 4px;
   color: #fff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.program::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
 }
 .program:hover {
   transform: translateY(-1px);
