@@ -368,13 +368,17 @@ class SearchIndexer:
         
         return snippet
     
-    def reindex(self, data_sources: Dict[str, str]):
-        """Rebuild the entire index from data sources"""
+    def clear(self):
+        """Clear the entire index"""
         self.documents.clear()
         self.term_to_docs.clear()
         self.doc_terms.clear()
         self.term_frequencies.clear()
         self.total_docs = 0
+
+    def reindex(self, data_sources: Dict[str, str]):
+        """Rebuild the entire index from JSON data sources (Legacy)"""
+        self.clear()
         
         # Load and index data
         for source_name, file_path in data_sources.items():
@@ -395,7 +399,25 @@ class SearchIndexer:
             except Exception as e:
                 print(f"Error loading {source_name}: {e}")
         
-        print(f"Indexed {self.total_docs} documents")
+        print(f"Indexed {self.total_docs} documents from JSON")
+
+    def reindex_from_data(self, music_tracks=None, shows=None, artists=None):
+        """Rebuild the entire index from provided data objects (DB-backed)"""
+        self.clear()
+        
+        if music_tracks:
+            for track in music_tracks:
+                self.add_document(track, 'music')
+        
+        if shows:
+            for show in shows:
+                self.add_document(show, 'show')
+        
+        if artists:
+            for artist in artists:
+                self.add_document(artist, 'artist')
+        
+        print(f"Indexed {self.total_docs} documents from data objects")
 
 
 # Global search index instance

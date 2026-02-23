@@ -346,6 +346,35 @@ def logout():
     return jsonify({"success": True})
 
 
+@bp.post("/delete-account")
+@login_required
+def delete_account():
+    """Delete current user account and data (REQUIRED for App Store compliance)"""
+    try:
+        user_id = current_user.id
+        email = current_user.email
+        
+        with get_session() as db_session:
+            user = db_session.get(User, user_id)
+            if not user:
+                return jsonify({"error": "user_not_found"}), 404
+            
+            # Perform deletion (Cascae in models.py handles related personal data)
+            db_session.delete(user)
+            db_session.commit()
+            
+            # Logout after deletion
+            logout_user()
+            
+            # Log the event for admin (anonymized/indirectly)
+            current_app.logger.info(f"User deleted account: {user_id} ({email})")
+            
+            return jsonify({"success": True, "message": "Account deleted successfully."})
+    except Exception as e:
+        current_app.logger.exception(f"Failed to delete account for user {current_user.id}")
+        return jsonify({"error": "deletion_failed", "detail": str(e)}), 500
+
+
 @bp.get("/me")
 def me():
     """Get current user info. Returns 401 when not authenticated (no redirect)."""

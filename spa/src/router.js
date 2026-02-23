@@ -226,7 +226,7 @@ const routes = [
   {
     path: '/beta-testers',
     name: 'beta-testers',
-    component: () => import('./views/BetaTestersView.vue'),
+    component: () => import('./views/BetaTesterView.vue'),
   },
   {
     path: '/sitemap',

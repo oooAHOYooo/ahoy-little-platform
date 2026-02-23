@@ -52,6 +52,10 @@
     <div class="app-sidebar-spacer"></div>
 
     <nav class="app-sidebar-nav app-sidebar-nav--secondary" aria-label="Account">
+      <router-link to="/beta-testers" class="app-sidebar-item beta-link" data-icon="rocket">
+        <i class="fas fa-rocket" aria-hidden="true"></i>
+        <span>Beta Program</span>
+      </router-link>
       <router-link to="/account" class="app-sidebar-item" :class="{ active: route.path === '/account' }" data-icon="user">
         <i class="fas fa-user" aria-hidden="true"></i>
         <span>{{ auth.isLoggedIn.value ? auth.username.value : 'Profile' }}</span>
@@ -90,5 +94,20 @@ const logoError = ref(false)
   font-size: 1.25rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.95);
+}
+
+.beta-link {
+  color: #f59e0b !important; /* Vibrant orange */
+  font-weight: 700;
+  border-left: 3px solid #f59e0b;
+  margin-bottom: 8px;
+}
+
+.beta-link:hover {
+  background: rgba(245, 158, 11, 0.1) !important;
+}
+
+.beta-link i {
+  color: #f59e0b !important;
 }
 </style>

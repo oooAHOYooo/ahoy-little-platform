@@ -1,5 +1,5 @@
 <template>
-  <div class="app">
+  <div class="app" :class="{ 'pinned-player-active': playerStore.isWidescreenPinned && playerStore.currentTrack && playerStore.mode === 'video' }">
     <!-- Toast notifications -->
     <Toast ref="toastRef" />
     <!-- Add to playlist modal (global) -->
@@ -169,3 +169,17 @@ onUnmounted(() => {
   window.removeEventListener('offline', onOffline)
 })
 </script>
+
+<style>
+.app.pinned-player-active {
+  padding-top: 41.841vw; /* 100vw / 2.39 aspect ratio */
+  transition: padding-top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* On very large screens, cap the height so it doesn't take too much space */
+@media (min-width: 1920px) {
+  .app.pinned-player-active {
+    padding-top: 800px;
+  }
+}
+</style>

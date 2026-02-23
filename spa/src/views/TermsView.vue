@@ -8,7 +8,21 @@
     </section>
     <div class="policy-container">
       <div class="policy-content">
-        <p>By using Ahoy Indie Media you agree to our terms. The service is for discovering and enjoying independent music and shows. You must be at least 13 to create an account. For the full terms, see the main site or contact support.</p>
+        <h3>1. Acceptance of Terms</h3>
+        <p>By using Ahoy Indie Media, you agree to these terms. If you do not agree, please do not use the service.</p>
+        
+        <h3>2. User Accounts</h3>
+        <p>You are responsible for maintaining the confidentiality of your account credentials. You must be at least 13 years old to use this service.</p>
+        
+        <h3>3. Content & Copyright</h3>
+        <p>Ahoy is a platform for independent artists. You may not upload or share content that violates the intellectual property rights of others.</p>
+        
+        <h3>4. Payments & Refunds</h3>
+        <p>Wallet funds and boosts are final once processed. Physical merchandise is subject to the return policies listed at checkout.</p>
+        
+        <h3>5. Termination</h3>
+        <p>We reserve the right to suspend or terminate accounts that violate our community standards or terms.</p>
+        
         <router-link to="/" class="policy-back">Back to Ahoy</router-link>
       </div>
     </div>

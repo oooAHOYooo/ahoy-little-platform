@@ -30,3 +30,4 @@ structlog
 itsdangerous
 requests
 stripe>=7.0.0
+google-cloud-storage>=2.14.0

@@ -2,7 +2,11 @@
   <div
     v-if="playerStore.currentTrack && playerStore.mode === 'video'"
     class="global-tv-player"
-    :class="{ 'mini': !playerStore.heroBounds, 'docked': !!playerStore.heroBounds }"
+    :class="{ 
+      'mini': !playerStore.heroBounds && !playerStore.isWidescreenPinned, 
+      'docked': !!playerStore.heroBounds,
+      'pinned': playerStore.isWidescreenPinned 
+    }"
     :style="playerStyle"
   >
     <div class="video-container">
@@ -24,6 +28,9 @@
       <div v-if="!playerStore.heroBounds" class="mini-controls">
         <button class="mini-btn close" @click.stop="playerStore.eject">
           <i class="fas fa-times"></i>
+        </button>
+        <button class="mini-btn pin" @click.stop="playerStore.toggleWidescreenPinned" :title="playerStore.isWidescreenPinned ? 'Unpin' : 'Pin to Top'">
+          <i :class="playerStore.isWidescreenPinned ? 'fas fa-thumbtack' : 'fas fa-map-marker-alt'"></i>
         </button>
         <button class="mini-btn expand" @click.stop="maximize">
           <i class="fas fa-expand-arrows-alt"></i>
@@ -55,6 +62,20 @@ const videoSrc = computed(() => {
 
 const playerStyle = computed(() => {
   const bounds = playerStore.heroBounds
+  // Pinned mode (Super Widescreen) - Highest priority
+  if (playerStore.isWidescreenPinned) {
+    return {
+      top: '0',
+      left: '0',
+      width: '100%',
+      aspectRatio: '2.39/1',
+      position: 'fixed',
+      zIndex: 10001,
+      boxShadow: '0 4px 20px rgba(0,0,0,0.8)',
+      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+    }
+  }
+
   if (bounds) {
     return {
       top: bounds.top + 'px',
@@ -152,7 +173,8 @@ video {
   justify-content: space-between;
   padding: 8px;
 }
-.global-tv-player.mini:hover .mini-controls {
+.global-tv-player.mini:hover .mini-controls,
+.global-tv-player.pinned:hover .mini-controls {
   opacity: 1;
 }
 .mini-btn {
@@ -183,5 +205,8 @@ video {
 }
 .global-tv-player.mini {
   border: 1px solid rgba(255,255,255,0.1);
+}
+.global-tv-player.pinned {
+  border-bottom: 2px solid rgba(255,255,255,0.1);
 }
 </style>

@@ -19,6 +19,7 @@ export const usePlayerStore = defineStore('player', () => {
   const mode = ref('audio') // 'audio' or 'video'
   const heroBounds = ref(null) // { top, left, width, height }
   const videoElement = ref(null) // DOM reference to the global video tag
+  const isWidescreenPinned = ref(false)
 
   // Audio element (singleton)
   let audio = null
@@ -295,6 +296,7 @@ export const usePlayerStore = defineStore('player', () => {
   // --- External Setters ---
   function setVideoElement(el) { videoElement.value = el }
   function setHeroBounds(bounds) { heroBounds.value = bounds }
+  function toggleWidescreenPinned() { isWidescreenPinned.value = !isWidescreenPinned.value }
 
   return {
     currentTrack,
@@ -331,6 +333,8 @@ export const usePlayerStore = defineStore('player', () => {
     eject,
     restoreLastPlayed,
     setVideoElement,
-    setHeroBounds
+    setHeroBounds,
+    isWidescreenPinned,
+    toggleWidescreenPinned
   }
 })

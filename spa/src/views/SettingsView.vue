@@ -188,6 +188,36 @@
           </div>
         </div>
 
+        <!-- Build Information -->
+        <div class="settings-section neu-card">
+          <h2><i class="fas fa-info-circle"></i> Build Info</h2>
+          <div class="build-info-grid">
+            <div class="build-info-item">
+              <span class="settings-label">Version</span>
+              <span class="settings-value">{{ buildInfo.version }}</span>
+            </div>
+            <div class="build-info-item" v-if="buildInfo.buildDate">
+              <span class="settings-label">Build Date</span>
+              <span class="settings-value">{{ buildInfo.buildDate }}</span>
+            </div>
+          </div>
+          
+          <div class="git-commits-section" v-if="buildInfo.commits && buildInfo.commits.length > 0">
+            <h3>Recent Commits</h3>
+            <div class="commit-list">
+              <div v-for="commit in buildInfo.commits" :key="commit.hash" class="commit-item neu-card-inset">
+                <div class="commit-meta">
+                  <span class="commit-hash">#{{ commit.hash }}</span>
+                  <span class="commit-author">{{ commit.author }}</span>
+                  <span class="commit-date">{{ formatCommitDate(commit.timestamp) }}</span>
+                </div>
+                <p class="commit-message">{{ commit.message }}</p>
+              </div>
+            </div>
+          </div>
+          <p v-else-if="buildInfo.loading" class="build-info-loading">Loading build info...</p>
+        </div>
+
         <!-- Actions -->
         <div class="settings-actions">
           <button type="button" class="neu-btn neu-btn-secondary" @click="resetSettings">
@@ -222,6 +252,13 @@ const dialEl = ref(null)
 const audioSettings = reactive({ masterVolume: 75 })
 const saveChimeEnabled = ref(isSaveChimeEnabled())
 const tapChimeEnabled = ref(isTapChimeEnabled())
+
+const buildInfo = reactive({
+  version: '0.1.0',
+  buildDate: '',
+  commits: [],
+  loading: true
+})
 
 function toggleSaveChime() {
   saveChimeEnabled.value = !saveChimeEnabled.value
@@ -362,6 +399,27 @@ function stopDialDrag() {
   upHandler = null
 }
 
+function formatCommitDate(timestamp) {
+  if (!timestamp) return ''
+  const d = new Date(timestamp)
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+async function fetchBuildInfo() {
+  try {
+    const data = await apiFetch('/api/build-info')
+    if (data) {
+      buildInfo.version = data.version || '0.1.0'
+      buildInfo.buildDate = data.buildDate || ''
+      buildInfo.commits = data.commits || []
+    }
+  } catch (err) {
+    console.error('Failed to fetch build info:', err)
+  } finally {
+    buildInfo.loading = false
+  }
+}
+
 async function onLogout() {
   await auth.logout()
   window.dispatchEvent(new CustomEvent('ahoy:toast', { detail: { message: 'Signed out', type: 'success' } }))
@@ -385,6 +443,7 @@ onMounted(() => {
       latestMacRelease.error = 'No macOS release available'
       latestMacRelease.loading = false
     })
+  fetchBuildInfo()
 })
 onUnmounted(() => {
   stopDialDrag()
@@ -751,6 +810,70 @@ onUnmounted(() => {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.5);
   flex-shrink: 0;
+}
+
+.build-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.git-commits-section {
+  margin-top: 24px;
+}
+
+.git-commits-section h3 {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+.commit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.commit-item {
+  padding: 12px 16px;
+  border-radius: 10px;
+}
+
+.commit-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+.commit-hash {
+  color: #8b5cf6;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.commit-author {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.commit-date {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.commit-message {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.4;
+}
+
+.build-info-loading {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
 }
 
 .settings-actions {

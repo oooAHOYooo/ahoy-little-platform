@@ -4,8 +4,10 @@ const config: CapacitorConfig = {
   appId: 'com.ahoy.app',
   appName: 'Ahoy Indie Media',
   webDir: 'spa-dist',
-  // No server.url — loads the Vue SPA from local built files.
-  // The SPA fetches data from https://app.ahoy.ooo/api/* at runtime.
+  server: {
+    url: 'https://ahoy-little-platform.onrender.com',
+    cleartext: false,
+  },
   android: {
     allowMixedContent: false,
   },

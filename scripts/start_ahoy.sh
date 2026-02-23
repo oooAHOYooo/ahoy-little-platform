@@ -19,4 +19,9 @@ else
 fi
 
 echo "Starting Flask on port ${PORT}..."
-PORT="${PORT}" python app.py
+if [ -d "venv" ]; then
+  echo "Using virtual environment found at ./venv"
+  PORT="${PORT}" ./venv/bin/python app.py
+else
+  PORT="${PORT}" python app.py
+fi

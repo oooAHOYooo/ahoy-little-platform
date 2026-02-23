@@ -27,6 +27,11 @@ def _require_database_url() -> str:
         if value.startswith("postgresql://"):
             return "postgresql+psycopg://" + value[len("postgresql://"):]
         return value
+    
+    # Fallback logic for residency
+    logger = logging.getLogger(__name__)
+    logger.warning("DATABASE_URL not set! Falling back to local database.")
+    
     value = os.getenv("LOCAL_DATABASE_URL")
     if value:
         return value

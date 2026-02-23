@@ -11,7 +11,7 @@
       </div>
     </section>
 
-    <div class="video-spotlight">
+    <div class="video-spotlight" v-if="!playerStore.isWidescreenPinned">
       <div class="spotlight-grid">
         <div class="spotlight-left">
           <!-- Hero video player with glass gradient -->
@@ -42,6 +42,9 @@
             </button>
             <button type="button" class="remote-btn" title="Fullscreen" @click="toggleFullscreen">
               <i class="fas fa-expand"></i>
+            </button>
+            <button type="button" class="remote-btn" :title="playerStore.isWidescreenPinned ? 'Unpin Player' : 'Pin Widescreen Player'" @click="playerStore.toggleWidescreenPinned">
+              <i :class="playerStore.isWidescreenPinned ? 'fas fa-thumbtack' : 'fas fa-map-marker-alt'"></i>
             </button>
             <button type="button" class="remote-btn" title="Go to Guide" @click="scrollToGuide">
               <i class="fas fa-list"></i>

@@ -56,6 +56,24 @@
         <i class="fas fa-sign-out-alt"></i>
         Sign out
       </button>
+
+      <div class="account-danger-zone">
+        <button v-if="!showDeleteConfirm" type="button" class="account-btn danger-link" @click="showDeleteConfirm = true">
+          Delete account
+        </button>
+        <div v-else class="delete-confirm-box neu-card-inset">
+          <p>Delete your account and all saved data? This cannot be undone.</p>
+          <div class="delete-actions">
+            <button class="account-btn danger" :disabled="deleteLoading" @click="onDeleteAccount">
+              <i v-if="deleteLoading" class="fas fa-spinner fa-spin"></i>
+              Yes, delete everything
+            </button>
+            <button class="account-btn secondary" :disabled="deleteLoading" @click="showDeleteConfirm = false">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div v-else class="account-guest">
@@ -106,6 +124,8 @@ const auth = useAuth()
 
 const walletBalance = ref(null)
 const walletLoading = ref(false)
+const showDeleteConfirm = ref(false)
+const deleteLoading = ref(false)
 
 onMounted(async () => {
   if (auth.isLoggedIn.value) {
@@ -147,6 +167,30 @@ async function onLogout() {
   await auth.logout()
   window.dispatchEvent(new CustomEvent('ahoy:toast', { detail: { message: 'Signed out', type: 'success' } }))
   router.push('/')
+}
+
+async function onDeleteAccount() {
+  deleteLoading.value = true
+  try {
+    const data = await apiFetch('/api/auth/delete-account', {
+      method: 'POST'
+    })
+    if (data.success) {
+      window.dispatchEvent(new CustomEvent('ahoy:toast', { detail: { message: 'Account deleted', type: 'success' } }))
+      // Redirect to home as a guest
+      router.push('/')
+      // The auth state should be cleared by the logout inside delete-account, 
+      // but let's re-verify if useAuth needs a refresh.
+      // useAuth usually reacts to 401s or explicit logouts.
+      await auth.logout()
+    } else {
+      window.dispatchEvent(new CustomEvent('ahoy:toast', { detail: { message: data.error || 'Deletion failed', type: 'error' } }))
+    }
+  } catch (err) {
+    window.dispatchEvent(new CustomEvent('ahoy:toast', { detail: { message: 'Failed to delete account', type: 'error' } }))
+  } finally {
+    deleteLoading.value = false
+  }
 }
 </script>
 
@@ -350,5 +394,49 @@ async function onLogout() {
 }
 .account-guest-cta .account-btn.primary {
   display: inline-flex;
+}
+
+/* Danger Zone */
+.account-danger-zone {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+.account-btn.danger-link {
+  background: transparent;
+  color: rgba(255, 82, 82, 0.7);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: underline;
+  padding: 4px 8px;
+}
+.account-btn.danger-link:hover {
+  color: #ff5252;
+}
+.delete-confirm-box {
+  padding: 16px;
+  background: rgba(255, 82, 82, 0.05);
+  border: 1px solid rgba(255, 82, 82, 0.2);
+  border-radius: 12px;
+}
+.delete-confirm-box p {
+  color: #ff8a80;
+  font-size: 14px;
+  margin: 0 0 16px;
+  line-height: 1.4;
+}
+.delete-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.account-btn.danger {
+  background: #ff5252;
+  color: white;
+  justify-content: center;
+}
+.account-btn.danger:hover {
+  background: #ff1744;
 }
 </style>

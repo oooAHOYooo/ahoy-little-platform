@@ -8,7 +8,18 @@
     </section>
     <div class="policy-container">
       <div class="policy-content">
-        <p>We collect account information, content preferences, and usage data. We use this to provide and improve our services, process payments, and personalize your experience. We do not sell your personal information. For the full policy, see the main site or contact <a href="mailto:privacy@ahoyindie.com">privacy@ahoyindie.com</a>.</p>
+        <h3>1. Information We Collect</h3>
+        <p>We collect information you provide directly to us when you create an account, such as your email address, username, and display name. If you use our wallet features, transaction data is processed via Stripe.</p>
+        
+        <h3>2. How We Use Your Information</h3>
+        <p>We use your data to provide the Ahoy service, personalize your experience, and communicate important updates. Data used for "Now Playing" feeds is anonymized or handled according to your privacy settings.</p>
+        
+        <h3>3. Data Retention & Deletion</h3>
+        <p>We retain your data as long as your account is active. You can delete your account at any time through the Account settings, which will remove your personal profile, saves, and playlists. Financial records are retained only as required by law.</p>
+        
+        <h3>4. Security</h3>
+        <p>We implement industry-standard security measures to protect your data. However, no internet transmission is 100% secure.</p>
+        
         <router-link to="/" class="policy-back">Back to Ahoy</router-link>
       </div>
     </div>
