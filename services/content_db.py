@@ -7,10 +7,13 @@ replacement for load_json_data().
 All functions include a TTL-based in-memory cache to avoid hitting the DB
 on every request (mirrors the old 600s JSON file cache).
 """
+import os
+import re
 import logging
 from time import time as _now
 
 from db import get_session
+from storage import read_json
 from models import (
     Track, Show, ContentArtist, ContentArtistAlbum, ContentArtistAlbumTrack,
     ContentArtistShow, ContentArtistTrack, PodcastShow, PodcastEpisode,
@@ -18,6 +21,18 @@ from models import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _load_fallback_json(filename, default=None):
+    """Load JSON from legacy or static data folders as a fallback."""
+    # Check migrated content first (dev/legacy_json/)
+    migrated_path = f"dev/legacy_json/{filename}"
+    if os.path.exists(migrated_path):
+        return read_json(migrated_path, default or {})
+    
+    # Check static data
+    static_path = f"static/data/{filename}"
+    return read_json(static_path, default or {})
 
 # ---------------------------------------------------------------------------
 # In-memory cache (same pattern as the old _json_data_cache)
@@ -284,124 +299,220 @@ def _serialize_video(v):
 def get_all_tracks(ttl=600):
     """Return {"tracks": [...]} matching /api/music response."""
     def _query():
-        with get_session() as session:
-            rows = session.query(Track).order_by(Track.position).all()
-            return {'tracks': [_serialize_track(t) for t in rows]}
+        try:
+            with get_session() as session:
+                rows = session.query(Track).order_by(Track.position).all()
+                if rows:
+                    return {'tracks': [_serialize_track(t) for t in rows]}
+        except Exception as e:
+            logger.error(f"DB query for music failed: {e}")
+        
+        # Fallback
+        return _load_fallback_json('music.json', {'tracks': []})
     return _cached('all_tracks', ttl, _query)
 
 
 def get_all_shows(ttl=600):
     """Return {"shows": [...]} matching /api/shows response."""
     def _query():
-        with get_session() as session:
-            rows = session.query(Show).order_by(Show.position).all()
-            return {'shows': [_serialize_show(s) for s in rows]}
+        try:
+            with get_session() as session:
+                rows = session.query(Show).order_by(Show.position).all()
+                if rows:
+                    return {'shows': [_serialize_show(s) for s in rows]}
+        except Exception as e:
+            logger.error(f"DB query for shows failed: {e}")
+            
+        # Fallback
+        return _load_fallback_json('shows.json', {'shows': []})
     return _cached('all_shows', ttl, _query)
 
 
 def get_all_artists(ttl=600):
     """Return {"artists": [...], "total_count": N, "last_updated": "..."} matching /api/artists."""
     def _query():
-        with get_session() as session:
-            artists = session.query(ContentArtist).order_by(ContentArtist.position).all()
-            if not artists:
-                return {'artists': [], 'total_count': 0, 'last_updated': ''}
+        try:
+            with get_session() as session:
+                artists = session.query(ContentArtist).order_by(ContentArtist.position).all()
+                if not artists:
+                    raise ValueError("No artists in DB") # Trigger fallback if empty
 
-            artist_ids = [a.artist_id for a in artists]
+                artist_ids = [a.artist_id for a in artists]
 
-            # Load nested data in bulk
-            albums_raw = session.query(ContentArtistAlbum).filter(
-                ContentArtistAlbum.artist_id_ref.in_(artist_ids)
-            ).order_by(ContentArtistAlbum.position).all()
+                # Load nested data in bulk
+                albums_raw = session.query(ContentArtistAlbum).filter(
+                    ContentArtistAlbum.artist_id_ref.in_(artist_ids)
+                ).order_by(ContentArtistAlbum.position).all()
 
-            album_ids = [alb.album_id for alb in albums_raw]
-            album_tracks_raw = session.query(ContentArtistAlbumTrack).filter(
-                ContentArtistAlbumTrack.album_id_ref.in_(album_ids)
-            ).order_by(ContentArtistAlbumTrack.position).all() if album_ids else []
+                album_ids = [alb.album_id for alb in albums_raw]
+                album_tracks_raw = session.query(ContentArtistAlbumTrack).filter(
+                    ContentArtistAlbumTrack.album_id_ref.in_(album_ids)
+                ).order_by(ContentArtistAlbumTrack.position).all() if album_ids else []
 
-            shows_raw = session.query(ContentArtistShow).filter(
-                ContentArtistShow.artist_id_ref.in_(artist_ids)
-            ).order_by(ContentArtistShow.position).all()
+                shows_raw = session.query(ContentArtistShow).filter(
+                    ContentArtistShow.artist_id_ref.in_(artist_ids)
+                ).order_by(ContentArtistShow.position).all()
 
-            tracks_raw = session.query(ContentArtistTrack).filter(
-                ContentArtistTrack.artist_id_ref.in_(artist_ids)
-            ).order_by(ContentArtistTrack.position).all()
+                tracks_raw = session.query(ContentArtistTrack).filter(
+                    ContentArtistTrack.artist_id_ref.in_(artist_ids)
+                ).order_by(ContentArtistTrack.position).all()
 
-            # Build lookup maps
-            album_tracks_by_album = {}
-            for at in album_tracks_raw:
-                album_tracks_by_album.setdefault(at.album_id_ref, []).append({
-                    'id': at.track_id_ref, 'title': at.title,
-                })
+                # Build lookup maps
+                album_tracks_by_album = {}
+                for at in album_tracks_raw:
+                    album_tracks_by_album.setdefault(at.album_id_ref, []).append({
+                        'id': at.track_id_ref, 'title': at.title,
+                    })
 
-            albums_map = {}
-            for alb in albums_raw:
-                albums_map.setdefault(alb.artist_id_ref, []).append({
-                    'album_id': alb.album_id,
-                    'title': alb.title,
-                    'release_date': alb.release_date,
-                    'cover_art': alb.cover_art,
-                    'tags': alb.tags,
-                    'is_new': alb.is_new,
-                    'extra_fields': alb.extra_fields,
-                    'tracks': album_tracks_by_album.get(alb.album_id, []),
-                })
+                albums_map = {}
+                for alb in albums_raw:
+                    albums_map.setdefault(alb.artist_id_ref, []).append({
+                        'album_id': alb.album_id,
+                        'title': alb.title,
+                        'release_date': alb.release_date,
+                        'cover_art': alb.cover_art,
+                        'tags': alb.tags,
+                        'is_new': alb.is_new,
+                        'extra_fields': alb.extra_fields,
+                        'tracks': album_tracks_by_album.get(alb.album_id, []),
+                    })
 
-            shows_map = {}
-            for sh in shows_raw:
-                shows_map.setdefault(sh.artist_id_ref, []).append({
-                    'show_ref_id': sh.show_ref_id,
-                    'title': sh.title,
-                    'show_type': sh.show_type,
-                    'duration': sh.duration,
-                    'category': sh.category,
-                    'published_date': sh.published_date,
-                })
+                shows_map = {}
+                for sh in shows_raw:
+                    shows_map.setdefault(sh.artist_id_ref, []).append({
+                        'show_ref_id': sh.show_ref_id,
+                        'title': sh.title,
+                        'show_type': sh.show_type,
+                        'duration': sh.duration,
+                        'category': sh.category,
+                        'published_date': sh.published_date,
+                    })
 
-            tracks_map = {}
-            for tr in tracks_raw:
-                tracks_map.setdefault(tr.artist_id_ref, []).append({
-                    'track_ref_id': tr.track_ref_id,
-                    'title': tr.title,
-                    'album': tr.album,
-                    'duration': tr.duration,
-                    'genre': tr.genre,
-                    'added_date': tr.added_date,
-                })
+                tracks_map = {}
+                for tr in tracks_raw:
+                    tracks_map.setdefault(tr.artist_id_ref, []).append({
+                        'track_ref_id': tr.track_ref_id,
+                        'title': tr.title,
+                        'album': tr.album,
+                        'duration': tr.duration,
+                        'genre': tr.genre,
+                        'added_date': tr.added_date,
+                    })
 
-            result_artists = [
-                _serialize_artist(a, albums_map, shows_map, tracks_map)
-                for a in artists
-            ]
+                result_artists = [
+                    _serialize_artist(a, albums_map, shows_map, tracks_map)
+                    for a in artists
+                ]
 
-            return {
-                'artists': result_artists,
-                'total_count': len(result_artists),
-                'last_updated': artists[0].updated_at_str if artists else '',
-            }
+                return {
+                    'artists': result_artists,
+                    'total_count': len(result_artists),
+                    'last_updated': artists[0].updated_at_str if artists else '',
+                }
+        except Exception as e:
+            logger.error(f"DB query for artists failed: {e}")
+            
+        # Fallback
+        return _load_fallback_json('artists.json', {'artists': [], 'total_count': 0, 'last_updated': ''})
     return _cached('all_artists', ttl, _query)
+
+
+# ---------------------------------------------------------------------------
+# Podcast collection fallback helpers
+# ---------------------------------------------------------------------------
+_PODCAST_SLUG_ALIASES = {
+    'The Rob Show': 'rob',
+    'Rob Meglio Show': 'rob',
+    'Poets & Friends': 'poets-and-friends',
+    "Tyler's New Broadcast": 'tyler-broadcast',
+    "Tyler's Show": 'tylers-show',
+}
+
+
+def _slugify_podcast(s: str) -> str:
+    s = (s or '').strip().lower()
+    s = re.sub(r"['']", '', s)
+    s = re.sub(r'[^a-z0-9]+', '-', s)
+    s = re.sub(r'-{2,}', '-', s).strip('-')
+    return s or 'show'
+
+
+def _extract_podcast_show_name(title: str) -> str:
+    t = (title or '').strip()
+    lower = t.lower()
+    if lower.startswith('the rob show'):    return 'The Rob Show'
+    if lower.startswith('my friend'):       return 'My Friend'
+    if lower.startswith('found cassettes'): return 'Found Cassettes'
+    if lower.startswith("tyler's show"):    return "Tyler's Show"
+    head = re.split(r'\s*[-–—]\s*', t, maxsplit=1)[0].strip()
+    head = re.sub(r'\s*#\s*\d+.*$', '', head).strip()
+    return head or 'Podcast'
+
+
+def _load_podcast_collection_fallback() -> dict:
+    """Convert flat podcastCollection.json into {'shows': [...]} matching get_all_podcasts() shape."""
+    collection = read_json('static/data/podcastCollection.json', {'podcasts': []})
+    items = [p for p in collection.get('podcasts', []) if p.get('active', True)]
+    items.sort(
+        key=lambda p: (str(p.get('date') or p.get('releaseDate') or ''), int(p.get('id') or 0)),
+        reverse=True,
+    )
+    shows_by_slug: dict = {}
+    for p in items:
+        title = p.get('title') or 'Untitled Episode'
+        show_name = _extract_podcast_show_name(title)
+        slug = _PODCAST_SLUG_ALIASES.get(show_name) or _slugify_podcast(show_name)
+        show = shows_by_slug.setdefault(slug, {
+            'slug': slug,
+            'title': show_name,
+            'description': '',
+            'artwork': p.get('thumbnail') or '/static/img/default-cover.jpg',
+            'last_updated': p.get('date') or p.get('releaseDate') or '',
+            'episodes': [],
+        })
+        show['episodes'].append({
+            'id': str(p.get('id') or title),
+            'title': title,
+            'description': p.get('description') or '',
+            'date': p.get('date') or p.get('releaseDate') or '',
+            'duration': '',
+            'duration_seconds': 0,
+            'audio_url': p.get('mp3url') or '',
+            'artwork': p.get('thumbnail') or '/static/img/default-cover.jpg',
+        })
+    shows = sorted(shows_by_slug.values(), key=lambda s: str(s.get('last_updated') or ''), reverse=True)
+    return {'shows': shows}
 
 
 def get_all_podcasts(ttl=600):
     """Return {"shows": [...]} matching /api/podcasts (podcasts.json)."""
     def _query():
-        with get_session() as session:
-            shows = session.query(PodcastShow).order_by(PodcastShow.position).all()
-            if not shows:
-                return {'shows': []}
-            slugs = [s.slug for s in shows]
-            episodes = session.query(PodcastEpisode).filter(
-                PodcastEpisode.show_slug.in_(slugs)
-            ).order_by(PodcastEpisode.position).all()
-            eps_by_show = {}
-            for ep in episodes:
-                eps_by_show.setdefault(ep.show_slug, []).append(ep)
-            return {
-                'shows': [
-                    _serialize_podcast_show(s, eps_by_show.get(s.slug, []))
-                    for s in shows
-                ]
-            }
+        try:
+            with get_session() as session:
+                shows = session.query(PodcastShow).order_by(PodcastShow.position).all()
+                if not shows:
+                    raise ValueError("No podcasts in DB")
+                slugs = [s.slug for s in shows]
+                episodes = session.query(PodcastEpisode).filter(
+                    PodcastEpisode.show_slug.in_(slugs)
+                ).order_by(PodcastEpisode.position).all()
+                eps_by_show = {}
+                for ep in episodes:
+                    eps_by_show.setdefault(ep.show_slug, []).append(ep)
+                return {
+                    'shows': [
+                        _serialize_podcast_show(s, eps_by_show.get(s.slug, []))
+                        for s in shows
+                    ]
+                }
+        except Exception as e:
+            logger.error(f"DB query for podcasts failed: {e}")
+            
+        # Fallback: podcasts.json → podcastCollection.json
+        result = _load_fallback_json('podcasts.json', {'shows': []})
+        if not result.get('shows'):
+            result = _load_podcast_collection_fallback()
+        return result
     return _cached('all_podcasts', ttl, _query)
 
 
@@ -423,66 +534,95 @@ def get_artists_list(ttl=600):
 def get_all_events(ttl=600):
     """Return {"events": [...]} matching events.json."""
     def _query():
-        with get_session() as session:
-            rows = session.query(Event).order_by(Event.position, Event.date.desc()).all()
-            return {'events': [_serialize_event(e) for e in rows]}
+        try:
+            with get_session() as session:
+                rows = session.query(Event).order_by(Event.position, Event.date.desc()).all()
+                if rows:
+                    return {'events': [_serialize_event(e) for e in rows]}
+        except Exception as e:
+            logger.error(f"DB query for events failed: {e}")
+            
+        # Fallback
+        return _load_fallback_json('events.json', {'events': []})
     return _cached('all_events', ttl, _query)
 
 
 def get_all_merch(ttl=600):
     """Return {"items": [...]} matching data/merch.json catalog."""
     def _query():
-        with get_session() as session:
-            rows = session.query(ContentMerch).order_by(ContentMerch.position).all()
-            return {'items': [_serialize_merch_item(m) for m in rows]}
+        try:
+            with get_session() as session:
+                rows = session.query(ContentMerch).order_by(ContentMerch.position).all()
+                if rows:
+                    return {'items': [_serialize_merch_item(m) for m in rows]}
+        except Exception as e:
+            logger.error(f"DB query for merch failed: {e}")
+            
+        # Fallback
+        return _load_fallback_json('merch.json', {'items': []})
     return _cached('all_merch', ttl, _query)
 
 
 def get_all_videos(ttl=600):
     """Return {"videos": [...]} matching videos.json."""
     def _query():
-        with get_session() as session:
-            rows = session.query(ContentVideo).order_by(ContentVideo.position).all()
-            return {'videos': [_serialize_video(v) for v in rows]}
+        try:
+            with get_session() as session:
+                rows = session.query(ContentVideo).order_by(ContentVideo.position).all()
+                if rows:
+                    return {'videos': [_serialize_video(v) for v in rows]}
+        except Exception as e:
+            logger.error(f"DB query for videos failed: {e}")
+            
+        # Fallback
+        return _load_fallback_json('videos.json', {'videos': []})
     return _cached('all_videos', ttl, _query)
 
 
 def get_all_whats_new(ttl=600):
     """Return whats_new data structured as {"updates": {year: {month: {section: ...}}}}."""
     def _query():
-        with get_session() as session:
-            rows = session.query(WhatsNewItem).order_by(
-                WhatsNewItem.year.desc(), WhatsNewItem.month, WhatsNewItem.section, WhatsNewItem.position
-            ).all()
-            updates = {}
-            for row in rows:
-                yr = updates.setdefault(row.year, {})
-                mn = yr.setdefault(row.month, {})
-                section_titles = {
-                    'music': 'Music Updates', 'videos': 'Video Updates',
-                    'artists': 'Artist Updates', 'platform': 'Platform Updates',
-                    'merch': 'Merch Updates', 'events': 'Events Updates',
-                }
-                if row.section not in mn:
-                    mn[row.section] = {
-                        'title': section_titles.get(row.section, f'{row.section.capitalize()} Updates'),
-                        'items': [],
+        try:
+            with get_session() as session:
+                rows = session.query(WhatsNewItem).order_by(
+                    WhatsNewItem.year.desc(), WhatsNewItem.month, WhatsNewItem.section, WhatsNewItem.position
+                ).all()
+                if not rows:
+                    raise ValueError("No whats_new data in DB")
+                updates = {}
+                for row in rows:
+                    yr = updates.setdefault(row.year, {})
+                    mn = yr.setdefault(row.month, {})
+                    section_titles = {
+                        'music': 'Music Updates', 'videos': 'Video Updates',
+                        'artists': 'Artist Updates', 'platform': 'Platform Updates',
+                        'merch': 'Merch Updates', 'events': 'Events Updates',
                     }
-                item = {
-                    'type': row.item_type,
-                    'title': row.title,
-                    'description': row.description,
-                }
-                if row.date:
-                    item['date'] = row.date
-                if row.link:
-                    item['link'] = row.link
-                if row.link_external:
-                    item['link_external'] = row.link_external
-                if row.features:
-                    item['features'] = row.features
-                if row.extra_fields:
-                    item.update(row.extra_fields)
-                mn[row.section]['items'].append(item)
-            return {'updates': updates}
+                    if row.section not in mn:
+                        mn[row.section] = {
+                            'title': section_titles.get(row.section, f'{row.section.capitalize()} Updates'),
+                            'items': [],
+                        }
+                    item = {
+                        'type': row.item_type,
+                        'title': row.title,
+                        'description': row.description,
+                    }
+                    if row.date:
+                        item['date'] = row.date
+                    if row.link:
+                        item['link'] = row.link
+                    if row.link_external:
+                        item['link_external'] = row.link_external
+                    if row.features:
+                        item['features'] = row.features
+                    if row.extra_fields:
+                        item.update(row.extra_fields)
+                    mn[row.section]['items'].append(item)
+                return {'updates': updates}
+        except Exception as e:
+            logger.error(f"DB query for whats_new failed: {e}")
+            
+        # Fallback
+        return _load_fallback_json('whats_new.json', {'updates': {}})
     return _cached('all_whats_new', ttl, _query)

@@ -31,6 +31,7 @@ from services.content_db import (
     get_all_tracks, get_all_shows, get_all_artists, get_all_podcasts,
     get_all_events, get_all_merch, get_all_videos, get_all_whats_new,
     get_tracks_list, get_shows_list, get_artists_list, invalidate_cache as invalidate_content_cache,
+    _PODCAST_SLUG_ALIASES,
 )
 from blueprints.api.auth import bp as api_auth_bp
 from blueprints.activity import bp as activity_bp
@@ -49,22 +50,34 @@ from models import Purchase
 
 # Initialize search index on app startup
 def initialize_search_index():
-    """Initialize the search index with all content"""
+    """Initialize the search index with all content, prioritizing DB"""
     try:
         from search_indexer import search_index
+        from services.content_db import get_tracks_list, get_shows_list, get_artists_list
         
+        # Try to pull from DB first
+        try:
+            music = get_tracks_list(ttl=0) # ttl=0 to force fresh load on startup
+            shows = get_shows_list(ttl=0)
+            artists = get_artists_list(ttl=0)
+            
+            if music or shows or artists:
+                search_index.reindex_from_data(music, shows, artists)
+                print(f"Search index initialized from DB with {search_index.total_docs} documents")
+                return
+        except Exception as e:
+            print(f"DB search reindex failed: {e}. Falling back to JSON...")
+        
+        # Fallback to JSON
         data_sources = {
             'music': 'static/data/music.json',
             'shows': 'static/data/shows.json',
             'artists': 'static/data/artists.json'
         }
-        
         search_index.reindex(data_sources)
-        # Avoid Unicode symbols here (Windows console can be cp1252).
-        print(f"Search index initialized with {search_index.total_docs} documents")
+        print(f"Search index initialized from JSON fallback with {search_index.total_docs} documents")
         
     except Exception as e:
-        # Avoid Unicode symbols here (Windows console can be cp1252).
         print(f"Error initializing search index: {e}")
 
 def startup_logging(app):
@@ -1958,92 +1971,6 @@ def _etag_for_static_json(filename: str) -> Optional[str]:
         return None
 
 
-def _build_podcasts_from_collection():
-    """Build { shows, episodes } from static/data/podcastCollection.json for API fallback.
-    Same shape as get_all_podcasts() so /api/podcasts returns consistent data to the Vue SPA.
-    """
-    def _slugify(s: str) -> str:
-        s = (s or '').strip().lower()
-        s = re.sub(r"['']", '', s)
-        s = re.sub(r'[^a-z0-9]+', '-', s)
-        s = re.sub(r'-{2,}', '-', s).strip('-')
-        return s or 'show'
-
-    def _extract_show_name(title: str) -> str:
-        t = (title or '').strip()
-        lower = t.lower()
-        if lower.startswith('the rob show'):
-            return 'The Rob Show'
-        if lower.startswith('my friend'):
-            return 'My Friend'
-        if lower.startswith('found cassettes'):
-            return 'Found Cassettes'
-        if lower.startswith("tyler's show"):
-            return "Tyler's Show"
-        head = re.split(r'\s*[-–—]\s*', t, maxsplit=1)[0].strip()
-        head = re.sub(r'\s*#\s*\d+.*$', '', head).strip()
-        return head or 'Podcast'
-
-    slug_aliases = {
-        'The Rob Show': 'rob',
-        'Rob Meglio Show': 'rob',
-        'Poets & Friends': 'poets-and-friends',
-        "Tyler's New Broadcast": 'tyler-broadcast',
-        "Tyler's Show": 'tylers-show',
-    }
-
-    collection = load_json_data('podcastCollection.json', {'podcasts': []})
-    items = list(collection.get('podcasts', []) or [])
-    active_items = [p for p in items if p.get('active', True)]
-    active_items.sort(
-        key=lambda p: (str(p.get('date') or p.get('releaseDate') or ''), int(p.get('id') or 0)),
-        reverse=True
-    )
-
-    episodes = []
-    for p in active_items:
-        title = p.get('title') or 'Untitled Episode'
-        show_name = _extract_show_name(title)
-        show_slug = slug_aliases.get(show_name) or _slugify(show_name)
-        episodes.append({
-            'id': str(p.get('id') or title),
-            'title': title,
-            'description': p.get('description') or '',
-            'date': p.get('date') or p.get('releaseDate') or '',
-            'duration': '',
-            'duration_seconds': 0,
-            'audio_url': p.get('mp3url') or '',
-            'artwork': p.get('thumbnail') or '/static/img/default-cover.jpg',
-            'show_slug': show_slug,
-            'show_title': show_name,
-        })
-
-    shows_by_slug = {}
-    for e in episodes:
-        s = shows_by_slug.setdefault(e['show_slug'], {
-            'slug': e['show_slug'],
-            'title': e.get('show_title') or e['show_slug'],
-            'description': '',
-            'artwork': e.get('artwork') or '/static/img/default-cover.jpg',
-            'last_updated': e.get('date') or '',
-            'episodes': [],
-        })
-        s['episodes'].append({
-            'id': e['id'],
-            'title': e['title'],
-            'description': e['description'],
-            'date': e['date'],
-            'duration': e['duration'],
-            'duration_seconds': e['duration_seconds'],
-            'audio_url': e['audio_url'],
-            'artwork': e['artwork'],
-        })
-
-    shows = list(shows_by_slug.values())
-    shows.sort(key=lambda s: str(s.get('last_updated') or ''), reverse=True)
-    return {'shows': shows, 'episodes': episodes}
-
-
 def _cached_json_response(filename: str, default: dict, max_age_seconds: int = 300):
     """Return a JSON response with Cache-Control + ETag (conditional GET)."""
     etag = _etag_for_static_json(filename)
@@ -2114,220 +2041,41 @@ def artists():
 @app.route('/podcasts')
 def podcasts_page():
     """Podcasts hub page"""
-    def slugify(s: str) -> str:
-        s = (s or '').strip().lower()
-        s = re.sub(r"['’]", '', s)
-        s = re.sub(r'[^a-z0-9]+', '-', s)
-        s = re.sub(r'-{2,}', '-', s).strip('-')
-        return s or 'show'
-
-    def extract_show_name(title: str) -> str:
-        t = (title or '').strip()
-        lower = t.lower()
-        # Known patterns
-        if lower.startswith('the rob show'):
-            return 'The Rob Show'
-        if lower.startswith('my friend'):
-            return 'My Friend'
-        if lower.startswith('found cassettes'):
-            return 'Found Cassettes'
-        if lower.startswith("tyler's show"):
-            return "Tyler's Show"
-        # Fallback: take leading segment before " - " and strip episode numbering
-        head = re.split(r'\s*[-–—]\s*', t, maxsplit=1)[0].strip()
-        head = re.sub(r'\s*#\s*\d+.*$', '', head).strip()
-        return head or 'Podcast'
-
-    # Keep existing “spot” slugs working while we move to data-driven shows.
-    slug_aliases = {
-        'The Rob Show': 'rob',
-        'Rob Meglio Show': 'rob',
-        'Poets & Friends': 'poets-and-friends',
-        "Tyler’s New Broadcast": 'tyler-broadcast',
-        "Tyler's New Broadcast": 'tyler-broadcast',
-        "Tyler's Show": 'tylers-show',
-    }
-
-    def build_podcasts_payload():
-        """
-        Build the podcasts payload expected by templates. DB first, then podcastCollection.json.
-        """
-        try:
-            data = get_all_podcasts(ttl=600)
-            if data.get('shows'):
-                shows = data['shows']
-                episodes = []
-                for s in shows:
-                    for ep in s.get('episodes', []):
-                        episodes.append({
-                            **ep,
-                            'show_slug': s['slug'],
-                            'show_title': s.get('title', s['slug']),
-                        })
-                return {'shows': shows, 'episodes': episodes}
-        except Exception:
-            pass
-        # Fallback: podcastCollection.json
-        collection = load_json_data('podcastCollection.json', {'podcasts': []})
-        items = list(collection.get('podcasts', []) or [])
-
-        active_items = [p for p in items if p.get('active', True)]
-        active_items.sort(
-            key=lambda p: (str(p.get('date') or p.get('releaseDate') or ''), int(p.get('id') or 0)),
-            reverse=True
-        )
-
-        episodes = []
-        for p in active_items:
-            title = p.get('title') or 'Untitled Episode'
-            show_name = extract_show_name(title)
-            show_slug = slug_aliases.get(show_name) or slugify(show_name)
-            episodes.append({
-                'id': str(p.get('id') or title),
-                'title': title,
-                'description': p.get('description') or '',
-                'date': p.get('date') or p.get('releaseDate') or '',
-                'duration': '',
-                'duration_seconds': 0,
-                'audio_url': p.get('mp3url') or '',
-                'artwork': p.get('thumbnail') or '/static/img/default-cover.jpg',
-                'show_slug': show_slug,
-                'show_title': show_name,
-            })
-
-        shows_by_slug = {}
-        for e in episodes:
-            s = shows_by_slug.setdefault(e['show_slug'], {
-                'slug': e['show_slug'],
-                'title': e.get('show_title') or e['show_slug'],
-                'description': '',
-                'artwork': e.get('artwork') or '/static/img/default-cover.jpg',
-                'last_updated': e.get('date') or '',
-                'episodes': [],
-            })
-            s['episodes'].append({
-                'id': e['id'],
-                'title': e['title'],
-                'description': e['description'],
-                'date': e['date'],
-                'duration': e['duration'],
-                'duration_seconds': e['duration_seconds'],
-                'audio_url': e['audio_url'],
-                'artwork': e['artwork'],
-            })
-
-        shows = list(shows_by_slug.values())
-        shows.sort(key=lambda s: str(s.get('last_updated') or ''), reverse=True)
-        return {'shows': shows, 'episodes': episodes}
-
-    data = build_podcasts_payload()
-    return render_template('podcasts.html', podcasts=data)
+    data = get_all_podcasts(ttl=600)
+    shows = data.get('shows', [])
+    episodes = []
+    for s in shows:
+        for ep in s.get('episodes', []):
+            episodes.append({**ep, 'show_slug': s['slug'], 'show_title': s.get('title', s['slug'])})
+    return render_template('podcasts.html', podcasts={'shows': shows, 'episodes': episodes})
 
 @app.route('/podcasts/<show_slug>')
 def podcast_show_page(show_slug):
     """Podcast show detail page"""
-    # DB first
-    try:
-        data = get_all_podcasts(ttl=600)
-        if data.get('shows'):
-            s = next((x for x in data['shows'] if x.get('slug') == show_slug), None)
-            if s:
-                show = {
-                    'slug': s['slug'],
-                    'title': s.get('title', show_slug.replace('-', ' ').title()),
-                    'description': s.get('description', ''),
-                    'artwork': s.get('artwork') or '/static/img/default-cover.jpg',
-                    'last_updated': s.get('last_updated', ''),
-                    'episodes': s.get('episodes', []),
-                }
-                return render_template('podcast_show.html', show=show)
-    except Exception:
-        pass
-    # Fallback: podcastCollection.json
-    collection = load_json_data('podcastCollection.json', {'podcasts': []})
-    items = list(collection.get('podcasts', []) or [])
-    active_items = [p for p in items if p.get('active', True)]
-    active_items.sort(
-        key=lambda p: (str(p.get('date') or p.get('releaseDate') or ''), int(p.get('id') or 0)),
-        reverse=True
-    )
+    data = get_all_podcasts(ttl=600)
+    shows = data.get('shows', [])
+    s = next((x for x in shows if x.get('slug') == show_slug), None)
+    if s:
+        show = {
+            'slug': s['slug'],
+            'title': s.get('title', show_slug.replace('-', ' ').title()),
+            'description': s.get('description', ''),
+            'artwork': s.get('artwork') or '/static/img/default-cover.jpg',
+            'last_updated': s.get('last_updated', ''),
+            'episodes': s.get('episodes', []),
+        }
+        return render_template('podcast_show.html', show=show)
 
-    def slugify(s: str) -> str:
-        s = (s or '').strip().lower()
-        s = re.sub(r"['’]", '', s)
-        s = re.sub(r'[^a-z0-9]+', '-', s)
-        s = re.sub(r'-{2,}', '-', s).strip('-')
-        return s or 'show'
-
-    def extract_show_name(title: str) -> str:
-        t = (title or '').strip()
-        lower = t.lower()
-        if lower.startswith('the rob show'):
-            return 'The Rob Show'
-        if lower.startswith('my friend'):
-            return 'My Friend'
-        if lower.startswith('found cassettes'):
-            return 'Found Cassettes'
-        if lower.startswith("tyler's show"):
-            return "Tyler's Show"
-        head = re.split(r'\s*[-–—]\s*', t, maxsplit=1)[0].strip()
-        head = re.sub(r'\s*#\s*\d+.*$', '', head).strip()
-        return head or 'Podcast'
-
-    slug_aliases = {
-        'The Rob Show': 'rob',
-        'Rob Meglio Show': 'rob',
-        'Poets & Friends': 'poets-and-friends',
-        "Tyler’s New Broadcast": 'tyler-broadcast',
-        "Tyler's New Broadcast": 'tyler-broadcast',
-        "Tyler's Show": 'tylers-show',
-    }
-
-    episodes = []
-    for p in active_items:
-        title = p.get('title') or 'Untitled Episode'
-        show_name = extract_show_name(title)
-        sslug = slug_aliases.get(show_name) or slugify(show_name)
-        episodes.append({
-            'id': str(p.get('id') or title),
-            'title': title,
-            'description': p.get('description') or '',
-            'date': p.get('date') or p.get('releaseDate') or '',
-            'duration': '',
-            'duration_seconds': 0,
-            'audio_url': p.get('mp3url') or '',
-            'artwork': p.get('thumbnail') or '/static/img/default-cover.jpg',
-            'show_slug': sslug,
-            'show_title': show_name,
-        })
-
-    show_eps = [e for e in episodes if e['show_slug'] == show_slug]
-    if not show_eps:
-        # Allow show pages to exist even before episodes arrive if they are in the “known” aliases.
-        # Otherwise, 404.
-        known_slugs = set(slug_aliases.values())
-        if show_slug not in known_slugs:
-            return render_template('404.html'), 404
-
-    # Get description from first episode or use a default
-    description = ''
-    if show_eps:
-        # Try to get description from show metadata or first episode
-        description = show_eps[0].get('description', '') or ''
-        # If episode description is too specific, use a generic one
-        if description and len(description) < 50:
-            description = f"Episodes and conversations from {show_eps[0].get('show_title', show_slug.replace('-', ' ').title())}."
-    
+    known_slugs = set(_PODCAST_SLUG_ALIASES.values())
+    if show_slug not in known_slugs:
+        return render_template('404.html'), 404
     show = {
         'slug': show_slug,
-        'title': (show_eps[0].get('show_title') if show_eps else show_slug.replace('-', ' ').title()),
-        'description': description or f"Episodes and conversations from {show_eps[0].get('show_title', show_slug.replace('-', ' ').title()) if show_eps else show_slug.replace('-', ' ').title()}.",
-        'artwork': (show_eps[0].get('artwork') if show_eps else '/static/img/default-cover.jpg'),
-        'last_updated': (show_eps[0].get('date') if show_eps else ''),
-        'episodes': [
-            {k: e[k] for k in ['id', 'title', 'description', 'date', 'duration', 'duration_seconds', 'audio_url', 'artwork']}
-            for e in show_eps
-        ],
+        'title': show_slug.replace('-', ' ').title(),
+        'description': '',
+        'artwork': '/static/img/default-cover.jpg',
+        'last_updated': '',
+        'episodes': [],
     }
     return render_template('podcast_show.html', show=show)
 
@@ -3022,18 +2770,8 @@ def api_featured_artists():
 @app.route('/api/podcasts')
 @limiter.exempt
 def api_podcasts():
-    """Get all podcast shows with episodes. DB first, then podcastCollection.json (same shape)."""
-    try:
-        data = get_all_podcasts(ttl=600)
-        if data.get('shows'):
-            resp = jsonify(data)
-            resp.headers['Cache-Control'] = 'public, max-age=600'
-            resp.headers['Vary'] = 'Accept-Encoding'
-            return resp
-    except Exception:
-        logging.getLogger(__name__).exception('DB podcasts query failed, falling back to JSON')
-    # Fallback: build { shows, episodes } from podcastCollection.json so Vue SPA gets same shape
-    data = _build_podcasts_from_collection()
+    """Get all podcast shows with episodes. DB → podcasts.json → podcastCollection.json."""
+    data = get_all_podcasts(ttl=600)
     resp = jsonify(data)
     resp.headers['Cache-Control'] = 'public, max-age=600'
     resp.headers['Vary'] = 'Accept-Encoding'
@@ -5082,6 +4820,61 @@ def trending_content():
     except Exception as e:
         print(f"Error in trending content: {e}")
         return jsonify({'error': 'Trending failed'}), 500
+
+
+@app.route('/api/build-info', methods=['GET'])
+@limiter.exempt
+def get_build_info():
+    """Return build information including recent git commits."""
+    try:
+        build_info_path = os.path.join(os.path.dirname(__file__), 'electron', 'build-info.json')
+        if os.path.exists(build_info_path):
+            with open(build_info_path, 'r') as f:
+                return jsonify(json.load(f))
+        return jsonify({"version": "0.1.0", "commits": []})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/beta/signup', methods=['POST'])
+@limiter.limit("5 per hour")
+def beta_signup():
+    """Handle beta tester signup and send email notification."""
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip()
+        platform = data.get('platform', 'unknown')
+        
+        if not email or '@' not in email:
+            return jsonify({"error": "Valid email is required"}), 400
+            
+        from services.emailer import send_email
+        
+        # Notify admin
+        admin_email = os.getenv("AHOY_ADMIN_EMAIL", "alex@littlemarket.org")
+        send_email(
+            to_email=admin_email,
+            subject=f"New Beta Tester Signup: {email}",
+            text=f"New beta tester signup for {platform} platform.\nEmail: {email}",
+            html=f"<p>New beta tester signup for <b>{platform}</b> platform.</p><p>Email: {email}</p>"
+        )
+        
+        # Send confirmation to user
+        send_email(
+            to_email=email,
+            subject="Welcome to the Ahoy Beta Program! ⚓",
+            text="Thanks for signing up for the Ahoy beta! You're now eligible for free stickers for life. We'll send instructions on how to join the Android or iOS beta soon.",
+            html="""
+            <h1>Welcome to the Ahoy Beta Program! ⚓</h1>
+            <p>Thanks for signing up to be a beta tester. Because you joined early, you've earned <b>free stickers for life!</b></p>
+            <p>We will send you a follow-up email shortly with specific instructions for your platform.</p>
+            <p>Fair winds!</p>
+            """
+        )
+        
+        return jsonify({"ok": True, "message": "Signup successful! Check your email for next steps."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # --- SPA (Vue) fallback: serve index.html for client routes; assets from spa-dist ---
