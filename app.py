@@ -168,7 +168,7 @@ def _bootstrap_admin_user_from_env():
     # Dev-only fallback so /admin works without env (do not use in production)
     if (not email or not password) and os.getenv("AHOY_ENV", "").strip().lower() in ("", "development", "dev", "sandbox"):
         email = "alex@ahoy.ooo"
-        password = "loveLOVElove"
+        password = "12345"
     if not email or not password:
         return
     try:
