@@ -4,9 +4,11 @@ from flask_login import LoginManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_cors import CORS
+from flask_compress import Compress
 
 bcrypt = Bcrypt()
 login_manager = LoginManager()
+compress = Compress()
 
 # Initialize limiter with environment-driven defaults
 rate_limit_default = os.getenv("RATE_LIMIT_DEFAULT", "60 per minute")

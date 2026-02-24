@@ -20,7 +20,7 @@ import re
 from pathlib import Path
 
 from config import get_config
-from extensions import bcrypt, login_manager, limiter, init_cors
+from extensions import bcrypt, login_manager, limiter, init_cors, compress
 from utils.auth import admin_required, get_effective_user
 from utils.observability import init_sentry
 from utils.logging_init import init_logging, init_request_logging
@@ -46,7 +46,7 @@ from services.listening import start_session as listening_start_session, end_ses
 from services.user_resolver import resolve_db_user_id
 from db import get_session
 from models import UserArtistFollow
-from models import Purchase
+from models import Purchase, BetaSignup
 
 # Initialize search index on app startup
 def initialize_search_index():
@@ -233,6 +233,7 @@ def create_app():
     login_manager.init_app(app)
     limiter.init_app(app)
     init_cors(app)
+    compress.init_app(app)
     login_manager.login_view = "auth_page"
 
     @login_manager.unauthorized_handler
@@ -3379,29 +3380,9 @@ def api_daily_playlist():
 
 # Removed duplicate search route - using comprehensive_search instead
 
-# Legacy playlist endpoints - redirect to new enhanced system
-@app.route('/api/user/playlists', methods=['GET', 'POST'])
-@login_required
-def user_playlists():
-    """Legacy playlist endpoint - redirects to new system"""
-    return manage_playlists()
+# Legacy playlist endpoints removed - use /api/playlists/ instead
 
-@app.route('/api/user/playlists/<playlist_id>', methods=['GET', 'PUT', 'DELETE'])
-@login_required
-def manage_playlist_legacy(playlist_id):
-    """Legacy playlist management - redirects to new system"""
-    return manage_playlist(playlist_id)
 
-@app.route('/api/user/playlists/<playlist_id>/items', methods=['POST', 'DELETE'])
-@login_required
-def manage_playlist_items(playlist_id):
-    """Legacy playlist items - redirects to new system"""
-    if request.method == 'POST':
-        return add_to_playlist(playlist_id)
-    else:
-        return remove_from_playlist(playlist_id)
-
-# Removed: /api/user/playlists/<playlist_id>/reorder - always returned error, feature not supported
 
 
 # Removed: /api/user/likes - use bookmarks instead (not part of MVP)
@@ -4849,6 +4830,22 @@ def beta_signup():
             return jsonify({"error": "Valid email is required"}), 400
             
         from services.emailer import send_email
+        from db import get_session
+        from flask_login import current_user
+        
+        # Save to database
+        try:
+            with get_session() as db_session:
+                new_signup = BetaSignup(
+                    email=email,
+                    platform=platform,
+                    user_id=current_user.id if current_user.is_authenticated else None
+                )
+                db_session.add(new_signup)
+                db_session.commit()
+        except Exception as db_err:
+            current_app.logger.error(f"Failed to save beta signup to DB: {db_err}")
+            # Continue anyway so user gets their email
         
         # Notify admin
         admin_email = os.getenv("AHOY_ADMIN_EMAIL", "alex@littlemarket.org")
@@ -4895,7 +4892,10 @@ def spa_assets(filename):
     assets_dir = _SPA_DIST / "assets"
     if not assets_dir.is_dir():
         abort(404)
-    return send_from_directory(str(assets_dir), filename)
+    response = send_from_directory(str(assets_dir), filename)
+    # Vite assets are hashed, so we can cache them for a long time (1 year)
+    response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    return response
 
 @app.route("/favicon.ico")
 @limiter.exempt
@@ -4938,7 +4938,25 @@ def spa_fallback(path):
     path_lower = (path or "").strip().lower()
     if any(path_lower.startswith(p) or path_lower == p.rstrip("/") for p in server_prefixes):
         abort(404)
-    return send_from_directory(str(_SPA_DIST), "index.html", mimetype="text/html")
+    response = send_from_directory(str(_SPA_DIST), "index.html", mimetype="text/html")
+    # SPA entry point should not be cached long, to ensure users get updates.
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    return response
+
+
+@app.after_request
+def add_header(response):
+    """Add global headers to every response."""
+    # Ensure sane defaults for API and other responses if not already set
+    if "Cache-Control" not in response.headers:
+        if request.path.startswith("/api/"):
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
+        else:
+            response.headers["Cache-Control"] = "public, max-age=3600"
+    
+    # Security: Ensure X-Content-Type-Options is set
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
 
 
 # Allow `python -m app` locally if needed

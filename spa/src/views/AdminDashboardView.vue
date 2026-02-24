@@ -63,26 +63,32 @@
       <!-- Main Content Tabs -->
       <div class="flex space-x-2 mb-8 p-1 bg-white/5 backdrop-blur-md rounded-xl w-fit border border-white/10">
         <button 
-          @click="currentTab = 'activity'"
+          @click="switchTab('activity')"
           :class="['px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300', currentTab === 'activity' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
         >
           Activity Feed
         </button>
         <button 
-          @click="currentTab = 'users'"
+          @click="switchTab('users')"
           :class="['px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300', currentTab === 'users' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
         >
           Users
         </button>
         <button 
-          @click="currentTab = 'actions'"
+          @click="switchTab('actions')"
           :class="['px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300', currentTab === 'actions' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
         >
           Action Items
           <span v-if="actions.length" class="ml-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{{ actions.length }}</span>
         </button>
         <button 
-          @click="currentTab = 'analytics'"
+          @click="switchTab('content')"
+          :class="['px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300', currentTab === 'content' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
+        >
+          Content
+        </button>
+        <button 
+          @click="switchTab('analytics')"
           :class="['px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300', currentTab === 'analytics' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
         >
           Analytics
@@ -190,6 +196,139 @@
         </div>
          <div v-if="actions.length === 0" class="text-purple-200/40 text-center py-20 italic">No pending actions. The ether is calm.</div>
       </div>
+
+      <!-- Content Management -->
+      <div v-if="currentTab === 'content'" class="space-y-6">
+        <div class="flex flex-wrap gap-2 p-1 bg-white/5 backdrop-blur-md rounded-xl w-fit border border-white/10 mb-6">
+          <button 
+            v-for="(label, type) in contentTypes" :key="type"
+            @click="selectContentType(type)"
+            :class="['px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-300', contentType === type ? 'bg-purple-500/50 text-white' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
+          >
+            {{ label }}
+          </button>
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+          <div class="relative flex-1 max-w-md">
+            <input 
+              v-model="contentSearch" 
+              @input="fetchContent" 
+              :placeholder="`Search ${contentTypes[contentType]}...`" 
+              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-purple-200/20 focus:outline-none focus:border-purple-500/50 transition-all"
+            >
+          </div>
+          <button 
+            @click="openContentEditor()"
+            class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg shadow-purple-900/30 transition-all active:scale-95"
+          >
+            + Add {{ contentTypes[contentType].slice(0, -1) }}
+          </button>
+        </div>
+
+        <div class="glass-card overflow-hidden">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="text-purple-200/40 border-b border-white/5">
+                <th class="p-4 font-medium text-xs uppercase tracking-wider">ID</th>
+                <th class="p-4 font-medium text-xs uppercase tracking-wider">Title/Name</th>
+                <th class="p-4 font-medium text-xs uppercase tracking-wider">Details</th>
+                <th class="p-4 font-medium text-xs uppercase tracking-wider text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in contentItems" :key="item.id" class="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                <td class="p-4 text-white/30 font-mono text-xs">{{ item.track_id || item.show_id || item.artist_id || item.id }}</td>
+                <td class="p-4">
+                  <div class="flex items-center gap-3">
+                    <img v-if="item.cover_art || item.thumbnail || item.image || item.image_url" :src="item.cover_art || item.thumbnail || item.image || item.image_url" class="w-8 h-8 rounded object-cover border border-white/10 shadow-sm">
+                    <div>
+                      <div class="text-white/90 font-medium">{{ item.title || item.name }}</div>
+                      <div class="text-[10px] text-purple-200/40">{{ item.artist || item.host || item.venue || item.kind }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="p-4 text-xs text-white/40">
+                  <span v-if="item.genre" class="bg-white/5 px-2 py-0.5 rounded mr-2">{{ item.genre }}</span>
+                  <span v-if="item.duration_seconds" class="mr-2">{{ Math.floor(item.duration_seconds / 60) }}:{{ (item.duration_seconds % 60).toString().padStart(2, '0') }}</span>
+                  <span v-if="item.status" :class="['px-2 py-0.5 rounded text-[10px] uppercase font-bold', item.status === 'upcoming' || item.status === 'active' ? 'text-green-400 bg-green-900/20' : 'text-gray-400 bg-gray-900/20']">{{ item.status }}</span>
+                </td>
+                <td class="p-4 text-right">
+                  <div class="flex justify-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                    <button @click="openContentEditor(item)" class="p-2 hover:bg-purple-500/20 rounded-lg text-purple-300 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                    </button>
+                    <button @click="deleteContentItem(item.id)" class="p-2 hover:bg-red-500/20 rounded-lg text-red-300 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div v-if="contentItems.length === 0 && !loading" class="p-20 text-center text-purple-200/40 italic">
+            No content found in this dimension.
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Editor Modal -->
+      <div v-if="showEditor" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
+        <div class="glass-card w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 shadow-2xl border-purple-500/30">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">{{ editingId ? 'Edit' : 'Add' }} {{ contentTypes[contentType].slice(0, -1) }}</h2>
+            <button @click="showEditor = false" class="text-white/40 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+
+          <form @submit.prevent="saveContent" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div v-for="(value, key) in editorForm" :key="key" class="space-y-1">
+                <label v-if="key !== 'id' && key !== 'extra_fields' && key !== 'position' && key !== 'tags' && key !== 'photos' && key !== 'social_links' && key !== 'genres' && key !== 'features'" class="text-[10px] font-bold text-purple-200/60 uppercase tracking-widest pl-1">{{ key.replace(/_/g, ' ') }}</label>
+                
+                <!-- String/Number fields -->
+                <input 
+                  v-if="key !== 'id' && key !== 'extra_fields' && key !== 'position' && key !== 'description' && key !== 'social_links' && key !== 'features' && typeof value !== 'boolean' && typeof value !== 'object'"
+                  v-model="editorForm[key]"
+                  :type="typeof value === 'number' ? 'number' : 'text'"
+                  class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-purple-500/50"
+                  :placeholder="Array.isArray(value) ? 'Comma separated list...' : ''"
+                >
+
+                <!-- Boolean fields -->
+                <div v-if="typeof value === 'boolean'" class="flex items-center gap-3 py-2">
+                  <input type="checkbox" v-model="editorForm[key]" class="w-4 h-4 rounded bg-white/5 border-white/10 text-purple-600 focus:ring-purple-500/50">
+                  <span class="text-sm text-white/70">{{ key.replace(/_/g, ' ') }}</span>
+                </div>
+
+                <!-- Textarea (description) -->
+                <textarea 
+                  v-if="key === 'description'"
+                  v-model="editorForm[key]"
+                  rows="4"
+                  class="w-full md:col-span-2 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-purple-500/50"
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-white/10">
+              <button 
+                type="button" @click="showEditor = false"
+                class="px-6 py-2 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit" :disabled="saving"
+                class="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white px-8 py-2 rounded-xl text-sm font-bold shadow-lg shadow-purple-900/30 transition-all active:scale-95"
+              >
+                {{ saving ? 'Saving...' : 'Save Changes' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
       
       <!-- Analytics / Heatmap -->
       <div v-if="currentTab === 'analytics'" class="space-y-6">
@@ -247,6 +386,114 @@ const actions = ref([])
 const heatmap = ref([])
 const userSearch = ref('')
 const currentTab = ref('activity')
+
+// Content Management State
+const contentType = ref('tracks')
+const contentItems = ref([])
+const contentSearch = ref('')
+const showEditor = ref(false)
+const saving = ref(false)
+const editingId = ref(null)
+const editorForm = ref({})
+
+const contentTypes = {
+  'tracks': 'Tracks',
+  'shows': 'Shows',
+  'artists': 'Artists',
+  'events': 'Events',
+  'merch': 'Merch',
+  'videos': 'Videos',
+  'whats-new': "What's New"
+}
+
+// Map content type to default model fields
+const getModelFields = (type) => {
+  const defaults = {
+    tracks: { track_id: '', title: '', artist: '', album: '', genre: '', audio_url: '', cover_art: '', featured: false, position: 0 },
+    shows: { show_id: '', title: '', host: '', description: '', thumbnail: '', video_url: '', category: '', position: 0 },
+    artists: { artist_id: '', name: '', slug: '', description: '', image: '', artist_type: '', featured: false, position: 0 },
+    events: { event_id: '', title: '', date: '', time: '', venue: '', description: '', status: 'upcoming', position: 0 },
+    merch: { item_id: '', name: '', price_usd: 20.0, available: true, image_url: '', position: 0 },
+    videos: { video_id: '', title: '', description: '', url: '', status: 'coming_soon', position: 0 },
+    'whats-new': { year: new Date().getFullYear().toString(), month: 'January', section: 'platform', title: '', description: '', position: 0 }
+  }
+  return defaults[type] || {}
+}
+
+const selectContentType = (type) => {
+  contentType.value = type
+  fetchContent()
+}
+
+const switchTab = (tab) => {
+  currentTab.value = tab
+  if (tab === 'content') fetchContent()
+}
+
+const fetchContent = async () => {
+    loading.value = true
+    try {
+        const data = await apiFetch(`/api/admin/content/${contentType.value}?q=${contentSearch.value}`)
+        contentItems.value = data.items
+    } catch (e) {
+        console.error("Failed to fetch content", e)
+    } finally {
+        loading.value = false
+    }
+}
+
+const openContentEditor = (item = null) => {
+  if (item) {
+    editingId.value = item.id
+    editorForm.value = { ...item }
+  } else {
+    editingId.value = null
+    editorForm.value = getModelFields(contentType.value)
+  }
+  showEditor.value = true
+}
+
+const saveContent = async () => {
+  saving.value = true
+  try {
+    const url = editingId.value 
+      ? `/api/admin/content/${contentType.value}/${editingId.value}`
+      : `/api/admin/content/${contentType.value}`
+    
+    const method = editingId.value ? 'PUT' : 'POST'
+    
+    // Process comma-separated arrays
+    const payload = { ...editorForm.value }
+    for (const key in payload) {
+      if (Array.isArray(getModelFields(contentType.value)[key]) && typeof payload[key] === 'string') {
+        payload[key] = payload[key].split(',').map(s => s.trim()).filter(Boolean)
+      }
+    }
+    
+    await apiFetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    
+    showEditor.value = false
+    fetchContent()
+  } catch (e) {
+    alert("Fail: " + e.message)
+  } finally {
+    saving.value = false
+  }
+}
+
+const deleteContentItem = async (id) => {
+  if (!confirm("Are you sure you want to delete this content? This cannot be undone.")) return
+  try {
+    await apiFetch(`/api/admin/content/${contentType.value}/${id}`, { method: 'DELETE' })
+    fetchContent()
+  } catch (e) {
+    alert("Delete failed: " + e.message)
+  }
+}
 
 const getActivityColor = (type) => {
   const map = {

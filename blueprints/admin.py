@@ -1,8 +1,12 @@
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request, current_app, make_response
 from flask_login import login_required, current_user
 from sqlalchemy import text
 from db import get_session
-from models import User, Tip, Purchase, Feedback, ArtistClaim, ArtistTip
+from datetime import datetime
+from models import (
+    User, Tip, Purchase, Feedback, ArtistClaim, ArtistTip, AnalyticsEvent,
+    Track, Show, ContentArtist, Event, ContentMerch, ContentVideo, WhatsNewItem
+)
 
 bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
@@ -168,7 +172,7 @@ def get_heatmap():
         """)).fetchall()
         
         heatmap_data = [{'path': r[0], 'count': r[1]} for r in results]
-        
+        return jsonify(heatmap_data)
 
 @bp.route('/users/<int:user_id>/toggle_status', methods=['POST'])
 def toggle_user_status(user_id):
@@ -215,3 +219,138 @@ def export_users_csv():
         output.headers["Content-Disposition"] = "attachment; filename=users_export.csv"
         output.headers["Content-type"] = "text/csv"
         return output
+
+# ---------------------------------------------------------------------------
+# Content CRUD (Tracks, Shows, Artists, Events, Merch, Videos, What's New)
+# ---------------------------------------------------------------------------
+
+CONTENT_MODEL_MAP = {
+    'tracks': Track,
+    'shows': Show,
+    'artists': ContentArtist,
+    'events': Event,
+    'merch': ContentMerch,
+    'videos': ContentVideo,
+    'whats-new': WhatsNewItem
+}
+
+def _serialize_model(obj):
+    """Simple serializer for SQLAlchemy models."""
+    if obj is None:
+        return None
+    d = {}
+    for column in obj.__table__.columns:
+        val = getattr(obj, column.name)
+        if isinstance(val, (datetime,)):
+            d[column.name] = val.isoformat()
+        elif hasattr(val, '__float__'): # Numeric, Float
+            d[column.name] = float(val)
+        else:
+            d[column.name] = val
+    return d
+
+@bp.route('/content/<ctype>', methods=['GET'])
+def list_content(ctype):
+    model = CONTENT_MODEL_MAP.get(ctype)
+    if not model:
+        return jsonify({'error': 'Invalid content type'}), 400
+    
+    query = request.args.get('q', '')
+    limit = min(int(request.args.get('limit', 50)), 100)
+    offset = int(request.args.get('offset', 0))
+    
+    with get_session() as session:
+        q = session.query(model)
+        
+        # Simple search based on common fields
+        if query:
+            if hasattr(model, 'title'):
+                q = q.filter(model.title.ilike(f"%{query}%"))
+            elif hasattr(model, 'name'):
+                q = q.filter(model.name.ilike(f"%{query}%"))
+        
+        # Order by position if available, else ID desc
+        if hasattr(model, 'position'):
+            q = q.order_by(model.position.asc())
+        else:
+            q = q.order_by(model.id.desc())
+            
+        total = q.count()
+        items = q.offset(offset).limit(limit).all()
+        
+        return jsonify({
+            'items': [_serialize_model(i) for i in items],
+            'total': total,
+            'limit': limit,
+            'offset': offset
+        })
+
+@bp.route('/content/<ctype>/<int:id>', methods=['GET'])
+def get_content_item(ctype, id):
+    model = CONTENT_MODEL_MAP.get(ctype)
+    if not model:
+        return jsonify({'error': 'Invalid content type'}), 400
+        
+    with get_session() as session:
+        item = session.query(model).get(id)
+        if not item:
+            return jsonify({'error': 'Item not found'}), 404
+        return jsonify(_serialize_model(item))
+
+@bp.route('/content/<ctype>', methods=['POST'])
+def create_content_item(ctype):
+    model = CONTENT_MODEL_MAP.get(ctype)
+    if not model:
+        return jsonify({'error': 'Invalid content type'}), 400
+        
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+        
+    with get_session() as session:
+        # Create new instance and map fields
+        item = model()
+        for key, value in data.items():
+            if hasattr(item, key) and key != 'id':
+                setattr(item, key, value)
+        
+        session.add(item)
+        session.commit()
+        return jsonify({'ok': True, 'id': item.id, 'item': _serialize_model(item)})
+
+@bp.route('/content/<ctype>/<int:id>', methods=['PUT'])
+def update_content_item(ctype, id):
+    model = CONTENT_MODEL_MAP.get(ctype)
+    if not model:
+        return jsonify({'error': 'Invalid content type'}), 400
+        
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+        
+    with get_session() as session:
+        item = session.query(model).get(id)
+        if not item:
+            return jsonify({'error': 'Item not found'}), 404
+            
+        for key, value in data.items():
+            if hasattr(item, key) and key != 'id':
+                setattr(item, key, value)
+        
+        session.commit()
+        return jsonify({'ok': True, 'item': _serialize_model(item)})
+
+@bp.route('/content/<ctype>/<int:id>', methods=['DELETE'])
+def delete_content_item(ctype, id):
+    model = CONTENT_MODEL_MAP.get(ctype)
+    if not model:
+        return jsonify({'error': 'Invalid content type'}), 400
+        
+    with get_session() as session:
+        item = session.query(model).get(id)
+        if not item:
+            return jsonify({'error': 'Item not found'}), 404
+            
+        session.delete(item)
+        session.commit()
+        return jsonify({'ok': True})

@@ -700,3 +700,20 @@ class AnalyticsEvent(Base):
         return f"<AnalyticsEvent id={self.id} type={self.event_type} path={self.path}>"
 
 
+class BetaSignup(Base):
+    """
+    Tracks interest in the beta program.
+    Ensures users who sign up early are flagged for the 'stickers for life' incentive.
+    """
+    __tablename__ = 'beta_signups'
+
+    id = Column(Integer, primary_key=True)
+    email = Column(String(255), nullable=False, index=True)
+    platform = Column(String(50), nullable=False) # ios, android, desktop
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True, index=True)
+
+    def __repr__(self) -> str:
+        return f"<BetaSignup id={self.id} email={self.email} platform={self.platform}>"
+
+
