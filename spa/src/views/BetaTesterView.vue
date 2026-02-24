@@ -3,12 +3,12 @@
     <div class="beta-container">
       <header class="beta-header">
         <h1>Beta Program</h1>
-        <p class="subtitle">Join the early crew and get free stickers for life!</p>
+        <p class="subtitle">Join the early beta testers</p>
       </header>
 
       <section class="beta-benefit-card neu-card pulse-border">
-        <h2>Free Stickers for Life! ⚓</h2>
-        <p>As a thank you for helping us test Ahoy on mobile, we're giving all early beta testers a lifetime supply of stickers. Sign up below to claim yours!</p>
+        <h2>Beta Program Information</h2>
+        <p>We're looking for early adopters to help us test the mobile version of Ahoy. To get on the app store app store - we need some brave souls, to tell us what they like, and didn't like about it all.</p>
       </section>
 
       <div class="beta-steps-grid">

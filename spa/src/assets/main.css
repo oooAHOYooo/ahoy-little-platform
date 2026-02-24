@@ -2662,8 +2662,6 @@ body.debug-layout .card {
     align-items: center;
     justify-content: space-between;
     height: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
     padding: 0 12px;
     gap: 8px;
     overflow: visible;
@@ -3212,9 +3210,9 @@ body.debug-layout .card {
 
 /* Desktop-specific styling for username/guest text */
 @media (min-width: 769px) {
-    .hidden-mobile.account-username {
-        font-size: 10px;
-        text-transform: uppercase;
+    .desktop-only.account-username {
+        font-size: 13px;
+        text-transform: none;
     }
 }
 

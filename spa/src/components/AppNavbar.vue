@@ -53,7 +53,7 @@
 
     <!-- 3. Navbar (desktop: breadcrumbs + account; mobile: logo + hamburger + breadcrumbs + Explore + account) -->
     <nav class="navbar desktop-nav">
-      <div class="nav-container ds-statusbar max-w-7xl mx-auto px-4">
+      <div class="nav-container ds-statusbar">
         <!-- Mobile logo (Flask: nav-logo mobile-only) -->
         <div class="nav-logo mobile-only" style="display: flex;">
           <router-link to="/" aria-label="Ahoy Home">
