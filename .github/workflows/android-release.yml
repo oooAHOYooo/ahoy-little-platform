@@ -1,13 +1,24 @@
-name: Android Release Build & Deploy
+name: Android Build & Release
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      deploy_to_play:
+        description: 'Deploy to Play Console?'
+        required: true
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
-  build-and-upload:
+  build:
     runs-on: ubuntu-latest
+    outputs:
+      build-success: ${{ steps.build.outcome }}
 
     steps:
       - name: Checkout code
@@ -61,21 +72,21 @@ jobs:
           keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
           EOF
 
-      - name: Build signed AAB
+      - name: Build signed AAB & APK
+        id: build
         working-directory: ./android
-        run: ./gradlew bundleRelease --quiet
+        run: ./gradlew bundleRelease assembleRelease --quiet
 
-      - name: Upload to Play Console (Internal Testing)
-        uses: r0adkll/upload-google-play@v1
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          serviceAccountJsonPlainText: ${{ secrets.PLAY_CONSOLE_SERVICE_ACCOUNT }}
-          packageName: com.ahoy.app
-          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
-          track: internal
-          status: draft
-          userFraction: 0.1
+          name: android-builds
+          path: |
+            android/app/build/outputs/bundle/release/app-release.aab
+            android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
 
-      - name: Comment on commit
+      - name: Comment build status (success)
         if: success()
         uses: actions/github-script@v7
         with:
@@ -84,7 +95,55 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '✅ Android build successful!\n\n📦 AAB uploaded to Play Console (Internal Testing track)\n\nVersion: ' + process.env.BUILD_VERSION + '\n\nReady to review in Play Console → Internal testing'
+              body: '✅ Android build successful!\n\n📦 AAB & APK built and ready\n\nTo release to Play Store, trigger workflow with `deploy_to_play=true`'
             })
-        env:
-          BUILD_VERSION: ${{ github.run_number }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_to_play == 'true')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: android-builds
+
+      - name: Upload to Play Console (Internal Testing)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_CONSOLE_SERVICE_ACCOUNT }}
+          packageName: com.ahoy.app
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: draft
+          userFraction: 0.1
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            app/build/outputs/bundle/release/app-release.aab
+            app/build/outputs/apk/release/app-release.apk
+          body: |
+            🚀 Release: ${{ github.ref_name }}
+            📦 AAB uploaded to Play Console (Internal Testing)
+
+            Ready for review in Play Console → Internal testing
+
+      - name: Notify deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Deployed to Play Console!\n\n📲 Version: ${{ github.ref_name }}\n\nCheck Play Console → Internal testing track'
+            })
