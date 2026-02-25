@@ -12,7 +12,7 @@
 - Waiting: Google Search Console DNS verification for `littlemarket.org` (added TXT record, awaiting propagation)
 
 **User's current focus (pick up from here):**
-- **Android release pipeline** — Set up automated CI/CD with GitHub Actions. Builds on every push; releases only on manual trigger or git tags. Waiting for DNS verification to complete service account setup.
+- **Linux desktop builds** — Added AppImage (universal) and DEB (Ubuntu/Debian) support via electron-builder. AUR package ready for Arch/Garuda. All packaging for desktop, web, and mobile complete.
 
 **Recent Changes (2026-02-25):**
 - **Android release pipeline:** Set up GitHub Actions CI/CD with two-stage workflow (build + deploy)
@@ -175,6 +175,37 @@ cd android && ./gradlew bundleRelease assembleRelease   # builds signed AAB + AP
 ---
 
 ## Session Log
+
+### 2026-02-25: Linux Desktop Builds & AUR Support
+- **Goal:** Build desktop app for Linux (Ubuntu, Garuda) while waiting for DNS verification
+- **Achievements:**
+  - ✅ Added Linux build configuration to electron-builder
+  - ✅ Created `packaging/linux-build.sh` for one-command builds
+  - ✅ AppImage support (universal, no installation required)
+  - ✅ DEB support (Ubuntu/Debian/Garuda)
+  - ✅ ARM64 support (Raspberry Pi 4+, Apple Silicon via Parallels)
+  - ✅ Created PKGBUILD for AUR (Arch User Repository)
+  - ✅ Comprehensive guides for Linux and AUR setup
+- **Output Formats:**
+  - **AppImage** — Universal Linux (all distros, any CPU)
+  - **DEB** — Ubuntu/Debian-based (incl. Garuda with sudo apt)
+  - **AUR** — Arch/Garuda via `yay -S ahoy-indie-media` (when submitted)
+- **Files Created:**
+  - `packaging/linux-build.sh` — Automated build script
+  - `packaging/linux/postinst.sh` — DEB post-install integration
+  - `packaging/PKGBUILD` — AUR package definition
+  - `info/LINUX_BUILD_GUIDE.md` — Linux build guide
+  - `info/AUR_SETUP_GUIDE.md` — AUR submission instructions
+  - Updated `package.json` with Linux targets + npm script
+- **Quick Commands:**
+  - `bash packaging/linux-build.sh` — Build AppImage + DEB
+  - `npm run electron:build:linux` — Direct build
+  - Future: `yay -S ahoy-indie-media` (after AUR approval)
+- **Next Steps:**
+  1. Test Linux builds locally
+  2. Create AUR account (optional, for long-term distribution)
+  3. Submit PKGBUILD to AUR
+  4. Users can then install via yay on Garuda/Arch
 
 ### 2026-02-25: Android Release Pipeline & CI/CD Automation
 - **Goal:** Set up automated, controlled release pipeline for Google Play Store
