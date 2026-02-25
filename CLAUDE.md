@@ -8,18 +8,29 @@
 
 ## Quick Reference (Read First)
 
-**Current Issues:** None active
+**Current Issues:**
+- Waiting: Google Search Console DNS verification for `littlemarket.org` (added TXT record, awaiting propagation)
 
 **User's current focus (pick up from here):**
-- **Mobile UX improvements** — Added collapsible mobile dock and now-playing bar with swipe gestures for a cleaner, more immersive experience. SPA built successfully.
+- **Android release pipeline** — Set up automated CI/CD with GitHub Actions. Builds on every push; releases only on manual trigger or git tags. Waiting for DNS verification to complete service account setup.
 
-**Recent Changes (2026-02-15):**
+**Recent Changes (2026-02-25):**
+- **Android release pipeline:** Set up GitHub Actions CI/CD with two-stage workflow (build + deploy)
+- **Automated builds:** Every push builds SPA + signed AAB/APK, artifacts kept 30 days
+- **Controlled releases:** Deploy only via manual trigger or git tags (fail-safe, no auto-uploads)
+- **Service account automation:** Created `scripts/setup-play-console-ci.sh` to automate GCP setup
+- **Release methods:** Manual (UI), git tags (v1.0.1), optional scheduled (weekly)
+- **Documentation:** Added `info/RELEASE_PIPELINE.md` with full setup and release instructions
+- **Files:** `.github/workflows/android-release.yml`, `scripts/setup-play-console-ci.sh`, `info/RELEASE_PIPELINE.md`
+- **Status:** Signed keystore working, builds succeeding, waiting for DNS verification to complete service account setup
+- **Emulator testing:** Android emulator (Pixel 7 Pro, Android 35) running on Linux with signed builds tested
+
+**Previous (2026-02-15):**
 - **Mobile collapse feature:** Added collapsible functionality to mobile dock and now-playing bar
 - **Swipe gestures:** Swipe down/up or tap handle bar to collapse/expand both components
 - **Persistent state:** Collapse preferences saved to localStorage (survives page reloads)
 - **Smooth animations:** 300ms cubic-bezier transitions with adaptive body padding
 - **Files:** Created `spa/src/composables/useMobileCollapse.js`, updated `MiniPlayer.vue`, `NavBar.vue`, `App.vue`, and CSS files
-- **Docs:** Added `.claude/MOBILE_COLLAPSE_FEATURE.md` for implementation details
 
 **Previous (2026-02-02):**
 - Android: Gradle upgraded 8.0.2→8.11.1, AGP 8.0.0→8.7.3 (Java 21 compat)
@@ -164,6 +175,35 @@ cd android && ./gradlew bundleRelease assembleRelease   # builds signed AAB + AP
 ---
 
 ## Session Log
+
+### 2026-02-25: Android Release Pipeline & CI/CD Automation
+- **Goal:** Set up automated, controlled release pipeline for Google Play Store
+- **Achievements:**
+  - ✅ Installed Java 21, Android SDK, emulator (Pixel 7 Pro, Android 35)
+  - ✅ Created signing keystore (`android/keystore/ahoy-release.jks`)
+  - ✅ Built and tested signed AAB + APK on emulator
+  - ✅ Created GitHub Actions workflow with two-stage deployment
+  - ✅ Implemented fail-safes: builds on every push, deploys only on manual trigger or git tags
+  - ✅ Automated service account setup script
+  - ✅ Created comprehensive release pipeline documentation
+  - ⏳ Waiting: Google Search Console DNS verification for `littlemarket.org`
+- **Workflow Design:**
+  - **Build stage:** Every push → builds SPA, syncs to Android, builds signed AAB/APK, artifacts saved 30 days
+  - **Deploy stage:** Manual/tag-based only → uploads to Play Console (internal testing, draft status)
+  - **Release methods:** (1) Manual via GitHub UI, (2) Git tags (v1.0.1), (3) Optional scheduled
+- **Files Created:**
+  - `android/keystore/ahoy-release.jks` (signing key)
+  - `android/keystore/sign.properties` (Gradle signing config)
+  - `android/local.properties` (Android SDK path)
+  - `.github/workflows/android-release.yml` (CI/CD workflow)
+  - `scripts/setup-play-console-ci.sh` (service account automation)
+  - `info/RELEASE_PIPELINE.md` (user guide)
+- **Next Steps:**
+  1. DNS verification completes (~15 min wait)
+  2. Run `bash scripts/setup-play-console-ci.sh` to create service account
+  3. Add Play Console permissions to service account
+  4. Test manual release from GitHub Actions
+  5. Review in Play Console → Internal testing
 
 ### 2026-02-15: Mobile Collapse Feature
 - **Request:** Make mobile dock and now-playing bar collapsible for cleaner UX
