@@ -1,0 +1,47 @@
+# Maintainer: Alex <alex@littlemarket.org>
+pkgname=ahoy-indie-media
+pkgver=0.2.1
+pkgrel=1
+pkgdesc="Comprehensive media platform for discovering and organizing independent music, shows, and content"
+arch=('x86_64' 'aarch64')
+url="https://github.com/oooAHOYooo/ahoy-little-platform"
+license=('ISC')
+depends=('gconf' 'libnotify' 'libappindicator-gtk3' 'libxss' 'libxtst')
+makedepends=('nodejs' 'npm' 'python' 'git')
+source=("git+https://github.com/oooAHOYooo/ahoy-little-platform.git#tag=v${pkgver}")
+sha256sums=('SKIP')
+
+build() {
+    cd "ahoy-little-platform"
+    npm ci
+    npm run prebuild
+    npm run electron:build:linux
+}
+
+package() {
+    cd "ahoy-little-platform"
+
+    # Install AppImage
+    install -Dm755 "dist-electron/Ahoy Indie Media-${pkgver}.AppImage" \
+        "${pkgdir}/opt/ahoy-indie-media/ahoy-indie-media"
+
+    # Create symbolic link in /usr/bin for easy access
+    install -dm755 "${pkgdir}/usr/bin"
+    ln -s "/opt/ahoy-indie-media/ahoy-indie-media" "${pkgdir}/usr/bin/ahoy-indie-media"
+
+    # Install desktop entry
+    install -Dm644 /dev/stdin "${pkgdir}/usr/share/applications/ahoy-indie-media.desktop" << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Ahoy Indie Media
+Comment=Discover and organize independent media
+Exec=ahoy-indie-media
+Icon=ahoy
+Categories=AudioVideo;Music;
+Terminal=false
+EOF
+
+    # Install icon
+    install -Dm644 "packaging/icons/ahoy.ico" \
+        "${pkgdir}/usr/share/pixmaps/ahoy.ico"
+}
