@@ -10,6 +10,7 @@
 
 **Current Issues:**
 - Waiting: Google Search Console DNS verification for `littlemarket.org` (added TXT record, awaiting propagation)
+- **Apple Developer:** Enrollment **In Review** for **Little Market LLC** (Enrollment ID: 5A8M5QU9GP). New Apple ID: alex@littlemarket.org. App will publish as **Ahoy Indie Media** (DBA), legal seller Little Market LLC. **Do not change iOS/signing configs until approval.** Zero-hour runbook: `info/APPLE_LITTLE_MARKET_LLC_ZERO_HOUR.md`
 
 **User's current focus (pick up from here):**
 - **Linux desktop builds** — Added AppImage (universal) and DEB (Ubuntu/Debian) support via electron-builder. AUR package ready for Arch/Garuda. All packaging for desktop, web, and mobile complete.
