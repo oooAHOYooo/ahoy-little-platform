@@ -106,8 +106,8 @@
       </section>
 
       <div class="account-guest-cta">
-        <p>Create a free account to sync your saves across devices and unlock wallet, playlists, and more.</p>
-        <router-link to="/login?signup=1" class="account-btn primary">Create account</router-link>
+        <p>Log in or create a free account to sync your saves across devices and unlock wallet, playlists, and more.</p>
+        <router-link to="/login" class="account-btn primary">Log In / Sign Up</router-link>
       </div>
     </div>
   </div>

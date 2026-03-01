@@ -9,103 +9,126 @@
         </div>
       </section>
 
-      <!-- Embedded Video Player Section (same as Flask) -->
+      <!-- Embedded Video Player Section -->
       <section ref="playerSectionRef" class="embedded-video-section">
-        <div class="video-player-wrapper">
-          <!-- Video Player -->
-          <div v-show="currentVideo" class="embedded-video-player">
-            <!-- Native video for direct MP4/URL -->
-            <video
-              v-if="currentVideo && isDirectVideoUrl(videoSrc(currentVideo))"
-              ref="videoEl"
-              :src="videoSrc(currentVideo)"
-              :poster="currentVideo.thumbnail || ''"
-              controls
-              class="embedded-video"
-              playsinline
-              @loadedmetadata="onVideoLoaded"
-              @play="isPlaying = true"
-              @pause="isPlaying = false"
-              @ended="onVideoEnded"
-            >
-              Your browser does not support the video tag.
-            </video>
-            <!-- Embed for YouTube/Vimeo: click-to-load (YouTube-style) so embed loads on user gesture (fixes mobile) -->
-            <template v-else-if="currentVideo && embedUrlFor(currentVideo)">
-              <div
-                v-if="!embedLoaded"
-                class="video-embed-poster"
-                role="button"
-                tabindex="0"
-                :aria-label="'Play ' + (currentVideo?.title || 'video')"
-                @click="loadEmbed"
-                @keydown.enter.prevent="loadEmbed"
-                @keydown.space.prevent="loadEmbed"
+        <div class="video-player-wrapper liquid-glass-wrap">
+          <transition name="fade-scale" mode="out-in">
+            <!-- Video Player -->
+            <div v-if="currentVideo" key="player" class="embedded-video-player modern-glass-player">
+              <!-- Native video for direct MP4/URL -->
+              <video
+                v-if="currentVideo && isDirectVideoUrl(videoSrc(currentVideo))"
+                ref="videoEl"
+                :src="videoSrc(currentVideo)"
+                :poster="currentVideo.thumbnail || ''"
+                controls
+                class="embedded-video"
+                playsinline
+                @loadedmetadata="onVideoLoaded"
+                @play="isPlaying = true"
+                @pause="isPlaying = false"
+                @ended="onVideoEnded"
               >
-                <img
-                  :src="currentVideo.thumbnail || ''"
-                  :alt="currentVideo?.title || ''"
-                  class="video-embed-poster-img"
-                />
-                <div class="video-embed-poster-play">
-                  <i class="fas fa-play"></i>
-                </div>
-              </div>
-              <div
-                v-else
-                class="video-embed-wrap"
-                style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000"
-              >
-                <iframe
-                  :src="embedSrc"
-                  style="position:absolute;top:0;left:0;width:100%;height:100%;border:0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                />
-              </div>
-            </template>
-            <div class="video-info-overlay">
-              <div class="video-info-content">
-                <h2 class="video-title">{{ currentVideo?.title || 'Untitled' }}</h2>
-                <div class="video-meta">
-                  <span class="video-host">{{ currentVideo?.host || '' }}</span>
-                  <span v-if="currentVideo?.type" class="video-type">
-                    {{ String(currentVideo.type || '').replace(/_/g, ' ') }}
-                  </span>
-                </div>
-                <p class="video-description">{{ currentVideo?.description || '' }}</p>
-              </div>
-              <div class="video-actions-bar">
-                <button type="button" class="action-btn view-solo-btn" title="View Solo" @click="viewSolo">
-                  <i class="fas fa-external-link-alt"></i>
-                  <span class="sr-only">View Solo</span>
-                </button>
-                <button
-                  type="button"
-                  class="action-btn bookmark-btn"
-                  :class="{ bookmarked: isShowBookmarked(currentVideo) }"
-                  :aria-pressed="isShowBookmarked(currentVideo)"
-                  :title="isShowBookmarked(currentVideo) ? 'Remove bookmark' : 'Bookmark'"
-                  @click="toggleShowBookmark(currentVideo)"
+                Your browser does not support the video tag.
+              </video>
+              <!-- Embed for YouTube/Vimeo: click-to-load (YouTube-style) so embed loads on user gesture (fixes mobile) -->
+              <template v-else-if="currentVideo && embedUrlFor(currentVideo)">
+                <div
+                  v-if="!embedLoaded"
+                  class="video-embed-poster"
+                  role="button"
+                  tabindex="0"
+                  :aria-label="'Play ' + (currentVideo?.title || 'video')"
+                  @click="loadEmbed"
+                  @keydown.enter.prevent="loadEmbed"
+                  @keydown.space.prevent="loadEmbed"
                 >
-                  <i :class="isShowBookmarked(currentVideo) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
-                  <span class="sr-only">{{ isShowBookmarked(currentVideo) ? 'Remove bookmark' : 'Bookmark' }}</span>
-                </button>
+                  <img
+                    :src="currentVideo.thumbnail || ''"
+                    :alt="currentVideo?.title || ''"
+                    class="video-embed-poster-img"
+                  />
+                  <div class="video-embed-poster-play">
+                    <i class="fas fa-play"></i>
+                  </div>
+                </div>
+                <div
+                  v-else
+                  class="video-embed-wrap"
+                  style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000"
+                >
+                  <iframe
+                    :src="embedSrc"
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;border:0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                  />
+                </div>
+              </template>
+              <div class="video-info-overlay liquid-glass-overlay">
+                <div class="video-info-content">
+                  <h2 class="video-title">{{ currentVideo?.title || 'Untitled' }}</h2>
+                  <div class="video-meta">
+                    <span class="video-host">{{ currentVideo?.host || '' }}</span>
+                    <span v-if="currentVideo?.type" class="video-type">
+                      {{ String(currentVideo.type || '').replace(/_/g, ' ') }}
+                    </span>
+                  </div>
+                  <p class="video-description">{{ currentVideo?.description || '' }}</p>
+                </div>
+                <div class="video-actions-bar">
+                  <button type="button" class="action-btn view-solo-btn" title="View Solo" @click="viewSolo">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span class="sr-only">View Solo</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="action-btn bookmark-btn"
+                    :class="{ bookmarked: isShowBookmarked(currentVideo) }"
+                    :aria-pressed="isShowBookmarked(currentVideo)"
+                    :title="isShowBookmarked(currentVideo) ? 'Remove bookmark' : 'Bookmark'"
+                    @click="toggleShowBookmark(currentVideo)"
+                  >
+                    <i :class="isShowBookmarked(currentVideo) ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+                    <span class="sr-only">{{ isShowBookmarked(currentVideo) ? 'Remove bookmark' : 'Bookmark' }}</span>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Placeholder when no video selected -->
-          <div v-show="!currentVideo" class="video-placeholder">
-            <div class="placeholder-content">
-              <i class="fas fa-play-circle"></i>
-              <h3>Select a video to play</h3>
-              <p>Click on any video below to start watching</p>
-              <button type="button" class="btn btn-primary placeholder-watch-random" @click="playRandomShow">
-                <i class="fas fa-play"></i> Watch Random
-              </button>
+            <!-- Featured Carousel (when no video selected) -->
+            <div v-else key="carousel" class="featured-carousel-container" @mouseenter="pauseCarousel" @mouseleave="resumeCarousel">
+              <div class="carousel-track" :style="{ transform: `translateX(-${carouselIndex * 100}%)` }">
+                <div v-for="(video, index) in featuredVideos" :key="video.id" class="carousel-slide">
+                  <div class="cinematic-backdrop">
+                    <img :src="video.thumbnail || '/static/img/default-cover.jpg'" :alt="video.title">
+                    <div class="glass-overlay"></div>
+                  </div>
+                  <div class="carousel-content liquid-glass-plate">
+                    <span class="trending-badge"><i class="fas fa-fire"></i> Featured Play</span>
+                    <h2>{{ video.title }}</h2>
+                    <p class="carousel-host">{{ video.host }}</p>
+                    <div class="carousel-actions">
+                      <button @click="playShow(video)" class="btn-glass-play">
+                        <i class="fas fa-play"></i> Watch Now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Controls -->
+              <div class="carousel-indicators" v-if="featuredVideos.length > 1">
+                <button 
+                  v-for="(_, i) in featuredVideos" 
+                  :key="'ind-'+i" 
+                  class="indicator" 
+                  :class="{ active: i === carouselIndex }" 
+                  @click.stop="setCarousel(i)"
+                  :aria-label="'Go to slide ' + (i + 1)"
+                ></button>
+              </div>
             </div>
-          </div>
+          </transition>
         </div>
       </section>
 
@@ -175,7 +198,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { apiFetchCached } from '../composables/useApi'
 import { useBookmarks } from '../composables/useBookmarks'
@@ -194,6 +217,40 @@ const currentVideo = ref(null)
 const isPlaying = ref(false)
 const videoEl = ref(null)
 const playerSectionRef = ref(null)
+
+// Carousel Logic
+const carouselIndex = ref(0)
+let carouselInterval = null
+const isCarouselPaused = ref(false)
+const randomFeatured = ref([])
+
+const featuredVideos = computed(() => {
+  return randomFeatured.value
+})
+
+function startCarousel() {
+  if (carouselInterval) clearInterval(carouselInterval)
+  carouselInterval = setInterval(() => {
+    if (!isCarouselPaused.value && featuredVideos.value.length > 0) {
+      carouselIndex.value = (carouselIndex.value + 1) % featuredVideos.value.length
+    }
+  }, 6000)
+}
+
+function pauseCarousel() {
+  isCarouselPaused.value = true
+}
+
+function resumeCarousel() {
+  isCarouselPaused.value = false
+}
+
+function setCarousel(i) {
+  carouselIndex.value = i
+  startCarousel() // reset timer
+}
+
+
 // YouTube-style click-to-load: embed iframe only after user tap (fixes mobile)
 const embedLoaded = ref(false)
 const embedSrc = ref('')
@@ -344,10 +401,33 @@ onMounted(async () => {
     if (list.length) {
       featuredShow.value = list[Math.floor(Math.random() * list.length)]
     }
+    
+    // Pick 5 random videos for the carousel
+    const validCarouselVideos = list.filter(s => s.thumbnail && s.title)
+    const pool = validCarouselVideos.length ? validCarouselVideos : list
+    const shuffled = [...pool].sort(() => 0.5 - Math.random())
+    randomFeatured.value = shuffled.slice(0, 5)
+
     filterShows()
     applyPlayFromUrl()
+    
+    if (!currentVideo.value) {
+      startCarousel()
+    }
   } finally {
     isLoading.value = false
+  }
+})
+
+onUnmounted(() => {
+  if (carouselInterval) clearInterval(carouselInterval)
+})
+
+watch(currentVideo, (val) => {
+  if (val && carouselInterval) {
+    clearInterval(carouselInterval)
+  } else if (!val) {
+    startCarousel()
   }
 })
 
@@ -489,5 +569,256 @@ watch(
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* FADE-SCALE TRANSITION */
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+  transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1), transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.fade-scale-enter-from {
+  opacity: 0;
+  transform: scale(0.95);
+}
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: scale(1.05);
+}
+
+/* CAROUSEL & LIQUID GLASS STYLES */
+.liquid-glass-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.5);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  perspective: 1000px;
+}
+
+.featured-carousel-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 21/9;
+  min-height: 250px;
+  overflow: hidden;
+}
+
+.carousel-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.cinematic-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cinematic-backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.05); /* Slight zoom for dramatic effect */
+}
+
+.glass-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%);
+}
+
+.liquid-glass-plate {
+  position: absolute;
+  bottom: 10%;
+  left: 5%;
+  width: 40%;
+  max-width: 500px;
+  min-width: 300px;
+  padding: 2rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+  transform: translateZ(0); /* Hardware accel */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.trending-badge {
+  align-self: flex-start;
+  background: linear-gradient(135deg, #ff0f7b, #f89b29);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 15px rgba(255, 15, 123, 0.4);
+}
+
+.liquid-glass-plate h2 {
+  font-size: 2rem;
+  font-weight: 900;
+  margin: 0;
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.carousel-host {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  margin: 0;
+}
+
+.carousel-actions {
+  margin-top: 0.25rem;
+}
+
+.btn-glass-play {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 0.8rem 1.8rem;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.btn-glass-play:hover {
+  background: rgba(255,255,255,0.95);
+  color: #000;
+  box-shadow: 0 10px 30px rgba(255,255,255,0.3);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.carousel-indicators {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.indicator {
+  width: 30px;
+  height: 4px;
+  background: rgba(255,255,255,0.3);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.indicator.active {
+  background: #fff;
+  width: 40px;
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.indicator:hover {
+  background: rgba(255,255,255,0.8);
+}
+
+/* Modern Glass Player Updates */
+.modern-glass-player {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+}
+
+.liquid-glass-overlay {
+  position: absolute;
+  inset: auto 0 0 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0) 100%);
+  padding: 2.5rem 2rem 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none; /* Let clicks pass through except on children */
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.modern-glass-player:hover .liquid-glass-overlay {
+  opacity: 1;
+}
+
+.liquid-glass-overlay > * {
+  pointer-events: auto;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .featured-carousel-container {
+    aspect-ratio: 16/9; /* Taller on mobile to fit content */
+  }
+  .liquid-glass-plate {
+    width: 85%;
+    left: 7.5%;
+    bottom: 5%;
+    padding: 1.25rem;
+    min-width: 0;
+    gap: 0.5rem;
+  }
+  .liquid-glass-plate h2 {
+    font-size: 1.25rem;
+  }
+  .carousel-host {
+    font-size: 0.95rem;
+  }
+  .trending-badge {
+    padding: 3px 10px;
+    font-size: 0.7rem;
+  }
+  .btn-glass-play {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  .carousel-indicators {
+    bottom: 10px;
+    right: 15px;
+  }
+  .indicator {
+    width: 20px;
+  }
+  .indicator.active {
+    width: 30px;
+  }
 }
 </style>

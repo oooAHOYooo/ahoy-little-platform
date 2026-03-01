@@ -2,10 +2,11 @@
   <div class="relative min-h-screen bg-black text-white overflow-hidden font-sans selection:bg-purple-500 selection:text-white">
     
     <!-- Ambient Background Elements -->
-    <div class="fixed inset-0 z-0 pointer-events-none">
-        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-900/40 rounded-full blur-[120px] animate-pulse"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-900/30 rounded-full blur-[120px] animate-pulse" style="animation-delay: 2s"></div>
-        <div class="absolute top-[20%] right-[20%] w-[300px] h-[300px] bg-pink-900/20 rounded-full blur-[100px] animate-bounce" style="animation-duration: 10s"></div>
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] bg-purple-600/30 rounded-full blur-[120px] mix-blend-screen animate-pulse duration-10000"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] max-w-[700px] max-h-[700px] bg-blue-500/30 rounded-full blur-[120px] mix-blend-screen animate-pulse" style="animation-delay: 2s; animation-duration: 12s;"></div>
+        <div class="absolute top-[30%] right-[30%] w-[30vw] h-[30vw] max-w-[400px] max-h-[400px] bg-pink-500/20 rounded-full blur-[100px] mix-blend-screen animate-bounce" style="animation-duration: 15s"></div>
+        <div class="absolute top-[50%] left-[20%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] bg-cyan-500/20 rounded-full blur-[100px] mix-blend-screen" style="animation: pulse 8s infinite alternate;"></div>
     </div>
 
     <div class="relative z-10 container mx-auto p-6">
@@ -23,45 +24,45 @@
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
-        <div class="glass-card p-6 group hover:bg-white/5 transition duration-300">
-          <h3 class="text-purple-200/60 text-xs font-bold uppercase tracking-wider mb-2">Users</h3>
-          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left">{{ stats.users }}</p>
-          <div class="h-1 w-full bg-gray-700/50 mt-4 rounded-full overflow-hidden">
-            <div class="h-full bg-purple-500 w-[70%]"></div>
+        <div class="glass-card p-6 group">
+          <h3 class="text-purple-200/80 text-xs font-bold uppercase tracking-wider mb-2">Users</h3>
+          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">{{ stats.users }}</p>
+          <div class="h-1 w-full bg-white/10 mt-4 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-purple-400 to-purple-600 w-[70%] shadow-[0_0_10px_rgba(168,85,247,0.8)]"></div>
           </div>
         </div>
-        <div class="glass-card p-6 group hover:bg-white/5 transition duration-300">
-          <h3 class="text-purple-200/60 text-xs font-bold uppercase tracking-wider mb-2">Total Tips</h3>
-          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left">${{ stats.tip_total?.toFixed(2) }}</p>
-          <div class="h-1 w-full bg-gray-700/50 mt-4 rounded-full overflow-hidden">
-             <div class="h-full bg-green-500 w-[45%]"></div>
+        <div class="glass-card p-6 group">
+          <h3 class="text-purple-200/80 text-xs font-bold uppercase tracking-wider mb-2">Total Tips</h3>
+          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">${{ stats.tip_total?.toFixed(2) }}</p>
+          <div class="h-1 w-full bg-white/10 mt-4 rounded-full overflow-hidden">
+             <div class="h-full bg-gradient-to-r from-green-400 to-green-600 w-[45%] shadow-[0_0_10px_rgba(74,222,128,0.8)]"></div>
           </div>
         </div>
-        <div class="glass-card p-6 group hover:bg-white/5 transition duration-300">
-          <h3 class="text-purple-200/60 text-xs font-bold uppercase tracking-wider mb-2">Tips Count</h3>
-          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left">{{ stats.tips }}</p>
-           <div class="h-1 w-full bg-gray-700/50 mt-4 rounded-full overflow-hidden">
-             <div class="h-full bg-blue-500 w-[30%]"></div>
+        <div class="glass-card p-6 group">
+          <h3 class="text-purple-200/80 text-xs font-bold uppercase tracking-wider mb-2">Tips Count</h3>
+          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">{{ stats.tips }}</p>
+           <div class="h-1 w-full bg-white/10 mt-4 rounded-full overflow-hidden">
+             <div class="h-full bg-gradient-to-r from-blue-400 to-blue-600 w-[30%] shadow-[0_0_10px_rgba(96,165,250,0.8)]"></div>
           </div>
         </div>
-        <div class="glass-card p-6 group hover:bg-white/5 transition duration-300">
-          <h3 class="text-purple-200/60 text-xs font-bold uppercase tracking-wider mb-2">Revenue</h3>
-          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left">${{ stats.revenue?.toFixed(2) }}</p>
-           <div class="h-1 w-full bg-gray-700/50 mt-4 rounded-full overflow-hidden">
-             <div class="h-full bg-yellow-500 w-[60%]"></div>
+        <div class="glass-card p-6 group">
+          <h3 class="text-purple-200/80 text-xs font-bold uppercase tracking-wider mb-2">Revenue</h3>
+          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">${{ stats.revenue?.toFixed(2) }}</p>
+           <div class="h-1 w-full bg-white/10 mt-4 rounded-full overflow-hidden">
+             <div class="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 w-[60%] shadow-[0_0_10px_rgba(250,204,21,0.8)]"></div>
           </div>
         </div>
-         <div class="glass-card p-6 group hover:bg-white/5 transition duration-300">
-          <h3 class="text-purple-200/60 text-xs font-bold uppercase tracking-wider mb-2">Purchases</h3>
-          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left">{{ stats.purchases }}</p>
-           <div class="h-1 w-full bg-gray-700/50 mt-4 rounded-full overflow-hidden">
-             <div class="h-full bg-red-500 w-[25%]"></div>
+         <div class="glass-card p-6 group">
+          <h3 class="text-purple-200/80 text-xs font-bold uppercase tracking-wider mb-2">Purchases</h3>
+          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">{{ stats.purchases }}</p>
+           <div class="h-1 w-full bg-white/10 mt-4 rounded-full overflow-hidden">
+             <div class="h-full bg-gradient-to-r from-red-400 to-red-600 w-[25%] shadow-[0_0_10px_rgba(248,113,113,0.8)]"></div>
           </div>
         </div>
       </div>
 
       <!-- Main Content Tabs -->
-      <div class="flex space-x-2 mb-8 p-1 bg-white/5 backdrop-blur-md rounded-xl w-fit border border-white/10">
+      <div class="flex space-x-2 mb-8 p-1 glass-card w-fit !rounded-xl !p-2 border-white/20">
         <button 
           @click="switchTab('activity')"
           :class="['px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300', currentTab === 'activity' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
@@ -117,10 +118,10 @@
             v-model="userSearch" 
             @input="searchUsers" 
             placeholder="Search users..." 
-            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-purple-200/20 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all"
+            class="w-full glass-input rounded-xl px-4 py-3 text-white placeholder-purple-200/40"
             >
-            <a href="/api/admin/users/export" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-xl border border-white/10 transition flex items-center whitespace-nowrap">
-                <span class="mr-2">⬇️</span> CSV
+            <a href="/api/admin/users/export" target="_blank" class="glass-btn text-white px-6 py-3 rounded-xl flex items-center whitespace-nowrap">
+                <span class="mr-2 border-r border-white/20 pr-2">⬇️</span> CSV
             </a>
             <div class="absolute right-[120px] top-3.5 text-purple-200/20 pointer-events-none">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
@@ -141,7 +142,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="u in users" :key="u.id" class="border-b border-white/5 hover:bg-white/5 transition-colors">
+              <tr v-for="u in users" :key="u.id" class="glass-table-row border-b border-white/5 hover:bg-white/10 transition-colors">
                 <td class="p-4 text-white/30 font-mono text-sm">{{ u.id }}</td>
                 <td class="p-4 text-white/90">{{ u.email }}</td>
                 <td class="p-4 text-white/70">{{ u.username || '-' }}</td>
@@ -215,12 +216,12 @@
               v-model="contentSearch" 
               @input="fetchContent" 
               :placeholder="`Search ${contentTypes[contentType]}...`" 
-              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-purple-200/20 focus:outline-none focus:border-purple-500/50 transition-all"
+              class="w-full glass-input rounded-xl px-4 py-2 text-sm text-white placeholder-purple-200/40"
             >
           </div>
           <button 
             @click="openContentEditor()"
-            class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded-xl text-sm font-bold shadow-lg shadow-purple-900/30 transition-all active:scale-95"
+            class="glass-primary-btn px-6 py-2 rounded-xl text-sm font-bold active:scale-95"
           >
             + Add {{ contentTypes[contentType].slice(0, -1) }}
           </button>
@@ -237,7 +238,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in contentItems" :key="item.id" class="border-b border-white/5 hover:bg-white/5 transition-colors group">
+              <tr v-for="item in contentItems" :key="item.id" class="glass-table-row border-b border-white/5 hover:bg-white/10 transition-colors group">
                 <td class="p-4 text-white/30 font-mono text-xs">{{ item.track_id || item.show_id || item.artist_id || item.id }}</td>
                 <td class="p-4">
                   <div class="flex items-center gap-3">
@@ -292,7 +293,7 @@
                   v-if="key !== 'id' && key !== 'extra_fields' && key !== 'position' && key !== 'description' && key !== 'social_links' && key !== 'features' && typeof value !== 'boolean' && typeof value !== 'object'"
                   v-model="editorForm[key]"
                   :type="typeof value === 'number' ? 'number' : 'text'"
-                  class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-purple-500/50"
+                  class="w-full glass-input rounded-lg px-4 py-2 text-sm"
                   :placeholder="Array.isArray(value) ? 'Comma separated list...' : ''"
                 >
 
@@ -307,7 +308,7 @@
                   v-if="key === 'description'"
                   v-model="editorForm[key]"
                   rows="4"
-                  class="w-full md:col-span-2 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-purple-500/50"
+                  class="w-full md:col-span-2 glass-input rounded-lg px-4 py-2 text-sm"
                 ></textarea>
               </div>
             </div>
@@ -321,7 +322,7 @@
               </button>
               <button 
                 type="submit" :disabled="saving"
-                class="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white px-8 py-2 rounded-xl text-sm font-bold shadow-lg shadow-purple-900/30 transition-all active:scale-95"
+                class="glass-primary-btn disabled:opacity-50 px-8 py-2 rounded-xl text-sm font-bold active:scale-95"
               >
                 {{ saving ? 'Saving...' : 'Save Changes' }}
               </button>
@@ -365,7 +366,64 @@
 
 <style scoped>
 .glass-card {
-    @apply bg-gray-900/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl;
+    background: rgba(255, 255, 255, 0.05); /* very subtle white */
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.15); /* bright thin edge */
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+.glass-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.glass-input {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    transition: all 0.3s ease;
+}
+.glass-input:focus {
+    border-color: rgba(168, 85, 247, 0.7); /* vivid purple */
+    background: rgba(0, 0, 0, 0.3);
+    outline: none;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-btn {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+.glass-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+.glass-primary-btn {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.8) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 15px 0 rgba(168, 85, 247, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+}
+.glass-primary-btn:hover {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 1) 0%, rgba(236, 72, 153, 1) 100%);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(168, 85, 247, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
 }
 </style>
 

@@ -32,7 +32,7 @@
           <label for="password">Password</label>
           <input id="password" v-model="password" type="password" :placeholder="mode === 'login' ? 'e.g. alexadmin' : '••••••••'" autocomplete="current-password" required />
         </div>
-        <p v-if="mode === 'login'" class="auth-hint">Test account: alexadmin / alexadmin</p>
+        <p v-if="mode === 'login'" class="auth-hint">Test account: alexadmin / alexadmin<br>Admin: alex@ahoy.ooo / 12345</p>
         <p v-if="mode === 'login'" class="auth-forgot">
           <router-link to="/auth/forgot">Forgot password?</router-link>
         </p>
