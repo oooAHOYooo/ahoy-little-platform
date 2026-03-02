@@ -119,6 +119,7 @@
                >
                  <option value="deep-blue">Deep Blue</option>
                  <option value="after-dark">After Dark</option>
+                 <option value="alien-tundra">Alien Tundra</option>
                  <option value="default">Default</option>
                </select>
             </div>

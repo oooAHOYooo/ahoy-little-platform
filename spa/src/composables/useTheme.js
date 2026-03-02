@@ -18,11 +18,13 @@ export function useTheme() {
         localStorage.setItem(THEME_KEY, theme)
 
         // Remove existing theme classes
-        document.body.classList.remove('theme-after-dark', 'theme-deep-blue')
+        document.body.classList.remove('theme-after-dark', 'theme-alien-tundra', 'theme-deep-blue')
 
         // Add new theme class if not default
         if (theme === 'after-dark') {
             document.body.classList.add('theme-after-dark')
+        } else if (theme === 'alien-tundra') {
+            document.body.classList.add('theme-alien-tundra')
         } else if (theme === 'deep-blue') {
             document.body.classList.add('theme-deep-blue')
         }

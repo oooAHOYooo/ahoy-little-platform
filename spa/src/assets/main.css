@@ -938,6 +938,70 @@ body.theme-after-dark .router-link-active {
     color: var(--primary-color);
 }
 
+/* Alien Tundra Theme */
+body.theme-alien-tundra {
+    /* Based on user image: Snowy Alien Landscape, Pink Fungal Structures, Cyan Ice Arches */
+    --primary-color: #ff2a75;
+    /* Vivid Pink/Red for fungi */
+    --secondary-color: #00d4ff;
+    /* Ice Cyan for arches */
+    --accent-color: #ff85a2;
+    /* Lighter Pink */
+
+    --background-dark: #0a1118;
+    /* Deep Icy Dark */
+    --background-medium: #141f2c;
+    /* Icy Navy */
+    --background-light: #223347;
+    /* Slate Cyan */
+
+    --text-primary: #ffffff;
+    --text-secondary: rgba(230, 245, 255, 0.85);
+    /* Cool white text */
+    --text-muted: rgba(200, 225, 255, 0.6);
+
+    --border-color: rgba(0, 212, 255, 0.15);
+    /* Cyan border */
+    --success-color: #00ff9d;
+    --warning-color: #ffaa00;
+    --error-color: #ff3366;
+
+    background: linear-gradient(135deg, #0a1118 0%, #1a2a3a 100%);
+    background-attachment: fixed;
+}
+
+/* Specific overrides for Alien Tundra */
+body.theme-alien-tundra .neu-card,
+body.theme-alien-tundra .settings-page,
+body.theme-alien-tundra .app-sidebar,
+body.theme-alien-tundra .app-navbar,
+body.theme-alien-tundra .mobile-menu-drawer,
+body.theme-alien-tundra .mini-player,
+body.theme-alien-tundra .compact-footer {
+    background-color: transparent !important;
+    background: rgba(20, 31, 44, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-color: rgba(0, 212, 255, 0.1);
+}
+
+body.theme-alien-tundra .neu-btn-primary {
+    background: linear-gradient(135deg, #ff2a75, #ff0055);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255, 42, 117, 0.4);
+}
+
+body.theme-alien-tundra .neu-btn-secondary {
+    background: rgba(0, 212, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+body.theme-alien-tundra .nav-link.active,
+body.theme-alien-tundra .router-link-active {
+    color: var(--primary-color);
+}
+
 /* Deep Blue Theme */
 body.theme-deep-blue {
     /* Inspired by the user image: Deep Sea Blues, Cyan Glows, Dark Glass */
