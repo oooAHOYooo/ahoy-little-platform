@@ -425,6 +425,14 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 25px 0 rgba(168, 85, 247, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
 }
+
+.glass-table-row {
+    background: rgba(255, 255, 255, 0.02);
+    transition: background 0.2s ease;
+}
+.glass-table-row:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
 </style>
 
 <script setup>

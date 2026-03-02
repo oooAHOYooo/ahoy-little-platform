@@ -91,6 +91,9 @@
         </div>
         <div class="ds-statusbar__right">
           <span class="account-username desktop-only">{{ auth.isLoggedIn.value ? auth.username.value : 'guest' }}</span>
+          <router-link v-if="auth.user.value?.is_admin" to="/admin" class="admin-link desktop-only" aria-label="Admin Dashboard" title="Admin">
+            <i class="fas fa-shield-alt"></i>
+          </router-link>
           <router-link to="/account" class="account-icon-btn desktop-only" aria-label="Account" title="Account">
             <i class="fas fa-user-circle"></i>
           </router-link>

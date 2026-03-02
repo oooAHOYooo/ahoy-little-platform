@@ -302,6 +302,17 @@ def create_app():
         from ahoy.version import __version__
         return jsonify({"ok": True, "version": __version__}), 200
 
+    @app.get("/api/config/stripe")
+    def get_stripe_config():
+        """Expose only the publishable key for Stripe Elements in the SPA."""
+        key = (
+            app.config.get("STRIPE_PUBLISHABLE_KEY") or 
+            os.getenv("STRIPE_PUBLISHABLE_KEY") or 
+            os.getenv("STRIPE_PUBLISHABLE_KEY_TEST") or
+            app.config.get("STRIPE_PUBLISHABLE_KEY_TEST")
+        )
+        return jsonify({"publishable_key": key}), 200
+
     # Readiness check that actually verifies DB connectivity
     @app.get("/readyz")
     def readyz():

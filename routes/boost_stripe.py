@@ -57,7 +57,7 @@ def create_payment_intent():
 
     try:
         intent = stripe.PaymentIntent.create(
-            amount=int(boost_amount_decimal * 100),  # cents
+            amount=int(total_charge * 100),  # cents (including fees)
             currency="usd",
             automatic_payment_methods={"enabled": True},
             metadata={

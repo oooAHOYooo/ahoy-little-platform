@@ -1,9 +1,9 @@
 <template>
   <div class="shows-page videos-page">
-    <div class="shows-container">
-      <!-- Global subpage hero (mobile: compact two-line like other pages) -->
-      <section class="podcasts-hero shows-page-hero">
-        <div class="podcasts-hero-inner">
+    <div class="shows-container" :class="{ 'video-is-active': currentVideo }">
+      <!-- Global subpage hero -->
+      <section v-show="!currentVideo" class="video-hero shows-page-hero">
+        <div class="video-hero-inner">
           <h1><i class="fas fa-video" aria-hidden="true"></i> Videos</h1>
           <p>Music videos, skate parts, short films, episodes, and more</p>
         </div>
@@ -15,57 +15,59 @@
           <transition name="fade-scale" mode="out-in">
             <!-- Video Player -->
             <div v-if="currentVideo" key="player" class="embedded-video-player modern-glass-player">
-              <!-- Native video for direct MP4/URL -->
-              <video
-                v-if="currentVideo && isDirectVideoUrl(videoSrc(currentVideo))"
-                ref="videoEl"
-                :src="videoSrc(currentVideo)"
-                :poster="currentVideo.thumbnail || ''"
-                controls
-                class="embedded-video"
-                playsinline
-                @loadedmetadata="onVideoLoaded"
-                @play="isPlaying = true"
-                @pause="isPlaying = false"
-                @ended="onVideoEnded"
-              >
-                Your browser does not support the video tag.
-              </video>
-              <!-- Embed for YouTube/Vimeo: click-to-load (YouTube-style) so embed loads on user gesture (fixes mobile) -->
-              <template v-else-if="currentVideo && embedUrlFor(currentVideo)">
-                <div
-                  v-if="!embedLoaded"
-                  class="video-embed-poster"
-                  role="button"
-                  tabindex="0"
-                  :aria-label="'Play ' + (currentVideo?.title || 'video')"
-                  @click="loadEmbed"
-                  @keydown.enter.prevent="loadEmbed"
-                  @keydown.space.prevent="loadEmbed"
+              <div class="video-container-inner">
+                <!-- Native video for direct MP4/URL -->
+                <video
+                  v-if="currentVideo && isDirectVideoUrl(videoSrc(currentVideo))"
+                  ref="videoEl"
+                  :src="videoSrc(currentVideo)"
+                  :poster="currentVideo.thumbnail || ''"
+                  controls
+                  class="embedded-video"
+                  playsinline
+                  @loadedmetadata="onVideoLoaded"
+                  @play="isPlaying = true"
+                  @pause="isPlaying = false"
+                  @ended="onVideoEnded"
                 >
-                  <img
-                    :src="currentVideo.thumbnail || ''"
-                    :alt="currentVideo?.title || ''"
-                    class="video-embed-poster-img"
-                  />
-                  <div class="video-embed-poster-play">
-                    <i class="fas fa-play"></i>
+                  Your browser does not support the video tag.
+                </video>
+                <!-- Embed for YouTube/Vimeo: click-to-load (YouTube-style) so embed loads on user gesture (fixes mobile) -->
+                <template v-else-if="currentVideo && embedUrlFor(currentVideo)">
+                  <div
+                    v-if="!embedLoaded"
+                    class="video-embed-poster"
+                    role="button"
+                    tabindex="0"
+                    :aria-label="'Play ' + (currentVideo?.title || 'video')"
+                    @click="loadEmbed"
+                    @keydown.enter.prevent="loadEmbed"
+                    @keydown.space.prevent="loadEmbed"
+                  >
+                    <img
+                      :src="currentVideo.thumbnail || ''"
+                      :alt="currentVideo?.title || ''"
+                      class="video-embed-poster-img"
+                    />
+                    <div class="video-embed-poster-play">
+                      <i class="fas fa-play"></i>
+                    </div>
                   </div>
-                </div>
-                <div
-                  v-else
-                  class="video-embed-wrap"
-                  style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000"
-                >
-                  <iframe
-                    :src="embedSrc"
-                    style="position:absolute;top:0;left:0;width:100%;height:100%;border:0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen
-                  />
-                </div>
-              </template>
-              <div class="video-info-overlay liquid-glass-overlay">
+                  <div
+                    v-else
+                    class="video-embed-wrap"
+                    style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000"
+                  >
+                    <iframe
+                      :src="embedSrc"
+                      style="position:absolute;top:0;left:0;width:100%;height:100%;border:0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen
+                    />
+                  </div>
+                </template>
+              </div>
+              <div class="video-info-overlay liquid-glass-overlay static-overlay">
                 <div class="video-info-content">
                   <h2 class="video-title">{{ currentVideo?.title || 'Untitled' }}</h2>
                   <div class="video-meta">
@@ -77,6 +79,10 @@
                   <p class="video-description">{{ currentVideo?.description || '' }}</p>
                 </div>
                 <div class="video-actions-bar">
+                  <button type="button" class="action-btn boost-btn" title="Boost artist" @click="openBoost">
+                    <i class="fas fa-bolt"></i>
+                    <span class="sr-only">Boost</span>
+                  </button>
                   <button type="button" class="action-btn view-solo-btn" title="View Solo" @click="viewSolo">
                     <i class="fas fa-external-link-alt"></i>
                     <span class="sr-only">View Solo</span>
@@ -97,7 +103,8 @@
             </div>
 
             <!-- Featured Carousel (when no video selected) -->
-            <div v-else key="carousel" class="featured-carousel-container" @mouseenter="pauseCarousel" @mouseleave="resumeCarousel">
+            <div v-else key="carousel" class="featured-carousel-wrapper" @mouseenter="pauseCarousel" @mouseleave="resumeCarousel">
+              <div class="featured-carousel-container">
               <div class="carousel-track" :style="{ transform: `translateX(-${carouselIndex * 100}%)` }">
                 <div v-for="(video, index) in featuredVideos" :key="video.id" class="carousel-slide">
                   <div class="cinematic-backdrop">
@@ -116,6 +123,10 @@
                   </div>
                 </div>
               </div>
+              <!-- Navigation Arrows -->
+              <button class="carousel-nav prev" @click.stop="prevCarousel" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+              <button class="carousel-nav next" @click.stop="nextCarousel" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+              
               <!-- Controls -->
               <div class="carousel-indicators" v-if="featuredVideos.length > 1">
                 <button 
@@ -128,6 +139,7 @@
                 ></button>
               </div>
             </div>
+          </div>
           </transition>
         </div>
       </section>
@@ -151,8 +163,8 @@
                 class="image-placeholder"
               />
               <div class="show-overlay video-card-overlay">
-                <button type="button" class="show-overlay-open action-btn open-btn" title="Open" @click.stop="viewSoloShow(show)">
-                  Open
+                <button type="button" class="show-overlay-open action-btn open-btn" title="Explore" @click.stop="viewSoloShow(show)">
+                  <i class="fas fa-play" style="font-size: 0.75rem; margin-right: 4px;"></i> Explore
                 </button>
                 <button
                   type="button"
@@ -248,6 +260,28 @@ function resumeCarousel() {
 function setCarousel(i) {
   carouselIndex.value = i
   startCarousel() // reset timer
+}
+
+function prevCarousel() {
+  if (featuredVideos.value.length === 0) return
+  carouselIndex.value = (carouselIndex.value - 1 + featuredVideos.value.length) % featuredVideos.value.length
+  startCarousel()
+}
+
+function nextCarousel() {
+  if (featuredVideos.value.length === 0) return
+  carouselIndex.value = (carouselIndex.value + 1) % featuredVideos.value.length
+  startCarousel()
+}
+
+function handleKeydown(e) {
+  if (!currentVideo.value && featuredVideos.value.length > 0) {
+    if (e.key === 'ArrowLeft') {
+      prevCarousel()
+    } else if (e.key === 'ArrowRight') {
+      nextCarousel()
+    }
+  }
 }
 
 
@@ -358,6 +392,15 @@ function viewSoloShow(show) {
   router.push({ name: 'video-detail', params: { id: show.id } })
 }
 
+const API_BASE = import.meta.env.VITE_API_BASE || 'https://app.ahoy.ooo'
+
+function openBoost() {
+  if (!currentVideo.value) return
+  const track = currentVideo.value
+  const artistId = encodeURIComponent(String(track.artist_id || track.artistId || track.artist || track.host || '').trim())
+  window.location.href = `${API_BASE}/checkout?type=boost&artist_id=${artistId}&amount=1`
+}
+
 function onVideoLoaded() {}
 function onVideoEnded() {
   isPlaying.value = false
@@ -414,6 +457,8 @@ onMounted(async () => {
     if (!currentVideo.value) {
       startCarousel()
     }
+    
+    window.addEventListener('keydown', handleKeydown)
   } finally {
     isLoading.value = false
   }
@@ -421,6 +466,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (carouselInterval) clearInterval(carouselInterval)
+  window.removeEventListener('keydown', handleKeydown)
 })
 
 watch(currentVideo, (val) => {
@@ -440,6 +486,47 @@ watch(
 </script>
 
 <style scoped>
+/* Flush layout when video is active */
+.shows-container.video-is-active {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+.shows-container.video-is-active .embedded-video-section {
+  margin-top: -1rem; /* Overrides any existing padding to sit closer to nav */
+}
+
+/* Video Hero Styles (duplicate from podcasts-hero for Videos page) */
+.video-hero {
+  text-align: center;
+  margin: 30px auto;
+  max-width: 800px;
+}
+.video-hero h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+.video-hero p {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 768px) {
+  .video-hero {
+    margin: 20px auto;
+    text-align: left;
+    padding: 0 1rem;
+  }
+  .video-hero-inner h1 {
+    font-size: 1.75rem;
+  }
+  .video-hero-inner p {
+    font-size: 0.95rem;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -515,7 +602,7 @@ watch(
   padding: 4px 8px;
   font-size: 11px;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: rgba(0, 0, 0, 0.5);
   color: rgba(255, 255, 255, 0.95);
@@ -534,7 +621,7 @@ watch(
   width: 32px;
   height: 32px;
   padding: 0;
-  border-radius: 8px;
+  border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(0, 0, 0, 0.5);
   color: rgba(255, 255, 255, 0.9);
@@ -593,7 +680,16 @@ watch(
   border-radius: 20px;
   background: rgba(0,0,0,0.5);
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-  perspective: 1000px;
+}
+
+.featured-carousel-wrapper {
+  position: relative;
+  width: 100%;
+  padding: 1.5rem;
+  background: rgba(0,0,0,0.4);
+  /* Use same border aesthetic as plates for cohesion */
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
 }
 
 .featured-carousel-container {
@@ -602,6 +698,8 @@ watch(
   aspect-ratio: 21/9;
   min-height: 250px;
   overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 .carousel-track {
@@ -751,53 +849,106 @@ watch(
   background: rgba(255,255,255,0.8);
 }
 
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.4);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.1);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  z-index: 20;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.featured-carousel-wrapper:hover .carousel-nav {
+  opacity: 1;
+}
+
+.carousel-nav:hover {
+  background: rgba(255,255,255,0.95);
+  color: black;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-nav.prev {
+  left: 30px;
+}
+
+.carousel-nav.next {
+  right: 30px;
+}
+
 /* Modern Glass Player Updates */
 .modern-glass-player {
+  position: relative;
+  width: 100%;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+}
+
+.video-container-inner {
   position: relative;
   width: 100%;
   aspect-ratio: 16/9;
   background: #000;
 }
 
-.liquid-glass-overlay {
-  position: absolute;
-  inset: auto 0 0 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0) 100%);
-  padding: 2.5rem 2rem 1.5rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  pointer-events: none; /* Let clicks pass through except on children */
-  opacity: 0;
-  transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+.liquid-glass-overlay.static-overlay {
+  position: relative;
+  inset: auto;
+  opacity: 1; /* Always show when not overlaying */
+  background: rgba(0,0,0,0.3);
+  padding: 1.5rem 2rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
   backdrop-filter: blur(12px) saturate(120%);
   -webkit-backdrop-filter: blur(12px) saturate(120%);
-  border-top: 1px solid rgba(255,255,255,0.08);
-}
-
-.modern-glass-player:hover .liquid-glass-overlay {
-  opacity: 1;
-}
-
-.liquid-glass-overlay > * {
+  border-radius: 0 0 20px 20px;
   pointer-events: auto;
+  transition: none;
 }
 
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
+  .featured-carousel-wrapper {
+    padding: 0.75rem;
+  }
   .featured-carousel-container {
     aspect-ratio: 16/9; /* Taller on mobile to fit content */
+    border-radius: 12px;
+  }
+  .carousel-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    opacity: 1; /* Always show arrows on mobile */
+  }
+  .carousel-nav.prev {
+    left: 15px;
+  }
+  .carousel-nav.next {
+    right: 15px;
   }
   .liquid-glass-plate {
     width: 85%;
     left: 7.5%;
     bottom: 5%;
-    padding: 1.25rem;
+    padding: 1rem;
     min-width: 0;
-    gap: 0.5rem;
+    gap: 0.25rem;
   }
   .liquid-glass-plate h2 {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
   }
   .carousel-host {
     font-size: 0.95rem;
