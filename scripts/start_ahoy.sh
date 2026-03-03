@@ -13,9 +13,16 @@ if command -v node >/dev/null 2>&1 && [ -f spa/package.json ]; then
     exit 1
   fi
   echo "Building Vue SPA (spa-dist) with VITE_API_BASE=..."
-  (cd spa && npm ci && VITE_API_BASE= npm run build)
+  (cd spa && npm install && VITE_API_BASE= npm run build)
 else
   echo "Node or spa/ not found; skipping SPA build."
+fi
+
+echo "Running database migrations..."
+if [ -d "venv" ]; then
+  PYTHONPATH="$(pwd):${PYTHONPATH:-}" ./venv/bin/alembic upgrade heads || true
+else
+  PYTHONPATH="$(pwd):${PYTHONPATH:-}" alembic upgrade heads || true
 fi
 
 echo "Starting Flask on port ${PORT}..."

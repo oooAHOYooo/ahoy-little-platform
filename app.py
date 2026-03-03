@@ -4983,23 +4983,6 @@ if __name__ == "__main__":
         except OSError:
             return False
 
-    # 1) Ensure DB migrations are applied (best-effort for local dev)
-    try:
-        alembic_bin = shutil.which("alembic")
-        if alembic_bin:
-            print("Applying migrations (alembic upgrade heads)...")
-            env = os.environ.copy()
-            # Ensure PYTHONPATH includes project root so alembic/env.py can import models
-            project_root = os.path.dirname(os.path.abspath(__file__))
-            env["PYTHONPATH"] = f"{project_root}:{env.get('PYTHONPATH','')}" if env.get('PYTHONPATH') else project_root
-            # Provide a sane default DATABASE_URL for local runs
-            env.setdefault("DATABASE_URL", "sqlite:///local.db")
-            subprocess.run([alembic_bin, "upgrade", "heads"], check=True, env=env)
-        else:
-            print("WARN: Alembic not found in PATH; skipping automatic migrations.")
-    except Exception as e:
-        print(f"WARN: Migrations step skipped: {e}")
-
     # 2) Pick a free port automatically if requested is busy
     requested = int(os.getenv("PORT", "5000"))
     chosen = requested
