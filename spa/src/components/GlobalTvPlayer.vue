@@ -84,7 +84,7 @@ const playerStyle = computed(() => {
       height: bounds.height + 'px',
       position: 'fixed',
       zIndex: 1000,
-      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+      transition: 'none' /* Remove transition to avoid lagging behind scroll */
     }
   }
   // Mini mode (Floating PiP)

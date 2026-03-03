@@ -29,7 +29,7 @@
       <div class="app-shell">
         <AppSidebar />
         <div class="app-main">
-          <div class="content-area content-pad-bottom app-content spa-main" :class="{ 'has-player': route.name !== 'now-playing', 'flush-content': route.name === 'music' }">
+          <div class="content-area content-pad-bottom app-content spa-main" :class="{ 'has-player': route.name !== 'now-playing', 'flush-content': route.name === 'music' || route.name === 'live-tv' }">
             <router-view v-slot="{ Component, route: viewRoute }">
               <Transition :name="transitionName" mode="out-in">
                 <keep-alive :include="['HomeView', 'MusicView', 'ShowsView', 'ArtistsView', 'PodcastsView', 'LiveTVView']">
@@ -48,8 +48,8 @@
     <!-- Mini player (always visible like Flask; hidden on full Now Playing page) -->
     <MiniPlayer v-if="route.name !== 'now-playing' && playerStore.mode === 'audio'" />
 
-    <!-- Global Video Player (TV / Shows) -->
-    <GlobalTvPlayer />
+    <!-- Global Video Player (TV / Shows) — hidden on live-tv page since video is embedded inline there -->
+    <GlobalTvPlayer v-if="route.name !== 'live-tv'" />
 
     <!-- Compact fixed footer (time, ticker, quicklinks — same as Flask base.html) -->
     <CompactFooter />
@@ -171,6 +171,7 @@ onUnmounted(() => {
 </script>
 
 <style>
+/* Pinned player top padding */
 .app.pinned-player-active {
   padding-top: 41.841vw; /* 100vw / 2.39 aspect ratio */
   transition: padding-top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -181,5 +182,12 @@ onUnmounted(() => {
   .app.pinned-player-active {
     padding-top: 800px;
   }
+}
+
+/* Live TV: allow full-bleed — remove overflow-x clip on content area */
+.app .content-area.app-content:has(.tv-container) {
+  overflow-x: visible;
+  overflow-y: auto; 
+  padding: 0 !important;
 }
 </style>

@@ -482,6 +482,7 @@ class Show(Base):
     host_slug = Column(String(255), nullable=True, index=True)
     category = Column(String(100), nullable=False, default='')
     position = Column(Integer, nullable=False, default=0, index=True)
+    is_hidden = Column(Boolean, nullable=False, default=False)
     extra_fields = Column(JSON, nullable=True)
 
 
@@ -575,6 +576,7 @@ class PodcastShow(Base):
     artwork = Column(String(1024), nullable=False, default='')
     last_updated = Column(String(50), nullable=False, default='')
     position = Column(Integer, nullable=False, default=0)
+    is_hidden = Column(Boolean, nullable=False, default=False)
 
 
 class PodcastEpisode(Base):
@@ -592,6 +594,7 @@ class PodcastEpisode(Base):
     audio_url = Column(String(1024), nullable=False, default='')
     artwork = Column(String(1024), nullable=False, default='')
     position = Column(Integer, nullable=False, default=0)
+    is_hidden = Column(Boolean, nullable=False, default=False)
 
 
 class Event(Base):
@@ -614,6 +617,7 @@ class Event(Base):
     rsvp_enabled = Column(Boolean, nullable=False, default=True)
     rsvp_limit = Column(String(50), nullable=True)
     position = Column(Integer, nullable=False, default=0, index=True)
+    is_hidden = Column(Boolean, nullable=False, default=False)
     extra_fields = Column(JSON, nullable=True)
 
 
@@ -630,6 +634,7 @@ class ContentMerch(Base):
     kind = Column(String(50), nullable=False, default='merch')
     available = Column(Boolean, nullable=False, default=True)
     position = Column(Integer, nullable=False, default=0, index=True)
+    is_hidden = Column(Boolean, nullable=False, default=False)
     extra_fields = Column(JSON, nullable=True)
 
 
@@ -650,6 +655,7 @@ class ContentVideo(Base):
     upload_date = Column(String(50), nullable=True)
     thumbnail = Column(String(1024), nullable=False, default='')
     position = Column(Integer, nullable=False, default=0, index=True)
+    is_hidden = Column(Boolean, nullable=False, default=False)
     extra_fields = Column(JSON, nullable=True)
 
 

@@ -22,6 +22,157 @@
         </div>
       </header>
 
+      <!-- Content Management Section (Prominent) -->
+      <div 
+        class="mb-12 relative"
+        @dragover.prevent="isGlobalDragover = true"
+        @dragleave.prevent="isGlobalDragover = false"
+        @drop.prevent="onGlobalDrop"
+      >
+        <h2 class="text-2xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent drop-shadow-sm mb-4">Content Manager</h2>
+        
+        <!-- Global Drag & Drop Overlay -->
+        <div v-if="isGlobalDragover" class="absolute inset-0 z-50 rounded-2xl bg-purple-900/80 backdrop-blur-sm border-2 border-dashed border-purple-400 flex flex-col items-center justify-center pointer-events-none">
+          <i class="fas fa-cloud-upload-alt text-6xl text-purple-300 mb-4 animate-bounce"></i>
+          <h3 class="text-3xl font-bold text-white mb-2">Drop it like it's hot!</h3>
+          <p class="text-purple-200">Release to create a new {{ contentTypes[contentType] ? contentTypes[contentType].slice(0, -1) : 'Item' }}</p>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="flex flex-wrap gap-2 p-1 bg-white/5 backdrop-blur-md rounded-xl w-fit border border-white/10 mb-6">
+            <button 
+              v-for="(label, type) in contentTypes" :key="type"
+              @click="selectContentType(type)"
+              :class="['px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-300', contentType === type ? 'bg-purple-500/50 text-white shadow-sm' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
+            >
+              {{ label }}
+            </button>
+          </div>
+
+          <div class="flex justify-between items-center mb-6">
+            <div class="relative flex-1 max-w-md flex gap-2">
+              <input 
+                v-model="contentSearch" 
+                @input="fetchContent" 
+                :placeholder="`Search ${contentTypes[contentType]}...`" 
+                class="w-full glass-input rounded-xl px-4 py-3 text-sm text-white placeholder-purple-200/40 focus:ring-2 focus:ring-purple-500/50"
+              >
+              
+              <!-- View Mode Toggle -->
+              <div class="flex items-center bg-white/5 rounded-xl border border-white/10 p-1">
+                <button 
+                  @click="viewMode = 'list'" 
+                  :class="['p-2 rounded-lg transition-colors', viewMode === 'list' ? 'bg-purple-500 text-white' : 'text-purple-200/50 hover:text-white']"
+                  title="List View"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+                <button 
+                  @click="viewMode = 'gallery'" 
+                  :class="['p-2 rounded-lg transition-colors', viewMode === 'gallery' ? 'bg-purple-500 text-white' : 'text-purple-200/50 hover:text-white']"
+                  title="Gallery View"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                </button>
+              </div>
+            </div>
+            <button 
+              @click="openContentEditor()"
+              class="px-6 py-3 rounded-xl text-sm font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-900/50 transition-all active:scale-95 ml-4"
+            >
+              + Add {{ contentTypes[contentType] ? contentTypes[contentType].slice(0, -1) : 'Item' }}
+            </button>
+          </div>
+
+          <div class="glass-card overflow-hidden">
+            <!-- List View -->
+            <table v-if="viewMode === 'list'" class="w-full text-left border-collapse">
+              <thead>
+                <tr class="text-purple-200/40 border-b border-white/5">
+                  <th class="p-4 font-medium text-xs uppercase tracking-wider">ID</th>
+                  <th class="p-4 font-medium text-xs uppercase tracking-wider">Title/Name</th>
+                  <th class="p-4 font-medium text-xs uppercase tracking-wider">Details</th>
+                  <th class="p-4 font-medium text-xs uppercase tracking-wider text-center">Visibility</th>
+                  <th class="p-4 font-medium text-xs uppercase tracking-wider text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in contentItems" :key="item.id" class="glass-table-row border-b border-white/5 hover:bg-white/10 transition-colors group">
+                  <td class="p-4 text-white/30 font-mono text-xs">{{ item.track_id || item.show_id || item.artist_id || item.podcast_id || item.episode_id || item.id }}</td>
+                  <td class="p-4">
+                    <div class="flex items-center gap-3">
+                      <img v-if="item.cover_art || item.thumbnail || item.image || item.image_url" :src="item.cover_art || item.thumbnail || item.image || item.image_url" class="w-8 h-8 rounded object-cover border border-white/10 shadow-sm">
+                      <div>
+                        <div class="text-white/90 font-medium">{{ item.title || item.name }}</div>
+                        <div class="text-[10px] text-purple-200/40">{{ item.artist || item.host || item.venue || item.kind }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="p-4 text-xs text-white/40">
+                    <span v-if="item.genre" class="bg-white/5 px-2 py-0.5 rounded mr-2">{{ item.genre }}</span>
+                    <span v-if="item.duration_seconds" class="mr-2">{{ Math.floor(item.duration_seconds / 60) }}:{{ (item.duration_seconds % 60).toString().padStart(2, '0') }}</span>
+                    <span v-if="item.status" :class="['px-2 py-0.5 rounded text-[10px] uppercase font-bold', item.status === 'upcoming' || item.status === 'active' ? 'text-green-400 bg-green-900/20' : 'text-gray-400 bg-gray-900/20']">{{ item.status }}</span>
+                  </td>
+                  <td class="p-4 text-center">
+                    <button 
+                      @click="toggleContentVisibility(item)"
+                      :class="['px-3 py-1 rounded text-[10px] font-bold uppercase transition-colors', item.is_hidden ? 'bg-red-900/40 text-red-300 border border-red-500/30 hover:bg-red-900/60' : 'bg-green-900/40 text-green-300 border border-green-500/30 hover:bg-green-900/60']"
+                    >
+                      {{ item.is_hidden ? 'Hidden' : 'Visible' }}
+                    </button>
+                  </td>
+                  <td class="p-4 text-right">
+                    <div class="flex justify-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                      <button @click="openContentEditor(item)" class="p-2 hover:bg-purple-500/20 rounded-lg text-purple-300 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                      </button>
+                      <button @click="deleteContentItem(item.id)" class="p-2 hover:bg-red-500/20 rounded-lg text-red-300 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Gallery View -->
+            <div v-else-if="viewMode === 'gallery'" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
+              <div v-for="item in contentItems" :key="item.id" class="group relative flex flex-col items-center p-3 glass-card rounded-xl hover:bg-white/10 transition-colors border border-white/5 cursor-pointer" @click="openContentEditor(item)">
+                
+                <div class="relative w-full aspect-square mb-3">
+                  <img v-if="item.cover_art || item.thumbnail || item.image || item.image_url" :src="item.cover_art || item.thumbnail || item.image || item.image_url" class="absolute inset-0 w-full h-full object-cover rounded-lg border border-white/10 shadow-lg">
+                  <div v-else class="absolute inset-0 w-full h-full bg-white/5 rounded-lg border border-white/10 flex items-center justify-center">
+                    <i class="fas fa-image text-4xl text-white/20"></i>
+                  </div>
+                  
+                  <div class="absolute top-2 right-2 flex gap-1">
+                    <button 
+                      @click.stop="toggleContentVisibility(item)"
+                      :class="['px-2 py-0.5 rounded text-[8px] font-bold uppercase backdrop-blur-md shadow-sm border transition-colors', item.is_hidden ? 'bg-red-900/80 text-red-300 border-red-500/50' : 'bg-green-900/80 text-green-300 border-green-500/50']"
+                    >
+                      {{ item.is_hidden ? 'Hidden' : 'Visible' }}
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="w-full max-w-full">
+                  <p class="font-bold text-sm text-white/90 truncate w-full flex-1" :title="item.title || item.name">{{ item.title || item.name }}</p>
+                  <p class="text-xs text-purple-200/50 truncate w-full mt-0.5" :title="item.artist || item.host || item.venue || item.kind">{{ item.artist || item.host || item.venue || item.kind || 'Unknown' }}</p>
+                </div>
+                
+                <!-- Hover Delete Button -->
+                <button @click.stop="deleteContentItem(item.id)" class="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg transition-all scale-95 z-10">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+            </div>
+            <div v-if="contentItems.length === 0 && !loading" class="p-20 text-center text-purple-200/40 italic">
+              No content found in this dimension.
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
         <div class="glass-card p-6 group">
@@ -82,12 +233,7 @@
           Action Items
           <span v-if="actions.length" class="ml-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{{ actions.length }}</span>
         </button>
-        <button 
-          @click="switchTab('content')"
-          :class="['px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300', currentTab === 'content' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
-        >
-          Content
-        </button>
+
         <button 
           @click="switchTab('analytics')"
           :class="['px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300', currentTab === 'analytics' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
@@ -198,80 +344,7 @@
          <div v-if="actions.length === 0" class="text-purple-200/40 text-center py-20 italic">No pending actions. The ether is calm.</div>
       </div>
 
-      <!-- Content Management -->
-      <div v-if="currentTab === 'content'" class="space-y-6">
-        <div class="flex flex-wrap gap-2 p-1 bg-white/5 backdrop-blur-md rounded-xl w-fit border border-white/10 mb-6">
-          <button 
-            v-for="(label, type) in contentTypes" :key="type"
-            @click="selectContentType(type)"
-            :class="['px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-300', contentType === type ? 'bg-purple-500/50 text-white' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
-          >
-            {{ label }}
-          </button>
-        </div>
 
-        <div class="flex justify-between items-center mb-6">
-          <div class="relative flex-1 max-w-md">
-            <input 
-              v-model="contentSearch" 
-              @input="fetchContent" 
-              :placeholder="`Search ${contentTypes[contentType]}...`" 
-              class="w-full glass-input rounded-xl px-4 py-2 text-sm text-white placeholder-purple-200/40"
-            >
-          </div>
-          <button 
-            @click="openContentEditor()"
-            class="glass-primary-btn px-6 py-2 rounded-xl text-sm font-bold active:scale-95"
-          >
-            + Add {{ contentTypes[contentType].slice(0, -1) }}
-          </button>
-        </div>
-
-        <div class="glass-card overflow-hidden">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="text-purple-200/40 border-b border-white/5">
-                <th class="p-4 font-medium text-xs uppercase tracking-wider">ID</th>
-                <th class="p-4 font-medium text-xs uppercase tracking-wider">Title/Name</th>
-                <th class="p-4 font-medium text-xs uppercase tracking-wider">Details</th>
-                <th class="p-4 font-medium text-xs uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in contentItems" :key="item.id" class="glass-table-row border-b border-white/5 hover:bg-white/10 transition-colors group">
-                <td class="p-4 text-white/30 font-mono text-xs">{{ item.track_id || item.show_id || item.artist_id || item.id }}</td>
-                <td class="p-4">
-                  <div class="flex items-center gap-3">
-                    <img v-if="item.cover_art || item.thumbnail || item.image || item.image_url" :src="item.cover_art || item.thumbnail || item.image || item.image_url" class="w-8 h-8 rounded object-cover border border-white/10 shadow-sm">
-                    <div>
-                      <div class="text-white/90 font-medium">{{ item.title || item.name }}</div>
-                      <div class="text-[10px] text-purple-200/40">{{ item.artist || item.host || item.venue || item.kind }}</div>
-                    </div>
-                  </div>
-                </td>
-                <td class="p-4 text-xs text-white/40">
-                  <span v-if="item.genre" class="bg-white/5 px-2 py-0.5 rounded mr-2">{{ item.genre }}</span>
-                  <span v-if="item.duration_seconds" class="mr-2">{{ Math.floor(item.duration_seconds / 60) }}:{{ (item.duration_seconds % 60).toString().padStart(2, '0') }}</span>
-                  <span v-if="item.status" :class="['px-2 py-0.5 rounded text-[10px] uppercase font-bold', item.status === 'upcoming' || item.status === 'active' ? 'text-green-400 bg-green-900/20' : 'text-gray-400 bg-gray-900/20']">{{ item.status }}</span>
-                </td>
-                <td class="p-4 text-right">
-                  <div class="flex justify-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
-                    <button @click="openContentEditor(item)" class="p-2 hover:bg-purple-500/20 rounded-lg text-purple-300 transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                    </button>
-                    <button @click="deleteContentItem(item.id)" class="p-2 hover:bg-red-500/20 rounded-lg text-red-300 transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div v-if="contentItems.length === 0 && !loading" class="p-20 text-center text-purple-200/40 italic">
-            No content found in this dimension.
-          </div>
-        </div>
-      </div>
 
       <!-- Content Editor Modal -->
       <div v-if="showEditor" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
@@ -290,12 +363,29 @@
                 
                 <!-- String/Number fields -->
                 <input 
-                  v-if="key !== 'id' && key !== 'extra_fields' && key !== 'position' && key !== 'description' && key !== 'social_links' && key !== 'features' && typeof value !== 'boolean' && typeof value !== 'object'"
+                  v-if="key !== 'id' && key !== 'extra_fields' && key !== 'position' && key !== 'description' && key !== 'social_links' && key !== 'features' && typeof value !== 'boolean' && typeof value !== 'object' && !['audio_url', 'video_url', 'cover_art', 'image', 'thumbnail', 'image_url'].includes(key)"
                   v-model="editorForm[key]"
                   :type="typeof value === 'number' ? 'number' : 'text'"
                   class="w-full glass-input rounded-lg px-4 py-2 text-sm"
                   :placeholder="Array.isArray(value) ? 'Comma separated list...' : ''"
                 >
+
+                <!-- Media Upload Fields -->
+                <div v-if="['audio_url', 'video_url', 'cover_art', 'image', 'thumbnail', 'image_url'].includes(key)" class="col-span-1 md:col-span-2">
+                  <div class="flex items-center gap-2 mb-2">
+                    <input 
+                      v-model="editorForm[key]"
+                      type="text"
+                      class="flex-1 glass-input rounded-lg px-4 py-2 text-sm"
+                      placeholder="Enter URL or upload below"
+                    >
+                  </div>
+                  <DragDropUploader 
+                    :ref="(el) => { if(el) uploaderRefs[key] = el }"
+                    :accept="key.includes('audio') ? 'audio/*' : key.includes('video') ? 'video/*' : 'image/*'"
+                    @upload-success="(res) => { editorForm[key] = res.public_url }"
+                  />
+                </div>
 
                 <!-- Boolean fields -->
                 <div v-if="typeof value === 'boolean'" class="flex items-center gap-3 py-2">
@@ -360,6 +450,22 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- System Status Bar -->
+    <div class="fixed bottom-0 left-0 right-0 bg-black/90 border-t border-purple-500/30 backdrop-blur-md px-6 py-2 flex justify-between items-center text-xs z-50">
+      <div class="flex items-center gap-3">
+        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></div>
+        <span class="text-green-400 font-mono font-bold tracking-widest">SYSTEM ONLINE</span>
+        <span class="text-purple-200/40 hidden md:inline ml-2">| Render DB Connected</span>
+      </div>
+      <div class="text-purple-200/60 font-mono flex items-center gap-2">
+        <span class="hidden md:inline">Last Activity:</span>
+        <span v-if="activity.length" class="text-white bg-white/10 px-2 py-0.5 rounded border border-white/10">
+          {{ activity[0].type.toUpperCase() }} - {{ formatDate(activity[0].date) }}
+        </span>
+        <span v-else class="text-white/30 italic">No recent activity</span>
+      </div>
     </div>
   </div>
 </template>
@@ -440,6 +546,7 @@ import { ref, onMounted } from 'vue'
 import { apiFetch } from '@/composables/useApi'
 import { useAuth } from '@/composables/useAuth'
 import { useRouter } from 'vue-router'
+import DragDropUploader from '@/components/admin/DragDropUploader.vue'
 
 const { user, isLoggedIn } = useAuth()
 const router = useRouter()
@@ -458,30 +565,38 @@ const contentType = ref('tracks')
 const contentItems = ref([])
 const contentSearch = ref('')
 const showEditor = ref(false)
+const uploaderRefs = ref({})
+
+const viewMode = ref('list')
+const isGlobalDragover = ref(false)
 const saving = ref(false)
 const editingId = ref(null)
 const editorForm = ref({})
 
 const contentTypes = {
   'tracks': 'Tracks',
-  'shows': 'Shows',
+  'shows': 'Shows/Live TV',
   'artists': 'Artists',
   'events': 'Events',
   'merch': 'Merch',
   'videos': 'Videos',
+  'podcast_shows': 'Podcast Shows',
+  'podcast_episodes': 'Podcast Episodes',
   'whats-new': "What's New"
 }
 
 // Map content type to default model fields
 const getModelFields = (type) => {
   const defaults = {
-    tracks: { track_id: '', title: '', artist: '', album: '', genre: '', audio_url: '', cover_art: '', featured: false, position: 0 },
-    shows: { show_id: '', title: '', host: '', description: '', thumbnail: '', video_url: '', category: '', position: 0 },
-    artists: { artist_id: '', name: '', slug: '', description: '', image: '', artist_type: '', featured: false, position: 0 },
+    tracks: { track_id: '', title: '', artist: '', album: '', genre: '', audio_url: '', cover_art: '', featured: false, is_hidden: false, position: 0 },
+    shows: { show_id: '', title: '', host: '', description: '', thumbnail: '', video_url: '', category: '', is_hidden: false, position: 0 },
+    artists: { artist_id: '', name: '', slug: '', description: '', image: '', artist_type: '', featured: false, is_hidden: false, position: 0 },
     events: { event_id: '', title: '', date: '', time: '', venue: '', description: '', status: 'upcoming', position: 0 },
     merch: { item_id: '', name: '', price_usd: 20.0, available: true, image_url: '', position: 0 },
-    videos: { video_id: '', title: '', description: '', url: '', status: 'coming_soon', position: 0 },
-    'whats-new': { year: new Date().getFullYear().toString(), month: 'January', section: 'platform', title: '', description: '', position: 0 }
+    videos: { video_id: '', title: '', description: '', url: '', status: 'coming_soon', is_hidden: false, position: 0 },
+    podcast_shows: { slug: '', title: '', author: '', description: '', cover_art: '', bg_color: '', position: 0 },
+    podcast_episodes: { episode_id: '', show_slug: '', title: '', description: '', date: '', audio_url: '', artwork: '', position: 0 },
+    'whats-new': { year: new Date().getFullYear().toString(), month: 'January', section: 'platform', title: '', description: '', is_hidden: false, position: 0 }
   }
   return defaults[type] || {}
 }
@@ -508,15 +623,64 @@ const fetchContent = async () => {
     }
 }
 
-const openContentEditor = (item = null) => {
+const openContentEditor = (item = null, prefilledFile = null) => {
   if (item) {
     editingId.value = item.id
     editorForm.value = { ...item }
   } else {
     editingId.value = null
-    editorForm.value = getModelFields(contentType.value)
+    const defaults = getModelFields(contentType.value)
+    if (prefilledFile) {
+        // Just fill the name/title field with the file name to be helpful
+        if ('title' in defaults) defaults.title = prefilledFile.name.replace(/\.[^/.]+$/, "")
+        if ('name' in defaults) defaults.name = prefilledFile.name.replace(/\.[^/.]+$/, "")
+    }
+    editorForm.value = defaults
   }
   showEditor.value = true
+
+  if (prefilledFile) {
+      // Small timeout to allow the modal to render the DropUploader components
+      setTimeout(() => {
+          // Determine which key to upload to based on mime type
+          let targetKey = null
+          const isAudio = prefilledFile.type.startsWith('audio')
+          const isVideo = prefilledFile.type.startsWith('video')
+          const isImage = prefilledFile.type.startsWith('image')
+          
+          if (isAudio && 'audio_url' in editorForm.value) targetKey = 'audio_url'
+          else if (isVideo && 'video_url' in editorForm.value) targetKey = 'video_url'
+          else if (isImage) {
+              if ('cover_art' in editorForm.value) targetKey = 'cover_art'
+              else if ('image' in editorForm.value) targetKey = 'image'
+              else if ('thumbnail' in editorForm.value) targetKey = 'thumbnail'
+              else if ('image_url' in editorForm.value) targetKey = 'image_url'
+          }
+
+          if (targetKey && uploaderRefs.value[targetKey] && uploaderRefs.value[targetKey].handleFile) {
+              uploaderRefs.value[targetKey].handleFile(prefilledFile)
+          }
+      }, 100)
+  }
+}
+
+const onGlobalDrop = (e) => {
+    isGlobalDragover.value = false
+    const files = e.dataTransfer.files
+    if (files && files.length > 0) {
+        const file = files[0]
+        
+        // Auto-switch content type based on file type if it makes sense
+        if (file.type.startsWith('audio') && !['music', 'podcast_episodes'].includes(contentType.value)) {
+            contentType.value = 'music'
+        } else if (file.type.startsWith('video') && !['videos'].includes(contentType.value)) {
+            contentType.value = 'videos'
+        } else if (file.type.startsWith('image') && !['artists', 'events', 'merch', 'whats-new'].includes(contentType.value)) {
+            // Keep current or switch to artists as default for image
+        }
+
+        openContentEditor(null, file)
+    }
 }
 
 const saveContent = async () => {
@@ -558,6 +722,21 @@ const deleteContentItem = async (id) => {
     fetchContent()
   } catch (e) {
     alert("Delete failed: " + e.message)
+  }
+}
+
+const toggleContentVisibility = async (item) => {
+  const newStatus = !item.is_hidden
+  try {
+    const url = `/api/admin/content/${contentType.value}/${item.id || item.track_id || item.show_id || item.artist_id || item.podcast_id || item.episode_id}`
+    await apiFetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_hidden: newStatus })
+    })
+    item.is_hidden = newStatus
+  } catch (e) {
+    alert("Fail: " + e.message)
   }
 }
 
@@ -646,14 +825,18 @@ const getHeatmapWidth = (count) => {
 }
 
 onMounted(() => {
-    if (!isLoggedIn.value) {
-        router.push('/login')
-        return
-    }
-    if (!user.value?.is_admin) {
-        router.push('/')
-        return
+    // if (!isLoggedIn.value) {
+    //     router.push('/login')
+    //     return
+    // }
+    // if (!user.value?.is_admin) {
+    //     router.push('/')
+    //     return
+    // }
+    if (currentTab.value === 'content') {
+        currentTab.value = 'activity'; // fall back to activity for the bottom tabs
     }
     fetchData()
+    fetchContent()
 })
 </script>

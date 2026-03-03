@@ -1,24 +1,27 @@
 <template>
   <div class="tv-container">
-    <!-- Subpage hero (same as Flask) -->
-    <section class="podcasts-hero">
-      <div class="podcasts-hero-inner">
-        <h1>
-          <i class="fas fa-tv" aria-hidden="true"></i>
-          Live TV
-        </h1>
-        <p>Channel surf and watch live programming.</p>
-      </div>
-    </section>
+    <!-- Subpage hero removed to make video flush at top -->
 
     <div class="video-spotlight" v-if="!playerStore.isWidescreenPinned">
       <div class="spotlight-grid">
         <div class="spotlight-left">
-          <!-- Hero video player with glass gradient -->
+          <!-- Hero video player: embedded inline video (no GlobalTvPlayer overlay needed here) -->
           <div ref="heroPlaceholder" class="panelstream-player hero-player">
+            <!-- Inline video for Live TV: renders directly in the hero -->
+            <video
+              ref="heroVideoRef"
+              class="hero-video"
+              autoplay
+              playsinline
+              :muted="playerStore.isMuted"
+              @play="playerStore.isPlaying = true"
+              @pause="playerStore.isPlaying = false"
+              @loadedmetadata="onHeroVideoMetadata"
+            ></video>
+
             <div v-if="!playerStore.currentTrack || playerStore.mode !== 'video'" class="placeholder-content">
-               <i class="fas fa-tv fa-3x" style="opacity:0.2; margin-bottom: 20px;"></i>
-               <span>Select a channel to start watching</span>
+               <i class="fas fa-tv fa-3x" style="opacity:0.4; margin-bottom: 16px; color: #00a2ff;"></i>
+               <span style="font-size: 16px; font-weight: 600; opacity: 0.6;">Select a channel below to start watching</span>
             </div>
             
             <div class="video-header">
@@ -64,59 +67,13 @@
           <!-- Playing now bar with progress -->
         </div>
 
-        <!-- Right dashboard (hidden on mobile) -->
-        <aside class="right-dashboard glass hidden-mobile" aria-label="Channel Dashboard">
-          <img :src="nowThumb" alt="" class="rd-thumb" />
-          <div class="rd-now">
-            <div class="rd-label">Playing Now</div>
-            <div class="rd-title">{{ nowTitle }}</div>
-            <div class="rd-meta"><span>{{ nowMeta }}</span></div>
-          </div>
-          <div class="rd-next">
-            <div class="rd-label">Up Next</div>
-            <div class="rd-title">{{ upNextTitle }}</div>
-          </div>
-          
-          <div class="rd-suggested">
-             <div class="rd-suggested-title">Suggested for You</div>
-             <div v-for="(ch, idx) in channels.slice(0, 4)" :key="ch.id" class="rd-suggested-item" @click="selectChannel(idx)">
-                <span class="rd-suggested-dot" :style="{ background: pillColors[idx % 4] }"></span>
-                <span class="rd-suggested-name">{{ ch.name }}</span>
-                <span class="rd-suggested-meta">Live</span>
-             </div>
-          </div>
-        </aside>
+
       </div>
     </div>
 
     <!-- TV Guide section (Moved flush under controls) -->
     <div ref="guideRef" class="live-tv-container guide-flush" aria-label="TV Guide">
-      <aside class="live-tv-sidebar" :class="{ open: mobileDrawerOpen }" aria-label="Channels">
-        <ul class="channel-list" role="listbox" aria-label="Live TV Channels">
-          <li
-            v-for="(ch, idx) in channels"
-            :key="ch.id"
-            class="channel-item"
-            role="option"
-            :aria-selected="String(selectedRow === idx)"
-            tabindex="0"
-            @click="selectChannel(idx)"
-            @keydown.enter="selectChannel(idx)"
-          >
-            <span class="channel-pill" :style="{ background: pillColors[idx % 4] }"></span>
-            <span class="channel-name">{{ ch.name }}</span>
-          </li>
-        </ul>
-      </aside>
-
       <section class="live-tv-main">
-        <!-- Mobile channels toggle -->
-        <div class="mobile-only" style="padding:8px 10px;">
-          <button class="channels-btn" type="button" @click="mobileDrawerOpen = true">
-            <i class="fas fa-list"></i> Channels
-          </button>
-        </div>
-
         <div class="guide">
           <div class="guide-header">
             <div>Guide</div>
@@ -133,12 +90,9 @@
             <div class="guide-rows" role="grid" aria-label="Channel Guide">
               <div class="now-line" :style="nowLineStyle"></div>
               <div v-for="(ch, rowIdx) in channels" :key="ch.id" class="guide-row" role="row">
-                <div class="guide-channel-label">
-                  <div class="guide-channel-icon" :style="{ 
-                    background: 'linear-gradient(135deg, ' + pillColors[rowIdx % 4] + ', ' + pillColors[rowIdx % 4] + 'dd)',
-                    boxShadow: '0 0 15px ' + pillColors[rowIdx % 4] + '44'
-                  }"></div>
-                  <div class="guide-channel-name">{{ ch.name }}</div>
+                <div class="guide-channel-label" @click="selectChannel(rowIdx)" @keydown.enter="selectChannel(rowIdx)" tabindex="0">
+                  <div class="guide-channel-icon" :style="getChannelBg(rowIdx)" style="background-size: cover; background-position: center; border-radius: 4px;"></div>
+                  <div class="guide-channel-name" style="font-weight: bold; font-size: 14px; opacity: 0.9;">{{ ch.name }}</div>
                 </div>
                 <div class="guide-track">
                   <div
@@ -210,7 +164,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { apiFetch, apiFetchCached } from '../composables/useApi'
 import { trackRecentPlay } from '../composables/useRecentlyPlayed'
 import { useRoute } from 'vue-router'
@@ -224,6 +178,7 @@ const DEFAULT_COVER = '' // Use empty string to trigger fallback logic
 
 // --- Refs ---
 const heroPlaceholder = ref(null)
+const heroVideoRef = ref(null)
 const scrollerRef = ref(null)
 const playerStore = usePlayerStore()
 const channels = ref([])
@@ -600,7 +555,7 @@ function getSeekTime(slot) {
 function playCurrentSlot() {
   const slot = getCurrentSlot(selectedRow.value)
   if (!slot || !slot.src) return
-  
+
   const ch = channels.value[selectedRow.value]
   const track = {
     type: 'live_tv',
@@ -612,20 +567,49 @@ function playCurrentSlot() {
     duration_seconds: slot.durationSec,
   }
 
+  // Update store track info (for media session, dock display, etc.)
+  // but do NOT call playerStore.play() which would trigger GlobalTvPlayer
   if (playerStore.currentTrack?.video_url !== slot.src) {
-    playerStore.play(track)
+    playerStore.mode = 'video'
+    playerStore.currentTrack = track
+
+    // Drive the hero video element directly
+    if (heroVideoRef.value) {
+      heroVideoRef.value.src = slot.src
+      heroVideoRef.value.load()
+      // Seek to match live broadcast position
+      const seekSec = getSeekTime(slot)
+      heroVideoRef.value.addEventListener('loadedmetadata', () => {
+        if (seekSec > 0) heroVideoRef.value.currentTime = seekSec
+        heroVideoRef.value.play().catch(() => {})
+      }, { once: true })
+    }
   }
 }
 
-function updateNowNext() {
-  const slot = getCurrentSlot(selectedRow.value)
-  const next = getNextSlot(selectedRow.value)
-  if (slot) {
-    nowTitle.value = cleanTitle(slot.title)
-    nowMeta.value = slot.category || ''
-    nowThumb.value = slot.thumb || generatedThumbs.value[slot.src] || DEFAULT_COVER
+function onHeroVideoMetadata() {
+  if (heroVideoRef.value) {
+    playerStore.duration = heroVideoRef.value.duration
+    playerStore.loading = false
+    // Register with store so volume/mute/controls work
+    playerStore.setVideoElement(heroVideoRef.value)
   }
-  upNextTitle.value = next ? cleanTitle(next.title) : '—'
+}
+
+// Keep heroVideoRef registered with store throughout lifecycle
+watch(heroVideoRef, (el) => {
+  if (el) playerStore.setVideoElement(el)
+})
+
+// Sync play/pause from store controls into hero video
+watch(() => playerStore.isPlaying, (playing) => {
+  if (!heroVideoRef.value) return
+  if (playing && heroVideoRef.value.paused) heroVideoRef.value.play().catch(() => {})
+  else if (!playing && !heroVideoRef.value.paused) heroVideoRef.value.pause()
+})
+
+function updateNowNext() {
+  // Widget removed per request: no longer updating side dashboard refs
 }
 
 function updateProgress() {
@@ -896,13 +880,20 @@ let resizeObserver = null
 function updateBounds() {
   if (heroPlaceholder.value) {
     const rect = heroPlaceholder.value.getBoundingClientRect()
+    // By passing exact window-relative client rect values, position: fixed matches perfectly.
     playerStore.setHeroBounds({
-      top: rect.top + window.scrollY,
-      left: rect.left + window.scrollX,
+      top: rect.top,
+      left: rect.left,
       width: rect.width,
       height: rect.height
     })
   }
+}
+
+let rafTracker = null;
+function startBoundsTracking() {
+  updateBounds();
+  rafTracker = requestAnimationFrame(startBoundsTracking);
 }
 
 onMounted(async () => {
@@ -913,16 +904,12 @@ onMounted(async () => {
   
   await loadChannels()
 
-  // Sync Global Player position
-  updateBounds()
-  if (window.ResizeObserver) {
-    resizeObserver = new ResizeObserver(updateBounds)
-    resizeObserver.observe(heroPlaceholder.value)
-  }
-  window.addEventListener('resize', updateBounds)
+  // Sync Global Player position using high-fidelity rAF
+  startBoundsTracking()
 })
 
 onUnmounted(() => {
+  if (rafTracker) cancelAnimationFrame(rafTracker)
   if (engineTimer) clearInterval(engineTimer)
   if (hoverTimer) clearTimeout(hoverTimer)
   if (controlsTimer) clearTimeout(controlsTimer)
@@ -930,7 +917,6 @@ onUnmounted(() => {
   window.removeEventListener('touchstart', resetControlsTimer)
   document.removeEventListener('keydown', onGlobalKeydown)
   window.removeEventListener('resize', updateBounds)
-  if (resizeObserver) resizeObserver.disconnect()
   
   // Detach Global Player from Hero position -> goes Mini
   playerStore.setHeroBounds(null)
@@ -943,19 +929,22 @@ onUnmounted(() => {
   background: #000;
   min-height: 100vh;
   color: #e5e7eb;
-  padding-bottom: 0; /* Remove bottom padded space if any */
+  padding-bottom: 0;
+  width: 100%;
 }
 
 /* ===== Hero Player ===== */
 .video-spotlight {
-  padding: 0; /* FLUSH */
+  padding: 0;
+  width: 100%;
 }
 .spotlight-grid {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
   gap: 0; /* FLUSH */
-  max-width: 100%;
-  margin: 0 auto;
+  max-width: none !important;
+  width: 100%;
+  margin: 0 !important;
 }
 .spotlight-left {
   min-width: 0;
@@ -965,11 +954,10 @@ onUnmounted(() => {
   background: #000;
   border-radius: 0; /* Flush edges */
   overflow: hidden;
-  /* Revert strict height, just ensure it doesn't go crazy */
   width: 100%;
   aspect-ratio: 2.39/1; /* Spaghetti Western / Cinemascope */
-  max-height: 70vh;
-  margin: 0 auto;
+  max-height: 500px; /* Capped to 500px as per anamorphic request */
+  margin: 0;
 }
 @media (max-width: 768px) {
   .panelstream-player.hero-player {
@@ -977,10 +965,26 @@ onUnmounted(() => {
     width: 100%;
   }
 }
-.hero-player video {
+.hero-player video,
+.hero-video {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
+  object-fit: cover !important; /* Fill the full anamorphic viewport, no letterboxing */
+  background: #000;
+}
+.placeholder-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #e5e7eb;
+  z-index: 1;
 }
 .video-header {
   position: absolute;
@@ -1063,43 +1067,7 @@ onUnmounted(() => {
   padding-top: 0 !important;
 }
 
-/* ===== Right Dashboard ===== */
-.right-dashboard {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: sticky;
-  top: 12px;
-  align-self: start;
-}
-.rd-thumb {
-  width: 100%;
-  aspect-ratio: 16/9;
-  border-radius: 8px;
-  object-fit: cover;
-  background: #1b1b1b;
-}
-.rd-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  opacity: 0.5;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-}
-.rd-title {
-  font-size: 15px;
-  font-weight: 700;
-}
-.rd-meta {
-  font-size: 12px;
-  opacity: 0.7;
-}
+
 
 /* ===== Channel selector empty / retry (mobile-friendly) ===== */
 .channel-selector-empty {
@@ -1185,12 +1153,8 @@ onUnmounted(() => {
 
 /* ===== TV Guide ===== */
 .live-tv-container {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 0; /* FLUSH */
-  padding: 0; /* FLUSH */
-  max-width: 100%;
-  margin: 0 auto;
+  display: block; /* No sidebar: guide takes full width */
+  width: 100%;
   background: #000;
 }
 .live-tv-sidebar {
@@ -1236,11 +1200,12 @@ onUnmounted(() => {
   background: var(--background-dark, #040810);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border-color, rgba(0, 162, 255, 0.1));
-  border-radius: 20px;
+  border-radius: 0; /* Flush */
   padding: 0;
   overflow: hidden;
   min-height: 48vh;
-  margin-top: 1rem;
+  margin-top: 0; /* Flush under player */
+  width: 100%;
 }
 .guide-header {
   display: flex;
@@ -1303,20 +1268,35 @@ onUnmounted(() => {
   border-bottom: 1px solid var(--border-color);
 }
 .guide-channel-label {
-  width: 140px;
+  width: 160px;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 8px;
   font-weight: 600;
   font-size: 13px;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 4px 6px;
+  transition: background 0.15s;
+}
+.guide-channel-label:hover {
+  background: rgba(255,255,255,0.07);
+}
+.guide-channel-label:focus {
+  outline: 2px solid #00a2ff;
+  outline-offset: 2px;
 }
 .guide-channel-icon {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 6px;
   display: inline-block;
   flex-shrink: 0;
+  object-fit: cover;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(255,255,255,0.1);
 }
 .guide-track {
   position: relative;
