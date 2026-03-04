@@ -1,8 +1,19 @@
 {
   "_help": {
     "structure": "Organize updates by year > month > section. Each section can have multiple items.",
-    "sections": ["music", "videos", "artists", "platform", "merch", "events"],
-    "item_types": ["content", "feature", "technical"],
+    "sections": [
+      "music",
+      "videos",
+      "artists",
+      "platform",
+      "merch",
+      "events"
+    ],
+    "item_types": [
+      "content",
+      "feature",
+      "technical"
+    ],
     "quick_add_tips": [
       "New music track/album? → Add to 'music' section with type 'content'",
       "New video/show? → Add to 'videos' section with type 'content'",
@@ -34,14 +45,16 @@
               "title": "New The Rob Show Video Clips Added",
               "description": "Three new video clips from The Rob Show are now available: Dominic Jace, Colleen Holt, and Tyler (2022).",
               "date": "2026-01-30",
-              "link": "/player?id=the-rob-show-dominic-jace-clip&type=show"
+              "link": "/player?id=the-rob-show-dominic-jace-clip&type=show",
+              "thumbnail": "/static/thumbnails/the-rob-show-dominic-jace-clip_a44a3430995d.jpg"
             },
             {
               "type": "content",
               "title": "New Pal-Bot Clips Added",
               "description": "Two new clips from Pal-Bot 1 are now available - 'Causes Tension in Couples Relationship' and 'Surprise Engagement and a Robotic Dilemma'.",
               "date": "2026-01-27",
-              "link": "/player?id=palbot-causes-tension&type=show"
+              "link": "/player?id=palbot-causes-tension&type=show",
+              "thumbnail": "/static/thumbnails/palbot-causes-tension_71f8226a4aae.jpg"
             }
           ]
         },
@@ -127,17 +140,33 @@
               "title": "Poet and Friends Show #7",
               "description": "Join us for another Poet and Friends show on January 29th, 2026 at 7pm at Koffee. Don't miss this special event!",
               "date": "2026-01-29",
-              "link": "/events"
+              "link": "/events",
+              "thumbnail": "https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/goT3YIfLz1xL1ITZbScUh?fit=clip&w=920&auto=format"
             }
           ]
         }
       },
       "feb": {
-        "music": { "title": "Music Updates", "items": [] },
-        "videos": { "title": "Video Updates", "items": [] },
-        "artists": { "title": "Artist Updates", "items": [] },
-        "platform": { "title": "Platform Updates", "items": [] },
-        "merch": { "title": "Merch Updates", "items": [] },
+        "music": {
+          "title": "Music Updates",
+          "items": []
+        },
+        "videos": {
+          "title": "Video Updates",
+          "items": []
+        },
+        "artists": {
+          "title": "Artist Updates",
+          "items": []
+        },
+        "platform": {
+          "title": "Platform Updates",
+          "items": []
+        },
+        "merch": {
+          "title": "Merch Updates",
+          "items": []
+        },
         "events": {
           "title": "Events Updates",
           "items": [
@@ -147,7 +176,8 @@
               "description": "Poet and Friends are back at Koffee? Thursday, Feb 26, 6:30pm. 104 Audubon St, New Haven, CT. ",
               "date": "2026-02-26",
               "link": "/events",
-              "link_external": "https://partiful.com/e/XTg8Cf9NAHSPE8VwslhdJ"
+              "link_external": "https://partiful.com/e/XTg8Cf9NAHSPE8VwslhdJ",
+              "thumbnail": "https://partiful.imgix.net/external/user/CwCebGXbOBSYcICoVLo5921X2ZC3/XTg8Cf9NAHSPE8VwslhdJ?fit=clip&w=800&auto=format"
             }
           ]
         }

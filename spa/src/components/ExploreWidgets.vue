@@ -88,7 +88,7 @@
           v-for="video in randomVideos"
           :key="video.id"
           :to="`/videos?play=${video.id}`"
-          class="widget-card video-card"
+          class="widget-card"
           v-tilt="{ target: '.card-image img', scale: 1.1, speed: 600, max: 10 }"
           @mouseenter="playHoverSound"
           @click="playClickSound"
@@ -184,7 +184,7 @@
           @mouseenter="playHoverSound"
           @click="playClickSound"
         >
-          <div class="card-image circle">
+          <div class="card-image">
             <img :src="artist.image || '/static/img/default-avatar.png'" :alt="artist.name" loading="lazy" />
           </div>
           <div class="card-title">{{ artist.name }}</div>
@@ -298,14 +298,14 @@ onMounted(async () => {
     
     let musicItems = Array.from(albumMap.values())
     
-    if (musicItems.length < 3) {
-      const needed = 3 - musicItems.length
+    if (musicItems.length < 6) {
+      const needed = 6 - musicItems.length
       const randomSingles = getRandomItems(singles, needed)
       musicItems = [...musicItems, ...randomSingles]
     }
     
-    if (musicItems.length < 3) {
-       const remaining = 3 - musicItems.length
+    if (musicItems.length < 6) {
+       const remaining = 6 - musicItems.length
        const existingIds = new Set(musicItems.map(i => i.id || i.title))
        const moreTracks = allTracks.filter(t => !existingIds.has(t.id) && !existingIds.has(t.title))
        
@@ -456,11 +456,17 @@ onUnmounted(() => {
 }
 
 /* Video widget uses default 6-column square grid now for unification */
-.video-widget .widget-grid {
+.video-widget .widget-grid,
+.podcast-widget .widget-grid,
+.music-widget .widget-grid,
+.artist-widget .widget-grid {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
-.video-card .card-image {
+.video-widget .card-image,
+.podcast-widget .card-image,
+.music-widget .card-image,
+.artist-widget .card-image {
   aspect-ratio: 1 / 1;
 }
 

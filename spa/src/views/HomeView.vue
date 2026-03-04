@@ -209,7 +209,13 @@
     <section class="whats-new-section">
       <div class="whats-new-container">
         <div class="whats-new-header">
-          <h2>What's New at Ahoy</h2>
+          <div class="whats-new-title-group">
+            <div class="whats-new-icon"><i class="fas fa-sparkles"></i></div>
+            <div class="whats-new-text">
+              <h2>What's New at Ahoy</h2>
+              <p>Platform & Content Updates</p>
+            </div>
+          </div>
           <a v-if="!whatsNewLoading && whatsNew.length > 0" href="/whats-new" class="view-all-link">
             View All <i class="fas fa-arrow-right"></i>
           </a>
@@ -1220,12 +1226,23 @@ watch(
 }
 .home-page .whats-new-header {
   margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem;
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex; justify-content: space-between; align-items: flex-end;
 }
-.home-page .whats-new-header h2 { font-size: 1.5rem; font-weight: 700; margin: 0; color: #fff; }
+.home-page .whats-new-title-group { display: flex; align-items: center; gap: 1.25rem; }
+.home-page .whats-new-icon {
+  width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.75rem; background: #fbbf24; box-shadow: 0 0 25px rgba(251, 191, 36, 0.4); color: #000;
+}
+.home-page .whats-new-text h2 {
+  font-size: 1.75rem; font-weight: 900; margin: 0; line-height: 0.9; text-transform: uppercase; letter-spacing: -0.03em; color: rgba(255,255,255,0.95);
+}
+.home-page .whats-new-text p {
+  margin: 0.35rem 0 0 0; font-size: 0.85rem; color: rgba(255,255,255,0.6); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+}
 .home-page .view-all-link {
   color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem;
   display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s, gap 0.2s;
+  margin-bottom: 0.25rem; /* Align perfectly with new flex-end */
 }
 .home-page .view-all-link:hover { color: #fff; gap: 0.75rem; }
 .home-page .whats-new-loading, .home-page .whats-new-empty { text-align: center; padding: 2rem; color: rgba(255,255,255,0.5); }
@@ -1250,4 +1267,12 @@ watch(
 .home-page .whats-new-date { font-size: 0.75rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.05em; }
 .home-page .whats-new-arrow { display: flex; align-items: center; color: rgba(255,255,255,0.4); transition: all 0.2s; flex-shrink: 0; }
 .home-page .whats-new-item:hover .whats-new-arrow { color: rgba(255,255,255,0.8); transform: translateX(4px); }
+
+@media (max-width: 768px) {
+  .home-page .whats-new-title-group { gap: 1rem; }
+  .home-page .whats-new-icon { width: 42px; height: 42px; font-size: 1.25rem; border-radius: 12px; }
+  .home-page .whats-new-text h2 { font-size: 1.4rem; }
+  .home-page .whats-new-text p { font-size: 0.75rem; }
+  .home-page .whats-new-header { align-items: flex-end; }
+}
 </style>
