@@ -225,6 +225,17 @@
             class="whats-new-item clickable"
             :class="'type-' + (update.type || 'update')"
           >
+            <div class="whats-new-thumb">
+              <img
+                v-if="getUpdateThumb(update)"
+                :src="getUpdateThumb(update)"
+                :alt="update.title"
+                loading="lazy"
+              />
+              <span v-else class="whats-new-thumb-placeholder" aria-hidden="true">
+                <i class="fas fa-sparkles"></i>
+              </span>
+            </div>
             <div class="whats-new-content">
               <h3>{{ update.title }}</h3>
               <p>{{ update.description }}</p>
@@ -604,6 +615,10 @@ function getUpdateUrl(update) {
   }
   if (update.link) return update.link
   return '/whats-new'
+}
+
+function getUpdateThumb(update) {
+  return (update && (update.thumbnail_url || update.thumbnail || update.image_url)) || ''
 }
 
 // Parse live-tv API response (same shape as Flask: { channels: [ { id, name, items }, ... ] })
@@ -1217,10 +1232,18 @@ watch(
 .home-page .view-archive-link { display: inline-block; margin-top: 1rem; color: rgba(99,102,241,1); text-decoration: none; font-weight: 500; }
 .home-page .whats-new-updates { display: flex; flex-direction: column; gap: 1rem; }
 .home-page .whats-new-item {
-  display: flex; gap: 1rem; padding: 1.25rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+  display: flex; align-items: stretch; gap: 1rem; padding: 1.25rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
   border-radius: 16px; transition: all 0.2s ease; text-decoration: none; color: inherit;
 }
 .home-page .whats-new-item:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1); transform: translateX(4px); }
+.home-page .whats-new-thumb {
+  flex-shrink: 0; width: 100px; min-width: 100px; height: 72px; border-radius: 12px; overflow: hidden;
+  background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;
+}
+.home-page .whats-new-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.home-page .whats-new-thumb-placeholder {
+  color: rgba(255,255,255,0.25); font-size: 1.25rem; display: flex; align-items: center; justify-content: center;
+}
 .home-page .whats-new-content { flex: 1; min-width: 0; }
 .home-page .whats-new-content h3 { font-size: 1.1rem; font-weight: 700; margin: 0 0 0.5rem 0; color: #fff; }
 .home-page .whats-new-content p { font-size: 0.9rem; color: rgba(255,255,255,0.7); margin: 0 0 0.5rem 0; line-height: 1.5; }

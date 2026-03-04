@@ -23,7 +23,6 @@
             <img src="{{ url_for('static', filename='img/ahoy_logo.png') }}"
                 alt="Ahoy Indie Media"
                 class="auth-hero-logo">
-            <p class="auth-hero-subtitle">Your indie universe awaits. Let’s make it yours.</p>
         </div>
     </div>
 
@@ -34,12 +33,12 @@
             <button @click="authMode = 'login'"
                 :class="{'active': authMode === 'login'}"
                 class="auth-tab-modern">
-                I’m back ✨
+                I'm back
             </button>
             <button @click="authMode = 'register'"
                 :class="{'active': authMode === 'register'}"
                 class="auth-tab-modern">
-                Claim a username 🚀
+                Create account
             </button>
         </div>
 
@@ -98,14 +97,14 @@
                     :class="{'auth-submit-loading': isLoading, 'auth-submit-success': loginSuccess}"
                     :disabled="isLoading || loginSuccess"
                     style="animation-delay: 0.4s">
-                    <span x-show="!isLoading && !loginSuccess">Let's go 🎧</span>
+                    <span x-show="!isLoading && !loginSuccess">Login</span>
                     <span x-show="isLoading" class="auth-submit-loading-text">
                         <span class="loading-dot"></span>
                         <span class="loading-dot"></span>
                         <span class="loading-dot"></span>
                         Signing you in…
                     </span>
-                    <span x-show="loginSuccess" class="auth-submit-success-text">🎉 Welcome back!</span>
+                    <span x-show="loginSuccess" class="auth-submit-success-text">Welcome back!</span>
                 </button>
 
                 <!-- Forgot Password -->
@@ -225,7 +224,7 @@
                 </div>
                 <div class="input-feedback" x-show="authForm.confirmPassword" style="animation-delay: 0.35s">
                     <span x-show="authForm.password !== authForm.confirmPassword" class="feedback-error">Passwords don't match</span>
-                    <span x-show="authForm.password === authForm.confirmPassword && authForm.password" class="feedback-success">Passwords match! 🔒</span>
+                    <span x-show="authForm.password === authForm.confirmPassword && authForm.password" class="feedback-success">Passwords match!</span>
                 </div>
 
                 <!-- Terms Checkbox -->
@@ -243,7 +242,7 @@
                     :class="{'auth-submit-loading': isLoading}"
                     :disabled="isLoading || !isFormValid()"
                     style="animation-delay: 0.5s">
-                    <span x-show="!isLoading">Claim it 🎉</span>
+                    <span x-show="!isLoading">Create account</span>
                     <span x-show="isLoading" class="auth-submit-loading-text">
                         <span class="loading-dot"></span>
                         <span class="loading-dot"></span>

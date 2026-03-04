@@ -11,11 +11,11 @@ from models import (
 
 bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
-@bp.before_request
-def admin_only():
-    pass
+def admin_only(f):
+    """Decorator: allow all for now; re-enable to require admin."""
     # if not current_user.is_authenticated or not current_user.is_admin:
     #     return jsonify({'error': 'Admin access required'}), 403
+    return f
 
 @bp.route('/stats', methods=['GET'])
 def get_stats():

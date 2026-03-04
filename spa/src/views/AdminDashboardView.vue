@@ -1,45 +1,45 @@
 <template>
-  <div class="relative min-h-screen bg-black text-white overflow-hidden font-sans selection:bg-purple-500 selection:text-white">
+  <div class="admin-page relative min-h-screen bg-[#0a0a0e] text-white overflow-x-hidden font-sans selection:bg-purple-500 selection:text-white">
     
     <!-- Ambient Background Elements -->
     <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div class="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] bg-purple-600/30 rounded-full blur-[120px] mix-blend-screen animate-pulse duration-10000"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] max-w-[700px] max-h-[700px] bg-blue-500/30 rounded-full blur-[120px] mix-blend-screen animate-pulse" style="animation-delay: 2s; animation-duration: 12s;"></div>
-        <div class="absolute top-[30%] right-[30%] w-[30vw] h-[30vw] max-w-[400px] max-h-[400px] bg-pink-500/20 rounded-full blur-[100px] mix-blend-screen animate-bounce" style="animation-duration: 15s"></div>
-        <div class="absolute top-[50%] left-[20%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] bg-cyan-500/20 rounded-full blur-[100px] mix-blend-screen" style="animation: pulse 8s infinite alternate;"></div>
+        <div class="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] max-w-[800px] max-h-[800px] bg-purple-600/25 rounded-full blur-[120px] mix-blend-screen animate-pulse duration-10000"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] max-w-[700px] max-h-[700px] bg-blue-500/25 rounded-full blur-[120px] mix-blend-screen animate-pulse" style="animation-delay: 2s; animation-duration: 12s;"></div>
+        <div class="absolute top-[30%] right-[30%] w-[30vw] h-[30vw] max-w-[400px] max-h-[400px] bg-pink-500/15 rounded-full blur-[100px] mix-blend-screen animate-bounce" style="animation-duration: 15s"></div>
+        <div class="absolute top-[50%] left-[20%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] bg-cyan-500/15 rounded-full blur-[100px] mix-blend-screen" style="animation: pulse 8s infinite alternate;"></div>
     </div>
 
-    <div class="relative z-10 container mx-auto p-6">
-      <header class="mb-12 flex justify-between items-center">
+    <div class="relative z-10 container mx-auto admin-content px-4 sm:px-6 py-6 pb-24 md:pb-8">
+      <header class="mb-8 md:mb-12 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 class="text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent drop-shadow-sm">
+          <h1 class="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent drop-shadow-sm">
             Admin Dashboard
           </h1>
-          <p class="text-purple-200/60 text-sm mt-1">Platform Overview & Management</p>
+          <p class="text-purple-200/60 text-xs sm:text-sm mt-1">Platform Overview & Management</p>
         </div>
-        <div v-if="loading" class="text-sm text-purple-300 animate-pulse bg-purple-900/30 px-3 py-1 rounded-full border border-purple-500/30">
+        <div v-if="loading" class="admin-glass-pill text-sm text-purple-300 animate-pulse px-3 py-1.5 rounded-full">
           Refreshing data...
         </div>
       </header>
 
       <!-- Content Management Section (Prominent) -->
       <div 
-        class="mb-12 relative"
+        class="mb-8 md:mb-12 relative"
         @dragover.prevent="isGlobalDragover = true"
         @dragleave.prevent="isGlobalDragover = false"
         @drop.prevent="onGlobalDrop"
       >
-        <h2 class="text-2xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent drop-shadow-sm mb-4">Content Manager</h2>
+        <h2 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent drop-shadow-sm mb-4">Content Manager</h2>
         
         <!-- Global Drag & Drop Overlay -->
-        <div v-if="isGlobalDragover" class="absolute inset-0 z-50 rounded-2xl bg-purple-900/80 backdrop-blur-sm border-2 border-dashed border-purple-400 flex flex-col items-center justify-center pointer-events-none">
-          <i class="fas fa-cloud-upload-alt text-6xl text-purple-300 mb-4 animate-bounce"></i>
-          <h3 class="text-3xl font-bold text-white mb-2">Drop it like it's hot!</h3>
-          <p class="text-purple-200">Release to create a new {{ contentTypes[contentType] ? contentTypes[contentType].slice(0, -1) : 'Item' }}</p>
+        <div v-if="isGlobalDragover" class="absolute inset-0 z-50 rounded-2xl admin-glass-overlay border-2 border-dashed border-purple-400 flex flex-col items-center justify-center pointer-events-none">
+          <i class="fas fa-cloud-upload-alt text-4xl sm:text-6xl text-purple-300 mb-4 animate-bounce"></i>
+          <h3 class="text-xl sm:text-3xl font-bold text-white mb-2">Drop it like it's hot!</h3>
+          <p class="text-purple-200 text-sm sm:text-base">Release to create a new {{ contentTypes[contentType] ? contentTypes[contentType].slice(0, -1) : 'Item' }}</p>
         </div>
         
-        <div class="space-y-6">
-          <div class="flex flex-wrap gap-2 p-1 bg-white/5 backdrop-blur-md rounded-xl w-fit border border-white/10 mb-6">
+        <div class="space-y-4 md:space-y-6">
+          <div class="admin-glass-pills flex flex-wrap gap-2 p-1.5 rounded-xl w-full sm:w-fit mb-4 md:mb-6">
             <button 
               v-for="(label, type) in contentTypes" :key="type"
               @click="selectContentType(type)"
@@ -49,17 +49,17 @@
             </button>
           </div>
 
-          <div class="flex justify-between items-center mb-6">
-            <div class="relative flex-1 max-w-md flex gap-2">
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4 md:mb-6">
+            <div class="relative flex-1 w-full flex flex-wrap gap-2">
               <input 
                 v-model="contentSearch" 
                 @input="fetchContent" 
                 :placeholder="`Search ${contentTypes[contentType]}...`" 
-                class="w-full glass-input rounded-xl px-4 py-3 text-sm text-white placeholder-purple-200/40 focus:ring-2 focus:ring-purple-500/50"
+                class="flex-1 min-w-0 glass-input rounded-xl px-4 py-3 text-sm text-white placeholder-purple-200/40 focus:ring-2 focus:ring-purple-500/50"
               >
               
               <!-- View Mode Toggle -->
-              <div class="flex items-center bg-white/5 rounded-xl border border-white/10 p-1">
+              <div class="admin-glass-pills flex items-center rounded-xl p-1">
                 <button 
                   @click="viewMode = 'list'" 
                   :class="['p-2 rounded-lg transition-colors', viewMode === 'list' ? 'bg-purple-500 text-white' : 'text-purple-200/50 hover:text-white']"
@@ -78,62 +78,83 @@
             </div>
             <button 
               @click="openContentEditor()"
-              class="px-6 py-3 rounded-xl text-sm font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-900/50 transition-all active:scale-95 ml-4"
+              class="admin-cta-btn w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold text-white transition-all active:scale-95 shrink-0"
             >
               + Add {{ contentTypes[contentType] ? contentTypes[contentType].slice(0, -1) : 'Item' }}
             </button>
           </div>
 
           <div class="glass-card overflow-hidden">
-            <!-- List View -->
-            <table v-if="viewMode === 'list'" class="w-full text-left border-collapse">
-              <thead>
-                <tr class="text-purple-200/40 border-b border-white/5">
-                  <th class="p-4 font-medium text-xs uppercase tracking-wider">ID</th>
-                  <th class="p-4 font-medium text-xs uppercase tracking-wider">Title/Name</th>
-                  <th class="p-4 font-medium text-xs uppercase tracking-wider">Details</th>
-                  <th class="p-4 font-medium text-xs uppercase tracking-wider text-center">Visibility</th>
-                  <th class="p-4 font-medium text-xs uppercase tracking-wider text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in contentItems" :key="item.id" class="glass-table-row border-b border-white/5 hover:bg-white/10 transition-colors group">
-                  <td class="p-4 text-white/30 font-mono text-xs">{{ item.track_id || item.show_id || item.artist_id || item.podcast_id || item.episode_id || item.id }}</td>
-                  <td class="p-4">
-                    <div class="flex items-center gap-3">
-                      <img v-if="item.cover_art || item.thumbnail || item.image || item.image_url" :src="item.cover_art || item.thumbnail || item.image || item.image_url" class="w-8 h-8 rounded object-cover border border-white/10 shadow-sm">
-                      <div>
-                        <div class="text-white/90 font-medium">{{ item.title || item.name }}</div>
-                        <div class="text-[10px] text-purple-200/40">{{ item.artist || item.host || item.venue || item.kind }}</div>
+            <!-- List View: desktop table, mobile cards -->
+            <div v-if="viewMode === 'list'" class="hidden md:block overflow-x-auto">
+              <table class="w-full text-left border-collapse min-w-[640px]">
+                <thead>
+                  <tr class="text-purple-200/40 border-b border-white/5">
+                    <th class="p-3 md:p-4 font-medium text-xs uppercase tracking-wider">ID</th>
+                    <th class="p-3 md:p-4 font-medium text-xs uppercase tracking-wider">Title/Name</th>
+                    <th class="p-3 md:p-4 font-medium text-xs uppercase tracking-wider">Details</th>
+                    <th class="p-3 md:p-4 font-medium text-xs uppercase tracking-wider text-center">Visibility</th>
+                    <th class="p-3 md:p-4 font-medium text-xs uppercase tracking-wider text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in contentItems" :key="item.id" class="glass-table-row border-b border-white/5 hover:bg-white/10 transition-colors group">
+                    <td class="p-3 md:p-4 text-white/30 font-mono text-xs">{{ item.track_id || item.show_id || item.artist_id || item.podcast_id || item.episode_id || item.id }}</td>
+                    <td class="p-3 md:p-4">
+                      <div class="flex items-center gap-3">
+                        <img v-if="item.cover_art || item.thumbnail || item.image || item.image_url" :src="item.cover_art || item.thumbnail || item.image || item.image_url" class="w-8 h-8 rounded object-cover border border-white/10 shadow-sm">
+                        <div>
+                          <div class="text-white/90 font-medium">{{ item.title || item.name }}</div>
+                          <div class="text-[10px] text-purple-200/40">{{ item.artist || item.host || item.venue || item.kind }}</div>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td class="p-4 text-xs text-white/40">
-                    <span v-if="item.genre" class="bg-white/5 px-2 py-0.5 rounded mr-2">{{ item.genre }}</span>
-                    <span v-if="item.duration_seconds" class="mr-2">{{ Math.floor(item.duration_seconds / 60) }}:{{ (item.duration_seconds % 60).toString().padStart(2, '0') }}</span>
-                    <span v-if="item.status" :class="['px-2 py-0.5 rounded text-[10px] uppercase font-bold', item.status === 'upcoming' || item.status === 'active' ? 'text-green-400 bg-green-900/20' : 'text-gray-400 bg-gray-900/20']">{{ item.status }}</span>
-                  </td>
-                  <td class="p-4 text-center">
-                    <button 
-                      @click="toggleContentVisibility(item)"
-                      :class="['px-3 py-1 rounded text-[10px] font-bold uppercase transition-colors', item.is_hidden ? 'bg-red-900/40 text-red-300 border border-red-500/30 hover:bg-red-900/60' : 'bg-green-900/40 text-green-300 border border-green-500/30 hover:bg-green-900/60']"
-                    >
-                      {{ item.is_hidden ? 'Hidden' : 'Visible' }}
-                    </button>
-                  </td>
-                  <td class="p-4 text-right">
-                    <div class="flex justify-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
-                      <button @click="openContentEditor(item)" class="p-2 hover:bg-purple-500/20 rounded-lg text-purple-300 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                    </td>
+                    <td class="p-3 md:p-4 text-xs text-white/40">
+                      <span v-if="item.genre" class="bg-white/5 px-2 py-0.5 rounded mr-2">{{ item.genre }}</span>
+                      <span v-if="item.duration_seconds" class="mr-2">{{ Math.floor(item.duration_seconds / 60) }}:{{ (item.duration_seconds % 60).toString().padStart(2, '0') }}</span>
+                      <span v-if="item.status" :class="['px-2 py-0.5 rounded text-[10px] uppercase font-bold', item.status === 'upcoming' || item.status === 'active' ? 'text-green-400 bg-green-900/20' : 'text-gray-400 bg-gray-900/20']">{{ item.status }}</span>
+                    </td>
+                    <td class="p-3 md:p-4 text-center">
+                      <button 
+                        @click="toggleContentVisibility(item)"
+                        :class="['px-3 py-1 rounded text-[10px] font-bold uppercase transition-colors', item.is_hidden ? 'bg-red-900/40 text-red-300 border border-red-500/30 hover:bg-red-900/60' : 'bg-green-900/40 text-green-300 border border-green-500/30 hover:bg-green-900/60']"
+                      >
+                        {{ item.is_hidden ? 'Hidden' : 'Visible' }}
                       </button>
-                      <button @click="deleteContentItem(item.id)" class="p-2 hover:bg-red-500/20 rounded-lg text-red-300 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    </td>
+                    <td class="p-3 md:p-4 text-right">
+                      <div class="flex justify-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                        <button @click="openContentEditor(item)" class="p-2 hover:bg-purple-500/20 rounded-lg text-purple-300 transition-colors">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        </button>
+                        <button @click="deleteContentItem(item.id)" class="p-2 hover:bg-red-500/20 rounded-lg text-red-300 transition-colors">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- Mobile list: cards -->
+            <div v-if="viewMode === 'list'" class="md:hidden divide-y divide-white/5">
+              <div v-for="item in contentItems" :key="item.id" class="p-4 glass-table-row hover:bg-white/10 transition-colors flex flex-wrap items-center gap-3">
+                <img v-if="item.cover_art || item.thumbnail || item.image || item.image_url" :src="item.cover_art || item.thumbnail || item.image || item.image_url" class="w-12 h-12 rounded object-cover border border-white/10 flex-shrink-0">
+                <div class="flex-1 min-w-0">
+                  <div class="text-white/90 font-medium truncate">{{ item.title || item.name }}</div>
+                  <div class="text-[10px] text-purple-200/40">{{ item.artist || item.host || item.venue || item.kind }}</div>
+                  <div class="text-[10px] text-white/30 font-mono mt-0.5">{{ item.track_id || item.show_id || item.artist_id || item.id }}</div>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                  <button 
+                    @click="toggleContentVisibility(item)"
+                    :class="['px-2 py-1 rounded text-[10px] font-bold uppercase', item.is_hidden ? 'bg-red-900/40 text-red-300' : 'bg-green-900/40 text-green-300']"
+                  >{{ item.is_hidden ? 'Hidden' : 'Visible' }}</button>
+                  <button @click="openContentEditor(item)" class="p-2 bg-white/5 rounded-lg text-purple-300">Edit</button>
+                  <button @click="deleteContentItem(item.id)" class="p-2 bg-red-500/20 rounded-lg text-red-300">Delete</button>
+                </div>
+              </div>
+            </div>
 
             <!-- Gallery View -->
             <div v-else-if="viewMode === 'gallery'" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
@@ -174,69 +195,68 @@
       </div>
 
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
-        <div class="glass-card p-6 group">
-          <h3 class="text-purple-200/80 text-xs font-bold uppercase tracking-wider mb-2">Users</h3>
-          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">{{ stats.users }}</p>
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-6 mb-8 md:mb-12">
+        <div class="glass-card p-4 sm:p-6 group">
+          <h3 class="text-purple-200/80 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Users</h3>
+          <p class="text-xl sm:text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">{{ stats.users }}</p>
           <div class="h-1 w-full bg-white/10 mt-4 rounded-full overflow-hidden">
             <div class="h-full bg-gradient-to-r from-purple-400 to-purple-600 w-[70%] shadow-[0_0_10px_rgba(168,85,247,0.8)]"></div>
           </div>
         </div>
-        <div class="glass-card p-6 group">
-          <h3 class="text-purple-200/80 text-xs font-bold uppercase tracking-wider mb-2">Total Tips</h3>
-          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">${{ stats.tip_total?.toFixed(2) }}</p>
+        <div class="glass-card p-4 sm:p-6 group">
+          <h3 class="text-purple-200/80 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Total Tips</h3>
+          <p class="text-xl sm:text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">${{ stats.tip_total?.toFixed(2) }}</p>
           <div class="h-1 w-full bg-white/10 mt-4 rounded-full overflow-hidden">
              <div class="h-full bg-gradient-to-r from-green-400 to-green-600 w-[45%] shadow-[0_0_10px_rgba(74,222,128,0.8)]"></div>
           </div>
         </div>
-        <div class="glass-card p-6 group">
-          <h3 class="text-purple-200/80 text-xs font-bold uppercase tracking-wider mb-2">Tips Count</h3>
-          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">{{ stats.tips }}</p>
+        <div class="glass-card p-4 sm:p-6 group">
+          <h3 class="text-purple-200/80 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Tips Count</h3>
+          <p class="text-xl sm:text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">{{ stats.tips }}</p>
            <div class="h-1 w-full bg-white/10 mt-4 rounded-full overflow-hidden">
              <div class="h-full bg-gradient-to-r from-blue-400 to-blue-600 w-[30%] shadow-[0_0_10px_rgba(96,165,250,0.8)]"></div>
           </div>
         </div>
-        <div class="glass-card p-6 group">
-          <h3 class="text-purple-200/80 text-xs font-bold uppercase tracking-wider mb-2">Revenue</h3>
-          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">${{ stats.revenue?.toFixed(2) }}</p>
+        <div class="glass-card p-4 sm:p-6 group">
+          <h3 class="text-purple-200/80 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Revenue</h3>
+          <p class="text-xl sm:text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">${{ stats.revenue?.toFixed(2) }}</p>
            <div class="h-1 w-full bg-white/10 mt-4 rounded-full overflow-hidden">
              <div class="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 w-[60%] shadow-[0_0_10px_rgba(250,204,21,0.8)]"></div>
           </div>
         </div>
-         <div class="glass-card p-6 group">
-          <h3 class="text-purple-200/80 text-xs font-bold uppercase tracking-wider mb-2">Purchases</h3>
-          <p class="text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">{{ stats.purchases }}</p>
+         <div class="glass-card p-4 sm:p-6 group">
+          <h3 class="text-purple-200/80 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Purchases</h3>
+          <p class="text-xl sm:text-3xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">{{ stats.purchases }}</p>
            <div class="h-1 w-full bg-white/10 mt-4 rounded-full overflow-hidden">
              <div class="h-full bg-gradient-to-r from-red-400 to-red-600 w-[25%] shadow-[0_0_10px_rgba(248,113,113,0.8)]"></div>
           </div>
         </div>
       </div>
 
-      <!-- Main Content Tabs -->
-      <div class="flex space-x-2 mb-8 p-1 glass-card w-fit !rounded-xl !p-2 border-white/20">
+      <!-- Main Content Tabs: scrollable on mobile -->
+      <div class="admin-tabs flex overflow-x-auto gap-1 mb-6 md:mb-8 p-1.5 glass-card rounded-xl w-full md:w-fit border-white/20 scrollbar-thin -mx-1 sm:mx-0">
         <button 
           @click="switchTab('activity')"
-          :class="['px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300', currentTab === 'activity' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
+          :class="['admin-tab px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap shrink-0', currentTab === 'activity' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
         >
-          Activity Feed
+          Activity
         </button>
         <button 
           @click="switchTab('users')"
-          :class="['px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300', currentTab === 'users' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
+          :class="['admin-tab px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap shrink-0', currentTab === 'users' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
         >
           Users
         </button>
         <button 
           @click="switchTab('actions')"
-          :class="['px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300', currentTab === 'actions' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
+          :class="['admin-tab px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap shrink-0', currentTab === 'actions' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
         >
-          Action Items
-          <span v-if="actions.length" class="ml-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{{ actions.length }}</span>
+          Actions
+          <span v-if="actions.length" class="ml-1.5 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{{ actions.length }}</span>
         </button>
-
         <button 
           @click="switchTab('analytics')"
-          :class="['px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300', currentTab === 'analytics' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
+          :class="['admin-tab px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap shrink-0', currentTab === 'analytics' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-purple-200/60 hover:text-white hover:bg-white/5']"
         >
           Analytics
         </button>
@@ -258,50 +278,48 @@
       </div>
 
       <!-- Users -->
-      <div v-if="currentTab === 'users'" class="space-y-6">
-        <div class="relative flex gap-4">
-             <input 
+      <div v-if="currentTab === 'users'" class="space-y-4 md:space-y-6">
+        <div class="relative flex flex-col sm:flex-row gap-3">
+          <input 
             v-model="userSearch" 
             @input="searchUsers" 
             placeholder="Search users..." 
             class="w-full glass-input rounded-xl px-4 py-3 text-white placeholder-purple-200/40"
-            >
-            <a href="/api/admin/users/export" target="_blank" class="glass-btn text-white px-6 py-3 rounded-xl flex items-center whitespace-nowrap">
-                <span class="mr-2 border-r border-white/20 pr-2">⬇️</span> CSV
-            </a>
-            <div class="absolute right-[120px] top-3.5 text-purple-200/20 pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            </div>
+          >
+          <a href="/api/admin/users/export" target="_blank" class="glass-btn text-white px-6 py-3 rounded-xl flex items-center justify-center whitespace-nowrap shrink-0">
+            <span class="mr-2 border-r border-white/20 pr-2">⬇️</span> CSV
+          </a>
         </div>
        
         <div class="glass-card overflow-hidden">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="text-purple-200/40 border-b border-white/5">
-                <th class="p-4 font-medium text-xs uppercase tracking-wider">ID</th>
-                <th class="p-4 font-medium text-xs uppercase tracking-wider">Email</th>
-                <th class="p-4 font-medium text-xs uppercase tracking-wider">Username</th>
-                <th class="p-4 font-medium text-xs uppercase tracking-wider">Joined</th>
-                <th class="p-4 font-medium text-xs uppercase tracking-wider">Status</th>
-                <th class="p-4 font-medium text-xs uppercase tracking-wider">Role</th>
-                <th class="p-4 font-medium text-xs uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="u in users" :key="u.id" class="glass-table-row border-b border-white/5 hover:bg-white/10 transition-colors">
-                <td class="p-4 text-white/30 font-mono text-sm">{{ u.id }}</td>
-                <td class="p-4 text-white/90">{{ u.email }}</td>
-                <td class="p-4 text-white/70">{{ u.username || '-' }}</td>
-                <td class="p-4 text-white/40 text-sm">{{ formatDate(u.created_at) }}</td>
-                <td class="p-4">
-                     <span v-if="u.disabled" class="text-red-400 font-bold text-xs uppercase tracking-wider bg-red-900/20 px-2 py-1 rounded">Banned</span>
-                     <span v-else class="text-green-400 text-xs uppercase tracking-wider bg-green-900/20 px-2 py-1 rounded">Active</span>
-                </td>
-                <td class="p-4">
-                  <span v-if="u.is_admin" class="bg-purple-500/20 border border-purple-500/30 text-purple-200 text-xs px-2 py-1 rounded shadow-[0_0_10px_rgba(168,85,247,0.2)]">Admin</span>
-                  <span v-else class="text-white/20 text-xs">User</span>
-                </td>
-                <td class="p-4">
+          <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[700px]">
+              <thead>
+                <tr class="text-purple-200/40 border-b border-white/5">
+                  <th class="p-3 font-medium text-xs uppercase tracking-wider">ID</th>
+                  <th class="p-3 font-medium text-xs uppercase tracking-wider">Email</th>
+                  <th class="p-3 font-medium text-xs uppercase tracking-wider">Username</th>
+                  <th class="p-3 font-medium text-xs uppercase tracking-wider">Joined</th>
+                  <th class="p-3 font-medium text-xs uppercase tracking-wider">Status</th>
+                  <th class="p-3 font-medium text-xs uppercase tracking-wider">Role</th>
+                  <th class="p-3 font-medium text-xs uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="u in users" :key="u.id" class="glass-table-row border-b border-white/5 hover:bg-white/10 transition-colors">
+                  <td class="p-3 text-white/30 font-mono text-sm">{{ u.id }}</td>
+                  <td class="p-3 text-white/90">{{ u.email }}</td>
+                  <td class="p-3 text-white/70">{{ u.username || '-' }}</td>
+                  <td class="p-3 text-white/40 text-sm">{{ formatDate(u.created_at) }}</td>
+                  <td class="p-3">
+                    <span v-if="u.disabled" class="text-red-400 font-bold text-xs uppercase bg-red-900/20 px-2 py-1 rounded">Banned</span>
+                    <span v-else class="text-green-400 text-xs uppercase bg-green-900/20 px-2 py-1 rounded">Active</span>
+                  </td>
+                  <td class="p-3">
+                    <span v-if="u.is_admin" class="bg-purple-500/20 border border-purple-500/30 text-purple-200 text-xs px-2 py-1 rounded">Admin</span>
+                    <span v-else class="text-white/20 text-xs">User</span>
+                  </td>
+                  <td class="p-3">
                     <button 
                       v-if="!u.is_admin"
                       @click="toggleUserSort(u)"
@@ -309,10 +327,30 @@
                     >
                       {{ u.disabled ? 'Unban' : 'Ban' }}
                     </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Mobile users: cards -->
+          <div class="md:hidden divide-y divide-white/5">
+            <div v-for="u in users" :key="u.id" class="p-4 glass-table-row hover:bg-white/10 transition-colors">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <span class="text-white/90 font-medium truncate flex-1 min-w-0">{{ u.email }}</span>
+                <span v-if="u.is_admin" class="text-purple-200 text-xs px-2 py-0.5 rounded bg-purple-500/20 shrink-0">Admin</span>
+                <span v-else :class="['text-xs px-2 py-0.5 rounded shrink-0', u.disabled ? 'text-red-400 bg-red-900/20' : 'text-green-400 bg-green-900/20']">{{ u.disabled ? 'Banned' : 'Active' }}</span>
+              </div>
+              <div class="text-[10px] text-white/40 font-mono">ID {{ u.id }} · {{ u.username || '-' }}</div>
+              <div class="text-xs text-white/50 mt-1">{{ formatDate(u.created_at) }}</div>
+              <button 
+                v-if="!u.is_admin"
+                @click="toggleUserSort(u)"
+                :class="['mt-3 w-full sm:w-auto px-3 py-1.5 rounded text-xs font-bold border', u.disabled ? 'bg-green-500/20 border-green-500/50 text-green-200' : 'bg-red-500/20 border-red-500/50 text-red-200']"
+              >
+                {{ u.disabled ? 'Unban' : 'Ban' }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -347,8 +385,8 @@
 
 
       <!-- Content Editor Modal -->
-      <div v-if="showEditor" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
-        <div class="glass-card w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 shadow-2xl border-purple-500/30">
+      <div v-if="showEditor" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 admin-modal-overlay">
+        <div class="glass-card w-full max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-8 shadow-2xl border-purple-500/30">
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold">{{ editingId ? 'Edit' : 'Add' }} {{ contentTypes[contentType].slice(0, -1) }}</h2>
             <button @click="showEditor = false" class="text-white/40 hover:text-white transition-colors">
@@ -452,84 +490,130 @@
 
     </div>
 
-    <!-- System Status Bar -->
-    <div class="fixed bottom-0 left-0 right-0 bg-black/90 border-t border-purple-500/30 backdrop-blur-md px-6 py-2 flex justify-between items-center text-xs z-50">
-      <div class="flex items-center gap-3">
+    <!-- System Status Bar: liquid glass + safe area -->
+    <div class="admin-status-bar fixed bottom-0 left-0 right-0 border-t border-white/10 px-4 sm:px-6 py-2.5 flex flex-wrap justify-between items-center gap-2 text-xs z-50">
+      <div class="flex items-center gap-2 sm:gap-3">
         <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></div>
-        <span class="text-green-400 font-mono font-bold tracking-widest">SYSTEM ONLINE</span>
-        <span class="text-purple-200/40 hidden md:inline ml-2">| Render DB Connected</span>
+        <span class="text-green-400 font-mono font-bold tracking-widest">ONLINE</span>
+        <span class="text-purple-200/40 hidden md:inline ml-2">| DB Connected</span>
       </div>
-      <div class="text-purple-200/60 font-mono flex items-center gap-2">
-        <span class="hidden md:inline">Last Activity:</span>
-        <span v-if="activity.length" class="text-white bg-white/10 px-2 py-0.5 rounded border border-white/10">
+      <div class="text-purple-200/60 font-mono flex items-center gap-2 min-w-0">
+        <span class="hidden md:inline shrink-0">Last:</span>
+        <span v-if="activity.length" class="text-white truncate max-w-[180px] sm:max-w-none bg-white/10 px-2 py-0.5 rounded border border-white/10">
           {{ activity[0].type.toUpperCase() }} - {{ formatDate(activity[0].date) }}
         </span>
-        <span v-else class="text-white/30 italic">No recent activity</span>
+        <span v-else class="text-white/30 italic shrink-0">No recent activity</span>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* Liquid glass: dark glass with strong blur and soft border */
 .glass-card {
-    background: rgba(255, 255, 255, 0.05); /* very subtle white */
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.15); /* bright thin edge */
-    border-radius: 1.5rem;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.03) 100%);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     transition: all 0.3s ease;
 }
 .glass-card:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.25);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.admin-glass-pill,
+.admin-glass-pills {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.admin-glass-overlay {
+    background: rgba(88, 28, 135, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 2px dashed rgba(192, 132, 252, 0.5);
+}
+
+.admin-cta-btn {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.9) 0%, rgba(139, 92, 246, 0.9) 100%);
+    box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.admin-cta-btn:hover {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 1) 0%, rgba(139, 92, 246, 1) 100%);
+    box-shadow: 0 6px 28px rgba(168, 85, 247, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.admin-tabs {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.admin-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.admin-status-bar {
+    background: rgba(10, 10, 14, 0.85);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+.admin-modal-overlay {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .glass-input {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
     transition: all 0.3s ease;
 }
 .glass-input:focus {
-    border-color: rgba(168, 85, 247, 0.7); /* vivid purple */
-    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(168, 85, 247, 0.6);
+    background: rgba(0, 0, 0, 0.35);
     outline: none;
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .glass-btn {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 4px 15px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     transition: all 0.2s ease;
 }
 .glass-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .glass-primary-btn {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.8) 0%, rgba(236, 72, 153, 0.8) 100%);
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.85) 0%, rgba(236, 72, 153, 0.85) 100%);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     color: white;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    box-shadow: 0 4px 15px 0 rgba(168, 85, 247, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(168, 85, 247, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     transition: all 0.2s ease;
 }
 .glass-primary-btn:hover {
     background: linear-gradient(135deg, rgba(168, 85, 247, 1) 0%, rgba(236, 72, 153, 1) 100%);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px 0 rgba(168, 85, 247, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 6px 28px rgba(168, 85, 247, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .glass-table-row {
@@ -537,7 +621,13 @@
     transition: background 0.2s ease;
 }
 .glass-table-row:hover {
-    background: rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 768px) {
+    .admin-content {
+        padding-bottom: 5rem;
+    }
 }
 </style>
 

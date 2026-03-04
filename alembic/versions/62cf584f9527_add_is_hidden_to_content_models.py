@@ -17,12 +17,12 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column('content_events', sa.Column('is_hidden', sa.Boolean(), nullable=False))
-    op.add_column('content_merch', sa.Column('is_hidden', sa.Boolean(), nullable=False))
-    op.add_column('content_podcast_episodes', sa.Column('is_hidden', sa.Boolean(), nullable=False))
-    op.add_column('content_podcast_shows', sa.Column('is_hidden', sa.Boolean(), nullable=False))
-    op.add_column('content_shows', sa.Column('is_hidden', sa.Boolean(), nullable=False))
-    op.add_column('content_videos', sa.Column('is_hidden', sa.Boolean(), nullable=False))
+    op.add_column('content_events', sa.Column('is_hidden', sa.Boolean(), nullable=False, server_default=sa.text('false')))
+    op.add_column('content_merch', sa.Column('is_hidden', sa.Boolean(), nullable=False, server_default=sa.text('false')))
+    op.add_column('content_podcast_episodes', sa.Column('is_hidden', sa.Boolean(), nullable=False, server_default=sa.text('false')))
+    op.add_column('content_podcast_shows', sa.Column('is_hidden', sa.Boolean(), nullable=False, server_default=sa.text('false')))
+    op.add_column('content_shows', sa.Column('is_hidden', sa.Boolean(), nullable=False, server_default=sa.text('false')))
+    op.add_column('content_videos', sa.Column('is_hidden', sa.Boolean(), nullable=False, server_default=sa.text('false')))
 
 
 def downgrade():

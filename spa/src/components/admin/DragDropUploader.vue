@@ -46,6 +46,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { apiFetch } from '@/composables/useApi'
 
 const props = defineProps({
   accept: {
@@ -115,29 +116,22 @@ const handleFile = async (file) => {
   emit('upload-start', file)
 
   try {
-    // 1. Get signed URL from backend
-    // Clean filename mapping spec characters
+    // 1. Get signed URL from backend (session auth via apiFetch = credentials: 'include')
     const cleanFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-    // Append timestamp to ensure uniqueness
     const filename = `${Date.now()}_${cleanFilename}`
-    
-    const signedUrlRes = await fetch(props.endpoint, {
+
+    const { signed_url, public_url } = await apiFetch(props.endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}` // if using JWT
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        filename: filename,
+        filename,
         content_type: file.type
       })
     })
 
-    if (!signedUrlRes.ok) {
-      throw new Error('Failed to get upload URL')
+    if (!signed_url || !public_url) {
+      throw new Error('Invalid signed URL response from server')
     }
-
-    const { signed_url, public_url } = await signedUrlRes.json()
 
     // 2. Upload directly to GCS using XMLHttpRequest for progress
     await new Promise((resolve, reject) => {
@@ -188,23 +182,28 @@ defineExpose({
 
 .drop-zone {
   width: 100%;
-  min-height: 200px;
-  border: 2px dashed rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
+  min-height: 160px;
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.02);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   position: relative;
   overflow: hidden;
 }
 
-.drop-zone:hover, .drop-zone.is-dragover {
-  border-color: rgba(168, 85, 247, 0.6);
-  background: rgba(168, 85, 247, 0.05);
+.drop-zone:hover,
+.drop-zone.is-dragover {
+  border-color: rgba(168, 85, 247, 0.5);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(168, 85, 247, 0.04) 100%);
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .hidden-input {
@@ -216,12 +215,19 @@ defineExpose({
   pointer-events: none;
 }
 
-.upload-progress, .upload-success {
+.upload-progress,
+.upload-success {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 2rem;
+  padding: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .drop-zone {
+    min-height: 140px;
+  }
 }
 </style>

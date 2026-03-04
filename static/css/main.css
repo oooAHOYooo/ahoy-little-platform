@@ -21105,7 +21105,7 @@ img.loading {
 /* Animated Gradient Hero Section */
 .auth-hero {
     width: 100%;
-    height: 180px;
+    height: 220px;
     position: relative;
     display: flex;
     align-items: center;
@@ -21149,7 +21149,7 @@ img.loading {
 }
 
 .auth-hero-logo {
-    height: 48px;
+    height: 88px;
     width: auto;
     filter: brightness(0) invert(1);
     animation: fadeInDown 0.6s ease-out;
@@ -21616,11 +21616,11 @@ img.loading {
     }
 
     .auth-hero {
-        height: 160px;
+        height: 200px;
     }
 
     .auth-hero-logo {
-        height: 40px;
+        height: 72px;
     }
 
     .auth-hero-subtitle {
