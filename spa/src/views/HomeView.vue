@@ -1269,6 +1269,7 @@ watch(
 .home-page .whats-new-item:hover .whats-new-arrow { color: rgba(255,255,255,0.8); transform: translateX(4px); }
 
 @media (max-width: 768px) {
+  .home-page .whats-new-container { padding: 1rem; border-radius: 20px; }
   .home-page .whats-new-title-group { gap: 1rem; }
   .home-page .whats-new-icon { width: 42px; height: 42px; font-size: 1.25rem; border-radius: 12px; }
   .home-page .whats-new-text h2 { font-size: 1.4rem; }

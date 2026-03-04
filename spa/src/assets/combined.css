@@ -2498,8 +2498,8 @@ img[src*="default-cover.jpg"] {
 
     /* Override older mobile padding rules (base.css) with safe-area aware gutter */
     .content-area.app-content {
-        padding-left: max(var(--gutter, 14px), env(safe-area-inset-left)) !important;
-        padding-right: max(var(--gutter, 14px), env(safe-area-inset-right)) !important;
+        padding-left: max(var(--gutter, 8px), env(safe-area-inset-left)) !important;
+        padding-right: max(var(--gutter, 8px), env(safe-area-inset-right)) !important;
         padding-top: 4px !important;
         max-width: var(--content-max, 680px);
         margin-left: auto;

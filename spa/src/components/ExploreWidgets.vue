@@ -648,8 +648,8 @@ onUnmounted(() => {
     display: none;
   }
   .explore-widget {
-    padding: 1.5rem;
-    border-radius: 24px;
+    padding: 1rem;
+    border-radius: 20px;
     gap: 1rem;
   }
   .card-title {
