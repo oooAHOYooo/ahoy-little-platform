@@ -164,6 +164,9 @@ class ListeningTotal(Base):
 
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
     total_seconds = Column(BigInteger, nullable=False, default=0)
+    music_seconds = Column(BigInteger, nullable=False, default=0, server_default='0')
+    podcast_seconds = Column(BigInteger, nullable=False, default=0, server_default='0')
+    video_seconds = Column(BigInteger, nullable=False, default=0, server_default='0')
     updated_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
 
 

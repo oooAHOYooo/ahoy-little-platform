@@ -93,7 +93,17 @@
                   </div>
                 </td>
                 <td class="col-duration">{{ formatDuration(track.duration_seconds) }}</td>
-                <td class="col-plays">{{ track.play_count || 0 }}</td>
+                <td class="col-plays">
+                  {{ track.play_count || 0 }}
+                  <button
+                    type="button"
+                    class="play-count-btn"
+                    :aria-label="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'Pause' : 'Play'"
+                    @click.stop="playTrackAtFilteredIndex(idx)"
+                  >
+                    <i :class="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'" aria-hidden="true"></i>
+                  </button>
+                </td>
                 <td class="col-action">
                   <button
                     type="button"
@@ -470,8 +480,39 @@ onMounted(loadTracks)
   position: absolute;
   top: 8px;
   right: 8px;
-  width: 32px;
-  height: 32px;
+}
+.col-plays {
+  width: 100px;
+  text-align: left;
+  position: relative;
+}
+
+.play-count-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  opacity: 0.4;
+  cursor: pointer;
+  margin-left: 8px;
+  padding: 4px;
+  transition: opacity 0.2s, transform 0.2s;
+  font-size: 0.8rem;
+}
+
+.music-table-row:hover .play-count-btn {
+  opacity: 0.8;
+}
+
+.play-count-btn:hover {
+  opacity: 1 !important;
+  transform: scale(1.1);
+}
+
+.playing .play-count-btn {
+  opacity: 1;
+  color: var(--accent-color, #00d4ff);
+}
+.add-to-playlist-btn {
   border-radius: 50%;
   border: none;
   background: rgba(0, 0, 0, 0.6);

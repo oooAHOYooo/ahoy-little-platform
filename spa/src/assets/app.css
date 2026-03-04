@@ -114,8 +114,20 @@
     padding-top: var(--ds-topbar-height);
   }
 
+  /* Persistent sidebar on mobile: narrower icon-only mode */
   .app .app-sidebar {
+    width: 60px !important;
+    min-width: 60px !important;
+    overflow-x: hidden;
+  }
+
+  .app .app-sidebar .app-sidebar-item span,
+  .app .app-sidebar .app-sidebar-logo-text {
     display: none !important;
+  }
+
+  .app .main-content {
+    margin-left: 60px;
   }
 }
 

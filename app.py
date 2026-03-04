@@ -2418,6 +2418,32 @@ def api_now_playing():
         except Exception as e:
             return jsonify({'error': 'failed', 'detail': str(e)}), 400
 
+    @app.get('/api/listening/stats')
+    def api_listening_stats():
+        try:
+            uid = resolve_db_user_id()
+            if not uid:
+                return jsonify({'error': 'not_authenticated'}), 401
+            
+            from models import ListeningTotal
+            stats = ListeningTotal.query.filter_by(user_id=uid).first()
+            if not stats:
+                return jsonify({
+                    'total_seconds': 0,
+                    'music_seconds': 0,
+                    'podcast_seconds': 0,
+                    'video_seconds': 0
+                })
+            
+            return jsonify({
+                'total_seconds': stats.total_seconds,
+                'music_seconds': stats.music_seconds,
+                'podcast_seconds': stats.podcast_seconds,
+                'video_seconds': stats.video_seconds
+            })
+        except Exception as e:
+            return jsonify({'error': 'failed', 'detail': str(e)}), 400
+
 @app.route('/api/products')
 @limiter.exempt
 def api_products():

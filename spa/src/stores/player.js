@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
+import { apiFetch } from '../composables/useApi'
 import { trackRecentPlay } from '../composables/useRecentlyPlayed'
 
 export const usePlayerStore = defineStore('player', () => {
@@ -12,8 +13,9 @@ export const usePlayerStore = defineStore('player', () => {
   const loading = ref(false)
   const shuffle = ref(false)
   const repeat = ref(false)
-  const volume = ref(100)
+  const volume = ref(JSON.parse(localStorage.getItem('player-volume') || '0.8') * 100) // Initialize from localStorage, convert to 0-100
   const isMuted = ref(false)
+  const sessionId = ref(null)
 
   // Unified Player State
   const mode = ref('audio') // 'audio' or 'video'
@@ -94,6 +96,7 @@ export const usePlayerStore = defineStore('player', () => {
     if (isMuted.value && v > 0) isMuted.value = false
     a.muted = isMuted.value
     if (videoElement.value) videoElement.value.muted = isMuted.value
+    localStorage.setItem('player-volume', JSON.stringify(v / 100))
   }
 
   function toggleMute() {
@@ -182,7 +185,53 @@ export const usePlayerStore = defineStore('player', () => {
     } else {
       // Resume current
       if (mode.value === 'audio') getAudio().play().catch(() => { })
-      else if (videoElement.value) videoElement.value.play().catch(() => { })
+      else if (videoElement.value) {
+        videoElement.value.play().catch(() => { })
+        isPlaying.value = true
+      }
+    }
+    // Start listening session
+    startListeningSession()
+  }
+
+  async function startListeningSession() {
+    if (!currentTrack.value) return
+
+    // End existing session if any
+    if (sessionId.value) {
+      await endListeningSession()
+    }
+
+    try {
+      const resp = await apiFetch('/api/listening/start', {
+        method: 'POST',
+        body: JSON.stringify({
+          media_id: currentTrack.value.id || currentTrack.value.key,
+          media_type: currentTrack.value.type || 'track',
+          source: 'manual'
+        })
+      })
+      if (resp && resp.session_id) {
+        sessionId.value = resp.session_id
+      }
+    } catch (e) {
+      console.error('Failed to start listening session:', e)
+    }
+  }
+
+  async function endListeningSession() {
+    if (!sessionId.value) return
+
+    const sid = sessionId.value
+    sessionId.value = null // Clear immediately to avoid re-entry
+
+    try {
+      await apiFetch('/api/listening/end', {
+        method: 'POST',
+        body: JSON.stringify({ session_id: sid })
+      })
+    } catch (e) {
+      console.error('Failed to end listening session:', e)
     }
   }
 
@@ -190,6 +239,17 @@ export const usePlayerStore = defineStore('player', () => {
     isPlaying.value = false
     getAudio().pause()
     if (videoElement.value) videoElement.value.pause()
+    endListeningSession()
+  }
+
+  function stop() {
+    pause() // Pause and end session
+    if (mode.value === 'audio') {
+      const a = getAudio()
+      a.currentTime = 0
+    } else if (videoElement.value) {
+      videoElement.value.currentTime = 0
+    }
   }
 
   function togglePlay() {

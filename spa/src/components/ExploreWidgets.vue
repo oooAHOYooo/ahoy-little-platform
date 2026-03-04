@@ -255,7 +255,7 @@ onMounted(async () => {
     randomPodcasts.value = getRandomItems(podData.shows || [], 6)
 
     // Process Videos
-    randomVideos.value = getRandomItems(videoData.shows || [], 6)
+    randomVideos.value = getRandomItems(videoData.shows || [], 8)
 
     // Process Music
     const allTracks = musicData.tracks || []
@@ -439,6 +439,11 @@ onUnmounted(() => {
   gap: 1.5rem;
   position: relative;
   z-index: 1;
+}
+
+/* Video widget: 4-column square grid (4x2 with 8 videos) */
+.video-widget .widget-grid {
+  grid-template-columns: repeat(4, 1fr);
 }
 
 /* Card */

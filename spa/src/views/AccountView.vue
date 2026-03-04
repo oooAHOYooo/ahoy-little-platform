@@ -109,12 +109,32 @@
         <p>Log in or create a free account to sync your saves across devices and unlock wallet, playlists, and more.</p>
         <router-link to="/login" class="account-btn primary">Log In / Sign Up</router-link>
       </div>
+      <section class="account-section glass-card stats-section">
+        <h2 class="section-title"><i class="fas fa-chart-line"></i> Total Time</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon music-icon"><i class="fas fa-music"></i></div>
+            <div class="stat-value">{{ formatTime(listeningStats.music_seconds) }}</div>
+            <div class="stat-label">Listening Music</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon podcast-icon"><i class="fas fa-podcast"></i></div>
+            <div class="stat-value">{{ formatTime(listeningStats.podcast_seconds) }}</div>
+            <div class="stat-label">Podcasts</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon video-icon"><i class="fas fa-video"></i></div>
+            <div class="stat-value">{{ formatTime(listeningStats.video_seconds) }}</div>
+            <div class="stat-label">Watching Videos</div>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { apiFetch } from '../composables/useApi'
@@ -122,12 +142,40 @@ import { apiFetch } from '../composables/useApi'
 const router = useRouter()
 const auth = useAuth()
 
+const user = ref(null)
+const loading = ref(true)
+const listeningStats = ref({
+  music_seconds: 0,
+  podcast_seconds: 0,
+  video_seconds: 0
+})
 const walletBalance = ref(null)
 const walletLoading = ref(false)
 const showDeleteConfirm = ref(false)
 const deleteLoading = ref(false)
 
+function formatTime(seconds) {
+  if (!seconds) return '0m'
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m`
+}
+
 onMounted(async () => {
+  try {
+    const [userData, statsData] = await Promise.all([
+      apiFetch('/api/me'),
+      apiFetch('/api/listening/stats')
+    ])
+    user.value = userData
+    listeningStats.value = statsData
+  } catch (e) {
+    console.error('Failed to load account data', e)
+  } finally {
+    loading.value = false
+  }
+
   if (auth.isLoggedIn.value) {
     try {
       const data = await apiFetch('/payments/wallet')
@@ -177,11 +225,7 @@ async function onDeleteAccount() {
     })
     if (data.success) {
       window.dispatchEvent(new CustomEvent('ahoy:toast', { detail: { message: 'Account deleted', type: 'success' } }))
-      // Redirect to home as a guest
       router.push('/')
-      // The auth state should be cleared by the logout inside delete-account, 
-      // but let's re-verify if useAuth needs a refresh.
-      // useAuth usually reacts to 401s or explicit logouts.
       await auth.logout()
     } else {
       window.dispatchEvent(new CustomEvent('ahoy:toast', { detail: { message: data.error || 'Deletion failed', type: 'error' } }))
@@ -193,6 +237,62 @@ async function onDeleteAccount() {
   }
 }
 </script>
+
+<style scoped>
+.stats-section {
+  margin-top: 2rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 1.5rem;
+}
+
+.music-icon { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
+.podcast-icon { background: rgba(255, 0, 150, 0.2); color: #ff0096; }
+.video-icon { background: rgba(255, 170, 0, 0.2); color: #ffaa00; }
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+</style>
 
 <style scoped>
 .account-page {
