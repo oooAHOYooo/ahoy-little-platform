@@ -314,8 +314,8 @@ onUnmounted(() => {
 
 <style scoped>
 .saved-page {
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   padding: 1.25rem 1.25rem 3rem;
 }
 .saved-page--recent .saves-content--recent {

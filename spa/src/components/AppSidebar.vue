@@ -97,17 +97,22 @@ const logoError = ref(false)
 }
 
 .beta-link {
-  color: #f59e0b !important; /* Vibrant orange */
-  font-weight: 700;
-  border-left: 3px solid #f59e0b;
+  color: rgba(255, 255, 255, 0.35) !important;
+  font-weight: 400;
+  font-size: 0.8rem;
+  white-space: nowrap;
   margin-bottom: 8px;
+  opacity: 0.7;
 }
 
 .beta-link:hover {
-  background: rgba(245, 158, 11, 0.1) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  opacity: 1;
 }
 
 .beta-link i {
-  color: #f59e0b !important;
+  color: rgba(255, 255, 255, 0.35) !important;
+  font-size: 0.75rem;
 }
 </style>

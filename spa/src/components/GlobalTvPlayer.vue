@@ -65,10 +65,11 @@ const playerStyle = computed(() => {
   // Pinned mode (Super Widescreen) - Highest priority
   if (playerStore.isWidescreenPinned) {
     return {
-      top: '0',
-      left: '0',
-      width: '100%',
-      aspectRatio: '2.39/1',
+      top: 'var(--ds-topbar-height, 44px)', /* Below the top utility navbar */
+      left: '182px', /* Adjacent to the dashboard sidebar */
+      width: 'calc(100% - 182px)', /* Take remaining width */
+      aspectRatio: '16/9',
+      maxHeight: '500px',
       position: 'fixed',
       zIndex: 10001,
       boxShadow: '0 4px 20px rgba(0,0,0,0.8)',
@@ -208,5 +209,12 @@ video {
 }
 .global-tv-player.pinned {
   border-bottom: 2px solid rgba(255,255,255,0.1);
+}
+
+@media (max-width: 768px) {
+  .global-tv-player.pinned {
+    left: 0 !important;
+    width: 100% !important;
+  }
 }
 </style>

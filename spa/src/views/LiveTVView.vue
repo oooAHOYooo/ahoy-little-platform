@@ -7,7 +7,6 @@
         <div class="spotlight-left">
           <!-- Hero video player: embedded inline video (no GlobalTvPlayer overlay needed here) -->
           <div ref="heroPlaceholder" class="panelstream-player hero-player">
-            <!-- Inline video for Live TV: renders directly in the hero -->
             <video
               ref="heroVideoRef"
               class="hero-video"
@@ -17,6 +16,7 @@
               @play="playerStore.isPlaying = true"
               @pause="playerStore.isPlaying = false"
               @loadedmetadata="onHeroVideoMetadata"
+              @click="playerStore.togglePlay()"
             ></video>
 
             <div v-if="!playerStore.currentTrack || playerStore.mode !== 'video'" class="placeholder-content">
@@ -43,7 +43,7 @@
             <button type="button" class="remote-btn" title="Mute" @click="playerStore.toggleMute()">
               <i :class="playerStore.isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
             </button>
-            <button type="button" class="remote-btn" title="Fullscreen" @click="toggleFullscreen">
+            <button type="button" class="remote-btn btn-highlight" title="Fullscreen" @click="toggleFullscreen">
               <i class="fas fa-expand"></i>
             </button>
             <button type="button" class="remote-btn" :title="playerStore.isWidescreenPinned ? 'Unpin Player' : 'Pin Widescreen Player'" @click="playerStore.toggleWidescreenPinned">
@@ -966,29 +966,30 @@ onUnmounted(() => {
 
 /* ===== Hero Player ===== */
 .video-spotlight {
-  padding: 0;
+  padding: 16px 16px 0; /* Match Videos page inset padding */
   width: 100%;
 }
 .spotlight-grid {
-  display: flex !important;
-  flex-direction: column;
-  gap: 0; /* FLUSH */
+  display: block !important; /* Kill the 2-col grid from main.css */
   max-width: none !important;
   width: 100%;
   margin: 0 !important;
 }
 .spotlight-left {
+  width: 100%; /* Full width — mirrors the Videos page player */
   min-width: 0;
 }
 .panelstream-player.hero-player {
   position: relative;
   background: #000;
-  border-radius: 0; /* Flush edges */
+  border-radius: 12px; /* Match Videos page card radius */
   overflow: hidden;
   width: 100%;
-  aspect-ratio: 2.39/1; /* Spaghetti Western / Cinemascope */
-  max-height: 500px; /* Capped to 500px as per anamorphic request */
-  margin: 0;
+  aspect-ratio: 16 / 9; /* Let aspect-ratio drive height, matching Videos page */
+  margin: 0 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  cursor: pointer;
 }
 @media (max-width: 768px) {
   .panelstream-player.hero-player {
@@ -1005,6 +1006,24 @@ onUnmounted(() => {
   display: block;
   object-fit: cover !important; /* Fill the full anamorphic viewport, no letterboxing */
   background: #000;
+}
+/* Hover overlay - matches Videos page show-card hover UX */
+.hero-player::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 3;
+  border-radius: inherit;
+}
+.hero-player:hover::after {
+  opacity: 1;
 }
 .placeholder-content {
   position: absolute;
@@ -1080,6 +1099,17 @@ onUnmounted(() => {
 .remote-btn:active {
   transform: scale(0.95);
   background: rgba(255,255,255,0.15);
+}
+.remote-btn.btn-highlight {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #60a5fa;
+}
+.remote-btn.btn-highlight:hover {
+  background: rgba(59, 130, 246, 0.35);
+  border-color: rgba(59, 130, 246, 0.8);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
 }
 
 
@@ -1359,9 +1389,30 @@ onUnmounted(() => {
   pointer-events: none;
 }
 .program:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.1);
+  transform: translateY(-2px);
+  filter: brightness(1.25);
   cursor: pointer; /* Now interactive */
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255, 255, 255, 0.2) inset !important;
+}
+/* Add a subtle play icon on hover to make it obvious it plays */
+.program::before {
+  content: '\f04b'; /* FontAwesome play icon */
+  font-family: 'Font Awesome 5 Free', 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.5);
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 10;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+}
+.program:hover::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.2);
 }
 .program-title {
   font-weight: 600;

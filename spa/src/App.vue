@@ -29,7 +29,7 @@
       <div class="app-shell">
         <AppSidebar />
         <div class="app-main">
-          <div class="content-area content-pad-bottom app-content spa-main" :class="{ 'has-player': route.name !== 'now-playing', 'flush-content': route.name === 'music' || route.name === 'live-tv' }">
+          <div class="content-area content-pad-bottom app-content spa-main" :class="{ 'has-player': route.name !== 'now-playing', 'flush-content': route.name === 'music' || route.name === 'live-tv' || route.name === 'my-saves' || route.name === 'recently-played' }">
             <router-view v-slot="{ Component, route: viewRoute }">
               <Transition :name="transitionName" mode="out-in">
                 <keep-alive :include="['HomeView', 'MusicView', 'ShowsView', 'ArtistsView', 'PodcastsView', 'LiveTVView']">
@@ -45,8 +45,8 @@
     <!-- Footer (same structure as Flask base.html app-footer) -->
     <AppFooter />
 
-    <!-- Mini player (always visible like Flask; hidden on full Now Playing page) -->
-    <MiniPlayer v-if="route.name !== 'now-playing' && playerStore.mode === 'audio'" />
+    <!-- Mini player (always visible) -->
+    <MiniPlayer />
 
     <!-- Global Video Player (TV / Shows) — hidden on live-tv page since video is embedded inline there -->
     <GlobalTvPlayer v-if="route.name !== 'live-tv'" />
@@ -104,10 +104,9 @@ watch(() => playerStore.isPlaying, async (playing) => {
   }
 })
 
-// Body class for Flask-style padding when mini player bar is visible
-watch(() => route.name, (name) => {
-  if (name === 'now-playing') document.body.classList.remove('has-player')
-  else document.body.classList.add('has-player')
+// Body class for Flask-style padding when mini player bar is visible (always shown)
+watch(() => route.name, () => {
+  document.body.classList.add('has-player')
 }, { immediate: true })
 
 // Adjust body padding when UI is collapsed
@@ -171,16 +170,17 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* Pinned player top padding */
-.app.pinned-player-active {
-  padding-top: 41.841vw; /* 100vw / 2.39 aspect ratio */
+/* Pinned player top padding - push down ONLY the app-main content, not the whole shell/dashboard */
+.app.pinned-player-active .app-main {
+  /* Using padding ensures the background isn't cut off */
+  position: relative;
+  padding-top: min(calc((100vw - 182px) / (16 / 9)), 500px); 
   transition: padding-top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* On very large screens, cap the height so it doesn't take too much space */
-@media (min-width: 1920px) {
-  .app.pinned-player-active {
-    padding-top: 800px;
+@media (max-width: 768px) {
+  .app.pinned-player-active .app-main {
+      padding-top: min(calc(100vw / (16 / 9)), 500px);
   }
 }
 
