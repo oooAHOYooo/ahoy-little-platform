@@ -455,13 +455,7 @@ onUnmounted(() => {
   z-index: 1;
 }
 
-/* Video widget uses default 6-column square grid now for unification */
-.video-widget .widget-grid,
-.podcast-widget .widget-grid,
-.music-widget .widget-grid,
-.artist-widget .widget-grid {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-}
+/* Removed redundant specific grid selectors for unification as they broke mobile media queries due to specificity. */
 
 .video-widget .card-image,
 .podcast-widget .card-image,
@@ -647,10 +641,10 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .widget-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
   }
-  .widget-grid .widget-card:nth-child(n+4) {
+  .widget-grid .widget-card:nth-child(n+5) {
     display: none;
   }
   .explore-widget {
@@ -659,7 +653,13 @@ onUnmounted(() => {
     gap: 1rem;
   }
   .card-title {
-      font-size: 0.8rem;
+      font-size: 0.7rem;
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      line-height: 1.2;
+      opacity: 1; /* Keep title fully visible on mobile */
   }
   .header-text h3 { font-size: 1.4rem; }
   .header-icon { width: 42px; height: 42px; font-size: 1.25rem; border-radius: 12px; }
