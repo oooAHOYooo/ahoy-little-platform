@@ -185,6 +185,17 @@ onMounted(async () => {
   const data = await apiFetchCached('/api/podcasts').catch(() => ({ shows: [] }))
   const shows = data.shows || []
   show.value = shows.find(s => s.slug === slug) || null
+
+  // Auto-play if 'play' query param is present
+  const epId = route.query.play
+  if (epId && show.value) {
+    const idx = episodes.value.findIndex(ep => (ep.id || ep.title) === epId)
+    if (idx !== -1) {
+      setTimeout(() => {
+        playEpisode(idx)
+      }, 500) // Small delay to ensure player is ready and UX is smooth
+    }
+  }
 })
 </script>
 

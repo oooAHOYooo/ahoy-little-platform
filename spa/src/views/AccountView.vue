@@ -334,7 +334,7 @@ async function onDeleteAccount() {
 }
 .account-card {
   max-width: 420px;
-  margin: 0 auto;
+  margin: 0;
   background: rgba(20, 20, 28, 0.85);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
@@ -441,7 +441,7 @@ async function onDeleteAccount() {
 .account-link:hover { color: var(--accent-primary); }
 .account-guest {
   max-width: 420px;
-  margin: 0 auto;
+  margin: 0;
   background: rgba(20, 20, 28, 0.85);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;

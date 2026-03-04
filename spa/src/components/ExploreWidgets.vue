@@ -116,18 +116,18 @@
       </div>
       <div class="widget-grid">
         <router-link
-          v-for="show in randomPodcasts"
-          :key="show.slug"
-          :to="`/podcasts/${show.slug}`"
+          v-for="ep in randomPodcasts"
+          :key="ep.id || ep.title"
+          :to="`/podcasts/${ep.showSlug}?play=${ep.id || ep.title}`"
           class="widget-card"
           v-tilt="{ target: '.card-image img', scale: 1.1, speed: 600, max: 10 }"
           @mouseenter="playHoverSound"
           @click="playClickSound"
         >
           <div class="card-image">
-            <img :src="show.artwork || '/static/img/default-cover.jpg'" :alt="show.title" loading="lazy" />
+            <img :src="ep.artwork || ep.cover_art || '/static/img/default-cover.jpg'" :alt="ep.title" loading="lazy" />
           </div>
-          <div class="card-title">{{ show.title }}</div>
+          <div class="card-title">{{ ep.title }}</div>
         </router-link>
       </div>
       <router-link to="/podcasts" class="widget-cta cta-purple" @click="playClickSound">
@@ -251,11 +251,25 @@ onMounted(async () => {
       apiFetchCached('/api/artists').catch(() => ({ artists: [] }))
     ])
 
-    // Process Podcasts
-    randomPodcasts.value = getRandomItems(podData.shows || [], 6)
+    // Process Podcasts - Flat episodes instead of series shows
+    const allEpisodes = []
+    if (podData.shows) {
+      podData.shows.forEach(show => {
+        if (show.episodes) {
+          show.episodes.forEach(ep => {
+            allEpisodes.push({
+              ...ep,
+              showSlug: show.slug,
+              showTitle: show.title
+            })
+          })
+        }
+      })
+    }
+    randomPodcasts.value = getRandomItems(allEpisodes, 6)
 
     // Process Videos
-    randomVideos.value = getRandomItems(videoData.shows || [], 8)
+    randomVideos.value = getRandomItems(videoData.shows || [], 6)
 
     // Process Music
     const allTracks = musicData.tracks || []
@@ -435,20 +449,25 @@ onUnmounted(() => {
 /* Grid */
 .widget-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 1.5rem;
   position: relative;
   z-index: 1;
 }
 
-/* Video widget: 4-column square grid (4x2 with 8 videos) */
+/* Video widget uses default 6-column square grid now for unification */
 .video-widget .widget-grid {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.video-card .card-image {
+  aspect-ratio: 1 / 1;
 }
 
 /* Card */
 .widget-card {
   display: block;
+  min-width: 0; /* Allow grid items to shrink below their content size */
   text-decoration: none;
   color: inherit;
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
