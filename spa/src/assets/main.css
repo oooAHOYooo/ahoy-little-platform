@@ -1638,6 +1638,21 @@ body.debug-layout .card {
     margin-bottom: 18px;
 }
 
+@media (min-width: 769px) {
+    .desktop-flush {
+        margin-top: 0 !important;
+        border-radius: 0 !important;
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        margin-left: 0;
+        margin-right: 0;
+        padding-top: 32px;
+        padding-bottom: 32px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+    }
+}
+
 .podcasts-hero h1 {
     margin: 0 0 6px 0;
     font-size: 28px;

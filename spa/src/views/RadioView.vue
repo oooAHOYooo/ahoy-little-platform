@@ -101,6 +101,9 @@
       </div>
       <p v-if="!justPlayedSlice.length" class="radio-empty-hint">Tracks you play will appear here.</p>
     </section>
+
+    <!-- Universal Ahoy Hub (Nintendo-inspired bottom widget) -->
+    <AhoyHub />
   </div>
 </template>
 
@@ -108,6 +111,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { apiFetchCached } from '../composables/useApi'
 import { usePlayerStore } from '../stores/player'
+import AhoyHub from '../components/AhoyHub.vue'
 
 const DEFAULT_COVER = 'https://ahoy.ooo/images/Ahoy-Indie-Media-DEFAULT-COVER-A-8.jpg'
 
@@ -233,8 +237,6 @@ onMounted(async () => {
 
 <style scoped>
 .radio-page--v2 {
-  max-width: 1200px;
-  margin: 0 auto;
   padding: 1.25rem 1.25rem 3rem;
   background: transparent;
 }

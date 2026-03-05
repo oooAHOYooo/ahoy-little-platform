@@ -29,7 +29,7 @@
       <div class="app-shell">
         <AppSidebar />
         <div class="app-main">
-          <div class="content-area content-pad-bottom app-content spa-main" :class="{ 'has-player': route.name !== 'now-playing', 'flush-content': route.name === 'music' || route.name === 'live-tv' || route.name === 'my-saves' || route.name === 'recently-played' }">
+          <div class="content-area content-pad-bottom app-content spa-main" :class="{ 'has-player': route.name !== 'now-playing', 'flush-content': route.name === 'music' || route.name === 'podcasts' || route.name === 'live-tv' || route.name === 'my-saves' || route.name === 'recently-played' || route.name === 'radio' }">
             <router-view v-slot="{ Component, route: viewRoute }">
               <Transition :name="transitionName" mode="out-in">
                 <keep-alive :include="['HomeView', 'MusicView', 'ShowsView', 'ArtistsView', 'PodcastsView', 'LiveTVView']">
@@ -37,22 +37,19 @@
                 </keep-alive>
               </Transition>
             </router-view>
+            <!-- Footer and compact bar scroll with page content -->
+            <AppFooter />
+            <CompactFooter />
           </div>
         </div>
       </div>
     </main>
-
-    <!-- Footer (same structure as Flask base.html app-footer) -->
-    <AppFooter />
 
     <!-- Mini player (always visible) -->
     <MiniPlayer />
 
     <!-- Global Video Player (TV / Shows) — hidden on live-tv page since video is embedded inline there -->
     <GlobalTvPlayer v-if="route.name !== 'live-tv'" />
-
-    <!-- Compact fixed footer (time, ticker, quicklinks — same as Flask base.html) -->
-    <CompactFooter />
   </div>
 </template>
 

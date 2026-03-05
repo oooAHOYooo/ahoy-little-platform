@@ -3,15 +3,17 @@
     <div class="ahoy-hub-widget" :class="{ 'has-active-search': activeSearchPillar }">
       <!-- Gamified Save Counter -->
       <div class="hub-save-counter" :class="{ 'pulse': savePulse }">
-        <i class="fas fa-heart"></i>
+        <i class="fas fa-bookmark"></i>
         <span>{{ savedCount }}</span>
       </div>
 
       <!-- Main Widget Body -->
       <div class="hub-inner">
         <div class="hub-brand">
-          <i class="fas fa-compass"></i>
-          <span>UNIVERSAL HUB</span>
+          <div class="brand-header">
+            <span>AHOY UNIVERSAL HUB</span>
+          </div>
+          <span class="brand-desc">Get content and make quick decisions to save or boost.</span>
         </div>
 
         <div class="hub-pillars">
@@ -76,7 +78,7 @@
                 <i class="fas fa-bolt"></i>
               </button>
               <button class="quick-action-btn save-btn" :class="{ 'saved': result.saved }" title="Bookmark" @click="handleSave(result)">
-                <i class="fas fa-heart"></i>
+                <i class="fas fa-bookmark"></i>
               </button>
             </div>
           </div>
@@ -195,12 +197,15 @@ function handleBoost(result) {
   padding: 0;
   font-family: inherit;
   z-index: 50;
-  min-height: 400px; /* Filling out height */
+  /* Instead of a fixed large minimum height leaving weird empty space, let it hug the widget but allow filling */
+  min-height: auto; 
   justify-content: flex-end; /* Push content to bottom */
 }
 
 .ahoy-hub-widget {
   width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
   background: rgba(15, 15, 25, 0.5);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
@@ -254,22 +259,43 @@ function handleBoost(result) {
 
 .hub-brand {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+  max-width: 400px;
+}
+
+.brand-header {
+  display: flex;
   align-items: center;
   gap: 12px;
-  font-weight: 800;
-  font-size: 1.2rem;
+  font-weight: 900;
+  font-size: 1.1rem;
   letter-spacing: 2px;
   color: #fff;
   text-transform: uppercase;
   text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  white-space: normal;
+}
+
+.brand-header i {
+  color: #00ffff;
+}
+
+.brand-desc {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.4;
+  letter-spacing: 0.5px;
 }
 
 .hub-pillars {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
   flex: 1;
   justify-content: center;
+  flex-wrap: wrap; /* allow wrapping to prevent horizontal scroll */
 }
 
 .hub-pillar-group {
@@ -596,8 +622,15 @@ function handleBoost(result) {
   .hub-inner {
     flex-direction: column;
     gap: 30px;
+    width: 100%;
+    box-sizing: border-box;
   }
-  .hub-brand span {
+  .hub-brand {
+    align-items: center;
+    text-align: center;
+    width: 100%;
+  }
+  .brand-header span {
     display: block; /* Keep text on mobile for premium feel if space allows */
   }
   .hub-pillars {

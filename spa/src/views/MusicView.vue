@@ -2,7 +2,7 @@
   <PullRefresh @refresh="onRefresh">
     <div class="music-container">
       <!-- Subpage hero (same as Podcasts / Flask subpage_hero) -->
-      <section class="podcasts-hero">
+      <section class="podcasts-hero desktop-flush">
         <div class="podcasts-hero-inner">
           <h1>
             <i class="fas fa-music" aria-hidden="true"></i>
@@ -33,9 +33,7 @@
           :albums="availableAlbums"
           :selected-album="selectedAlbum"
           @update:selectedAlbum="selectedAlbum = $event"
-          :show-favorites-toggle="true"
-          :favorites-only="favoritesOnly"
-          @update:favoritesOnly="favoritesOnly = $event"
+          :show-favorites-toggle="false"
           @action="playRandomTrack"
         >
           <template #action>
@@ -97,7 +95,7 @@
                   {{ track.play_count || 0 }}
                   <button
                     type="button"
-                    class="play-count-btn"
+                    class="episode-btn play-in-row-btn"
                     :aria-label="playerStore.currentTrack?.id === track.id && playerStore.isPlaying ? 'Pause' : 'Play'"
                     @click.stop="playTrackAtFilteredIndex(idx)"
                   >
@@ -511,6 +509,15 @@ onMounted(loadTracks)
 .playing .play-count-btn {
   opacity: 1;
   color: var(--accent-color, #00d4ff);
+}
+
+.play-in-row-btn {
+  margin-left: 8px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .add-to-playlist-btn {
   border-radius: 50%;

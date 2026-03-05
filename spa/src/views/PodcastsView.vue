@@ -1,7 +1,7 @@
 <template>
   <div class="podcasts-page">
-    <!-- Mobile: subpage hero (same as Flask macros/subpage_header) -->
-    <section class="podcasts-hero mobile-only">
+    <!-- Unified subpage hero (consistent with Music Library) -->
+    <section class="podcasts-hero desktop-flush">
       <div class="podcasts-hero-inner">
         <h1>
           <i class="fas fa-podcast" aria-hidden="true"></i>
@@ -11,60 +11,7 @@
       </div>
     </section>
 
-    <!-- Desktop: full unified subheader with search, filters, actions -->
-    <section class="unified-header podcasts-subheader desktop-only">
-      <div class="header-content">
-        <div class="header-title">
-          <div class="title-text">
-            <h1>Podcasts</h1>
-            <p>Fresh episodes and shows from independent creators.</p>
-          </div>
-        </div>
-        <div class="header-search">
-          <div class="search-bar">
-            <i class="fas fa-search" aria-hidden="true"></i>
-            <input
-              v-model="searchQuery"
-              type="text"
-              class="search-input"
-              placeholder="Search shows or episodes..."
-            />
-            <button v-if="searchQuery" type="button" class="search-clear" aria-label="Clear search" @click="searchQuery = ''">
-              <i class="fas fa-times" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
-        <div class="header-filters">
-          <div class="filter-tabs">
-            <button
-              type="button"
-              class="filter-tab"
-              :class="{ active: activeShowSlug === 'all' }"
-              @click="activeShowSlug = 'all'"
-            >
-              <i class="fas fa-th-large" style="margin-right: 6px;"></i>
-              <span>All Shows</span>
-            </button>
-            <button
-              v-for="show in featuredShows"
-              :key="show.slug"
-              type="button"
-              class="filter-tab"
-              :class="{ active: activeShowSlug === show.slug }"
-              @click="activeShowSlug = show.slug"
-            >
-              <i class="fas fa-microphone" style="margin-right: 6px;"></i>
-              <span>{{ show.title }}</span>
-            </button>
-          </div>
-        </div>
-        <div class="header-actions">
-           <button type="button" class="btn btn-primary btn-large" @click="goRandomEpisode">
-            <i class="fas fa-random"></i> Random Episode
-          </button>
-        </div>
-      </div>
-    </section>
+
 
     <!-- Featured section: Shows + filter chips + show cards -->
     <!-- Mobile: search + filter strip then episode list -->

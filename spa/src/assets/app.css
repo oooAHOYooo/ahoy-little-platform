@@ -99,6 +99,30 @@
   height: calc(100vh - var(--ds-topbar-height));
 }
 
+/* Desktop: sidebar fixed and always locked in place */
+@media (min-width: 769px) {
+  .app .app-sidebar {
+    position: fixed !important;
+    left: 0;
+    width: 182px;
+    z-index: 10;
+  }
+
+  /* Compensate for fixed sidebar so app-main isn't hidden behind it */
+  .app .app-shell {
+    padding-left: 182px;
+  }
+}
+
+/* Compact footer: un-fix when inside the scrollable content area */
+.app .content-area .compact-footer {
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+}
+
 /* Desktop: hide mobile-only volume button (shown in same slot as + on mobile) */
 .app .now-playing-volume-mobile-btn {
   display: none !important;

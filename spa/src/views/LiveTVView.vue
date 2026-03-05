@@ -985,8 +985,9 @@ onUnmounted(() => {
   border-radius: 12px; /* Match Videos page card radius */
   overflow: hidden;
   width: 100%;
+  max-height: 70vh; /* Responsive max height caps vertical growth on ultrawide */
   aspect-ratio: 16 / 9; /* Let aspect-ratio drive height, matching Videos page */
-  margin: 0 0 8px;
+  margin: 0 auto 8px auto; /* Center container */
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
   cursor: pointer;
@@ -1004,7 +1005,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover !important; /* Fill the full anamorphic viewport, no letterboxing */
+  object-fit: contain !important; /* contain like YouTube player */
   background: #000;
 }
 /* Hover overlay - matches Videos page show-card hover UX */
