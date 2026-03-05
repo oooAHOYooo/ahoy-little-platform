@@ -10,46 +10,21 @@
         <p>Fresh episodes and shows from independent creators.</p>
       </div>
     </section>
-
-
-
-    <!-- Featured section: Shows + filter chips + show cards -->
-    <!-- Mobile: search + filter strip then episode list -->
-    <section class="podcasts-section mobile-only" style="margin-top:0">
-      <div class="artists-mobile-controls">
-        <div class="search-bar">
-          <i class="fas fa-search" aria-hidden="true"></i>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="search-input"
-            placeholder="Search shows or episodes..."
-          />
-          <button v-if="searchQuery" type="button" class="search-clear" aria-label="Clear search" @click="searchQuery = ''">
-            <i class="fas fa-times" aria-hidden="true"></i>
-          </button>
-        </div>
-        <div class="filter-tabs-mobile">
-          <button
-            type="button"
-            class="filter-tab-mobile"
-            :class="{ active: activeShowSlug === 'all' }"
-            @click="activeShowSlug = 'all'"
-          >
-            <span>All</span>
-          </button>
-          <button
-            v-for="show in featuredShows"
-            :key="show.slug"
-            type="button"
-            class="filter-tab-mobile"
-            :class="{ active: activeShowSlug === show.slug }"
-            @click="activeShowSlug = show.slug"
-          >
-            <span>{{ show.title }}</span>
-          </button>
-        </div>
-      </div>
+    <!-- Sub-menu filter (design parity with Music Library) -->
+    <section class="podcasts-section">
+      <SubMenuFilter
+        v-model="activeShowSlug"
+        :filters="showFilters"
+        all-value="all"
+        filter-all-label="All Shows"
+        :show-search="true"
+        search-placeholder="Search shows or episodes…"
+        :search-query="searchQuery"
+        @update:searchQuery="searchQuery = $event"
+        action-label="Random Episode"
+        action-icon="fas fa-random"
+        @action="goRandomEpisode"
+      />
     </section>
 
     <!-- Featured section: Shows + show cards (Desktop Only) -->
@@ -130,7 +105,7 @@
         <h2>New Episodes</h2>
       </div>
 
-      <div class="episode-list">
+      <div class="episode-list desktop-only">
         <article
           v-for="ep in filteredEpisodes"
           :key="ep.key"
@@ -203,6 +178,70 @@
           </div>
         </article>
       </div>
+
+      <!-- Mobile: list view (parity with Music Library) -->
+      <div class="podcast-mobile-list mobile-only">
+        <div
+          v-for="ep in filteredEpisodes"
+          :key="'mobile-' + ep.key"
+          class="podcast-mobile-row"
+          :class="{ playing: playerStore.currentTrack && (playerStore.currentTrack.id === ep.id || playerStore.currentTrack.key === ep.key) }"
+          @click="playEpisode(ep)"
+        >
+          <div class="podcast-mobile-art">
+            <img
+              class="podcast-mobile-art-img"
+              :src="ep.artwork || '/static/img/default-cover.jpg'"
+              :alt="ep.title"
+              loading="lazy"
+              @error="($event.target).src = '/static/img/default-cover.jpg'"
+            />
+            <button
+              type="button"
+              class="podcast-mobile-art-play"
+              :aria-label="playerStore.currentTrack && (playerStore.currentTrack.id === ep.id || playerStore.currentTrack.key === ep.key) && playerStore.isPlaying ? 'Pause' : 'Play'"
+              @click.stop="playEpisode(ep)"
+            >
+              <i :class="playerStore.currentTrack && (playerStore.currentTrack.id === ep.id || playerStore.currentTrack.key === ep.key) && playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div class="podcast-mobile-meta">
+            <span class="podcast-mobile-title">{{ ep.title }}</span>
+            <span class="podcast-mobile-artist">{{ ep.showTitle }}</span>
+          </div>
+
+          <div class="podcast-mobile-right">
+            <div class="podcast-mobile-duration">{{ ep.duration }}</div>
+            <div class="podcast-mobile-actions">
+              <button
+                type="button"
+                class="episode-btn podcast-mobile-btn podcast-mobile-play-btn"
+                :title="playerStore.currentTrack && (playerStore.currentTrack.id === ep.id || playerStore.currentTrack.key === ep.key) && playerStore.isPlaying ? 'Pause' : 'Play'"
+                @click.stop="playEpisode(ep)"
+              >
+                <i :class="playerStore.currentTrack && (playerStore.currentTrack.id === ep.id || playerStore.currentTrack.key === ep.key) && playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                class="episode-btn queue-btn podcast-mobile-btn"
+                title="Add to queue"
+                @click.stop="addToQueue(ep)"
+              >
+                <i class="fas fa-plus" aria-hidden="true"></i>
+              </button>
+              <button
+                type="button"
+                class="episode-btn bm-btn podcast-mobile-btn"
+                title="Save"
+                @click.stop="toggleBookmark(ep)"
+              >
+                <i class="fas fa-bookmark" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Loading -->
@@ -223,6 +262,7 @@ import { useRouter } from 'vue-router'
 import { apiFetchCached } from '../composables/useApi'
 import { usePlayerStore } from '../stores/player'
 import { useBookmarks } from '../composables/useBookmarks'
+import SubMenuFilter from '../components/SubMenuFilter.vue'
 
 const router = useRouter()
 const playerStore = usePlayerStore()
@@ -243,6 +283,14 @@ const featuredShows = computed(() => {
     )
   }
   return list.slice(0, 4)
+})
+
+const showFilters = computed(() => {
+  return (shows.value || []).map(s => ({
+    value: s.slug,
+    label: s.title,
+    image: s.artwork || null
+  }))
 })
 
 const episodes = computed(() => {
@@ -348,3 +396,305 @@ onMounted(async () => {
   loading.value = false
 })
 </script>
+
+<style scoped>
+.podcasts-page {
+  padding: 0;
+}
+
+.podcasts-section {
+  padding: 0 16px;
+  margin-bottom: 32px;
+}
+
+.podcasts-section-header {
+  margin-bottom: 20px;
+}
+
+.podcasts-section-subtitle {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* Featured Shows Grid */
+.podcast-shows {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.podcast-show-preview-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.podcast-show-preview-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.podcast-show-preview-card.active {
+  border-color: var(--accent-color, #00d4ff);
+  background: rgba(0, 212, 255, 0.05);
+}
+
+.podcast-show-card-art {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-bottom: 12px;
+}
+
+.podcast-show-card-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.podcast-show-card-meta {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Episode List (Desktop) */
+.episode-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.episode-row {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.episode-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.episode-row.playing {
+  border-color: var(--accent-color, #00d4ff);
+  background: rgba(0, 212, 255, 0.05);
+}
+
+.episode-art {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.episode-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+}
+
+.episode-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.episode-desc {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.episode-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.episode-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.episode-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.episode-open {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.2rem;
+  margin-left: 10px;
+}
+
+.episode-open:hover {
+  color: #fff;
+}
+
+/* Mobile Styles Parity with Music Library */
+.podcast-mobile-list {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .podcasts-page {
+    padding: 0 !important;
+  }
+
+  /* Force content area to be flush */
+  :deep(.content-area) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin: 0 !important;
+  }
+
+  .podcasts-section {
+    padding: 0 !important;
+    margin-bottom: 0;
+  }
+
+  .podcasts-featured-section {
+    display: none; /* Hide featured shows grid on mobile to match music flow */
+  }
+
+  .podcast-mobile-list {
+    display: flex;
+    flex-direction: column;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .podcast-mobile-row {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    width: 100%;
+  }
+
+  .podcast-mobile-row.playing {
+    background: rgba(0, 212, 255, 0.1) !important;
+  }
+
+  .podcast-mobile-art {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .podcast-mobile-art-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .podcast-mobile-art-play {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: rgba(0, 0, 0, 0.4);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .podcast-mobile-meta {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0 !important;
+  }
+
+  .podcast-mobile-title {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.1;
+  }
+
+  .podcast-mobile-artist {
+    display: block;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.1;
+    margin-top: 1px;
+  }
+
+  .podcast-mobile-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .podcast-mobile-duration {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .podcast-mobile-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .podcast-mobile-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 12px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .podcast-mobile-play-btn {
+    background: linear-gradient(180deg, rgba(0, 212, 255, 0.15), rgba(0, 212, 255, 0.08));
+    border-color: rgba(0, 212, 255, 0.15);
+  }
+}
+</style>
