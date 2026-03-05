@@ -258,6 +258,9 @@
         </div>
       </div>
     </section>
+
+    <!-- Universal Ahoy Hub (Nintendo-inspired bottom widget) -->
+    <AhoyHub />
   </div>
 </template>
 
@@ -267,6 +270,7 @@ import { useRouter } from 'vue-router'
 import { apiFetchCached } from '../composables/useApi'
 import { usePlayerStore } from '../stores/player'
 import ExploreWidgets from '../components/ExploreWidgets.vue'
+import AhoyHub from '../components/AhoyHub.vue'
 
 const router = useRouter()
 const playerStore = usePlayerStore()
