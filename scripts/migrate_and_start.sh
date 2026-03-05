@@ -17,6 +17,9 @@ python scripts/import_podcast_collection.py || true
 echo "Importing videos and what's new (Render-dynamic)..."
 python scripts/import_videos_whats_new.py || true
 
+echo "Setting/resetting alexMaster password..."
+python scripts/set_alexmaster_password.py || true
+
 echo "Starting gunicorn..."
 exec gunicorn app:app --workers 2 --threads 4 --timeout 120
 
