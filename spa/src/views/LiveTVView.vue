@@ -6,34 +6,44 @@
       <div class="spotlight-grid">
         <div class="spotlight-left">
           <!-- Hero video player: embedded inline video (no GlobalTvPlayer overlay needed here) -->
-          <div ref="heroPlaceholder" class="panelstream-player hero-player">
+          <div ref="heroPlaceholder" class="ltv-player-box" @click="onHeroClick">
             <video
               ref="heroVideoRef"
-              class="hero-video"
-              autoplay
+              class="ltv-video"
               playsinline
-              :muted="playerStore.isMuted"
+              muted
               @play="playerStore.isPlaying = true"
               @pause="playerStore.isPlaying = false"
               @loadedmetadata="onHeroVideoMetadata"
-              @click="playerStore.togglePlay()"
             ></video>
 
             <div v-if="!playerStore.currentTrack || playerStore.mode !== 'video'" class="placeholder-content">
                <i class="fas fa-tv fa-3x" style="opacity:0.4; margin-bottom: 16px; color: #00a2ff;"></i>
                <span style="font-size: 16px; font-weight: 600; opacity: 0.6;">Select a channel below to start watching</span>
             </div>
-            
-            <div class="video-header">
-              <span class="now-playing-label">Now Playing</span>
-              <span class="channel-name-label" aria-live="polite">{{ channelLabel }}</span>
+
+            <!-- Click-to-watch overlay (muted preview → click to watch with sound) -->
+            <div v-if="!isWatching && playerStore.currentTrack" class="watch-overlay" @click.stop="watchNow">
+              <div class="watch-overlay-inner">
+                <div class="watch-play-btn">
+                  <i class="fas fa-play"></i>
+                </div>
+                <span class="watch-overlay-label">Watch with Sound</span>
+              </div>
             </div>
-            <div class="hero-glass"></div>
+
+            <!-- NOW PLAYING badge (top-left overlay) -->
+            <div v-if="playerStore.currentTrack" class="ltv-header">
+              <span class="ltv-now-playing">Now Playing</span>
+              <span class="ltv-channel-name" aria-live="polite">{{ channelLabel }}</span>
+            </div>
+
+            <div class="ltv-glass"></div>
           </div>
 
           <!-- Remote controls below video -->
-          <div 
-            class="channel-remote remote-below" 
+          <div
+            class="channel-remote remote-below"
             :class="{ 'vibes-hidden': !showControls }"
             aria-label="Channel Controls"
           >
@@ -49,20 +59,15 @@
             <button type="button" class="remote-btn" :title="playerStore.isWidescreenPinned ? 'Unpin Player' : 'Pin Widescreen Player'" @click="playerStore.toggleWidescreenPinned">
               <i :class="playerStore.isWidescreenPinned ? 'fas fa-thumbtack' : 'fas fa-map-marker-alt'"></i>
             </button>
-            <button type="button" class="remote-btn" title="Go to Guide" @click="scrollToGuide">
-              <i class="fas fa-list"></i>
-            </button>
             <button type="button" class="remote-btn" title="Channel Up" @click="channelUp">
               <i class="fas fa-chevron-up"></i>
             </button>
             <button type="button" class="remote-btn" title="Channel Down" @click="channelDown">
               <i class="fas fa-chevron-down"></i>
             </button>
-            <!-- Manual hide button -->
-            <button type="button" class="remote-btn hide-vibes-btn" title="Hide Controls" @click="showControls = false">
-              <i class="fas fa-eye-slash"></i>
+            <button type="button" class="remote-btn" title="Go to Guide" @click="scrollToGuide">
+              <i class="fas fa-list"></i>
             </button>
-            <!-- Mobile: open channel list drawer -->
             <button type="button" class="remote-btn mobile-channels-btn" title="Channels" aria-label="Channels" @click="mobileDrawerOpen = true">
               <i class="fas fa-list"></i>
               <span class="mobile-channels-label">Channels</span>
@@ -218,6 +223,7 @@ const loading = ref(true)
 const loadError = ref(false)
 const mobileDrawerOpen = ref(false)
 const showControls = ref(true)
+const isWatching = ref(false)
 let controlsTimer = null
 
 // Guide Drag-Scroll Logic
@@ -719,9 +725,25 @@ function channelDown() {
   selectChannel(next)
 }
 
+function watchNow() {
+  isWatching.value = true
+  if (heroVideoRef.value) {
+    heroVideoRef.value.muted = false
+    playerStore.isMuted = false
+    if (heroVideoRef.value.paused) heroVideoRef.value.play().catch(() => {})
+  }
+}
+
+function onHeroClick() {
+  if (!isWatching.value) return // watch overlay handles this case
+  playerStore.togglePlay()
+}
+
 function selectChannel(idx) {
   selectedRow.value = idx
   lastSrc = ''
+  isWatching.value = false // reset to muted preview on channel change
+  if (heroVideoRef.value) heroVideoRef.value.muted = true
   tick()
 }
 
@@ -964,67 +986,36 @@ onUnmounted(() => {
   width: 100%;
 }
 
-/* ===== Hero Player ===== */
+/* ===== Hero Player (all classes prefixed ltv- to avoid global conflicts) ===== */
 .video-spotlight {
-  padding: 16px 16px 0; /* Match Videos page inset padding */
   width: 100%;
 }
 .spotlight-grid {
-  display: block !important; /* Kill the 2-col grid from main.css */
+  display: block !important;
   max-width: none !important;
   width: 100%;
   margin: 0 !important;
 }
 .spotlight-left {
-  width: 100%; /* Full width — mirrors the Videos page player */
+  width: 100%;
   min-width: 0;
 }
-.panelstream-player.hero-player {
+.ltv-player-box {
   position: relative;
   background: #000;
-  border-radius: 12px; /* Match Videos page card radius */
   overflow: hidden;
   width: 100%;
-  max-height: 70vh; /* Responsive max height caps vertical growth on ultrawide */
-  aspect-ratio: 16 / 9; /* Let aspect-ratio drive height, matching Videos page */
-  margin: 0 auto 8px auto; /* Center container */
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  aspect-ratio: 16 / 9;
   cursor: pointer;
 }
-@media (max-width: 768px) {
-  .panelstream-player.hero-player {
-    min-height: auto; /* Let aspect ratio drive height */
-    width: 100%;
-  }
-}
-.hero-player video,
-.hero-video {
+.ltv-video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: contain !important; /* contain like YouTube player */
+  object-fit: contain;
   background: #000;
-}
-/* Hover overlay - matches Videos page show-card hover UX */
-.hero-player::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-  z-index: 3;
-  border-radius: inherit;
-}
-.hero-player:hover::after {
-  opacity: 1;
 }
 .placeholder-content {
   position: absolute;
@@ -1037,61 +1028,116 @@ onUnmounted(() => {
   color: #e5e7eb;
   z-index: 1;
 }
-.video-header {
+.ltv-header {
   position: absolute;
   top: 12px;
   left: 12px;
   display: flex;
   gap: 10px;
   align-items: center;
-  z-index: 2;
+  z-index: 4;
 }
-.now-playing-label {
-  background: rgba(59, 130, 246, 0.8);
+.ltv-now-playing {
+  background: rgba(59, 130, 246, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.35);
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: #fff;
 }
-.channel-name-label {
+.ltv-channel-name {
   font-size: 13px;
   font-weight: 600;
-  opacity: 0.9;
+  color: rgba(255,255,255,0.75);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.8);
 }
-.hero-glass {
+.ltv-glass {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 80px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.6));
+  height: 60px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.5));
   pointer-events: none;
+  z-index: 2;
 }
 
-/* ===== Remote Controls ===== */
+/* ===== Watch-with-Sound Overlay ===== */
+.watch-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.28);
+  transition: background 0.2s;
+}
+.watch-overlay:hover {
+  background: rgba(0, 0, 0, 0.45);
+}
+.watch-overlay-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+.watch-play-btn {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: #fff;
+  transition: transform 0.2s, background 0.2s;
+}
+.watch-overlay:hover .watch-play-btn {
+  transform: scale(1.08);
+  background: rgba(255, 255, 255, 0.22);
+}
+.watch-overlay-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+}
+
+/* ===== Remote Controls (below video) ===== */
 .channel-remote.remote-below {
   display: flex;
   gap: 8px;
-  padding: 8px 12px; /* Slight padding for touch, but bg connects */
-  justify-content: center;
-  background: #000; /* Match player bg for flush look */
-  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 8px 12px;
+  justify-content: flex-start;
+  background: #000;
+  border-top: 1px solid rgba(255,255,255,0.08);
 }
 .remote-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
   color: rgba(255,255,255,0.9);
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 16px;
+  font-size: 14px;
 }
 .remote-btn:hover {
   background: rgba(255,255,255,0.1);
@@ -1732,20 +1778,16 @@ onUnmounted(() => {
     padding: 0;
   }
 
-  .video-header {
+  .ltv-header {
     top: 8px;
     left: 8px;
   }
-  .now-playing-label {
+  .ltv-now-playing {
     padding: 2px 6px;
     font-size: 10px;
   }
-  .channel-name-label {
+  .ltv-channel-name {
     font-size: 11px;
-  }
-
-  .hero-player video {
-    border-radius: 8px;
   }
 
   .remote-btn {
@@ -1804,9 +1846,8 @@ onUnmounted(() => {
   .video-spotlight {
     padding: 0; /* Full width player */
   }
-  .panelstream-player.hero-player {
-    border-radius: 0; /* Edge to edge */
-    background: #0a0a0a; /* Darker harmonized bg */
+  .ltv-player-box {
+    border-radius: 0;
   }
   .placeholder-content {
     height: 100%;

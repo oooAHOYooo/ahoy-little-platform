@@ -1,12 +1,5 @@
 <template>
   <div class="cast-page">
-    <section class="podcasts-hero cast-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-tv" aria-hidden="true"></i> Cast</h1>
-        <p>Cast Ahoy to your TV with quick, no-fuss options.</p>
-      </div>
-    </section>
-
     <div class="cast-content">
       <div class="cast-card">
         <h3><i class="fas fa-bolt"></i> Quick Start</h3>

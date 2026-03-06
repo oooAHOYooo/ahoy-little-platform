@@ -1,12 +1,5 @@
 <template>
   <div class="focus-container focus-strava">
-    <section class="podcasts-hero focus-page-header">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-headphones" aria-hidden="true"></i> Focus</h1>
-        <p>Timer · Music · Progress</p>
-      </div>
-    </section>
-
     <div class="focus-content">
       <section class="focus-step focus-dial-section">
         <div class="focus-dial-wrap">

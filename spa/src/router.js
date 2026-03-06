@@ -84,6 +84,16 @@ const routes = [
     component: () => import('./views/EventDetailView.vue'),
   },
   {
+    path: '/studio',
+    name: 'studio',
+    component: () => import('./views/StudioView.vue'),
+  },
+  {
+    path: '/studio/:id',
+    name: 'studio-collection',
+    component: () => import('./views/StudioCollectionView.vue'),
+  },
+  {
     path: '/merch',
     name: 'merch',
     component: () => import('./views/MerchView.vue'),

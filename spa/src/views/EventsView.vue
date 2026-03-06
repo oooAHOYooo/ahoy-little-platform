@@ -1,16 +1,5 @@
 <template>
   <div class="events-page">
-    <!-- Subpage hero (same as Flask) -->
-    <section class="podcasts-hero">
-      <div class="podcasts-hero-inner">
-        <h1>
-          <i class="fas fa-calendar" aria-hidden="true"></i>
-          Events
-        </h1>
-        <p>Upcoming live Ahoy shows, plus past events and recordings.</p>
-      </div>
-    </section>
-
     <!-- Upcoming -->
     <section class="podcasts-section">
       <div class="podcasts-section-header">

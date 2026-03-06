@@ -1625,7 +1625,7 @@ body.debug-layout .card {
    ========================================================================== */
 .podcasts-page,
 .podcast-show-page {
-    padding: 18px 18px 40px 18px;
+    padding: 0 18px 40px 18px;
 }
 
 /* Global mobile subpage hero: same look on every subpage (Home, Music, Podcasts, Settings, etc.) */
@@ -1696,7 +1696,7 @@ body.debug-layout .card {
 }
 
 .podcasts-section {
-    margin-top: 18px;
+    margin-top: 8px;
 }
 
 .podcasts-section-header {
@@ -2553,6 +2553,12 @@ body.debug-layout .card {
 
 .ds-crumbs__muted {
     opacity: 0.75;
+}
+
+.ds-crumbs__current {
+    color: #fff;
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(180, 210, 255, 0.55);
 }
 
 .ds-statusbar__right {
@@ -14164,7 +14170,7 @@ img.loading {
 .music-container,
 .shows-container,
 .artists-container {
-    padding: var(--spacing-lg) 0;
+    padding: 8px 0 var(--spacing-lg) 0;
     max-width: 1400px;
     margin: 0 auto;
 }

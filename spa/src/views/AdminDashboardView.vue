@@ -397,7 +397,7 @@
           <form @submit.prevent="saveContent" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div v-for="(value, key) in editorForm" :key="key" class="space-y-1">
-                <label v-if="key !== 'id' && key !== 'extra_fields' && key !== 'position' && key !== 'tags' && key !== 'photos' && key !== 'social_links' && key !== 'genres' && key !== 'features'" class="text-[10px] font-bold text-purple-200/60 uppercase tracking-widest pl-1">{{ key.replace(/_/g, ' ') }}</label>
+                <label v-if="key !== 'id' && key !== 'extra_fields' && key !== 'position' && key !== 'tags' && key !== 'photos' && key !== 'social_links' && key !== 'genres' && key !== 'features' && key !== 'description'" class="text-[10px] font-bold text-purple-200/60 uppercase tracking-widest pl-1">{{ key.replace(/_/g, ' ') }}</label>
                 
                 <!-- String/Number fields -->
                 <input 
@@ -432,12 +432,25 @@
                 </div>
 
                 <!-- Textarea (description) -->
-                <textarea 
+                <textarea
                   v-if="key === 'description'"
                   v-model="editorForm[key]"
                   rows="4"
                   class="w-full md:col-span-2 glass-input rounded-lg px-4 py-2 text-sm"
                 ></textarea>
+
+                <!-- Photos: one URL per line -->
+                <div v-if="key === 'photos'" class="col-span-1 md:col-span-2 space-y-1">
+                  <label class="text-[10px] font-bold text-purple-200/60 uppercase tracking-widest pl-1">Photos (one URL per line)</label>
+                  <textarea
+                    :value="Array.isArray(editorForm[key]) ? editorForm[key].join('\n') : ''"
+                    @input="editorForm[key] = $event.target.value.split('\n').map(s => s.trim()).filter(Boolean)"
+                    rows="6"
+                    class="w-full glass-input rounded-lg px-4 py-2 text-sm font-mono"
+                    placeholder="https://storage.googleapis.com/bucket/photo1.jpg&#10;https://storage.googleapis.com/bucket/photo2.jpg"
+                  ></textarea>
+                  <p class="text-[10px] text-purple-200/30 pl-1">{{ Array.isArray(editorForm[key]) ? editorForm[key].length : 0 }} photo(s)</p>
+                </div>
               </div>
             </div>
 
@@ -668,6 +681,7 @@ const contentTypes = {
   'shows': 'Shows/Live TV',
   'artists': 'Artists',
   'events': 'Events',
+  'studio_collections': 'Studio',
   'merch': 'Merch',
   'videos': 'Videos',
   'podcast_shows': 'Podcast Shows',
@@ -686,7 +700,8 @@ const getModelFields = (type) => {
     videos: { video_id: '', title: '', description: '', url: '', status: 'coming_soon', is_hidden: false, position: 0 },
     podcast_shows: { slug: '', title: '', author: '', description: '', cover_art: '', bg_color: '', position: 0 },
     podcast_episodes: { episode_id: '', show_slug: '', title: '', description: '', date: '', audio_url: '', artwork: '', position: 0 },
-    'whats-new': { year: new Date().getFullYear().toString(), month: 'January', section: 'platform', title: '', description: '', is_hidden: false, position: 0 }
+    'whats-new': { year: new Date().getFullYear().toString(), month: 'January', section: 'platform', title: '', description: '', is_hidden: false, position: 0 },
+    'studio_collections': { collection_id: '', title: '', date: '', tag: '', description: '', cover: '', photos: [], is_hidden: false, position: 0 },
   }
   return defaults[type] || {}
 }

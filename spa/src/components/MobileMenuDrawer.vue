@@ -23,6 +23,7 @@
           <router-link to="/music" @click="close"><i class="fas fa-music"></i><span>Music</span></router-link>
           <router-link to="/videos" @click="close"><i class="fas fa-video"></i><span>Videos</span></router-link>
           <router-link to="/artists" @click="close"><i class="fas fa-users"></i><span>Artists</span></router-link>
+          <router-link to="/studio" @click="close"><i class="fas fa-camera"></i><span>Studio</span></router-link>
           <router-link to="/merch" @click="close"><i class="fas fa-shopping-bag"></i><span>Merch</span></router-link>
           <router-link to="/radio" @click="close"><i class="fas fa-broadcast-tower"></i><span>Radio</span></router-link>
           <router-link to="/live-tv" @click="close"><i class="fas fa-tv"></i><span>Live TV</span></router-link>

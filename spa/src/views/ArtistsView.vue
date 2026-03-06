@@ -1,13 +1,5 @@
 <template>
   <div class="artists-page">
-    <!-- Mobile: subpage hero (same as Flask macros/subpage_header) -->
-    <section class="podcasts-hero mobile-only">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-users" aria-hidden="true"></i> Artists</h1>
-        <p>Discover indie musicians, show hosts, athletes, filmmakers, and more.</p>
-      </div>
-    </section>
-
     <!-- Desktop: full unified subheader with search, filters, actions -->
     <section class="unified-header artists-subheader desktop-only">
       <div class="header-content">

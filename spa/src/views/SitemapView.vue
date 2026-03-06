@@ -1,11 +1,5 @@
 <template>
   <div class="sitemap-page">
-    <section class="podcasts-hero sitemap-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-sitemap" aria-hidden="true"></i> Sitemap</h1>
-        <p>Find your way around Ahoy.</p>
-      </div>
-    </section>
     <div class="sitemap-container">
       <nav class="sitemap-links">
         <router-link to="/">Home</router-link>

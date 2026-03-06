@@ -1,11 +1,5 @@
 <template>
   <div class="contact-page">
-    <section class="podcasts-hero contact-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-envelope" aria-hidden="true"></i> Contact</h1>
-        <p>Have a question or want to reach out? We'd love to hear from you.</p>
-      </div>
-    </section>
     <div class="contact-container">
       <p>Email us at <a href="mailto:support@ahoyindie.com">support@ahoyindie.com</a> or use the feedback form for product feedback.</p>
       <router-link to="/feedback" class="contact-link">Go to Feedback</router-link>

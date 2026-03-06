@@ -1,14 +1,6 @@
 <template>
   <div class="shows-page videos-page">
     <div class="shows-container" :class="{ 'video-is-active': currentVideo }">
-      <!-- Global subpage hero -->
-      <section v-show="!currentVideo" class="video-hero shows-page-hero">
-        <div class="video-hero-inner">
-          <h1><i class="fas fa-video" aria-hidden="true"></i> Videos</h1>
-          <p>Music videos, skate parts, short films, episodes, and more</p>
-        </div>
-      </section>
-
       <!-- Embedded Video Player Section -->
       <section ref="playerSectionRef" class="embedded-video-section">
         <div class="video-player-wrapper liquid-glass-wrap">

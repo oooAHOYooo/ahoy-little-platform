@@ -1,11 +1,5 @@
 <template>
   <div class="policy-page">
-    <section class="podcasts-hero policy-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-shield-alt" aria-hidden="true"></i> Privacy Policy</h1>
-        <p>Last updated: February 2026</p>
-      </div>
-    </section>
     <div class="policy-container">
       <div class="policy-content">
         <h3>1. Information We Collect</h3>

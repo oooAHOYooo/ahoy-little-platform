@@ -1,15 +1,5 @@
 <template>
   <div class="podcasts-page">
-    <!-- Unified subpage hero (consistent with Music Library) -->
-    <section class="podcasts-hero desktop-flush">
-      <div class="podcasts-hero-inner">
-        <h1>
-          <i class="fas fa-podcast" aria-hidden="true"></i>
-          Podcasts
-        </h1>
-        <p>Fresh episodes and shows from independent creators.</p>
-      </div>
-    </section>
     <!-- Sub-menu filter (design parity with Music Library) -->
     <section class="podcasts-section">
       <SubMenuFilter

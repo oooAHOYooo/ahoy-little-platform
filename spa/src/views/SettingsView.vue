@@ -1,17 +1,6 @@
 <template>
   <div class="settings-page">
     <div class="settings-container">
-      <!-- Subpage hero (same as Flask subpage_hero) -->
-      <section class="podcasts-hero settings-page-header">
-        <div class="podcasts-hero-inner">
-          <h1>
-            <i class="fas fa-cog" aria-hidden="true"></i>
-            Settings
-          </h1>
-          <p>Customize your Ahoy experience.</p>
-        </div>
-      </section>
-
       <!-- Desktop header -->
       <div class="settings-header desktop-only">
         <div class="settings-header-icon">

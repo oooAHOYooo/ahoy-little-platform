@@ -1,12 +1,5 @@
 <template>
   <div class="tip-artist-page">
-    <section class="podcasts-hero tip-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-heart"></i> Boost Artists</h1>
-        <p>Support the indie artists you love</p>
-      </div>
-    </section>
-
     <div class="tip-content">
       <div class="tip-grid">
         <!-- Left: Form -->

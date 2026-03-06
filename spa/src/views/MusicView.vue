@@ -1,17 +1,6 @@
 <template>
   <PullRefresh @refresh="onRefresh">
     <div class="music-container">
-      <!-- Subpage hero (same as Podcasts / Flask subpage_hero) -->
-      <section class="podcasts-hero desktop-flush">
-        <div class="podcasts-hero-inner">
-          <h1>
-            <i class="fas fa-music" aria-hidden="true"></i>
-            Music Library
-          </h1>
-          <p>Explore</p>
-        </div>
-      </section>
-
       <!-- Sub-menu filter (all screen sizes) -->
       <section class="music-library-section">
         <SubMenuFilter

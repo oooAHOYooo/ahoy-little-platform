@@ -1,22 +1,5 @@
 <template>
   <div class="merch-shell">
-    <!-- Subpage hero (same as Flask subpage_hero) -->
-    <section class="podcasts-hero">
-      <div class="podcasts-hero-inner">
-        <h1>
-          <i class="fas fa-shopping-bag" aria-hidden="true"></i>
-          Merch
-        </h1>
-        <p>Support Ahoy with limited drops and essentials.</p>
-      </div>
-    </section>
-
-    <!-- Desktop hero (Flask: merch-hero desktop-only) -->
-    <div class="merch-hero desktop-only">
-      <h1>Merch</h1>
-      <p>Support Ahoy with limited drops and essentials. Fast checkout, easy quantities.</p>
-    </div>
-
     <!-- Controls: search + sort (Flask: merch-controls) -->
     <div class="merch-controls">
       <div class="merch-search" role="search">

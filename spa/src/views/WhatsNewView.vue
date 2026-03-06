@@ -1,11 +1,5 @@
 <template>
   <div class="whats-new-page">
-    <section class="podcasts-hero whats-new-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-sparkles" aria-hidden="true"></i> What's New</h1>
-        <p>Updates and improvements to Ahoy Indie Media.</p>
-      </div>
-    </section>
     <div class="whats-new-container">
       <p>Check the blog and release notes on the main site for the latest updates.</p>
       <router-link to="/" class="policy-back">Back to Ahoy</router-link>

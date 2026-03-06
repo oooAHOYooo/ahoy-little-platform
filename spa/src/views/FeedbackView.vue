@@ -1,16 +1,6 @@
 <template>
   <div class="feedback-page">
     <div class="feedback-container">
-      <section class="podcasts-hero feedback-header">
-        <div class="podcasts-hero-inner">
-          <h1>
-            <i class="fas fa-comment" aria-hidden="true"></i>
-            Feedback
-          </h1>
-          <p>Help us improve Ahoy for the upcoming Poetry Event!</p>
-        </div>
-      </section>
-
       <div class="feedback-content">
         <!-- Feedback Form -->
         <div v-if="!submitted" class="neu-card">

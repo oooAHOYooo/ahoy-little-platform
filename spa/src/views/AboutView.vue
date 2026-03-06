@@ -1,15 +1,5 @@
 <template>
   <div class="about-page">
-    <section class="podcasts-hero about-hero">
-      <div class="podcasts-hero-inner">
-        <div class="hero-logo-container">
-          <img src="/static/img/ahoy_logo.png" alt="Ahoy Logo" class="hero-logo" />
-        </div>
-        <h1>About Ahoy</h1>
-        <p>A Independent Media Collective & Platform</p>
-      </div>
-    </section>
-
     <div class="about-content">
       <div class="about-grid">
         <div class="about-card neu-card">

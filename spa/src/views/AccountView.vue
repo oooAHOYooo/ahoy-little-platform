@@ -1,15 +1,5 @@
 <template>
   <div class="account-page">
-    <section class="podcasts-hero account-page-header">
-      <div class="podcasts-hero-inner account-hero-inner">
-        <img src="/static/img/ahoy_logo.png" alt="Ahoy" class="account-hero-logo" />
-        <div>
-          <h1>Account</h1>
-          <p>Wallet & profile</p>
-        </div>
-      </div>
-    </section>
-
     <div v-if="auth.isLoggedIn.value" class="account-card">
       <div class="account-profile">
         <div class="account-avatar">

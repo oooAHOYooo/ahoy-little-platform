@@ -1,11 +1,5 @@
 <template>
   <div class="silverback-page">
-    <section class="podcasts-hero silverback-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-server" aria-hidden="true"></i> Silverback</h1>
-        <p>Robust Backend Infrastructure - Documentation & Details</p>
-      </div>
-    </section>
     <div class="silverback-content">
       <p>Coming Soon. This page will describe the Silverback infrastructure details based on the documentation.</p>
       <router-link to="/downloads" class="back-link"><i class="fas fa-arrow-left"></i> Back to Downloads</router-link>

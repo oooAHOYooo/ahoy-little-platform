@@ -38,6 +38,10 @@
         <i class="fas fa-calendar-alt" aria-hidden="true"></i>
         <span>Events</span>
       </router-link>
+      <router-link to="/studio" class="app-sidebar-item" :class="{ active: route.path.startsWith('/studio') }" data-icon="camera">
+        <i class="fas fa-camera" aria-hidden="true"></i>
+        <span>Studio</span>
+      </router-link>
       <router-link to="/merch" class="app-sidebar-item" :class="{ active: route.path === '/merch' }" data-icon="shopping-bag">
         <i class="fas fa-shopping-bag" aria-hidden="true"></i>
         <span>Merch</span>

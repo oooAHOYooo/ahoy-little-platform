@@ -1,16 +1,5 @@
 <template>
   <div class="radio-page radio-page--v2">
-    <!-- Subpage hero (same as Flask subpage_hero) -->
-    <section class="podcasts-hero radio-page-header">
-      <div class="podcasts-hero-inner">
-        <h1>
-          <i class="fas fa-broadcast-tower" aria-hidden="true"></i>
-          Radio
-        </h1>
-        <p>Live radio feed and indie discovery.</p>
-      </div>
-    </section>
-
     <!-- Big radio hero card – station art, Live Now, primary CTA -->
     <section class="radio-hero">
       <div class="radio-hero-inner">

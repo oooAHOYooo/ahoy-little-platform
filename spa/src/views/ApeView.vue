@@ -1,11 +1,5 @@
 <template>
   <div class="ape-page">
-    <section class="podcasts-hero ape-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-robot" aria-hidden="true"></i> Ape</h1>
-        <p>Advanced Platform Engine - Documentation & Details</p>
-      </div>
-    </section>
     <div class="ape-content">
       <p>Coming Soon. This page will describe the Ape platform details based on the documentation.</p>
       <router-link to="/downloads" class="back-link"><i class="fas fa-arrow-left"></i> Back to Downloads</router-link>

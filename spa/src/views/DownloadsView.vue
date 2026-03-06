@@ -1,12 +1,5 @@
 <template>
   <div class="downloads-page">
-    <section class="podcasts-hero downloads-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-download" aria-hidden="true"></i> Downloads</h1>
-        <p>Get Ahoy Indie Media as a standalone desktop app.</p>
-      </div>
-    </section>
-
     <section class="downloads-container">
       <div class="downloads-intro">
         <p>Get Ahoy Indie Media as a standalone desktop application. Desktop apps are coming soon as part of our <router-link to="/whats-new/2026/jan/platform">mobile improvements initiative</router-link>.</p>

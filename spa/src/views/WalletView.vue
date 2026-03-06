@@ -1,12 +1,5 @@
 <template>
   <div class="wallet-page">
-    <section class="podcasts-hero wallet-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-wallet"></i> Wallet</h1>
-        <p>Balance and transaction history</p>
-      </div>
-    </section>
-
     <div class="wallet-content">
       <div class="wallet-actions">
         <router-link to="/account" class="wallet-back">

@@ -6,7 +6,7 @@ from datetime import datetime
 from models import (
     User, Tip, Purchase, Feedback, ArtistClaim, ArtistTip, AnalyticsEvent,
     Track, Show, ContentArtist, Event, ContentMerch, ContentVideo, WhatsNewItem,
-    PodcastShow, PodcastEpisode
+    PodcastShow, PodcastEpisode, StudioCollection
 )
 
 bp = Blueprint('admin', __name__, url_prefix='/api/admin')
@@ -233,7 +233,8 @@ CONTENT_MODEL_MAP = {
     'events': Event,
     'merch': ContentMerch,
     'videos': ContentVideo,
-    'whats-new': WhatsNewItem
+    'whats-new': WhatsNewItem,
+    'studio_collections': StudioCollection,
 }
 
 def _serialize_model(obj):

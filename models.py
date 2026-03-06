@@ -685,6 +685,23 @@ class WhatsNewItem(Base):
     )
 
 
+class StudioCollection(Base):
+    """Studio photo collection — source of truth for the /studio page."""
+    __tablename__ = 'studio_collections'
+
+    id = Column(Integer, primary_key=True)
+    collection_id = Column(String(100), unique=True, nullable=False, index=True)
+    title = Column(String(500), nullable=False, default='')
+    date = Column(String(50), nullable=False, default='')
+    tag = Column(String(100), nullable=False, default='')  # e.g. "Live Event", "BTS", "Short Film"
+    description = Column(String(5000), nullable=False, default='')
+    cover = Column(String(1024), nullable=False, default='')  # cover/hero photo URL
+    photos = Column(JSON, nullable=False, default=list)  # list of photo URLs
+    is_hidden = Column(Boolean, nullable=False, default=False, server_default='false')
+    position = Column(Integer, nullable=False, default=0, index=True)
+    extra_fields = Column(JSON, nullable=True)
+
+
 class AnalyticsEvent(Base):
     """
     Tracks user analytics events (page views, clicks, etc.)

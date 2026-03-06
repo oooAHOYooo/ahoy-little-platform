@@ -1,11 +1,5 @@
 <template>
   <div class="policy-page">
-    <section class="podcasts-hero policy-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-lock" aria-hidden="true"></i> Security Policy</h1>
-        <p>Last updated: December 2024</p>
-      </div>
-    </section>
     <div class="policy-container">
       <div class="policy-content">
         <p>We use TLS for data in transit, encryption at rest, and secure password hashing. We implement access controls and regular security updates. For the full security policy, see the main site.</p>

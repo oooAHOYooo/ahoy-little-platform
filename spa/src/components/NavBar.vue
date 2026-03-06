@@ -11,13 +11,17 @@
           <i class="fas fa-users"></i>
           <span>Artists</span>
         </router-link>
-        <router-link to="/merch" class="mobile-tab" :class="{ active: route.path === '/merch' }">
-          <i class="fas fa-shopping-bag"></i>
-          <span>Merch</span>
-        </router-link>
         <router-link to="/events" class="mobile-tab" :class="{ active: route.path.startsWith('/events') }">
           <i class="fas fa-calendar-alt"></i>
           <span>Events</span>
+        </router-link>
+        <router-link to="/studio" class="mobile-tab" :class="{ active: route.path.startsWith('/studio') }">
+          <i class="fas fa-camera"></i>
+          <span>Studio</span>
+        </router-link>
+        <router-link to="/merch" class="mobile-tab" :class="{ active: route.path === '/merch' }">
+          <i class="fas fa-shopping-bag"></i>
+          <span>Merch</span>
         </router-link>
         <router-link to="/account" class="mobile-tab" :class="{ active: route.path === '/account' || route.path === '/settings' }">
           <i class="fas fa-user-circle"></i>

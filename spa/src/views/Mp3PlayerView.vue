@@ -1,12 +1,5 @@
 <template>
   <div class="mp3-page">
-    <section class="podcasts-hero mp3-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-compact-disc" aria-hidden="true"></i> MP3 Player</h1>
-        <p>Import &amp; play your local files · Experimental</p>
-      </div>
-    </section>
-
     <!-- Winamp-style player window (fills remaining space) -->
     <div class="winamp-window">
       <!-- Title bar -->

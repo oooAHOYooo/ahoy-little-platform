@@ -2836,6 +2836,61 @@ def api_events():
     resp.headers['Vary'] = 'Accept-Encoding'
     return resp
 
+@app.route('/api/studio')
+@limiter.exempt
+def api_studio():
+    """Get all studio collections (public)."""
+    try:
+        from models import StudioCollection
+        with get_session() as session:
+            cols = (session.query(StudioCollection)
+                    .filter_by(is_hidden=False)
+                    .order_by(StudioCollection.position.asc(), StudioCollection.id.desc())
+                    .all())
+            data = [{
+                'id': c.id,
+                'collection_id': c.collection_id,
+                'title': c.title,
+                'date': c.date,
+                'tag': c.tag,
+                'description': c.description,
+                'cover': c.cover,
+                'photo_count': len(c.photos) if c.photos else 0,
+            } for c in cols]
+        resp = jsonify({'collections': data})
+        resp.headers['Cache-Control'] = 'public, max-age=300'
+        return resp
+    except Exception as e:
+        return jsonify({'collections': [], 'error': str(e)})
+
+
+@app.route('/api/studio/<collection_id>')
+@limiter.exempt
+def api_studio_collection(collection_id):
+    """Get a single studio collection with all photos."""
+    try:
+        from models import StudioCollection
+        with get_session() as session:
+            c = (session.query(StudioCollection)
+                 .filter_by(collection_id=collection_id, is_hidden=False)
+                 .first())
+            if not c:
+                return jsonify({'error': 'Not found'}), 404
+            data = {
+                'id': c.id,
+                'collection_id': c.collection_id,
+                'title': c.title,
+                'date': c.date,
+                'tag': c.tag,
+                'description': c.description,
+                'cover': c.cover,
+                'photos': c.photos or [],
+            }
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/whats-new')
 @limiter.exempt
 def api_whats_new():

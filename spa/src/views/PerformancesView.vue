@@ -1,12 +1,5 @@
 <template>
   <div class="performances-page">
-    <section class="podcasts-hero performances-hero">
-      <div class="podcasts-hero-inner">
-        <h1><i class="fas fa-theater-masks" aria-hidden="true"></i> Live Performances</h1>
-        <p>Discover amazing live performances, concerts, and exclusive events.</p>
-      </div>
-    </section>
-
     <div class="performances-content">
       <div v-if="loading" class="performances-loading">Loading…</div>
       <div v-else-if="performances.length" class="performances-grid">
