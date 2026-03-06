@@ -3,14 +3,14 @@
     <!-- Subpage hero removed to make video flush at top -->
 
     <!-- Video Player (same layout as Videos page) -->
-    <section v-if="!playerStore.isWidescreenPinned" class="ltv-embedded-section">
-      <div class="ltv-glass-wrap">
-        <div ref="heroPlaceholder" class="ltv-modern-player">
+    <section v-if="!playerStore.isWidescreenPinned" class="embedded-video-section">
+      <div class="video-player-wrapper liquid-glass-wrap">
+        <div ref="heroPlaceholder" class="embedded-video-player modern-glass-player">
           <!-- 16:9 video container -->
-          <div class="ltv-video-container" @click="onHeroClick">
+          <div class="video-container-inner" @click="onHeroClick">
             <video
               ref="heroVideoRef"
-              class="ltv-video"
+              class="embedded-video"
               playsinline
               muted
               @play="playerStore.isPlaying = true"
@@ -44,33 +44,33 @@
           </div>
 
           <!-- Info + controls bar (mirrors Videos page glass overlay) -->
-          <div class="ltv-info-bar">
-            <div class="ltv-info-content">
-              <h2 class="ltv-video-title">{{ channelLabel }}</h2>
-              <div class="ltv-video-meta">
-                <span class="ltv-program-name">{{ channelNowTitle(selectedRow) }}</span>
+          <div class="video-info-overlay liquid-glass-overlay static-overlay">
+            <div class="video-info-content">
+              <h2 class="video-title">{{ channelLabel }}</h2>
+              <div class="video-meta">
+                <span class="video-host">{{ channelNowTitle(selectedRow) }}</span>
               </div>
             </div>
-            <div class="ltv-actions-bar">
-              <button type="button" class="ltv-action-btn" title="Play/Pause" @click="playerStore.togglePlay()">
+            <div class="video-actions-bar">
+              <button type="button" class="action-btn" title="Play/Pause" @click="playerStore.togglePlay()">
                 <i :class="playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
               </button>
-              <button type="button" class="ltv-action-btn" title="Mute/Unmute" @click="playerStore.toggleMute()">
+              <button type="button" class="action-btn" title="Mute/Unmute" @click="playerStore.toggleMute()">
                 <i :class="playerStore.isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
               </button>
-              <button type="button" class="ltv-action-btn ltv-action-highlight" title="Fullscreen" @click="toggleFullscreen">
+              <button type="button" class="action-btn" title="Fullscreen" @click="toggleFullscreen">
                 <i class="fas fa-expand"></i>
               </button>
-              <button type="button" class="ltv-action-btn" title="Channel Up" @click="channelUp">
+              <button type="button" class="action-btn" title="Channel Up" @click="channelUp">
                 <i class="fas fa-chevron-up"></i>
               </button>
-              <button type="button" class="ltv-action-btn" title="Channel Down" @click="channelDown">
+              <button type="button" class="action-btn" title="Channel Down" @click="channelDown">
                 <i class="fas fa-chevron-down"></i>
               </button>
-              <button type="button" class="ltv-action-btn" title="Go to Guide" @click="scrollToGuide">
+              <button type="button" class="action-btn" title="Go to Guide" @click="scrollToGuide">
                 <i class="fas fa-list"></i>
               </button>
-              <button type="button" class="ltv-action-btn ltv-channels-btn" title="Channels" @click="mobileDrawerOpen = true">
+              <button type="button" class="action-btn ltv-channels-btn" title="Channels" @click="mobileDrawerOpen = true">
                 <i class="fas fa-list"></i>
                 <span class="ltv-channels-label">Channels</span>
               </button>
@@ -1298,11 +1298,59 @@ onUnmounted(() => {
 }
 .live-tv-channel-preview-meta {
   padding: 0 12px 10px;
-  font-size: 12px;
-  color: #999;
 }
 
-/* ===== TV Guide ===== */
+.tv-container {
+  padding-bottom: 2rem;
+}
+
+/* CAROUSEL & LIQUID GLASS STYLES */
+.liquid-glass-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.5);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+
+/* Modern Glass Player Updates */
+.modern-glass-player {
+  position: relative;
+  width: 100%;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+}
+
+.video-container-inner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+}
+
+.liquid-glass-overlay.static-overlay {
+  position: relative;
+  inset: auto;
+  opacity: 1; /* Always show when not overlaying */
+  background: rgba(0,0,0,0.3);
+  padding: 1.5rem 2rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border-radius: 0 0 20px 20px;
+  pointer-events: auto;
+  transition: none;
+}
+
+.embedded-video-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* ========================================= */
 .live-tv-container {
   display: block; /* No sidebar: guide takes full width */
   width: 100%;
