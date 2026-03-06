@@ -2,11 +2,12 @@
   <div class="tv-container">
     <!-- Subpage hero removed to make video flush at top -->
 
-    <div class="video-spotlight" v-if="!playerStore.isWidescreenPinned">
-      <div class="spotlight-grid">
-        <div class="spotlight-left">
-          <!-- Hero video player: embedded inline video (no GlobalTvPlayer overlay needed here) -->
-          <div ref="heroPlaceholder" class="ltv-player-box" @click="onHeroClick">
+    <!-- Video Player (same layout as Videos page) -->
+    <section v-if="!playerStore.isWidescreenPinned" class="ltv-embedded-section">
+      <div class="ltv-glass-wrap">
+        <div ref="heroPlaceholder" class="ltv-modern-player">
+          <!-- 16:9 video container -->
+          <div class="ltv-video-container" @click="onHeroClick">
             <video
               ref="heroVideoRef"
               class="ltv-video"
@@ -17,12 +18,13 @@
               @loadedmetadata="onHeroVideoMetadata"
             ></video>
 
+            <!-- Empty state -->
             <div v-if="!playerStore.currentTrack || playerStore.mode !== 'video'" class="placeholder-content">
-               <i class="fas fa-tv fa-3x" style="opacity:0.4; margin-bottom: 16px; color: #00a2ff;"></i>
-               <span style="font-size: 16px; font-weight: 600; opacity: 0.6;">Select a channel below to start watching</span>
+              <i class="fas fa-tv fa-3x" style="opacity:0.4; margin-bottom: 16px; color: #00a2ff;"></i>
+              <span style="font-size: 16px; font-weight: 600; opacity: 0.6;">Select a channel below to start watching</span>
             </div>
 
-            <!-- Click-to-watch overlay (muted preview → click to watch with sound) -->
+            <!-- Click-to-watch overlay -->
             <div v-if="!isWatching && playerStore.currentTrack" class="watch-overlay" @click.stop="watchNow">
               <div class="watch-overlay-inner">
                 <div class="watch-play-btn">
@@ -32,7 +34,7 @@
               </div>
             </div>
 
-            <!-- NOW PLAYING badge (top-left overlay) -->
+            <!-- NOW PLAYING badge -->
             <div v-if="playerStore.currentTrack" class="ltv-header">
               <span class="ltv-now-playing">Now Playing</span>
               <span class="ltv-channel-name" aria-live="polite">{{ channelLabel }}</span>
@@ -41,45 +43,42 @@
             <div class="ltv-glass"></div>
           </div>
 
-          <!-- Remote controls below video -->
-          <div
-            class="channel-remote remote-below"
-            :class="{ 'vibes-hidden': !showControls }"
-            aria-label="Channel Controls"
-          >
-            <button type="button" class="remote-btn" title="Play/Pause" @click="playerStore.togglePlay()">
-              <i :class="playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
-            </button>
-            <button type="button" class="remote-btn" title="Mute" @click="playerStore.toggleMute()">
-              <i :class="playerStore.isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
-            </button>
-            <button type="button" class="remote-btn btn-highlight" title="Fullscreen" @click="toggleFullscreen">
-              <i class="fas fa-expand"></i>
-            </button>
-            <button type="button" class="remote-btn" :title="playerStore.isWidescreenPinned ? 'Unpin Player' : 'Pin Widescreen Player'" @click="playerStore.toggleWidescreenPinned">
-              <i :class="playerStore.isWidescreenPinned ? 'fas fa-thumbtack' : 'fas fa-map-marker-alt'"></i>
-            </button>
-            <button type="button" class="remote-btn" title="Channel Up" @click="channelUp">
-              <i class="fas fa-chevron-up"></i>
-            </button>
-            <button type="button" class="remote-btn" title="Channel Down" @click="channelDown">
-              <i class="fas fa-chevron-down"></i>
-            </button>
-            <button type="button" class="remote-btn" title="Go to Guide" @click="scrollToGuide">
-              <i class="fas fa-list"></i>
-            </button>
-            <button type="button" class="remote-btn mobile-channels-btn" title="Channels" aria-label="Channels" @click="mobileDrawerOpen = true">
-              <i class="fas fa-list"></i>
-              <span class="mobile-channels-label">Channels</span>
-            </button>
+          <!-- Info + controls bar (mirrors Videos page glass overlay) -->
+          <div class="ltv-info-bar">
+            <div class="ltv-info-content">
+              <h2 class="ltv-video-title">{{ channelLabel }}</h2>
+              <div class="ltv-video-meta">
+                <span class="ltv-program-name">{{ channelNowTitle(selectedRow) }}</span>
+              </div>
+            </div>
+            <div class="ltv-actions-bar">
+              <button type="button" class="ltv-action-btn" title="Play/Pause" @click="playerStore.togglePlay()">
+                <i :class="playerStore.isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
+              </button>
+              <button type="button" class="ltv-action-btn" title="Mute/Unmute" @click="playerStore.toggleMute()">
+                <i :class="playerStore.isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
+              </button>
+              <button type="button" class="ltv-action-btn ltv-action-highlight" title="Fullscreen" @click="toggleFullscreen">
+                <i class="fas fa-expand"></i>
+              </button>
+              <button type="button" class="ltv-action-btn" title="Channel Up" @click="channelUp">
+                <i class="fas fa-chevron-up"></i>
+              </button>
+              <button type="button" class="ltv-action-btn" title="Channel Down" @click="channelDown">
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <button type="button" class="ltv-action-btn" title="Go to Guide" @click="scrollToGuide">
+                <i class="fas fa-list"></i>
+              </button>
+              <button type="button" class="ltv-action-btn ltv-channels-btn" title="Channels" @click="mobileDrawerOpen = true">
+                <i class="fas fa-list"></i>
+                <span class="ltv-channels-label">Channels</span>
+              </button>
+            </div>
           </div>
-
-          <!-- Playing now bar with progress -->
         </div>
-
-
       </div>
-    </div>
+    </section>
 
     <!-- TV Guide section (Moved flush under controls) -->
     <div ref="guideRef" class="live-tv-container guide-flush" aria-label="TV Guide">
@@ -986,27 +985,125 @@ onUnmounted(() => {
   width: 100%;
 }
 
-/* ===== Hero Player (all classes prefixed ltv- to avoid global conflicts) ===== */
-.video-spotlight {
+/* ===== Player section (mirrors Videos page layout) ===== */
+.ltv-embedded-section {
   width: 100%;
 }
-.spotlight-grid {
-  display: block !important;
-  max-width: none !important;
-  width: 100%;
-  margin: 0 !important;
-}
-.spotlight-left {
-  width: 100%;
-  min-width: 0;
-}
-.ltv-player-box {
+.ltv-glass-wrap {
   position: relative;
-  background: #000;
+  width: 100%;
   overflow: hidden;
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+.ltv-modern-player {
+  position: relative;
+  width: 100%;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+}
+.ltv-video-container {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
+  background: #000;
   cursor: pointer;
+  overflow: hidden;
+}
+/* Info + controls bar below video */
+.ltv-info-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+}
+.ltv-info-content {
+  flex: 1;
+  min-width: 0;
+}
+.ltv-video-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ltv-video-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ltv-program-name {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+.ltv-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.ltv-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+.ltv-action-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.ltv-action-btn:active {
+  transform: scale(0.95);
+}
+.ltv-action-highlight {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #60a5fa;
+}
+.ltv-action-highlight:hover {
+  background: rgba(59, 130, 246, 0.35);
+  color: #fff;
+}
+.ltv-channels-btn {
+  width: auto;
+  padding: 0 12px;
+  gap: 6px;
+}
+.ltv-channels-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+@media (max-width: 768px) {
+  .ltv-info-bar {
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .ltv-actions-bar {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .ltv-video-title {
+    font-size: 0.95rem;
+  }
 }
 .ltv-video {
   position: absolute;
@@ -1114,60 +1211,6 @@ onUnmounted(() => {
   font-weight: 600;
   letter-spacing: 0.3px;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
-}
-
-/* ===== Remote Controls (below video) ===== */
-.channel-remote.remote-below {
-  display: flex;
-  gap: 8px;
-  padding: 8px 12px;
-  justify-content: flex-start;
-  background: #000;
-  border-top: 1px solid rgba(255,255,255,0.08);
-}
-.remote-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.9);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 14px;
-}
-.remote-btn:hover {
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(255,255,255,0.2);
-}
-.remote-btn:active {
-  transform: scale(0.95);
-  background: rgba(255,255,255,0.15);
-}
-.remote-btn.btn-highlight {
-  background: rgba(59, 130, 246, 0.2);
-  border-color: rgba(59, 130, 246, 0.5);
-  color: #60a5fa;
-}
-.remote-btn.btn-highlight:hover {
-  background: rgba(59, 130, 246, 0.35);
-  border-color: rgba(59, 130, 246, 0.8);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-}
-
-
-.vibes-hidden {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: opacity 0.5s ease;
-}
-
-.channel-remote {
-  transition: opacity 0.5s ease;
 }
 
 .guide-flush {
